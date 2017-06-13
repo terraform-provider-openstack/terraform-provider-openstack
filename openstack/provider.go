@@ -249,7 +249,7 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		UserID:           d.Get("user_id").(string),
 	}
 
-	if err := config.loadAndValidate(); err != nil {
+	if err := config.LoadAndValidate(); err != nil {
 		return nil, err
 	}
 
