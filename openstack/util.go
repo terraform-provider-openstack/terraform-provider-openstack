@@ -35,8 +35,9 @@ func CheckDeleted(d *schema.ResourceData, err error, msg string) error {
 	return fmt.Errorf("%s: %s", msg, err)
 }
 
-// GetRegion returns the region from either d.Get("region") or config.Region
-// which is either specified in the config or pulled from OS_REGION_NAME.
+// GetRegion returns the region that was specified in the resource. If a
+// region was not set, the provider-level region is checked. The provider-level
+// region can either be set by the region argument or by OS_REGION_NAME.
 func GetRegion(d *schema.ResourceData, config *Config) string {
 	if v, ok := d.GetOk("region"); ok {
 		return v.(string)

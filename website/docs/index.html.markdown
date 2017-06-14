@@ -40,7 +40,10 @@ The following arguments are supported:
   `OS_AUTH_URL` environment variable is used.
 
 * `region` - (Optional) The region of the OpenStack cloud to use. If omitted,
-  the `OS_REGION_NAME` environment variable is used.
+  the `OS_REGION_NAME` environment variable is used. If `OS_REGION_NAME` is
+  not set, then no region will be used. It should be possible to omit the
+  region in single-region OpenStack environments, but this behavior may vary
+  depending on the OpenStack environment being used.
 
 * `user_name` - (Optional) The Username to login with. If omitted, the
   `OS_USERNAME` environment variable is used.
