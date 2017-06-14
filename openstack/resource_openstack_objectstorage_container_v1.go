@@ -93,6 +93,9 @@ func resourceObjectStorageContainerV1Create(d *schema.ResourceData, meta interfa
 }
 
 func resourceObjectStorageContainerV1Read(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	d.Set("region", GetRegion(d, config))
+
 	return nil
 }
 

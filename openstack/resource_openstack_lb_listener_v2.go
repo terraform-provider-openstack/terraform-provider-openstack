@@ -191,6 +191,7 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("connection_limit", listener.ConnLimit)
 	d.Set("sni_container_refs", listener.SniContainerRefs)
 	d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

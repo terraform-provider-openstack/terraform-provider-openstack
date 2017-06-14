@@ -607,6 +607,9 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	// Set the availability zone
 	d.Set("availability_zone", serverWithAZ.AvailabilityZone)
 
+	// Set the region
+	d.Set("region", GetRegion(d, config))
+
 	return nil
 }
 

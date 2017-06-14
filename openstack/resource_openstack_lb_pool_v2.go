@@ -239,6 +239,7 @@ func resourcePoolV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("name", pool.Name)
 	d.Set("id", pool.ID)
 	d.Set("persistence", pool.Persistence)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

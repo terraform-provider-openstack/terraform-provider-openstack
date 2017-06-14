@@ -188,6 +188,7 @@ func resourceLoadBalancerV2Read(d *schema.ResourceData, meta interface{}) error 
 	d.Set("admin_state_up", lb.AdminStateUp)
 	d.Set("flavor", lb.Flavor)
 	d.Set("loadbalancer_provider", lb.Provider)
+	d.Set("region", GetRegion(d, config))
 
 	// Get any security groups on the VIP Port
 	if lb.VipPortID != "" {

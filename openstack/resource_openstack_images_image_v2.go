@@ -277,6 +277,8 @@ func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("size_bytes", img.SizeBytes)
 	d.Set("tags", img.Tags)
 	d.Set("visibility", img.Visibility)
+	d.Set("region", GetRegion(d, config))
+
 	return nil
 }
 

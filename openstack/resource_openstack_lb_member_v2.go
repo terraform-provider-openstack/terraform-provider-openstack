@@ -194,6 +194,7 @@ func resourceMemberV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("address", member.Address)
 	d.Set("protocol_port", member.ProtocolPort)
 	d.Set("id", member.ID)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

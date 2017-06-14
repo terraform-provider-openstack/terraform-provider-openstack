@@ -142,6 +142,8 @@ func resourceNetworkingRouterRouteV2Read(d *schema.ResourceData, meta interface{
 		}
 	}
 
+	d.Set("region", GetRegion(d, config))
+
 	return nil
 }
 

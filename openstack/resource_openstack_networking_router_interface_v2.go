@@ -106,6 +106,8 @@ func resourceNetworkingRouterInterfaceV2Read(d *schema.ResourceData, meta interf
 
 	log.Printf("[DEBUG] Retrieved Router Interface %s: %+v", d.Id(), n)
 
+	d.Set("region", GetRegion(d, config))
+
 	return nil
 }
 
