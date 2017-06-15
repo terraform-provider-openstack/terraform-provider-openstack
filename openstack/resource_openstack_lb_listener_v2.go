@@ -139,7 +139,22 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	listener, err := listeners.Create(networkingClient, createOpts).Extract()
+	var listener *listeners.Listener
+	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
+		var err error
+		log.Printf("[DEBUG] Attempting to create listener")
+		listener, err = listeners.Create(networkingClient, createOpts).Extract()
+		if err != nil {
+			if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
+				if errCode.Actual == 409 || errCode.Actual == 500 {
+					log.Printf("[DEBUG] OpenStack listener received retryable response code:%d", errCode.Actual)
+					return resource.RetryableError(err)
+				}
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack LBaaSV2 listener: %s", err)
 	}
