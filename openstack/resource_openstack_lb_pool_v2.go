@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 )
 
@@ -171,21 +172,24 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 	var pool *pools.Pool
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		var err error
+		lbID := createOpts.LoadbalancerID
+		if lbID != "" {
+			lb, err := loadbalancers.Get(networkingClient, lbID).Extract()
+			if err != nil {
+				fmt.Printf("[DEBUG] Error attempting to get loadbalancer before creating pool: %s. Continuing...", err)
+			} else {
+				if lb.ProvisioningStatus != "ACTIVE" {
+					err := waitForLoadBalancerActive(d, networkingClient, lbID)
+					if err != nil {
+						fmt.Printf("[DEBUG] Error waiting for loadbalancer before creating pool: %s. Continuing...", err)
+					}
+				}
+			}
+		}
 		log.Printf("[DEBUG] Attempting to create LBaaSV2 pool")
 		pool, err = pools.Create(networkingClient, createOpts).Extract()
 		if err != nil {
-			switch errCode := err.(type) {
-			case gophercloud.ErrDefault500:
-				log.Printf("[DEBUG] OpenStack LBaaSV2 pool is still creating.")
-				return resource.RetryableError(err)
-			case gophercloud.ErrUnexpectedResponseCode:
-				if errCode.Actual == 409 {
-					log.Printf("[DEBUG] OpenStack LBaaSV2 pool is still creating.")
-					return resource.RetryableError(err)
-				}
-			default:
-				return resource.NonRetryableError(err)
-			}
+			return checkForRetryableError(err)
 		}
 		return nil
 	})
@@ -201,7 +205,7 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    waitForPoolActive(networkingClient, pool.ID),
+		Refresh:    checkForPoolActive(networkingClient, pool.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -286,7 +290,7 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE", "PENDING_DELETE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForPoolDelete(networkingClient, d.Id()),
+		Refresh:    checkForPoolDelete(networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -301,7 +305,7 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func waitForPoolActive(networkingClient *gophercloud.ServiceClient, poolID string) resource.StateRefreshFunc {
+func checkForPoolActive(networkingClient *gophercloud.ServiceClient, poolID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		pool, err := pools.Get(networkingClient, poolID).Extract()
 		if err != nil {
@@ -314,7 +318,7 @@ func waitForPoolActive(networkingClient *gophercloud.ServiceClient, poolID strin
 	}
 }
 
-func waitForPoolDelete(networkingClient *gophercloud.ServiceClient, poolID string) resource.StateRefreshFunc {
+func checkForPoolDelete(networkingClient *gophercloud.ServiceClient, poolID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete OpenStack LBaaSV2 Pool %s", poolID)
 
