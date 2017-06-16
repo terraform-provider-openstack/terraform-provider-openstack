@@ -337,19 +337,3 @@ func checkForLoadBalancerDelete(networkingClient *gophercloud.ServiceClient, lbI
 		return lb, "ACTIVE", nil
 	}
 }
-
-func checkForRetryableError(err error) *resource.RetryError {
-	switch errCode := err.(type) {
-	case gophercloud.ErrDefault500:
-		return resource.RetryableError(err)
-	case gophercloud.ErrUnexpectedResponseCode:
-		switch errCode.Actual {
-		case 409, 503:
-			return resource.RetryableError(err)
-		default:
-			return resource.NonRetryableError(err)
-		}
-	default:
-		return resource.NonRetryableError(err)
-	}
-}
