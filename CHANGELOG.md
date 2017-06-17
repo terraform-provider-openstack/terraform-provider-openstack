@@ -7,4 +7,7 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 IMPROVEMENTS:
 
 * Can specify `region` in the provider [GH-25]
-* Exposed `Config.LoadAndValidate` func and `Config.OsClient` type field [GH-3]
+
+BUG FIXES
+
+* Wait for LoadBalancer to be active before creating Pools and Monitors [GH-29]
