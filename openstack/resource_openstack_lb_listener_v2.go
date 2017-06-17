@@ -20,6 +20,10 @@ func resourceListenerV2() *schema.Resource {
 		Update: resourceListenerV2Update,
 		Delete: resourceListenerV2Delete,
 
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+		},
+
 		Schema: map[string]*schema.Schema{
 			"region": &schema.Schema{
 				Type:     schema.TypeString,
