@@ -103,7 +103,7 @@ func checkForRetryableError(err error) *resource.RetryError {
 		return resource.RetryableError(err)
 	case gophercloud.ErrUnexpectedResponseCode:
 		switch errCode.Actual {
-		case 409, 503:
+		case 409, 500, 503:
 			return resource.RetryableError(err)
 		default:
 			return resource.NonRetryableError(err)
