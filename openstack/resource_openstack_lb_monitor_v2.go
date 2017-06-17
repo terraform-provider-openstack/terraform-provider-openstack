@@ -131,7 +131,7 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    waitForMonitorActive(networkingClient, monitor.ID),
+		Refresh:    checkForMonitorActive(networkingClient, monitor.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -231,7 +231,7 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE", "PENDING_DELETE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForMonitorDelete(networkingClient, d.Id()),
+		Refresh:    checkForMonitorDelete(networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -246,7 +246,7 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func waitForMonitorActive(networkingClient *gophercloud.ServiceClient, monitorID string) resource.StateRefreshFunc {
+func checkForMonitorActive(networkingClient *gophercloud.ServiceClient, monitorID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		monitor, err := monitors.Get(networkingClient, monitorID).Extract()
 		if err != nil {
@@ -258,7 +258,7 @@ func waitForMonitorActive(networkingClient *gophercloud.ServiceClient, monitorID
 	}
 }
 
-func waitForMonitorDelete(networkingClient *gophercloud.ServiceClient, monitorID string) resource.StateRefreshFunc {
+func checkForMonitorDelete(networkingClient *gophercloud.ServiceClient, monitorID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete OpenStack LBaaSV2 Monitor %s", monitorID)
 

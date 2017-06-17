@@ -8,6 +8,7 @@ import (
 
 	"github.com/Unknwon/com"
 	"github.com/gophercloud/gophercloud"
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -94,4 +95,20 @@ func FormatHeaders(headers http.Header, seperator string) string {
 	sort.Strings(redactedHeaders)
 
 	return strings.Join(redactedHeaders, seperator)
+}
+
+func checkForRetryableError(err error) *resource.RetryError {
+	switch errCode := err.(type) {
+	case gophercloud.ErrDefault500:
+		return resource.RetryableError(err)
+	case gophercloud.ErrUnexpectedResponseCode:
+		switch errCode.Actual {
+		case 409, 503:
+			return resource.RetryableError(err)
+		default:
+			return resource.NonRetryableError(err)
+		}
+	default:
+		return resource.NonRetryableError(err)
+	}
 }

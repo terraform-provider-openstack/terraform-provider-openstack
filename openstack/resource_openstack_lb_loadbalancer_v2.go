@@ -139,16 +139,7 @@ func resourceLoadBalancerV2Create(d *schema.ResourceData, meta interface{}) erro
 
 	log.Printf("[DEBUG] Waiting for Openstack LoadBalancer (%s) to become available.", lb.ID)
 
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"PENDING_CREATE"},
-		Target:     []string{"ACTIVE"},
-		Refresh:    waitForLoadBalancerActive(networkingClient, lb.ID),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
-	}
-
-	_, err = stateConf.WaitForState()
+	err = waitForLoadBalancerActive(d, networkingClient, lb.ID)
 	if err != nil {
 		return err
 	}
@@ -250,7 +241,7 @@ func resourceLoadBalancerV2Delete(d *schema.ResourceData, meta interface{}) erro
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE", "PENDING_DELETE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForLoadBalancerDelete(networkingClient, d.Id()),
+		Refresh:    checkForLoadBalancerDelete(networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -285,7 +276,7 @@ func resourceLoadBalancerV2SecurityGroups(networkingClient *gophercloud.ServiceC
 	return nil
 }
 
-func waitForLoadBalancerActive(networkingClient *gophercloud.ServiceClient, lbID string) resource.StateRefreshFunc {
+func checkForLoadBalancerActive(networkingClient *gophercloud.ServiceClient, lbID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		lb, err := loadbalancers.Get(networkingClient, lbID).Extract()
 		if err != nil {
@@ -293,15 +284,25 @@ func waitForLoadBalancerActive(networkingClient *gophercloud.ServiceClient, lbID
 		}
 
 		log.Printf("[DEBUG] OpenStack LBaaSV2 LoadBalancer: %+v", lb)
-		if lb.ProvisioningStatus == "ACTIVE" {
-			return lb, "ACTIVE", nil
-		}
-
 		return lb, lb.ProvisioningStatus, nil
 	}
 }
 
-func waitForLoadBalancerDelete(networkingClient *gophercloud.ServiceClient, lbID string) resource.StateRefreshFunc {
+func waitForLoadBalancerActive(d *schema.ResourceData, networkingClient *gophercloud.ServiceClient, lbID string) error {
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"PENDING_CREATE", "PENDING_UPDATE"},
+		Target:     []string{"ACTIVE"},
+		Refresh:    checkForLoadBalancerActive(networkingClient, lbID),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      5 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+
+	_, err := stateConf.WaitForState()
+	return err
+}
+
+func checkForLoadBalancerDelete(networkingClient *gophercloud.ServiceClient, lbID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete OpenStack LBaaSV2 LoadBalancer %s", lbID)
 

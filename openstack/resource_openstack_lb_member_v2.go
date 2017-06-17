@@ -156,7 +156,7 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    waitForMemberActive(networkingClient, poolID, member.ID),
+		Refresh:    checkForMemberActive(networkingClient, poolID, member.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -238,7 +238,7 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE", "PENDING_DELETE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForMemberDelete(networkingClient, d.Get("pool_id").(string), d.Id()),
+		Refresh:    checkForMemberDelete(networkingClient, d.Get("pool_id").(string), d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -253,7 +253,7 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func waitForMemberActive(networkingClient *gophercloud.ServiceClient, poolID string, memberID string) resource.StateRefreshFunc {
+func checkForMemberActive(networkingClient *gophercloud.ServiceClient, poolID string, memberID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		member, err := pools.GetMember(networkingClient, poolID, memberID).Extract()
 		if err != nil {
@@ -266,7 +266,7 @@ func waitForMemberActive(networkingClient *gophercloud.ServiceClient, poolID str
 	}
 }
 
-func waitForMemberDelete(networkingClient *gophercloud.ServiceClient, poolID string, memberID string) resource.StateRefreshFunc {
+func checkForMemberDelete(networkingClient *gophercloud.ServiceClient, poolID string, memberID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete OpenStack LBaaSV2 Member %s", memberID)
 
