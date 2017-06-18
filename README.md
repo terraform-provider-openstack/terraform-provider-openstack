@@ -1,5 +1,5 @@
-Terraform Provider
-==================
+Terraform OpenStack Provider
+============================
 
 - Website: https://www.terraform.io
 - [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
@@ -32,7 +32,9 @@ $ make build
 
 Using the provider
 ----------------------
-## Fill in for each provider
+Please see the documentation at [terraform.io](https://www.terraform.io/docs/providers/openstack/index.html).
+
+Or you can browse the documentation within this repo [here](https://github.com/terraform-providers/terraform-provider-openstack/tree/master/website/docs).
 
 Developing the Provider
 ---------------------------
