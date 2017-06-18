@@ -937,13 +937,16 @@ func getInstanceNetworks(computeClient *gophercloud.ServiceClient, d *schema.Res
 
 		networkID := ""
 		networkName := ""
+		networkFound := false
 		if tenantNetworkExt {
 			for _, network := range networkList {
 				if network.Name == rawMap["name"] {
 					tenantnet = network
+					networkFound = true
 				}
 				if network.ID == rawMap["uuid"] {
 					tenantnet = network
+					networkFound = true
 				}
 			}
 
@@ -952,15 +955,20 @@ func getInstanceNetworks(computeClient *gophercloud.ServiceClient, d *schema.Res
 		} else {
 			networkID = rawMap["uuid"].(string)
 			networkName = rawMap["name"].(string)
+			networkFound = true
 		}
 
-		newNetworks = append(newNetworks, map[string]interface{}{
-			"uuid":           networkID,
-			"name":           networkName,
-			"port":           rawMap["port"].(string),
-			"fixed_ip_v4":    rawMap["fixed_ip_v4"].(string),
-			"access_network": rawMap["access_network"].(bool),
-		})
+		if networkFound {
+			newNetworks = append(newNetworks, map[string]interface{}{
+				"uuid":           networkID,
+				"name":           networkName,
+				"port":           rawMap["port"].(string),
+				"fixed_ip_v4":    rawMap["fixed_ip_v4"].(string),
+				"access_network": rawMap["access_network"].(bool),
+			})
+		} else {
+			log.Printf("[DEBUG] doesnt found tenant net with the name [%s] or the uuid [%s]", rawMap["name"], rawMap["uuid"])
+		}
 	}
 
 	log.Printf("[DEBUG] networks: %+v", newNetworks)
