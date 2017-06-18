@@ -17,7 +17,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/startstop"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tenantnetworks"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
@@ -266,7 +265,6 @@ func resourceComputeInstanceV2() *schema.Resource {
 						},
 					},
 				},
-				Set: resourceComputeVolumeAttachmentHash,
 			},
 			"scheduler_hints": &schema.Schema{
 				Type:     schema.TypeSet,
@@ -481,18 +479,6 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	// networks in order to associate floating IPs
 	_, err = getInstanceNetworksAndAddresses(computeClient, d)
 
-	// if volumes were specified, attach them after the instance has launched.
-	if v, ok := d.GetOk("volume"); ok {
-		vols := v.(*schema.Set).List()
-		if blockClient, err := config.blockStorageV1Client(GetRegion(d, config)); err != nil {
-			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
-		} else {
-			if err := attachVolumesToInstance(computeClient, blockClient, d.Id(), vols); err != nil {
-				return err
-			}
-		}
-	}
-
 	return resourceComputeInstanceV2Read(d, meta)
 }
 
@@ -572,11 +558,6 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 
 	// Set the instance's image information appropriately
 	if err := setImageInformation(computeClient, server, d); err != nil {
-		return err
-	}
-
-	// volume attachments
-	if err := getVolumeAttachments(computeClient, d); err != nil {
 		return err
 	}
 
@@ -700,34 +681,6 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
-	if d.HasChange("volume") {
-		// old attachments and new attachments
-		oldAttachments, newAttachments := d.GetChange("volume")
-		// for each old attachment, detach the volume
-		oldAttachmentSet := oldAttachments.(*schema.Set).List()
-
-		log.Printf("[DEBUG] Attempting to detach the following volumes: %#v", oldAttachmentSet)
-		if blockClient, err := config.blockStorageV1Client(GetRegion(d, config)); err != nil {
-			return err
-		} else {
-			if err := detachVolumesFromInstance(computeClient, blockClient, d.Id(), oldAttachmentSet); err != nil {
-				return err
-			}
-		}
-
-		// for each new attachment, attach the volume
-		newAttachmentSet := newAttachments.(*schema.Set).List()
-		if blockClient, err := config.blockStorageV1Client(GetRegion(d, config)); err != nil {
-			return err
-		} else {
-			if err := attachVolumesToInstance(computeClient, blockClient, d.Id(), newAttachmentSet); err != nil {
-				return err
-			}
-		}
-
-		d.SetPartial("volume")
-	}
-
 	if d.HasChange("flavor_id") || d.HasChange("flavor_name") {
 		var newFlavorId string
 		var err error
@@ -797,22 +750,6 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
-	}
-
-	// Make sure all volumes are detached before deleting
-	volumes := d.Get("volume")
-	if volumeSet, ok := volumes.(*schema.Set); ok {
-		volumeList := volumeSet.List()
-		if len(volumeList) > 0 {
-			log.Printf("[DEBUG] Attempting to detach the following volumes: %#v", volumeList)
-			if blockClient, err := config.blockStorageV1Client(GetRegion(d, config)); err != nil {
-				return err
-			} else {
-				if err := detachVolumesFromInstance(computeClient, blockClient, d.Id(), volumeList); err != nil {
-					return err
-				}
-			}
-		}
 	}
 
 	if d.Get("stop_before_destroy").(bool) {
@@ -1261,14 +1198,6 @@ func getFlavorID(client *gophercloud.ServiceClient, d *schema.ResourceData) (str
 	return flavors.IDFromName(client, flavorName)
 }
 
-func resourceComputeVolumeAttachmentHash(v interface{}) int {
-	var buf bytes.Buffer
-	m := v.(map[string]interface{})
-	buf.WriteString(fmt.Sprintf("%s-", m["volume_id"].(string)))
-
-	return hashcode.String(buf.String())
-}
-
 func resourceComputeSchedulerHintsHash(v interface{}) int {
 	var buf bytes.Buffer
 	m := v.(map[string]interface{})
@@ -1290,121 +1219,6 @@ func resourceComputeSchedulerHintsHash(v interface{}) int {
 	buf.WriteString(fmt.Sprintf("%s-", m["query"].([]interface{})))
 
 	return hashcode.String(buf.String())
-}
-
-func attachVolumesToInstance(computeClient *gophercloud.ServiceClient, blockClient *gophercloud.ServiceClient, serverId string, vols []interface{}) error {
-	for _, v := range vols {
-		va := v.(map[string]interface{})
-		volumeId := va["volume_id"].(string)
-		device := va["device"].(string)
-
-		s := ""
-		if serverId != "" {
-			s = serverId
-		} else if va["server_id"] != "" {
-			s = va["server_id"].(string)
-		} else {
-			return fmt.Errorf("Unable to determine server ID to attach volume.")
-		}
-
-		vaOpts := &volumeattach.CreateOpts{
-			Device:   device,
-			VolumeID: volumeId,
-		}
-
-		if _, err := volumeattach.Create(computeClient, s, vaOpts).Extract(); err != nil {
-			return err
-		}
-
-		stateConf := &resource.StateChangeConf{
-			Pending:    []string{"attaching", "available"},
-			Target:     []string{"in-use"},
-			Refresh:    VolumeV1StateRefreshFunc(blockClient, va["volume_id"].(string)),
-			Timeout:    30 * time.Minute,
-			Delay:      5 * time.Second,
-			MinTimeout: 2 * time.Second,
-		}
-
-		if _, err := stateConf.WaitForState(); err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] Attached volume %s to instance %s", volumeId, serverId)
-	}
-	return nil
-}
-
-func detachVolumesFromInstance(computeClient *gophercloud.ServiceClient, blockClient *gophercloud.ServiceClient, serverId string, vols []interface{}) error {
-	for _, v := range vols {
-		va := v.(map[string]interface{})
-		aId := va["id"].(string)
-
-		log.Printf("[INFO] Attempting to detach volume %s", va["volume_id"])
-		if err := volumeattach.Delete(computeClient, serverId, aId).ExtractErr(); err != nil {
-			return err
-		}
-
-		stateConf := &resource.StateChangeConf{
-			Pending:    []string{"detaching", "in-use"},
-			Target:     []string{"available"},
-			Refresh:    VolumeV1StateRefreshFunc(blockClient, va["volume_id"].(string)),
-			Timeout:    30 * time.Minute,
-			Delay:      5 * time.Second,
-			MinTimeout: 2 * time.Second,
-		}
-
-		if _, err := stateConf.WaitForState(); err != nil {
-			return err
-		}
-		log.Printf("[INFO] Detached volume %s from instance %s", va["volume_id"], serverId)
-	}
-
-	return nil
-}
-
-func getVolumeAttachments(computeClient *gophercloud.ServiceClient, d *schema.ResourceData) error {
-	var vols []map[string]interface{}
-
-	allPages, err := volumeattach.List(computeClient, d.Id()).AllPages()
-	if err != nil {
-		if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
-			if errCode.Actual == 403 {
-				log.Printf("[DEBUG] os-volume_attachments disabled.")
-				return nil
-			} else {
-				return err
-			}
-		}
-	}
-
-	allVolumeAttachments, err := volumeattach.ExtractVolumeAttachments(allPages)
-	if err != nil {
-		return err
-	}
-
-	if v, ok := d.GetOk("volume"); ok {
-		volumes := v.(*schema.Set).List()
-		for _, volume := range volumes {
-			if volumeMap, ok := volume.(map[string]interface{}); ok {
-				if v, ok := volumeMap["volume_id"].(string); ok {
-					for _, volumeAttachment := range allVolumeAttachments {
-						if v == volumeAttachment.ID {
-							vol := make(map[string]interface{})
-							vol["id"] = volumeAttachment.ID
-							vol["volume_id"] = volumeAttachment.VolumeID
-							vol["device"] = volumeAttachment.Device
-							vols = append(vols, vol)
-						}
-					}
-				}
-			}
-		}
-	}
-
-	log.Printf("[INFO] Volume attachments: %v", vols)
-	d.Set("volume", vols)
-
-	return nil
 }
 
 func checkBlockDeviceConfig(d *schema.ResourceData) error {
