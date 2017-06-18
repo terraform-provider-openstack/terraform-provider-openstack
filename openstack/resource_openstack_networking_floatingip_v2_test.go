@@ -29,27 +29,6 @@ func TestAccNetworkingV2FloatingIP_basic(t *testing.T) {
 	})
 }
 
-func TestAccNetworkingV2FloatingIP_attach(t *testing.T) {
-	var instance servers.Server
-	var fip floatingips.FloatingIP
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2FloatingIPDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccNetworkV2FloatingIP_attach,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
-					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
-					testAccCheckNetworkingV2InstanceFloatingIPAttach(&instance, &fip),
-				),
-			},
-		},
-	})
-}
-
 func TestAccNetworkingV2FloatingIP_fixedip_bind(t *testing.T) {
 	var fip floatingips.FloatingIP
 
@@ -176,21 +155,6 @@ const testAccNetworkingV2FloatingIP_basic = `
 resource "openstack_networking_floatingip_v2" "fip_1" {
 }
 `
-
-var testAccNetworkV2FloatingIP_attach = fmt.Sprintf(`
-resource "openstack_networking_floatingip_v2" "fip_1" {
-}
-
-resource "openstack_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
-  floating_ip = "${openstack_networking_floatingip_v2.fip_1.address}"
-
-  network {
-    uuid = "%s"
-  }
-}
-`, OS_NETWORK_ID)
 
 var testAccNetworkingV2FloatingIP_fixedip_bind = fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {

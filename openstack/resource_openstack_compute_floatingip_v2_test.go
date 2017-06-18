@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 )
 
 func TestAccComputeV2FloatingIP_basic(t *testing.T) {
@@ -23,26 +22,6 @@ func TestAccComputeV2FloatingIP_basic(t *testing.T) {
 				Config: testAccComputeV2FloatingIP_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FloatingIPExists("openstack_compute_floatingip_v2.fip_1", &fip),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeV2FloatingIP_attach(t *testing.T) {
-	var instance servers.Server
-	var fip floatingips.FloatingIP
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2FloatingIPDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2FloatingIP_attach,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2FloatingIPExists("openstack_compute_floatingip_v2.fip_1", &fip),
-					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
-					testAccCheckComputeV2InstanceFloatingIPAttach(&instance, &fip),
 				),
 			},
 		},
@@ -106,18 +85,3 @@ const testAccComputeV2FloatingIP_basic = `
 resource "openstack_compute_floatingip_v2" "fip_1" {
 }
 `
-
-var testAccComputeV2FloatingIP_attach = fmt.Sprintf(`
-resource "openstack_compute_floatingip_v2" "fip_1" {
-}
-
-resource "openstack_compute_instance_v2" "instance_1" {
-	name = "instance_1"
-	security_groups = ["default"]
-	floating_ip = "${openstack_compute_floatingip_v2.fip_1.address}"
-
-	network {
-		uuid = "%s"
-	}
-}
-`, OS_NETWORK_ID)
