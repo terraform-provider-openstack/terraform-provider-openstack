@@ -10,7 +10,6 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
 )
 
 func resourceListenerV2() *schema.Resource {
@@ -21,7 +20,9 @@ func resourceListenerV2() *schema.Resource {
 		Delete: resourceListenerV2Delete,
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(30 * time.Minute),
+			Create: schema.DefaultTimeout(10 * time.Minute),
+			Update: schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -145,49 +146,35 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
+	// Wait for LoadBalancer to become active before continuing
+	lbID := createOpts.LoadbalancerID
+	timeout := d.Timeout(schema.TimeoutCreate)
+	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] Attempting to create listener")
 	var listener *listeners.Listener
-	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		var err error
-		lbID := createOpts.LoadbalancerID
-		if lbID != "" {
-			lb, err := loadbalancers.Get(networkingClient, lbID).Extract()
-			if err != nil {
-				fmt.Printf("[DEBUG] Error attempting to get loadbalancer before creating listener: %s. Continuing...", err)
-			} else {
-				if lb.ProvisioningStatus != "ACTIVE" {
-					err := waitForLoadBalancerActive(d, networkingClient, lbID)
-					if err != nil {
-						fmt.Printf("[DEBUG] Error waiting for loadbalancer before creating listener: %s. Continuing...", err)
-					}
-				}
-			}
-		}
-		log.Printf("[DEBUG] Attempting to create LBaaSV2 listener")
+	err = resource.Retry(timeout, func() *resource.RetryError {
 		listener, err = listeners.Create(networkingClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
 		return nil
 	})
-
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack LBaaSV2 listener: %s", err)
+		return fmt.Errorf("Error creating listener: %s", err)
 	}
 
-	log.Printf("[INFO] Listener ID: %s", listener.ID)
-
-	log.Printf("[DEBUG] Waiting for Openstack LBaaSV2 listener (%s) to become available.", listener.ID)
-
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"PENDING_CREATE"},
-		Target:     []string{"ACTIVE"},
-		Refresh:    checkForListenerActive(networkingClient, listener.ID),
-		Timeout:    2 * time.Minute,
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+	// Wait for Listener to become active
+	err = waitForLBV2Listener(networkingClient, listener.ID, "ACTIVE", nil, timeout)
+	if err != nil {
+		return err
 	}
 
-	_, err = stateConf.WaitForState()
+	// Wait for LoadBalancer to become active again before continuing
+	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
 	if err != nil {
 		return err
 	}
@@ -206,10 +193,10 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 
 	listener, err := listeners.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "LBV2 listener")
+		return CheckDeleted(d, err, "listener")
 	}
 
-	log.Printf("[DEBUG] Retrieved OpenStack LBaaSV2 listener %s: %+v", d.Id(), listener)
+	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)
 
 	d.Set("id", listener.ID)
 	d.Set("name", listener.Name)
@@ -262,11 +249,37 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 		updateOpts.AdminStateUp = &asu
 	}
 
-	log.Printf("[DEBUG] Updating OpenStack LBaaSV2 Listener %s with options: %+v", d.Id(), updateOpts)
-
-	_, err = listeners.Update(networkingClient, d.Id(), updateOpts).Extract()
+	// Wait for LoadBalancer to become active before continuing
+	lbID := d.Get("loadbalancer_id").(string)
+	timeout := d.Timeout(schema.TimeoutUpdate)
+	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
 	if err != nil {
-		return fmt.Errorf("Error updating OpenStack LBaaSV2 Listener: %s", err)
+		return err
+	}
+
+	log.Printf("[DEBUG] Updating listener %s with options: %#v", d.Id(), updateOpts)
+	err = resource.Retry(timeout, func() *resource.RetryError {
+		_, err = listeners.Update(networkingClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return checkForRetryableError(err)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("Error updating listener %s: %s", d.Id(), err)
+	}
+
+	// Wait for Listener to become active before continuing
+	err = waitForLBV2Listener(networkingClient, d.Id(), "ACTIVE", nil, timeout)
+	if err != nil {
+		return err
+	}
+
+	// Wait for LoadBalancer to become active again before continuing
+	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	if err != nil {
+		return err
 	}
 
 	return resourceListenerV2Read(d, meta)
@@ -280,69 +293,72 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"ACTIVE", "PENDING_DELETE"},
-		Target:     []string{"DELETED"},
-		Refresh:    checkForListenerDelete(networkingClient, d.Id()),
-		Timeout:    2 * time.Minute,
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
-	}
-
-	_, err = stateConf.WaitForState()
+	// Wait for LoadBalancer to become active before continuing
+	lbID := d.Get("loadbalancer_id").(string)
+	timeout := d.Timeout(schema.TimeoutDelete)
+	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack LBaaSV2 listener: %s", err)
+		return err
 	}
 
-	d.SetId("")
+	log.Printf("[DEBUG] Deleting listener %s", d.Id())
+	err = resource.Retry(timeout, func() *resource.RetryError {
+		err = listeners.Delete(networkingClient, d.Id()).ExtractErr()
+		if err != nil {
+			return checkForRetryableError(err)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("Error deleting listener %s: %s", d.Id(), err)
+	}
+
+	// Wait for Listener to delete
+	err = waitForLBV2Listener(networkingClient, d.Id(), "DELETED", nil, timeout)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func checkForListenerActive(networkingClient *gophercloud.ServiceClient, listenerID string) resource.StateRefreshFunc {
+func resourceLBV2ListenerRefreshFunc(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		listener, err := listeners.Get(networkingClient, listenerID).Extract()
+		listener, err := listeners.Get(networkingClient, id).Extract()
 		if err != nil {
 			return nil, "", err
 		}
 
 		// The listener resource has no Status attribute, so a successful Get is the best we can do
-		log.Printf("[DEBUG] OpenStack LBaaSV2 listener: %+v", listener)
 		return listener, "ACTIVE", nil
 	}
 }
 
-func checkForListenerDelete(networkingClient *gophercloud.ServiceClient, listenerID string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		log.Printf("[DEBUG] Attempting to delete OpenStack LBaaSV2 listener %s", listenerID)
+func waitForLBV2Listener(networkingClient *gophercloud.ServiceClient, id string, target string, pending []string, timeout time.Duration) error {
+	log.Printf("[DEBUG] Waiting for listener %s to become %s.", id, target)
 
-		listener, err := listeners.Get(networkingClient, listenerID).Extract()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenStack LBaaSV2 listener %s", listenerID)
-				return listener, "DELETED", nil
-			}
-			return listener, "ACTIVE", err
-		}
-
-		log.Printf("[DEBUG] Openstack LBaaSV2 listener: %+v", listener)
-		err = listeners.Delete(networkingClient, listenerID).ExtractErr()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenStack LBaaSV2 listener %s", listenerID)
-				return listener, "DELETED", nil
-			}
-
-			if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 409 {
-					log.Printf("[DEBUG] OpenStack LBaaSV2 listener (%s) is still in use.", listenerID)
-					return listener, "ACTIVE", nil
-				}
-			}
-
-			return listener, "ACTIVE", err
-		}
-
-		log.Printf("[DEBUG] OpenStack LBaaSV2 listener %s still active.", listenerID)
-		return listener, "ACTIVE", nil
+	stateConf := &resource.StateChangeConf{
+		Target:     []string{target},
+		Pending:    pending,
+		Refresh:    resourceLBV2ListenerRefreshFunc(networkingClient, id),
+		Timeout:    timeout,
+		Delay:      5 * time.Second,
+		MinTimeout: 1 * time.Second,
 	}
+
+	_, err := stateConf.WaitForState()
+	if err != nil {
+		if _, ok := err.(gophercloud.ErrDefault404); ok {
+			switch target {
+			case "DELETED":
+				return nil
+			default:
+				return fmt.Errorf("Error: listener %s not found: %s", id, err)
+			}
+		}
+		return fmt.Errorf("Error waiting for listener %s to become %s: %s", id, target, err)
+	}
+
+	return nil
 }
