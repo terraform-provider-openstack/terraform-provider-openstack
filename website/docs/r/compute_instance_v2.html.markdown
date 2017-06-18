@@ -303,10 +303,6 @@ The following arguments are supported:
 * `flavor_name` - (Optional; Required if `flavor_id` is empty) The name of the
     desired flavor for the server. Changing this resizes the existing server.
 
-* `floating_ip` - (Deprecated) A *Compute* Floating IP that will be associated
-    with the Instance. The Floating IP must be provisioned already. See *Notes*
-    for more information about Floating IPs.
-
 * `user_data` - (Optional) The user data to provide when launching the instance.
     Changing this creates a new server.
 
@@ -343,12 +339,6 @@ The following arguments are supported:
     following [reference](http://docs.openstack.org/developer/nova/block_device_mapping.html)
     for more information.
 
-* `volume` - (Deprecated) Attach an existing volume to the instance. The volume
-    structure is described below. *Note*: This is no longer the recommended
-    method of attaching a volume to an instance. Please see `block_device`
-    (above) or the `openstack_compute_volume_attach_v2` and
-    `openstack_blockstorage_volume_attach_v2` resources.
-
 * `scheduler_hints` - (Optional) Provide the Nova scheduler with hints on how
     the instance should be launched. The available hints are described below.
 
@@ -382,10 +372,6 @@ The `network` block supports:
 * `fixed_ip_v6` - (Optional) Specifies a fixed IPv6 address to be used on this
     network. Changing this creates a new server.
 
-* `floating_ip` - (Deprecated) Specifies a floating IP address to be associated
-    with this network. Cannot be combined with a top-level floating IP. See
-    *Notes* for more information about Floating IPs.
-
 * `access_network` - (Optional) Specifies if this network should be used for
     provisioning access. Accepts true or false. Defaults to false.
 
@@ -412,14 +398,6 @@ The `block_device` block supports:
 * `delete_on_termination` - (Optional) Delete the volume / block device upon
     termination of the instance. Defaults to false. Changing this creates a
     new server.
-
-The `volume` block supports:
-
-* `volume_id` - (Required) The UUID of the volume to attach.
-
-* `device` - (Optional) The device that the volume will be attached as. For
-    example:  `/dev/vdc`. Omit this option to allow the volume to be
-    auto-assigned a device.
 
 The `scheduler_hints` block supports:
 
@@ -466,32 +444,11 @@ The following attributes are exported:
     network.
 * `network/fixed_ip_v6` - The Fixed IPv6 address of the Instance on that
     network.
-* `network/floating_ip` - The Floating IP address of the Instance on that
-    network.
 * `network/mac` - The MAC address of the NIC on that network.
 * `all_metadata` - Contains all instance metadata, even metadata not set
     by Terraform.
 
 ## Notes
-
-### Floating IPs
-
-Specifying Floating IPs within the instance is now deprecated. Please use
-either the `openstack_compute_floatingip_associate_v2` resource or attach
-the floating IP to an `openstack_networking_port_v2` resource.
-
-Floating IPs can be associated in one of two ways:
-
-* You can specify a Floating IP address by using the top-level `floating_ip`
-attribute. This floating IP will be associated with either the network defined
-in the first `network` block or the default network if no `network` blocks are
-defined.
-
-* You can specify a Floating IP address by using the `floating_ip` attribute
-defined in the `network` block. Each `network` block can have its own floating
-IP address.
-
-Only one of the above methods can be used.
 
 ### Multiple Ephemeral Disks
 

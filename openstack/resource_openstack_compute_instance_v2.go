@@ -12,13 +12,11 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/schedulerhints"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/startstop"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tenantnetworks"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
@@ -80,10 +78,10 @@ func resourceComputeInstanceV2() *schema.Resource {
 				DefaultFunc: schema.EnvDefaultFunc("OS_FLAVOR_NAME", nil),
 			},
 			"floating_ip": &schema.Schema{
-				Type:       schema.TypeString,
-				Optional:   true,
-				ForceNew:   false,
-				Deprecated: "Use the openstack_compute_floatingip_associate_v2 resource instead",
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+				Removed:  "Use the openstack_compute_floatingip_associate_v2 resource instead",
 			},
 			"user_data": &schema.Schema{
 				Type:     schema.TypeString,
@@ -152,10 +150,10 @@ func resourceComputeInstanceV2() *schema.Resource {
 							Computed: true,
 						},
 						"floating_ip": &schema.Schema{
-							Type:       schema.TypeString,
-							Optional:   true,
-							Computed:   true,
-							Deprecated: "Use the openstack_compute_floatingip_associate_v2 resource instead",
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							Removed:  "Use the openstack_compute_floatingip_associate_v2 resource instead",
 						},
 						"mac": &schema.Schema{
 							Type:     schema.TypeString,
@@ -246,9 +244,9 @@ func resourceComputeInstanceV2() *schema.Resource {
 				},
 			},
 			"volume": &schema.Schema{
-				Type:       schema.TypeSet,
-				Optional:   true,
-				Deprecated: "Use block_device or openstack_compute_volume_attach_v2 instead",
+				Type:     schema.TypeSet,
+				Optional: true,
+				Removed:  "Use block_device or openstack_compute_volume_attach_v2 instead",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": &schema.Schema{
@@ -267,7 +265,6 @@ func resourceComputeInstanceV2() *schema.Resource {
 						},
 					},
 				},
-				Set: resourceComputeVolumeAttachmentHash,
 			},
 			"scheduler_hints": &schema.Schema{
 				Type:     schema.TypeSet,
@@ -373,11 +370,6 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	// determine if block_device configuration is correct
 	// this includes valid combinations and required attributes
 	if err := checkBlockDeviceConfig(d); err != nil {
-		return err
-	}
-
-	// check if floating IP configuration is correct
-	if err := checkInstanceFloatingIPs(d); err != nil {
 		return err
 	}
 
@@ -487,24 +479,6 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	// networks in order to associate floating IPs
 	_, err = getInstanceNetworksAndAddresses(computeClient, d)
 
-	// If floating IPs were specified, associate them after the instance has launched.
-	err = associateFloatingIPsToInstance(computeClient, d)
-	if err != nil {
-		return err
-	}
-
-	// if volumes were specified, attach them after the instance has launched.
-	if v, ok := d.GetOk("volume"); ok {
-		vols := v.(*schema.Set).List()
-		if blockClient, err := config.blockStorageV1Client(GetRegion(d, config)); err != nil {
-			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
-		} else {
-			if err := attachVolumesToInstance(computeClient, blockClient, d.Id(), vols); err != nil {
-				return err
-			}
-		}
-	}
-
 	return resourceComputeInstanceV2Read(d, meta)
 }
 
@@ -584,11 +558,6 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 
 	// Set the instance's image information appropriately
 	if err := setImageInformation(computeClient, server, d); err != nil {
-		return err
-	}
-
-	// volume attachments
-	if err := getVolumeAttachments(computeClient, d); err != nil {
 		return err
 	}
 
@@ -712,90 +681,6 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
-	if d.HasChange("floating_ip") {
-		oldFIP, newFIP := d.GetChange("floating_ip")
-		log.Printf("[DEBUG] Old Floating IP: %v", oldFIP)
-		log.Printf("[DEBUG] New Floating IP: %v", newFIP)
-		if oldFIP.(string) != "" {
-			log.Printf("[DEBUG] Attempting to disassociate %s from %s", oldFIP, d.Id())
-			if err := disassociateFloatingIPFromInstance(computeClient, oldFIP.(string), d.Id(), ""); err != nil {
-				return fmt.Errorf("Error disassociating Floating IP during update: %s", err)
-			}
-		}
-
-		if newFIP.(string) != "" {
-			log.Printf("[DEBUG] Attempting to associate %s to %s", newFIP, d.Id())
-			if err := associateFloatingIPToInstance(computeClient, newFIP.(string), d.Id(), ""); err != nil {
-				return fmt.Errorf("Error associating Floating IP during update: %s", err)
-			}
-		}
-	}
-
-	if d.HasChange("network") {
-		oldNetworks, newNetworks := d.GetChange("network")
-		oldNetworkList := oldNetworks.([]interface{})
-		newNetworkList := newNetworks.([]interface{})
-		for i, oldNet := range oldNetworkList {
-			var oldFIP, newFIP string
-			var oldFixedIP, newFixedIP string
-
-			if oldNetRaw, ok := oldNet.(map[string]interface{}); ok {
-				oldFIP = oldNetRaw["floating_ip"].(string)
-				oldFixedIP = oldNetRaw["fixed_ip_v4"].(string)
-			}
-
-			if len(newNetworkList) > i {
-				if newNetRaw, ok := newNetworkList[i].(map[string]interface{}); ok {
-					newFIP = newNetRaw["floating_ip"].(string)
-					newFixedIP = newNetRaw["fixed_ip_v4"].(string)
-				}
-			}
-
-			// Only changes to the floating IP are supported
-			if oldFIP != "" && oldFIP != newFIP {
-				log.Printf("[DEBUG] Attempting to disassociate %s from %s", oldFIP, d.Id())
-				if err := disassociateFloatingIPFromInstance(computeClient, oldFIP, d.Id(), oldFixedIP); err != nil {
-					return fmt.Errorf("Error disassociating Floating IP during update: %s", err)
-				}
-			}
-
-			if newFIP != "" && oldFIP != newFIP {
-				log.Printf("[DEBUG] Attempting to associate %s to %s", newFIP, d.Id())
-				if err := associateFloatingIPToInstance(computeClient, newFIP, d.Id(), newFixedIP); err != nil {
-					return fmt.Errorf("Error associating Floating IP during update: %s", err)
-				}
-			}
-		}
-	}
-
-	if d.HasChange("volume") {
-		// old attachments and new attachments
-		oldAttachments, newAttachments := d.GetChange("volume")
-		// for each old attachment, detach the volume
-		oldAttachmentSet := oldAttachments.(*schema.Set).List()
-
-		log.Printf("[DEBUG] Attempting to detach the following volumes: %#v", oldAttachmentSet)
-		if blockClient, err := config.blockStorageV1Client(GetRegion(d, config)); err != nil {
-			return err
-		} else {
-			if err := detachVolumesFromInstance(computeClient, blockClient, d.Id(), oldAttachmentSet); err != nil {
-				return err
-			}
-		}
-
-		// for each new attachment, attach the volume
-		newAttachmentSet := newAttachments.(*schema.Set).List()
-		if blockClient, err := config.blockStorageV1Client(GetRegion(d, config)); err != nil {
-			return err
-		} else {
-			if err := attachVolumesToInstance(computeClient, blockClient, d.Id(), newAttachmentSet); err != nil {
-				return err
-			}
-		}
-
-		d.SetPartial("volume")
-	}
-
 	if d.HasChange("flavor_id") || d.HasChange("flavor_name") {
 		var newFlavorId string
 		var err error
@@ -865,22 +750,6 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
-	}
-
-	// Make sure all volumes are detached before deleting
-	volumes := d.Get("volume")
-	if volumeSet, ok := volumes.(*schema.Set); ok {
-		volumeList := volumeSet.List()
-		if len(volumeList) > 0 {
-			log.Printf("[DEBUG] Attempting to detach the following volumes: %#v", volumeList)
-			if blockClient, err := config.blockStorageV1Client(GetRegion(d, config)); err != nil {
-				return err
-			} else {
-				if err := detachVolumesFromInstance(computeClient, blockClient, d.Id(), volumeList); err != nil {
-					return err
-				}
-			}
-		}
 	}
 
 	if d.Get("stop_before_destroy").(bool) {
@@ -996,7 +865,6 @@ func getInstanceNetworksAndAddresses(computeClient *gophercloud.ServiceClient, d
 				"name":        netName,
 				"fixed_ip_v4": n["fixed_ip_v4"],
 				"fixed_ip_v6": n["fixed_ip_v6"],
-				"floating_ip": n["floating_ip"],
 				"mac":         n["mac"],
 			}
 		}
@@ -1010,7 +878,6 @@ func getInstanceNetworksAndAddresses(computeClient *gophercloud.ServiceClient, d
 				"port":           networkDetails[i]["port"],
 				"fixed_ip_v4":    n["fixed_ip_v4"],
 				"fixed_ip_v6":    n["fixed_ip_v6"],
-				"floating_ip":    n["floating_ip"],
 				"mac":            n["mac"],
 				"access_network": networkDetails[i]["access_network"],
 			}
@@ -1037,15 +904,6 @@ func getInstanceNetworks(computeClient *gophercloud.ServiceClient, d *schema.Res
 		}
 
 		rawMap := raw.(map[string]interface{})
-
-		// Both a floating IP and a port cannot be specified
-		if fip, ok := rawMap["floating_ip"].(string); ok {
-			if port, ok := rawMap["port"].(string); ok {
-				if fip != "" && port != "" {
-					return nil, fmt.Errorf("Only one of a floating IP or port may be specified per network.")
-				}
-			}
-		}
 
 		allPages, err := tenantnetworks.List(computeClient).AllPages()
 		if err != nil {
@@ -1115,9 +973,7 @@ func getInstanceAddresses(addresses map[string]interface{}) map[string]map[strin
 		addrs[n] = make(map[string]interface{})
 		for _, element := range networkAddresses.([]interface{}) {
 			address := element.(map[string]interface{})
-			if address["OS-EXT-IPS:type"] == "floating" {
-				addrs[n]["floating_ip"] = address["addr"]
-			} else {
+			if address["OS-EXT-IPS:type"] == "fixed" {
 				if address["version"].(float64) == 4 {
 					addrs[n]["fixed_ip_v4"] = address["addr"].(string)
 				} else {
@@ -1138,14 +994,8 @@ func getInstanceAddresses(addresses map[string]interface{}) map[string]map[strin
 func getInstanceAccessAddresses(d *schema.ResourceData, networks []map[string]interface{}) (string, string) {
 	var hostv4, hostv6 string
 
-	// Start with a global floating IP
-	floatingIP := d.Get("floating_ip").(string)
-	if floatingIP != "" {
-		hostv4 = floatingIP
-	}
-
 	// Loop through all networks
-	// If the network has a valid floating, fixed v4, or fixed v6 address
+	// If the network has a valid fixed v4 or fixed v6 address
 	// and hostv4 or hostv6 is not set, set hostv4/hostv6.
 	// If the network is an "access_network" overwrite hostv4/hostv6.
 	for _, n := range networks {
@@ -1161,12 +1011,6 @@ func getInstanceAccessAddresses(d *schema.ResourceData, networks []map[string]in
 			}
 		}
 
-		if floatingIP, ok := n["floating_ip"].(string); ok && floatingIP != "" {
-			if hostv4 == "" || accessNetwork {
-				hostv4 = floatingIP
-			}
-		}
-
 		if fixedIPv6, ok := n["fixed_ip_v6"].(string); ok && fixedIPv6 != "" {
 			if hostv6 == "" || accessNetwork {
 				hostv6 = fixedIPv6
@@ -1177,78 +1021,6 @@ func getInstanceAccessAddresses(d *schema.ResourceData, networks []map[string]in
 	log.Printf("[DEBUG] OpenStack Instance Network Access Addresses: %s, %s", hostv4, hostv6)
 
 	return hostv4, hostv6
-}
-
-func checkInstanceFloatingIPs(d *schema.ResourceData) error {
-	rawNetworks := d.Get("network").([]interface{})
-	floatingIP := d.Get("floating_ip").(string)
-
-	for _, raw := range rawNetworks {
-		if raw == nil {
-			continue
-		}
-
-		rawMap := raw.(map[string]interface{})
-
-		// Error if a floating IP was specified both globally and in the network block.
-		if floatingIP != "" && rawMap["floating_ip"] != "" {
-			return fmt.Errorf("Cannot specify a floating IP both globally and in a network block.")
-		}
-	}
-	return nil
-}
-
-func associateFloatingIPsToInstance(computeClient *gophercloud.ServiceClient, d *schema.ResourceData) error {
-	floatingIP := d.Get("floating_ip").(string)
-	rawNetworks := d.Get("network").([]interface{})
-	instanceID := d.Id()
-
-	if floatingIP != "" {
-		if err := associateFloatingIPToInstance(computeClient, floatingIP, instanceID, ""); err != nil {
-			return err
-		}
-	} else {
-		for _, raw := range rawNetworks {
-			if raw == nil {
-				continue
-			}
-
-			rawMap := raw.(map[string]interface{})
-			if rawMap["floating_ip"].(string) != "" {
-				floatingIP := rawMap["floating_ip"].(string)
-				fixedIP := rawMap["fixed_ip_v4"].(string)
-				if err := associateFloatingIPToInstance(computeClient, floatingIP, instanceID, fixedIP); err != nil {
-					return err
-				}
-			}
-		}
-	}
-	return nil
-}
-
-func associateFloatingIPToInstance(computeClient *gophercloud.ServiceClient, floatingIP string, instanceID string, fixedIP string) error {
-	associateOpts := floatingips.AssociateOpts{
-		FloatingIP: floatingIP,
-		FixedIP:    fixedIP,
-	}
-
-	if err := floatingips.AssociateInstance(computeClient, instanceID, associateOpts).ExtractErr(); err != nil {
-		return fmt.Errorf("Error associating floating IP: %s", err)
-	}
-
-	return nil
-}
-
-func disassociateFloatingIPFromInstance(computeClient *gophercloud.ServiceClient, floatingIP string, instanceID string, fixedIP string) error {
-	disassociateOpts := floatingips.DisassociateOpts{
-		FloatingIP: floatingIP,
-	}
-
-	if err := floatingips.DisassociateInstance(computeClient, instanceID, disassociateOpts).ExtractErr(); err != nil {
-		return fmt.Errorf("Error disassociating floating IP: %s", err)
-	}
-
-	return nil
 }
 
 func resourceInstanceMetadataV2(d *schema.ResourceData) map[string]string {
@@ -1426,14 +1198,6 @@ func getFlavorID(client *gophercloud.ServiceClient, d *schema.ResourceData) (str
 	return flavors.IDFromName(client, flavorName)
 }
 
-func resourceComputeVolumeAttachmentHash(v interface{}) int {
-	var buf bytes.Buffer
-	m := v.(map[string]interface{})
-	buf.WriteString(fmt.Sprintf("%s-", m["volume_id"].(string)))
-
-	return hashcode.String(buf.String())
-}
-
 func resourceComputeSchedulerHintsHash(v interface{}) int {
 	var buf bytes.Buffer
 	m := v.(map[string]interface{})
@@ -1455,121 +1219,6 @@ func resourceComputeSchedulerHintsHash(v interface{}) int {
 	buf.WriteString(fmt.Sprintf("%s-", m["query"].([]interface{})))
 
 	return hashcode.String(buf.String())
-}
-
-func attachVolumesToInstance(computeClient *gophercloud.ServiceClient, blockClient *gophercloud.ServiceClient, serverId string, vols []interface{}) error {
-	for _, v := range vols {
-		va := v.(map[string]interface{})
-		volumeId := va["volume_id"].(string)
-		device := va["device"].(string)
-
-		s := ""
-		if serverId != "" {
-			s = serverId
-		} else if va["server_id"] != "" {
-			s = va["server_id"].(string)
-		} else {
-			return fmt.Errorf("Unable to determine server ID to attach volume.")
-		}
-
-		vaOpts := &volumeattach.CreateOpts{
-			Device:   device,
-			VolumeID: volumeId,
-		}
-
-		if _, err := volumeattach.Create(computeClient, s, vaOpts).Extract(); err != nil {
-			return err
-		}
-
-		stateConf := &resource.StateChangeConf{
-			Pending:    []string{"attaching", "available"},
-			Target:     []string{"in-use"},
-			Refresh:    VolumeV1StateRefreshFunc(blockClient, va["volume_id"].(string)),
-			Timeout:    30 * time.Minute,
-			Delay:      5 * time.Second,
-			MinTimeout: 2 * time.Second,
-		}
-
-		if _, err := stateConf.WaitForState(); err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] Attached volume %s to instance %s", volumeId, serverId)
-	}
-	return nil
-}
-
-func detachVolumesFromInstance(computeClient *gophercloud.ServiceClient, blockClient *gophercloud.ServiceClient, serverId string, vols []interface{}) error {
-	for _, v := range vols {
-		va := v.(map[string]interface{})
-		aId := va["id"].(string)
-
-		log.Printf("[INFO] Attempting to detach volume %s", va["volume_id"])
-		if err := volumeattach.Delete(computeClient, serverId, aId).ExtractErr(); err != nil {
-			return err
-		}
-
-		stateConf := &resource.StateChangeConf{
-			Pending:    []string{"detaching", "in-use"},
-			Target:     []string{"available"},
-			Refresh:    VolumeV1StateRefreshFunc(blockClient, va["volume_id"].(string)),
-			Timeout:    30 * time.Minute,
-			Delay:      5 * time.Second,
-			MinTimeout: 2 * time.Second,
-		}
-
-		if _, err := stateConf.WaitForState(); err != nil {
-			return err
-		}
-		log.Printf("[INFO] Detached volume %s from instance %s", va["volume_id"], serverId)
-	}
-
-	return nil
-}
-
-func getVolumeAttachments(computeClient *gophercloud.ServiceClient, d *schema.ResourceData) error {
-	var vols []map[string]interface{}
-
-	allPages, err := volumeattach.List(computeClient, d.Id()).AllPages()
-	if err != nil {
-		if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
-			if errCode.Actual == 403 {
-				log.Printf("[DEBUG] os-volume_attachments disabled.")
-				return nil
-			} else {
-				return err
-			}
-		}
-	}
-
-	allVolumeAttachments, err := volumeattach.ExtractVolumeAttachments(allPages)
-	if err != nil {
-		return err
-	}
-
-	if v, ok := d.GetOk("volume"); ok {
-		volumes := v.(*schema.Set).List()
-		for _, volume := range volumes {
-			if volumeMap, ok := volume.(map[string]interface{}); ok {
-				if v, ok := volumeMap["volume_id"].(string); ok {
-					for _, volumeAttachment := range allVolumeAttachments {
-						if v == volumeAttachment.ID {
-							vol := make(map[string]interface{})
-							vol["id"] = volumeAttachment.ID
-							vol["volume_id"] = volumeAttachment.VolumeID
-							vol["device"] = volumeAttachment.Device
-							vols = append(vols, vol)
-						}
-					}
-				}
-			}
-		}
-	}
-
-	log.Printf("[INFO] Volume attachments: %v", vols)
-	d.Set("volume", vols)
-
-	return nil
 }
 
 func checkBlockDeviceConfig(d *schema.ResourceData) error {
