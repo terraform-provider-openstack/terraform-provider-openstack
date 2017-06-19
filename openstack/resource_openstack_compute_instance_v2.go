@@ -967,7 +967,7 @@ func getInstanceNetworks(computeClient *gophercloud.ServiceClient, d *schema.Res
 				"access_network": rawMap["access_network"].(bool),
 			})
 		} else {
-			log.Printf("[DEBUG] doesnt found tenant net with the name [%s] or the uuid [%s]", rawMap["name"], rawMap["uuid"])
+			log.Printf("[DEBUG] Unable to find a network with the name [%s] or the uuid [%s]", rawMap["name"], rawMap["uuid"])
 		}
 	}
 
