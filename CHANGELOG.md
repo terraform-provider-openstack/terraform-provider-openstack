@@ -15,3 +15,4 @@ IMPROVEMENTS:
 BUG FIXES
 
 * Wait for LoadBalancer to be active before creating Pools and Monitors [GH-29]
+* Choose first network found with a matching name for compute instances [GH-36]
