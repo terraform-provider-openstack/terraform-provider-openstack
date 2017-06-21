@@ -16,7 +16,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/schedulerhints"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/startstop"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tenantnetworks"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
@@ -375,19 +374,13 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 
 	// Build a list of networks with the information given upon creation.
 	// Error out if an invalid network configuration was used.
-	networkDetails, err := getInstanceNetworks(computeClient, d)
+	allInstanceNetworks, err := getAllInstanceNetworks(d, meta)
 	if err != nil {
 		return err
 	}
 
-	networks := make([]servers.Network, len(networkDetails))
-	for i, net := range networkDetails {
-		networks[i] = servers.Network{
-			UUID:    net["uuid"].(string),
-			Port:    net["port"].(string),
-			FixedIP: net["fixed_ip_v4"].(string),
-		}
-	}
+	// Build a []servers.Network to pass into the create options.
+	networks := expandInstanceNetworks(allInstanceNetworks)
 
 	configDrive := d.Get("config_drive").(bool)
 
@@ -475,10 +468,6 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 			server.ID, err)
 	}
 
-	// Now that the instance has been created, we need to do an early read on the
-	// networks in order to associate floating IPs
-	_, err = getInstanceNetworksAndAddresses(computeClient, d)
-
 	return resourceComputeInstanceV2Read(d, meta)
 }
 
@@ -499,7 +488,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	d.Set("name", server.Name)
 
 	// Get the instance network and address information
-	networks, err := getInstanceNetworksAndAddresses(computeClient, d)
+	networks, err := flattenInstanceNetworks(d, meta)
 	if err != nil {
 		return err
 	}
@@ -507,6 +496,8 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	// Determine the best IPv4 and IPv6 addresses to access the instance with
 	hostv4, hostv6 := getInstanceAccessAddresses(d, networks)
 
+	// AccessIPv4/v6 isn't standard in OpenStack, but there have been reports
+	// of them being used in some environments.
 	if server.AccessIPv4 != "" && hostv4 == "" {
 		hostv4 = server.AccessIPv4
 	}
@@ -521,7 +512,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 
 	// Determine the best IP address to use for SSH connectivity.
 	// Prefer IPv4 over IPv6.
-	preferredSSHAddress := ""
+	var preferredSSHAddress string
 	if hostv4 != "" {
 		preferredSSHAddress = hostv4
 	} else if hostv6 != "" {
@@ -833,202 +824,6 @@ func resourceInstanceSecGroupsV2(d *schema.ResourceData) []string {
 		secgroups[i] = raw.(string)
 	}
 	return secgroups
-}
-
-// getInstanceNetworks collects instance network information from different sources
-// and aggregates it all together.
-func getInstanceNetworksAndAddresses(computeClient *gophercloud.ServiceClient, d *schema.ResourceData) ([]map[string]interface{}, error) {
-	server, err := servers.Get(computeClient, d.Id()).Extract()
-
-	if err != nil {
-		return nil, CheckDeleted(d, err, "server")
-	}
-
-	networkDetails, err := getInstanceNetworks(computeClient, d)
-	addresses := getInstanceAddresses(server.Addresses)
-	if err != nil {
-		return nil, err
-	}
-
-	// if there are no networkDetails, make networks at least a length of 1
-	networkLength := 1
-	if len(networkDetails) > 0 {
-		networkLength = len(networkDetails)
-	}
-	networks := make([]map[string]interface{}, networkLength)
-
-	// Loop through all networks and addresses,
-	// merge relevant address details.
-	if len(networkDetails) == 0 {
-		for netName, n := range addresses {
-			networks[0] = map[string]interface{}{
-				"name":        netName,
-				"fixed_ip_v4": n["fixed_ip_v4"],
-				"fixed_ip_v6": n["fixed_ip_v6"],
-				"mac":         n["mac"],
-			}
-		}
-	} else {
-		for i, net := range networkDetails {
-			n := addresses[net["name"].(string)]
-
-			networks[i] = map[string]interface{}{
-				"uuid":           networkDetails[i]["uuid"],
-				"name":           networkDetails[i]["name"],
-				"port":           networkDetails[i]["port"],
-				"fixed_ip_v4":    n["fixed_ip_v4"],
-				"fixed_ip_v6":    n["fixed_ip_v6"],
-				"mac":            n["mac"],
-				"access_network": networkDetails[i]["access_network"],
-			}
-		}
-	}
-
-	log.Printf("[DEBUG] networks: %+v", networks)
-
-	return networks, nil
-}
-
-func getInstanceNetworks(computeClient *gophercloud.ServiceClient, d *schema.ResourceData) ([]map[string]interface{}, error) {
-	rawNetworks := d.Get("network").([]interface{})
-	newNetworks := make([]map[string]interface{}, 0, len(rawNetworks))
-	var tenantnet tenantnetworks.Network
-
-	tenantNetworkExt := true
-	for _, raw := range rawNetworks {
-		// Not sure what causes this, but it is a possibility (see GH-2323).
-		// Since we call this function to reconcile what we'll save in the
-		// state anyways, we just ignore it.
-		if raw == nil {
-			continue
-		}
-
-		rawMap := raw.(map[string]interface{})
-
-		allPages, err := tenantnetworks.List(computeClient).AllPages()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				log.Printf("[DEBUG] os-tenant-networks disabled")
-				tenantNetworkExt = false
-			}
-
-			log.Printf("[DEBUG] Err looks like: %+v", err)
-			if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 403 {
-					log.Printf("[DEBUG] os-tenant-networks disabled.")
-					tenantNetworkExt = false
-				} else {
-					log.Printf("[DEBUG] unexpected os-tenant-networks error: %s", err)
-					tenantNetworkExt = false
-				}
-			}
-		}
-
-		// In some cases, a call to os-tenant-networks might work,
-		// but the response is invalid. Catch this during extraction.
-		networkList := []tenantnetworks.Network{}
-		if tenantNetworkExt {
-			networkList, err = tenantnetworks.ExtractNetworks(allPages)
-			if err != nil {
-				log.Printf("[DEBUG] error extracting os-tenant-networks results: %s", err)
-				tenantNetworkExt = false
-			}
-		}
-
-		networkID := ""
-		networkName := ""
-		networkFound := false
-		if tenantNetworkExt {
-			for _, network := range networkList {
-				if network.Name == rawMap["name"] {
-					tenantnet = network
-					networkFound = true
-				}
-				if network.ID == rawMap["uuid"] {
-					tenantnet = network
-					networkFound = true
-				}
-			}
-
-			networkID = tenantnet.ID
-			networkName = tenantnet.Name
-		} else {
-			networkID = rawMap["uuid"].(string)
-			networkName = rawMap["name"].(string)
-			networkFound = true
-		}
-
-		if networkFound {
-			newNetworks = append(newNetworks, map[string]interface{}{
-				"uuid":           networkID,
-				"name":           networkName,
-				"port":           rawMap["port"].(string),
-				"fixed_ip_v4":    rawMap["fixed_ip_v4"].(string),
-				"access_network": rawMap["access_network"].(bool),
-			})
-		} else {
-			log.Printf("[DEBUG] Unable to find a network with the name [%s] or the uuid [%s]", rawMap["name"], rawMap["uuid"])
-		}
-	}
-
-	log.Printf("[DEBUG] networks: %+v", newNetworks)
-	return newNetworks, nil
-}
-
-func getInstanceAddresses(addresses map[string]interface{}) map[string]map[string]interface{} {
-	addrs := make(map[string]map[string]interface{})
-	for n, networkAddresses := range addresses {
-		addrs[n] = make(map[string]interface{})
-		for _, element := range networkAddresses.([]interface{}) {
-			address := element.(map[string]interface{})
-			if address["OS-EXT-IPS:type"] == "fixed" {
-				if address["version"].(float64) == 4 {
-					addrs[n]["fixed_ip_v4"] = address["addr"].(string)
-				} else {
-					addrs[n]["fixed_ip_v6"] = fmt.Sprintf("[%s]", address["addr"].(string))
-				}
-			}
-			if mac, ok := address["OS-EXT-IPS-MAC:mac_addr"]; ok {
-				addrs[n]["mac"] = mac.(string)
-			}
-		}
-	}
-
-	log.Printf("[DEBUG] Addresses: %+v", addresses)
-
-	return addrs
-}
-
-func getInstanceAccessAddresses(d *schema.ResourceData, networks []map[string]interface{}) (string, string) {
-	var hostv4, hostv6 string
-
-	// Loop through all networks
-	// If the network has a valid fixed v4 or fixed v6 address
-	// and hostv4 or hostv6 is not set, set hostv4/hostv6.
-	// If the network is an "access_network" overwrite hostv4/hostv6.
-	for _, n := range networks {
-		var accessNetwork bool
-
-		if an, ok := n["access_network"].(bool); ok && an {
-			accessNetwork = true
-		}
-
-		if fixedIPv4, ok := n["fixed_ip_v4"].(string); ok && fixedIPv4 != "" {
-			if hostv4 == "" || accessNetwork {
-				hostv4 = fixedIPv4
-			}
-		}
-
-		if fixedIPv6, ok := n["fixed_ip_v6"].(string); ok && fixedIPv6 != "" {
-			if hostv6 == "" || accessNetwork {
-				hostv6 = fixedIPv6
-			}
-		}
-	}
-
-	log.Printf("[DEBUG] OpenStack Instance Network Access Addresses: %s, %s", hostv4, hostv6)
-
-	return hostv4, hostv6
 }
 
 func resourceInstanceMetadataV2(d *schema.ResourceData) map[string]string {

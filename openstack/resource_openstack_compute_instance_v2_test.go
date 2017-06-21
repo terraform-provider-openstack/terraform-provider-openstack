@@ -396,6 +396,54 @@ func TestAccComputeV2Instance_networkNameToID(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
+	var instance servers.Server
+	var network_1 networks.Network
+	var network_2 networks.Network
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeV2Instance_crazyNICs,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					testAccCheckNetworkingV2NetworkExists(
+						"openstack_networking_network_v2.network_1", &network_1),
+					testAccCheckNetworkingV2NetworkExists(
+						"openstack_networking_network_v2.network_2", &network_2),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_compute_instance_v2.instance_1", "network.1.uuid", &network_1.ID),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_compute_instance_v2.instance_1", "network.2.uuid", &network_2.ID),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_compute_instance_v2.instance_1", "network.3.uuid", &network_1.ID),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_compute_instance_v2.instance_1", "network.4.uuid", &network_2.ID),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "network.1.name", "network_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "network.2.name", "network_2"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "network.3.name", "network_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "network.4.name", "network_2"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "network.1.fixed_ip_v4", "192.168.1.100"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "network.2.fixed_ip_v4", "192.168.2.100"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "network.3.fixed_ip_v4", "192.168.1.101"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "network.4.fixed_ip_v4", "192.168.2.101"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckComputeV2InstanceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	computeClient, err := config.computeV2Client(OS_REGION_NAME)
@@ -925,5 +973,67 @@ resource "openstack_compute_instance_v2" "instance_1" {
     name = "${openstack_networking_network_v2.network_1.name}"
   }
 
+}
+`, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_crazyNICs = fmt.Sprintf(`
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  cidr = "192.168.1.0/24"
+  ip_version = 4
+  enable_dhcp = true
+  no_gateway = true
+}
+
+resource "openstack_networking_network_v2" "network_2" {
+  name = "network_2"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_2" {
+  name = "subnet_2"
+  network_id = "${openstack_networking_network_v2.network_2.id}"
+  cidr = "192.168.2.0/24"
+  ip_version = 4
+  enable_dhcp = true
+  no_gateway = true
+}
+
+resource "openstack_compute_instance_v2" "instance_1" {
+  depends_on = [
+    "openstack_networking_subnet_v2.subnet_1",
+    "openstack_networking_subnet_v2.subnet_2",
+  ]
+
+  name = "instance_1"
+  security_groups = ["default"]
+
+  network {
+    uuid = "%s"
+  }
+
+  network {
+    uuid = "${openstack_networking_network_v2.network_1.id}"
+    fixed_ip_v4 = "192.168.1.100"
+  }
+
+  network {
+    uuid = "${openstack_networking_network_v2.network_2.id}"
+    fixed_ip_v4 = "192.168.2.100"
+  }
+
+  network {
+    uuid = "${openstack_networking_network_v2.network_1.id}"
+    fixed_ip_v4 = "192.168.1.101"
+  }
+
+  network {
+    uuid = "${openstack_networking_network_v2.network_2.id}"
+    fixed_ip_v4 = "192.168.2.101"
+  }
 }
 `, OS_NETWORK_ID)
