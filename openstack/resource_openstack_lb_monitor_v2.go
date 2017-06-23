@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/monitors"
 )
 
@@ -255,46 +254,6 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 	err = waitForLBV2Monitor(networkingClient, d.Id(), "DELETED", nil, timeout)
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func resourceLBV2MonitorRefreshFunc(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		monitor, err := monitors.Get(networkingClient, id).Extract()
-		if err != nil {
-			return nil, "", err
-		}
-
-		// The monitor resource has no Status attribute, so a successful Get is the best we can do
-		return monitor, "ACTIVE", nil
-	}
-}
-
-func waitForLBV2Monitor(networkingClient *gophercloud.ServiceClient, id string, target string, pending []string, timeout time.Duration) error {
-	log.Printf("[DEBUG] Waiting for monitor %s to become %s.", id, target)
-
-	stateConf := &resource.StateChangeConf{
-		Target:     []string{target},
-		Pending:    pending,
-		Refresh:    resourceLBV2MonitorRefreshFunc(networkingClient, id),
-		Timeout:    timeout,
-		Delay:      5 * time.Second,
-		MinTimeout: 1 * time.Second,
-	}
-
-	_, err := stateConf.WaitForState()
-	if err != nil {
-		if _, ok := err.(gophercloud.ErrDefault404); ok {
-			switch target {
-			case "DELETED":
-				return nil
-			default:
-				return fmt.Errorf("Error: monitor %s not found: %s", id, err)
-			}
-		}
-		return fmt.Errorf("Error waiting for monitor %s to become %s: %s", id, target, err)
 	}
 
 	return nil

@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 )
 
@@ -374,46 +373,6 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	err = waitForLBV2Pool(networkingClient, d.Id(), "DELETED", nil, timeout)
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func resourceLBV2PoolRefreshFunc(networkingClient *gophercloud.ServiceClient, poolID string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		pool, err := pools.Get(networkingClient, poolID).Extract()
-		if err != nil {
-			return nil, "", err
-		}
-
-		// The pool resource has no Status attribute, so a successful Get is the best we can do
-		return pool, "ACTIVE", nil
-	}
-}
-
-func waitForLBV2Pool(networkingClient *gophercloud.ServiceClient, id string, target string, pending []string, timeout time.Duration) error {
-	log.Printf("[DEBUG] Waiting for pool %s to become %s.", id, target)
-
-	stateConf := &resource.StateChangeConf{
-		Target:     []string{target},
-		Pending:    pending,
-		Refresh:    resourceLBV2PoolRefreshFunc(networkingClient, id),
-		Timeout:    timeout,
-		Delay:      5 * time.Second,
-		MinTimeout: 1 * time.Second,
-	}
-
-	_, err := stateConf.WaitForState()
-	if err != nil {
-		if _, ok := err.(gophercloud.ErrDefault404); ok {
-			switch target {
-			case "DELETED":
-				return nil
-			default:
-				return fmt.Errorf("Error: pool %s not found: %s", id, err)
-			}
-		}
-		return fmt.Errorf("Error waiting for pool %s to become %s: %s", id, target, err)
 	}
 
 	return nil

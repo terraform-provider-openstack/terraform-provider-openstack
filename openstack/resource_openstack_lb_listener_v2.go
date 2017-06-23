@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 )
 
@@ -318,46 +317,6 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 	err = waitForLBV2Listener(networkingClient, d.Id(), "DELETED", nil, timeout)
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func resourceLBV2ListenerRefreshFunc(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		listener, err := listeners.Get(networkingClient, id).Extract()
-		if err != nil {
-			return nil, "", err
-		}
-
-		// The listener resource has no Status attribute, so a successful Get is the best we can do
-		return listener, "ACTIVE", nil
-	}
-}
-
-func waitForLBV2Listener(networkingClient *gophercloud.ServiceClient, id string, target string, pending []string, timeout time.Duration) error {
-	log.Printf("[DEBUG] Waiting for listener %s to become %s.", id, target)
-
-	stateConf := &resource.StateChangeConf{
-		Target:     []string{target},
-		Pending:    pending,
-		Refresh:    resourceLBV2ListenerRefreshFunc(networkingClient, id),
-		Timeout:    timeout,
-		Delay:      5 * time.Second,
-		MinTimeout: 1 * time.Second,
-	}
-
-	_, err := stateConf.WaitForState()
-	if err != nil {
-		if _, ok := err.(gophercloud.ErrDefault404); ok {
-			switch target {
-			case "DELETED":
-				return nil
-			default:
-				return fmt.Errorf("Error: listener %s not found: %s", id, err)
-			}
-		}
-		return fmt.Errorf("Error waiting for listener %s to become %s: %s", id, target, err)
 	}
 
 	return nil
