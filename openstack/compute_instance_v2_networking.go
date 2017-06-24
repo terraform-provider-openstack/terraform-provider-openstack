@@ -18,6 +18,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tenantnetworks"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -61,6 +62,11 @@ type InstanceNetwork struct {
 // Not only that, but we have to account for two OpenStack network services
 // running: nova-network (legacy) and Neutron (current).
 //
+// In addition, if a port was specified, not all of the port information
+// will be displayed, such as multiple fixed and floating IPs. This resource
+// isn't currently configured for that type of flexibility. It's better to
+// reference the actual port resource itself.
+//
 // So, let's begin the journey.
 func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]InstanceNetwork, error) {
 	var instanceNetworks []InstanceNetwork
@@ -70,9 +76,11 @@ func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]Instanc
 		network := v.(map[string]interface{})
 		networkID := network["uuid"].(string)
 		networkName := network["name"].(string)
+		portID := network["port"].(string)
 
-		if networkID == "" && networkName == "" {
-			return nil, fmt.Errorf("At least one of network.uuid or network.name must be set.")
+		if networkID == "" && networkName == "" && portID == "" {
+			return nil, fmt.Errorf(
+				"At least one of network.uuid, network.name, or network.port must be set.")
 		}
 
 		// If a user specified both an ID and name, that makes things easy
@@ -82,7 +90,7 @@ func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]Instanc
 			v := InstanceNetwork{
 				UUID:          networkID,
 				Name:          networkName,
-				Port:          network["port"].(string),
+				Port:          portID,
 				FixedIP:       network["fixed_ip_v4"].(string),
 				AccessNetwork: network["access_network"].(bool),
 			}
@@ -93,13 +101,20 @@ func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]Instanc
 		// But if at least one of name or ID was missing, we have to query
 		// for that other piece.
 		//
-		// Priority is giving to the network ID since it's guaranteed to be
+		// Priority is given to a port since a network ID or name usually isn't
+		// specified when using a port.
+		//
+		// Next priority is given to the network ID since it's guaranteed to be
 		// an exact match.
 		queryType := "name"
 		queryTerm := networkName
 		if networkID != "" {
 			queryType = "id"
 			queryTerm = networkID
+		}
+		if portID != "" {
+			queryType = "port"
+			queryTerm = portID
 		}
 
 		networkInfo, err := getInstanceNetworkInfo(d, meta, queryType, queryTerm)
@@ -110,7 +125,7 @@ func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]Instanc
 		v := InstanceNetwork{
 			UUID:          networkInfo["uuid"].(string),
 			Name:          networkInfo["name"].(string),
-			Port:          network["port"].(string),
+			Port:          portID,
 			FixedIP:       network["fixed_ip_v4"].(string),
 			AccessNetwork: network["access_network"].(bool),
 		}
@@ -167,6 +182,12 @@ func getInstanceNetworkInfo(
 func getInstanceNetworkInfoNovaNet(
 	client *gophercloud.ServiceClient, queryType, queryTerm string) (map[string]interface{}, error) {
 
+	// If somehow a port ended up here, we should just error out.
+	if queryType == "port" {
+		return nil, fmt.Errorf(
+			"Unable to query a port (%s) using the Nova API", queryTerm)
+	}
+
 	allPages, err := tenantnetworks.List(client).AllPages()
 	if err != nil {
 		return nil, fmt.Errorf(
@@ -213,6 +234,36 @@ func getInstanceNetworkInfoNovaNet(
 // information.
 func getInstanceNetworkInfoNeutron(
 	client *gophercloud.ServiceClient, queryType, queryTerm string) (map[string]interface{}, error) {
+
+	// If a port was specified, use it to look up the network ID
+	// and then query the network as if a network ID was originally used.
+	if queryType == "port" {
+		listOpts := ports.ListOpts{
+			ID: queryTerm,
+		}
+		allPages, err := ports.List(client, listOpts).AllPages()
+		if err != nil {
+			return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
+		}
+
+		allPorts, err := ports.ExtractPorts(allPages)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
+		}
+
+		var port ports.Port
+		switch len(allPorts) {
+		case 0:
+			return nil, fmt.Errorf("Could not find any matching port for %s %s", queryType, queryTerm)
+		case 1:
+			port = allPorts[0]
+		default:
+			return nil, fmt.Errorf("More than one port found for %s %s", queryType, queryTerm)
+		}
+
+		queryType = "id"
+		queryTerm = port.NetworkID
+	}
 
 	listOpts := networks.ListOpts{
 		Status: "ACTIVE",
@@ -350,7 +401,7 @@ func flattenInstanceNetworks(
 			}
 		}
 
-		log.Printf("[DEBUG] getInstanceNetworksAndAddresses: %#v", networks)
+		log.Printf("[DEBUG] flattenInstanceNetworks: %#v", networks)
 		return networks, nil
 	}
 
