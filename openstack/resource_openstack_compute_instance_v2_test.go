@@ -401,6 +401,10 @@ func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 	var instance servers.Server
 	var network_1 networks.Network
 	var network_2 networks.Network
+	var port_1 ports.Port
+	var port_2 ports.Port
+	var port_3 ports.Port
+	var port_4 ports.Port
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -415,6 +419,14 @@ func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 						"openstack_networking_network_v2.network_1", &network_1),
 					testAccCheckNetworkingV2NetworkExists(
 						"openstack_networking_network_v2.network_2", &network_2),
+					testAccCheckNetworkingV2PortExists(
+						"openstack_networking_port_v2.port_1", &port_1),
+					testAccCheckNetworkingV2PortExists(
+						"openstack_networking_port_v2.port_2", &port_2),
+					testAccCheckNetworkingV2PortExists(
+						"openstack_networking_port_v2.port_3", &port_3),
+					testAccCheckNetworkingV2PortExists(
+						"openstack_networking_port_v2.port_4", &port_4),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_compute_instance_v2.instance_1", "network.1.uuid", &network_1.ID),
 					resource.TestCheckResourceAttrPtr(
@@ -423,6 +435,10 @@ func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 						"openstack_compute_instance_v2.instance_1", "network.3.uuid", &network_1.ID),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_compute_instance_v2.instance_1", "network.4.uuid", &network_2.ID),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_compute_instance_v2.instance_1", "network.5.uuid", &network_1.ID),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_compute_instance_v2.instance_1", "network.6.uuid", &network_2.ID),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_instance_v2.instance_1", "network.1.name", "network_1"),
 					resource.TestCheckResourceAttr(
@@ -432,6 +448,14 @@ func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_compute_instance_v2.instance_1", "network.4.name", "network_2"),
 					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "network.5.name", "network_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "network.6.name", "network_2"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "network.7.name", "network_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "network.8.name", "network_2"),
+					resource.TestCheckResourceAttr(
 						"openstack_compute_instance_v2.instance_1", "network.1.fixed_ip_v4", "192.168.1.100"),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_instance_v2.instance_1", "network.2.fixed_ip_v4", "192.168.2.100"),
@@ -439,32 +463,14 @@ func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 						"openstack_compute_instance_v2.instance_1", "network.3.fixed_ip_v4", "192.168.1.101"),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_instance_v2.instance_1", "network.4.fixed_ip_v4", "192.168.2.101"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeV2Instance_networkPort(t *testing.T) {
-	var instance servers.Server
-	var network networks.Network
-	var port ports.Port
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2Instance_networkPort,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
-					testAccCheckNetworkingV2NetworkExists(
-						"openstack_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2PortExists(
-						"openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttrPtr(
-						"openstack_compute_instance_v2.instance_1", "network.0.port", &port.ID),
+						"openstack_compute_instance_v2.instance_1", "network.5.port", &port_1.ID),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_compute_instance_v2.instance_1", "network.6.port", &port_2.ID),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_compute_instance_v2.instance_1", "network.7.port", &port_3.ID),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_compute_instance_v2.instance_1", "network.8.port", &port_4.ID),
 				),
 			},
 		},
@@ -1030,10 +1036,56 @@ resource "openstack_networking_subnet_v2" "subnet_2" {
   no_gateway = true
 }
 
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  admin_state_up = "true"
+
+  fixed_ip {
+    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.1.103"
+  }
+}
+
+resource "openstack_networking_port_v2" "port_2" {
+  name = "port_2"
+  network_id = "${openstack_networking_network_v2.network_2.id}"
+  admin_state_up = "true"
+
+  fixed_ip {
+    subnet_id = "${openstack_networking_subnet_v2.subnet_2.id}"
+    ip_address = "192.168.2.103"
+  }
+}
+
+resource "openstack_networking_port_v2" "port_3" {
+  name = "port_3"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  admin_state_up = "true"
+
+  fixed_ip {
+    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.1.104"
+  }
+}
+
+resource "openstack_networking_port_v2" "port_4" {
+  name = "port_4"
+  network_id = "${openstack_networking_network_v2.network_2.id}"
+  admin_state_up = "true"
+
+  fixed_ip {
+    subnet_id = "${openstack_networking_subnet_v2.subnet_2.id}"
+    ip_address = "192.168.2.104"
+  }
+}
+
 resource "openstack_compute_instance_v2" "instance_1" {
   depends_on = [
     "openstack_networking_subnet_v2.subnet_1",
     "openstack_networking_subnet_v2.subnet_2",
+    "openstack_networking_port_v2.port_1",
+    "openstack_networking_port_v2.port_2",
   ]
 
   name = "instance_1"
@@ -1062,44 +1114,21 @@ resource "openstack_compute_instance_v2" "instance_1" {
     uuid = "${openstack_networking_network_v2.network_2.id}"
     fixed_ip_v4 = "192.168.2.101"
   }
-}
-`, OS_NETWORK_ID)
-
-const testAccComputeV2Instance_networkPort = `
-resource "openstack_networking_network_v2" "network_1" {
-  name = "network_1"
-}
-
-resource "openstack_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-  cidr = "192.168.1.0/24"
-  ip_version = 4
-  enable_dhcp = true
-  no_gateway = true
-}
-
-resource "openstack_networking_port_v2" "port_1" {
-  name = "port_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-  admin_state_up = "true"
-
-  fixed_ip {
-    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
-    ip_address = "192.168.1.100"
-  }
-}
-
-resource "openstack_compute_instance_v2" "instance_1" {
-  depends_on = [
-    "openstack_networking_port_v2.port_1"
-  ]
-
-  name = "instance_1"
-  security_groups = ["default"]
 
   network {
     port = "${openstack_networking_port_v2.port_1.id}"
   }
+
+  network {
+    port = "${openstack_networking_port_v2.port_2.id}"
+  }
+
+  network {
+    port = "${openstack_networking_port_v2.port_3.id}"
+  }
+
+  network {
+    port = "${openstack_networking_port_v2.port_4.id}"
+  }
 }
-`
+`, OS_NETWORK_ID)
