@@ -1,4 +1,15 @@
 ## 0.1.1 (Unreleased)
+
+BACKWARDS INCOMPATIBILITIES / NOTES:
+
+* Network detection in the `openstack_compute_instance_v2` resource was cleaned up and updated. There should be no incompatibilities, but you should do a `plan` before `apply` just to be safe.
+
+IMPROVEMENTS:
+
+* `openstack_compute_instance_v2` now supports Neutron for network detection [GH-39]
+* `openstack_compute_instance_v2` support for multiple NICs on the same network [GH-39]
+
+
 ## 0.1.0 (June 21, 2017)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
