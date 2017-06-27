@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/monitors"
 )
 
@@ -21,6 +20,7 @@ func resourceMonitorV2() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
+			Update: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
@@ -120,24 +120,19 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	monitor, err := monitors.Create(networkingClient, createOpts).Extract()
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack LBaaSV2 monitor: %s", err)
-	}
-	log.Printf("[INFO] monitor ID: %s", monitor.ID)
+	log.Printf("[DEBUG] Attempting to create monitor")
+	var monitor *monitors.Monitor
+	timeout := d.Timeout(schema.TimeoutCreate)
+	err = resource.Retry(timeout, func() *resource.RetryError {
+		monitor, err = monitors.Create(networkingClient, createOpts).Extract()
+		if err != nil {
+			return checkForRetryableError(err)
+		}
+		return nil
+	})
 
-	log.Printf("[DEBUG] Waiting for Openstack LBaaSV2 monitor (%s) to become available.", monitor.ID)
-
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"PENDING_CREATE"},
-		Target:     []string{"ACTIVE"},
-		Refresh:    checkForMonitorActive(networkingClient, monitor.ID),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
-	}
-
-	_, err = stateConf.WaitForState()
+	// Wait for monitor to become active before continuing
+	err = waitForLBV2Monitor(networkingClient, monitor.ID, "ACTIVE", nil, timeout)
 	if err != nil {
 		return err
 	}
@@ -156,10 +151,10 @@ func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
 
 	monitor, err := monitors.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "LBV2 Monitor")
+		return CheckDeleted(d, err, "monitor")
 	}
 
-	log.Printf("[DEBUG] Retrieved OpenStack LBaaSV2 Monitor %s: %+v", d.Id(), monitor)
+	log.Printf("[DEBUG] Retrieved monitor %s: %#v", d.Id(), monitor)
 
 	d.Set("id", monitor.ID)
 	d.Set("tenant_id", monitor.TenantID)
@@ -211,11 +206,24 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 		updateOpts.HTTPMethod = d.Get("http_method").(string)
 	}
 
-	log.Printf("[DEBUG] Updating OpenStack LBaaSV2 Monitor %s with options: %+v", d.Id(), updateOpts)
+	log.Printf("[DEBUG] Updating monitor %s with options: %#v", d.Id(), updateOpts)
+	timeout := d.Timeout(schema.TimeoutUpdate)
+	err = resource.Retry(timeout, func() *resource.RetryError {
+		_, err = monitors.Update(networkingClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return checkForRetryableError(err)
+		}
+		return nil
+	})
 
-	_, err = monitors.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenStack LBaaSV2 Monitor: %s", err)
+		return fmt.Errorf("Unable to update monitor %s: %s", d.Id(), err)
+	}
+
+	// Wait for monitor to become active before continuing
+	err = waitForLBV2Monitor(networkingClient, d.Id(), "ACTIVE", nil, timeout)
+	if err != nil {
+		return err
 	}
 
 	return resourceMonitorV2Read(d, meta)
@@ -228,68 +236,25 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"ACTIVE", "PENDING_DELETE"},
-		Target:     []string{"DELETED"},
-		Refresh:    checkForMonitorDelete(networkingClient, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
-	}
+	log.Printf("[DEBUG] Deleting monitor %s", d.Id())
+	timeout := d.Timeout(schema.TimeoutUpdate)
+	err = resource.Retry(timeout, func() *resource.RetryError {
+		err = monitors.Delete(networkingClient, d.Id()).ExtractErr()
+		if err != nil {
+			return checkForRetryableError(err)
+		}
+		return nil
+	})
 
-	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack LBaaSV2 Monitor: %s", err)
+		return fmt.Errorf("Unable to delete monitor %s: %s", d.Id(), err)
 	}
 
-	d.SetId("")
+	// Wait for monitor to delete
+	err = waitForLBV2Monitor(networkingClient, d.Id(), "DELETED", nil, timeout)
+	if err != nil {
+		return err
+	}
+
 	return nil
-}
-
-func checkForMonitorActive(networkingClient *gophercloud.ServiceClient, monitorID string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		monitor, err := monitors.Get(networkingClient, monitorID).Extract()
-		if err != nil {
-			return nil, "", err
-		}
-
-		log.Printf("[DEBUG] OpenStack LBaaSV2 Monitor: %+v", monitor)
-		return monitor, "ACTIVE", nil
-	}
-}
-
-func checkForMonitorDelete(networkingClient *gophercloud.ServiceClient, monitorID string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		log.Printf("[DEBUG] Attempting to delete OpenStack LBaaSV2 Monitor %s", monitorID)
-
-		monitor, err := monitors.Get(networkingClient, monitorID).Extract()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenStack LBaaSV2 Monitor %s", monitorID)
-				return monitor, "DELETED", nil
-			}
-			return monitor, "ACTIVE", err
-		}
-
-		log.Printf("[DEBUG] Openstack LBaaSV2 Monitor: %+v", monitor)
-		err = monitors.Delete(networkingClient, monitorID).ExtractErr()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenStack LBaaSV2 Monitor %s", monitorID)
-				return monitor, "DELETED", nil
-			}
-
-			if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 409 {
-					log.Printf("[DEBUG] OpenStack LBaaSV2 Monitor (%s) is still in use.", monitorID)
-					return monitor, "ACTIVE", nil
-				}
-			}
-
-			return monitor, "ACTIVE", err
-		}
-
-		log.Printf("[DEBUG] OpenStack LBaaSV2 Monitor %s still active.", monitorID)
-		return monitor, "ACTIVE", nil
-	}
 }

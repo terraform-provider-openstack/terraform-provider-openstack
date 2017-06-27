@@ -112,6 +112,12 @@ resource "openstack_lb_listener_v2" "listener_1" {
   protocol = "HTTP"
   protocol_port = 8080
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+
+	timeouts {
+		create = "5m"
+		update = "5m"
+		delete = "5m"
+	}
 }
 `
 
@@ -140,5 +146,11 @@ resource "openstack_lb_listener_v2" "listener_1" {
   connection_limit = 100
   admin_state_up = "true"
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+
+	timeouts {
+		create = "5m"
+		update = "5m"
+		delete = "5m"
+	}
 }
 `

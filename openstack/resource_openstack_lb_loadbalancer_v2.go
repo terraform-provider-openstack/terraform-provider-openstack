@@ -22,6 +22,7 @@ func resourceLoadBalancerV2() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
@@ -133,13 +134,12 @@ func resourceLoadBalancerV2Create(d *schema.ResourceData, meta interface{}) erro
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	lb, err := loadbalancers.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack LoadBalancer: %s", err)
+		return fmt.Errorf("Error creating LoadBalancer: %s", err)
 	}
-	log.Printf("[INFO] LoadBalancer ID: %s", lb.ID)
 
-	log.Printf("[DEBUG] Waiting for Openstack LoadBalancer (%s) to become available.", lb.ID)
-
-	err = waitForLoadBalancerActive(d, networkingClient, lb.ID)
+	// Wait for LoadBalancer to become active before continuing
+	timeout := d.Timeout(schema.TimeoutCreate)
+	err = waitForLBV2LoadBalancer(networkingClient, lb.ID, "ACTIVE", nil, timeout)
 	if err != nil {
 		return err
 	}
@@ -165,10 +165,10 @@ func resourceLoadBalancerV2Read(d *schema.ResourceData, meta interface{}) error 
 
 	lb, err := loadbalancers.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "LoadBalancerV2")
+		return CheckDeleted(d, err, "loadbalancer")
 	}
 
-	log.Printf("[DEBUG] Retrieved OpenStack LBaaSV2 LoadBalancer %s: %+v", d.Id(), lb)
+	log.Printf("[DEBUG] Retrieved loadbalancer %s: %#v", d.Id(), lb)
 
 	d.Set("name", lb.Name)
 	d.Set("description", lb.Description)
@@ -213,11 +213,20 @@ func resourceLoadBalancerV2Update(d *schema.ResourceData, meta interface{}) erro
 		updateOpts.AdminStateUp = &asu
 	}
 
-	log.Printf("[DEBUG] Updating OpenStack LBaaSV2 LoadBalancer %s with options: %+v", d.Id(), updateOpts)
+	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
+	timeout := d.Timeout(schema.TimeoutUpdate)
+	err = resource.Retry(timeout, func() *resource.RetryError {
+		_, err = loadbalancers.Update(networkingClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return checkForRetryableError(err)
+		}
+		return nil
+	})
 
-	_, err = loadbalancers.Update(networkingClient, d.Id(), updateOpts).Extract()
+	// Wait for LoadBalancer to become active before continuing
+	err = waitForLBV2LoadBalancer(networkingClient, d.Id(), "ACTIVE", nil, timeout)
 	if err != nil {
-		return fmt.Errorf("Error updating OpenStack LBaaSV2 LoadBalancer: %s", err)
+		return err
 	}
 
 	// Security Groups get updated separately
@@ -238,21 +247,23 @@ func resourceLoadBalancerV2Delete(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"ACTIVE", "PENDING_DELETE"},
-		Target:     []string{"DELETED"},
-		Refresh:    checkForLoadBalancerDelete(networkingClient, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
-	}
+	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
+	timeout := d.Timeout(schema.TimeoutDelete)
+	err = resource.Retry(timeout, func() *resource.RetryError {
+		err = loadbalancers.Delete(networkingClient, d.Id()).ExtractErr()
+		if err != nil {
+			return checkForRetryableError(err)
+		}
+		return nil
+	})
 
-	_, err = stateConf.WaitForState()
+	// Wait for LoadBalancer to become delete
+	pending := []string{"PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"}
+	err = waitForLBV2LoadBalancer(networkingClient, d.Id(), "DELETED", pending, timeout)
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack LBaaSV2 LoadBalancer: %s", err)
+		return err
 	}
 
-	d.SetId("")
 	return nil
 }
 
@@ -263,8 +274,8 @@ func resourceLoadBalancerV2SecurityGroups(networkingClient *gophercloud.ServiceC
 				SecurityGroups: resourcePortSecurityGroupsV2(d),
 			}
 
-			log.Printf("[DEBUG] Adding security groups to OpenStack LoadBalancer "+
-				"VIP Port (%s): %#v", vipPortID, updateOpts)
+			log.Printf("[DEBUG] Adding security groups to loadbalancer "+
+				"VIP Port %s: %#v", vipPortID, updateOpts)
 
 			_, err := ports.Update(networkingClient, vipPortID, updateOpts).Extract()
 			if err != nil {
@@ -274,66 +285,4 @@ func resourceLoadBalancerV2SecurityGroups(networkingClient *gophercloud.ServiceC
 	}
 
 	return nil
-}
-
-func checkForLoadBalancerActive(networkingClient *gophercloud.ServiceClient, lbID string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		lb, err := loadbalancers.Get(networkingClient, lbID).Extract()
-		if err != nil {
-			return nil, "", err
-		}
-
-		log.Printf("[DEBUG] OpenStack LBaaSV2 LoadBalancer: %+v", lb)
-		return lb, lb.ProvisioningStatus, nil
-	}
-}
-
-func waitForLoadBalancerActive(d *schema.ResourceData, networkingClient *gophercloud.ServiceClient, lbID string) error {
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"PENDING_CREATE", "PENDING_UPDATE"},
-		Target:     []string{"ACTIVE"},
-		Refresh:    checkForLoadBalancerActive(networkingClient, lbID),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
-	}
-
-	_, err := stateConf.WaitForState()
-	return err
-}
-
-func checkForLoadBalancerDelete(networkingClient *gophercloud.ServiceClient, lbID string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		log.Printf("[DEBUG] Attempting to delete OpenStack LBaaSV2 LoadBalancer %s", lbID)
-
-		lb, err := loadbalancers.Get(networkingClient, lbID).Extract()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenStack LBaaSV2 LoadBalancer %s", lbID)
-				return lb, "DELETED", nil
-			}
-			return lb, "ACTIVE", err
-		}
-
-		log.Printf("[DEBUG] Openstack LoadBalancerV2: %+v", lb)
-		err = loadbalancers.Delete(networkingClient, lbID).ExtractErr()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenStack LBaaSV2 LoadBalancer %s", lbID)
-				return lb, "DELETED", nil
-			}
-
-			if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 409 {
-					log.Printf("[DEBUG] OpenStack LBaaSV2 LoadBalancer (%s) is still in use.", lbID)
-					return lb, "ACTIVE", nil
-				}
-			}
-
-			return lb, "ACTIVE", err
-		}
-
-		log.Printf("[DEBUG] OpenStack LBaaSV2 LoadBalancer (%s) still active.", lbID)
-		return lb, "ACTIVE", nil
-	}
 }
