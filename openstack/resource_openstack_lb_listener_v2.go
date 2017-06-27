@@ -281,7 +281,7 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"ACTIVE", "PENDING_DELETE"},
+		Pending:    []string{"ACTIVE", "PENDING_DELETE", "RETRYABLE_ERROR"},
 		Target:     []string{"DELETED"},
 		Refresh:    checkForListenerDelete(networkingClient, d.Id()),
 		Timeout:    2 * time.Minute,
@@ -339,6 +339,10 @@ func checkForListenerDelete(networkingClient *gophercloud.ServiceClient, listene
 				}
 			}
 
+			if _, ok := err.(gophercloud.ErrDefault500); ok {
+				log.Printf("[DEBUG] OpenStack LBaaSV2 listener (%s) received 500 during delete. Retrying.", listenerID)
+				return listener, "RETRYABLE_ERROR", nil
+			}
 			return listener, "ACTIVE", err
 		}
 
