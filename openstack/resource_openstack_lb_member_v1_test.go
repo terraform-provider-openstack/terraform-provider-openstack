@@ -13,7 +13,7 @@ func TestAccLBV1Member_basic(t *testing.T) {
 	var member members.Member
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckDeprecated(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1MemberDestroy,
 		Steps: []resource.TestStep{
@@ -37,7 +37,7 @@ func TestAccLBV1Member_timeout(t *testing.T) {
 	var member members.Member
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckDeprecated(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1MemberDestroy,
 		Steps: []resource.TestStep{

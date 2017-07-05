@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v1/volumes"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
@@ -194,8 +194,8 @@ func TestAccComputeV2Instance_blockDeviceExistingVolume(t *testing.T) {
 				Config: testAccComputeV2Instance_blockDeviceExistingVolume,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
-					testAccCheckBlockStorageV1VolumeExists(
-						"openstack_blockstorage_volume_v1.volume_1", &volume),
+					testAccCheckBlockStorageV2VolumeExists(
+						"openstack_blockstorage_volume_v2.volume_1", &volume),
 				),
 			},
 		},
@@ -736,7 +736,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
 `, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_bootFromVolumeVolume = fmt.Sprintf(`
-resource "openstack_blockstorage_volume_v1" "vol_1" {
+resource "openstack_blockstorage_volume_v2" "vol_1" {
   name = "vol_1"
   size = 5
   image_id = "%s"
@@ -746,7 +746,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   block_device {
-    uuid = "${openstack_blockstorage_volume_v1.vol_1.id}"
+    uuid = "${openstack_blockstorage_volume_v2.vol_1.id}"
     source_type = "volume"
     boot_index = 0
     destination_type = "volume"
@@ -807,7 +807,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
 `, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_blockDeviceExistingVolume = fmt.Sprintf(`
-resource "openstack_blockstorage_volume_v1" "volume_1" {
+resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
 }
@@ -823,7 +823,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
     delete_on_termination = true
   }
   block_device {
-    uuid = "${openstack_blockstorage_volume_v1.volume_1.id}"
+    uuid = "${openstack_blockstorage_volume_v2.volume_1.id}"
     source_type = "volume"
     destination_type = "volume"
     boot_index = 1

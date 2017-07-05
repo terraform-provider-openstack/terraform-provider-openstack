@@ -14,7 +14,7 @@ func TestAccLBV1Monitor_basic(t *testing.T) {
 	var monitor monitors.Monitor
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckDeprecated(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1MonitorDestroy,
 		Steps: []resource.TestStep{
@@ -38,7 +38,7 @@ func TestAccLBV1Monitor_timeout(t *testing.T) {
 	var monitor monitors.Monitor
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckDeprecated(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1MonitorDestroy,
 		Steps: []resource.TestStep{

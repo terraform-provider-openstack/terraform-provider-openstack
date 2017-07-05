@@ -20,7 +20,7 @@ func TestAccLBV1Pool_basic(t *testing.T) {
 	var pool pools.Pool
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckDeprecated(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
@@ -51,7 +51,7 @@ func TestAccLBV1Pool_fullstack(t *testing.T) {
 	var vip vips.VirtualIP
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckDeprecated(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
@@ -89,7 +89,7 @@ func TestAccLBV1Pool_timeout(t *testing.T) {
 	var pool pools.Pool
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckDeprecated(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
@@ -112,7 +112,7 @@ func TestAccLBV1Pool_updateMonitor(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckDeprecated(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
