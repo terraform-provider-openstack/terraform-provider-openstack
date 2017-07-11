@@ -14,7 +14,7 @@ func TestAccLBV1VIP_basic(t *testing.T) {
 	var vip vips.VirtualIP
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckDeprecated(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1VIPDestroy,
 		Steps: []resource.TestStep{
@@ -38,7 +38,7 @@ func TestAccLBV1VIP_timeout(t *testing.T) {
 	var vip vips.VirtualIP
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckDeprecated(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1VIPDestroy,
 		Steps: []resource.TestStep{

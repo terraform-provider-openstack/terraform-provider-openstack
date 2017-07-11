@@ -2,7 +2,6 @@ package openstack
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -18,7 +17,7 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDNSZoneV2(t) },
+		PreCheck:     func() { testAccPreCheckDNS(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
@@ -50,7 +49,7 @@ func TestAccDNSV2Zone_readTTL(t *testing.T) {
 	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDNSZoneV2(t) },
+		PreCheck:     func() { testAccPreCheckDNS(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
@@ -72,7 +71,7 @@ func TestAccDNSV2Zone_timeout(t *testing.T) {
 	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDNSZoneV2(t) },
+		PreCheck:     func() { testAccPreCheckDNS(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
@@ -136,13 +135,6 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 		*zone = *found
 
 		return nil
-	}
-}
-
-func testAccPreCheckDNSZoneV2(t *testing.T) {
-	v := os.Getenv("OS_AUTH_URL")
-	if v == "" {
-		t.Fatal("OS_AUTH_URL must be set for acceptance tests")
 	}
 }
 

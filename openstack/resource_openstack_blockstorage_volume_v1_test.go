@@ -15,7 +15,7 @@ func TestAccBlockStorageV1Volume_basic(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckDeprecated(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageV1VolumeDestroy,
 		Steps: []resource.TestStep{
@@ -45,7 +45,7 @@ func TestAccBlockStorageV1Volume_image(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckDeprecated(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageV1VolumeDestroy,
 		Steps: []resource.TestStep{
@@ -65,7 +65,7 @@ func TestAccBlockStorageV1Volume_timeout(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckDeprecated(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageV1VolumeDestroy,
 		Steps: []resource.TestStep{

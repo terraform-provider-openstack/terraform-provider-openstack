@@ -2,7 +2,6 @@ package openstack
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -22,7 +21,7 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 	zoneName := randomZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDNSRecordSetV2(t) },
+		PreCheck:     func() { testAccPreCheckDNS(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
@@ -57,7 +56,7 @@ func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 	zoneName := randomZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDNSRecordSetV2(t) },
+		PreCheck:     func() { testAccPreCheckDNS(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
@@ -78,7 +77,7 @@ func TestAccDNSV2RecordSet_timeout(t *testing.T) {
 	zoneName := randomZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDNSRecordSetV2(t) },
+		PreCheck:     func() { testAccPreCheckDNS(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
@@ -152,12 +151,6 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 		*recordset = *found
 
 		return nil
-	}
-}
-
-func testAccPreCheckDNSRecordSetV2(t *testing.T) {
-	if os.Getenv("OS_AUTH_URL") == "" {
-		t.Fatal("OS_AUTH_URL must be set for acceptance tests")
 	}
 }
 
