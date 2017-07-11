@@ -1,13 +1,11 @@
 {
   "builders": [{
     "type": "amazon-ebs",
-    "region": "us-west-1",
+    "region": "us-west-2",
     "spot_price": "auto",
     "spot_price_auto_product": "Linux/UNIX",
     "instance_type": "m3.xlarge",
     "ssh_username": "centos",
-    "ssh_keypair_name": "infra",
-    "ssh_private_key_file": "/root/infrastructure/keys/infra",
     "ami_name": "packstack-standard-ocata {{timestamp}}",
     "tags": {"release": "ocata"},
     "source_ami_filter": {
