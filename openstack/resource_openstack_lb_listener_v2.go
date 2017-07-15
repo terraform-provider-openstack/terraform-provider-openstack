@@ -38,9 +38,9 @@ func resourceListenerV2() *schema.Resource {
 				ForceNew: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					value := v.(string)
-					if value != "TCP" && value != "HTTP" && value != "HTTPS" {
+					if value != "TCP" && value != "HTTP" && value != "HTTPS" && value != "TERMINATED_HTTPS" {
 						errors = append(errors, fmt.Errorf(
-							"Only 'TCP', 'HTTP', and 'HTTPS' are supported values for 'protocol'"))
+							"Only 'TCP', 'HTTP', 'HTTPS' and 'TERMINATED_HTTPS' are supported values for 'protocol'"))
 					}
 					return
 				},
