@@ -379,10 +379,16 @@
 			"revisionTime": "2017-03-10T01:59:53Z"
 		},
 		{
-			"checksumSHA1": "ZKyEbJuIlvuZ9aUushINCXJHF4w=",
+			"checksumSHA1": "3W2lBfZVEu3kf9Nq3KFnBwG76nw=",
+			"path": "github.com/gophercloud/gophercloud/openstack/identity/v3/projects",
+			"revision": "062f2739aef0b03a8e68cd94865c34d416d753e0",
+			"revisionTime": "2017-07-14T02:05:18Z"
+		},
+		{
+			"checksumSHA1": "rqE0NwmQ9qhXADXxg3DcuZ4A3wk=",
 			"path": "github.com/gophercloud/gophercloud/openstack/identity/v3/tokens",
-			"revision": "0f64da0e36de86a0ca1a8f2fc1b0570a0d3f7504",
-			"revisionTime": "2017-03-10T01:59:53Z"
+			"revision": "062f2739aef0b03a8e68cd94865c34d416d753e0",
+			"revisionTime": "2017-07-14T02:05:18Z"
 		},
 		{
 			"checksumSHA1": "5+wNKnxGvSGV8lHS+7km0ZiNEts=",
