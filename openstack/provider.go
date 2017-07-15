@@ -162,6 +162,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_fw_firewall_v1":                  resourceFWFirewallV1(),
 			"openstack_fw_policy_v1":                    resourceFWPolicyV1(),
 			"openstack_fw_rule_v1":                      resourceFWRuleV1(),
+			"openstack_identity_project_v3":             resourceIdentityProjectV3(),
 			"openstack_images_image_v2":                 resourceImagesImageV2(),
 			"openstack_lb_member_v1":                    resourceLBMemberV1(),
 			"openstack_lb_monitor_v1":                   resourceLBMonitorV1(),
