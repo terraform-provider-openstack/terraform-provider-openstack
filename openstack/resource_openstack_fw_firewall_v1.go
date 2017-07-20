@@ -64,6 +64,7 @@ func resourceFWFirewallV1() *schema.Resource {
 				Elem:          &schema.Schema{Type: schema.TypeString},
 				Set:           schema.HashString,
 				ConflictsWith: []string{"no_routers"},
+				Computed:      true,
 			},
 			"no_routers": &schema.Schema{
 				Type:          schema.TypeBool,
