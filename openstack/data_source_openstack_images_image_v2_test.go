@@ -66,6 +66,9 @@ func TestAccOpenStackImagesV2ImageDataSource_testQueries(t *testing.T) {
 					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
 				),
 			},
+			resource.TestStep{
+				Config: testAccOpenStackImagesV2ImageDataSource_cirros,
+			},
 		},
 	})
 }
