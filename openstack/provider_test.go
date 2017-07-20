@@ -23,6 +23,7 @@ var (
 	OS_NETWORK_ID             = os.Getenv("OS_NETWORK_ID")
 	OS_POOL_NAME              = os.Getenv("OS_POOL_NAME")
 	OS_REGION_NAME            = os.Getenv("OS_REGION_NAME")
+	OS_SWIFT_ENVIRONMENT      = os.Getenv("OS_SWIFT_ENVIRONMENT")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -92,6 +93,17 @@ func testAccPreCheckDNS(t *testing.T) {
 
 	if OS_DNS_ENVIRONMENT == "" {
 		t.Skip("This environment does not support DNS tests")
+	}
+}
+
+func testAccPreCheckSwift(t *testing.T) {
+	v := os.Getenv("OS_AUTH_URL")
+	if v == "" {
+		t.Fatalf("OS_AUTH_URL must be set for acceptance tests")
+	}
+
+	if OS_SWIFT_ENVIRONMENT == "" {
+		t.Skip("This environment does not support Swift tests")
 	}
 }
 
