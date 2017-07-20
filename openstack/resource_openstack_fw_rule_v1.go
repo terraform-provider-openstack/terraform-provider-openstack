@@ -171,61 +171,31 @@ func resourceFWRuleV1Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	opts := rules.UpdateOpts{}
+	name := d.Get("name").(string)
+	description := d.Get("description").(string)
+	protocol := d.Get("protocol").(string)
+	action := d.Get("action").(string)
+	ipVersion := resourceFWRuleV1DetermineIPVersion(d.Get("ip_version").(int))
+	sourceIPAddress := d.Get("source_ip_address").(string)
+	sourcePort := d.Get("source_port").(string)
+	destinationIPAddress := d.Get("destination_ip_address").(string)
+	destinationPort := d.Get("destination_port").(string)
+	enabled := d.Get("enabled").(bool)
 
-	if d.HasChange("name") {
-		v := d.Get("name").(string)
-		opts.Name = &v
-	}
-
-	if d.HasChange("description") {
-		v := d.Get("description").(string)
-		opts.Description = &v
-	}
-
-	if d.HasChange("protocol") {
-		v := d.Get("protocol").(string)
-		opts.Protocol = &v
-	}
-
-	if d.HasChange("action") {
-		v := d.Get("action").(string)
-		opts.Action = &v
-	}
-
-	if d.HasChange("ip_version") {
-		v := d.Get("ip_version").(int)
-		ipVersion := resourceFWRuleV1DetermineIPVersion(v)
-		opts.IPVersion = &ipVersion
-	}
-
-	if d.HasChange("source_ip_address") {
-		v := d.Get("source_ip_address").(string)
-		opts.SourceIPAddress = &v
-	}
-
-	if d.HasChange("destination_ip_address") {
-		v := d.Get("destination_ip_address").(string)
-		opts.DestinationIPAddress = &v
-	}
-
-	if d.HasChange("source_port") {
-		v := d.Get("source_port").(string)
-		opts.SourcePort = &v
-	}
-
-	if d.HasChange("destination_port") {
-		v := d.Get("destination_port").(string)
-		opts.DestinationPort = &v
-	}
-
-	if d.HasChange("enabled") {
-		v := d.Get("enabled").(bool)
-		opts.Enabled = &v
+	opts := rules.UpdateOpts{
+		Name:                 &name,
+		Description:          &description,
+		Protocol:             &protocol,
+		Action:               &action,
+		IPVersion:            &ipVersion,
+		SourceIPAddress:      &sourceIPAddress,
+		DestinationIPAddress: &destinationIPAddress,
+		SourcePort:           &sourcePort,
+		DestinationPort:      &destinationPort,
+		Enabled:              &enabled,
 	}
 
 	log.Printf("[DEBUG] Updating firewall rules: %#v", opts)
-
 	err = rules.Update(networkingClient, d.Id(), opts).Err
 	if err != nil {
 		return err
