@@ -2,6 +2,7 @@
 set -x
 
 sudo hostnamectl set-hostname localhost
+sudo yum -y update
 
 cd
 sudo yum install -y -q nfs-utils
