@@ -1,0 +1,26 @@
+{
+  "builders": [{
+    "type": "openstack",
+    "flavor": "{{user `flavor`}}",
+    "security_groups": ["{{user `secgroup`}}"],
+    "image_name": "packstack-standard-ocata",
+    "ssh_username": "centos",
+    "source_image": "{{user `image_id`}}",
+    "floating_ip_pool": "{{user `pool`}}",
+    "reuse_ips": true,
+    "networks": ["{{user `network_id`}}"]
+  }],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "../../files",
+      "destination": "/home/centos/files"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "bash /home/centos/files/deploy.sh"
+      ]
+    }
+  ]
+}
