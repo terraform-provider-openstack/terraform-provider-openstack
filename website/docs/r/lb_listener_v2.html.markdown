@@ -29,10 +29,10 @@ The following arguments are supported:
     `region` argument of the provider is used. Changing this creates a new
     Listener.
 
-* `protocol` = (Required) The protocol - can either be TCP, HTTP, HTTPS or TERMINATED_HTTPS.
+* `protocol` - (Required) The protocol - can either be TCP, HTTP, HTTPS or TERMINATED_HTTPS.
     Changing this creates a new Listener.
 
-* `protocol_port` = (Required) The port on which to listen for client traffic.
+* `protocol_port` - (Required) The port on which to listen for client traffic.
     Changing this creates a new Listener.
 
 * `tenant_id` - (Optional) Required for admins. The UUID of the tenant who owns
