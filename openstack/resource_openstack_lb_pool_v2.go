@@ -112,7 +112,7 @@ func resourcePoolV2() *schema.Resource {
 
 						"cookie_name": &schema.Schema{
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 							ForceNew: true,
 						},
 					},
@@ -147,10 +147,24 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 		pV := (p.([]interface{}))[0].(map[string]interface{})
 
 		persistence = pools.SessionPersistence{
-			Type:       pV["type"].(string),
-			CookieName: pV["cookie_name"].(string),
+			Type: pV["type"].(string),
+		}
+
+		if persistence.Type == "APP_COOKIE" {
+			if pV["cookie_name"].(string) == "" {
+				return fmt.Errorf(
+					"Persistence cookie_name needs to be set if using 'APP_COOKIE' persistence type.")
+			} else {
+				persistence.CookieName = pV["cookie_name"].(string)
+			}
+		} else {
+			if pV["cookie_name"].(string) != "" {
+				return fmt.Errorf(
+					"Persistence cookie_name can only be set if using 'APP_COOKIE' persistence type.")
+			}
 		}
 	}
+
 	createOpts := pools.CreateOpts{
 		TenantID:       d.Get("tenant_id").(string),
 		Name:           d.Get("name").(string),
@@ -161,6 +175,7 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 		LBMethod:       pools.LBMethod(d.Get("lb_method").(string)),
 		AdminStateUp:   &adminStateUp,
 	}
+
 	// Must omit if not set
 	if persistence != (pools.SessionPersistence{}) {
 		createOpts.Persistence = &persistence
