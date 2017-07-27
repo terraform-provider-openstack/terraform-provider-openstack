@@ -69,8 +69,8 @@ The `persistence` argument supports:
 * `type` - (Required) The type of persistence mode. The current specification
     supports SOURCE_IP, HTTP_COOKIE, and APP_COOKIE.
 
-* `cookie_name` - (Required) The name of the cookie if persistence mode is set
-    appropriately.
+* `cookie_name` - (Optional) The name of the cookie if persistence mode is set
+    appropriately. Required if `type = APP_COOKIE`.
 
 ## Attributes Reference
 
