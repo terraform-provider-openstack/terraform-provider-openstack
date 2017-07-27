@@ -10,6 +10,8 @@ IMPROVEMENTS:
 * `openstack_compute_instance_v2` support for multiple NICs on the same network [GH-39]
 * Added support for `TERMINATED_HTTPS` protocol in `openstack_lb_listener_v2` [GH-49]
 
+BUG FIXES:
+* `openstack_lb_pool_v2` handling of `persistence` updated, `cookie_name` is now optional. [GH-57]
 
 ## 0.1.0 (June 21, 2017)
 
