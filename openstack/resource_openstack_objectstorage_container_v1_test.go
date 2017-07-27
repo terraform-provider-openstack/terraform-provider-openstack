@@ -11,7 +11,10 @@ import (
 
 func TestAccObjectStorageV1Container_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckSwift(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckObjectStorageV1ContainerDestroy,
 		Steps: []resource.TestStep{

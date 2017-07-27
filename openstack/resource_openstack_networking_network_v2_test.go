@@ -108,16 +108,19 @@ func TestAccNetworkingV2Network_timeout(t *testing.T) {
 	})
 }
 
-func TestAccNetworkingV2Network_with_multiple_segment_mappings(t *testing.T) {
+func TestAccNetworkingV2Network_multipleSegmentMappings(t *testing.T) {
 	var network networks.Network
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV2Network_with_multiple_segment_mappings,
+				Config: testAccNetworkingV2Network_multipleSegmentMappings,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 				),
@@ -274,7 +277,7 @@ resource "openstack_networking_network_v2" "network_1" {
 }
 `
 
-const testAccNetworkingV2Network_with_multiple_segment_mappings = `
+const testAccNetworkingV2Network_multipleSegmentMappings = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   segments =[

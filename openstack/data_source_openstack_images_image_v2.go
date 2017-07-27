@@ -6,7 +6,6 @@ import (
 	"sort"
 
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
-	"github.com/gophercloud/gophercloud/pagination"
 
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -162,33 +161,27 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 		Tag:        d.Get("tag").(string),
 	}
 
-	var allImages []images.Image
-	pager := images.List(imageClient, listOpts)
-	err = pager.EachPage(func(page pagination.Page) (bool, error) {
-		images, err := images.ExtractImages(page)
-		if err != nil {
-			return false, err
-		}
+	log.Printf("[DEBUG] List Options: %#v", listOpts)
 
-		for _, i := range images {
-			allImages = append(allImages, i)
-		}
+	var image images.Image
+	allPages, err := images.List(imageClient, listOpts).AllPages()
+	if err != nil {
+		return fmt.Errorf("Unable to query images: %s", err)
+	}
 
-		return true, nil
-	})
-
+	allImages, err := images.ExtractImages(allPages)
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve images: %s", err)
 	}
 
-	var image images.Image
 	if len(allImages) < 1 {
-		return fmt.Errorf("Your query returned no results. Please change your search criteria and try again.")
+		return fmt.Errorf("Your query returned no results. " +
+			"Please change your search criteria and try again.")
 	}
 
 	if len(allImages) > 1 {
 		recent := d.Get("most_recent").(bool)
-		log.Printf("[DEBUG] openstack_images_image: multiple results found and `most_recent` is set to: %t", recent)
+		log.Printf("[DEBUG] Multiple results found and `most_recent` is set to: %t", recent)
 		if recent {
 			image = mostRecentImage(allImages)
 		} else {
@@ -199,7 +192,7 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 		image = allImages[0]
 	}
 
-	log.Printf("[DEBUG] openstack_images_image: Single Image found: %s", image.ID)
+	log.Printf("[DEBUG] Single Image found: %s", image.ID)
 	return dataSourceImagesImageV2Attributes(d, &image)
 }
 
