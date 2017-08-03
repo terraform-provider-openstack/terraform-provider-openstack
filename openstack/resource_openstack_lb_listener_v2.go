@@ -166,12 +166,6 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating listener: %s", err)
 	}
 
-	// Wait for Listener to become active
-	err = waitForLBV2Listener(networkingClient, listener.ID, "ACTIVE", nil, timeout)
-	if err != nil {
-		return err
-	}
-
 	// Wait for LoadBalancer to become active again before continuing
 	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
 	if err != nil {
@@ -269,12 +263,6 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error updating listener %s: %s", d.Id(), err)
 	}
 
-	// Wait for Listener to become active before continuing
-	err = waitForLBV2Listener(networkingClient, d.Id(), "ACTIVE", nil, timeout)
-	if err != nil {
-		return err
-	}
-
 	// Wait for LoadBalancer to become active again before continuing
 	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
 	if err != nil {
@@ -311,6 +299,12 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		return fmt.Errorf("Error deleting listener %s: %s", d.Id(), err)
+	}
+
+	// Wait for LoadBalancer to become active again before continuing
+	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	if err != nil {
+		return err
 	}
 
 	// Wait for Listener to delete

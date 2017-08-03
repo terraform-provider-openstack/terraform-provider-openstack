@@ -121,10 +121,10 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	// Wait for Pool to become active before continuing
+	// Wait for LB to become active before continuing
 	poolID := d.Get("pool_id").(string)
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2Pool(networkingClient, poolID, "ACTIVE", nil, timeout)
+	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return err
 	}
@@ -143,14 +143,8 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating member: %s", err)
 	}
 
-	// Wait for member to become active before continuing
-	err = waitForLBV2Member(networkingClient, poolID, member.ID, "ACTIVE", nil, timeout)
-	if err != nil {
-		return err
-	}
-
-	// Wait for Pool to become active before continuing
-	err = waitForLBV2Pool(networkingClient, poolID, "ACTIVE", nil, timeout)
+	// Wait for LB to become ACTIVE again
+	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return err
 	}
@@ -206,10 +200,10 @@ func resourceMemberV2Update(d *schema.ResourceData, meta interface{}) error {
 		updateOpts.AdminStateUp = &asu
 	}
 
-	// Wait for Pool to become active before continuing
+	// Wait for LB to become active before continuing
 	poolID := d.Get("pool_id").(string)
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2Pool(networkingClient, poolID, "ACTIVE", nil, timeout)
+	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return err
 	}
@@ -227,14 +221,7 @@ func resourceMemberV2Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to update member %s: %s", d.Id(), err)
 	}
 
-	// Wait for member to become active before continuing
-	err = waitForLBV2Member(networkingClient, poolID, d.Id(), "ACTIVE", nil, timeout)
-	if err != nil {
-		return err
-	}
-
-	// Wait for Pool to become active before continuing
-	err = waitForLBV2Pool(networkingClient, poolID, "ACTIVE", nil, timeout)
+	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return err
 	}
@@ -252,7 +239,7 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 	// Wait for Pool to become active before continuing
 	poolID := d.Get("pool_id").(string)
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = waitForLBV2Pool(networkingClient, poolID, "ACTIVE", nil, timeout)
+	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return err
 	}
@@ -266,8 +253,8 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	})
 
-	// Wait for member to delete before continuing
-	err = waitForLBV2Member(networkingClient, poolID, d.Id(), "DELETED", nil, timeout)
+	// Wait for LB to become ACTIVE
+	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return err
 	}

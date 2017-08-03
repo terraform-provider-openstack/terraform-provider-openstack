@@ -186,16 +186,14 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutCreate)
 	lbID := createOpts.LoadbalancerID
+	listenerID := createOpts.ListenerID
 	if lbID != "" {
 		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
 		if err != nil {
 			return err
 		}
-	}
-
-	// Wait for Listener to become active before continuing
-	listenerID := createOpts.ListenerID
-	if listenerID != "" {
+	} else if listenerID != "" {
+		// Wait for Listener to become active before continuing
 		err = waitForLBV2Listener(networkingClient, listenerID, "ACTIVE", nil, timeout)
 		if err != nil {
 			return err
@@ -216,26 +214,15 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating pool: %s", err)
 	}
 
-	// Wait for Pool to become active
-	err = waitForLBV2Pool(networkingClient, pool.ID, "ACTIVE", nil, timeout)
-	if err != nil {
-		return err
-	}
-
 	// Wait for LoadBalancer to become active before continuing
 	if lbID != "" {
 		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-		if err != nil {
-			return err
-		}
+	} else {
+		// Pool exists by now so we can ask for lbID
+		err = waitForLBV2viaPool(networkingClient, pool.ID, "ACTIVE", timeout)
 	}
-
-	// Wait for Listener to become active before continuing
-	if listenerID != "" {
-		err = waitForLBV2Listener(networkingClient, listenerID, "ACTIVE", nil, timeout)
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		return err
 	}
 
 	d.SetId(pool.ID)
@@ -297,18 +284,11 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 	lbID := d.Get("loadbalancer_id").(string)
 	if lbID != "" {
 		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-		if err != nil {
-			return err
-		}
+	} else {
+		err = waitForLBV2viaPool(networkingClient, d.Id(), "ACTIVE", timeout)
 	}
-
-	// Wait for Listener to become active before continuing
-	listenerID := d.Get("listener_id").(string)
-	if listenerID != "" {
-		err = waitForLBV2Listener(networkingClient, listenerID, "ACTIVE", nil, timeout)
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		return err
 	}
 
 	log.Printf("[DEBUG] Updating pool %s with options: %#v", d.Id(), updateOpts)
@@ -324,26 +304,14 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to update pool %s: %s", d.Id(), err)
 	}
 
-	// Wait for Pool to become active
-	err = waitForLBV2Pool(networkingClient, d.Id(), "ACTIVE", nil, timeout)
-	if err != nil {
-		return err
-	}
-
 	// Wait for LoadBalancer to become active before continuing
 	if lbID != "" {
 		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-		if err != nil {
-			return err
-		}
+	} else {
+		err = waitForLBV2viaPool(networkingClient, d.Id(), "ACTIVE", timeout)
 	}
-
-	// Wait for Listener to become active before continuing
-	if listenerID != "" {
-		err = waitForLBV2Listener(networkingClient, listenerID, "ACTIVE", nil, timeout)
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		return err
 	}
 
 	return resourcePoolV2Read(d, meta)
@@ -366,15 +334,6 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	// Wait for Listener to become active before continuing
-	listenerID := d.Get("listener_id").(string)
-	if listenerID != "" {
-		err = waitForLBV2Listener(networkingClient, listenerID, "ACTIVE", nil, timeout)
-		if err != nil {
-			return err
-		}
-	}
-
 	log.Printf("[DEBUG] Attempting to delete pool %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		err = pools.Delete(networkingClient, d.Id()).ExtractErr()
@@ -384,8 +343,12 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	})
 
-	// Wait for Pool to delete
-	err = waitForLBV2Pool(networkingClient, d.Id(), "DELETED", nil, timeout)
+	if lbID != "" {
+		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	} else {
+		// Wait for Pool to delete
+		err = waitForLBV2Pool(networkingClient, d.Id(), "DELETED", nil, timeout)
+	}
 	if err != nil {
 		return err
 	}

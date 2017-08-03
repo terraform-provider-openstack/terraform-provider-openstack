@@ -213,8 +213,14 @@ func resourceLoadBalancerV2Update(d *schema.ResourceData, meta interface{}) erro
 		updateOpts.AdminStateUp = &asu
 	}
 
-	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
+	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutUpdate)
+	err = waitForLBV2LoadBalancer(networkingClient, d.Id(), "ACTIVE", nil, timeout)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		_, err = loadbalancers.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
