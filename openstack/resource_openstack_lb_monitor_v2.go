@@ -119,10 +119,16 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 		AdminStateUp:  &adminStateUp,
 	}
 
+	timeout := d.Timeout(schema.TimeoutCreate)
+	poolID := createOpts.PoolID
+	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	if err != nil {
+		return err
+	}
+
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	log.Printf("[DEBUG] Attempting to create monitor")
 	var monitor *monitors.Monitor
-	timeout := d.Timeout(schema.TimeoutCreate)
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		monitor, err = monitors.Create(networkingClient, createOpts).Extract()
 		if err != nil {
@@ -131,8 +137,7 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	})
 
-	// Wait for monitor to become active before continuing
-	err = waitForLBV2Monitor(networkingClient, monitor.ID, "ACTIVE", nil, timeout)
+	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return err
 	}
@@ -208,6 +213,12 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Updating monitor %s with options: %#v", d.Id(), updateOpts)
 	timeout := d.Timeout(schema.TimeoutUpdate)
+	poolID := d.Get("pool_id").(string)
+	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	if err != nil {
+		return err
+	}
+
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		_, err = monitors.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
@@ -220,8 +231,8 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to update monitor %s: %s", d.Id(), err)
 	}
 
-	// Wait for monitor to become active before continuing
-	err = waitForLBV2Monitor(networkingClient, d.Id(), "ACTIVE", nil, timeout)
+	// Wait for LB to become active before continuing
+	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return err
 	}
@@ -238,6 +249,12 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Deleting monitor %s", d.Id())
 	timeout := d.Timeout(schema.TimeoutUpdate)
+	poolID := d.Get("pool_id").(string)
+	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	if err != nil {
+		return err
+	}
+
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		err = monitors.Delete(networkingClient, d.Id()).ExtractErr()
 		if err != nil {
@@ -250,8 +267,7 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to delete monitor %s: %s", d.Id(), err)
 	}
 
-	// Wait for monitor to delete
-	err = waitForLBV2Monitor(networkingClient, d.Id(), "DELETED", nil, timeout)
+	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return err
 	}

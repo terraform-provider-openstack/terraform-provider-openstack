@@ -212,3 +212,19 @@ func resourceLBV2PoolRefreshFunc(networkingClient *gophercloud.ServiceClient, po
 		return pool, "ACTIVE", nil
 	}
 }
+
+func waitForLBV2viaPool(networkingClient *gophercloud.ServiceClient, id string, target string, timeout time.Duration) error {
+	pool, err := pools.Get(networkingClient, id).Extract()
+	if err != nil {
+		return err
+	}
+
+	if pool.Loadbalancers != nil {
+		// we know each pool has an LB
+		lbID := pool.Loadbalancers[0].ID
+		return waitForLBV2LoadBalancer(networkingClient, lbID, target, nil, timeout)
+	}
+
+	// got a pool but no LB - this is wrong
+	return fmt.Errorf("No Load Balancer on pool %s", id)
+}
