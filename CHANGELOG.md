@@ -9,6 +9,7 @@ IMPROVEMENTS:
 * `openstack_compute_instance_v2` now supports Neutron for network detection [GH-39]
 * `openstack_compute_instance_v2` support for multiple NICs on the same network [GH-39]
 * Added support for `TERMINATED_HTTPS` protocol in `openstack_lb_listener_v2` [GH-49]
+* Improvements to LBaaS v2 resource coordination [GH-59]
 
 BUG FIXES:
 * `openstack_lb_pool_v2` handling of `persistence` updated, `cookie_name` is now optional. [GH-57]
