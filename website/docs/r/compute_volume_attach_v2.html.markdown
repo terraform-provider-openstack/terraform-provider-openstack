@@ -13,6 +13,8 @@ Compute (Nova) v2 API.
 
 ## Example Usage
 
+### Basic attachment of a single volume to a single instance
+
 ```hcl
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
@@ -27,6 +29,31 @@ resource "openstack_compute_instance_v2" "instance_1" {
 resource "openstack_compute_volume_attach_v2" "va_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   volume_id   = "${openstack_blockstorage_volume_v2.volume_1.id}"
+}
+```
+
+### Attaching multiple volumes to a single instance
+
+```hcl
+resource "openstack_blockstorage_volume_v2" "volumes" {
+  count = 2
+  name  = "${format("vol-%02d", count.index + 1)}"
+  size  = 1
+}
+
+resource "openstack_compute_instance_v2" "instance_1" {
+  name            = "instance_1"
+  security_groups = ["default"]
+}
+
+resource "openstack_compute_volume_attach_v2" "attachments" {
+  count       = 2
+  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+  volume_id   = "${element(openstack_blockstorage_volume_v2.volumes.*.id, count.index)}"
+}
+
+output "volume devices" {
+  value = "${openstack_compute_volume_attach_v2.attachments.*.device}"
 }
 ```
 
