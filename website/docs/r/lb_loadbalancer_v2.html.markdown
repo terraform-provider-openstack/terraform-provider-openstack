@@ -50,8 +50,6 @@ The following arguments are supported:
 * `flavor` - (Optional) The UUID of a flavor. Changing this creates a new
     loadbalancer.
 
-* `provider` - (Deprecated) Use `loadbalancer_provider` instead.
-
 * `loadbalancer_provider` - (Optional) The name of the provider. Changing this
   creates a new loadbalancer.
 
