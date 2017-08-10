@@ -3,6 +3,7 @@
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
 * Network detection in the `openstack_compute_instance_v2` resource was cleaned up and updated. There should be no incompatibilities, but you should do a `plan` before `apply` just to be safe.
+* The `openstack_lb_loadbalancer_v2.provider` argument has been removed entirely. This was an erroneous argument from the beginning, so it should not be in use. However, if you do have it set in your configurations, please rename it to `loadbalancer_provider`.
 
 IMPROVEMENTS:
 
@@ -10,6 +11,7 @@ IMPROVEMENTS:
 * `openstack_compute_instance_v2` support for multiple NICs on the same network [GH-39]
 * Added support for `TERMINATED_HTTPS` protocol in `openstack_lb_listener_v2` [GH-49]
 * Improvements to LBaaS v2 resource coordination [GH-59]
+* `openstack_lb_loadbalancer_v2.provider` has been removed. See notes above. [GH-65]
 
 BUG FIXES:
 * `openstack_lb_pool_v2` handling of `persistence` updated, `cookie_name` is now optional. [GH-57]
