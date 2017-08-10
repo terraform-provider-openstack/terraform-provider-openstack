@@ -81,14 +81,6 @@ func resourceLoadBalancerV2() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"provider": &schema.Schema{
-				Type:       schema.TypeString,
-				Optional:   true,
-				Computed:   true,
-				ForceNew:   true,
-				Deprecated: "Please use loadbalancer_provider",
-			},
-
 			"loadbalancer_provider": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
