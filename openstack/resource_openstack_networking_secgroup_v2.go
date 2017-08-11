@@ -137,7 +137,7 @@ func resourceNetworkingSecGroupV2Update(d *schema.ResourceData, meta interface{}
 
 	if d.HasChange("description") {
 		update = true
-		updateOpts.Name = d.Get("description").(string)
+		updateOpts.Description = d.Get("description").(string)
 	}
 
 	if update {
