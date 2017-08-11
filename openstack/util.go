@@ -2,7 +2,9 @@ package openstack
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"reflect"
 	"sort"
 	"strings"
 
@@ -20,7 +22,7 @@ func BuildRequest(opts interface{}, parent string) (map[string]interface{}, erro
 		return nil, err
 	}
 
-	b = AddValueSpecs(b)
+	b = AddValueSpecs(b, nil)
 
 	return map[string]interface{}{parent: b}, nil
 }
@@ -49,14 +51,34 @@ func GetRegion(d *schema.ResourceData, config *Config) string {
 
 // AddValueSpecs expands the 'value_specs' object and removes 'value_specs'
 // from the reqeust body.
-func AddValueSpecs(body map[string]interface{}) map[string]interface{} {
+func AddValueSpecs(body map[string]interface{}, value_specs map[string]string) map[string]interface{} {
+	log.Printf("[DEBUG] Got to AddValueSpecs")
+	log.Printf("[DEBUG] value_specs = %+v", value_specs)
 	if body["value_specs"] != nil {
+		log.Printf("[DEBUG] Got some value_specs in body!")
 		for k, v := range body["value_specs"].(map[string]interface{}) {
+			log.Printf("[DEBUG] Adding key %s with value %s", k, v)
 			body[k] = v
 		}
 		delete(body, "value_specs")
 	}
 
+	if value_specs != nil {
+		log.Printf("[DEBUG] Got some value_specs provided!")
+		keys := reflect.ValueOf(body).MapKeys()
+		log.Printf("[DEBUG] Keys looks like %+v", keys)
+		key := keys[0].String()
+		log.Printf("[DEBUG] Key = %s", key)
+		request := body[key].(map[string]interface{})
+		log.Printf("[DEBUG] Request = %+v", request)
+		for k, v := range value_specs {
+			log.Printf("[DEBUG] Adding key %s with value %s", k, v)
+			request[k] = v
+		}
+		body[key] = request
+	}
+
+	log.Printf("[DEBUG] Final body looks like %+v", body)
 	return body
 }
 

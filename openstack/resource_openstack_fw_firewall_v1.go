@@ -89,6 +89,7 @@ func resourceFWFirewallV1Create(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	var createOpts firewalls.CreateOptsBuilder
+	// var createOpts FirewallCreateOpts
 
 	adminStateUp := d.Get("admin_state_up").(bool)
 	createOpts = &firewalls.CreateOpts{
@@ -124,8 +125,8 @@ func resourceFWFirewallV1Create(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	createOpts = &FirewallCreateOpts{
-		createOpts,
-		MapValueSpecs(d),
+		CreateOptsBuilder: createOpts,
+		ValueSpecs:        MapValueSpecs(d),
 	}
 
 	log.Printf("[DEBUG] Create firewall: %#v", createOpts)

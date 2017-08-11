@@ -172,8 +172,10 @@ func (opts FirewallCreateOpts) ToFirewallCreateMap() (map[string]interface{}, er
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("[DEBUG] Firewall body looks like: %+v", body)
 
-	return AddValueSpecs(body), nil
+	log.Printf("[DEBUG] Opts looks like: %+v", opts)
+	return AddValueSpecs(body, opts.ValueSpecs), nil
 }
 
 //FirewallUpdateOpts
