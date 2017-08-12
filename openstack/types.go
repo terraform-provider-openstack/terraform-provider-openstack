@@ -161,19 +161,14 @@ type Firewall struct {
 
 // FirewallCreateOpts represents the attributes used when creating a new firewall.
 type FirewallCreateOpts struct {
-	firewalls.CreateOptsBuilder
+	firewalls.CreateOpts
 	ValueSpecs map[string]string `json:"value_specs,omitempty"`
 }
 
 // ToFirewallCreateMap casts a CreateOptsExt struct to a map.
 // It overrides firewalls.ToFirewallCreateMap to add the ValueSpecs field.
 func (opts FirewallCreateOpts) ToFirewallCreateMap() (map[string]interface{}, error) {
-	body, err := opts.CreateOptsBuilder.ToFirewallCreateMap()
-	if err != nil {
-		return nil, err
-	}
-
-	return AddValueSpecs(body), nil
+	return BuildRequest(opts, "firewall")
 }
 
 //FirewallUpdateOpts
