@@ -91,12 +91,15 @@ func resourceFWFirewallV1Create(d *schema.ResourceData, meta interface{}) error 
 	var createOpts firewalls.CreateOptsBuilder
 
 	adminStateUp := d.Get("admin_state_up").(bool)
-	createOpts = &firewalls.CreateOpts{
-		Name:         d.Get("name").(string),
-		Description:  d.Get("description").(string),
-		PolicyID:     d.Get("policy_id").(string),
-		AdminStateUp: &adminStateUp,
-		TenantID:     d.Get("tenant_id").(string),
+	createOpts = FirewallCreateOpts{
+		firewalls.CreateOpts{
+			Name:         d.Get("name").(string),
+			Description:  d.Get("description").(string),
+			PolicyID:     d.Get("policy_id").(string),
+			AdminStateUp: &adminStateUp,
+			TenantID:     d.Get("tenant_id").(string),
+		},
+		MapValueSpecs(d),
 	}
 
 	associatedRoutersRaw := d.Get("associated_routers").(*schema.Set).List()
@@ -121,11 +124,6 @@ func resourceFWFirewallV1Create(d *schema.ResourceData, meta interface{}) error 
 			CreateOptsBuilder: createOpts,
 			RouterIDs:         routerIds,
 		}
-	}
-
-	createOpts = &FirewallCreateOpts{
-		createOpts,
-		MapValueSpecs(d),
 	}
 
 	log.Printf("[DEBUG] Create firewall: %#v", createOpts)
