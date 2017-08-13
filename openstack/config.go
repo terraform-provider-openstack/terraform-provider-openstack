@@ -176,6 +176,13 @@ func (c *Config) dnsV2Client(region string) (*gophercloud.ServiceClient, error) 
 	})
 }
 
+func (c *Config) identityV3Client(region string) (*gophercloud.ServiceClient, error) {
+	return openstack.NewIdentityV3(c.OsClient, gophercloud.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) imageV2Client(region string) (*gophercloud.ServiceClient, error) {
 	return openstack.NewImageServiceV2(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
