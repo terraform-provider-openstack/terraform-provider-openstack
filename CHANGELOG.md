@@ -5,6 +5,10 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 * Network detection in the `openstack_compute_instance_v2` resource was cleaned up and updated. There should be no incompatibilities, but you should do a `plan` before `apply` just to be safe.
 * The `openstack_lb_loadbalancer_v2.provider` argument has been removed entirely. This was an erroneous argument from the beginning, so it should not be in use. However, if you do have it set in your configurations, please rename it to `loadbalancer_provider`.
 
+FEATURES:
+
+* __New Resource:__ `openstack_identity_project_v3` [GH-50]
+
 IMPROVEMENTS:
 
 * `openstack_compute_instance_v2` now supports Neutron for network detection [GH-39]
