@@ -8,6 +8,7 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 FEATURES:
 
 * __New Resource:__ `openstack_identity_project_v3` [GH-50]
+* __New Resource:__ `openstack_identity_user_v3` [GH-52]
 
 IMPROVEMENTS:
 
