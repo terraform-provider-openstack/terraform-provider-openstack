@@ -22,6 +22,7 @@ BUG FIXES:
 * `openstack_fw_firewall_v1.associated_routers` is now computed. [GH-53]
 * All `openstack_fw_rule_v1` attributes are now passed during an update phase. [GH-53]
 * `openstack_networking_secgroup_v2` now correctly updates description. [GH-60]
+* `openstack_fw_firewall_v1` now correctly translates `value_specs` on create. [GH-66]
 
 ## 0.1.0 (June 21, 2017)
 
