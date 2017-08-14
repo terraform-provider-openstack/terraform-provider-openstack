@@ -1,4 +1,4 @@
-## 0.2.0 (Unreleased)
+## 0.2.0 (August 14, 2017)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
@@ -7,23 +7,23 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 FEATURES:
 
-* __New Resource:__ `openstack_identity_project_v3` [GH-50]
-* __New Resource:__ `openstack_identity_user_v3` [GH-52]
+* __New Resource:__ `openstack_identity_project_v3` ([#50](https://github.com/terraform-providers/terraform-provider-openstack/issues/50))
+* __New Resource:__ `openstack_identity_user_v3` ([#52](https://github.com/terraform-providers/terraform-provider-openstack/issues/52))
 
 IMPROVEMENTS:
 
-* `openstack_compute_instance_v2` now supports Neutron for network detection [GH-39]
-* `openstack_compute_instance_v2` support for multiple NICs on the same network [GH-39]
-* Added support for `TERMINATED_HTTPS` protocol in `openstack_lb_listener_v2` [GH-49]
-* Improvements to LBaaS v2 resource coordination [GH-59]
-* `openstack_lb_loadbalancer_v2.provider` has been removed. See notes above. [GH-65]
+* `openstack_compute_instance_v2` now supports Neutron for network detection ([#39](https://github.com/terraform-providers/terraform-provider-openstack/issues/39))
+* `openstack_compute_instance_v2` support for multiple NICs on the same network ([#39](https://github.com/terraform-providers/terraform-provider-openstack/issues/39))
+* Added support for `TERMINATED_HTTPS` protocol in `openstack_lb_listener_v2` ([#49](https://github.com/terraform-providers/terraform-provider-openstack/issues/49))
+* Improvements to LBaaS v2 resource coordination ([#59](https://github.com/terraform-providers/terraform-provider-openstack/issues/59))
+* `openstack_lb_loadbalancer_v2.provider` has been removed. See notes above. ([#65](https://github.com/terraform-providers/terraform-provider-openstack/issues/65))
 
 BUG FIXES:
-* `openstack_lb_pool_v2` handling of `persistence` updated, `cookie_name` is now optional. [GH-57]
-* `openstack_fw_firewall_v1.associated_routers` is now computed. [GH-53]
-* All `openstack_fw_rule_v1` attributes are now passed during an update phase. [GH-53]
-* `openstack_networking_secgroup_v2` now correctly updates description. [GH-60]
-* `openstack_fw_firewall_v1` now correctly translates `value_specs` on create. [GH-66]
+* `openstack_lb_pool_v2` handling of `persistence` updated, `cookie_name` is now optional. ([#57](https://github.com/terraform-providers/terraform-provider-openstack/issues/57))
+* `openstack_fw_firewall_v1.associated_routers` is now computed. ([#53](https://github.com/terraform-providers/terraform-provider-openstack/issues/53))
+* All `openstack_fw_rule_v1` attributes are now passed during an update phase. ([#53](https://github.com/terraform-providers/terraform-provider-openstack/issues/53))
+* `openstack_networking_secgroup_v2` now correctly updates description. ([#60](https://github.com/terraform-providers/terraform-provider-openstack/issues/60))
+* `openstack_fw_firewall_v1` now correctly translates `value_specs` on create. ([#66](https://github.com/terraform-providers/terraform-provider-openstack/issues/66))
 
 ## 0.1.0 (June 21, 2017)
 
