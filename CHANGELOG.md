@@ -1,4 +1,9 @@
 ## 0.2.1 (Unreleased)
+
+IMPROVEMENTS:
+
+* `openstack_lb_loadbalancer_v2` timeouts have been lowered to 10 and 5 minutes [GH-74]
+
 ## 0.2.0 (August 14, 2017)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
