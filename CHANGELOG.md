@@ -4,6 +4,10 @@ IMPROVEMENTS:
 
 * `openstack_lb_loadbalancer_v2` timeouts have been lowered to 10 and 5 minutes [GH-74]
 
+BUG FIXES:
+
+* `openstack_images_image_v2` data source now sorts images by `CreatedAt` instead of `UpdatedAt` [GH-78]
+
 ## 0.2.0 (August 14, 2017)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
