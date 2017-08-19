@@ -226,8 +226,8 @@ type imageSort []images.Image
 func (a imageSort) Len() int      { return len(a) }
 func (a imageSort) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a imageSort) Less(i, j int) bool {
-	itime := a[i].UpdatedAt
-	jtime := a[j].UpdatedAt
+	itime := a[i].CreatedAt
+	jtime := a[j].CreatedAt
 	return itime.Unix() < jtime.Unix()
 }
 
