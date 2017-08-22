@@ -315,8 +315,8 @@ func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses 
 			NetworkName: networkName,
 		}
 
+		instanceNIC := InstanceNIC{}
 		for _, v := range v.([]interface{}) {
-			instanceNIC := InstanceNIC{}
 			v := v.(map[string]interface{})
 			if v["OS-EXT-IPS:type"] == "fixed" {
 				switch v["version"].(float64) {
@@ -330,9 +330,8 @@ func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses 
 			if v, ok := v["OS-EXT-IPS-MAC:mac_addr"].(string); ok {
 				instanceNIC.MAC = v
 			}
-
-			instanceAddresses.InstanceNICs = append(instanceAddresses.InstanceNICs, instanceNIC)
 		}
+		instanceAddresses.InstanceNICs = append(instanceAddresses.InstanceNICs, instanceNIC)
 
 		allInstanceAddresses = append(allInstanceAddresses, instanceAddresses)
 	}
@@ -395,7 +394,7 @@ func flattenInstanceNetworks(
 					"name":        instanceAddresses.NetworkName,
 					"fixed_ip_v4": instanceNIC.FixedIPv4,
 					"fixed_ip_v6": instanceNIC.FixedIPv6,
-					"mac":         instanceNIC.FixedIPv6,
+					"mac":         instanceNIC.MAC,
 				}
 				networks = append(networks, v)
 			}
@@ -417,7 +416,7 @@ func flattenInstanceNetworks(
 					"name":           instanceAddresses.NetworkName,
 					"fixed_ip_v4":    instanceNIC.FixedIPv4,
 					"fixed_ip_v6":    instanceNIC.FixedIPv6,
-					"mac":            instanceNIC.FixedIPv6,
+					"mac":            instanceNIC.MAC,
 					"uuid":           instanceNetwork.UUID,
 					"port":           instanceNetwork.Port,
 					"access_network": instanceNetwork.AccessNetwork,
