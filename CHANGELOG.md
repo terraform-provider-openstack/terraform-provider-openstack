@@ -1,14 +1,14 @@
-## 0.2.1 (Unreleased)
+## 0.2.1 (August 23, 2017)
 
 IMPROVEMENTS:
 
-* `openstack_lb_loadbalancer_v2` timeouts have been lowered to 10 and 5 minutes [GH-74]
+* `openstack_lb_loadbalancer_v2` timeouts have been lowered to 10 and 5 minutes ([#74](https://github.com/terraform-providers/terraform-provider-openstack/issues/74))
 
 BUG FIXES:
 
-* `openstack_images_image_v2` data source now sorts images by `CreatedAt` instead of `UpdatedAt` [GH-78]
-* `openstack_networking_secgroup_v2` now re-reads security group before deleteing rules when `delete_default_rules => true` [GH-82]
-* Fixed `openstack_compute_instance_v2` access IP address detection in dual-stack environments [GH-85]
+* `openstack_images_image_v2` data source now sorts images by `CreatedAt` instead of `UpdatedAt` ([#78](https://github.com/terraform-providers/terraform-provider-openstack/issues/78))
+* `openstack_networking_secgroup_v2` now re-reads security group before deleteing rules when `delete_default_rules => true` ([#82](https://github.com/terraform-providers/terraform-provider-openstack/issues/82))
+* Fixed `openstack_compute_instance_v2` access IP address detection in dual-stack environments ([#85](https://github.com/terraform-providers/terraform-provider-openstack/issues/85))
 
 ## 0.2.0 (August 14, 2017)
 
