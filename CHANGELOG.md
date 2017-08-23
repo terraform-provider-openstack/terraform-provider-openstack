@@ -8,6 +8,7 @@ BUG FIXES:
 
 * `openstack_images_image_v2` data source now sorts images by `CreatedAt` instead of `UpdatedAt` [GH-78]
 * `openstack_networking_secgroup_v2` now re-reads security group before deleteing rules when `delete_default_rules => true` [GH-82]
+* Fixed `openstack_compute_instance_v2` access IP address detection in dual-stack environments [GH-85]
 
 ## 0.2.0 (August 14, 2017)
 
