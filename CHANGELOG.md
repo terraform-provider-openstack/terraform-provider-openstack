@@ -1,4 +1,10 @@
 ## 0.2.2 (Unreleased)
+
+FEATURES:
+
+* __New Data Source:__ `openstack_networking_secgroup_v2` [GH-86]
+
+
 ## 0.2.1 (August 23, 2017)
 
 IMPROVEMENTS:
