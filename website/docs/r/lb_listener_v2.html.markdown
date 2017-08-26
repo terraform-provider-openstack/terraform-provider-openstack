@@ -53,10 +53,16 @@ The following arguments are supported:
 * `connection_limit` - (Optional) The maximum number of connections allowed
     for the Listener.
 
-* `default_tls_container_ref` - (Optional) A reference to a container of TLS
-    secrets.
+* `default_tls_container_ref` - (Optional) A reference to a Barbican Secrets
+    container which stores TLS information. This is required if the protocol
+    is `TERMINATED_HTTPS`. See
+    [here](https://wiki.openstack.org/wiki/Network/LBaaS/docs/how-to-create-tls-loadbalancer)
+    for more information.
 
-* `sni_container_refs` - (Optional) A list of references to TLS secrets.
+* `sni_container_refs` - (Optional) A list of references to Barbican Secrets
+    containers which store SNI information. See
+    [here](https://wiki.openstack.org/wiki/Network/LBaaS/docs/how-to-create-tls-loadbalancer)
+    for more information.
 
 * `admin_state_up` - (Optional) The administrative state of the Listener.
     A valid value is true (UP) or false (DOWN).
