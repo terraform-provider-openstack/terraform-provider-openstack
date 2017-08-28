@@ -87,12 +87,6 @@ func resourceMonitorV2() *schema.Resource {
 				Default:  true,
 				Optional: true,
 			},
-
-			"id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -161,7 +155,6 @@ func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Retrieved monitor %s: %#v", d.Id(), monitor)
 
-	d.Set("id", monitor.ID)
 	d.Set("tenant_id", monitor.TenantID)
 	d.Set("type", monitor.Type)
 	d.Set("delay", monitor.Delay)

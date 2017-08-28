@@ -124,12 +124,6 @@ func resourcePoolV2() *schema.Resource {
 				Default:  true,
 				Optional: true,
 			},
-
-			"id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -250,7 +244,6 @@ func resourcePoolV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("tenant_id", pool.TenantID)
 	d.Set("admin_state_up", pool.AdminStateUp)
 	d.Set("name", pool.Name)
-	d.Set("id", pool.ID)
 	d.Set("persistence", pool.Persistence)
 	d.Set("region", GetRegion(d, config))
 
