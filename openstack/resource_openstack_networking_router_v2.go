@@ -108,6 +108,21 @@ func resourceNetworkingRouterV2() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"vendor_options": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"set_router_gateway_on_update": &schema.Schema{
+							Type:     schema.TypeBool,
+							Default:  false,
+							Optional: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -138,6 +153,20 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 		createOpts.Distributed = &d
 	}
 
+	// Get Vendor_options
+	vendorOptionsRaw := d.Get("vendor_options").(*schema.Set)
+	var updateGateway bool
+	log.Printf("[DEBUG] vendorOptions looks like: %+v", vendorOptionsRaw)
+	if vendorOptionsRaw.Len() > 0 {
+		log.Printf("[DEBUG] vendorOptionsRaw contains some data.")
+
+		vendorOptions := expandVendorOptions(vendorOptionsRaw.List())
+		log.Printf("[DEBUG] vendorOptions Contents = %+v", vendorOptions)
+
+		updateGateway = vendorOptions["set_router_gateway_on_update"].(bool)
+		log.Printf("[DEBUG] updateGateway is a %T with value %+v", updateGateway, updateGateway)
+	}
+
 	// Gateway settings
 	var externalNetworkID string
 	if v := d.Get("external_gateway").(string); v != "" {
@@ -148,10 +177,12 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 		externalNetworkID = v
 	}
 
-	if externalNetworkID != "" {
+	if !updateGateway && externalNetworkID != "" {
+		log.Println("[DEBUG] Setting Router External Network upon creation")
 		gatewayInfo := routers.GatewayInfo{
 			NetworkID: externalNetworkID,
 		}
+
 		createOpts.GatewayInfo = &gatewayInfo
 	}
 
@@ -191,6 +222,22 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 	_, err = stateConf.WaitForState()
 
 	d.SetId(n.ID)
+
+	if updateGateway && externalNetworkID != "" {
+		log.Printf("[DEBUG] Adding External Network %s to router ID %s", externalNetworkID, d.Id())
+		var updateOpts routers.UpdateOpts
+
+		gatewayInfo := routers.GatewayInfo{
+			NetworkID: externalNetworkID,
+		}
+		updateOpts.GatewayInfo = &gatewayInfo
+
+		log.Printf("[DEBUG] Assigning external gateway to Router %s with options: %+v", d.Id(), updateOpts)
+		_, err = routers.Update(networkingClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenStack Neutron Router: %s", err)
+		}
+	}
 
 	return resourceNetworkingRouterV2Read(d, meta)
 }
@@ -403,4 +450,19 @@ func resourceRouterExternalFixedIPsV2(d *schema.ResourceData) []routers.External
 	}
 
 	return externalFixedIPs
+}
+
+func expandVendorOptions(vendOptsRaw []interface{}) map[string]interface{} {
+	vendorOptions := make(map[string]interface{})
+
+	for _, option := range vendOptsRaw {
+		log.Printf("[DEBUG] option = %+v", option)
+		for optKey, optValue := range option.(map[string]interface{}) {
+			log.Printf("optKey = %+v, optValue = %+v", optKey, optValue)
+			vendorOptions[optKey] = optValue
+		}
+
+	}
+
+	return vendorOptions
 }
