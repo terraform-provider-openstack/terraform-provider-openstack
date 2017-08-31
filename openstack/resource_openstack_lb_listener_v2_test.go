@@ -21,6 +21,8 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 				Config: TestAccLBV2ListenerConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_listener_v2.listener_1", "connection_limit", "-1"),
 				),
 			},
 			resource.TestStep{
