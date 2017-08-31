@@ -220,9 +220,22 @@ func waitForLBV2viaPool(networkingClient *gophercloud.ServiceClient, id string, 
 	}
 
 	if pool.Loadbalancers != nil {
-		// we know each pool has an LB
+		// each pool has an LB in Octavia lbaasv2 API
 		lbID := pool.Loadbalancers[0].ID
 		return waitForLBV2LoadBalancer(networkingClient, lbID, target, nil, timeout)
+	}
+
+	if pool.Listeners != nil {
+		// each pool has a listener in Neutron lbaasv2 API
+		listenerID := pool.Listeners[0].ID
+		listener, err := listeners.Get(networkingClient, listenerID).Extract()
+		if err != nil {
+			return err
+		}
+		if listener.Loadbalancers != nil {
+			lbID := listener.Loadbalancers[0].ID
+			return waitForLBV2LoadBalancer(networkingClient, lbID, target, nil, timeout)
+		}
 	}
 
 	// got a pool but no LB - this is wrong
