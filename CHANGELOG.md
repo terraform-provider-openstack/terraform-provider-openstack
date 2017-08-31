@@ -5,6 +5,9 @@ FEATURES:
 * __New Data Source:__ `openstack_networking_secgroup_v2` [GH-86]
 * __New Resource:__: `openstack_compute_flavor_v2` [GH-83]
 
+BUG FIXES
+
+* `openstack_lb_listener_v2`: Don't send `connection_limit` unless it has been set [GH-90]
 
 ## 0.2.1 (August 23, 2017)
 
