@@ -1,5 +1,9 @@
 ## 0.2.2 (Unreleased)
 
+BACKWARDS INCOMPATIBILITIES / NOTES:
+
+* Unused `id` fields in the LBaaS v2 resources were removed. This should not cause any issues, but please report if you find otherwise.
+
 FEATURES:
 
 * __New Data Source:__ `openstack_networking_secgroup_v2` [GH-86]
@@ -9,6 +13,7 @@ BUG FIXES
 
 * `openstack_lb_listener_v2`: Don't send `connection_limit` unless it has been set [GH-90]
 * `openstack_lb_pool_v2`: Find Load Balancer via Listener [GH-97]
+* LBaaS v2: Removed unused `id` fields [GH-93]
 
 ## 0.2.1 (August 23, 2017)
 
