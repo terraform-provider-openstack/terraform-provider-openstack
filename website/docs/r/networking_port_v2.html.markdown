@@ -76,7 +76,9 @@ this port.
 
 * `ip_address` - (Optional) IP address desired in the subnet for this port. If
 you don't specify `ip_address`, an available IP address from the specified
-subnet will be allocated to this port.
+subnet will be allocated to this port. This field will not be populated if it
+is left blank. To retrieve the assigned IP address, use the `all_fixed_ips`
+attribute.
 
 The `allowed_address_pairs` block supports:
 
