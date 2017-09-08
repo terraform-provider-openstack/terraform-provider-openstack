@@ -31,6 +31,10 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"status": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"matching_subnet_cidr": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -64,7 +68,10 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 		ID:       d.Get("network_id").(string),
 		Name:     d.Get("name").(string),
 		TenantID: d.Get("tenant_id").(string),
-		Status:   "ACTIVE",
+	}
+
+	if v, ok := d.GetOk("status"); ok {
+		listOpts.Status = v.(string)
 	}
 
 	pages, err := networks.List(networkingClient, listOpts).AllPages()
