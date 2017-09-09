@@ -15,6 +15,7 @@ BUG FIXES
 * `openstack_lb_pool_v2`: Find Load Balancer via Listener [GH-97]
 * LBaaS v2: Removed unused `id` fields [GH-93]
 * `openstack_lb_monitor_v2`: Check if a monitor was successfully created before proceeding [GH-102]
+* `openstack_networking_router_v2`: Fix region parameter [GH-107]
 
 ## 0.2.1 (August 23, 2017)
 
