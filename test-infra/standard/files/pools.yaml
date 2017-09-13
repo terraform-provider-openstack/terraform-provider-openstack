@@ -1,0 +1,26 @@
+---
+
+- name: default
+  description: Default PowerDNS Pool
+  attributes: {}
+  ns_records:
+    - hostname: ns.example.com.
+      priority: 1
+
+  nameservers:
+    - host: 127.0.0.1
+      port: 53
+
+  targets:
+    - type: pdns4
+      description: PowerDNS4 DNS Server
+      masters:
+        - host: 127.0.0.1
+          port: 5354
+
+      # PowerDNS Configuration options
+      options:
+        host: 127.0.0.1
+        port: 53
+        api_endpoint: http://127.0.0.1:8081
+        api_token: someapikey

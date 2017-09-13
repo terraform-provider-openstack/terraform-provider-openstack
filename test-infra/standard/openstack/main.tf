@@ -1,5 +1,4 @@
 variable "key_name" {}
-variable "public_key" {}
 variable "network_id" {}
 
 variable "pool" {
