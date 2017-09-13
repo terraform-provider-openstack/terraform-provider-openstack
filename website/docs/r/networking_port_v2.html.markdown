@@ -53,9 +53,16 @@ The following arguments are supported:
 * `device_owner` - (Optional) The device owner of the Port. Changing this creates
     a new port.
 
-* `security_group_ids` - (Optional) A list of security group IDs to apply to the
-    port. The security groups must be specified by ID and not name (as opposed
-    to how they are configured with the Compute Instance).
+* `security_group_ids` - (Optional - Conflicts with `no_security_groups`) A list
+    of security group IDs to apply to the port. The security groups must be
+    specified by ID and not name (as opposed to how they are configured with
+    the Compute Instance).
+
+* `no_security_groups` - (Optional - Conflicts with `security_group_ids`) If set to
+    `true`, then no security groups are applied to the port. If set to `false` and
+    no `security_group_ids` are specified, then the Port will yield to the default
+    behavior of the Networking service, which is to usually apply the "default"
+    security group.
 
 * `device_id` - (Optional) The ID of the device attached to the port. Changing this
     creates a new port.
@@ -100,6 +107,8 @@ The following attributes are exported:
 * `fixed_ip` - See Argument Reference above.
 * `all fixed_ips` - The collection of Fixed IP addresses on the port in the
   order returned by the Network v2 API.
+* `all_security_group_ids` - The collection of Security Group IDs on the port
+  which have been explicitly and implicitly added.
 
 ## Import
 
