@@ -61,3 +61,12 @@ The following attributes are exported:
 * `router_id` - See Argument Reference above.
 * `subnet_id` - See Argument Reference above.
 * `port_id` - See Argument Reference above.
+
+## Import
+
+Router Interfaces can be imported using the port `id`, e.g.
+
+```
+$ openstack port list --router <router name or id>
+$ terraform import openstack_networking_router_interface_v2.int_1 <port id from above output>
+```
