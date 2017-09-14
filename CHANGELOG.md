@@ -11,7 +11,8 @@ FEATURES:
 
 IMPROVEMENTS
  * Added `status` field to `openstack_networking_network_v2` data source [GH-105]
- * `openstack_networking_routers_v2` can now be imported [GH-111]
+ * `openstack_networking_router_v2` can now be imported [GH-111]
+ * `openstack_networking_router_interface_v2` can now be imported [GH-112]
  
 BUG FIXES
 
