@@ -18,6 +18,9 @@ func resourceNetworkingRouterInterfaceV2() *schema.Resource {
 		Create: resourceNetworkingRouterInterfaceV2Create,
 		Read:   resourceNetworkingRouterInterfaceV2Read,
 		Delete: resourceNetworkingRouterInterfaceV2Delete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -44,6 +47,7 @@ func resourceNetworkingRouterInterfaceV2() *schema.Resource {
 			"port_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 		},
@@ -106,6 +110,8 @@ func resourceNetworkingRouterInterfaceV2Read(d *schema.ResourceData, meta interf
 
 	log.Printf("[DEBUG] Retrieved Router Interface %s: %+v", d.Id(), n)
 
+	d.Set("router_id", n.DeviceID)
+	d.Set("port_id", n.ID)
 	d.Set("region", GetRegion(d, config))
 
 	return nil
