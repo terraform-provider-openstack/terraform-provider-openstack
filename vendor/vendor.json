@@ -403,10 +403,10 @@
 			"revisionTime": "2017-03-10T01:59:53Z"
 		},
 		{
-			"checksumSHA1": "fyXTcJg3obtp3n+99WOGtUiMelg=",
+			"checksumSHA1": "gnDqkD2hdbV0ek3m2eNgsc4opdg=",
 			"path": "github.com/gophercloud/gophercloud/openstack/imageservice/v2/images",
-			"revision": "0f64da0e36de86a0ca1a8f2fc1b0570a0d3f7504",
-			"revisionTime": "2017-03-10T01:59:53Z"
+			"revision": "e764e6cf0316a135851b56f8eea946b906988707",
+			"revisionTime": "2017-09-08T04:14:34Z"
 		},
 		{
 			"checksumSHA1": "YqqqrMdOCKY2xwFkwxskkx8XtTQ=",
