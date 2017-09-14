@@ -28,6 +28,8 @@ data "openstack_networking_network_v2" "network" {
 
 * `name` - (Optional) The name of the network.
 
+* `status` - (Optional) The status of the network.
+
 * `matching_subnet_cidr` - (Optional) The CIDR of a subnet within the network.
 
 * `tenant_id` - (Optional) The owner of the network.
