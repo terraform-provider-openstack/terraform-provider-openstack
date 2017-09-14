@@ -60,3 +60,11 @@ The following attributes are exported:
 * `external_gateway` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
 * `value_specs` - See Argument Reference above.
+
+## Import
+
+Routers can be imported using the `id`, e.g.
+
+```
+$ terraform import openstack_networking_router_v2.router_1 014395cd-89fc-4c9b-96b7-13d1ee79dad2
+```
