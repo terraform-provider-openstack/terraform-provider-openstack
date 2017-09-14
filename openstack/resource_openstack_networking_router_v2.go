@@ -18,6 +18,9 @@ func resourceNetworkingRouterV2() *schema.Resource {
 		Read:   resourceNetworkingRouterV2Read,
 		Update: resourceNetworkingRouterV2Update,
 		Delete: resourceNetworkingRouterV2Delete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -52,6 +55,7 @@ func resourceNetworkingRouterV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
+				Computed: true,
 			},
 			"tenant_id": &schema.Schema{
 				Type:     schema.TypeString,
