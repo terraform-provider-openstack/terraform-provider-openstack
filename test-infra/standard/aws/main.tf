@@ -8,6 +8,11 @@ data "aws_ami" "packstack_standard" {
   name_regex = "^packstack-standard-ocata"
 }
 
+resource "random_id" "security_group_name" {
+  prefix = "openstack_test_instance_allow_all_"
+  byte_length = 8
+}
+
 resource "aws_spot_instance_request" "openstack_acc_tests" {
   ami = "${data.aws_ami.packstack_standard.id}"
   spot_price = "0.0441"
@@ -28,7 +33,7 @@ resource "aws_spot_instance_request" "openstack_acc_tests" {
 }
 
 resource "aws_security_group" "allow_all" {
-  name        = "openstack_test_instance_allow_all"
+  name        = "${random_id.security_group_name.hex}"
   description = "OpenStack Test Infra Allow all inbound/outbound traffic"
 
   ingress {
