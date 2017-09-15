@@ -1,4 +1,4 @@
-## 0.2.2 (Unreleased)
+## 0.2.2 (September 15, 2017)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
@@ -6,22 +6,22 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 FEATURES:
 
-* __New Data Source:__ `openstack_networking_secgroup_v2` [GH-86]
-* __New Resource:__: `openstack_compute_flavor_v2` [GH-83]
+* __New Data Source:__ `openstack_networking_secgroup_v2` ([#86](https://github.com/terraform-providers/terraform-provider-openstack/issues/86))
+* __New Resource:__: `openstack_compute_flavor_v2` ([#83](https://github.com/terraform-providers/terraform-provider-openstack/issues/83))
 
 IMPROVEMENTS
- * Added `status` field to `openstack_networking_network_v2` data source [GH-105]
- * `openstack_networking_router_v2` can now be imported [GH-111]
- * `openstack_networking_router_interface_v2` can now be imported [GH-112]
+ * Added `status` field to `openstack_networking_network_v2` data source ([#105](https://github.com/terraform-providers/terraform-provider-openstack/issues/105))
+ * `openstack_networking_router_v2` can now be imported ([#111](https://github.com/terraform-providers/terraform-provider-openstack/issues/111))
+ * `openstack_networking_router_interface_v2` can now be imported ([#112](https://github.com/terraform-providers/terraform-provider-openstack/issues/112))
  
 BUG FIXES
 
-* `openstack_lb_listener_v2`: Don't send `connection_limit` unless it has been set [GH-90]
-* `openstack_lb_pool_v2`: Find Load Balancer via Listener [GH-97]
-* LBaaS v2: Removed unused `id` fields [GH-93]
-* `openstack_lb_monitor_v2`: Check if a monitor was successfully created before proceeding [GH-102]
-* `openstack_networking_router_v2`: Fix region parameter [GH-107]
-* `openstack_compute_instance_v2`: Fix regression bug with NIC detection [GH-117]
+* `openstack_lb_listener_v2`: Don't send `connection_limit` unless it has been set ([#90](https://github.com/terraform-providers/terraform-provider-openstack/issues/90))
+* `openstack_lb_pool_v2`: Find Load Balancer via Listener ([#97](https://github.com/terraform-providers/terraform-provider-openstack/issues/97))
+* LBaaS v2: Removed unused `id` fields ([#93](https://github.com/terraform-providers/terraform-provider-openstack/issues/93))
+* `openstack_lb_monitor_v2`: Check if a monitor was successfully created before proceeding ([#102](https://github.com/terraform-providers/terraform-provider-openstack/issues/102))
+* `openstack_networking_router_v2`: Fix region parameter ([#107](https://github.com/terraform-providers/terraform-provider-openstack/issues/107))
+* `openstack_compute_instance_v2`: Fix regression bug with NIC detection ([#117](https://github.com/terraform-providers/terraform-provider-openstack/issues/117))
 
 ## 0.2.1 (August 23, 2017)
 
