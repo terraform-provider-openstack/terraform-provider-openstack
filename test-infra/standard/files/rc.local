@@ -14,16 +14,18 @@ exportfs -a
 
 # Update the Keystone catalog for the new public IP
 public_ip=$(curl http://169.254.169.254/latest/meta-data/public-ipv4/)
-while true ; do
-  mysql -e "update endpoint set url = replace(url, '127.0.0.1', '$public_ip')" keystone
-  if [[ $? == 0 ]]; then
-    break
-  fi
-  sleep 10
-done
+if [[ -n $public_ip ]]; then
+  while true ; do
+    mysql -e "update endpoint set url = replace(url, '127.0.0.1', '$public_ip')" keystone
+    if [[ $? == 0 ]]; then
+      break
+    fi
+    sleep 10
+  done
 
-sed -i -e "s/127.0.0.1/$public_ip/g" /home/centos/keystonerc_demo
-sed -i -e "s/127.0.0.1/$public_ip/g" /home/centos/keystonerc_admin
+  sed -i -e "s/127.0.0.1/$public_ip/g" /home/centos/keystonerc_demo
+  sed -i -e "s/127.0.0.1/$public_ip/g" /home/centos/keystonerc_admin
+fi
 
 # Kick rabbit
 systemctl restart rabbitmq-server
@@ -55,11 +57,24 @@ systemctl restart neutron-metadata-agent.service
 systemctl restart neutron-openvswitch-agent.service
 systemctl restart neutron-metering-agent.service
 systemctl restart httpd
+systemctl restart designate-central designate-api
+systemctl restart designate-worker designate-producer designate-mdns
 
 # Discover the local compute service
 nova-manage cell_v2 discover_hosts
 
+# Discover Designate servers
+sudo -u designate designate-manage pool update
+
+# iptables for Designate
+iptables -I INPUT -p tcp --dport 9001 -j ACCEPT
+ip6tables -I INPUT -p tcp --dport 9001 -j ACCEPT
+
+# Restart PowerDNS
+systemctl restart pdns
+
 # Place the rc files in a web-accessible area
 iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+ip6tables -I INPUT -p tcp --dport 80 -j ACCEPT
 cp /home/centos/keystonerc* /var/www/html
 chmod 666 /var/www/html/keystonerc*

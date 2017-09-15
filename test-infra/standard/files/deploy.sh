@@ -19,26 +19,6 @@ sudo yum install -y -q openstack-packstack crudini
 # Run packstack
 sudo packstack --answer-file /home/centos/files/packstack-answers.txt
 
-# Configure LBaaSv2 and FWaaS
-#sudo crudini --set /etc/neutron/neutron.conf DEFAULT debug True
-#sudo crudini --set /etc/neutron/l3_agent.ini DEFAULT debug True
-#sudo crudini --set /etc/neutron/neutron.conf DEFAULT service_plugins router,firewall,neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2
-#sudo crudini --set /etc/neutron/neutron_lbaas.conf service_providers service_provider LOADBALANCERV2:Haproxy:neutron_lbaas.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
-#sudo crudini --set /etc/neutron/neutron.conf service_providers service_provider FIREWALL:Iptables:neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver:default
-#sudo crudini --set /etc/neutron/lbaas_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.OVSInterfaceDriver
-#sudo crudini --set /etc/neutron/l3_agent.ini AGENT extensions fwaas
-#sudo crudini --set /etc/neutron/neutron.conf fwaas enabled True
-#sudo crudini --set /etc/neutron/neutron.conf fwaas driver iptables
-#sudo crudini --set /etc/neutron/neutron.conf fwaas agent_version v1
-
-#sudo neutron-db-manage --subproject neutron-lbaas upgrade head
-#sudo neutron-db-manage --subproject neutron-fwaas upgrade head
-#sudo systemctl disable neutron-lbaas-agent.service
-#sudo systemctl restart neutron-server.service
-#sudo systemctl restart neutron-l3-agent.service
-#sudo systemctl enable neutron-lbaasv2-agent.service
-#sudo systemctl start neutron-lbaasv2-agent.service
-
 # Move findmnt to allow multiple mounts to 127.0.0.1:/mnt
 sudo mv /bin/findmnt{,.orig}
 
@@ -72,6 +52,80 @@ echo export OS_POOL_NAME="public" >> /home/centos/keystonerc_demo
 echo export OS_FLAVOR_ID=99 >> /home/centos/keystonerc_demo
 echo export OS_FLAVOR_ID_RESIZE=98 >> /home/centos/keystonerc_demo
 
+# Configure Swift
+sudo crudini --set /etc/swift/proxy-server.conf DEFAULT bind_ip 0.0.0.0
+
+# Install PowerDNS
+sudo mysql -e "CREATE DATABASE pdns default character set utf8 default collate utf8_general_ci"
+sudo mysql -e "GRANT ALL PRIVILEGES ON pdns.* TO 'pdns'@'localhost' IDENTIFIED BY 'password'"
+sudo yum install -y epel-release yum-plugin-priorities
+sudo curl -o /etc/yum.repos.d/powerdns-auth-40.repo https://repo.powerdns.com/repo-files/centos-auth-40.repo
+sudo yum install -y pdns pdns-backend-mysql
+
+echo "daemon=no
+allow-recursion=127.0.0.1
+config-dir=/etc/powerdns
+daemon=yes
+disable-axfr=no
+guardian=yes
+local-address=0.0.0.0
+local-ipv6=::
+local-port=53
+setgid=pdns
+setuid=pdns
+slave=yes
+socket-dir=/var/run
+version-string=powerdns
+out-of-zone-additional-processing=no
+webserver=yes
+api=yes
+api-key=someapikey
+launch=gmysql
+gmysql-host=127.0.0.1
+gmysql-user=pdns
+gmysql-dbname=pdns
+gmysql-password=password" | sudo tee /etc/pdns/pdns.conf
+
+sudo mysql pdns < /home/centos/files/pdns.sql
+sudo systemctl restart pdns
+
+# Install Designate
+openstack user create --domain default --password password designate
+openstack role add --project services --user designate admin
+openstack service create --name designate --description "DNS" dns
+openstack endpoint create --region RegionOne dns public http://127.0.0.1:9001/
+sudo mysql -e "CREATE DATABASE designate CHARACTER SET utf8 COLLATE utf8_general_ci"
+sudo mysql -e "CREATE DATABASE designate_pool_manager"
+sudo mysql -e "GRANT ALL PRIVILEGES ON designate.* TO 'designate'@'localhost' IDENTIFIED BY 'password'"
+sudo mysql -e "GRANT ALL PRIVILEGES ON designate_pool_manager.* TO 'designate'@'localhost' IDENTIFIED BY 'password'"
+sudo mysql -e "GRANT ALL PRIVILEGES ON designate.* TO 'designate'@'localhost' IDENTIFIED BY 'password'"
+
+sudo yum install -y openstack-designate\*
+designate_conf="/etc/designate/designate.conf"
+sudo cp /home/centos/files/pools.yaml /etc/designate/
+sudo crudini --set $designate_conf DEFAULT debug True
+sudo crudini --set $designate_conf DEFAULT debug True
+sudo crudini --set $designate_conf DEFAULT notification_driver messaging
+sudo crudini --set $designate_conf service:api enabled_extensions_v2 "quotas, reports"
+sudo crudini --set $designate_conf keystone_authtoken auth_uri http://127.0.0.1:5000
+sudo crudini --set $designate_conf keystone_authtoken auth_url http://127.0.0.1:35357
+sudo crudini --set $designate_conf keystone_authtoken username designate
+sudo crudini --set $designate_conf keystone_authtoken password password
+sudo crudini --set $designate_conf keystone_authtoken project_name services
+sudo crudini --set $designate_conf keystone_authtoken auth_type password
+sudo crudini --set $designate_conf service:worker enabled true
+sudo crudini --set $designate_conf service:worker notify true
+sudo crudini --set $designate_conf storage:sqlalchemy connection mysql+pymysql://designate:password@127.0.0.1/designate
+sudo -u designate designate-manage database sync
+
+sudo systemctl enable designate-central designate-api
+sudo systemctl enable designate-worker designate-producer designate-mdns
+sudo systemctl restart designate-central designate-api
+sudo systemctl restart designate-worker designate-producer designate-mdns
+
+sudo -u designate designate-manage pool update
+
+
 # Configure Manila
 manila type-create default_share_type True
 sudo mkdir -p /var/lib/manila/.ssh
@@ -80,7 +134,10 @@ sudo chown -R manila:manila /var/lib/manila/.ssh
 sudo crudini --set /etc/manila/manila.conf DEFAULT default_share_type default_share_type
 sudo crudini --set /etc/manila/manila.conf generic service_instance_user manila
 sudo crudini --set /etc/manila/manila.conf generic service_instance_password manila
-_MANILA_NET=$(openstack network show manila_service_network -c id -f value)
+source ~/keystone_demorc
+_SUBNET_ID=$(openstack subnet show private_subnet -c id -f value)
+manila share-network-create --neutron-net-id $_NETWORK_ID --neutron-subnet-id $_SUBNET_ID --name manila-network
+_MANILA_NET=$(manila share-network-list --columns id | grep [0-9] | awk '{print $2}')
 echo export OS_SHARE_NETWORK_ID=$_MANILA_NET >> /home/centos/keystonerc_admin
 echo export OS_SHARE_NETWORK_ID=$_MANILA_NET >> /home/centos/keystonerc_demo
 
@@ -103,6 +160,8 @@ sudo systemctl stop neutron-metering-agent.service
 sudo systemctl stop openstack-manila-api.service
 sudo systemctl stop openstack-manila-scheduler.service
 sudo systemctl stop openstack-manila-share.service
+sudo systemctl stop designate-central designate-api
+sudo systemctl stop designate-worker designate-producer designate-mdns
 
 sudo mysql -e "update services set deleted_at=now(), deleted=id" cinder
 sudo mysql -e "update services set deleted_at=now(), deleted=id" nova
