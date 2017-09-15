@@ -21,6 +21,7 @@ BUG FIXES
 * LBaaS v2: Removed unused `id` fields [GH-93]
 * `openstack_lb_monitor_v2`: Check if a monitor was successfully created before proceeding [GH-102]
 * `openstack_networking_router_v2`: Fix region parameter [GH-107]
+* `openstack_compute_instance_v2`: Fix regression bug with NIC detection [GH-117]
 
 ## 0.2.1 (August 23, 2017)
 
