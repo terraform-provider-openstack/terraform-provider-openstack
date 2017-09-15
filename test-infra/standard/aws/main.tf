@@ -15,7 +15,7 @@ resource "random_id" "security_group_name" {
 
 resource "aws_spot_instance_request" "openstack_acc_tests" {
   ami = "${data.aws_ami.packstack_standard.id}"
-  spot_price = "0.0441"
+  spot_price = "0.0500"
   instance_type = "m3.xlarge"
   wait_for_fulfillment = true
   spot_type = "one-time"
