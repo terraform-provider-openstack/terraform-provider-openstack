@@ -134,6 +134,41 @@ func testAccCheckNetworkingV2RouterRouteExists(n string) resource.TestCheckFunc 
 	}
 }
 
+func testAccCheckNetworkingV2RouterRouteDestroy(s *terraform.State) error {
+	config := testAccProvider.Meta().(*Config)
+	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+	}
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "openstack_networking_router_route_v2" {
+			continue
+		}
+
+		var routeExists = false
+
+		router, err := routers.Get(networkingClient, rs.Primary.Attributes["router_id"]).Extract()
+		if err == nil {
+
+			var rts = router.Routes
+			for _, r := range rts {
+
+				if r.DestinationCIDR == rs.Primary.Attributes["destination_cidr"] && r.NextHop == rs.Primary.Attributes["next_hop"] {
+					routeExists = true
+					break
+				}
+			}
+		}
+
+		if routeExists {
+			return fmt.Errorf("Route still exists")
+		}
+	}
+
+	return nil
+}
+
 const testAccNetworkingV2RouterRoute_create = `
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
