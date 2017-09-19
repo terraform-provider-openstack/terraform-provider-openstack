@@ -42,6 +42,7 @@ func resourceNetworkingRouterInterfaceV2() *schema.Resource {
 			"subnet_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"port_id": &schema.Schema{
@@ -112,6 +113,16 @@ func resourceNetworkingRouterInterfaceV2Read(d *schema.ResourceData, meta interf
 
 	d.Set("router_id", n.DeviceID)
 	d.Set("port_id", n.ID)
+
+	// Set the subnet ID by looking at thet port's FixedIPs.
+	// If there's more than one FixedIP, do not set the subnet
+	// as it's not possible to confidently determine which subnet
+	// belongs to this interface. However, that situation should
+	// not happen.
+	if len(n.FixedIPs) == 1 {
+		d.Set("subnet_id", n.FixedIPs[0].SubnetID)
+	}
+
 	d.Set("region", GetRegion(d, config))
 
 	return nil
