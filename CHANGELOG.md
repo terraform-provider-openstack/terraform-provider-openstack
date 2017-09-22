@@ -3,6 +3,7 @@
 IMPROVEMENTS
 
  * `openstack_networking_router_interface_v2` will now set `subnet_id` when importing [GH-119]
+ * `openstack_networking_router_route_v2` can now be imported [GH-120]
 
 ## 0.2.2 (September 15, 2017)
 
