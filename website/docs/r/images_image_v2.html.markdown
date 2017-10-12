@@ -18,6 +18,10 @@ resource "openstack_images_image_v2" "rancheros" {
   image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
   container_format = "bare"
   disk_format = "qcow2"
+
+  properties {
+    key = "value"
+  }
 }
 ```
 
@@ -52,6 +56,9 @@ The following arguments are supported:
 
 * `name` - (Required) The name of the image.
 
+* `properties` - (Optional) A map of key/value pairs to set freeform
+    information about an image.
+
 * `protected` - (Optional) If true, image will not be deletable.
    Defaults to false.
 
@@ -66,9 +73,6 @@ The following arguments are supported:
 * `visibility` - (Optional) The visibility of the image. Must be one of
    "public", "private", "community", or "shared". The ability to set the
    visibility depends upon the configuration of the OpenStack cloud.
-
-Note: The `properties` attribute handling in the gophercloud library is currently buggy
-and needs to be fixed before being implemented in this resource.
 
 ## Attributes Reference
 
@@ -89,6 +93,7 @@ The following attributes are exported:
 * `min_ram_mb` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `owner` - The id of the openstack user who owns the image.
+* `properties` - See Argument Reference above.
 * `protected` - See Argument Reference above.
 * `region` - See Argument Reference above.
 * `schema` - The path to the JSON-schema that represent
