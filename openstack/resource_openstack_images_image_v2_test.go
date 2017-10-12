@@ -30,6 +30,10 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 						"openstack_images_image_v2.image_1", "disk_format", "qcow2"),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "schema", "/v2/schemas/image"),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "properties.foo", "bar"),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "properties.baz", "foo"),
 				),
 			},
 		},
@@ -282,6 +286,10 @@ var testAccImagesImageV2_basic = `
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
+      properties {
+        foo = "bar"
+        baz = "foo"
+      }
   }`
 
 var testAccImagesImageV2_name_1 = `

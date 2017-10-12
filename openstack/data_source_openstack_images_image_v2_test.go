@@ -21,7 +21,7 @@ func TestAccOpenStackImagesV2ImageDataSource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_images_image_v2.image_1", "name", "CirrOS-tf"),
+						"data.openstack_images_image_v2.image_1", "name", "CirrOS-tf_1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_images_image_v2.image_1", "container_format", "bare"),
 					resource.TestCheckResourceAttr(
@@ -67,6 +67,12 @@ func TestAccOpenStackImagesV2ImageDataSource_testQueries(t *testing.T) {
 				),
 			},
 			resource.TestStep{
+				Config: testAccOpenStackImagesV2ImageDataSource_property,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
+				),
+			},
+			resource.TestStep{
 				Config: testAccOpenStackImagesV2ImageDataSource_cirros,
 			},
 		},
@@ -91,11 +97,26 @@ func testAccCheckImagesV2DataSourceID(n string) resource.TestCheckFunc {
 // Standard CirrOS image
 const testAccOpenStackImagesV2ImageDataSource_cirros = `
 resource "openstack_images_image_v2" "image_1" {
-	name = "CirrOS-tf"
-	container_format = "bare"
-	disk_format = "qcow2"
-	image_source_url = "http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
-	tags = ["cirros-tf"]
+  name = "CirrOS-tf_1"
+  container_format = "bare"
+  disk_format = "qcow2"
+  image_source_url = "http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
+  tags = ["cirros-tf_1"]
+  properties {
+    foo = "bar"
+    bar = "foo"
+  }
+}
+
+resource "openstack_images_image_v2" "image_2" {
+  name = "CirrOS-tf_2"
+  container_format = "bare"
+  disk_format = "qcow2"
+  image_source_url = "http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
+  tags = ["cirros-tf_2"]
+  properties {
+    foo = "bar"
+  }
 }
 `
 
@@ -114,7 +135,7 @@ var testAccOpenStackImagesV2ImageDataSource_queryTag = fmt.Sprintf(`
 data "openstack_images_image_v2" "image_1" {
 	most_recent = true
 	visibility = "private"
-	tag = "cirros-tf"
+	tag = "cirros-tf_1"
 }
 `, testAccOpenStackImagesV2ImageDataSource_cirros)
 
@@ -135,5 +156,16 @@ data "openstack_images_image_v2" "image_1" {
 	most_recent = true
 	visibility = "private"
 	size_max = "23000000"
+}
+`, testAccOpenStackImagesV2ImageDataSource_cirros)
+
+var testAccOpenStackImagesV2ImageDataSource_property = fmt.Sprintf(`
+%s
+
+data "openstack_images_image_v2" "image_1" {
+  properties {
+    foo = "bar"
+    bar = "foo"
+  }
 }
 `, testAccOpenStackImagesV2ImageDataSource_cirros)

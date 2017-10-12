@@ -163,6 +163,12 @@ func resourceImagesImageV2() *schema.Resource {
 				ValidateFunc: resourceImagesImageV2ValidateVisibility,
 				Default:      "private",
 			},
+
+			"properties": &schema.Schema{
+				Type:     schema.TypeMap,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -176,6 +182,10 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 
 	protected := d.Get("protected").(bool)
 	visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
+
+	properties := d.Get("properties").(map[string]interface{})
+	imageProperties := resourceImagesImageV2ExpandProperties(properties)
+
 	createOpts := &images.CreateOpts{
 		Name:            d.Get("name").(string),
 		ContainerFormat: d.Get("container_format").(string),
@@ -184,6 +194,7 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 		MinRAM:          d.Get("min_ram_mb").(int),
 		Protected:       &protected,
 		Visibility:      &visibility,
+		Properties:      imageProperties,
 	}
 
 	if v, ok := d.GetOk("tags"); ok {
@@ -277,6 +288,7 @@ func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("size_bytes", img.SizeBytes)
 	d.Set("tags", img.Tags)
 	d.Set("visibility", img.Visibility)
+	d.Set("properties", img.Properties)
 	d.Set("region", GetRegion(d, config))
 
 	return nil
@@ -500,4 +512,15 @@ func resourceImagesImageV2BuildTags(v []interface{}) []string {
 	}
 
 	return tags
+}
+
+func resourceImagesImageV2ExpandProperties(v map[string]interface{}) map[string]string {
+	properties := map[string]string{}
+	for key, value := range v {
+		if v, ok := value.(string); ok {
+			properties[key] = v
+		}
+	}
+
+	return properties
 }
