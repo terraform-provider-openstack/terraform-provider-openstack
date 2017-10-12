@@ -16,6 +16,10 @@ Use this data source to get the ID of an available OpenStack image.
 data "openstack_images_image_v2" "ubuntu" {
   name = "Ubuntu 16.04"
   most_recent = true
+
+  properties {
+    key = "value"
+  }
 }
 ```
 
@@ -32,6 +36,9 @@ data "openstack_images_image_v2" "ubuntu" {
 * `name` - (Optional) The name of the image.
 
 * `owner` - (Optional) The owner (UUID) of the image.
+
+* `properties` - (Optional) a map of key/value pairs to match an image with.
+    All specified properties must be matched.
 
 * `size_min` - (Optional) The minimum size (in bytes) of the image to return.
 
@@ -61,8 +68,9 @@ location of the image or the path to retrieve it.
 * `metadata` - The metadata associated with the image.
    Image metadata allow for meaningfully define the image properties
    and tags. See http://docs.openstack.org/developer/glance/metadefs-concepts.html.
-* `min_disk_gb`: The minimum amount of disk space required to use the image.
-* `min_ram_mb`: The minimum amount of ram required to use the image.
+* `min_disk_gb` - The minimum amount of disk space required to use the image.
+* `min_ram_mb` - The minimum amount of ram required to use the image.
+* `properties` - Freeform information about the image.
 * `protected` - Whether or not the image is protected.
 * `schema` - The path to the JSON-schema that represent
    the image or image
