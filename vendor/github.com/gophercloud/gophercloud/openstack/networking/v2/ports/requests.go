@@ -120,7 +120,7 @@ type UpdateOpts struct {
 	DeviceID            string        `json:"device_id,omitempty"`
 	DeviceOwner         string        `json:"device_owner,omitempty"`
 	SecurityGroups      []string      `json:"security_groups"`
-	AllowedAddressPairs []AddressPair `json:"allowed_address_pairs"`
+	AllowedAddressPairs []AddressPair `json:"allowed_address_pairs,omitempty"`
 }
 
 // ToPortUpdateMap casts an UpdateOpts struct to a map.
