@@ -267,9 +267,10 @@ func resourceLoadBalancerV2Delete(d *schema.ResourceData, meta interface{}) erro
 
 func resourceLoadBalancerV2SecurityGroups(networkingClient *gophercloud.ServiceClient, vipPortID string, d *schema.ResourceData) error {
 	if vipPortID != "" {
-		if _, ok := d.GetOk("security_group_ids"); ok {
+		if v, ok := d.GetOk("security_group_ids"); ok {
+			securityGroups := resourcePortSecurityGroupsV2(v.(*schema.Set))
 			updateOpts := ports.UpdateOpts{
-				SecurityGroups: resourcePortSecurityGroupsV2(d),
+				SecurityGroups: &securityGroups,
 			}
 
 			log.Printf("[DEBUG] Adding security groups to loadbalancer "+

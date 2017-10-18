@@ -74,9 +74,13 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
+			},
+			"no_security_groups": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: false,
 			},
 			"device_id": &schema.Schema{
 				Type:     schema.TypeString,
@@ -105,7 +109,6 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 				Set:      allowedAddressPairsHash,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -131,6 +134,12 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"all_security_group_ids": &schema.Schema{
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
 		},
 	}
 }
@@ -142,6 +151,16 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	var securityGroups []string
+	v := d.Get("security_group_ids")
+	securityGroups = resourcePortSecurityGroupsV2(v.(*schema.Set))
+	noSecurityGroups := d.Get("no_security_groups").(bool)
+
+	// Check and make sure an invalid security group configuration wasn't given.
+	if noSecurityGroups && len(securityGroups) > 0 {
+		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set")
+	}
+
 	createOpts := PortCreateOpts{
 		ports.CreateOpts{
 			Name:                d.Get("name").(string),
@@ -150,12 +169,22 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 			MACAddress:          d.Get("mac_address").(string),
 			TenantID:            d.Get("tenant_id").(string),
 			DeviceOwner:         d.Get("device_owner").(string),
-			SecurityGroups:      resourcePortSecurityGroupsV2(d),
 			DeviceID:            d.Get("device_id").(string),
 			FixedIPs:            resourcePortFixedIpsV2(d),
 			AllowedAddressPairs: resourceAllowedAddressPairsV2(d),
 		},
 		MapValueSpecs(d),
+	}
+
+	if noSecurityGroups {
+		securityGroups = []string{}
+		createOpts.SecurityGroups = &securityGroups
+	}
+
+	// Only set SecurityGroups if one was specified.
+	// Otherwise this would mimic the no_security_groups action.
+	if len(securityGroups) > 0 {
+		createOpts.SecurityGroups = &securityGroups
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -202,7 +231,6 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	d.Set("mac_address", p.MACAddress)
 	d.Set("tenant_id", p.TenantID)
 	d.Set("device_owner", p.DeviceOwner)
-	d.Set("security_group_ids", p.SecurityGroups)
 	d.Set("device_id", p.DeviceID)
 
 	// Create a slice of all returned Fixed IPs.
@@ -213,6 +241,11 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 		ips = append(ips, ipObject.IPAddress)
 	}
 	d.Set("all_fixed_ips", ips)
+
+	// Set all security groups.
+	// This can be different from what the user specified since
+	// the port can have the "default" group automatically applied.
+	d.Set("all_security_group_ids", p.SecurityGroups)
 
 	// Convert AllowedAddressPairs to list of map
 	var pairs []map[string]interface{}
@@ -236,40 +269,71 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	// security_group_ids and allowed_address_pairs are able to send empty arrays
-	// to denote the removal of each. But their default zero-value is translated
-	// to "null", which has been reported to cause problems in vendor-modified
-	// OpenStack clouds. Therefore, we must set them in each request update.
-	updateOpts := ports.UpdateOpts{
-		AllowedAddressPairs: resourceAllowedAddressPairsV2(d),
-		SecurityGroups:      resourcePortSecurityGroupsV2(d),
+	v := d.Get("security_group_ids").(*schema.Set)
+	securityGroups := resourcePortSecurityGroupsV2(v)
+	noSecurityGroups := d.Get("no_security_groups").(bool)
+
+	// Check and make sure an invalid security group configuration wasn't given.
+	if noSecurityGroups && len(securityGroups) > 0 {
+		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set")
+	}
+
+	var hasChange bool
+	var updateOpts ports.UpdateOpts
+
+	if d.HasChange("allowed_address_pairs") {
+		hasChange = true
+		aap := resourceAllowedAddressPairsV2(d)
+		updateOpts.AllowedAddressPairs = &aap
+	}
+
+	if d.HasChange("no_security_groups") {
+		if noSecurityGroups {
+			hasChange = true
+			v := []string{}
+			updateOpts.SecurityGroups = &v
+		}
+	}
+
+	if d.HasChange("security_group_ids") {
+		hasChange = true
+		sgs := d.Get("security_group_ids").(*schema.Set)
+		securityGroups := resourcePortSecurityGroupsV2(sgs)
+		updateOpts.SecurityGroups = &securityGroups
 	}
 
 	if d.HasChange("name") {
+		hasChange = true
 		updateOpts.Name = d.Get("name").(string)
 	}
 
 	if d.HasChange("admin_state_up") {
+		hasChange = true
 		updateOpts.AdminStateUp = resourcePortAdminStateUpV2(d)
 	}
 
 	if d.HasChange("device_owner") {
+		hasChange = true
 		updateOpts.DeviceOwner = d.Get("device_owner").(string)
 	}
 
 	if d.HasChange("device_id") {
+		hasChange = true
 		updateOpts.DeviceID = d.Get("device_id").(string)
 	}
 
 	if d.HasChange("fixed_ip") {
+		hasChange = true
 		updateOpts.FixedIPs = resourcePortFixedIpsV2(d)
 	}
 
-	log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), updateOpts)
+	if hasChange {
+		log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), updateOpts)
 
-	_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
-	if err != nil {
-		return fmt.Errorf("Error updating OpenStack Neutron Network: %s", err)
+		_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenStack Neutron Network: %s", err)
+		}
 	}
 
 	return resourceNetworkingPortV2Read(d, meta)
@@ -300,13 +364,12 @@ func resourceNetworkingPortV2Delete(d *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-func resourcePortSecurityGroupsV2(d *schema.ResourceData) []string {
-	rawSecurityGroups := d.Get("security_group_ids").(*schema.Set)
-	groups := make([]string, rawSecurityGroups.Len())
-	for i, raw := range rawSecurityGroups.List() {
-		groups[i] = raw.(string)
+func resourcePortSecurityGroupsV2(v *schema.Set) []string {
+	var securityGroups []string
+	for _, v := range v.List() {
+		securityGroups = append(securityGroups, v.(string))
 	}
-	return groups
+	return securityGroups
 }
 
 func resourcePortFixedIpsV2(d *schema.ResourceData) interface{} {
