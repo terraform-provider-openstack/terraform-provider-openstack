@@ -1,11 +1,18 @@
 ## 0.2.3 (Unreleased)
 
+BACKWARDS INCOMPATIBILITIES / NOTES:
+
+* The `openstack_networking_port_v2` resource had a significant update to how it handles security groups. If you have not explicitly defined security groups in the port resource, any security groups which were automatically applied by OpenStack (such as the `default` security group) will be removed upon the next apply. To prevent this from happening, add the ID of the security groups to the `security_group_ids` argument. If you are already explicitly specifying security groups, you should see no change in behavior.
+
 IMPROVEMENTS
 
  * `openstack_networking_router_interface_v2` will now set `subnet_id` when importing [GH-119]
  * `openstack_networking_router_route_v2` can now be imported [GH-120]
  * `openstack_images_image_v2` resource and data source now supports reading and setting properties [GH-113]
 
+BUG FIXES
+
+  * `openstack_networking_port_v2`: Fixed issues with how security groups and allowed address pairs are applied and updated [GH-114].
 
 ## 0.2.2 (September 15, 2017)
 
