@@ -1,4 +1,4 @@
-## 0.2.3 (Unreleased)
+## 0.3.0 (Unreleased)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
