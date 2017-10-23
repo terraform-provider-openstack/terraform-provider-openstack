@@ -80,6 +80,13 @@ func dataSourceImagesImageV2() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"error_on_empty": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+				ForceNew: true,
+			},
+
 			"properties": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -209,11 +216,16 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if len(allImages) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
-			"Please change your search criteria and try again.")
-	}
+		error_on_empty := d.Get("error_on_empty").(bool)
+		log.Printf("[DEBUG] No results found and `error_on_empty` is set to: %t", error_on_empty)
 
-	if len(allImages) > 1 {
+		if error_on_empty {
+			return fmt.Errorf("Your query returned no results. " +
+				"Please change your search criteria and try again.")
+		} else {
+			image = nullImage()
+		}
+	} else if len(allImages) > 1 {
 		recent := d.Get("most_recent").(bool)
 		log.Printf("[DEBUG] Multiple results found and `most_recent` is set to: %t", recent)
 		if recent {
@@ -280,4 +292,10 @@ func dataSourceImagesImageV2SortDirection(v interface{}, k string) (ws []string,
 		errors = append(errors, err)
 	}
 	return
+}
+
+func nullImage() images.Image {
+
+	image := images.Image{ID: "0"} // If ID value of resource is blank, then the resource will be destroyed by SetId()
+	return image
 }
