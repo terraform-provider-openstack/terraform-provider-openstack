@@ -1,4 +1,4 @@
-## 0.3.0 (Unreleased)
+## 0.3.0 (October 23, 2017)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
@@ -6,13 +6,13 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 IMPROVEMENTS
 
- * `openstack_networking_router_interface_v2` will now set `subnet_id` when importing [GH-119]
- * `openstack_networking_router_route_v2` can now be imported [GH-120]
- * `openstack_images_image_v2` resource and data source now supports reading and setting properties [GH-113]
+ * `openstack_networking_router_interface_v2` will now set `subnet_id` when importing ([#119](https://github.com/terraform-providers/terraform-provider-openstack/issues/119))
+ * `openstack_networking_router_route_v2` can now be imported ([#120](https://github.com/terraform-providers/terraform-provider-openstack/issues/120))
+ * `openstack_images_image_v2` resource and data source now supports reading and setting properties ([#113](https://github.com/terraform-providers/terraform-provider-openstack/issues/113))
 
 BUG FIXES
 
-  * `openstack_networking_port_v2`: Fixed issues with how security groups and allowed address pairs are applied and updated [GH-114].
+  * `openstack_networking_port_v2`: Fixed issues with how security groups and allowed address pairs are applied and updated [[#114](https://github.com/terraform-providers/terraform-provider-openstack/issues/114)].
 
 ## 0.2.2 (September 15, 2017)
 
