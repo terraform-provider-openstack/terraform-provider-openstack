@@ -73,15 +73,17 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				},
 			},
 			"gateway_ip": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: false,
-				Computed: true,
+				Type:          schema.TypeString,
+				ConflictsWith: []string{"no_gateway"},
+				Optional:      true,
+				ForceNew:      false,
+				Computed:      true,
 			},
 			"no_gateway": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: false,
+				Type:          schema.TypeBool,
+				ConflictsWith: []string{"gateway_ip"},
+				Optional:      true,
+				ForceNew:      false,
 			},
 			"ip_version": &schema.Schema{
 				Type:     schema.TypeInt,
@@ -149,18 +151,12 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 		MapValueSpecs(d),
 	}
 
-	noGateway := d.Get("no_gateway").(bool)
-	gatewayIP := d.Get("gateway_ip").(string)
-
-	if gatewayIP != "" && noGateway {
-		return fmt.Errorf("Both gateway_ip and no_gateway cannot be set")
-	}
-
-	if gatewayIP != "" {
+	if v, ok := d.GetOk("gateway_ip"); ok {
+		gatewayIP := v.(string)
 		createOpts.GatewayIP = &gatewayIP
 	}
 
-	if noGateway {
+	if _, ok := d.GetOk("no_gateway"); ok {
 		disableGateway := ""
 		createOpts.GatewayIP = &disableGateway
 	}
