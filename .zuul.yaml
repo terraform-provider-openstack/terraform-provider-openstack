@@ -2,11 +2,11 @@
     name: theopenlab/terraform-provider-openstack
     check:
       jobs:
-        - terraform-openstack-unittest
-        - terraform-openstack-acctest
+        - terraform-provider-openstack-unittest
+        - terraform-provider-openstack-acceptance-test
     recheck-mitaka:
       jobs:
-        - terraform-openstack-acctest-mitaka
+        - terraform-provider-openstack-acceptance-test-mitaka
     recheck-pike:
       jobs:
-        - terraform-openstack-acctest-pike
+        - terraform-provider-openstack-acceptance-test-pike
