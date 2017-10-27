@@ -1,4 +1,9 @@
 ## 0.3.1 (Unreleased)
+
+FEATURES;
+
+* __New Data Source:__ `openstack_networking_subnet_v2` [GH-135]
+
 ## 0.3.0 (October 23, 2017)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
