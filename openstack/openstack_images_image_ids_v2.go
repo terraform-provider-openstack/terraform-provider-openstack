@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-
 func dataSourceImagesImageIdsV2() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceImagesImageIdsV2Read,
@@ -198,7 +197,7 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 
 	searchParams := dataSourceImagesImageIdsV2SearchParams(d)
 
-	d.SetId(fmt.Sprintf("%d", hashcode.String(strings.Join(searchParams,","))))
+	d.SetId(fmt.Sprintf("%d", hashcode.String(strings.Join(searchParams, ","))))
 	d.Set("ids", imageIds)
 
 	return nil
