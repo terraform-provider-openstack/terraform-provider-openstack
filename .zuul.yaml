@@ -1,0 +1,12 @@
+- project:
+    name: theopenlab/terraform-provider-openstack
+    check:
+      jobs:
+        - terraform-openstack-unittest
+        - terraform-openstack-acctest
+    recheck-mitaka:
+      jobs:
+        - terraform-openstack-acctest-mitaka
+    recheck-pike:
+      jobs:
+        - terraform-openstack-acctest-pike
