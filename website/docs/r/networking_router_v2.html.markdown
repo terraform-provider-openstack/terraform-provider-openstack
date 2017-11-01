@@ -44,6 +44,11 @@ The following arguments are supported:
     instances or load balancers will be using floating IPs. Changing this
     updates the `external_gateway` of an existing router.
 
+* `enable_snat` - (Optional) Enable Source NAT for the router.
+    (must be "true" or "false" if provided). An `external_gateway` has to be 
+    set in order to set the `enable_snat` property. Changing this
+    updates the `enable_snat` of an existing router.
+
 * `tenant_id` - (Optional) The owner of the floating IP. Required if admin wants
     to create a router for another tenant. Changing this creates a new router.
 
@@ -58,6 +63,7 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
 * `external_gateway` - See Argument Reference above.
+* `enable_snat` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
 * `value_specs` - See Argument Reference above.
 

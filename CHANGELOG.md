@@ -1,4 +1,13 @@
 ## 0.3.1 (Unreleased)
+
+FEATURES
+
+* __New Data Source:__ `openstack_networking_subnet_v2` [GH-135]
+
+IMPROVEMENTS
+
+* `openstack_networking_router_v2`: Added `enable_snat` argument [GH-140]
+
 ## 0.3.0 (October 23, 2017)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
