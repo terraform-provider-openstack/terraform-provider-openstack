@@ -255,8 +255,8 @@
 		{
 			"checksumSHA1": "Zcapl92yLsRGDnDfmD5BMZrU0i8=",
 			"path": "github.com/gophercloud/gophercloud",
-			"revision": "c7551a666c4fee120cc314dce91ba3d0663a86f3",
-			"revisionTime": "2017-10-29T05:30:20Z"
+			"revision": "e7fa81ec4cbb506026fa90fe7deeb9b7548a0728",
+			"revisionTime": "2017-11-01T04:49:27Z"
 		},
 		{
 			"checksumSHA1": "1qj5kmj/tNZEu92NWXjxMawBg0w=",
@@ -529,10 +529,22 @@
 			"revisionTime": "2017-05-24T02:11:01Z"
 		},
 		{
+			"checksumSHA1": "Q9VHGSztw2B4PmN4kyvY9TcJD6c=",
+			"path": "github.com/gophercloud/gophercloud/openstack/objectstorage/v1/accounts",
+			"revision": "e7fa81ec4cbb506026fa90fe7deeb9b7548a0728",
+			"revisionTime": "2017-11-01T04:49:27Z"
+		},
+		{
 			"checksumSHA1": "1lwXcRrM5A7iCfekbn3bpfNLe3g=",
 			"path": "github.com/gophercloud/gophercloud/openstack/objectstorage/v1/containers",
 			"revision": "0f64da0e36de86a0ca1a8f2fc1b0570a0d3f7504",
 			"revisionTime": "2017-03-10T01:59:53Z"
+		},
+		{
+			"checksumSHA1": "F1gaBPZj2MGwEF7u8GARRa6XlvQ=",
+			"path": "github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects",
+			"revision": "e7fa81ec4cbb506026fa90fe7deeb9b7548a0728",
+			"revisionTime": "2017-11-01T04:49:27Z"
 		},
 		{
 			"checksumSHA1": "roxPPVwS2CjJhf0CApHNQxAX7EA=",
