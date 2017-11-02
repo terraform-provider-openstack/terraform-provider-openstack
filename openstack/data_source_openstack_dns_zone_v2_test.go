@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
+
+var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
 
 func TestAccOpenStackDNSZoneV2DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -21,7 +24,7 @@ func TestAccOpenStackDNSZoneV2DataSource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSZoneV2DataSourceID("data.openstack_dns_zone_v2.z1"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_dns_zone_v2.z1", "name", "terraform-dns-zone-v2-test.com."),
+						"data.openstack_dns_zone_v2.z1", "name", zoneName),
 					resource.TestCheckResourceAttr(
 						"data.openstack_dns_zone_v2.z1", "type", "PRIMARY"),
 					resource.TestCheckResourceAttr(
@@ -47,14 +50,13 @@ func testAccCheckDNSZoneV2DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-const testAccOpenStackDNSZoneV2DataSource_zone = `
+var testAccOpenStackDNSZoneV2DataSource_zone = fmt.Sprintf(`
 resource "openstack_dns_zone_v2" "z1" {
-        name = "terraform-dns-zone-v2-test.com."
-        email = "terraform-dns-zone-v2-test-name@example.com"
-        type = "PRIMARY"
-        ttl = 7200
-}
-`
+  name = "%s"
+  email = "terraform-dns-zone-v2-test-name@example.com"
+  type = "PRIMARY"
+  ttl = 7200
+}`, zoneName)
 
 var testAccOpenStackDNSZoneV2DataSource_basic = fmt.Sprintf(`
 %s
