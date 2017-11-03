@@ -3,6 +3,7 @@
 FEATURES
 
 * __New Data Source:__ `openstack_networking_subnet_v2` [GH-135]
+* __New Data Source:__ `openstack_dns_zone_v2` [GH-145]
 
 IMPROVEMENTS
 
