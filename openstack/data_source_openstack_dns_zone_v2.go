@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -181,9 +182,9 @@ func dataSourceDNSZoneV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("serial", zone.Serial)
 
 	// time.Times
-	d.Set("created_at", zone.CreatedAt.String())
-	d.Set("updated_at", zone.UpdatedAt.String())
-	d.Set("transferred_at", zone.TransferredAt.String())
+	d.Set("created_at", zone.CreatedAt.Format(time.RFC3339))
+	d.Set("updated_at", zone.UpdatedAt.Format(time.RFC3339))
+	d.Set("transferred_at", zone.TransferredAt.Format(time.RFC3339))
 
 	// maps
 	err = d.Set("attributes", zone.Attributes)
