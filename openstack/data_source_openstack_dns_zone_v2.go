@@ -186,7 +186,11 @@ func dataSourceDNSZoneV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("transferred_at", zone.TransferredAt.String())
 
 	// maps
-	d.Set("attributes", zone.Attributes)
+	err = d.Set("attributes", zone.Attributes)
+	if err != nil {
+		log.Printf("[DEBUG] Unable to set attributes: %s", err)
+		return err
+	}
 
 	// slices
 	err = d.Set("masters", zone.Masters)
