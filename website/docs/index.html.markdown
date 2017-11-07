@@ -103,6 +103,9 @@ The following arguments are supported:
   Finally, set `auth_url` as the location of the Swift service. Note that this
   will only work when used with the OpenStack Object Storage resources.
 
+* `use_octavia` - (Optional) If set to `true`, API requests will go the Load Balancer
+  service (Octavia) instead of the Networking service (Neutron).
+
 ## Additional Logging
 
 This provider has the ability to log all HTTP requests and responses between
