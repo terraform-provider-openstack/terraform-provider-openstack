@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
@@ -240,4 +241,11 @@ func waitForLBV2viaPool(networkingClient *gophercloud.ServiceClient, id string, 
 
 	// got a pool but no LB - this is wrong
 	return fmt.Errorf("No Load Balancer on pool %s", id)
+}
+
+func chooseLBV2Client(d *schema.ResourceData, config *Config) (*gophercloud.ServiceClient, error) {
+	if config.useOctavia {
+		return config.loadBalancerV2Client(GetRegion(d, config))
+	}
+	return config.networkingV2Client(GetRegion(d, config))
 }

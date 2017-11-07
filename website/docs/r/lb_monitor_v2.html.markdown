@@ -30,7 +30,7 @@ The following arguments are supported:
     A Networking client is needed to create an . If omitted, the
     `region` argument of the provider is used. Changing this creates a new
     monitor.
-    
+
 * `pool_id` - (Required) The id of the pool that this monitor will be assigned to.
 
 * `name` - (Optional) The Name of the Monitor.
@@ -66,7 +66,6 @@ The following arguments are supported:
 
 * `admin_state_up` - (Optional) The administrative state of the monitor.
     A valid value is true (UP) or false (DOWN).
-
 
 ## Attributes Reference
 

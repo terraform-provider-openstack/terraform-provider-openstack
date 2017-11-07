@@ -32,6 +32,7 @@ type Config struct {
 	Token            string
 	Username         string
 	UserID           string
+	useOctavia       bool
 
 	OsClient *gophercloud.ProviderClient
 }
@@ -207,6 +208,13 @@ func (c *Config) objectStorageV1Client(region string) (*gophercloud.ServiceClien
 	}
 
 	return openstack.NewObjectStorageV1(c.OsClient, gophercloud.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) loadBalancerV2Client(region string) (*gophercloud.ServiceClient, error) {
+	return openstack.NewLoadBalancerV2(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType(),
 	})
