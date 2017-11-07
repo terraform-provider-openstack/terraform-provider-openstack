@@ -13,7 +13,7 @@ var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
 
 func TestAccOpenStackDNSZoneV2DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheckDNS(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
