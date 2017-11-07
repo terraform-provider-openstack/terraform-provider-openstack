@@ -1,5 +1,9 @@
 ## 0.3.1 (Unreleased)
 
+BACKWARDS INCOMPATIBILITIES / NOTES:
+
+* If your OpenStack cloud supports the Octavia Load Balancing service, you can now use it by setting the provider-level `use_octavia` argument to `true`. The `openstack_networking_lb_*_v2` resources will then seamlessly use Octavia.
+
 FEATURES
 
 * __New Data Source:__ `openstack_networking_subnet_v2` [GH-135]
@@ -8,6 +12,7 @@ FEATURES
 IMPROVEMENTS
 
 * `openstack_networking_router_v2`: Added `enable_snat` argument [GH-140]
+* Added provider-level option of `use_octavia` to use the Octavia load balancing service [GH-149]
 
 ## 0.3.0 (October 23, 2017)
 
