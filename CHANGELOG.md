@@ -2,7 +2,7 @@
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
-* If your OpenStack cloud supports the Octavia Load Balancing service, you can now use it by setting the provider-level `use_octavia` argument to `true`. The `openstack_networking_lb_*_v2` resources will then seamlessly use Octavia.
+* If your OpenStack cloud supports the Octavia Load Balancing service, you can now use it by setting the provider-level `use_octavia` argument to `true`. The `openstack_lb_*_v2` resources will then seamlessly use Octavia.
 
 FEATURES
 
