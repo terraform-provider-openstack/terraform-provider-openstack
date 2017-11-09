@@ -139,9 +139,17 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("OS_SWAUTH", ""),
 				Description: descriptions["swauth"],
 			},
+
+			"use_octavia": &schema.Schema{
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_USE_OCTAVIA", ""),
+				Description: descriptions["use_octavia"],
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
+			"openstack_dns_zone_v2":            dataSourceDNSZoneV2(),
 			"openstack_images_image_v2":        dataSourceImagesImageV2(),
 			"openstack_networking_network_v2":  dataSourceNetworkingNetworkV2(),
 			"openstack_networking_subnet_v2":   dataSourceNetworkingSubnetV2(),
@@ -231,6 +239,9 @@ func init() {
 
 		"swauth": "Use Swift's authentication system instead of Keystone. Only used for\n" +
 			"interaction with Swift.",
+
+		"use_octavia": "If set to `true`, API requests will go the Load Balancer\n" +
+			"service (Octavia) instead of the Networking service (Neutron).",
 	}
 }
 
@@ -252,6 +263,7 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		TenantName:       d.Get("tenant_name").(string),
 		Username:         d.Get("user_name").(string),
 		UserID:           d.Get("user_id").(string),
+		useOctavia:       d.Get("use_octavia").(bool),
 	}
 
 	if err := config.LoadAndValidate(); err != nil {

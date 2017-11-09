@@ -259,10 +259,10 @@
 			"revisionTime": "2017-10-29T05:30:20Z"
 		},
 		{
-			"checksumSHA1": "0rCdHaLp8s8+UK/Uk/7E3qsLtPI=",
+			"checksumSHA1": "1qj5kmj/tNZEu92NWXjxMawBg0w=",
 			"path": "github.com/gophercloud/gophercloud/openstack",
-			"revision": "c7551a666c4fee120cc314dce91ba3d0663a86f3",
-			"revisionTime": "2017-10-29T05:30:20Z"
+			"revision": "754e57e7867bfa48062ff2a237caad538085700a",
+			"revisionTime": "2017-11-03T04:02:05Z"
 		},
 		{
 			"checksumSHA1": "f2hdkOhYmmO2ljNtr+OThK8VAEI=",

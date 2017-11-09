@@ -1,12 +1,19 @@
-## 0.3.1 (Unreleased)
+## 1.0.1 (Unreleased)
+## 1.0.0 (November 08, 2017)
+
+BACKWARDS INCOMPATIBILITIES / NOTES:
+
+* If your OpenStack cloud supports the Octavia Load Balancing service, you can now use it by setting the provider-level `use_octavia` argument to `true`. The `openstack_lb_*_v2` resources will then seamlessly use Octavia.
 
 FEATURES
 
-* __New Data Source:__ `openstack_networking_subnet_v2` [GH-135]
+* __New Data Source:__ `openstack_networking_subnet_v2` ([#135](https://github.com/terraform-providers/terraform-provider-openstack/issues/135))
+* __New Data Source:__ `openstack_dns_zone_v2` ([#145](https://github.com/terraform-providers/terraform-provider-openstack/issues/145))
 
 IMPROVEMENTS
 
-* `openstack_networking_router_v2`: Added `enable_snat` argument [GH-140]
+* `openstack_networking_router_v2`: Added `enable_snat` argument ([#140](https://github.com/terraform-providers/terraform-provider-openstack/issues/140))
+* Added provider-level option of `use_octavia` to use the Octavia load balancing service ([#149](https://github.com/terraform-providers/terraform-provider-openstack/issues/149))
 
 ## 0.3.0 (October 23, 2017)
 
