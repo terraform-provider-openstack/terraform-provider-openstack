@@ -11,6 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/swauth"
+	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/hashicorp/terraform/helper/pathorcontents"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -19,6 +20,7 @@ type Config struct {
 	CACertFile       string
 	ClientCertFile   string
 	ClientKeyFile    string
+	Cloud            string
 	DomainID         string
 	DomainName       string
 	EndpointType     string
@@ -38,6 +40,11 @@ type Config struct {
 }
 
 func (c *Config) LoadAndValidate() error {
+	// Make sure at least one of auth_url or cloud was specified.
+	if c.IdentityEndpoint == "" && c.Cloud == "" {
+		return fmt.Errorf("One of 'auth_url' or 'cloud' must be specified")
+	}
+
 	validEndpoint := false
 	validEndpoints := []string{
 		"internal", "internalURL",
@@ -56,16 +63,31 @@ func (c *Config) LoadAndValidate() error {
 		return fmt.Errorf("Invalid endpoint type provided")
 	}
 
-	ao := gophercloud.AuthOptions{
-		DomainID:         c.DomainID,
-		DomainName:       c.DomainName,
-		IdentityEndpoint: c.IdentityEndpoint,
-		Password:         c.Password,
-		TenantID:         c.TenantID,
-		TenantName:       c.TenantName,
-		TokenID:          c.Token,
-		Username:         c.Username,
-		UserID:           c.UserID,
+	ao := &gophercloud.AuthOptions{}
+
+	// If a cloud entry was given, base AuthOptions on a clouds.yaml file.
+	if c.Cloud != "" {
+		clientOpts := &clientconfig.ClientOpts{
+			Cloud: c.Cloud,
+		}
+
+		var err error
+		ao, err = clientconfig.AuthOptions(clientOpts)
+		if err != nil {
+			return err
+		}
+	} else {
+		ao = &gophercloud.AuthOptions{
+			DomainID:         c.DomainID,
+			DomainName:       c.DomainName,
+			IdentityEndpoint: c.IdentityEndpoint,
+			Password:         c.Password,
+			TenantID:         c.TenantID,
+			TenantName:       c.TenantName,
+			TokenID:          c.Token,
+			Username:         c.Username,
+			UserID:           c.UserID,
+		}
 	}
 
 	client, err := openstack.NewClient(ao.IdentityEndpoint)
@@ -127,7 +149,7 @@ func (c *Config) LoadAndValidate() error {
 
 	// If using Swift Authentication, there's no need to validate authentication normally.
 	if !c.Swauth {
-		err = openstack.Authenticate(client, ao)
+		err = openstack.Authenticate(client, *ao)
 		if err != nil {
 			return err
 		}

@@ -36,8 +36,14 @@ resource "openstack_compute_instance_v2" "test-server" {
 
 The following arguments are supported:
 
-* `auth_url` - (Required) The Identity authentication URL. If omitted, the
-  `OS_AUTH_URL` environment variable is used.
+* `auth_url` - (Optional; required if `cloud` is not specified) The Identity
+  authentication URL. If omitted, the `OS_AUTH_URL` environment variable is used.
+
+* `cloud` - (Optional; required if `auth_url` is not specified) An entry in a
+  `clouds.yaml` file. See the OpenStack `os-client-config`
+  [documentation](https://docs.openstack.org/os-client-config/latest/user/configuration.html)
+  for more information about `clouds.yaml` files. If omitted, the `OS_CLOUD`
+  environment variable is used.
 
 * `region` - (Optional) The region of the OpenStack cloud to use. If omitted,
   the `OS_REGION_NAME` environment variable is used. If `OS_REGION_NAME` is
