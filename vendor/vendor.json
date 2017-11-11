@@ -553,6 +553,12 @@
 			"revisionTime": "2017-03-10T01:59:53Z"
 		},
 		{
+			"checksumSHA1": "osQsRGKh9IjGBc3xJHaUC/H2t7o=",
+			"path": "github.com/gophercloud/utils/openstack/clientconfig",
+			"revision": "e1c757960427fd592fd76cdabcaba24741f02f4b",
+			"revisionTime": "2017-11-17T02:51:11Z"
+		},
+		{
 			"checksumSHA1": "cdOCt0Yb+hdErz8NAQqayxPmRsY=",
 			"path": "github.com/hashicorp/errwrap",
 			"revision": "7554cd9344cec97297fa6649b055a8c98c2a1e55"
@@ -974,6 +980,12 @@
 			"path": "golang.org/x/net/html/atom",
 			"revision": "1c05540f6879653db88113bc4a2b70aec4bd491f",
 			"revisionTime": "2017-08-04T00:04:37Z"
+		},
+		{
+			"checksumSHA1": "RDJpJQwkF012L6m/2BJizyOksNw=",
+			"path": "gopkg.in/yaml.v2",
+			"revision": "eb3733d160e74a9c7e442f435eb3bea458e1d19f",
+			"revisionTime": "2017-08-12T16:00:11Z"
 		},
 		{
 			"checksumSHA1": "wICWAGQfZcHD2y0dHesz9R2YSiw=",
