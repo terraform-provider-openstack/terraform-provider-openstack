@@ -116,7 +116,7 @@ func resourceObjectStorageObjectV1() *schema.Resource {
 				ConflictsWith: []string{"content", "copy_from", "object_manifest"},
 			},
 
-			//Read Only
+			// Read Only
 			"content_length": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -197,7 +197,7 @@ func resourceObjectStorageObjectV1Put(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if !isValid {
-		return fmt.Errorf("Must specify \"source\", \"content\" or \"copy_from\" field")
+		return fmt.Errorf("Must specify \"source\", \"content\", \"copy_from\" or \"object_manifest\" field")
 	}
 
 	if v, ok := d.GetOk("content_disposition"); ok {
@@ -229,7 +229,7 @@ func resourceObjectStorageObjectV1Put(d *schema.ResourceData, meta interface{}) 
 		createOpts.DetectContentType = "true"
 	}
 
-	//this attribute is used to trigger resource updates if the file content is changed
+	// this attribute is used to trigger resource updates if the file content is changed
 	if v, ok := d.GetOk("etag"); ok {
 		createOpts.ETag = v.(string)
 	}
