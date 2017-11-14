@@ -13,6 +13,8 @@ import (
 )
 
 var (
+	OS_DB_DATASTORE_VERSION   = os.Getenv("OS_DB_DATASTORE_VERSION")
+	OS_DB_DATASTORE_TYPE      = os.Getenv("OS_DB_DATASTORE_TYPE")
 	OS_DEPRECATED_ENVIRONMENT = os.Getenv("OS_DEPRECATED_ENVIRONMENT")
 	OS_DNS_ENVIRONMENT        = os.Getenv("OS_DNS_ENVIRONMENT")
 	OS_EXTGW_ID               = os.Getenv("OS_EXTGW_ID")
@@ -24,8 +26,6 @@ var (
 	OS_POOL_NAME              = os.Getenv("OS_POOL_NAME")
 	OS_REGION_NAME            = os.Getenv("OS_REGION_NAME")
 	OS_SWIFT_ENVIRONMENT      = os.Getenv("OS_SWIFT_ENVIRONMENT")
-	OS_DATASTORE_VERSION      = os.Getenv("OS_DATASTORE_VERSION")
-	OS_DATASTORE_TYPE         = os.Getenv("OS_DATASTORE_TYPE")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider

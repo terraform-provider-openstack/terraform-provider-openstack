@@ -21,9 +21,9 @@ func TestAccDatabaseInstance_basic(t *testing.T) {
 				Config: testAccDatabaseInstanceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatabaseInstanceExists(
-						"openstack_db_instance.basic", &instance),
+						"openstack_db_instance_v1.basic", &instance),
 					resource.TestCheckResourceAttr(
-						"openstack_db_instance.basic", "name", "basic"),
+						"openstack_db_instance_v1.basic", "name", "basic"),
 				),
 			},
 		},
@@ -42,12 +42,12 @@ func testAccCheckDatabaseInstanceExists(n string, instance *instances.Instance) 
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		databaseInstanceClient, err := config.databaseInstanceClient(OS_REGION_NAME)
+		databaseV1Client, err := config.databaseV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		found, err := instances.Get(databaseInstanceClient, rs.Primary.ID).Extract()
+		found, err := instances.Get(databaseV1Client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -63,7 +63,7 @@ func testAccCheckDatabaseInstanceExists(n string, instance *instances.Instance) 
 }
 
 var testAccDatabaseInstanceBasic = fmt.Sprintf(`
-resource "openstack_db_instance" "basic" {
+resource "openstack_db_instance_v1" "basic" {
   name = "basic"
   datastore {
     version = "%s"
@@ -76,4 +76,4 @@ resource "openstack_db_instance" "basic" {
   size = 10
 
 }
-`, OS_DATASTORE_VERSION, OS_DATASTORE_TYPE, OS_NETWORK_ID)
+`, OS_DB_DATASTORE_VERSION, OS_DB_DATASTORE_TYPE, OS_NETWORK_ID)

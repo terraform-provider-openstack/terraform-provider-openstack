@@ -11,11 +11,11 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func resourceDatabaseInstance() *schema.Resource {
+func resourceDatabaseInstanceV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDatabaseInstanceCreate,
-		Read:   resourceDatabaseInstanceRead,
-		Delete: resourceDatabaseInstanceDelete,
+		Create: resourceDatabaseInstanceV1Create,
+		Read:   resourceDatabaseInstanceV1Read,
+		Delete: resourceDatabaseInstanceV1Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -101,9 +101,9 @@ func resourceDatabaseInstance() *schema.Resource {
 	}
 }
 
-func resourceDatabaseInstanceCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	databaseInstanceClient, err := config.databaseInstanceClient(GetRegion(d, config))
+	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
@@ -141,7 +141,7 @@ func resourceDatabaseInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	createOpts.Networks = networks
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	instance, err := instances.Create(databaseInstanceClient, createOpts).Extract()
+	instance, err := instances.Create(databaseV1Client, createOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error creating cloud database instance: %s", err)
 	}
@@ -155,7 +155,7 @@ func resourceDatabaseInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"BUILD"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    InstanceStateRefreshFunc(databaseInstanceClient, instance.ID),
+		Refresh:    DatabaseInstanceV1StateRefreshFunc(databaseV1Client, instance.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -171,17 +171,17 @@ func resourceDatabaseInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	// Store the ID now
 	d.SetId(instance.ID)
 
-	return resourceDatabaseInstanceRead(d, meta)
+	return resourceDatabaseInstanceV1Read(d, meta)
 }
 
-func resourceDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) error {
+func resourceDatabaseInstanceV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	databaseInstanceClient, err := config.databaseInstanceClient(GetRegion(d, config))
+	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack cloud database client: %s", err)
 	}
 
-	instance, err := instances.Get(databaseInstanceClient, d.Id()).Extract()
+	instance, err := instances.Get(databaseV1Client, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "instance")
 	}
@@ -196,15 +196,15 @@ func resourceDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func resourceDatabaseInstanceDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceDatabaseInstanceV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	databaseInstanceClient, err := config.databaseInstanceClient(GetRegion(d, config))
+	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating RS cloud instance client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting cloud database instance %s", d.Id())
-	err = instances.Delete(databaseInstanceClient, d.Id()).ExtractErr()
+	err = instances.Delete(databaseV1Client, d.Id()).ExtractErr()
 	if err != nil {
 		return fmt.Errorf("Error deleting cloud database instance: %s", err)
 	}
@@ -215,7 +215,7 @@ func resourceDatabaseInstanceDelete(d *schema.ResourceData, meta interface{}) er
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    InstanceStateRefreshFunc(databaseInstanceClient, d.Id()),
+		Refresh:    DatabaseInstanceV1StateRefreshFunc(databaseV1Client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -232,9 +232,9 @@ func resourceDatabaseInstanceDelete(d *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-// InstanceStateRefreshFunc returns a resource.StateRefreshFunc that is used to watch
+// DatabaseInstanceV1StateRefreshFunc returns a resource.StateRefreshFunc that is used to watch
 // an cloud database instance.
-func InstanceStateRefreshFunc(client *gophercloud.ServiceClient, instanceID string) resource.StateRefreshFunc {
+func DatabaseInstanceV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		i, err := instances.Get(client, instanceID).Extract()
 		if err != nil {
