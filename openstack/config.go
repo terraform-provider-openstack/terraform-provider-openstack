@@ -220,7 +220,7 @@ func (c *Config) loadBalancerV2Client(region string) (*gophercloud.ServiceClient
 	})
 }
 
-func (c *Config) databaseInstanceClient(region string) (*gophercloud.ServiceClient, error) {
+func (c *Config) databaseV1Client(region string) (*gophercloud.ServiceClient, error) {
 	return openstack.NewDBV1(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType(),
