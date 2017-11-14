@@ -220,6 +220,13 @@ func (c *Config) loadBalancerV2Client(region string) (*gophercloud.ServiceClient
 	})
 }
 
+func (c *Config) databaseInstanceClient(region string) (*gophercloud.ServiceClient, error) {
+	return openstack.NewDBV1(c.OsClient, gophercloud.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) getEndpointType() gophercloud.Availability {
 	if c.EndpointType == "internal" || c.EndpointType == "internalURL" {
 		return gophercloud.AvailabilityInternal
