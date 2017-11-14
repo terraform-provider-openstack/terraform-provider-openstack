@@ -6,16 +6,29 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
 
+const (
+	deleteAt = "2100-12-31T14:30:59+01:00"
+)
+
+var (
+	fooMD5      = fmt.Sprintf("%x", md5.Sum([]byte("foo")))
+	barMD5      = fmt.Sprintf("%x", md5.Sum([]byte("bar")))
+	foobarMD5   = fmt.Sprintf("%x", md5.Sum([]byte("foobar")))
+	manifestMD5 = fmt.Sprintf("\"%x\"", md5.Sum([]byte(fmt.Sprintf("%s%s", fooMD5, barMD5))))
+)
+
 func TestAccObjectStorageV1Object_basic(t *testing.T) {
-	foomd5 := fmt.Sprintf("%x", md5.Sum([]byte("foo")))
-	foobarmd5 := fmt.Sprintf("%x", md5.Sum([]byte("foobar")))
+	var object objects.GetHeader
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -29,6 +42,9 @@ func TestAccObjectStorageV1Object_basic(t *testing.T) {
 			resource.TestStep{
 				Config: testAccObjectStorageV1Object_basic,
 				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObjectStorageV1ObjectExists(
+						"openstack_objectstorage_object_v1.myfile", &object),
+					testAccCheckObjectStorageV1ObjectDeleteAtMatches(deleteAt, &object),
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_container_v1.container_1", "name", "tf_test_container_1"),
 					resource.TestCheckResourceAttr(
@@ -40,31 +56,29 @@ func TestAccObjectStorageV1Object_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_object_v1.myfile", "content_encoding", "utf8"),
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfile", "delete_at", "2100-12-31T14:30:59+01:00"),
-					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfile", "etag", foomd5),
+						"openstack_objectstorage_object_v1.myfile", "etag", fooMD5),
 				),
 			},
 			resource.TestStep{
-				Config: testAccObjectStorageV1Object_update_content_type,
+				Config: testAccObjectStorageV1Object_updateContentType,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_object_v1.myfile", "content_type", "application/octet-stream"),
 				),
 			},
 			resource.TestStep{
-				Config: testAccObjectStorageV1Object_update_content,
+				Config: testAccObjectStorageV1Object_updateContent,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_object_v1.myfile", "content_type", "application/octet-stream"),
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfile", "etag", foobarmd5),
+						"openstack_objectstorage_object_v1.myfile", "etag", foobarMD5),
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_object_v1.myfile", "content_length", "6"),
 				),
 			},
 			resource.TestStep{
-				Config: testAccObjectStorageV1Object_update_delete,
+				Config: testAccObjectStorageV1Object_updateDeleteAfter,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_object_v1.myfile", "delete_after", "3600"),
@@ -74,9 +88,8 @@ func TestAccObjectStorageV1Object_basic(t *testing.T) {
 	})
 }
 
-func TestAccObjectStorageV1Object_fromsource(t *testing.T) {
+func TestAccObjectStorageV1Object_fromSource(t *testing.T) {
 	content := []byte("foo")
-	foomd5 := fmt.Sprintf("%x", md5.Sum(content))
 	tmpfile, err := ioutil.TempFile("", "tf_test_objectstorage_object")
 	if err != nil {
 		log.Fatal(err)
@@ -100,7 +113,7 @@ func TestAccObjectStorageV1Object_fromsource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: fmt.Sprintf(testAccObjectStorageV1Object_fromsource, tmpfile.Name()),
+				Config: fmt.Sprintf(testAccObjectStorageV1Object_fromSource, tmpfile.Name()),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_container_v1.container_1", "name", "tf_test_container_1"),
@@ -109,15 +122,14 @@ func TestAccObjectStorageV1Object_fromsource(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_object_v1.myfile", "content_length", fmt.Sprintf("%v", len(content))),
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfile", "etag", foomd5),
+						"openstack_objectstorage_object_v1.myfile", "etag", fooMD5),
 				),
 			},
 		},
 	})
 }
 
-func TestAccObjectStorageV1Object_detectcontenttype(t *testing.T) {
-	foomd5 := fmt.Sprintf("%x", md5.Sum([]byte("foo")))
+func TestAccObjectStorageV1Object_detectContentType(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -129,22 +141,21 @@ func TestAccObjectStorageV1Object_detectcontenttype(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccObjectStorageV1Object_detectcontenttype,
+				Config: testAccObjectStorageV1Object_detectContentType,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_container_v1.container_1", "name", "tf_test_container_1"),
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_object_v1.myfile", "content_type", "text/csv"),
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfile", "etag", foomd5),
+						"openstack_objectstorage_object_v1.myfile", "etag", fooMD5),
 				),
 			},
 		},
 	})
 }
 
-func TestAccObjectStorageV1Object_copyfrom(t *testing.T) {
-	foomd5 := fmt.Sprintf("%x", md5.Sum([]byte("foo")))
+func TestAccObjectStorageV1Object_copyFrom(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -159,22 +170,20 @@ func TestAccObjectStorageV1Object_copyfrom(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccObjectStorageV1Object_copyfrom,
+				Config: testAccObjectStorageV1Object_copyFrom,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfilesource", "etag", foomd5),
+						"openstack_objectstorage_object_v1.myfilesource", "etag", fooMD5),
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfilecopied", "etag", foomd5),
+						"openstack_objectstorage_object_v1.myfilecopied", "etag", fooMD5),
 				),
 			},
 		},
 	})
 }
 
-func TestAccObjectStorageV1Object_objectmanifest(t *testing.T) {
-	foomd5 := fmt.Sprintf("%x", md5.Sum([]byte("foo")))
-	barmd5 := fmt.Sprintf("%x", md5.Sum([]byte("bar")))
-	manifestmd5 := fmt.Sprintf("\"%x\"", md5.Sum([]byte(fmt.Sprintf("%s%s", foomd5, barmd5))))
+func TestAccObjectStorageV1Object_objectManifest(t *testing.T) {
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -195,14 +204,14 @@ func TestAccObjectStorageV1Object_objectmanifest(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccObjectStorageV1Object_objectmanifest,
+				Config: testAccObjectStorageV1Object_objectManifest,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfile_part1", "etag", foomd5),
+						"openstack_objectstorage_object_v1.myfile_part1", "etag", fooMD5),
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfile_part2", "etag", barmd5),
+						"openstack_objectstorage_object_v1.myfile_part2", "etag", barMD5),
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfile", "etag", manifestmd5),
+						"openstack_objectstorage_object_v1.myfile", "etag", manifestMD5),
 				),
 			},
 		},
@@ -231,7 +240,55 @@ func testAccCheckObjectStorageV1ObjectDestroy(s *terraform.State, objectname str
 	return nil
 }
 
-const testAccObjectStorageV1Object_basic = `
+func testAccCheckObjectStorageV1ObjectExists(n string, object *objects.GetHeader) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := testAccProvider.Meta().(*Config)
+		objectStorageClient, err := config.objectStorageV1Client(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack object storage client: %s", err)
+		}
+
+		parts := strings.SplitN(rs.Primary.ID, "/", 2)
+		if len(parts) < 2 {
+			return fmt.Errorf("Malformed object name: %s", rs.Primary.ID)
+		}
+
+		found, err := objects.Get(objectStorageClient, parts[0], parts[1], nil).Extract()
+		if err != nil {
+			return err
+		}
+
+		*object = *found
+
+		return nil
+	}
+}
+
+func testAccCheckObjectStorageV1ObjectDeleteAtMatches(expected string, object *objects.GetHeader) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		expectedTime, err := time.Parse(time.RFC3339, expected)
+		if err != nil {
+			return err
+		}
+
+		if !expectedTime.Equal(object.DeleteAt) {
+			return fmt.Errorf("%s and %s do not match", expected, object.DeleteAt)
+		}
+
+		return nil
+	}
+}
+
+var testAccObjectStorageV1Object_basic = fmt.Sprintf(`
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "tf_test_container_1"
   content_type = "text/plain"
@@ -244,10 +301,11 @@ resource "openstack_objectstorage_object_v1" "myfile" {
 
   content_disposition = "foo"
   content_encoding = "utf8"
-  delete_at = "2100-12-31T14:30:59+01:00"
+  delete_at = "%s"
 }
-`
-const testAccObjectStorageV1Object_detectcontenttype = `
+`, deleteAt)
+
+var testAccObjectStorageV1Object_detectContentType = fmt.Sprintf(`
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "tf_test_container_1"
   content_type = "text/plain"
@@ -260,11 +318,11 @@ resource "openstack_objectstorage_object_v1" "myfile" {
   content = "foo"
   content_disposition = "foo"
   content_encoding = "utf8"
-  delete_at = "2100-12-31T14:30:59+01:00"
+  delete_at = "%s"
 }
-`
+`, deleteAt)
 
-const testAccObjectStorageV1Object_update_content_type = `
+var testAccObjectStorageV1Object_updateContentType = fmt.Sprintf(`
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "tf_test_container_1"
   content_type = "text/plain"
@@ -277,12 +335,11 @@ resource "openstack_objectstorage_object_v1" "myfile" {
   content = "foo"
   content_disposition = "foo"
   content_encoding = "utf8"
-  delete_at = "2100-12-31T14:30:59+01:00"
-
+  delete_at = "%s"
 }
-`
+`, deleteAt)
 
-const testAccObjectStorageV1Object_update_delete = `
+const testAccObjectStorageV1Object_updateDeleteAfter = `
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "tf_test_container_1"
   content_type = "text/plain"
@@ -298,7 +355,7 @@ resource "openstack_objectstorage_object_v1" "myfile" {
 }
 `
 
-const testAccObjectStorageV1Object_update_content = `
+const testAccObjectStorageV1Object_updateContent = `
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "tf_test_container_1"
   content_type = "text/plain"
@@ -313,7 +370,7 @@ resource "openstack_objectstorage_object_v1" "myfile" {
 }
 `
 
-const testAccObjectStorageV1Object_fromsource = `
+const testAccObjectStorageV1Object_fromSource = `
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "tf_test_container_1"
 }
@@ -326,7 +383,7 @@ resource "openstack_objectstorage_object_v1" "myfile" {
 }
 `
 
-const testAccObjectStorageV1Object_copyfrom = `
+const testAccObjectStorageV1Object_copyFrom = `
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "tf_test_container_1"
 }
@@ -344,7 +401,7 @@ resource "openstack_objectstorage_object_v1" "myfilecopied" {
 }
 `
 
-const testAccObjectStorageV1Object_objectmanifest = `
+const testAccObjectStorageV1Object_objectManifest = `
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "tf_test_container_1"
 }

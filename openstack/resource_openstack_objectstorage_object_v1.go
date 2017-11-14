@@ -78,9 +78,10 @@ func resourceObjectStorageObjectV1() *schema.Resource {
 			},
 
 			"delete_at": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
+				Type:             schema.TypeString,
+				Computed:         true,
+				Optional:         true,
+				DiffSuppressFunc: suppressEquivilentTimeDiffs,
 			},
 
 			"detect_content_type": {
