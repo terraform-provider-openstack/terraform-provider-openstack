@@ -10,7 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/db/v1/instances"
 )
 
-func TestAccDatabaseInstance_basic(t *testing.T) {
+func TestAccDatabaseV1Instance_basic(t *testing.T) {
 	var instance instances.Instance
 
 	resource.Test(t, resource.TestCase{
@@ -18,9 +18,9 @@ func TestAccDatabaseInstance_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccDatabaseInstanceBasic,
+				Config: testAccDatabaseV1InstanceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDatabaseInstanceExists(
+					testAccCheckDatabaseV1InstanceExists(
 						"openstack_db_instance_v1.basic", &instance),
 					resource.TestCheckResourceAttr(
 						"openstack_db_instance_v1.basic", "name", "basic"),
@@ -30,7 +30,7 @@ func TestAccDatabaseInstance_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckDatabaseInstanceExists(n string, instance *instances.Instance) resource.TestCheckFunc {
+func testAccCheckDatabaseV1InstanceExists(n string, instance *instances.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -62,7 +62,7 @@ func testAccCheckDatabaseInstanceExists(n string, instance *instances.Instance) 
 	}
 }
 
-var testAccDatabaseInstanceBasic = fmt.Sprintf(`
+var testAccDatabaseV1InstanceBasic = fmt.Sprintf(`
 resource "openstack_db_instance_v1" "basic" {
   name = "basic"
   datastore {
