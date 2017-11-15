@@ -1,4 +1,10 @@
 ## 1.0.1 (Unreleased)
+
+FEATURES
+
+* __New Resource:__ `openstack_objectstorage_object_v1` [GH-146]
+
+
 ## 1.0.0 (November 08, 2017)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
