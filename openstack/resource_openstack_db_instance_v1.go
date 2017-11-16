@@ -70,7 +70,7 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 			},
 			"network": {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
