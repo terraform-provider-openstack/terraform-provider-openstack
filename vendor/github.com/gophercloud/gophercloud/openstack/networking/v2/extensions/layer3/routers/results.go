@@ -58,6 +58,9 @@ type Router struct {
 	// identifier other than its own.
 	TenantID string `json:"tenant_id"`
 
+	// AvailabilityZoneHints is The availability zone candidates for the router.
+	AvailabilityZoneHints []string `json:"availability_zone_hints"`
+
 	// Routes are a collection of static routes that the router will host.
 	Routes []Route `json:"routes"`
 }
