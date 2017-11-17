@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/Unknwon/com"
 	"github.com/gophercloud/gophercloud"
@@ -111,4 +112,18 @@ func checkForRetryableError(err error) *resource.RetryError {
 	default:
 		return resource.NonRetryableError(err)
 	}
+}
+
+func suppressEquivilentTimeDiffs(k, old, new string, d *schema.ResourceData) bool {
+	oldTime, err := time.Parse(time.RFC3339, old)
+	if err != nil {
+		return false
+	}
+
+	newTime, err := time.Parse(time.RFC3339, new)
+	if err != nil {
+		return false
+	}
+
+	return oldTime.Equal(newTime)
 }
