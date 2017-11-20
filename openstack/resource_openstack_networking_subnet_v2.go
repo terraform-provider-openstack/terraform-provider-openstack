@@ -83,6 +83,7 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				Type:          schema.TypeBool,
 				ConflictsWith: []string{"gateway_ip"},
 				Optional:      true,
+				Default:       false,
 				ForceNew:      false,
 			},
 			"ip_version": &schema.Schema{
@@ -156,9 +157,10 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 		createOpts.GatewayIP = &gatewayIP
 	}
 
-	if _, ok := d.GetOk("no_gateway"); ok {
-		disableGateway := ""
-		createOpts.GatewayIP = &disableGateway
+	noGateway := d.Get("no_gateway").(bool)
+	if noGateway {
+		gatewayIP := ""
+		createOpts.GatewayIP = &gatewayIP
 	}
 
 	enableDHCP := d.Get("enable_dhcp").(bool)
@@ -210,7 +212,6 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("ip_version", s.IPVersion)
 	d.Set("name", s.Name)
 	d.Set("tenant_id", s.TenantID)
-	d.Set("gateway_ip", s.GatewayIP)
 	d.Set("dns_nameservers", s.DNSNameservers)
 	d.Set("host_routes", s.HostRoutes)
 	d.Set("enable_dhcp", s.EnableDHCP)
@@ -227,6 +228,17 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 	}
 	d.Set("allocation_pools", allocationPools)
 
+	// Set the subnet's Gateway IP.
+	gatewayIP := s.GatewayIP
+	d.Set("gateway_ip", s.GatewayIP)
+
+	// Based on the subnet's Gateway IP, set `no_gateway` accordingly.
+	if gatewayIP == "" {
+		d.Set("no_gateway", true)
+	} else {
+		d.Set("no_gateway", false)
+	}
+
 	d.Set("region", GetRegion(d, config))
 
 	return nil
@@ -239,22 +251,7 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	// Check if both gateway_ip and no_gateway are set
-	if _, ok := d.GetOk("gateway_ip"); ok {
-		noGateway := d.Get("no_gateway").(bool)
-		if noGateway {
-			return fmt.Errorf("Both gateway_ip and no_gateway cannot be set.")
-		}
-	}
-
 	var updateOpts subnets.UpdateOpts
-
-	noGateway := d.Get("no_gateway").(bool)
-	gatewayIP := d.Get("gateway_ip").(string)
-
-	if gatewayIP != "" && noGateway {
-		return fmt.Errorf("Both gateway_ip and no_gateway cannot be set")
-	}
 
 	if d.HasChange("name") {
 		updateOpts.Name = d.Get("name").(string)
