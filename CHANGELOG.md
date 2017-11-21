@@ -4,6 +4,10 @@ FEATURES
 
 * __New Resource:__ `openstack_objectstorage_object_v1` [GH-146]
 
+IMPROVEMENTS
+
+* Better handling of mutually exclusive options `no_gateway` and `gateway_ip` in the `openstack_networking_subnet_v2` resource [GH-136]
+
 
 ## 1.0.0 (November 08, 2017)
 
