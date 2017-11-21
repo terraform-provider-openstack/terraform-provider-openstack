@@ -7,6 +7,7 @@ FEATURES
 IMPROVEMENTS
 
 * Better handling of mutually exclusive options `no_gateway` and `gateway_ip` in the `openstack_networking_subnet_v2` resource [GH-136]
+* Can now authenticate with a `clouds.yaml` file [GH-154]
 
 
 ## 1.0.0 (November 08, 2017)
