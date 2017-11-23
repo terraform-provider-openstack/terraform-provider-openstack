@@ -191,13 +191,13 @@ func getInstanceNetworkInfoNovaNet(
 	allPages, err := tenantnetworks.List(client).AllPages()
 	if err != nil {
 		return nil, fmt.Errorf(
-			"An error occured while querying the Nova API for network information: %s", err)
+			"An error occurred while querying the Nova API for network information: %s", err)
 	}
 
 	networkList, err := tenantnetworks.ExtractNetworks(allPages)
 	if err != nil {
 		return nil, fmt.Errorf(
-			"An error occured while querying the Nova API for network information: %s", err)
+			"An error occurred while querying the Nova API for network information: %s", err)
 	}
 
 	var networkFound bool
