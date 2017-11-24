@@ -496,6 +496,11 @@ resource "openstack_compute_instance_v2" "foo" {
 Neutron Ports are a great feature and provide a lot of functionality. However,
 there are some notes to be aware of when mixing Instances and Ports:
 
+* In OpenStack environments prior to the Kilo release, deleting or recreating
+an Instance will cause the Instance's Port(s) to be deleted. One way of working
+around this is to taint any Port(s) used in Instances which are to be recreated.
+See [here](https://review.openstack.org/#/c/126309/) for further information.
+
 * When attaching an Instance to one or more networks using Ports, place the
 security groups on the Port and not the Instance. If you place the security
 groups on the Instance, the security groups will not be applied upon creation,
