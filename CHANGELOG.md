@@ -3,6 +3,7 @@
 FEATURES
 
 * __New Resource:__ `openstack_objectstorage_object_v1` [GH-146]
+* __New Resource:__ `openstack_db_instance_v1` [GH-155]
 
 IMPROVEMENTS
 
