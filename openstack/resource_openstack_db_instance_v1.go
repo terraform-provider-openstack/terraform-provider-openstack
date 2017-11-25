@@ -212,14 +212,14 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 	createOpts.Databases = dbs
 
 	// user options
-	var users_list users.BatchCreateOpts
+	var UserList users.BatchCreateOpts
 
 	if p, ok := d.GetOk("user"); ok {
 		pV := (p.([]interface{}))[0].(map[string]interface{})
 
 		raw_databases := pV["databases"].(*schema.Set).List()
 
-		users_list = append(users_list, users.CreateOpts{
+		UserList = append(UserList, users.CreateOpts{
 			Name:      pV["name"].(string),
 			Password:  pV["password"].(string),
 			Databases: resourceDBv1GetDatabases(raw_databases),
@@ -227,7 +227,7 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 		})
 	}
 
-	createOpts.Users = users_list
+	createOpts.Users = UserList
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	instance, err := instances.Create(databaseV1Client, createOpts).Extract()
