@@ -53,6 +53,12 @@ The following arguments are supported:
     instance. The network object structure is documented below. Changing this
     creates a new instance.
 
+* `user` - (Optional) An array of username, password, host and databases. The user
+    object structure is documented below.
+
+* `database` - (Optional) An array of database name, charset and collate. The database
+    object structure is documented below.
+
 The `datastore` block supports:
 
 * `type` - (Required) Database engine type to be used in new instance. Changing this
@@ -74,6 +80,30 @@ The `network` block supports:
 * `fixed_ip_v6` - (Optional) Specifies a fixed IPv6 address to be used on this
     network. Changing this creates a new instance.
 
+The `user` block supports:
+
+* `name` - (Optional) Username to be created on new instance. Changing this creates a
+    new instance.
+
+* `password` - (Optional) User's password. Changing this creates a
+    new instance.
+
+* `host` - (Optional) An ip address or % sign indicating what ip addresses can connect with
+    this user credentials. Changing this creates a new instance.
+
+* `databases` - (Optional) A list of databases that user will have access to. If not specified, 
+     user has access to all databases on th einstance. Changing this creates a new instance.
+
+The `database` block supports:
+
+* `name` - (Optional) Database to be created on new instance. Changing this creates a
+    new instance.
+
+* `collate` - (Optional) Database collation. Changing this creates a new instance.
+
+* `charset` - (Optional) Database character set. Changing this creates a
+    new instance.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -89,4 +119,10 @@ The following attributes are exported:
 * `network/fixed_ip_v4` - The Fixed IPv4 address of the Instance on that
     network.
 * `network/fixed_ip_v6` - The Fixed IPv6 address of the Instance on that
-    network.
+* `database/name` - See Argument Reference above.
+* `database/collate` - See Argument Reference above.
+* `database/charset` - See Argument Reference above.
+* `user/name` - See Argument Reference above.
+* `user/password` - See Argument Reference above.
+* `user/databases` - See Argument Reference above.
+* `user/host` - See Argument Reference above.

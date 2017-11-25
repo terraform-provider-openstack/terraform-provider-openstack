@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/db/v1/databases"
 	"github.com/gophercloud/gophercloud/openstack/db/v1/instances"
+	"github.com/gophercloud/gophercloud/openstack/db/v1/users"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -97,6 +99,61 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 					},
 				},
 			},
+			"database": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"charset": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"collate": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+					},
+				},
+			},
+			"user": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"password": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"host": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"databases": &schema.Schema{
+							Type:     schema.TypeSet,
+							Optional: true,
+							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Set:      schema.HashString,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -139,6 +196,38 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 	}
 
 	createOpts.Networks = networks
+
+	var dbs databases.BatchCreateOpts
+
+	if p, ok := d.GetOk("database"); ok {
+		pV := (p.([]interface{}))[0].(map[string]interface{})
+
+		dbs = append(dbs, databases.CreateOpts{
+			Name:    pV["name"].(string),
+			CharSet: pV["charset"].(string),
+			Collate: pV["collate"].(string),
+		})
+	}
+
+	createOpts.Databases = dbs
+
+	// user options
+	var users_list users.BatchCreateOpts
+
+	if p, ok := d.GetOk("user"); ok {
+		pV := (p.([]interface{}))[0].(map[string]interface{})
+
+		raw_databases := pV["databases"].(*schema.Set).List()
+
+		users_list = append(users_list, users.CreateOpts{
+			Name:      pV["name"].(string),
+			Password:  pV["password"].(string),
+			Databases: getDatabases(raw_databases),
+			Host:      pV["host"].(string),
+		})
+	}
+
+	createOpts.Users = users_list
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	instance, err := instances.Create(databaseV1Client, createOpts).Extract()
@@ -250,4 +339,17 @@ func DatabaseInstanceV1StateRefreshFunc(client *gophercloud.ServiceClient, insta
 
 		return i, i.Status, nil
 	}
+}
+
+func getDatabases(v []interface{}) databases.BatchCreateOpts {
+
+	var dbs databases.BatchCreateOpts
+
+	for _, db := range v {
+		dbs = append(dbs, databases.CreateOpts{
+			Name: db.(string),
+		})
+	}
+
+	return dbs
 }
