@@ -222,7 +222,7 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 		users_list = append(users_list, users.CreateOpts{
 			Name:      pV["name"].(string),
 			Password:  pV["password"].(string),
-			Databases: getDatabases(raw_databases),
+			Databases: resourceDBv1GetDatabases(raw_databases),
 			Host:      pV["host"].(string),
 		})
 	}
@@ -341,7 +341,7 @@ func DatabaseInstanceV1StateRefreshFunc(client *gophercloud.ServiceClient, insta
 	}
 }
 
-func getDatabases(v []interface{}) databases.BatchCreateOpts {
+func resourceDBv1GetDatabases(v []interface{}) databases.BatchCreateOpts {
 
 	var dbs databases.BatchCreateOpts
 
