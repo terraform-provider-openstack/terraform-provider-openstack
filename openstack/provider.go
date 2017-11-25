@@ -15,8 +15,8 @@ func Provider() terraform.ResourceProvider {
 		Schema: map[string]*schema.Schema{
 			"auth_url": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_AUTH_URL", nil),
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_AUTH_URL", ""),
 				Description: descriptions["auth_url"],
 			},
 
@@ -146,6 +146,13 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("OS_USE_OCTAVIA", ""),
 				Description: descriptions["use_octavia"],
 			},
+
+			"cloud": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_CLOUD", ""),
+				Description: descriptions["cloud"],
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -168,6 +175,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_compute_floatingip_v2":           resourceComputeFloatingIPV2(),
 			"openstack_compute_floatingip_associate_v2": resourceComputeFloatingIPAssociateV2(),
 			"openstack_compute_volume_attach_v2":        resourceComputeVolumeAttachV2(),
+			"openstack_db_instance_v1":                  resourceDatabaseInstanceV1(),
 			"openstack_dns_recordset_v2":                resourceDNSRecordSetV2(),
 			"openstack_dns_zone_v2":                     resourceDNSZoneV2(),
 			"openstack_fw_firewall_v1":                  resourceFWFirewallV1(),
@@ -243,6 +251,8 @@ func init() {
 
 		"use_octavia": "If set to `true`, API requests will go the Load Balancer\n" +
 			"service (Octavia) instead of the Networking service (Neutron).",
+
+		"cloud": "An entry in a `clouds.yaml` file to use.",
 	}
 }
 
@@ -251,6 +261,7 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		CACertFile:       d.Get("cacert_file").(string),
 		ClientCertFile:   d.Get("cert").(string),
 		ClientKeyFile:    d.Get("key").(string),
+		Cloud:            d.Get("cloud").(string),
 		DomainID:         d.Get("domain_id").(string),
 		DomainName:       d.Get("domain_name").(string),
 		EndpointType:     d.Get("endpoint_type").(string),
