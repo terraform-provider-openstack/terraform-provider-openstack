@@ -219,16 +219,16 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 	var UserList users.BatchCreateOpts
 
 	if p, ok := d.GetOk("user"); ok {
-		pV := (p.([]interface{}))[0].(map[string]interface{})
-
-		raw_databases := pV["databases"].(*schema.Set).List()
-
-		UserList = append(UserList, users.CreateOpts{
-			Name:      pV["name"].(string),
-			Password:  pV["password"].(string),
-			Databases: resourceDBv1GetDatabases(raw_databases),
-			Host:      pV["host"].(string),
-		})
+		if userList, ok := p.([]interface{}); ok {
+			for _, user := range userList {
+				UserList = append(UserList, users.CreateOpts{
+					Name:      user.(map[string]interface{})["name"].(string),
+					Password:  user.(map[string]interface{})["password"].(string),
+					Databases: resourceDBv1GetDatabases(user.(map[string]interface{})["databases"].(*schema.Set).List()),
+					Host:      user.(map[string]interface{})["host"].(string),
+				})
+			}
+		}
 	}
 
 	createOpts.Users = UserList
