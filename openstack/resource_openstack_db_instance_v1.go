@@ -183,16 +183,22 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 
 	createOpts.Datastore = &datastore
 
+	// networks
 	var networks []instances.NetworkOpts
-	if p, ok := d.GetOk("network"); ok {
-		pV := (p.([]interface{}))[0].(map[string]interface{})
 
-		networks = append(networks, instances.NetworkOpts{
-			UUID:      pV["uuid"].(string),
-			Port:      pV["port"].(string),
-			V4FixedIP: pV["fixed_ip_v4"].(string),
-			V6FixedIP: pV["fixed_ip_v6"].(string),
-		})
+	if p, ok := d.GetOk("network"); ok {
+		if networkList, ok := p.([]interface{}); ok {
+
+			for _, network := range networkList {
+				networks = append(networks, instances.NetworkOpts{
+					UUID:      network.(map[string]interface{})["uuid"].(string),
+					Port:      network.(map[string]interface{})["port"].(string),
+					V4FixedIP: network.(map[string]interface{})["fixed_ip_v4"].(string),
+					V6FixedIP: network.(map[string]interface{})["fixed_ip_v6"].(string),
+				})
+			}
+
+		}
 	}
 
 	createOpts.Networks = networks
