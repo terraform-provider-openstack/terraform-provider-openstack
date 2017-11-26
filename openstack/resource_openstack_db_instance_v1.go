@@ -200,13 +200,17 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 	var dbs databases.BatchCreateOpts
 
 	if p, ok := d.GetOk("database"); ok {
-		pV := (p.([]interface{}))[0].(map[string]interface{})
+		if databaseList, ok := p.([]interface{}); ok {
 
-		dbs = append(dbs, databases.CreateOpts{
-			Name:    pV["name"].(string),
-			CharSet: pV["charset"].(string),
-			Collate: pV["collate"].(string),
-		})
+			for _, db := range databaseList {
+				dbs = append(dbs, databases.CreateOpts{
+					Name:    db.(map[string]interface{})["name"].(string),
+					CharSet: db.(map[string]interface{})["charset"].(string),
+					Collate: db.(map[string]interface{})["collate"].(string),
+				})
+			}
+
+		}
 	}
 
 	createOpts.Databases = dbs

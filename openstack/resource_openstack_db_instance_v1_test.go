@@ -29,11 +29,17 @@ func TestAccDatabaseV1Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_db_instance_v1.basic", "user.0.password", "testpassword"),
 					resource.TestCheckResourceAttr(
-						"openstack_db_instance_v1.basic", "database.0.name", "testdb"),
+						"openstack_db_instance_v1.basic", "database.0.name", "testdb1"),
 					resource.TestCheckResourceAttr(
 						"openstack_db_instance_v1.basic", "database.0.charset", "utf8"),
 					resource.TestCheckResourceAttr(
 						"openstack_db_instance_v1.basic", "database.0.collate", "utf8_general_ci"),
+					resource.TestCheckResourceAttr(
+						"openstack_db_instance_v1.basic", "database.1.name", "testdb2"),
+					resource.TestCheckResourceAttr(
+						"openstack_db_instance_v1.basic", "database.1.charset", "utf8"),
+					resource.TestCheckResourceAttr(
+						"openstack_db_instance_v1.basic", "database.1.collate", "utf8_general_ci"),
 				),
 			},
 		},
@@ -88,7 +94,13 @@ resource "openstack_db_instance_v1" "basic" {
   size = 10
 
   database {
-    name    = "testdb"
+    name    = "testdb1"
+    charset = "utf8"
+    collate = "utf8_general_ci"
+  }
+
+  database {
+    name    = "testdb2"
     charset = "utf8"
     collate = "utf8_general_ci"
   }
@@ -96,7 +108,7 @@ resource "openstack_db_instance_v1" "basic" {
   user {
     name      = "testuser"
     password  = "testpassword"
-	databases = ["testdb"]
+	databases = ["testdb1"]
 	host      = "%%"
   }
 }
