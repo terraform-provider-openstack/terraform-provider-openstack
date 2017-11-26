@@ -197,6 +197,7 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 
 	createOpts.Networks = networks
 
+	// databases
 	var dbs databases.BatchCreateOpts
 
 	if p, ok := d.GetOk("database"); ok {
@@ -215,7 +216,7 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 
 	createOpts.Databases = dbs
 
-	// user options
+	// users
 	var UserList users.BatchCreateOpts
 
 	if p, ok := d.GetOk("user"); ok {
