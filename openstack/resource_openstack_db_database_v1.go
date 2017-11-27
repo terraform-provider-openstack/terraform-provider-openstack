@@ -172,7 +172,7 @@ func DatabaseDatabaseV1StateRefreshFunc(client *gophercloud.ServiceClient, insta
 
 		pages, err := databases.List(client, instance_id).AllPages()
 		if err != nil {
-			return nil, "", fmt.Errorf("Unable to retrieve databases, pageszzz: %s", err)
+			return nil, "", fmt.Errorf("Unable to retrieve databases, pages: %s", err)
 		}
 
 		allDatabases, err := databases.ExtractDBs(pages)
