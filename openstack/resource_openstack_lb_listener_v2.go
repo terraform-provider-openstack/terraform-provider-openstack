@@ -111,7 +111,7 @@ func resourceListenerV2() *schema.Resource {
 
 func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := chooseLBV2Client(d, config)
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -146,7 +146,7 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 	// Wait for LoadBalancer to become active before continuing
 	lbID := createOpts.LoadbalancerID
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
 	if err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Attempting to create listener")
 	var listener *listeners.Listener
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		listener, err = listeners.Create(networkingClient, createOpts).Extract()
+		listener, err = listeners.Create(lbClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -165,7 +165,7 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
 	if err != nil {
 		return err
 	}
@@ -177,12 +177,12 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 
 func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := chooseLBV2Client(d, config)
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	listener, err := listeners.Get(networkingClient, d.Id()).Extract()
+	listener, err := listeners.Get(lbClient, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "listener")
 	}
@@ -206,7 +206,7 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 
 func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := chooseLBV2Client(d, config)
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -242,14 +242,14 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	// Wait for LoadBalancer to become active before continuing
 	lbID := d.Get("loadbalancer_id").(string)
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Updating listener %s with options: %#v", d.Id(), updateOpts)
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		_, err = listeners.Update(networkingClient, d.Id(), updateOpts).Extract()
+		_, err = listeners.Update(lbClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -261,7 +261,7 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
 	if err != nil {
 		return err
 	}
@@ -272,7 +272,7 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 
 func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := chooseLBV2Client(d, config)
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -280,14 +280,14 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 	// Wait for LoadBalancer to become active before continuing
 	lbID := d.Get("loadbalancer_id").(string)
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Deleting listener %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		err = listeners.Delete(networkingClient, d.Id()).ExtractErr()
+		err = listeners.Delete(lbClient, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -299,13 +299,13 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
 	if err != nil {
 		return err
 	}
 
 	// Wait for Listener to delete
-	err = waitForLBV2Listener(networkingClient, d.Id(), "DELETED", nil, timeout)
+	err = waitForLBV2Listener(lbClient, d.Id(), "DELETED", nil, timeout)
 	if err != nil {
 		return err
 	}
