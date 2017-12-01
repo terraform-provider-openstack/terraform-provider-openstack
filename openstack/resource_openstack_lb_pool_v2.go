@@ -130,7 +130,7 @@ func resourcePoolV2() *schema.Resource {
 
 func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := chooseLBV2Client(d, config)
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -182,13 +182,13 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 	lbID := createOpts.LoadbalancerID
 	listenerID := createOpts.ListenerID
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
 		if err != nil {
 			return err
 		}
 	} else if listenerID != "" {
 		// Wait for Listener to become active before continuing
-		err = waitForLBV2Listener(networkingClient, listenerID, "ACTIVE", nil, timeout)
+		err = waitForLBV2Listener(lbClient, listenerID, "ACTIVE", nil, timeout)
 		if err != nil {
 			return err
 		}
@@ -197,7 +197,7 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Attempting to create pool")
 	var pool *pools.Pool
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		pool, err = pools.Create(networkingClient, createOpts).Extract()
+		pool, err = pools.Create(lbClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -210,10 +210,10 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	// Wait for LoadBalancer to become active before continuing
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
 	} else {
 		// Pool exists by now so we can ask for lbID
-		err = waitForLBV2viaPool(networkingClient, pool.ID, "ACTIVE", timeout)
+		err = waitForLBV2viaPool(lbClient, pool.ID, "ACTIVE", timeout)
 	}
 	if err != nil {
 		return err
@@ -226,12 +226,12 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 
 func resourcePoolV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := chooseLBV2Client(d, config)
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	pool, err := pools.Get(networkingClient, d.Id()).Extract()
+	pool, err := pools.Get(lbClient, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "pool")
 	}
@@ -252,7 +252,7 @@ func resourcePoolV2Read(d *schema.ResourceData, meta interface{}) error {
 
 func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := chooseLBV2Client(d, config)
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -276,9 +276,9 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	lbID := d.Get("loadbalancer_id").(string)
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
 	} else {
-		err = waitForLBV2viaPool(networkingClient, d.Id(), "ACTIVE", timeout)
+		err = waitForLBV2viaPool(lbClient, d.Id(), "ACTIVE", timeout)
 	}
 	if err != nil {
 		return err
@@ -286,7 +286,7 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Updating pool %s with options: %#v", d.Id(), updateOpts)
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		_, err = pools.Update(networkingClient, d.Id(), updateOpts).Extract()
+		_, err = pools.Update(lbClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -299,9 +299,9 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 
 	// Wait for LoadBalancer to become active before continuing
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
 	} else {
-		err = waitForLBV2viaPool(networkingClient, d.Id(), "ACTIVE", timeout)
+		err = waitForLBV2viaPool(lbClient, d.Id(), "ACTIVE", timeout)
 	}
 	if err != nil {
 		return err
@@ -312,7 +312,7 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 
 func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := chooseLBV2Client(d, config)
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -321,7 +321,7 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	timeout := d.Timeout(schema.TimeoutDelete)
 	lbID := d.Get("loadbalancer_id").(string)
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
 		if err != nil {
 			return err
 		}
@@ -329,7 +329,7 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Attempting to delete pool %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		err = pools.Delete(networkingClient, d.Id()).ExtractErr()
+		err = pools.Delete(lbClient, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -337,10 +337,10 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
 	} else {
 		// Wait for Pool to delete
-		err = waitForLBV2Pool(networkingClient, d.Id(), "DELETED", nil, timeout)
+		err = waitForLBV2Pool(lbClient, d.Id(), "DELETED", nil, timeout)
 	}
 	if err != nil {
 		return err

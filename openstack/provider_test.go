@@ -13,6 +13,7 @@ import (
 )
 
 var (
+	OS_DB_ENVIRONMENT         = os.Getenv("OS_DB_ENVIRONMENT")
 	OS_DB_DATASTORE_VERSION   = os.Getenv("OS_DB_DATASTORE_VERSION")
 	OS_DB_DATASTORE_TYPE      = os.Getenv("OS_DB_DATASTORE_TYPE")
 	OS_DEPRECATED_ENVIRONMENT = os.Getenv("OS_DEPRECATED_ENVIRONMENT")
@@ -88,10 +89,7 @@ func testAccPreCheckDeprecated(t *testing.T) {
 }
 
 func testAccPreCheckDNS(t *testing.T) {
-	v := os.Getenv("OS_AUTH_URL")
-	if v == "" {
-		t.Fatalf("OS_AUTH_URL must be set for acceptance tests")
-	}
+	testAccPreCheckRequiredEnvVars(t)
 
 	if OS_DNS_ENVIRONMENT == "" {
 		t.Skip("This environment does not support DNS tests")
@@ -99,13 +97,18 @@ func testAccPreCheckDNS(t *testing.T) {
 }
 
 func testAccPreCheckSwift(t *testing.T) {
-	v := os.Getenv("OS_AUTH_URL")
-	if v == "" {
-		t.Fatalf("OS_AUTH_URL must be set for acceptance tests")
-	}
+	testAccPreCheckRequiredEnvVars(t)
 
 	if OS_SWIFT_ENVIRONMENT == "" {
 		t.Skip("This environment does not support Swift tests")
+	}
+}
+
+func testAccPreCheckDatabase(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_DB_ENVIRONMENT == "" {
+		t.Skip("This environment does not support Database tests")
 	}
 }
 

@@ -30,10 +30,7 @@ func TestAccObjectStorageV1Object_basic(t *testing.T) {
 	var object objects.GetHeader
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckSwift(t)
-		},
+		PreCheck:  func() { testAccPreCheckSwift(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(s *terraform.State) error {
 			return testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test/myfile.txt")
@@ -103,10 +100,7 @@ func TestAccObjectStorageV1Object_fromSource(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckSwift(t)
-		},
+		PreCheck:  func() { testAccPreCheckSwift(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(s *terraform.State) error {
 			return testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test/myfile")
@@ -131,10 +125,7 @@ func TestAccObjectStorageV1Object_fromSource(t *testing.T) {
 
 func TestAccObjectStorageV1Object_detectContentType(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckSwift(t)
-		},
+		PreCheck:  func() { testAccPreCheckSwift(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(s *terraform.State) error {
 			return testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test/myfile.csv")
@@ -157,10 +148,7 @@ func TestAccObjectStorageV1Object_detectContentType(t *testing.T) {
 
 func TestAccObjectStorageV1Object_copyFrom(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckSwift(t)
-		},
+		PreCheck:  func() { testAccPreCheckSwift(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(s *terraform.State) error {
 			if err := testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test/myfile.txt"); err != nil {
@@ -185,10 +173,7 @@ func TestAccObjectStorageV1Object_copyFrom(t *testing.T) {
 func TestAccObjectStorageV1Object_objectManifest(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckSwift(t)
-		},
+		PreCheck:  func() { testAccPreCheckSwift(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(s *terraform.State) error {
 			if err := testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test.csv/part001"); err != nil {
