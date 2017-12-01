@@ -93,6 +93,8 @@ func testAccComputeV2Flavor_basic(flavorName string) string {
       ram = 2048
       vcpus = 2
       disk = 5
+
+      is_public = true
     }
     `, flavorName)
 }
