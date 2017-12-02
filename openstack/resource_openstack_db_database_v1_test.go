@@ -29,6 +29,7 @@ func TestAccDatabaseV1Database_basic(t *testing.T) {
 					// resource.TestCheckResourceAttr(
 					// 	"openstack_db_database_v1.test", "name", "testdb"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
