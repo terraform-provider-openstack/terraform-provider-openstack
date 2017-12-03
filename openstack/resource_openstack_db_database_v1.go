@@ -87,7 +87,7 @@ func resourceDatabaseDatabaseV1Create(d *schema.ResourceData, meta interface{}) 
 	_, err = stateConf.WaitForState()
 	if err != nil {
 		return fmt.Errorf(
-			"Error waiting for database to become ready", err)
+			"Error waiting for database to become ready: %s", err)
 	}
 
 	// Store the ID now
@@ -143,8 +143,8 @@ func resourceDatabaseDatabaseV1Delete(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Unable to retrieve databases: %s", err)
 	}
 
-	log.Printf("Retrieved databases", allDatabases)
-	log.Printf("Looking for db", dbname)
+	log.Println("Retrieved databases", allDatabases)
+	log.Println("Looking for db", dbname)
 
 	dbExists := false
 
