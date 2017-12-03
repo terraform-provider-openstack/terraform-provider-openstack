@@ -48,7 +48,6 @@ func testAccCheckDatabaseV1DatabaseExists(n string, db *databases.Database) reso
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		fmt.Println("** resources", s.RootModule().Resources["openstack_db_instance_v1.basic"])
 		dbInstance := s.RootModule().Resources["openstack_db_instance_v1.basic"]
 
 		pages, err := databases.List(databaseV1Client, dbInstance.Primary.ID).AllPages()
