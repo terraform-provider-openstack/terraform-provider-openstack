@@ -13,6 +13,7 @@ IMPROVEMENTS
 BUG FIXES
 
 * Fixed issue with automatic detection of an Octavia client and Networking client [GH-172]
+* Fixed issue with creating public flavors [GH-177]
 
 ## 1.0.0 (November 08, 2017)
 
