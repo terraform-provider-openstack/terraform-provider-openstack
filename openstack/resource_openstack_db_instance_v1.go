@@ -154,6 +154,12 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 					},
 				},
 			},
+			"configuration": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: false,
+			},
 		},
 	}
 }
@@ -268,6 +274,13 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 			instance.ID, err)
 	}
 
+	if configuration, ok := d.GetOk("configuration"); ok {
+		instances.AttachConfigurationGroup(databaseV1Client, instance.ID, configuration.(string))
+		log.Printf("Attaching configuration %v to the instance %v", configuration, instance.ID)
+		instances.Restart(databaseV1Client, instance.ID)
+		log.Printf("Restarting instance instance %v", instance.ID)
+	}
+
 	// Store the ID now
 	d.SetId(instance.ID)
 
@@ -294,6 +307,24 @@ func resourceDatabaseInstanceV1Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("region", GetRegion(d, config))
 
 	return nil
+}
+
+func resourceDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack cloud database client: %s", err)
+	}
+
+	if d.HasChange("configuration") {
+		old, new := d.GetChange("configuration")
+		instances.DetachConfigurationGroup(databaseV1Client, d.Id())
+		log.Printf("Detaching configuration %v from the instance %v", old, d.Id())
+		instances.AttachConfigurationGroup(databaseV1Client, d.Id(), new.(string))
+		log.Printf("Attaching configuration %v to the instance %v", new, d.Id())
+	}
+
+	return resourceDatabaseInstanceV1Read(d, meta)
 }
 
 func resourceDatabaseInstanceV1Delete(d *schema.ResourceData, meta interface{}) error {
