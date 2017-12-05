@@ -105,7 +105,7 @@ The following attributes are exported:
 * `security_group_ids` - See Argument Reference above.
 * `device_id` - See Argument Reference above.
 * `fixed_ip` - See Argument Reference above.
-* `all fixed_ips` - The collection of Fixed IP addresses on the port in the
+* `all_fixed_ips` - The collection of Fixed IP addresses on the port in the
   order returned by the Network v2 API.
 * `all_security_group_ids` - The collection of Security Group IDs on the port
   which have been explicitly and implicitly added.

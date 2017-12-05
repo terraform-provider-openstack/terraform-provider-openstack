@@ -7,6 +7,14 @@ Terraform OpenStack Provider
 
 <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
 
+Maintainers
+-----------
+
+This provider plugin is maintained by:
+
+* Gavin Williams ([@fatmcgav](https://github.com/fatmcgav))
+* Joe Topjian ([@jtopjian](https://github.com/jtopjian))
+
 Requirements
 ------------
 
