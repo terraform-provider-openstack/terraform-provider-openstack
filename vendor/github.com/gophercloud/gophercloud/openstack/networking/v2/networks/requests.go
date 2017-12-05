@@ -68,10 +68,11 @@ type CreateOptsBuilder interface {
 
 // CreateOpts satisfies the CreateOptsBuilder interface
 type CreateOpts struct {
-	AdminStateUp *bool  `json:"admin_state_up,omitempty"`
-	Name         string `json:"name,omitempty"`
-	Shared       *bool  `json:"shared,omitempty"`
-	TenantID     string `json:"tenant_id,omitempty"`
+	AdminStateUp          *bool    `json:"admin_state_up,omitempty"`
+	Name                  string   `json:"name,omitempty"`
+	Shared                *bool    `json:"shared,omitempty"`
+	TenantID              string   `json:"tenant_id,omitempty"`
+	AvailabilityZoneHints []string `json:"availability_zone_hints"`
 }
 
 // ToNetworkCreateMap casts a CreateOpts struct to a map.
@@ -106,9 +107,10 @@ type UpdateOptsBuilder interface {
 
 // UpdateOpts satisfies the UpdateOptsBuilder interface
 type UpdateOpts struct {
-	AdminStateUp *bool  `json:"admin_state_up,omitempty"`
-	Name         string `json:"name,omitempty"`
-	Shared       *bool  `json:"shared,omitempty"`
+	AdminStateUp          *bool    `json:"admin_state_up,omitempty"`
+	Name                  string   `json:"name,omitempty"`
+	Shared                *bool    `json:"shared,omitempty"`
+	AvailabilityZoneHints []string `json:"availability_zone_hints"`
 }
 
 // ToNetworkUpdateMap casts a UpdateOpts struct to a map.

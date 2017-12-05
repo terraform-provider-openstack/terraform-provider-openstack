@@ -74,6 +74,14 @@ func resourceNetworkingRouterV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"availability_zone_hints": &schema.Schema{
+				Type:     schema.TypeSet,
+				Computed: true,
+				ForceNew: true,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
 		},
 	}
 }
@@ -87,8 +95,9 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 
 	createOpts := RouterCreateOpts{
 		routers.CreateOpts{
-			Name:     d.Get("name").(string),
-			TenantID: d.Get("tenant_id").(string),
+			Name:                  d.Get("name").(string),
+			TenantID:              d.Get("tenant_id").(string),
+			AvailabilityZoneHints: resourceNetworkingNetworkAvailabilityZoneHintsV2(d),
 		},
 		MapValueSpecs(d),
 	}
@@ -166,6 +175,7 @@ func resourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("admin_state_up", n.AdminStateUp)
 	d.Set("distributed", n.Distributed)
 	d.Set("tenant_id", n.TenantID)
+	d.Set("availability_zone_hints", n.AvailabilityZoneHints)
 	d.Set("external_gateway", n.GatewayInfo.NetworkID)
 	d.Set("enable_snat", n.GatewayInfo.EnableSNAT)
 	d.Set("region", GetRegion(d, config))
@@ -244,6 +254,15 @@ func resourceNetworkingRouterV2Delete(d *schema.ResourceData, meta interface{}) 
 
 	d.SetId("")
 	return nil
+}
+
+func resourceNetworkingRouterkAvailabilityZoneHintsV2(d *schema.ResourceData) []string {
+	rawAZH := d.Get("availability_zone_hints").(*schema.Set)
+	azh := make([]string, rawAZH.Len())
+	for i, raw := range rawAZH.List() {
+		azh[i] = raw.(string)
+	}
+	return azh
 }
 
 func waitForRouterActive(networkingClient *gophercloud.ServiceClient, routerId string) resource.StateRefreshFunc {

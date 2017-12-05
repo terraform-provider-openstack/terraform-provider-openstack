@@ -17,18 +17,20 @@ type ListOptsBuilder interface {
 // by a particular subnet attribute. SortDir sets the direction, and is either
 // `asc' or `desc'. Marker and Limit are used for pagination.
 type ListOpts struct {
-	Name       string `q:"name"`
-	EnableDHCP *bool  `q:"enable_dhcp"`
-	NetworkID  string `q:"network_id"`
-	TenantID   string `q:"tenant_id"`
-	IPVersion  int    `q:"ip_version"`
-	GatewayIP  string `q:"gateway_ip"`
-	CIDR       string `q:"cidr"`
-	ID         string `q:"id"`
-	Limit      int    `q:"limit"`
-	Marker     string `q:"marker"`
-	SortKey    string `q:"sort_key"`
-	SortDir    string `q:"sort_dir"`
+	Name            string `q:"name"`
+	EnableDHCP      *bool  `q:"enable_dhcp"`
+	NetworkID       string `q:"network_id"`
+	TenantID        string `q:"tenant_id"`
+	IPVersion       int    `q:"ip_version"`
+	GatewayIP       string `q:"gateway_ip"`
+	CIDR            string `q:"cidr"`
+	ID              string `q:"id"`
+	IPv6AddressMode string `q:"ipv6_address_mode"`
+	IPv6RaMode      string `q:"ipv6_ra_mode"`
+	Limit           int    `q:"limit"`
+	Marker          string `q:"marker"`
+	SortKey         string `q:"sort_key"`
+	SortDir         string `q:"sort_dir"`
 }
 
 // ToSubnetListQuery formats a ListOpts into a query string.
@@ -84,6 +86,8 @@ type CreateOpts struct {
 	EnableDHCP      *bool                 `json:"enable_dhcp,omitempty"`
 	DNSNameservers  []string              `json:"dns_nameservers,omitempty"`
 	HostRoutes      []HostRoute           `json:"host_routes,omitempty"`
+	IPv6AddressMode string                `json:"ipv6_address_mode,omitempty"`
+	IPv6RaMode      string                `json:"ipv6_ra_mode,omitempty"`
 }
 
 // ToSubnetCreateMap casts a CreateOpts struct to a map.

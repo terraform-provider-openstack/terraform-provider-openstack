@@ -42,6 +42,12 @@ data "openstack_networking_subnet_v2" "subnet_1" {
 
 * `tenant_id` - (Optional) The owner of the subnet.
 
+* `ipv6_address_mode` - (Optional) The IPv6 address modes specifies mechanisms for assigning IP addresses.
+  Value is slaac, dhcpv6-stateful or dhcpv6-stateless.
+
+* `ipv6_ra_mode` - (Optional) The IPv6 RA specifies whether the networking service should transmit ICMPv6 packets, for a subnet.
+  Value is slaac, dhcpv6-stateful or dhcpv6-stateless.
+
 ## Attributes Reference
 
 `id` is set to the ID of the found subnet. In addition, the following attributes

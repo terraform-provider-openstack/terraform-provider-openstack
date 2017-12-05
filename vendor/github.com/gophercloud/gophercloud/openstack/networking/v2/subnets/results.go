@@ -63,6 +63,10 @@ type Subnet struct {
 	Name string `json:"name"`
 	// IP version, either `4' or `6'
 	IPVersion int `json:"ip_version"`
+	// The IPv6 address modes specifies mechanisms for assigning IP addresses.
+	IPv6AddressMode string `json:"ipv6_address_mode"`
+	// The IPv6 router advertisement specifies whether the networking service should transmit ICMPv6 packets.
+	IPv6RaMode string `json:"ipv6_ra_mode"`
 	// CIDR representing IP range for this subnet, based on IP version
 	CIDR string `json:"cidr"`
 	// Default gateway used by devices in this subnet

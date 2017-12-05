@@ -54,6 +54,8 @@ The following arguments are supported:
 
 * `value_specs` - (Optional) Map of additional driver-specific options.
 
+* `availability_zone_hints` - (Optional) The availability zone candidates for the router. 
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -66,6 +68,7 @@ The following attributes are exported:
 * `enable_snat` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
 * `value_specs` - See Argument Reference above.
+* `availability_zone_hints` - See Argument Reference above.
 
 ## Import
 

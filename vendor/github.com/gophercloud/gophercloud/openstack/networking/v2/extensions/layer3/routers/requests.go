@@ -11,16 +11,17 @@ import (
 // sort by a particular network attribute. SortDir sets the direction, and is
 // either `asc' or `desc'. Marker and Limit are used for pagination.
 type ListOpts struct {
-	ID           string `q:"id"`
-	Name         string `q:"name"`
-	AdminStateUp *bool  `q:"admin_state_up"`
-	Distributed  *bool  `q:"distributed"`
-	Status       string `q:"status"`
-	TenantID     string `q:"tenant_id"`
-	Limit        int    `q:"limit"`
-	Marker       string `q:"marker"`
-	SortKey      string `q:"sort_key"`
-	SortDir      string `q:"sort_dir"`
+	ID                    string   `q:"id"`
+	Name                  string   `q:"name"`
+	AdminStateUp          *bool    `q:"admin_state_up"`
+	Distributed           *bool    `q:"distributed"`
+	Status                string   `q:"status"`
+	TenantID              string   `q:"tenant_id"`
+	AvailabilityZoneHints []string `q:"availability_zone_hints"`
+	Limit                 int      `q:"limit"`
+	Marker                string   `q:"marker"`
+	SortKey               string   `q:"sort_key"`
+	SortDir               string   `q:"sort_dir"`
 }
 
 // List returns a Pager which allows you to iterate over a collection of
@@ -49,11 +50,12 @@ type CreateOptsBuilder interface {
 // CreateOpts contains all the values needed to create a new router. There are
 // no required values.
 type CreateOpts struct {
-	Name         string       `json:"name,omitempty"`
-	AdminStateUp *bool        `json:"admin_state_up,omitempty"`
-	Distributed  *bool        `json:"distributed,omitempty"`
-	TenantID     string       `json:"tenant_id,omitempty"`
-	GatewayInfo  *GatewayInfo `json:"external_gateway_info,omitempty"`
+	Name                  string       `json:"name,omitempty"`
+	AdminStateUp          *bool        `json:"admin_state_up,omitempty"`
+	Distributed           *bool        `json:"distributed,omitempty"`
+	TenantID              string       `json:"tenant_id,omitempty"`
+	AvailabilityZoneHints []string     `json:"availability_zone_hints,omitempty"`
+	GatewayInfo           *GatewayInfo `json:"external_gateway_info,omitempty"`
 }
 
 // ToRouterCreateMap builds a create request body from CreateOpts.
@@ -93,11 +95,12 @@ type UpdateOptsBuilder interface {
 
 // UpdateOpts contains the values used when updating a router.
 type UpdateOpts struct {
-	Name         string       `json:"name,omitempty"`
-	AdminStateUp *bool        `json:"admin_state_up,omitempty"`
-	Distributed  *bool        `json:"distributed,omitempty"`
-	GatewayInfo  *GatewayInfo `json:"external_gateway_info,omitempty"`
-	Routes       []Route      `json:"routes"`
+	Name                  string       `json:"name,omitempty"`
+	AdminStateUp          *bool        `json:"admin_state_up,omitempty"`
+	Distributed           *bool        `json:"distributed,omitempty"`
+	AvailabilityZoneHints []string     `json:"availability_zone_hints,omitempty"`
+	GatewayInfo           *GatewayInfo `json:"external_gateway_info,omitempty"`
+	Routes                []Route      `json:"routes"`
 }
 
 // ToRouterUpdateMap builds an update body based on UpdateOpts.

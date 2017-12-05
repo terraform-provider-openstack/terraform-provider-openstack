@@ -61,6 +61,9 @@ type Network struct {
 
 	// Specifies whether the network resource can be accessed by any tenant or not.
 	Shared bool `json:"shared"`
+
+	// An availability zone groups network nodes that run services like DHCP, L3, FW, and others.
+	AvailabilityZoneHints []string `json:"availability_zone_hints"`
 }
 
 // NetworkPage is the page returned by a pager when traversing over a
