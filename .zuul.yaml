@@ -7,6 +7,12 @@
     recheck-mitaka:
       jobs:
         - terraform-provider-openstack-acceptance-test-mitaka
+    recheck-newton:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-newton
+    recheck-ocata:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-ocata
     recheck-pike:
       jobs:
         - terraform-provider-openstack-acceptance-test-pike
