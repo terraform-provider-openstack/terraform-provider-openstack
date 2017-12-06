@@ -25,7 +25,6 @@ func TestAccDatabaseV1Database_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_db_database_v1.basic", "name", "basic"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -87,7 +86,5 @@ resource "openstack_db_instance_v1" "basic" {
 resource "openstack_db_database_v1" "basic" {
   name     = "basic"
   instance = "${openstack_db_instance_v1.basic.id}"
-  charset  = "utf8"
-  collate  = "utf8_general_ci"
 }
 `, OS_DB_DATASTORE_VERSION, OS_DB_DATASTORE_TYPE, OS_NETWORK_ID)

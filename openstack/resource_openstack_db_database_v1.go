@@ -42,16 +42,6 @@ func resourceDatabaseDatabaseV1() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"charset": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"collate": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 		},
 	}
 }
@@ -67,9 +57,7 @@ func resourceDatabaseDatabaseV1Create(d *schema.ResourceData, meta interface{}) 
 
 	var dbs databases.BatchCreateOpts
 	dbs = append(dbs, databases.CreateOpts{
-		Name:    dbname,
-		CharSet: d.Get("charset").(string),
-		Collate: d.Get("collate").(string),
+		Name: dbname,
 	})
 
 	instance_id := d.Get("instance").(string)
@@ -117,8 +105,6 @@ func resourceDatabaseDatabaseV1Read(d *schema.ResourceData, meta interface{}) er
 	for _, v := range allDatabases {
 		if v.Name == dbname {
 			d.Set("name", v.Name)
-			d.Set("charset", v.CharSet)
-			d.Set("collate", v.Collate)
 			break
 		}
 	}
@@ -135,7 +121,6 @@ func resourceDatabaseDatabaseV1Delete(d *schema.ResourceData, meta interface{}) 
 	}
 
 	dbname := d.Get("name").(string)
-	// instance_id := d.Get("instance").(string)
 
 	pages, err := databases.List(databaseV1Client, d.Id()).AllPages()
 	allDatabases, err := databases.ExtractDBs(pages)
