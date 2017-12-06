@@ -3,6 +3,11 @@
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
 * The way IP addresses for `allowed_address_pairs` in the `openstack_networking_port_v2` resource are stored in the Terraform state has changed. This should not break the port configuration but will trigger an update.
+* The `external_gateway` argument in the `openstack_networking_router_v2` has been deprecated in favor of the more appropriately named `external_network_id`.
+
+IMPROVEMENTS
+
+* Added `external_fixed_ips` to the `openstack_networking_router_v2` resource [GH-178]
 
 BUG FIXES
 
