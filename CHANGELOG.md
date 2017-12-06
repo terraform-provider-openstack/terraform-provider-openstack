@@ -1,4 +1,13 @@
 ## 1.1.1 (Unreleased)
+
+BACKWARDS INCOMPATIBILITIES / NOTES:
+
+* The way IP addresses for `allowed_address_pairs` in the `openstack_networking_port_v2` resource are stored in the Terraform state has changed. This should not break the port configuration but will trigger an update.
+
+BUG FIXES
+
+* Allow the same `ip_address` with a different `mac_address` to be specified multiple times in the `openstack_networking_port_v2` resource [GH-168]
+
 ## 1.1.0 (December 04, 2017)
 
 FEATURES
