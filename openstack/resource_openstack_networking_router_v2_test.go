@@ -35,7 +35,7 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 	})
 }
 
-func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
+func TestAccNetworkingV2Router_updateExternalGateway(t *testing.T) {
 	var router routers.Router
 
 	resource.Test(t, resource.TestCase{
@@ -44,16 +44,16 @@ func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV2Router_update_external_gw_1,
+				Config: testAccNetworkingV2Router_updateExternalGateway1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
 				),
 			},
 			resource.TestStep{
-				Config: testAccNetworkingV2Router_update_external_gw_2,
+				Config: testAccNetworkingV2Router_updateExternalGateway2,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"openstack_networking_router_v2.router_1", "external_gateway", OS_EXTGW_ID),
+						"openstack_networking_router_v2.router_1", "external_network_id", OS_EXTGW_ID),
 				),
 			},
 		},
@@ -147,7 +147,7 @@ resource "openstack_networking_router_v2" "router_1" {
 }
 `
 
-const testAccNetworkingV2Router_update_external_gw_1 = `
+const testAccNetworkingV2Router_updateExternalGateway1 = `
 resource "openstack_networking_router_v2" "router_1" {
 	name = "router"
 	admin_state_up = "true"
@@ -155,12 +155,12 @@ resource "openstack_networking_router_v2" "router_1" {
 }
 `
 
-var testAccNetworkingV2Router_update_external_gw_2 = fmt.Sprintf(`
+var testAccNetworkingV2Router_updateExternalGateway2 = fmt.Sprintf(`
 resource "openstack_networking_router_v2" "router_1" {
 	name = "router"
 	admin_state_up = "true"
 	distributed = "false"
-	external_gateway = "%s"
+	external_network_id = "%s"
 }
 `, OS_EXTGW_ID)
 
