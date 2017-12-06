@@ -18,8 +18,6 @@ Manages a V1 DB database resource within OpenStack.
 resource "openstack_db_database_v1" "test" {
   name     = "testdb"
   instance = "${openstack_db_instance_v1.basic.id}"
-  charset  = "utf8"
-  collate  = "utf8_general_ci"
 }
 ```
 
@@ -31,10 +29,6 @@ The following arguments are supported:
 
 * `instance` - (Required) The ID for the database instance.
 
-* `charset` - (Optional) A set of symbols and encodings. Default is utf8.
-
-* `collate` - (Optional) A set of rules for comparing characters in a character set. Default is utf8_general_ci.
-
 ## Attributes Reference
 
 The following attributes are exported:
@@ -42,5 +36,3 @@ The following attributes are exported:
 * `region` - Openstack region resource is created in.
 * `name` - See Argument Reference above.
 * `instance` - See Argument Reference above.
-* `charset` - See Argument Reference above.
-* `collate` - See Argument Reference above.
