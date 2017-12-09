@@ -1,19 +1,34 @@
-## 1.0.1 (Unreleased)
+## 1.1.1 (Unreleased)
 
-FEATURES
+BACKWARDS INCOMPATIBILITIES / NOTES:
 
-* __New Resource:__ `openstack_objectstorage_object_v1` [GH-146]
-* __New Resource:__ `openstack_db_instance_v1` [GH-155]
+* The way IP addresses for `allowed_address_pairs` in the `openstack_networking_port_v2` resource are stored in the Terraform state has changed. This should not break the port configuration but will trigger an update.
+* The `external_gateway` argument in the `openstack_networking_router_v2` has been deprecated in favor of the more appropriately named `external_network_id`.
 
 IMPROVEMENTS
 
-* Better handling of mutually exclusive options `no_gateway` and `gateway_ip` in the `openstack_networking_subnet_v2` resource [GH-136]
-* Can now authenticate with a `clouds.yaml` file [GH-154]
+* Added `external_fixed_ips` to the `openstack_networking_router_v2` resource [GH-178]
 
 BUG FIXES
 
-* Fixed issue with automatic detection of an Octavia client and Networking client [GH-172]
-* Fixed issue with creating public flavors [GH-177]
+* Allow the same `ip_address` with a different `mac_address` to be specified multiple times in the `openstack_networking_port_v2` resource [GH-168]
+
+## 1.1.0 (December 04, 2017)
+
+FEATURES
+
+* __New Resource:__ `openstack_objectstorage_object_v1` ([#146](https://github.com/terraform-providers/terraform-provider-openstack/issues/146))
+* __New Resource:__ `openstack_db_instance_v1` ([#155](https://github.com/terraform-providers/terraform-provider-openstack/issues/155))
+
+IMPROVEMENTS
+
+* Better handling of mutually exclusive options `no_gateway` and `gateway_ip` in the `openstack_networking_subnet_v2` resource ([#136](https://github.com/terraform-providers/terraform-provider-openstack/issues/136))
+* Can now authenticate with a `clouds.yaml` file ([#154](https://github.com/terraform-providers/terraform-provider-openstack/issues/154))
+
+BUG FIXES
+
+* Fixed issue with automatic detection of an Octavia client and Networking client ([#172](https://github.com/terraform-providers/terraform-provider-openstack/issues/172))
+* Fixed issue with creating public flavors ([#177](https://github.com/terraform-providers/terraform-provider-openstack/issues/177))
 
 ## 1.0.0 (November 08, 2017)
 
