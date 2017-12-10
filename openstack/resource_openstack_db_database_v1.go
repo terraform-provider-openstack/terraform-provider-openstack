@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/gophercloud/gophercloud"
@@ -53,20 +54,20 @@ func resourceDatabaseDatabaseV1Create(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
 
-	dbname := d.Get("name").(string)
+	dbName := d.Get("name").(string)
 
 	var dbs databases.BatchCreateOpts
 	dbs = append(dbs, databases.CreateOpts{
-		Name: dbname,
+		Name: dbName,
 	})
 
-	instance_id := d.Get("instance").(string)
-	databases.Create(databaseV1Client, instance_id, dbs)
+	instanceID := d.Get("instance").(string)
+	databases.Create(databaseV1Client, instanceID, dbs)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"BUILD"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    DatabaseDatabaseV1StateRefreshFunc(databaseV1Client, instance_id, dbname),
+		Refresh:    DatabaseDatabaseV1StateRefreshFunc(databaseV1Client, instanceID, dbName),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -79,7 +80,7 @@ func resourceDatabaseDatabaseV1Create(d *schema.ResourceData, meta interface{}) 
 	}
 
 	// Store the ID now
-	d.SetId(instance_id)
+	d.SetId(fmt.Sprintf("%s/%s", instanceID, dbName))
 
 	return resourceDatabaseInstanceV1Read(d, meta)
 }
@@ -91,9 +92,11 @@ func resourceDatabaseDatabaseV1Read(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
 
-	dbname := d.Get("name").(string)
+	dbID := strings.Split(d.Id(), "/")
+	instanceID := dbID[0]
+	dbName := dbID[1]
 
-	pages, err := databases.List(databaseV1Client, d.Id()).AllPages()
+	pages, err := databases.List(databaseV1Client, instanceID).AllPages()
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve databases, pages: %s", err)
 	}
@@ -103,12 +106,12 @@ func resourceDatabaseDatabaseV1Read(d *schema.ResourceData, meta interface{}) er
 	}
 
 	for _, v := range allDatabases {
-		if v.Name == dbname {
+		if v.Name == dbName {
 			d.Set("name", v.Name)
 			break
 		}
 	}
-	log.Printf("[DEBUG] Retrieved database %s", dbname)
+	log.Printf("[DEBUG] Retrieved database %s", dbName)
 
 	return nil
 }
@@ -120,31 +123,33 @@ func resourceDatabaseDatabaseV1Delete(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
 
-	dbname := d.Get("name").(string)
+	dbID := strings.Split(d.Id(), "/")
+	instanceID := dbID[0]
+	dbName := dbID[1]
 
-	pages, err := databases.List(databaseV1Client, d.Id()).AllPages()
+	pages, err := databases.List(databaseV1Client, instanceID).AllPages()
 	allDatabases, err := databases.ExtractDBs(pages)
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve databases: %s", err)
 	}
 
 	log.Println("Retrieved databases", allDatabases)
-	log.Println("Looking for db", dbname)
+	log.Println("Looking for db", dbName)
 
 	dbExists := false
 
 	for _, v := range allDatabases {
-		if v.Name == dbname {
+		if v.Name == dbName {
 			dbExists = true
 			break
 		}
 	}
 
 	if !dbExists {
-		log.Printf("Database %s was not found on instance %s", dbname, d.Id())
+		log.Printf("Database %s was not found on instance %s", dbName, instanceID)
 	}
 
-	databases.Delete(databaseV1Client, d.Id(), dbname)
+	databases.Delete(databaseV1Client, instanceID, dbName)
 
 	d.SetId("")
 	return nil
