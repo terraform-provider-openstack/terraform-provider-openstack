@@ -72,7 +72,7 @@ func resourceMemberV2() *schema.Resource {
 
 			"subnet_id": &schema.Schema{
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 
