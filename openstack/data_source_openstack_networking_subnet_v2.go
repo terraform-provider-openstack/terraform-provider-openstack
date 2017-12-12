@@ -127,6 +127,20 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 					},
 				},
 			},
+			"ipv6_address_mode": &schema.Schema{
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ValidateFunc: dataSourceSubnetV2IPv6AddessMode,
+			},
+			"ipv6_ra_mode": &schema.Schema{
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ValidateFunc: dataSourceSubnetV2IPv6AddessMode,
+			},
 		},
 	}
 }
@@ -175,6 +189,14 @@ func dataSourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) 
 		listOpts.ID = v.(string)
 	}
 
+	if v, ok := d.GetOk("ipv6_address_mode"); ok {
+		listOpts.IPv6AddressMode = v.(string)
+	}
+
+	if v, ok := d.GetOk("ipv6_ra_mode"); ok {
+		listOpts.IPv6RAMode = v.(string)
+	}
+
 	pages, err := subnets.List(networkingClient, listOpts).AllPages()
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve subnets: %s", err)
@@ -205,6 +227,8 @@ func dataSourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) 
 	d.Set("network_id", subnet.NetworkID)
 	d.Set("cidr", subnet.CIDR)
 	d.Set("ip_version", subnet.IPVersion)
+	d.Set("ipv6_address_mode", subnet.IPv6AddressMode)
+	d.Set("ipv6_ra_mode", subnet.IPv6RAMode)
 	d.Set("gateway_ip", subnet.GatewayIP)
 	d.Set("enable_dhcp", subnet.EnableDHCP)
 	d.Set("region", GetRegion(d, config))
@@ -234,4 +258,13 @@ func dataSourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) 
 	}
 
 	return nil
+}
+
+func dataSourceSubnetV2IPv6AddessMode(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	if value != "slaac" && value != "dhcpv6-stateful" && value != "dhcpv6-stateless" {
+		err := fmt.Errorf("%s must be one of slaac, dhcpv6-stateful or dhcpv6-stateless", k)
+		errors = append(errors, err)
+	}
+	return
 }
