@@ -19,7 +19,7 @@ resource "openstack_networking_subnet_v2" "terraform" {
 resource "openstack_networking_router_v2" "terraform" {
   name             = "terraform"
   admin_state_up   = "true"
-  external_gateway = "${var.external_gateway}"
+  external_network_id = "${var.external_gateway}"
 }
 
 resource "openstack_networking_router_interface_v2" "terraform" {
@@ -64,14 +64,20 @@ resource "openstack_compute_instance_v2" "terraform" {
   flavor_name     = "${var.flavor}"
   key_pair        = "${openstack_compute_keypair_v2.terraform.name}"
   security_groups = ["${openstack_compute_secgroup_v2.terraform.name}"]
-  floating_ip     = "${openstack_compute_floatingip_v2.terraform.address}"
 
   network {
     uuid = "${openstack_networking_network_v2.terraform.id}"
   }
 
+}
+
+resource "openstack_compute_floatingip_associate_v2" "terraform" {
+  floating_ip = "${openstack_compute_floatingip_v2.terraform.address}"
+  instance_id = "${openstack_compute_instance_v2.terraform.id}"
+
   provisioner "remote-exec" {
     connection {
+      host = "${openstack_compute_floatingip_v2.terraform.address}"
       user     = "${var.ssh_user_name}"
       private_key = "${file(var.ssh_key_file)}"
     }
@@ -82,4 +88,5 @@ resource "openstack_compute_instance_v2" "terraform" {
       "sudo service nginx start",
     ]
   }
+
 }
