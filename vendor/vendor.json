@@ -535,10 +535,10 @@
 			"revisionTime": "2017-05-24T13:09:59Z"
 		},
 		{
-			"checksumSHA1": "zKOhFTL5BDZPMC58ZzZkryjskno=",
+			"checksumSHA1": "YnP/P8Tr8hHw+NVZ/KegcGCbK0I=",
 			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/networks",
-			"revision": "0f64da0e36de86a0ca1a8f2fc1b0570a0d3f7504",
-			"revisionTime": "2017-03-10T01:59:53Z"
+			"revision": "4d2733c962898d8cd68456bd275aee64256cd2a1",
+			"revisionTime": "2017-12-08T16:30:52Z"
 		},
 		{
 			"checksumSHA1": "68RL/R3cHJvkHPNZmu0GW4xd4cY=",
