@@ -132,14 +132,14 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Computed:     true,
-				ValidateFunc: dataSourceSubnetV2IPv6AddessMode,
+				ValidateFunc: validateSubnetV2IPv6Mode,
 			},
 			"ipv6_ra_mode": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
 				Computed:     true,
-				ValidateFunc: dataSourceSubnetV2IPv6AddessMode,
+				ValidateFunc: validateSubnetV2IPv6Mode,
 			},
 		},
 	}
@@ -258,13 +258,4 @@ func dataSourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) 
 	}
 
 	return nil
-}
-
-func dataSourceSubnetV2IPv6AddessMode(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	if value != "slaac" && value != "dhcpv6-stateful" && value != "dhcpv6-stateless" {
-		err := fmt.Errorf("%s must be one of slaac, dhcpv6-stateful or dhcpv6-stateless", k)
-		errors = append(errors, err)
-	}
-	return
 }
