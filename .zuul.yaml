@@ -16,3 +16,4 @@
     recheck-pike:
       jobs:
         - terraform-provider-openstack-acceptance-test-pike
+# test
