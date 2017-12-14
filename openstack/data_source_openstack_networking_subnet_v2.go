@@ -23,6 +23,7 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 			},
 
@@ -40,11 +41,13 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 
 			"network_id": &schema.Schema{
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 			},
 
 			"tenant_id": &schema.Schema{
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 					"OS_TENANT_ID",
@@ -56,6 +59,7 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 			"ip_version": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					value := v.(int)
 					if value != 4 && value != 6 {
@@ -68,16 +72,19 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 
 			"gateway_ip": &schema.Schema{
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 			},
 
 			"cidr": &schema.Schema{
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 			},
 
 			"subnet_id": &schema.Schema{
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 			},
 
