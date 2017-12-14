@@ -8,6 +8,7 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 IMPROVEMENTS
 
 * Added `external_fixed_ips` to the `openstack_networking_router_v2` resource [GH-178]
+* Added `ipv6_address_mode` and `ipv6_ra_mode` to the `openstack_networking_subnet_v2` resource and data source [GH-193]
 
 BUG FIXES
 
