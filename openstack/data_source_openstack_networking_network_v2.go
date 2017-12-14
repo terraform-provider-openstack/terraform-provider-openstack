@@ -75,6 +75,10 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	}
 
 	pages, err := networks.List(networkingClient, listOpts).AllPages()
+	if err != nil {
+		return err
+	}
+
 	allNetworks, err := networks.ExtractNetworks(pages)
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve networks: %s", err)
