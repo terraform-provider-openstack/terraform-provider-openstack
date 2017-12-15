@@ -3,6 +3,10 @@
 	"ignore": "appengine test github.com/hashicorp/nomad/ github.com/hashicorp/terraform/backend",
 	"package": [
 		{
+			"path": "fetch",
+			"revision": ""
+		},
+		{
 			"checksumSHA1": "ly9VLPE9GKo2U7mnbZyjb2LDQ3w=",
 			"path": "github.com/Unknwon/com",
 			"revision": "28b053d5a2923b87ce8c5a08f3af779894a72758",
@@ -463,10 +467,10 @@
 			"revisionTime": "2017-03-10T01:59:53Z"
 		},
 		{
-			"checksumSHA1": "MwH3GAr/ULiw/D2slN4vxYjQDjI=",
+			"checksumSHA1": "X2qWZ68Xlfobx/EQR0EEGEpUJBk=",
 			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers",
-			"revision": "d6667ee368f58dfeeb69ae9c11ba37f9fc7e0c58",
-			"revisionTime": "2017-10-27T02:34:43Z"
+			"revision": "92fb632e86f730790c3d240e468617c6f8d4a3bf",
+			"revisionTime": "2017-12-14T02:21:50Z"
 		},
 		{
 			"checksumSHA1": "mCTz2rnyVfhjJ+AD/WihCNcYWiY=",
@@ -1022,6 +1026,10 @@
 			"path": "gopkg.in/yaml.v2",
 			"revision": "eb3733d160e74a9c7e442f435eb3bea458e1d19f",
 			"revisionTime": "2017-08-12T16:00:11Z"
+		},
+		{
+			"path": "govendor",
+			"revision": ""
 		},
 		{
 			"checksumSHA1": "wICWAGQfZcHD2y0dHesz9R2YSiw=",
