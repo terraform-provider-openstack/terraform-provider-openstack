@@ -192,7 +192,10 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 	d.Set("shared", strconv.FormatBool(n.Shared))
 	d.Set("tenant_id", n.TenantID)
 	d.Set("region", GetRegion(d, config))
-	d.Set("availability_zone_hints", n.AvailabilityZoneHints)
+
+	if err := d.Set("availability_zone_hints", n.AvailabilityZoneHints); err != nil {
+		log.Printf("[DEBUG] unable to set availability_zone_hints: %s", err)
+	}
 
 	return nil
 }
