@@ -57,7 +57,7 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 				Computed: true,
 			},
 			"availability_zone_hints": &schema.Schema{
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
