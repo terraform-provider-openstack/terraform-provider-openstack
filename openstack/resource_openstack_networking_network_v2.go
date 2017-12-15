@@ -88,6 +88,13 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"availability_zone_hints": &schema.Schema{
+				Type:     schema.TypeList,
+				Computed: true,
+				ForceNew: true,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -101,8 +108,9 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 
 	createOpts := NetworkCreateOpts{
 		networks.CreateOpts{
-			Name:     d.Get("name").(string),
-			TenantID: d.Get("tenant_id").(string),
+			Name:                  d.Get("name").(string),
+			TenantID:              d.Get("tenant_id").(string),
+			AvailabilityZoneHints: resourceNetworkingNetworkAvailabilityZoneHintsV2(d),
 		},
 		MapValueSpecs(d),
 	}
@@ -183,6 +191,10 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 	d.Set("shared", strconv.FormatBool(n.Shared))
 	d.Set("tenant_id", n.TenantID)
 	d.Set("region", GetRegion(d, config))
+
+	if err := d.Set("availability_zone_hints", n.AvailabilityZoneHints); err != nil {
+		log.Printf("[DEBUG] unable to set availability_zone_hints: %s", err)
+	}
 
 	return nil
 }
@@ -275,6 +287,15 @@ func resourceNetworkingNetworkV2Segments(d *schema.ResourceData) (providerSegmen
 		providerSegments = append(providerSegments, segment)
 	}
 	return
+}
+
+func resourceNetworkingNetworkAvailabilityZoneHintsV2(d *schema.ResourceData) []string {
+	rawAZH := d.Get("availability_zone_hints").([]interface{})
+	azh := make([]string, len(rawAZH))
+	for i, raw := range rawAZH {
+		azh[i] = raw.(string)
+	}
+	return azh
 }
 
 func waitForNetworkActive(networkingClient *gophercloud.ServiceClient, networkId string) resource.StateRefreshFunc {
