@@ -89,12 +89,11 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"availability_zone_hints": &schema.Schema{
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
 				ForceNew: true,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 		},
 	}
@@ -291,9 +290,9 @@ func resourceNetworkingNetworkV2Segments(d *schema.ResourceData) (providerSegmen
 }
 
 func resourceNetworkingNetworkAvailabilityZoneHintsV2(d *schema.ResourceData) []string {
-	rawAZH := d.Get("availability_zone_hints").(*schema.Set)
-	azh := make([]string, rawAZH.Len())
-	for i, raw := range rawAZH.List() {
+	rawAZH := d.Get("availability_zone_hints").([]interface{})
+	azh := make([]string, len(rawAZH))
+	for i, raw := range rawAZH {
 		azh[i] = raw.(string)
 	}
 	return azh
