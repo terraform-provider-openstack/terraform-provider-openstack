@@ -123,7 +123,7 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 		routers.CreateOpts{
 			Name:                  d.Get("name").(string),
 			TenantID:              d.Get("tenant_id").(string),
-			AvailabilityZoneHints: resourceNetworkingRouterkAvailabilityZoneHintsV2(d),
+			AvailabilityZoneHints: resourceNetworkingAvailabilityZoneHintsV2(d),
 		},
 		MapValueSpecs(d),
 	}
@@ -348,15 +348,6 @@ func resourceNetworkingRouterV2Delete(d *schema.ResourceData, meta interface{}) 
 
 	d.SetId("")
 	return nil
-}
-
-func resourceNetworkingRouterkAvailabilityZoneHintsV2(d *schema.ResourceData) []string {
-	rawAZH := d.Get("availability_zone_hints").([]interface{})
-	azh := make([]string, len(rawAZH))
-	for i, raw := range rawAZH {
-		azh[i] = raw.(string)
-	}
-	return azh
 }
 
 func waitForRouterActive(networkingClient *gophercloud.ServiceClient, routerId string) resource.StateRefreshFunc {
