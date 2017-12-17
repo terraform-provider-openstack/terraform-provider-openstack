@@ -62,6 +62,15 @@ func resourceDatabaseDatabaseV1Create(d *schema.ResourceData, meta interface{}) 
 	})
 
 	instanceID := d.Get("instance").(string)
+
+	exists, err := DatabaseDatabaseV1State(databaseV1Client, instanceID, dbName)
+	if err != nil {
+		return fmt.Errorf("Error checking database status: %s", err)
+	}
+	if exists {
+		return fmt.Errorf("Database %s exists on instance %s", dbName, instanceID)
+	}
+
 	databases.Create(databaseV1Client, instanceID, dbs)
 
 	stateConf := &resource.StateChangeConf{
@@ -80,7 +89,7 @@ func resourceDatabaseDatabaseV1Create(d *schema.ResourceData, meta interface{}) 
 	}
 
 	// Store the ID now
-	d.SetId(fmt.Sprintf("%s/%s", instanceID, dbName))
+	d.SetId(fmt.Sprintf("%s.%s", instanceID, dbName))
 
 	return resourceDatabaseInstanceV1Read(d, meta)
 }
@@ -92,9 +101,11 @@ func resourceDatabaseDatabaseV1Read(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
 
-	dbID := strings.Split(d.Id(), "/")
+	dbID := strings.Split(d.Id(), ".")
 	instanceID := dbID[0]
 	dbName := dbID[1]
+
+	log.Println("***DEBUG", dbID, instanceID, dbName)
 
 	pages, err := databases.List(databaseV1Client, instanceID).AllPages()
 	if err != nil {
@@ -178,4 +189,29 @@ func DatabaseDatabaseV1StateRefreshFunc(client *gophercloud.ServiceClient, insta
 
 		return nil, "", fmt.Errorf("Error retrieving database %s status", dbname)
 	}
+}
+
+func DatabaseDatabaseV1State(client *gophercloud.ServiceClient, instanceID string, dbName string) (exists bool, err error) {
+	exists = false
+	err = nil
+
+	pages, err := databases.List(client, instanceID).AllPages()
+	if err != nil {
+		return
+	}
+
+	allDatabases, err := databases.ExtractDBs(pages)
+	if err != nil {
+		return
+	}
+
+	for _, v := range allDatabases {
+		if v.Name == dbName {
+			exists = true
+			return
+		}
+	}
+
+	return false, err
+
 }
