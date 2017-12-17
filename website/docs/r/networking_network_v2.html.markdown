@@ -86,6 +86,11 @@ The following arguments are supported:
 
 * `value_specs` - (Optional) Map of additional options.
 
+* `availability_zone_hints` -  (Optional) An availability zone is used to make
+    network resources highly available. Used for resources with high availability
+    so that they are scheduled on different availability zones. Changing this 
+    creates a new network.
+
 The `segments` block supports:
 
 * `physical_network` - The phisical network where this network is implemented.
@@ -101,6 +106,7 @@ The following attributes are exported:
 * `shared` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
+* `availability_zone_hints` - See Argument Reference above.
 
 ## Import
 
