@@ -20,6 +20,7 @@ func TestAccNetworkingV2SubnetDataSource_basic(t *testing.T) {
 				Config: testAccOpenStackNetworkingSubnetV2DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
+					testAccCheckNetworkingSubnetV2DataSourceGoodNetwork("data.openstack_networking_subnet_v2.subnet_1", "openstack_networking_network_v2.network_1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_subnet_v2.subnet_1", "name", "subnet_1"),
 				),
@@ -64,6 +65,23 @@ func TestAccNetworkingV2SubnetDataSource_testQueries(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2SubnetDataSource_networkIdAttribute(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccOpenStackNetworkingSubnetV2DataSource_networkIdAttribute,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
+					testAccCheckNetworkingSubnetV2DataSourceGoodNetwork("data.openstack_networking_subnet_v2.subnet_1", "openstack_networking_network_v2.network_1"),
+					testAccCheckNetworkingPortV2ID("openstack_networking_port_v2.port_1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingSubnetV2DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -73,6 +91,49 @@ func testAccCheckNetworkingSubnetV2DataSourceID(n string) resource.TestCheckFunc
 
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("Subnet data source ID not set")
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckNetworkingPortV2ID(n string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Can't find port resource: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("Port resource ID not set")
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckNetworkingSubnetV2DataSourceGoodNetwork(n1, n2 string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		ds1, ok := s.RootModule().Resources[n1]
+		if !ok {
+			return fmt.Errorf("Can't find subnet data source: %s", n1)
+		}
+
+		if ds1.Primary.ID == "" {
+			return fmt.Errorf("Subnet data source ID not set")
+		}
+
+		rs2, ok := s.RootModule().Resources[n2]
+		if !ok {
+			return fmt.Errorf("Can't find network resource: %s", n2)
+		}
+
+		if rs2.Primary.ID == "" {
+			return fmt.Errorf("Network resource ID not set")
+		}
+
+		if rs2.Primary.ID != ds1.Primary.Attributes["network_id"] {
+			return fmt.Errorf("Network id and subnet network_id don't match")
 		}
 
 		return nil
@@ -132,4 +193,19 @@ var testAccOpenStackNetworkingSubnetV2DataSource_gatewayIP = fmt.Sprintf(`
 data "openstack_networking_subnet_v2" "subnet_1" {
   gateway_ip = "${openstack_networking_subnet_v2.subnet_1.gateway_ip}"
 }
+`, testAccOpenStackNetworkingSubnetV2DataSource_subnet)
+
+var testAccOpenStackNetworkingSubnetV2DataSource_networkIdAttribute = fmt.Sprintf(`
+%s
+
+data "openstack_networking_subnet_v2" "subnet_1" {
+  subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name               = "test_port"
+  network_id         = "${data.openstack_networking_subnet_v2.subnet_1.network_id}"
+  admin_state_up  = "true"
+}
+
 `, testAccOpenStackNetworkingSubnetV2DataSource_subnet)
