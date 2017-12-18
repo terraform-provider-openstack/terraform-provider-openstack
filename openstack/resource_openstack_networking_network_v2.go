@@ -110,7 +110,7 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 		networks.CreateOpts{
 			Name:                  d.Get("name").(string),
 			TenantID:              d.Get("tenant_id").(string),
-			AvailabilityZoneHints: resourceNetworkingNetworkAvailabilityZoneHintsV2(d),
+			AvailabilityZoneHints: resourceNetworkingAvailabilityZoneHintsV2(d),
 		},
 		MapValueSpecs(d),
 	}
@@ -287,15 +287,6 @@ func resourceNetworkingNetworkV2Segments(d *schema.ResourceData) (providerSegmen
 		providerSegments = append(providerSegments, segment)
 	}
 	return
-}
-
-func resourceNetworkingNetworkAvailabilityZoneHintsV2(d *schema.ResourceData) []string {
-	rawAZH := d.Get("availability_zone_hints").([]interface{})
-	azh := make([]string, len(rawAZH))
-	for i, raw := range rawAZH {
-		azh[i] = raw.(string)
-	}
-	return azh
 }
 
 func waitForNetworkActive(networkingClient *gophercloud.ServiceClient, networkId string) resource.StateRefreshFunc {
