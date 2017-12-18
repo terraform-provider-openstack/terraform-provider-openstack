@@ -49,6 +49,10 @@ func dataSourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}
 	}
 
 	pages, err := groups.List(networkingClient, listOpts).AllPages()
+	if err != nil {
+		return err
+	}
+
 	allSecGroups, err := groups.ExtractGroups(pages)
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve security groups: %s", err)
