@@ -105,24 +105,17 @@ func resourceDatabaseDatabaseV1Read(d *schema.ResourceData, meta interface{}) er
 	instanceID := dbID[0]
 	dbName := dbID[1]
 
-	log.Println("***DEBUG", dbID, instanceID, dbName)
-
-	pages, err := databases.List(databaseV1Client, instanceID).AllPages()
+	exists, err := DatabaseDatabaseV1State(databaseV1Client, instanceID, dbName)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve databases, pages: %s", err)
+		return fmt.Errorf("Error checking database status: %s", err)
 	}
-	allDatabases, err := databases.ExtractDBs(pages)
-	if err != nil {
-		return fmt.Errorf("Unable to retrieve databases, extract: %s", err)
+	if !exists {
+		return fmt.Errorf("Error, database %s was not found", err)
 	}
 
-	for _, v := range allDatabases {
-		if v.Name == dbName {
-			d.Set("name", v.Name)
-			break
-		}
-	}
 	log.Printf("[DEBUG] Retrieved database %s", dbName)
+
+	d.Set("name", dbName)
 
 	return nil
 }
@@ -134,30 +127,16 @@ func resourceDatabaseDatabaseV1Delete(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
 
-	dbID := strings.Split(d.Id(), "/")
+	dbID := strings.Split(d.Id(), ".")
 	instanceID := dbID[0]
 	dbName := dbID[1]
 
-	pages, err := databases.List(databaseV1Client, instanceID).AllPages()
-	allDatabases, err := databases.ExtractDBs(pages)
+	exists, err := DatabaseDatabaseV1State(databaseV1Client, instanceID, dbName)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve databases: %s", err)
+		return fmt.Errorf("Error checking database status: %s", err)
 	}
-
-	log.Println("Retrieved databases", allDatabases)
-	log.Println("Looking for db", dbName)
-
-	dbExists := false
-
-	for _, v := range allDatabases {
-		if v.Name == dbName {
-			dbExists = true
-			break
-		}
-	}
-
-	if !dbExists {
-		log.Printf("Database %s was not found on instance %s", dbName, instanceID)
+	if !exists {
+		return fmt.Errorf("Database %s does not exist on instance %s", dbName, instanceID)
 	}
 
 	databases.Delete(databaseV1Client, instanceID, dbName)
@@ -168,10 +147,10 @@ func resourceDatabaseDatabaseV1Delete(d *schema.ResourceData, meta interface{}) 
 
 // DatabaseDatabaseV1StateRefreshFunc returns a resource.StateRefreshFunc that is used to watch
 // an cloud database.
-func DatabaseDatabaseV1StateRefreshFunc(client *gophercloud.ServiceClient, instance_id string, dbname string) resource.StateRefreshFunc {
+func DatabaseDatabaseV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string, dbName string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 
-		pages, err := databases.List(client, instance_id).AllPages()
+		pages, err := databases.List(client, instanceID).AllPages()
 		if err != nil {
 			return nil, "", fmt.Errorf("Unable to retrieve databases, pages: %s", err)
 		}
@@ -182,12 +161,12 @@ func DatabaseDatabaseV1StateRefreshFunc(client *gophercloud.ServiceClient, insta
 		}
 
 		for _, v := range allDatabases {
-			if v.Name == dbname {
+			if v.Name == dbName {
 				return v, "ACTIVE", nil
 			}
 		}
 
-		return nil, "", fmt.Errorf("Error retrieving database %s status", dbname)
+		return nil, "", fmt.Errorf("Error retrieving database %s status", dbName)
 	}
 }
 
