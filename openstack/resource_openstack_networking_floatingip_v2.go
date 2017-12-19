@@ -112,6 +112,9 @@ func resourceNetworkFloatingIPV2Create(d *schema.ResourceData, meta interface{})
 	}
 
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack Neutron Floating IP: %s", err)
+	}
 
 	d.SetId(floatingIP.ID)
 
