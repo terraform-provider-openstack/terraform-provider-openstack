@@ -15,9 +15,9 @@ Manages a V1 DB database resource within OpenStack.
 ### Database
 
 ```hcl
-resource "openstack_db_database_v1" "test" {
-  name     = "testdb"
-  instance = "${openstack_db_instance_v1.basic.id}"
+resource "openstack_db_database_v1" "mydb" {
+  name        = "mydb"
+  instance_id = "${openstack_db_instance_v1.basic.id}"
 }
 ```
 
@@ -27,7 +27,7 @@ The following arguments are supported:
 
 * `name` - (Required) A unique name for the resource.
 
-* `instance` - (Required) The ID for the database instance.
+* `instance_id` - (Required) The ID for the database instance.
 
 ## Attributes Reference
 
@@ -35,4 +35,12 @@ The following attributes are exported:
 
 * `region` - Openstack region resource is created in.
 * `name` - See Argument Reference above.
-* `instance` - See Argument Reference above.
+* `instance_id` - See Argument Reference above.
+
+## Import
+
+Databases can be imported by using `instance-id/db-name`, e.g.
+
+```
+$ terraform import openstack_db_database_v1.mydb 7b9e3cd3-00d9-449c-b074-8439f8e274fa/mydb
+```
