@@ -115,7 +115,7 @@ func resourceNetworkingRouterV2() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"set_router_gateway_on_update": &schema.Schema{
+						"set_router_gateway_after_create": &schema.Schema{
 							Type:     schema.TypeBool,
 							Default:  false,
 							Optional: true,
@@ -155,16 +155,10 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 
 	// Get Vendor_options
 	vendorOptionsRaw := d.Get("vendor_options").(*schema.Set)
-	var updateGateway bool
-	log.Printf("[DEBUG] vendorOptions looks like: %+v", vendorOptionsRaw)
+	var vendorUpdateGateway bool
 	if vendorOptionsRaw.Len() > 0 {
-		log.Printf("[DEBUG] vendorOptionsRaw contains some data.")
-
 		vendorOptions := expandVendorOptions(vendorOptionsRaw.List())
-		log.Printf("[DEBUG] vendorOptions Contents = %+v", vendorOptions)
-
-		updateGateway = vendorOptions["set_router_gateway_on_update"].(bool)
-		log.Printf("[DEBUG] updateGateway is a %T with value %+v", updateGateway, updateGateway)
+		vendorUpdateGateway = vendorOptions["set_router_gateway_after_create"].(bool)
 	}
 
 	// Gateway settings
@@ -177,8 +171,7 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 		externalNetworkID = v
 	}
 
-	if !updateGateway && externalNetworkID != "" {
-		log.Println("[DEBUG] Setting Router External Network upon creation")
+	if !vendorUpdateGateway && externalNetworkID != "" {
 		gatewayInfo := routers.GatewayInfo{
 			NetworkID: externalNetworkID,
 		}
@@ -223,7 +216,7 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 
 	d.SetId(n.ID)
 
-	if updateGateway && externalNetworkID != "" {
+	if vendorUpdateGateway && externalNetworkID != "" {
 		log.Printf("[DEBUG] Adding External Network %s to router ID %s", externalNetworkID, d.Id())
 		var updateOpts routers.UpdateOpts
 
@@ -456,9 +449,7 @@ func expandVendorOptions(vendOptsRaw []interface{}) map[string]interface{} {
 	vendorOptions := make(map[string]interface{})
 
 	for _, option := range vendOptsRaw {
-		log.Printf("[DEBUG] option = %+v", option)
 		for optKey, optValue := range option.(map[string]interface{}) {
-			log.Printf("optKey = %+v, optValue = %+v", optKey, optValue)
 			vendorOptions[optKey] = optValue
 		}
 

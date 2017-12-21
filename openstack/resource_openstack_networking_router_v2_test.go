@@ -174,7 +174,7 @@ resource "openstack_networking_router_v2" "router_1" {
 	distributed = "false"
 	external_network_id = "%s"
 	vendor_options {
-		set_router_gateway_on_update = true
+		set_router_gateway_after_create = true
 	}
 }
 `, OS_EXTGW_ID)
