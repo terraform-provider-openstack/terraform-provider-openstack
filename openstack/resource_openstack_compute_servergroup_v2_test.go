@@ -124,7 +124,7 @@ resource "openstack_compute_servergroup_v2" "sg_1" {
 }
 `
 
-const testAccComputeV2ServerGroup_affinity = `
+var testAccComputeV2ServerGroup_affinity = fmt.Sprintf(`
 resource "openstack_compute_servergroup_v2" "sg_1" {
   name = "sg_1"
   policies = ["affinity"]
@@ -136,5 +136,8 @@ resource "openstack_compute_instance_v2" "instance_1" {
   scheduler_hints {
     group = "${openstack_compute_servergroup_v2.sg_1.id}"
   }
+  network {
+    uuid = "%s"
+  }
 }
-`
+`, OS_NETWORK_ID)

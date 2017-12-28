@@ -199,10 +199,13 @@ func testAccCheckComputeV2FloatingIPAssociateAssociated(
 	}
 }
 
-const testAccComputeV2FloatingIPAssociate_basic = `
+var testAccComputeV2FloatingIPAssociate_basic = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
 }
 
 resource "openstack_networking_floatingip_v2" "fip_1" {
@@ -212,12 +215,15 @@ resource "openstack_compute_floatingip_associate_v2" "fip_1" {
   floating_ip = "${openstack_networking_floatingip_v2.fip_1.address}"
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2FloatingIPAssociate_fixedIP = `
+var testAccComputeV2FloatingIPAssociate_fixedIP = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
 }
 
 resource "openstack_networking_floatingip_v2" "fip_1" {
@@ -228,7 +234,7 @@ resource "openstack_compute_floatingip_associate_v2" "fip_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   fixed_ip = "${openstack_compute_instance_v2.instance_1.access_ip_v4}"
 }
-`
+`, OS_NETWORK_ID)
 
 var testAccComputeV2FloatingIPAssociate_attachToFirstNetwork = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
@@ -287,10 +293,13 @@ resource "openstack_compute_floatingip_associate_v2" "fip_1" {
 }
 `, OS_NETWORK_ID)
 
-const testAccComputeV2FloatingIPAssociate_attachNew_1 = `
+var testAccComputeV2FloatingIPAssociate_attachNew_1 = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
 }
 
 resource "openstack_networking_floatingip_v2" "fip_1" {
@@ -303,12 +312,15 @@ resource "openstack_compute_floatingip_associate_v2" "fip_1" {
   floating_ip = "${openstack_networking_floatingip_v2.fip_1.address}"
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2FloatingIPAssociate_attachNew_2 = `
+var testAccComputeV2FloatingIPAssociate_attachNew_2 = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
 }
 
 resource "openstack_networking_floatingip_v2" "fip_1" {
@@ -321,4 +333,4 @@ resource "openstack_compute_floatingip_associate_v2" "fip_1" {
   floating_ip = "${openstack_networking_floatingip_v2.fip_2.address}"
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
 }
-`
+`, OS_NETWORK_ID)
