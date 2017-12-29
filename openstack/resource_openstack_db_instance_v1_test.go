@@ -14,16 +14,17 @@ func TestAccDatabaseV1Instance_basic(t *testing.T) {
 	var instance instances.Instance
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckDatabase(t) },
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheckDatabase(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDatabaseV1InstanceDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccDatabaseV1InstanceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatabaseV1InstanceExists(
 						"openstack_db_instance_v1.basic", &instance),
-					resource.TestCheckResourceAttr(
-						"openstack_db_instance_v1.basic", "name", "basic"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_db_instance_v1.basic", "name", &instance.Name),
 					resource.TestCheckResourceAttr(
 						"openstack_db_instance_v1.basic", "user.0.name", "testuser"),
 					resource.TestCheckResourceAttr(
@@ -78,6 +79,28 @@ func testAccCheckDatabaseV1InstanceExists(n string, instance *instances.Instance
 	}
 }
 
+func testAccCheckDatabaseV1InstanceDestroy(s *terraform.State) error {
+	config := testAccProvider.Meta().(*Config)
+
+	databaseV1Client, err := config.databaseV1Client(OS_REGION_NAME)
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+	}
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "openstack_db_instance_v1" {
+			continue
+		}
+
+		_, err := instances.Get(databaseV1Client, rs.Primary.ID).Extract()
+		if err == nil {
+			return fmt.Errorf("Instance still exists")
+		}
+	}
+
+	return nil
+}
+
 var testAccDatabaseV1InstanceBasic = fmt.Sprintf(`
 resource "openstack_db_instance_v1" "basic" {
   name = "basic"
@@ -108,8 +131,8 @@ resource "openstack_db_instance_v1" "basic" {
   user {
     name      = "testuser"
     password  = "testpassword"
-	databases = ["testdb1"]
-	host      = "%%"
+    databases = ["testdb1"]
+    host      = "%%"
   }
 }
 `, OS_DB_DATASTORE_VERSION, OS_DB_DATASTORE_TYPE, OS_NETWORK_ID)
