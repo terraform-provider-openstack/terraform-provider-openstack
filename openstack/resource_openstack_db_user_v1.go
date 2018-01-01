@@ -167,7 +167,8 @@ func resourceDatabaseUserV1Delete(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if !exists {
-		return fmt.Errorf("User %s was not found: %s", userName, err)
+		log.Printf("User %s was not found on instance %s", userName, instanceID)
+		return nil
 	}
 
 	log.Printf("[DEBUG] Retrieved user %s", userName)
