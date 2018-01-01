@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/gophercloud/gophercloud"
@@ -71,11 +72,12 @@ func resourceDatabaseUserV1Create(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
 
-	username := d.Get("name").(string)
-	rawDBs := d.Get("databases").(*schema.Set).List()
+	userName := d.Get("name").(string)
+	rawDatabases := d.Get("databases").(*schema.Set).List()
+	instanceID := d.Get("instance").(string)
 
 	var dbs databases.BatchCreateOpts
-	for _, db := range rawDBs {
+	for _, db := range rawDatabases {
 		dbs = append(dbs, databases.CreateOpts{
 			Name: db.(string),
 		})
@@ -83,20 +85,18 @@ func resourceDatabaseUserV1Create(d *schema.ResourceData, meta interface{}) erro
 
 	var usersList users.BatchCreateOpts
 	usersList = append(usersList, users.CreateOpts{
-		Name:      username,
+		Name:      userName,
 		Password:  d.Get("password").(string),
 		Host:      d.Get("host").(string),
 		Databases: dbs,
 	})
-
-	instanceID := d.Get("instance").(string)
 
 	users.Create(databaseV1Client, instanceID, usersList)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"BUILD"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    DatabaseUserV1StateRefreshFunc(databaseV1Client, instanceID, username),
+		Refresh:    DatabaseUserV1StateRefreshFunc(databaseV1Client, instanceID, userName),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -109,7 +109,7 @@ func resourceDatabaseUserV1Create(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	// Store the ID now
-	d.SetId(instanceID)
+	d.SetId(fmt.Sprintf("%s/%s", instanceID, userName))
 
 	return resourceDatabaseUserV1Read(d, meta)
 }
@@ -118,29 +118,30 @@ func resourceDatabaseUserV1Read(d *schema.ResourceData, meta interface{}) error 
 	config := meta.(*Config)
 	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack cloud database client: %s", err)
+		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
 
-	username := d.Get("name").(string)
+	userID := strings.SplitN(d.Id(), "/", 2)
+	if len(userID) != 2 {
+		return fmt.Errorf("Invalid openstack_db_user_v1 ID format")
+	}
 
-	pages, err := users.List(databaseV1Client, d.Id()).AllPages()
+	instanceID := userID[0]
+	userName := userID[1]
+
+	exists, err := DatabaseUserV1State(databaseV1Client, instanceID, userName)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve users, pages: %s", err)
-	}
-	allUsers, err := users.ExtractUsers(pages)
-	if err != nil {
-		return fmt.Errorf("Unable to retrieve users, extract: %s", err)
+		return fmt.Errorf("Error checking user status: %s", err)
 	}
 
-	for _, v := range allUsers {
-		if v.Name == username {
-			d.Set("name", v.Name)
-			d.Set("password", v.Password)
-			d.Set("databases", v.Databases)
-			break
-		}
+	if !exists {
+		return fmt.Errorf("User %s was not found: %s", userName, err)
 	}
-	log.Printf("[DEBUG] Retrieved user %s", username)
+
+	log.Printf("[DEBUG] Retrieved user %s", userName)
+
+	d.Set("name", userName)
+	// d.Set("databases", v.Databases)
 
 	return nil
 }
@@ -149,41 +150,36 @@ func resourceDatabaseUserV1Delete(d *schema.ResourceData, meta interface{}) erro
 	config := meta.(*Config)
 	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack cloud database client: %s", err)
+		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
 
-	username := d.Get("name").(string)
+	userID := strings.SplitN(d.Id(), "/", 2)
+	if len(userID) != 2 {
+		return fmt.Errorf("Invalid openstack_db_user_v1 ID format")
+	}
 
-	pages, err := users.List(databaseV1Client, d.Id()).AllPages()
-	allUsers, err := users.ExtractUsers(pages)
+	instanceID := userID[0]
+	userName := userID[1]
+
+	exists, err := DatabaseUserV1State(databaseV1Client, instanceID, userName)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve users: %s", err)
+		return fmt.Errorf("Error checking user status: %s", err)
 	}
 
-	log.Println("Retrieved users", allUsers)
-	log.Println("Looking for user", username)
-
-	userExists := false
-
-	for _, v := range allUsers {
-		if v.Name == username {
-			userExists = true
-			break
-		}
+	if !exists {
+		return fmt.Errorf("User %s was not found: %s", userName, err)
 	}
 
-	if !userExists {
-		log.Printf("User %s was not found on instance %s", username, d.Id())
-	}
+	log.Printf("[DEBUG] Retrieved user %s", userName)
 
-	users.Delete(databaseV1Client, d.Id(), username)
+	users.Delete(databaseV1Client, instanceID, userName)
 
 	d.SetId("")
 	return nil
 }
 
 // DatabaseUserV1StateRefreshFunc returns a resource.StateRefreshFunc that is used to watch db user.
-func DatabaseUserV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string, username string) resource.StateRefreshFunc {
+func DatabaseUserV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string, userName string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 
 		pages, err := users.List(client, instanceID).AllPages()
@@ -197,11 +193,36 @@ func DatabaseUserV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceI
 		}
 
 		for _, v := range allUsers {
-			if v.Name == username {
+			if v.Name == userName {
 				return v, "ACTIVE", nil
 			}
 		}
 
-		return nil, "", fmt.Errorf("Error retrieving user %s status", username)
+		return nil, "", fmt.Errorf("Error retrieving user %s status", userName)
 	}
+}
+
+// DatabaseUserV1State is used to check whether user exists on particular database instance
+func DatabaseUserV1State(client *gophercloud.ServiceClient, instanceID string, userName string) (exists bool, err error) {
+	exists = false
+	err = nil
+
+	pages, err := users.List(client, instanceID).AllPages()
+	if err != nil {
+		return
+	}
+
+	allUsers, err := users.ExtractUsers(pages)
+	if err != nil {
+		return
+	}
+
+	for _, v := range allUsers {
+		if v.Name == userName {
+			exists = true
+			return
+		}
+	}
+
+	return false, err
 }
