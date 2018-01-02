@@ -76,6 +76,15 @@ func (c *Config) LoadAndValidate() error {
 		if err != nil {
 			return err
 		}
+
+		cloud, err := clientconfig.GetCloudFromYAML(clientOpts)
+		if err != nil {
+			return err
+		}
+
+		if c.Region == "" && cloud.RegionName != "" {
+			c.Region = cloud.RegionName
+		}
 	} else {
 		ao = &gophercloud.AuthOptions{
 			DomainID:         c.DomainID,
