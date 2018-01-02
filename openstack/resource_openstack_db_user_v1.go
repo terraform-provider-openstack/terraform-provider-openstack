@@ -129,7 +129,7 @@ func resourceDatabaseUserV1Read(d *schema.ResourceData, meta interface{}) error 
 	instanceID := userID[0]
 	userName := userID[1]
 
-	exists, err := DatabaseUserV1State(databaseV1Client, instanceID, userName)
+	exists, userObj, err := DatabaseUserV1State(databaseV1Client, instanceID, userName)
 	if err != nil {
 		return fmt.Errorf("Error checking user status: %s", err)
 	}
@@ -141,7 +141,9 @@ func resourceDatabaseUserV1Read(d *schema.ResourceData, meta interface{}) error 
 	log.Printf("[DEBUG] Retrieved user %s", userName)
 
 	d.Set("name", userName)
-	// d.Set("databases", v.Databases)
+	if err := d.Set("databases", userObj.Databases); err != nil {
+		return fmt.Errorf("Unable to set databases: %s", err)
+	}
 
 	return nil
 }
@@ -161,7 +163,7 @@ func resourceDatabaseUserV1Delete(d *schema.ResourceData, meta interface{}) erro
 	instanceID := userID[0]
 	userName := userID[1]
 
-	exists, err := DatabaseUserV1State(databaseV1Client, instanceID, userName)
+	exists, _, err := DatabaseUserV1State(databaseV1Client, instanceID, userName)
 	if err != nil {
 		return fmt.Errorf("Error checking user status: %s", err)
 	}
@@ -204,7 +206,7 @@ func DatabaseUserV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceI
 }
 
 // DatabaseUserV1State is used to check whether user exists on particular database instance
-func DatabaseUserV1State(client *gophercloud.ServiceClient, instanceID string, userName string) (exists bool, err error) {
+func DatabaseUserV1State(client *gophercloud.ServiceClient, instanceID string, userName string) (exists bool, userObj users.User, err error) {
 	exists = false
 	err = nil
 
@@ -225,5 +227,5 @@ func DatabaseUserV1State(client *gophercloud.ServiceClient, instanceID string, u
 		}
 	}
 
-	return false, err
+	return false, userObj, err
 }
