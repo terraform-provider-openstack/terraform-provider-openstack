@@ -18,13 +18,10 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 		Create: resourceDatabaseInstanceV1Create,
 		Read:   resourceDatabaseInstanceV1Read,
 		Delete: resourceDatabaseInstanceV1Delete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(10 * time.Minute),
-			Delete: schema.DefaultTimeout(10 * time.Minute),
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -55,6 +52,7 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 				Type:     schema.TypeList,
 				Required: true,
 				ForceNew: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"version": &schema.Schema{
@@ -147,9 +145,8 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 						"databases": &schema.Schema{
 							Type:     schema.TypeSet,
 							Optional: true,
-							Computed: true,
+							ForceNew: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
-							Set:      schema.HashString,
 						},
 					},
 				},
@@ -162,17 +159,7 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 	config := meta.(*Config)
 	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating cloud database client: %s", err)
-	}
-
-	var datastore instances.DatastoreOpts
-	if p, ok := d.GetOk("datastore"); ok {
-		pV := (p.([]interface{}))[0].(map[string]interface{})
-
-		datastore = instances.DatastoreOpts{
-			Version: pV["version"].(string),
-			Type:    pV["type"].(string),
-		}
+		return fmt.Errorf("Error creating database client: %s", err)
 	}
 
 	createOpts := &instances.CreateOpts{
@@ -181,23 +168,32 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 		Size:      d.Get("size").(int),
 	}
 
-	createOpts.Datastore = &datastore
+	var datastore instances.DatastoreOpts
+	if v, ok := d.GetOk("datastore"); ok {
+		if v, ok := v.([]interface{}); ok && len(v) > 0 {
+			ds := v[0].(map[string]interface{})
+			datastore = instances.DatastoreOpts{
+				Version: ds["version"].(string),
+				Type:    ds["type"].(string),
+			}
+			createOpts.Datastore = &datastore
+		}
+	}
 
 	// networks
 	var networks []instances.NetworkOpts
 
-	if p, ok := d.GetOk("network"); ok {
-		if networkList, ok := p.([]interface{}); ok {
-
-			for _, network := range networkList {
+	if v, ok := d.GetOk("network"); ok {
+		if networkList, ok := v.([]interface{}); ok {
+			for _, v := range networkList {
+				network := v.(map[string]interface{})
 				networks = append(networks, instances.NetworkOpts{
-					UUID:      network.(map[string]interface{})["uuid"].(string),
-					Port:      network.(map[string]interface{})["port"].(string),
-					V4FixedIP: network.(map[string]interface{})["fixed_ip_v4"].(string),
-					V6FixedIP: network.(map[string]interface{})["fixed_ip_v6"].(string),
+					UUID:      network["uuid"].(string),
+					Port:      network["port"].(string),
+					V4FixedIP: network["fixed_ip_v4"].(string),
+					V6FixedIP: network["fixed_ip_v6"].(string),
 				})
 			}
-
 		}
 	}
 
@@ -206,17 +202,16 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 	// databases
 	var dbs databases.BatchCreateOpts
 
-	if p, ok := d.GetOk("database"); ok {
-		if databaseList, ok := p.([]interface{}); ok {
-
-			for _, db := range databaseList {
+	if v, ok := d.GetOk("database"); ok {
+		if databaseList, ok := v.([]interface{}); ok {
+			for _, v := range databaseList {
+				db := v.(map[string]interface{})
 				dbs = append(dbs, databases.CreateOpts{
-					Name:    db.(map[string]interface{})["name"].(string),
-					CharSet: db.(map[string]interface{})["charset"].(string),
-					Collate: db.(map[string]interface{})["collate"].(string),
+					Name:    db["name"].(string),
+					CharSet: db["charset"].(string),
+					Collate: db["collate"].(string),
 				})
 			}
-
 		}
 	}
 
@@ -225,14 +220,15 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 	// users
 	var UserList users.BatchCreateOpts
 
-	if p, ok := d.GetOk("user"); ok {
-		if userList, ok := p.([]interface{}); ok {
-			for _, user := range userList {
+	if v, ok := d.GetOk("user"); ok {
+		if userList, ok := v.([]interface{}); ok {
+			for _, v := range userList {
+				user := v.(map[string]interface{})
 				UserList = append(UserList, users.CreateOpts{
-					Name:      user.(map[string]interface{})["name"].(string),
-					Password:  user.(map[string]interface{})["password"].(string),
-					Databases: resourceDBv1GetDatabases(user.(map[string]interface{})["databases"].(*schema.Set).List()),
-					Host:      user.(map[string]interface{})["host"].(string),
+					Name:      user["name"].(string),
+					Password:  user["password"].(string),
+					Databases: resourceDBv1GetDatabases(user["databases"]),
+					Host:      user["host"].(string),
 				})
 			}
 		}
@@ -243,13 +239,13 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	instance, err := instances.Create(databaseV1Client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating cloud database instance: %s", err)
+		return fmt.Errorf("Error creating database instance: %s", err)
 	}
-	log.Printf("[INFO] instance ID: %s", instance.ID)
+	log.Printf("[INFO] database instance ID: %s", instance.ID)
 
-	// Wait for the volume to become available.
+	// Wait for the instance to become available.
 	log.Printf(
-		"[DEBUG] Waiting for volume (%s) to become available",
+		"[DEBUG] Waiting for database instance (%s) to become available",
 		instance.ID)
 
 	stateConf := &resource.StateChangeConf{
@@ -264,7 +260,7 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 	_, err = stateConf.WaitForState()
 	if err != nil {
 		return fmt.Errorf(
-			"Error waiting for instance (%s) to become ready: %s",
+			"Error waiting for database instance (%s) to become ready: %s",
 			instance.ID, err)
 	}
 
@@ -278,7 +274,7 @@ func resourceDatabaseInstanceV1Read(d *schema.ResourceData, meta interface{}) er
 	config := meta.(*Config)
 	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack cloud database client: %s", err)
+		return fmt.Errorf("Error creating database client: %s", err)
 	}
 
 	instance, err := instances.Get(databaseV1Client, d.Id()).Extract()
@@ -286,7 +282,7 @@ func resourceDatabaseInstanceV1Read(d *schema.ResourceData, meta interface{}) er
 		return CheckDeleted(d, err, "instance")
 	}
 
-	log.Printf("[DEBUG] Retrieved instance %s: %+v", d.Id(), instance)
+	log.Printf("[DEBUG] Retrieved database instance %s: %+v", d.Id(), instance)
 
 	d.Set("name", instance.Name)
 	d.Set("flavor_id", instance.Flavor)
@@ -300,17 +296,17 @@ func resourceDatabaseInstanceV1Delete(d *schema.ResourceData, meta interface{}) 
 	config := meta.(*Config)
 	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating RS cloud instance client: %s", err)
+		return fmt.Errorf("Error creating database client: %s", err)
 	}
 
-	log.Printf("[DEBUG] Deleting cloud database instance %s", d.Id())
+	log.Printf("[DEBUG] Deleting database instance %s", d.Id())
 	err = instances.Delete(databaseV1Client, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting cloud database instance: %s", err)
+		return fmt.Errorf("Error deleting database instance: %s", err)
 	}
 
-	// Wait for the volume to delete before moving on.
-	log.Printf("[DEBUG] Waiting for volume (%s) to delete", d.Id())
+	// Wait for the database to delete before moving on.
+	log.Printf("[DEBUG] Waiting for database instance (%s) to delete", d.Id())
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE", "SHUTDOWN"},
@@ -324,16 +320,15 @@ func resourceDatabaseInstanceV1Delete(d *schema.ResourceData, meta interface{}) 
 	_, err = stateConf.WaitForState()
 	if err != nil {
 		return fmt.Errorf(
-			"Error waiting for instance (%s) to delete: %s",
+			"Error waiting for database instance (%s) to delete: %s",
 			d.Id(), err)
 	}
 
-	d.SetId("")
 	return nil
 }
 
-// DatabaseInstanceV1StateRefreshFunc returns a resource.StateRefreshFunc that is used to watch
-// an cloud database instance.
+// DatabaseInstanceV1StateRefreshFunc returns a resource.StateRefreshFunc
+// that is used to watch a database instance.
 func DatabaseInstanceV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		i, err := instances.Get(client, instanceID).Extract()
@@ -345,21 +340,22 @@ func DatabaseInstanceV1StateRefreshFunc(client *gophercloud.ServiceClient, insta
 		}
 
 		if i.Status == "error" {
-			return i, i.Status, fmt.Errorf("There was an error creating the instance.")
+			return i, i.Status, fmt.Errorf("There was an error creating the database instance.")
 		}
 
 		return i, i.Status, nil
 	}
 }
 
-func resourceDBv1GetDatabases(v []interface{}) databases.BatchCreateOpts {
-
+func resourceDBv1GetDatabases(v interface{}) databases.BatchCreateOpts {
 	var dbs databases.BatchCreateOpts
 
-	for _, db := range v {
-		dbs = append(dbs, databases.CreateOpts{
-			Name: db.(string),
-		})
+	if v, ok := v.(*schema.Set); ok {
+		for _, db := range v.List() {
+			dbs = append(dbs, databases.CreateOpts{
+				Name: db.(string),
+			})
+		}
 	}
 
 	return dbs
