@@ -201,7 +201,7 @@ func DatabaseUserV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceI
 			}
 		}
 
-		return nil, "", fmt.Errorf("Error retrieving user %s status", userName)
+		return nil, "BUILD", nil
 	}
 }
 
