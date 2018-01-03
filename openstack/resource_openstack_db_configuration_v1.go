@@ -61,6 +61,7 @@ func resourceDatabaseConfigurationV1() *schema.Resource {
 						},
 					},
 				},
+				MaxItems: 1,
 			},
 			"configuration": &schema.Schema{
 				Type:     schema.TypeList,
