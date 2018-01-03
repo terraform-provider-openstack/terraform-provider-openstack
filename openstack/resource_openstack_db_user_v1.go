@@ -45,9 +45,10 @@ func resourceDatabaseUserV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"password": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:      schema.TypeString,
+				Required:  true,
+				ForceNew:  true,
+				Sensitive: true,
 			},
 			"host": &schema.Schema{
 				Type:     schema.TypeString,
