@@ -7,6 +7,14 @@ Terraform OpenStack Provider
 
 <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
 
+Maintainers
+-----------
+
+This provider plugin is maintained by:
+
+* Gavin Williams ([@fatmcgav](https://github.com/fatmcgav))
+* Joe Topjian ([@jtopjian](https://github.com/jtopjian))
+
 Requirements
 ------------
 
@@ -63,3 +71,22 @@ In order to run the full suite of Acceptance tests, run `make testacc`.
 ```sh
 $ make testacc
 ```
+
+Thank You
+---------
+
+We'd like to extend special thanks and appreciation to the following:
+
+### OpenLab
+
+<a href="http://openlabtesting.org/"><img src="assets/openlab.png" width="600px"></a>
+
+OpenLab is providing a full CI environment to test each PR and merge for a variety of OpenStack releases.
+
+### VEXXHOST
+
+<a href="https://vexxhost.com/"><img src="assets/vexxhost.png" width="600px"></a>
+
+VEXXHOST is providing their services to assist with the development and testing of this provider.
+
+

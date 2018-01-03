@@ -634,17 +634,20 @@ func testAccCheckComputeV2InstanceInstanceIDsDoNotMatch(
 	}
 }
 
-const testAccComputeV2Instance_basic = `
+var testAccComputeV2Instance_basic = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   metadata {
     foo = "bar"
   }
+  network {
+    uuid = "%s"
+  }
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_secgroupMulti = `
+var testAccComputeV2Instance_secgroupMulti = fmt.Sprintf(`
 resource "openstack_compute_secgroup_v2" "secgroup_1" {
   name = "secgroup_1"
   description = "a security group"
@@ -659,10 +662,13 @@ resource "openstack_compute_secgroup_v2" "secgroup_1" {
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default", "${openstack_compute_secgroup_v2.secgroup_1.name}"]
+  network {
+    uuid = "%s"
+  }
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_secgroupMultiUpdate_1 = `
+var testAccComputeV2Instance_secgroupMultiUpdate_1 = fmt.Sprintf(`
 resource "openstack_compute_secgroup_v2" "secgroup_1" {
   name = "secgroup_1"
   description = "a security group"
@@ -688,10 +694,13 @@ resource "openstack_compute_secgroup_v2" "secgroup_2" {
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_secgroupMultiUpdate_2 = `
+var testAccComputeV2Instance_secgroupMultiUpdate_2 = fmt.Sprintf(`
 resource "openstack_compute_secgroup_v2" "secgroup_1" {
   name = "secgroup_1"
   description = "a security group"
@@ -717,8 +726,11 @@ resource "openstack_compute_secgroup_v2" "secgroup_2" {
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default", "${openstack_compute_secgroup_v2.secgroup_1.name}", "${openstack_compute_secgroup_v2.secgroup_2.name}"]
+  network {
+    uuid = "%s"
+  }
 }
-`
+`, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_bootFromVolumeImage = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
@@ -732,8 +744,11 @@ resource "openstack_compute_instance_v2" "instance_1" {
     destination_type = "volume"
     delete_on_termination = true
   }
+  network {
+    uuid = "%s"
+  }
 }
-`, OS_IMAGE_ID)
+`, OS_IMAGE_ID, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_bootFromVolumeVolume = fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v2" "vol_1" {
@@ -752,8 +767,11 @@ resource "openstack_compute_instance_v2" "instance_1" {
     destination_type = "volume"
     delete_on_termination = true
   }
+  network {
+    uuid = "%s"
+  }
 }
-`, OS_IMAGE_ID)
+`, OS_IMAGE_ID, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_bootFromVolumeForceNew_1 = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
@@ -767,8 +785,11 @@ resource "openstack_compute_instance_v2" "instance_1" {
     destination_type = "volume"
     delete_on_termination = true
   }
+  network {
+    uuid = "%s"
+  }
 }
-`, OS_IMAGE_ID)
+`, OS_IMAGE_ID, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_bootFromVolumeForceNew_2 = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
@@ -782,8 +803,11 @@ resource "openstack_compute_instance_v2" "instance_1" {
     destination_type = "volume"
     delete_on_termination = true
   }
+  network {
+    uuid = "%s"
+  }
 }
-`, OS_IMAGE_ID)
+`, OS_IMAGE_ID, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_blockDeviceNewVolume = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
@@ -803,8 +827,11 @@ resource "openstack_compute_instance_v2" "instance_1" {
     boot_index = 1
     delete_on_termination = true
   }
+  network {
+    uuid = "%s"
+  }
 }
-`, OS_IMAGE_ID)
+`, OS_IMAGE_ID, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_blockDeviceExistingVolume = fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v2" "volume_1" {
@@ -829,10 +856,13 @@ resource "openstack_compute_instance_v2" "instance_1" {
     boot_index = 1
     delete_on_termination = true
   }
+  network {
+    uuid = "%s"
+  }
 }
-`, OS_IMAGE_ID)
+`, OS_IMAGE_ID, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_personality = `
+var testAccComputeV2Instance_personality = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -844,8 +874,11 @@ resource "openstack_compute_instance_v2" "instance_1" {
     file = "/tmp/barfoo.txt"
     content = "angry"
   }
+  network {
+    uuid = "%s"
+  }
 }
-`
+`, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_multiEphemeral = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
@@ -872,8 +905,11 @@ resource "openstack_compute_instance_v2" "instance_1" {
     source_type = "blank"
     volume_size = 1
   }
+  network {
+    uuid = "%s"
+  }
 }
-`, OS_IMAGE_ID)
+`, OS_IMAGE_ID, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_accessIPv4 = fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
@@ -929,15 +965,18 @@ resource "openstack_compute_instance_v2" "instance_1" {
 }
 `, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_stopBeforeDestroy = `
+var testAccComputeV2Instance_stopBeforeDestroy = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   stop_before_destroy = true
+  network {
+    uuid = "%s"
+  }
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_metadataRemove_1 = `
+var testAccComputeV2Instance_metadataRemove_1 = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -945,10 +984,13 @@ resource "openstack_compute_instance_v2" "instance_1" {
     foo = "bar"
     abc = "def"
   }
+  network {
+    uuid = "%s"
+  }
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_metadataRemove_2 = `
+var testAccComputeV2Instance_metadataRemove_2 = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -956,18 +998,24 @@ resource "openstack_compute_instance_v2" "instance_1" {
     foo = "bar"
     ghi = "jkl"
   }
+  network {
+    uuid = "%s"
+  }
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_forceDelete = `
+var testAccComputeV2Instance_forceDelete = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   force_delete = true
+  network {
+    uuid = "%s"
+  }
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_timeout = `
+var testAccComputeV2Instance_timeout = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -975,8 +1023,11 @@ resource "openstack_compute_instance_v2" "instance_1" {
   timeouts {
     create = "10m"
   }
+  network {
+    uuid = "%s"
+  }
 }
-`
+`, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_networkNameToID = fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {

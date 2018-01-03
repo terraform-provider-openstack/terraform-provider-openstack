@@ -23,6 +23,7 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 			},
 
@@ -40,11 +41,13 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 
 			"network_id": &schema.Schema{
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 			},
 
 			"tenant_id": &schema.Schema{
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 					"OS_TENANT_ID",
@@ -56,6 +59,7 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 			"ip_version": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					value := v.(int)
 					if value != 4 && value != 6 {
@@ -68,16 +72,19 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 
 			"gateway_ip": &schema.Schema{
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 			},
 
 			"cidr": &schema.Schema{
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 			},
 
 			"subnet_id": &schema.Schema{
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 			},
 
@@ -127,6 +134,20 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 					},
 				},
 			},
+			"ipv6_address_mode": &schema.Schema{
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ValidateFunc: validateSubnetV2IPv6Mode,
+			},
+			"ipv6_ra_mode": &schema.Schema{
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ValidateFunc: validateSubnetV2IPv6Mode,
+			},
 		},
 	}
 }
@@ -175,6 +196,14 @@ func dataSourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) 
 		listOpts.ID = v.(string)
 	}
 
+	if v, ok := d.GetOk("ipv6_address_mode"); ok {
+		listOpts.IPv6AddressMode = v.(string)
+	}
+
+	if v, ok := d.GetOk("ipv6_ra_mode"); ok {
+		listOpts.IPv6RAMode = v.(string)
+	}
+
 	pages, err := subnets.List(networkingClient, listOpts).AllPages()
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve subnets: %s", err)
@@ -205,6 +234,8 @@ func dataSourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) 
 	d.Set("network_id", subnet.NetworkID)
 	d.Set("cidr", subnet.CIDR)
 	d.Set("ip_version", subnet.IPVersion)
+	d.Set("ipv6_address_mode", subnet.IPv6AddressMode)
+	d.Set("ipv6_ra_mode", subnet.IPv6RAMode)
 	d.Set("gateway_ip", subnet.GatewayIP)
 	d.Set("enable_dhcp", subnet.EnableDHCP)
 	d.Set("region", GetRegion(d, config))

@@ -418,7 +418,7 @@ func resourcePortAdminStateUpV2(d *schema.ResourceData) *bool {
 func allowedAddressPairsHash(v interface{}) int {
 	var buf bytes.Buffer
 	m := v.(map[string]interface{})
-	buf.WriteString(fmt.Sprintf("%s", m["ip_address"].(string)))
+	buf.WriteString(fmt.Sprintf("%s-%s", m["ip_address"].(string), m["mac_address"].(string)))
 
 	return hashcode.String(buf.String())
 }
