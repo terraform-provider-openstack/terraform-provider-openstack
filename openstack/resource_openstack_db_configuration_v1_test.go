@@ -14,8 +14,9 @@ func TestAccDatabaseV1Configuration_basic(t *testing.T) {
 	var configuration configurations.Config
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckDatabase(t) },
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheckDatabase(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDatabaseV1ConfigurationDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccDatabaseV1ConfigurationBasic,
@@ -64,6 +65,29 @@ func testAccCheckDatabaseV1ConfigurationExists(n string, configuration *configur
 
 		return nil
 	}
+}
+
+func testAccCheckDatabaseV1ConfigurationDestroy(s *terraform.State) error {
+	config := testAccProvider.Meta().(*Config)
+
+	databaseV1Client, err := config.databaseV1Client(OS_REGION_NAME)
+	if err != nil {
+		return fmt.Errorf("Error creating database client: %s", err)
+	}
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "openstack_db_configuration_v1" {
+			continue
+		}
+
+		_, err := configurations.Get(databaseV1Client, rs.Primary.ID).Extract()
+		if err.Error() != "Resource not found" {
+			return fmt.Errorf("Destroy check failed: %s", err)
+		}
+
+	}
+
+	return nil
 }
 
 var testAccDatabaseV1ConfigurationBasic = fmt.Sprintf(`
