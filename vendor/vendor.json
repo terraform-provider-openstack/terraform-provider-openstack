@@ -463,10 +463,10 @@
 			"revisionTime": "2017-03-10T01:59:53Z"
 		},
 		{
-			"checksumSHA1": "MwH3GAr/ULiw/D2slN4vxYjQDjI=",
+			"checksumSHA1": "X2qWZ68Xlfobx/EQR0EEGEpUJBk=",
 			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers",
-			"revision": "d6667ee368f58dfeeb69ae9c11ba37f9fc7e0c58",
-			"revisionTime": "2017-10-27T02:34:43Z"
+			"revision": "92fb632e86f730790c3d240e468617c6f8d4a3bf",
+			"revisionTime": "2017-12-14T02:21:50Z"
 		},
 		{
 			"checksumSHA1": "mCTz2rnyVfhjJ+AD/WihCNcYWiY=",
@@ -535,10 +535,10 @@
 			"revisionTime": "2017-05-24T13:09:59Z"
 		},
 		{
-			"checksumSHA1": "zKOhFTL5BDZPMC58ZzZkryjskno=",
+			"checksumSHA1": "YnP/P8Tr8hHw+NVZ/KegcGCbK0I=",
 			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/networks",
-			"revision": "0f64da0e36de86a0ca1a8f2fc1b0570a0d3f7504",
-			"revisionTime": "2017-03-10T01:59:53Z"
+			"revision": "4d2733c962898d8cd68456bd275aee64256cd2a1",
+			"revisionTime": "2017-12-08T16:30:52Z"
 		},
 		{
 			"checksumSHA1": "68RL/R3cHJvkHPNZmu0GW4xd4cY=",
@@ -547,10 +547,10 @@
 			"revisionTime": "2017-09-08T04:14:34Z"
 		},
 		{
-			"checksumSHA1": "mNRf4F3OjUIivhWTPZD/FjJNuCk=",
+			"checksumSHA1": "/qBBI4mL+5zb0qjmN4hpd70eRM0=",
 			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/subnets",
-			"revision": "4f943e86d0a2c2e1c5c040e00a1358079c0881a1",
-			"revisionTime": "2017-05-24T02:11:01Z"
+			"revision": "4d2733c962898d8cd68456bd275aee64256cd2a1",
+			"revisionTime": "2017-12-08T16:30:52Z"
 		},
 		{
 			"checksumSHA1": "Q9VHGSztw2B4PmN4kyvY9TcJD6c=",

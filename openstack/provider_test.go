@@ -73,11 +73,6 @@ func testAccPreCheck(t *testing.T) {
 	if OS_DEPRECATED_ENVIRONMENT != "" {
 		t.Skip("This environment only runs deprecated tests")
 	}
-
-	// Do not run the test if this is a standalone DNS environment.
-	if OS_DNS_ENVIRONMENT != "" {
-		t.Skip("This environment only runs DNS tests")
-	}
 }
 
 func testAccPreCheckDeprecated(t *testing.T) {
