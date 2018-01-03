@@ -39,7 +39,7 @@ func resourceDatabaseUserV1() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"instance": &schema.Schema{
+			"instance_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -75,7 +75,7 @@ func resourceDatabaseUserV1Create(d *schema.ResourceData, meta interface{}) erro
 
 	userName := d.Get("name").(string)
 	rawDatabases := d.Get("databases").(*schema.Set).List()
-	instanceID := d.Get("instance").(string)
+	instanceID := d.Get("instance_id").(string)
 
 	var dbs databases.BatchCreateOpts
 	for _, db := range rawDatabases {

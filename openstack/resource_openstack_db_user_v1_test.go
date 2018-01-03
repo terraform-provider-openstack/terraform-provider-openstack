@@ -126,6 +126,7 @@ func testAccCheckDatabaseV1UserDestroy(s *terraform.State) error {
 var testAccDatabaseV1UserBasic = fmt.Sprintf(`
 resource "openstack_db_instance_v1" "basic" {
   name = "basic"
+
   datastore {
     version = "%s"
     type    = "%s"
@@ -134,14 +135,14 @@ resource "openstack_db_instance_v1" "basic" {
   network {
     uuid = "%s"
   }
-  size = 10
 
+  size = 10
 }
 
 resource "openstack_db_user_v1" "basic" {
-  name      = "basic"
-  instance  = "${openstack_db_instance_v1.basic.id}"
-  password  = "password"
-  databases = ["testdb"]
+  name        = "basic"
+  instance_id = "${openstack_db_instance_v1.basic.id}"
+  password    = "password"
+  databases   = ["testdb"]
 }
 `, OS_DB_DATASTORE_VERSION, OS_DB_DATASTORE_TYPE, OS_NETWORK_ID)
