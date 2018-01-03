@@ -17,9 +17,6 @@ func resourceDatabaseConfigurationV1() *schema.Resource {
 		Create: resourceDatabaseConfigurationV1Create,
 		Read:   resourceDatabaseConfigurationV1Read,
 		Delete: resourceDatabaseConfigurationV1Delete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
