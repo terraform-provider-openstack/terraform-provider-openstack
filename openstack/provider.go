@@ -156,6 +156,7 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
+			"openstack_compute_flavor_v2":      dataSourceComputeFlavorV2(),
 			"openstack_dns_zone_v2":            dataSourceDNSZoneV2(),
 			"openstack_images_image_v2":        dataSourceImagesImageV2(),
 			"openstack_networking_network_v2":  dataSourceNetworkingNetworkV2(),
