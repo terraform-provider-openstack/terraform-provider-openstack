@@ -8,6 +8,8 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 FEATURES
 
 * __New Resource:__ `openstack_db_database_v1` [GH-179]
+* __New Resource:__ `openstack_db_configuration_v1` [GH-185]
+* __New Data Source:__ `openstack_compute_flavor_v2` [GH-190]
 
 
 IMPROVEMENTS
