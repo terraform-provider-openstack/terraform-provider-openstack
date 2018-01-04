@@ -15,7 +15,7 @@ Manages a V2 flavor resource within OpenStack.
 ```hcl
 resource "openstack_compute_flavor_v2" "test-flavor" {
   name  = "my-flavor"
-  ram   = "8"
+  ram   = "8096"
   vcpus = "2"
   disk  = "20"
 }
