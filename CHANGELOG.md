@@ -25,6 +25,7 @@ BUG FIXES
 * Allow the same `ip_address` with a different `mac_address` to be specified multiple times in the `openstack_networking_port_v2` resource [GH-168]
 * Fixed unhandled error checks which were causing crashes in `openstack_networking_secgroup_v2` and `openstack_networking_network_v2` data sources [GH-201]
 * Fixed unhandled error check when creating `openstack_networking_floatingip_v2` [GH-206]
+* Fixed region detection when using `clouds.yaml` [GH-216]
 
 ## 1.1.0 (December 04, 2017)
 
