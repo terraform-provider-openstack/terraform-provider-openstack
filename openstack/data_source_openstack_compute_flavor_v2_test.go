@@ -45,11 +45,11 @@ func TestAccOpenStackComputeV2FlavorDataSource_testQueries(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_compute_flavor_v2.flavor_1", "name", "m1.acctest"),
+						"data.openstack_compute_flavor_v2.flavor_1", "name", "m1.resize"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "ram", "512"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_compute_flavor_v2.flavor_1", "disk", "5"),
+						"data.openstack_compute_flavor_v2.flavor_1", "disk", "6"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "vcpus", "1"),
 					resource.TestCheckResourceAttr(
@@ -139,7 +139,7 @@ data "openstack_compute_flavor_v2" "flavor_1" {
 
 const testAccOpenStackComputeV2FlavorDataSource_queryDisk = `
 data "openstack_compute_flavor_v2" "flavor_1" {
-  disk = 5
+  disk = 6
 }
 `
 
