@@ -42,6 +42,12 @@ The following arguments are supported:
 * `ip_version` - (Optional) IP version, either 4 (default) or 6. Changing this creates a
     new subnet.
 
+* `ipv6_address_mode` - (Optional) The IPv6 address mode. Valid values are
+  `dhcpv6-stateful`, `dhcpv6-stateless`, or `slaac`.
+
+* `ipv6_ra_mode` - (Optional) The IPv6 Router Advertisement mode. Valid values
+  are `dhcpv6-stateful`, `dhcpv6-stateless`, or `slaac`.
+
 * `name` - (Optional) The name of the subnet. Changing this updates the name of
     the existing subnet.
 
