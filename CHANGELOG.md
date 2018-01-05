@@ -26,6 +26,7 @@ BUG FIXES
 * Fixed unhandled error checks which were causing crashes in `openstack_networking_secgroup_v2` and `openstack_networking_network_v2` data sources [GH-201]
 * Fixed unhandled error check when creating `openstack_networking_floatingip_v2` [GH-206]
 * Fixed region detection when using `clouds.yaml` [GH-216]
+* Make `subnet_id` optional for `openstack_lb_member_v2` [GH-189]
 
 ## 1.1.0 (December 04, 2017)
 
