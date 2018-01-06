@@ -139,7 +139,13 @@ func resourceDatabaseUserV1Read(d *schema.ResourceData, meta interface{}) error 
 	log.Printf("[DEBUG] Retrieved user %s", userName)
 
 	d.Set("name", userName)
-	if err := d.Set("databases", userObj.Databases); err != nil {
+
+	var databases []string
+	for _, dbName := range userObj.Databases {
+		databases = append(databases, dbName.Name)
+	}
+
+	if err := d.Set("databases", databases); err != nil {
 		return fmt.Errorf("Unable to set databases: %s", err)
 	}
 
@@ -221,6 +227,7 @@ func DatabaseUserV1State(client *gophercloud.ServiceClient, instanceID string, u
 	for _, v := range allUsers {
 		if v.Name == userName {
 			exists = true
+			userObj = v
 			return
 		}
 	}

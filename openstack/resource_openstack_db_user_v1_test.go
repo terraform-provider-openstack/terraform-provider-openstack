@@ -30,7 +30,6 @@ func TestAccDatabaseV1User_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPtr(
 						"openstack_db_user_v1.basic", "name", &user.Name),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
