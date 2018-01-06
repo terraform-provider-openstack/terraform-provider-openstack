@@ -152,7 +152,7 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 					},
 				},
 			},
-			"configuration": &schema.Schema{
+			"configuration_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: false,
@@ -271,7 +271,7 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 			instance.ID, err)
 	}
 
-	if configuration, ok := d.GetOk("configuration"); ok {
+	if configuration, ok := d.GetOk("configuration_id"); ok {
 		instances.AttachConfigurationGroup(databaseV1Client, instance.ID, configuration.(string))
 		log.Printf("Attaching configuration %v to the instance %v", configuration, instance.ID)
 		log.Printf("Restarting instance instance %v", instance.ID)
@@ -312,8 +312,8 @@ func resourceDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating database client: %s", err)
 	}
 
-	if d.HasChange("configuration") {
-		old, new := d.GetChange("configuration")
+	if d.HasChange("configuration_id") {
+		old, new := d.GetChange("configuration_id")
 
 		instances.DetachConfigurationGroup(databaseV1Client, d.Id())
 		log.Printf("Detaching configuration %v from the instance %v", old, d.Id())
