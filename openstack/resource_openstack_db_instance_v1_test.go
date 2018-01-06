@@ -7,11 +7,13 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 
+	"github.com/gophercloud/gophercloud/openstack/db/v1/configurations"
 	"github.com/gophercloud/gophercloud/openstack/db/v1/instances"
 )
 
 func TestAccDatabaseV1Instance_basic(t *testing.T) {
 	var instance instances.Instance
+	var configuration configurations.Config
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckDatabase(t) },
@@ -41,6 +43,10 @@ func TestAccDatabaseV1Instance_basic(t *testing.T) {
 						"openstack_db_instance_v1.basic", "database.1.charset", "utf8"),
 					resource.TestCheckResourceAttr(
 						"openstack_db_instance_v1.basic", "database.1.collate", "utf8_general_ci"),
+					resource.TestCheckResourceAttrSet(
+						"openstack_db_instance_v1.basic", "configuration_id"),
+					testAccCheckDatabaseV1ConfigurationExists(
+						"openstack_db_configuration_v1.basic", &configuration),
 				),
 			},
 		},
@@ -103,15 +109,16 @@ func testAccCheckDatabaseV1InstanceDestroy(s *terraform.State) error {
 
 var testAccDatabaseV1InstanceBasic = fmt.Sprintf(`
 resource "openstack_db_instance_v1" "basic" {
-  name = "basic"
+  name             = "basic"
+  configuration_id = "${openstack_db_configuration_v1.basic.id}"
 
   datastore {
-    version = "%s"
-    type    = "%s"
+    version = "%[1]s"
+    type    = "%[2]s"
   }
 
   network {
-    uuid = "%s"
+    uuid = "%[3]s"
   }
 
   size = 10
@@ -133,6 +140,32 @@ resource "openstack_db_instance_v1" "basic" {
     password  = "testpassword"
     databases = ["testdb1"]
     host      = "%%"
+  }
+
+}
+
+resource "openstack_db_configuration_v1" "basic" {
+  name        = "basic"
+  description = "test"
+
+  datastore {
+    version = "%[1]s"
+    type    = "%[2]s"
+  }
+
+  configuration {
+    name  = "collation_server"
+    value = "latin1_swedish_ci"
+  }
+
+  configuration {
+    name  = "collation_database"
+    value = "latin1_swedish_ci"
+  }
+
+  configuration {
+    name  = "max_connections"
+    value = 200
   }
 }
 `, OS_DB_DATASTORE_VERSION, OS_DB_DATASTORE_TYPE, OS_NETWORK_ID)
