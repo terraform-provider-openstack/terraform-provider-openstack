@@ -44,7 +44,7 @@ The following arguments are supported:
 * `flavor_id` - (Required) The flavor ID of the desired flavor for the instance.
     Changing this creates new instance.
 
-* `configuration` - (Optional) Configuration ID to be attached to the instance. Database instance
+* `configuration_id` - (Optional) Configuration ID to be attached to the instance. Database instance
    will be rebooted when configuration is detached.
 
 * `size` - (Required) Specifies the volume size in GB. Changing this creates new instance.
@@ -115,7 +115,7 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `size` - See Argument Reference above.
 * `flavor_id` - See Argument Reference above.
-* `configuration` - See Argument Reference above.
+* `configuration_id` - See Argument Reference above.
 * `datastore/type` - See Argument Reference above.
 * `datastore/version` - See Argument Reference above.
 * `network/uuid` - See Argument Reference above.
