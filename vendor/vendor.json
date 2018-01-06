@@ -361,6 +361,12 @@
 			"revisionTime": "2017-03-10T01:59:53Z"
 		},
 		{
+			"checksumSHA1": "paRHLRizEZWL2sm/vG38zr+DQRM=",
+			"path": "github.com/gophercloud/gophercloud/openstack/db/v1/configurations",
+			"revision": "955c2f50b357c1b6352c031203183190951ba55b",
+			"revisionTime": "2017-12-05T04:13:40Z"
+		},
+		{
 			"checksumSHA1": "jdKwC7fxB11ACuo8CUH2VoleJao=",
 			"path": "github.com/gophercloud/gophercloud/openstack/db/v1/databases",
 			"revision": "c7551a666c4fee120cc314dce91ba3d0663a86f3",
@@ -375,8 +381,8 @@
 		{
 			"checksumSHA1": "qfGm1J6bFl+CIYTby8YRYQdEbJo=",
 			"path": "github.com/gophercloud/gophercloud/openstack/db/v1/instances",
-			"revision": "c7551a666c4fee120cc314dce91ba3d0663a86f3",
-			"revisionTime": "2017-10-29T05:30:20Z"
+			"revision": "955c2f50b357c1b6352c031203183190951ba55b",
+			"revisionTime": "2017-12-05T04:13:40Z"
 		},
 		{
 			"checksumSHA1": "62KZtZ4VoCLsOrXxcFTpp0qJEgw=",
