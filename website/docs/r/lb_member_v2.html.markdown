@@ -31,7 +31,7 @@ The following arguments are supported:
 * `pool_id` - (Required) The id of the pool that this member will be
     assigned to.
 
-* `subnet_id` - (Required) The subnet in which to access the member
+* `subnet_id` - (Optional) The subnet in which to access the member
 
 * `name` - (Optional) Human-readable name for the member.
 

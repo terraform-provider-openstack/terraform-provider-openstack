@@ -32,6 +32,12 @@ data "openstack_networking_subnet_v2" "subnet_1" {
 
 * `ip_version` - (Optional) The IP version of the subnet (either 4 or 6).
 
+* `ipv6_address_mode` - (Optional) The IPv6 address mode. Valid values are
+  `dhcpv6-stateful`, `dhcpv6-stateless`, or `slaac`.
+
+* `ipv6_ra_mode` - (Optional) The IPv6 Router Advertisement mode. Valid values
+  are `dhcpv6-stateful`, `dhcpv6-stateless`, or `slaac`.
+
 * `gateway_ip` - (Optional) The IP of the subnet's gateway.
 
 * `cidr` - (Optional) The CIDR of the subnet.
