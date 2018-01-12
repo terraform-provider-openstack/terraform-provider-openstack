@@ -171,46 +171,70 @@ func resourceFWRuleV1Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	var requireExtraFields bool
+
 	var updateOpts rules.UpdateOpts
 	if d.HasChange("name") {
 		name := d.Get("name").(string)
 		updateOpts.Name = &name
 	}
+
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
 	}
+
 	if d.HasChange("protocol") {
 		protocol := d.Get("protocol").(string)
 		updateOpts.Protocol = &protocol
 	}
+
 	if d.HasChange("action") {
 		action := d.Get("action").(string)
 		updateOpts.Action = &action
 	}
+
 	if d.HasChange("ip_version") {
 		ipVersion := resourceFWRuleV1DetermineIPVersion(d.Get("ip_version").(int))
 		updateOpts.IPVersion = &ipVersion
 	}
+
 	if d.HasChange("source_ip_address") {
+		requireExtraFields = true
 		sourceIPAddress := d.Get("source_ip_address").(string)
 		updateOpts.SourceIPAddress = &sourceIPAddress
 	}
+
 	if d.HasChange("source_port") {
+		requireExtraFields = true
 		sourcePort := d.Get("source_port").(string)
 		updateOpts.SourcePort = &sourcePort
 	}
+
 	if d.HasChange("destination_ip_address") {
+		requireExtraFields = true
 		destinationIPAddress := d.Get("destination_ip_address").(string)
 		updateOpts.DestinationIPAddress = &destinationIPAddress
 	}
+
 	if d.HasChange("destination_port") {
+		requireExtraFields = true
 		destinationPort := d.Get("destination_port").(string)
 		updateOpts.DestinationPort = &destinationPort
+
 	}
+
 	if d.HasChange("enabled") {
 		enabled := d.Get("enabled").(bool)
 		updateOpts.Enabled = &enabled
+	}
+
+	if requireExtraFields {
+		protocol := d.Get("protocol").(string)
+		ipVersion := resourceFWRuleV1DetermineIPVersion(d.Get("ip_version").(int))
+
+		updateOpts.Protocol = &protocol
+		updateOpts.IPVersion = &ipVersion
 	}
 
 	log.Printf("[DEBUG] Updating firewall rules: %#v", updateOpts)
