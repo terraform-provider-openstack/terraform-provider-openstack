@@ -20,6 +20,7 @@ IMPROVEMENTS
 * Several new `openstack_networking_subnet_v2` attributes are now accessible in the data source [GH-199]
 * Added `availability_zone_hints` to the `openstack_networking_network_v2` resource and data source [GH-196]
 * Added `availability_zone_hints` to the `openstack_networking_router_v2` resource [GH-203]
+* User's password field in `openstack_db_instance_v2` resource has been marked sensitive [GH-220]
 
 BUG FIXES
 
