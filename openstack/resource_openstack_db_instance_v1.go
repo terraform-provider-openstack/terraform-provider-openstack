@@ -274,7 +274,6 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 	if configuration, ok := d.GetOk("configuration_id"); ok {
 		instances.AttachConfigurationGroup(databaseV1Client, instance.ID, configuration.(string))
 		log.Printf("Attaching configuration %v to the instance %v", configuration, instance.ID)
-		log.Printf("Restarting instance instance %v", instance.ID)
 	}
 
 	// Store the ID now
@@ -322,9 +321,6 @@ func resourceDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 			instances.AttachConfigurationGroup(databaseV1Client, d.Id(), new.(string))
 			log.Printf("Attaching configuration %v to the instance %v", new, d.Id())
 		}
-
-		instances.Restart(databaseV1Client, d.Id())
-		log.Printf("Restarting instace %v", d.Id())
 	}
 
 	return resourceDatabaseInstanceV1Read(d, meta)
