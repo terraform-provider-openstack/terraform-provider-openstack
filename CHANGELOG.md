@@ -29,6 +29,7 @@ BUG FIXES
 * Fixed unhandled error check when creating `openstack_networking_floatingip_v2` [GH-206]
 * Fixed region detection when using `clouds.yaml` [GH-216]
 * Make `subnet_id` optional for `openstack_lb_member_v2` [GH-189]
+* Fix ordering of DNS servers in `openstack_networking_subnet_v2` [GH-225]
 
 ## 1.1.0 (December 04, 2017)
 
