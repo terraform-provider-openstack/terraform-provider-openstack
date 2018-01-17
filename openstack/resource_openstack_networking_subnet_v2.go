@@ -99,11 +99,10 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				Default:  true,
 			},
 			"dns_nameservers": &schema.Schema{
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: false,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 			"host_routes": &schema.Schema{
 				Type:     schema.TypeList,
@@ -150,6 +149,10 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+	}
+
+	if err = resourceSubnetDNSNameserversV2CheckIsSet(d); err != nil {
+		return err
 	}
 
 	createOpts := SubnetCreateOpts{
@@ -291,6 +294,9 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if d.HasChange("dns_nameservers") {
+		if err = resourceSubnetDNSNameserversV2CheckIsSet(d); err != nil {
+			return err
+		}
 		updateOpts.DNSNameservers = resourceSubnetDNSNameserversV2(d)
 	}
 
@@ -356,12 +362,26 @@ func resourceSubnetAllocationPoolsV2(d *schema.ResourceData) []subnets.Allocatio
 }
 
 func resourceSubnetDNSNameserversV2(d *schema.ResourceData) []string {
-	rawDNSN := d.Get("dns_nameservers").(*schema.Set)
-	dnsn := make([]string, rawDNSN.Len())
-	for i, raw := range rawDNSN.List() {
+	rawDNSN := d.Get("dns_nameservers").([]interface{})
+	dnsn := make([]string, len(rawDNSN))
+	for i, raw := range rawDNSN {
 		dnsn[i] = raw.(string)
 	}
 	return dnsn
+}
+
+func resourceSubnetDNSNameserversV2CheckIsSet(d *schema.ResourceData) error {
+	rawDNSN := d.Get("dns_nameservers").([]interface{})
+	set := make(map[string]*string)
+	for _, raw := range rawDNSN {
+		dns := raw.(string)
+		if set[dns] != nil {
+			return fmt.Errorf("DNS nameservers must appear exactly once: %q", dns)
+		} else {
+			set[dns] = &dns
+		}
+	}
+	return nil
 }
 
 func resourceSubnetHostRoutesV2(d *schema.ResourceData) []subnets.HostRoute {
