@@ -272,7 +272,10 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if configuration, ok := d.GetOk("configuration_id"); ok {
-		instances.AttachConfigurationGroup(databaseV1Client, instance.ID, configuration.(string))
+		err := instances.AttachConfigurationGroup(databaseV1Client, instance.ID, configuration.(string)).ExtractErr()
+		if err != nil {
+			return err
+		}
 		log.Printf("Attaching configuration %v to the instance %v", configuration, instance.ID)
 	}
 
@@ -314,11 +317,17 @@ func resourceDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("configuration_id") {
 		old, new := d.GetChange("configuration_id")
 
-		instances.DetachConfigurationGroup(databaseV1Client, d.Id())
+		err := instances.DetachConfigurationGroup(databaseV1Client, d.Id()).ExtractErr()
+		if err != nil {
+			return err
+		}
 		log.Printf("Detaching configuration %v from the instance %v", old, d.Id())
 
 		if new != "" {
-			instances.AttachConfigurationGroup(databaseV1Client, d.Id(), new.(string))
+			err := instances.AttachConfigurationGroup(databaseV1Client, d.Id(), new.(string)).ExtractErr()
+			if err != nil {
+				return err
+			}
 			log.Printf("Attaching configuration %v to the instance %v", new, d.Id())
 		}
 	}
