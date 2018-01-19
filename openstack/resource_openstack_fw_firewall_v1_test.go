@@ -15,7 +15,7 @@ func TestAccFWFirewallV1_basic(t *testing.T) {
 	var policyID *string
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckFW(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
@@ -40,7 +40,7 @@ func TestAccFWFirewallV1_router(t *testing.T) {
 	var firewall Firewall
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckFW(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
@@ -59,7 +59,7 @@ func TestAccFWFirewallV1_no_router(t *testing.T) {
 	var firewall Firewall
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckFW(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
@@ -79,7 +79,7 @@ func TestAccFWFirewallV1_router_update(t *testing.T) {
 	var firewall Firewall
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckFW(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
@@ -105,7 +105,7 @@ func TestAccFWFirewallV1_router_remove(t *testing.T) {
 	var firewall Firewall
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckFW(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{

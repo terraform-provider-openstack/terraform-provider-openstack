@@ -13,7 +13,7 @@ func TestAccLBV2Monitor_basic(t *testing.T) {
 	var monitor monitors.Monitor
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckLB(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2MonitorDestroy,
 		Steps: []resource.TestStep{
