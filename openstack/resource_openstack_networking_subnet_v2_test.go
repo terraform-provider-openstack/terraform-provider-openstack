@@ -22,6 +22,7 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 				Config: testAccNetworkingV2Subnet_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2SubnetDnsConsistency("openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "allocation_pools.0.start", "192.168.199.100"),
 				),
@@ -194,6 +195,27 @@ func testAccCheckNetworkingV2SubnetExists(n string, subnet *subnets.Subnet) reso
 	}
 }
 
+func testAccCheckNetworkingV2SubnetDnsConsistency(n string, subnet *subnets.Subnet) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		for i, dns := range subnet.DNSNameservers {
+			if dns != rs.Primary.Attributes[fmt.Sprintf("dns_nameservers.%d", i)] {
+				return fmt.Errorf("Dns Nameservers list elements or order is not consistent")
+			}
+		}
+
+		return nil
+	}
+}
+
 const testAccNetworkingV2Subnet_basic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
@@ -203,6 +225,8 @@ resource "openstack_networking_network_v2" "network_1" {
 resource "openstack_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
   network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  dns_nameservers = ["10.0.16.4", "213.186.33.99"]
 
   allocation_pools {
     start = "192.168.199.100"
@@ -222,6 +246,8 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
   gateway_ip = "192.168.199.1"
   network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  dns_nameservers = ["10.0.16.4", "213.186.33.99"]
 
   allocation_pools {
     start = "192.168.199.150"
