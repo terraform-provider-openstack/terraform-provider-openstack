@@ -25,6 +25,9 @@
     recheck-lbaas:
       jobs:
         - terraform-provider-openstack-acceptance-test-lbaas
+    recheck-fwaas:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-fwaas
     periodic:
       jobs:
         - terraform-provider-openstack-unittest
