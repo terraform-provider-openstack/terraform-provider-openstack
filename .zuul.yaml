@@ -22,6 +22,9 @@
     recheck-designate:
       jobs:
         - terraform-provider-openstack-acceptance-test-designate
+    recheck-lbaas:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-lbaas
     periodic:
       jobs:
         - terraform-provider-openstack-unittest
