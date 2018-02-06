@@ -1,8 +1,13 @@
 ## 1.2.1 (Unreleased)
 
+BACKWARDS INCOMPATIBILITIES / NOTES:
+
+* `openstack_compute_keypair_v2` can now generate a private key, however the private key will be stored in your Terraform state. Please use caution.
+
 IMPROVEMENTS
 
 * Added `additional_properties` to `openstack_compute_instance_v2` scheduler hints [GH-230]
+* `openstack_compute_keypair_v2` can now generate a private key [GH-217]
 
 ## 1.2.0 (January 18, 2018)
 
