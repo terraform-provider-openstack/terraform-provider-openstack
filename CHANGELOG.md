@@ -1,4 +1,9 @@
 ## 1.2.1 (Unreleased)
+
+IMPROVEMENTS
+
+* Added `additional_properties` to `openstack_compute_instance_v2` scheduler hints [GH-230]
+
 ## 1.2.0 (January 18, 2018)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
