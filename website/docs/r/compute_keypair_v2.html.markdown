@@ -18,7 +18,7 @@ to the system where Terraform will be run.
 
 ## Example Usage
 
-### Import an Existing Private Key
+### Import an Existing Public Key
 
 ```hcl
 resource "openstack_compute_keypair_v2" "test-keypair" {
