@@ -303,6 +303,11 @@ func resourceComputeInstanceV2() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 						},
+						"additional_properties": &schema.Schema{
+							Type:     schema.TypeMap,
+							Optional: true,
+							ForceNew: true,
+						},
 					},
 				},
 				Set: resourceComputeSchedulerHintsHash,
@@ -898,12 +903,13 @@ func resourceInstanceSchedulerHintsV2(d *schema.ResourceData, schedulerHintsRaw 
 	}
 
 	schedulerHints := schedulerhints.SchedulerHints{
-		Group:           schedulerHintsRaw["group"].(string),
-		DifferentHost:   differentHost,
-		SameHost:        sameHost,
-		Query:           query,
-		TargetCell:      schedulerHintsRaw["target_cell"].(string),
-		BuildNearHostIP: schedulerHintsRaw["build_near_host_ip"].(string),
+		Group:                schedulerHintsRaw["group"].(string),
+		DifferentHost:        differentHost,
+		SameHost:             sameHost,
+		Query:                query,
+		TargetCell:           schedulerHintsRaw["target_cell"].(string),
+		BuildNearHostIP:      schedulerHintsRaw["build_near_host_ip"].(string),
+		AdditionalProperties: schedulerHintsRaw["additional_properties"].(map[string]interface{}),
 	}
 
 	return schedulerHints
@@ -1015,6 +1021,12 @@ func resourceComputeSchedulerHintsHash(v interface{}) int {
 
 	if m["build_host_near_ip"] != nil {
 		buf.WriteString(fmt.Sprintf("%s-", m["build_host_near_ip"].(string)))
+	}
+
+	if m["additional_properties"] != nil {
+		for _, v := range m["additional_properties"].(map[string]interface{}) {
+			buf.WriteString(fmt.Sprintf("%s-", v))
+		}
 	}
 
 	buf.WriteString(fmt.Sprintf("%s-", m["different_host"].([]interface{})))
