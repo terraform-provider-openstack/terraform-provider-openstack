@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestAccOpenStackIdentityTokenV3DataSource_basic(t *testing.T) {
+func TestAccOpenStackIdentityAuthScopeV3DataSource_basic(t *testing.T) {
 	userName := os.Getenv("OS_USERNAME")
 	projectName := os.Getenv("OS_PROJECT_NAME")
 
@@ -18,20 +18,20 @@ func TestAccOpenStackIdentityTokenV3DataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccOpenStackIdentityTokenV3DataSource_basic,
+				Config: testAccOpenStackIdentityAuthScopeV3DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityTokenV3DataSourceID("data.openstack_identity_token_v3.token"),
+					testAccCheckIdentityAuthScopeV3DataSourceID("data.openstack_identity_auth_scope_v3.token"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_identity_token_v3.token", "user_name", userName),
+						"data.openstack_identity_auth_scope_v3.token", "user_name", userName),
 					resource.TestCheckResourceAttr(
-						"data.openstack_identity_token_v3.token", "project_name", projectName),
+						"data.openstack_identity_auth_scope_v3.token", "project_name", projectName),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckIdentityTokenV3DataSourceID(n string) resource.TestCheckFunc {
+func testAccCheckIdentityAuthScopeV3DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -46,8 +46,8 @@ func testAccCheckIdentityTokenV3DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-const testAccOpenStackIdentityTokenV3DataSource_basic = `
-data "openstack_identity_token_v3" "token" {
+const testAccOpenStackIdentityAuthScopeV3DataSource_basic = `
+data "openstack_identity_auth_scope_v3" "token" {
 	name = "my_token"
 }
 `

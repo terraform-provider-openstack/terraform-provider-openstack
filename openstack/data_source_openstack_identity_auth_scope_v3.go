@@ -8,9 +8,9 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 )
 
-func dataSourceIdentityTokenV3() *schema.Resource {
+func dataSourceIdentityAuthScopeV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIdentityTokenV3Read,
+		Read: dataSourceIdentityAuthScopeV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -83,7 +83,7 @@ func dataSourceIdentityTokenV3() *schema.Resource {
 	}
 }
 
-func dataSourceIdentityTokenV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	identityClient, err := config.identityV3Client(GetRegion(d, config))
 	tokenID := config.OsClient.TokenID
