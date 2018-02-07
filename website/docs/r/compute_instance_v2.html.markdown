@@ -418,6 +418,9 @@ The `scheduler_hints` block supports:
 * `build_near_host_ip` - (Optional) An IP Address in CIDR form. The instance
     will be placed on a compute node that is in the same subnet.
 
+* `additional_properties` - (Optional) Arbitrary key/value pairs of additional
+  properties to pass to the scheduler.
+
 The `personality` block supports:
 
 * `file` - (Required) The absolute path of the destination file.

@@ -307,10 +307,10 @@
 			"revisionTime": "2017-03-10T01:59:53Z"
 		},
 		{
-			"checksumSHA1": "tOmntqlmZ/r8aObUChNloddLhwk=",
+			"checksumSHA1": "+hlElX7o8ULWTc0r7oGyDlOnwWM=",
 			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/schedulerhints",
-			"revision": "0f64da0e36de86a0ca1a8f2fc1b0570a0d3f7504",
-			"revisionTime": "2017-03-10T01:59:53Z"
+			"revision": "3b177406222d4b76d93e90d6ab412e7b7dc160f4",
+			"revisionTime": "2018-02-02T23:12:48Z"
 		},
 		{
 			"checksumSHA1": "jNrUTQf+9dYfaD7YqvKwC+kGvyY=",
