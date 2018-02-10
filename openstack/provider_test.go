@@ -27,6 +27,8 @@ var (
 	OS_POOL_NAME              = os.Getenv("OS_POOL_NAME")
 	OS_REGION_NAME            = os.Getenv("OS_REGION_NAME")
 	OS_SWIFT_ENVIRONMENT      = os.Getenv("OS_SWIFT_ENVIRONMENT")
+	OS_LB_ENVIRONMENT         = os.Getenv("OS_LB_ENVIRONMENT")
+	OS_FW_ENVIRONMENT         = os.Getenv("OS_FW_ENVIRONMENT")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -104,6 +106,22 @@ func testAccPreCheckDatabase(t *testing.T) {
 
 	if OS_DB_ENVIRONMENT == "" {
 		t.Skip("This environment does not support Database tests")
+	}
+}
+
+func testAccPreCheckLB(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_LB_ENVIRONMENT == "" {
+		t.Skip("This environment does not support LB tests")
+	}
+}
+
+func testAccPreCheckFW(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_FW_ENVIRONMENT == "" {
+		t.Skip("This environment does not support FW tests")
 	}
 }
 
