@@ -60,6 +60,18 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 		Enabled:              false,
 	}
 
+	rule5 := &rules.Rule{
+		Name:                 "rule_1",
+		Protocol:             "udp",
+		Action:               "allow",
+		Description:          "Terraform accept test updated",
+		IPVersion:            4,
+		SourceIPAddress:      "1.2.3.0/24",
+		DestinationIPAddress: "4.3.2.8",
+		SourcePort:           "666",
+		Enabled:              false,
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -87,6 +99,12 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 				Config: testAccFWRuleV1_basic_4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", rule4),
+				),
+			},
+			resource.TestStep{
+				Config: testAccFWRuleV1_basic_5,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", rule5),
 				),
 			},
 		},
@@ -283,6 +301,20 @@ resource "openstack_fw_rule_v1" "rule_1" {
 	destination_ip_address = "4.3.2.8"
 	source_port = "666"
 	destination_port = "777"
+	enabled = false
+}
+`
+
+const testAccFWRuleV1_basic_5 = `
+resource "openstack_fw_rule_v1" "rule_1" {
+	name = "rule_1"
+	description = "Terraform accept test updated"
+	protocol = "udp"
+	action = "allow"
+	ip_version = 4
+	source_ip_address = "1.2.3.0/24"
+	destination_ip_address = "4.3.2.8"
+	source_port = "666"
 	enabled = false
 }
 `

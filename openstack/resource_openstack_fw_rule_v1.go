@@ -208,6 +208,9 @@ func resourceFWRuleV1Update(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("source_port") {
 		sourcePort := d.Get("source_port").(string)
+		if sourcePort == "" {
+			sourcePort = "0"
+		}
 		updateOpts.SourcePort = &sourcePort
 
 		// Also include the protocol.
@@ -226,6 +229,10 @@ func resourceFWRuleV1Update(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("destination_port") {
 		destinationPort := d.Get("destination_port").(string)
+		if destinationPort == "" {
+			destinationPort = "0"
+		}
+
 		updateOpts.DestinationPort = &destinationPort
 
 		// Also include the protocol.
