@@ -463,7 +463,7 @@ equal to what the chosen flavor supports.
 The following example shows how to create an instance with multiple ephemeral
 disks:
 
-```
+```hcl
 resource "openstack_compute_instance_v2" "foo" {
   name            = "terraform-test"
   security_groups = ["default"]
@@ -491,6 +491,27 @@ resource "openstack_compute_instance_v2" "foo" {
     source_type           = "blank"
     volume_size           = 1
   }
+}
+```
+
+### Instances and Security Groups
+
+When referencing a security group resource in an instance resource, always
+use the _name_ of the security group. If you specify the ID of the security
+group, Terraform will remove and reapply the security group upon each call.
+This is because the OpenStack Compute API returns the names of the associated
+security groups and not their IDs.
+
+Note the following example:
+
+```hcl
+resource "openstack_networking_secgroup_v2" "sg_1" {
+  name = "sg_1"
+}
+
+resource "openstack_compute_instance_v2" "foo" {
+  name            = "terraform-test"
+  security_groups = ["${openstack_networking_secgroup_v2.sg_1.name}"]
 }
 ```
 
