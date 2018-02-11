@@ -13,7 +13,7 @@ func TestAccLBV2Pool_basic(t *testing.T) {
 	var pool pools.Pool
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckLB(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2PoolDestroy,
 		Steps: []resource.TestStep{

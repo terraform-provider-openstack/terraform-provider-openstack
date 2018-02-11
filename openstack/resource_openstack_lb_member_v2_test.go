@@ -14,7 +14,7 @@ func TestAccLBV2Member_basic(t *testing.T) {
 	var member_2 pools.Member
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckLB(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2MemberDestroy,
 		Steps: []resource.TestStep{
