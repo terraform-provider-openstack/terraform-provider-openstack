@@ -12,6 +12,7 @@ func resourceComputeFlavorV2() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeFlavorV2Create,
 		Read:   resourceComputeFlavorV2Read,
+		Update: resourceComputeFlavorV2Update,
 		Delete: resourceComputeFlavorV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -65,6 +66,11 @@ func resourceComputeFlavorV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"extra_specs": &schema.Schema{
+				Type:     schema.TypeMap,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -99,6 +105,19 @@ func resourceComputeFlavorV2Create(d *schema.ResourceData, meta interface{}) err
 
 	d.SetId(fl.ID)
 
+	extraSpecsRaw := d.Get("extra_specs").(map[string]interface{})
+	if len(extraSpecsRaw) > 0 {
+		extraSpecs := make(flavors.ExtraSpecsOpts, len(extraSpecsRaw))
+		for k, v := range extraSpecsRaw {
+			extraSpecs[k] = v.(string)
+		}
+
+		_, err := flavors.CreateExtraSpecs(computeClient, fl.ID, extraSpecs).Extract()
+		if err != nil {
+			return fmt.Errorf("Error creating extra specs for flavor %s: %s", fl.ID, err)
+		}
+	}
+
 	return resourceComputeFlavorV2Read(d, meta)
 }
 
@@ -124,7 +143,51 @@ func resourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) error
 	// d.Set("ephemeral", fl.Ephemeral) TODO: Implement this in gophercloud
 	d.Set("region", GetRegion(d, config))
 
+	es, err := flavors.ListExtraSpecs(computeClient, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("Error reading extra specs for flavor %s: %s", d.Id(), err)
+	}
+
+	if err := d.Set("extra_specs", es); err != nil {
+		log.Printf("[WARN] Unable to set extra specs for flavor %s: %s", d.Id(), err)
+	}
+
 	return nil
+}
+
+func resourceComputeFlavorV2Update(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+	}
+
+	if d.HasChange("extra_specs") {
+		oldES, newES := d.GetChange("extra_specs")
+
+		// Delete all old extra specs.
+		for oldKey, _ := range oldES.(map[string]interface{}) {
+			if err := flavors.DeleteExtraSpec(computeClient, d.Id(), oldKey).ExtractErr(); err != nil {
+				return fmt.Errorf("Error deleting extra spec %s from flavor %s: %s", oldKey, d.Id(), err)
+			}
+		}
+
+		// Add new extra specs.
+		newESRaw := newES.(map[string]interface{})
+		if len(newESRaw) > 0 {
+			extraSpecs := make(flavors.ExtraSpecsOpts, len(newESRaw))
+			for k, v := range newESRaw {
+				extraSpecs[k] = v.(string)
+			}
+
+			_, err := flavors.CreateExtraSpecs(computeClient, d.Id(), extraSpecs).Extract()
+			if err != nil {
+				return fmt.Errorf("Error creating extra specs for flavor %s: %s", d.Id(), err)
+			}
+		}
+	}
+
+	return resourceComputeFlavorV2Read(d, meta)
 }
 
 func resourceComputeFlavorV2Delete(d *schema.ResourceData, meta interface{}) error {
