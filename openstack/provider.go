@@ -158,6 +158,7 @@ func Provider() terraform.ResourceProvider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"openstack_compute_flavor_v2":      dataSourceComputeFlavorV2(),
 			"openstack_dns_zone_v2":            dataSourceDNSZoneV2(),
+			"openstack_identity_role_v3":       dataSourceIdentityRoleV3(),
 			"openstack_images_image_v2":        dataSourceImagesImageV2(),
 			"openstack_networking_network_v2":  dataSourceNetworkingNetworkV2(),
 			"openstack_networking_subnet_v2":   dataSourceNetworkingSubnetV2(),
@@ -186,6 +187,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_fw_policy_v1":                    resourceFWPolicyV1(),
 			"openstack_fw_rule_v1":                      resourceFWRuleV1(),
 			"openstack_identity_project_v3":             resourceIdentityProjectV3(),
+			"openstack_identity_role_v3":                resourceIdentityRoleV3(),
 			"openstack_identity_user_v3":                resourceIdentityUserV3(),
 			"openstack_images_image_v2":                 resourceImagesImageV2(),
 			"openstack_lb_member_v1":                    resourceLBMemberV1(),
