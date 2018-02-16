@@ -49,19 +49,7 @@ func TestAccNetworkingV2SubnetPoolDataSourceTestQueries(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceIPversion,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
-				),
-			},
-			resource.TestStep{
-				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceShared,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
-				),
-			},
-			resource.TestStep{
-				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceIsDefault,
+				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceDescription,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
 				),
@@ -126,28 +114,10 @@ data "openstack_networking_subnetpool_v2" "subnetpool_1" {
 }
 `, testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool)
 
-var testAccOpenStackNetworkingSubnetPoolV2DataSourceIPversion = fmt.Sprintf(`
+var testAccOpenStackNetworkingSubnetPoolV2DataSourceDescription = fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnetpool_v2" "subnetpool_1" {
-	ip_version = 4
-}
-`, testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool)
-
-var testAccOpenStackNetworkingSubnetPoolV2DataSourceShared = fmt.Sprintf(`
-%s
-
-data "openstack_networking_subnetpool_v2" "subnetpool_1" {
-	name = "${openstack_networking_subnetpool_v2.subnetpool_1.name}"
-	shared = false
-}
-`, testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool)
-
-var testAccOpenStackNetworkingSubnetPoolV2DataSourceIsDefault = fmt.Sprintf(`
-%s
-
-data "openstack_networking_subnetpool_v2" "subnetpool_1" {
-	name = "${openstack_networking_subnetpool_v2.subnetpool_1.name}"
-	is_default = false
+	description = "${openstack_networking_subnetpool_v2.subnetpool_1.description}"
 }
 `, testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool)
