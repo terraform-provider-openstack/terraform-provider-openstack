@@ -156,12 +156,13 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"openstack_compute_flavor_v2":      dataSourceComputeFlavorV2(),
-			"openstack_dns_zone_v2":            dataSourceDNSZoneV2(),
-			"openstack_images_image_v2":        dataSourceImagesImageV2(),
-			"openstack_networking_network_v2":  dataSourceNetworkingNetworkV2(),
-			"openstack_networking_subnet_v2":   dataSourceNetworkingSubnetV2(),
-			"openstack_networking_secgroup_v2": dataSourceNetworkingSecGroupV2(),
+			"openstack_compute_flavor_v2":        dataSourceComputeFlavorV2(),
+			"openstack_dns_zone_v2":              dataSourceDNSZoneV2(),
+			"openstack_images_image_v2":          dataSourceImagesImageV2(),
+			"openstack_networking_network_v2":    dataSourceNetworkingNetworkV2(),
+			"openstack_networking_subnet_v2":     dataSourceNetworkingSubnetV2(),
+			"openstack_networking_secgroup_v2":   dataSourceNetworkingSecGroupV2(),
+			"openstack_networking_subnetpool_v2": dataSourceNetworkingSubnetPoolV2(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -206,6 +207,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_networking_router_route_v2":      resourceNetworkingRouterRouteV2(),
 			"openstack_networking_secgroup_v2":          resourceNetworkingSecGroupV2(),
 			"openstack_networking_secgroup_rule_v2":     resourceNetworkingSecGroupRuleV2(),
+			"openstack_networking_subnetpool_v2":        resourceNetworkingSubnetPoolV2(),
 			"openstack_objectstorage_container_v1":      resourceObjectStorageContainerV1(),
 			"openstack_objectstorage_object_v1":         resourceObjectStorageObjectV1(),
 		},

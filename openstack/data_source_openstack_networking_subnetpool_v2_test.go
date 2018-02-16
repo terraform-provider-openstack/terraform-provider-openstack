@@ -1,0 +1,153 @@
+package openstack
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
+)
+
+func TestAccNetworkingV2SubnetPoolDataSourceBasic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool,
+			},
+			resource.TestStep{
+				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceBasic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_subnetpool_v2.subnetpool_1", "name", "subnetpool_1"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2SubnetPoolDataSourceTestQueries(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool,
+			},
+			resource.TestStep{
+				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceDefaultQuota,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourcePrefixLenghts,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceIPversion,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceShared,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceIsDefault,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
+				),
+			},
+		},
+	})
+}
+
+func testAccCheckNetworkingSubnetPoolV2DataSourceID(n string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Can't find subnetpool data source: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("Subnetpool data source ID not set")
+		}
+
+		return nil
+	}
+}
+
+const testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool = `
+resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
+	name = "subnetpool_1"
+	description = "terraform subnetpool acceptance test"
+
+	prefixes = ["10.10.0.0/16", "10.11.11.0/24"]
+
+	default_quota = 4
+
+	default_prefixlen = 25
+	min_prefixlen = 24
+	max_prefixlen = 30
+}
+`
+
+var testAccOpenStackNetworkingSubnetPoolV2DataSourceBasic = fmt.Sprintf(`
+%s
+
+data "openstack_networking_subnetpool_v2" "subnetpool_1" {
+	name = "${openstack_networking_subnetpool_v2.subnetpool_1.name}"
+}
+`, testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool)
+
+var testAccOpenStackNetworkingSubnetPoolV2DataSourceDefaultQuota = fmt.Sprintf(`
+%s
+
+data "openstack_networking_subnetpool_v2" "subnetpool_1" {
+	default_quota = 4
+}
+`, testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool)
+
+var testAccOpenStackNetworkingSubnetPoolV2DataSourcePrefixLenghts = fmt.Sprintf(`
+%s
+
+data "openstack_networking_subnetpool_v2" "subnetpool_1" {
+	default_prefixlen = 25
+	min_prefixlen = 24
+	max_prefixlen = 30
+}
+`, testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool)
+
+var testAccOpenStackNetworkingSubnetPoolV2DataSourceIPversion = fmt.Sprintf(`
+%s
+
+data "openstack_networking_subnetpool_v2" "subnetpool_1" {
+	ip_version = 4
+}
+`, testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool)
+
+var testAccOpenStackNetworkingSubnetPoolV2DataSourceShared = fmt.Sprintf(`
+%s
+
+data "openstack_networking_subnetpool_v2" "subnetpool_1" {
+	name = "${openstack_networking_subnetpool_v2.subnetpool_1.name}"
+	shared = false
+}
+`, testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool)
+
+var testAccOpenStackNetworkingSubnetPoolV2DataSourceIsDefault = fmt.Sprintf(`
+%s
+
+data "openstack_networking_subnetpool_v2" "subnetpool_1" {
+	name = "${openstack_networking_subnetpool_v2.subnetpool_1.name}"
+	is_default = false
+}
+`, testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool)
