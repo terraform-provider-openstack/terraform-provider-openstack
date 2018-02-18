@@ -31,12 +31,6 @@ func dataSourceNetworkingSubnetPoolV2() *schema.Resource {
 				Computed: true,
 				ForceNew: false,
 			},
-			"tenant_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
 			"project_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -142,24 +136,8 @@ func dataSourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface
 		listOpts.DefaultQuota = v.(int)
 	}
 
-	if v, ok := d.GetOk("tenant_id"); ok {
-		listOpts.TenantID = v.(string)
-	}
-
 	if v, ok := d.GetOk("project_id"); ok {
 		listOpts.ProjectID = v.(string)
-	}
-
-	if v, ok := d.GetOk("created_at"); ok {
-		listOpts.CreatedAt = v.(string)
-	}
-
-	if v, ok := d.GetOk("updated_at"); ok {
-		listOpts.UpdatedAt = v.(string)
-	}
-
-	if v, ok := d.GetOk("prefixes"); ok {
-		listOpts.Prefixes = v.([]string)
 	}
 
 	if v, ok := d.GetOk("default_prefixlen"); ok {
@@ -225,11 +203,9 @@ func dataSourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface
 
 	d.Set("name", subnetPool.Name)
 	d.Set("default_quota", subnetPool.DefaultQuota)
-	d.Set("tenant_id", subnetPool.TenantID)
 	d.Set("project_id", subnetPool.ProjectID)
 	d.Set("created_at", subnetPool.CreatedAt)
 	d.Set("updated_at", subnetPool.UpdatedAt)
-	d.Set("prefixes", subnetPool.Prefixes)
 	d.Set("default_prefixlen", subnetPool.DefaultPrefixLen)
 	d.Set("min_prefixlen", subnetPool.MinPrefixLen)
 	d.Set("max_prefixlen", subnetPool.MaxPrefixLen)
@@ -240,6 +216,10 @@ func dataSourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface
 	d.Set("description", subnetPool.Description)
 	d.Set("revision_number", subnetPool.RevisionNumber)
 	d.Set("region", GetRegion(d, config))
+
+	if err := d.Set("prefixes", subnetPool.Prefixes); err != nil {
+		log.Printf("[WARN] unable to set prefixes: %s", err)
+	}
 
 	return nil
 }

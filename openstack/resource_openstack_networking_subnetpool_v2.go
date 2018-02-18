@@ -43,12 +43,6 @@ func resourceNetworkingSubnetPoolV2() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
-			"tenant_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
-			},
 			"project_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -57,13 +51,11 @@ func resourceNetworkingSubnetPoolV2() *schema.Resource {
 			},
 			"created_at": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
 			"updated_at": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
@@ -123,7 +115,6 @@ func resourceNetworkingSubnetPoolV2() *schema.Resource {
 			},
 			"revision_number": &schema.Schema{
 				Type:     schema.TypeInt,
-				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
@@ -147,7 +138,6 @@ func resourceNetworkingSubnetPoolV2Create(d *schema.ResourceData, meta interface
 		subnetpools.CreateOpts{
 			Name:             d.Get("name").(string),
 			DefaultQuota:     d.Get("default_quota").(int),
-			TenantID:         d.Get("tenant_id").(string),
 			ProjectID:        d.Get("project_id").(string),
 			Prefixes:         resourceSubnetPoolPrefixesV2(d),
 			DefaultPrefixLen: d.Get("default_prefixlen").(int),
@@ -176,6 +166,9 @@ func resourceNetworkingSubnetPoolV2Create(d *schema.ResourceData, meta interface
 	}
 
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack Neutron Subnetpool: %s", err)
+	}
 
 	d.SetId(s.ID)
 
@@ -199,11 +192,9 @@ func resourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface{}
 
 	d.Set("name", s.Name)
 	d.Set("default_quota", s.DefaultQuota)
-	d.Set("tenant_id", s.TenantID)
 	d.Set("project_id", s.ProjectID)
 	d.Set("created_at", s.CreatedAt)
 	d.Set("updated_at", s.UpdatedAt)
-	d.Set("prefixes", s.Prefixes)
 	d.Set("default_prefixlen", s.DefaultPrefixLen)
 	d.Set("min_prefixlen", s.MinPrefixLen)
 	d.Set("max_prefixlen", s.MaxPrefixLen)
@@ -214,6 +205,10 @@ func resourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface{}
 	d.Set("description", s.Description)
 	d.Set("revision_number", s.RevisionNumber)
 	d.Set("region", GetRegion(d, config))
+
+	if err := d.Set("prefixes", s.Prefixes); err != nil {
+		log.Printf("[WARN] unable to set prefixes: %s", err)
+	}
 
 	return nil
 }
@@ -234,6 +229,10 @@ func resourceNetworkingSubnetPoolV2Update(d *schema.ResourceData, meta interface
 	if d.HasChange("default_quota") {
 		v := d.Get("default_quota").(int)
 		updateOpts.DefaultQuota = &v
+	}
+
+	if d.HasChange("project_id") {
+		updateOpts.ProjectID = d.Get("project_id").(string)
 	}
 
 	if d.HasChange("prefixes") {
@@ -304,7 +303,6 @@ func resourceNetworkingSubnetPoolV2Delete(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Error deleting OpenStack Neutron Subnetpool: %s", err)
 	}
 
-	d.SetId("")
 	return nil
 }
 

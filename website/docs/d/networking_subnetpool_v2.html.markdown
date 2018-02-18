@@ -33,10 +33,6 @@ data "openstack_networking_subnetpool_v2" "subnetpool_1" {
 
 * `project_id` - (Optional) The owner of the subnetpool.
 
-* `created_at` - The time at which subnetpool was created.
-
-* `updated_at` - The time at which subnetpool was created.
-
 * `prefixes` - (Optional) A list of subnet prefixes that are assigned to the
     subnetpool.
 
@@ -68,10 +64,9 @@ are exported:
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `default_quota` - See Argument Reference above.
-* `tenant_id` - See Argument Reference above.
 * `project_id` - See Argument Reference above.
-* `created_at` - See Argument Reference above.
-* `updated_at` - See Argument Reference above.
+* `created_at` -  The time at which subnetpool was created.
+* `updated_at` - The time at which subnetpool was created.
 * `prefixes` - See Argument Reference above.
 * `default_prefixlen` - See Argument Reference above.
 * `min_prefixlen` - See Argument Reference above.

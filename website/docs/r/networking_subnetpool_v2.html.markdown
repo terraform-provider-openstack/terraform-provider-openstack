@@ -35,9 +35,6 @@ The following arguments are supported:
     allocated from the subnetpool for project subnets. Changing this updates the
     default quota of the existing subnetpool.
 
-* `tenant_id` - (Optional) The owner of the subnetpool. Required if admin wants to
-    create a subnetpool for another tenant. Changing this creates a new subnetpool.
-
 * `project_id` - (Optional) The owner of the subnetpool. Required if admin wants to
     create a subnetpool for another project. Changing this creates a new subnetpool.
 
@@ -85,7 +82,6 @@ The following attributes are exported:
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `default_quota` - See Argument Reference above.
-* `tenant_id` - See Argument Reference above.
 * `project_id` - See Argument Reference above.
 * `created_at` - The time at which subnetpool was created.
 * `updated_at` - The time at which subnetpool was created.
