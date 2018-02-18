@@ -163,6 +163,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_dns_zone_v2":              dataSourceDNSZoneV2(),
 			"openstack_identity_role_v3":         dataSourceIdentityRoleV3(),
 			"openstack_identity_project_v3":      dataSourceIdentityProjectV3(),
+			"openstack_identity_user_v3":         dataSourceIdentityUserV3(),
 			"openstack_images_image_v2":          dataSourceImagesImageV2(),
 			"openstack_networking_network_v2":    dataSourceNetworkingNetworkV2(),
 			"openstack_networking_subnet_v2":     dataSourceNetworkingSubnetV2(),
