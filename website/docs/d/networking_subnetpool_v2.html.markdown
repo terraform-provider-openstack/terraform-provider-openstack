@@ -29,8 +29,6 @@ data "openstack_networking_subnetpool_v2" "subnetpool_1" {
 * `default_quota` - (Optional) The per-project quota on the prefix space that
     can be allocated from the subnetpool for project subnets.
 
-* `tenant_id` - (Optional) The owner of the subnetpool.
-
 * `project_id` - (Optional) The owner of the subnetpool.
 
 * `prefixes` - (Optional) A list of subnet prefixes that are assigned to the
