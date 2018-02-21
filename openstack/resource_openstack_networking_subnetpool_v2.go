@@ -69,16 +69,19 @@ func resourceNetworkingSubnetPoolV2() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: false,
+				Computed: true,
 			},
 			"min_prefixlen": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: false,
+				Computed: true,
 			},
 			"max_prefixlen": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: false,
+				Computed: true,
 			},
 			"address_scope_id": &schema.Schema{
 				Type:     schema.TypeString,
