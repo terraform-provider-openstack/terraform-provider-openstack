@@ -44,6 +44,8 @@ data "openstack_networking_subnet_v2" "subnet_1" {
 
 * `subnet_id` - (Optional) The ID of the subnet.
 
+* `subnetpool_id` - (Optional) The ID of the subnetpool associated with the subnet.
+
 * `network_id` - (Optional) The ID of the network the subnet belongs to.
 
 * `tenant_id` - (Optional) The owner of the subnet.

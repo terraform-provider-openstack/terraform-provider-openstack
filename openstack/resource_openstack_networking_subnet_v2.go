@@ -135,6 +135,11 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				Computed:     true,
 				ValidateFunc: validateSubnetV2IPv6Mode,
 			},
+			"subnetpool_id": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"value_specs": &schema.Schema{
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -166,6 +171,7 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 			AllocationPools: resourceSubnetAllocationPoolsV2(d),
 			DNSNameservers:  resourceSubnetDNSNameserversV2(d),
 			HostRoutes:      resourceSubnetHostRoutesV2(d),
+			SubnetPoolID:    d.Get("subnetpool_id").(string),
 			EnableDHCP:      nil,
 		},
 		MapValueSpecs(d),
@@ -237,6 +243,7 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("network_id", s.NetworkID)
 	d.Set("ipv6_address_mode", s.IPv6AddressMode)
 	d.Set("ipv6_ra_mode", s.IPv6RAMode)
+	d.Set("subnetpool_id", s.SubnetPoolID)
 
 	// Set the allocation_pools
 	var allocationPools []map[string]interface{}
