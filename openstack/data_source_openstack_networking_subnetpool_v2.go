@@ -157,19 +157,19 @@ func dataSourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface
 	}
 
 	if v, ok := d.GetOk("ip_version"); ok {
-		listOpts.IPversion = v.(int)
+		listOpts.IPVersion = v.(int)
 	}
 
 	if v, ok := d.GetOk("shared"); ok {
-		listOpts.Shared = v.(bool)
+		listOpts.Shared = v.(*bool)
 	}
 
 	if v, ok := d.GetOk("description"); ok {
 		listOpts.Description = v.(string)
 	}
 
-	if v, ok := d.GetOk("is_default"); ok {
-		listOpts.IsDefault = v.(bool)
+	if v, ok := d.GetOk("default"); ok {
+		listOpts.IsDefault = v.(*bool)
 	}
 
 	if v, ok := d.GetOk("revision_number"); ok {
