@@ -541,10 +541,10 @@
 			"revisionTime": "2017-05-24T13:09:59Z"
 		},
 		{
-			"checksumSHA1": "FfrAXT0/uBEcrHl2jaPSSp2eY0U=",
+			"checksumSHA1": "nbFJZRXhTvv4g0LK+FCzG0W11G4=",
 			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools",
-			"revision": "cf2bbaa52ab69d063466a3c46a5918d05d752625",
-			"revisionTime": "2018-02-15T05:19:35Z"
+			"revision": "47e78c6bba46f5484da66c8e9ba0ecb94093641c",
+			"revisionTime": "2018-02-24T04:26:33Z"
 		},
 		{
 			"checksumSHA1": "YnP/P8Tr8hHw+NVZ/KegcGCbK0I=",
