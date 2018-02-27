@@ -65,6 +65,9 @@ The following arguments are supported:
 
 * `value_specs` - (Optional) Map of additional driver-specific options.
 
+* `vendor_options` - (Optional) Map of additional vendor-specific options.
+    Supported options are described below.
+
 * `availability_zone_hints` -  (Optional) An availability zone is used to make 
     network resources highly available. Used for resources with high availability so that they are scheduled on different availability zones. Changing
     this creates a new router.
@@ -74,6 +77,11 @@ The `external_fixed_ip` block supports:
 * `subnet_id` - (Optional) Subnet in which the fixed IP belongs to.
 
 * `ip_address` - (Optional) The IP address to set on the router.
+
+The `vendor_options` block supports:
+
+* `set_router_gateway_after_create` - (Optional) Boolean to control whether
+    the Router gateway is assigned during creation or updated after creation.
 
 ## Attributes Reference
 
