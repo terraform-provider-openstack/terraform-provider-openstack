@@ -15,6 +15,7 @@ Manages a V2 Neutron subnetpool resource within OpenStack.
 ```hcl
 resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
   name = "my_ipv6_pool"
+  ip_version = 6
   prefixes = ["fdf7:b13d:dead:beef::/64", "fd65:86cc:a334:39b7::/64"]
 }
 ```

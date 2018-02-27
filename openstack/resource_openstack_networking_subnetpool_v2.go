@@ -3,7 +3,6 @@ package openstack
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -265,14 +264,8 @@ func resourceNetworkingSubnetPoolV2Update(d *schema.ResourceData, meta interface
 	}
 
 	if d.HasChange("is_default") {
-		isDefaultRaw := d.Get("is_default").(string)
-		if isDefaultRaw != "" {
-			isDefault, err := strconv.ParseBool(isDefaultRaw)
-			if err != nil {
-				return fmt.Errorf("is_default, if provided, must be either 'true' or 'false': %v", err)
-			}
-			updateOpts.IsDefault = &isDefault
-		}
+		v := d.Get("is_default").(bool)
+		updateOpts.IsDefault = &v
 	}
 
 	log.Printf("[DEBUG] Updating Subnetpool %s with options: %+v", d.Id(), updateOpts)
@@ -282,7 +275,7 @@ func resourceNetworkingSubnetPoolV2Update(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Error updating OpenStack Neutron Subnetpool: %s", err)
 	}
 
-	return resourceNetworkingNetworkV2Read(d, meta)
+	return resourceNetworkingSubnetPoolV2Read(d, meta)
 }
 
 func resourceNetworkingSubnetPoolV2Delete(d *schema.ResourceData, meta interface{}) error {

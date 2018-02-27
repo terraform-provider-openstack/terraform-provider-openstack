@@ -52,8 +52,6 @@ data "openstack_networking_subnetpool_v2" "subnetpool_1" {
 
 * `is_default` - (Optional) Whether the subnetpool is default subnetpool or not.
 
-* `revision_number` - The revision number of the subnetpool.
-
 ## Attributes Reference
 
 `id` is set to the ID of the found subnetpool. In addition, the following attributes
@@ -74,5 +72,4 @@ are exported:
 * `shared` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `is_default` - See Argument Reference above.
-* `revision_number` - See Argument Reference above.
-* `value_specs` - See Argument Reference above.
+* `revision_number` - The revision number of the subnetpool.

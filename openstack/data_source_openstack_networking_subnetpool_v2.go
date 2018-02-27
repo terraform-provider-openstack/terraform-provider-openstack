@@ -39,19 +39,16 @@ func dataSourceNetworkingSubnetPoolV2() *schema.Resource {
 			},
 			"created_at": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
 			"updated_at": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
 			"prefixes": &schema.Schema{
 				Type:     schema.TypeSet,
-				Optional: true,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
@@ -114,7 +111,6 @@ func dataSourceNetworkingSubnetPoolV2() *schema.Resource {
 			},
 			"revision_number": &schema.Schema{
 				Type:     schema.TypeInt,
-				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
@@ -161,19 +157,17 @@ func dataSourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface
 	}
 
 	if v, ok := d.GetOk("shared"); ok {
-		listOpts.Shared = v.(*bool)
+		shared := v.(bool)
+		listOpts.Shared = &shared
 	}
 
 	if v, ok := d.GetOk("description"); ok {
 		listOpts.Description = v.(string)
 	}
 
-	if v, ok := d.GetOk("default"); ok {
-		listOpts.IsDefault = v.(*bool)
-	}
-
-	if v, ok := d.GetOk("revision_number"); ok {
-		listOpts.RevisionNumber = v.(int)
+	if v, ok := d.GetOk("is_default"); ok {
+		isDefault := v.(bool)
+		listOpts.IsDefault = &isDefault
 	}
 
 	pages, err := subnetpools.List(networkingClient, listOpts).AllPages()

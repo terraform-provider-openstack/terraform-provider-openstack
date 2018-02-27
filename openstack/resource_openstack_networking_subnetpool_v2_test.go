@@ -26,7 +26,7 @@ func TestAccNetworkingV2SubnetPoolBasic(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config: testAccNetworkingV2SubnetPoolPrefixLenghts,
+				Config: testAccNetworkingV2SubnetPoolPrefixLengths,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnetpool_v2.subnetpool_1", "name", "subnetpool_1"),
@@ -40,6 +40,23 @@ func TestAccNetworkingV2SubnetPoolBasic(t *testing.T) {
 						"openstack_networking_subnetpool_v2.subnetpool_1", "min_prefixlen", "24"),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnetpool_v2.subnetpool_1", "max_prefixlen", "30"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccNetworkingV2SubnetPoolUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnetpool_v2.subnetpool_1", "name", "subnetpool_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnetpool_v2.subnetpool_1", "description", "terraform subnetpool acceptance test updated"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnetpool_v2.subnetpool_1", "default_quota", "8"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnetpool_v2.subnetpool_1", "default_prefixlen", "26"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnetpool_v2.subnetpool_1", "min_prefixlen", "25"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnetpool_v2.subnetpool_1", "max_prefixlen", "28"),
 				),
 			},
 		},
@@ -135,7 +152,7 @@ resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
 }
 `
 
-const testAccNetworkingV2SubnetPoolPrefixLenghts = `
+const testAccNetworkingV2SubnetPoolPrefixLengths = `
 resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
 	name = "subnetpool_1"
 	description = "terraform subnetpool acceptance test"
@@ -147,5 +164,20 @@ resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
 	default_prefixlen = 25
 	min_prefixlen = 24
 	max_prefixlen = 30
+}
+`
+
+const testAccNetworkingV2SubnetPoolUpdate = `
+resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
+	name = "subnetpool_1"
+	description = "terraform subnetpool acceptance test updated"
+
+	prefixes = ["10.10.0.0/16", "10.11.11.0/24"]
+
+	default_quota = 8
+
+	default_prefixlen = 26
+	min_prefixlen = 25
+	max_prefixlen = 28
 }
 `
