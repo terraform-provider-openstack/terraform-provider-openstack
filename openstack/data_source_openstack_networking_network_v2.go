@@ -40,12 +40,8 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 				Optional: true,
 			},
 			"tenant_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"OS_TENANT_ID",
-					"OS_PROJECT_ID",
-				}, ""),
+				Type:        schema.TypeString,
+				Optional:    true,
 				Description: descriptions["tenant_id"],
 			},
 			"admin_state_up": &schema.Schema{
