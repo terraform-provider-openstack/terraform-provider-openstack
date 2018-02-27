@@ -10,6 +10,10 @@ IMPROVEMENTS
 * `openstack_compute_keypair_v2` can now generate a private key [GH-217]
 * `openstack_networking_router_v2` can now optionally set a default gateway after it has been created [GH-209]
 
+BUG FIXES
+
+* Fixed bug with `openstack_networking_network_v2` and `openstack_networking_subnet_v2` where the `OS_TENANT_ID` was incorrectly being used as a default value [GH-254]
+
 ## 1.2.0 (January 18, 2018)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
