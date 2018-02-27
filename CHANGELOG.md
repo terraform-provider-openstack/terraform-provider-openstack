@@ -8,6 +8,7 @@ IMPROVEMENTS
 
 * Added `additional_properties` to `openstack_compute_instance_v2` scheduler hints [GH-230]
 * `openstack_compute_keypair_v2` can now generate a private key [GH-217]
+* `openstack_networking_router_v2` can now optionally set a default gateway after it has been created [GH-209]
 
 ## 1.2.0 (January 18, 2018)
 
