@@ -79,6 +79,8 @@ The following arguments are supported:
     object structure is documented below. Changing this updates the host routes
     for the existing subnet.
 
+* `subnetpool_id` - (Optional) The ID of the subnetpool associated with the subnet.
+
 * `value_specs` - (Optional) Map of additional options.
 
 The `allocation_pools` block supports:
@@ -108,6 +110,7 @@ The following attributes are exported:
 * `enable_dhcp` - See Argument Reference above.
 * `dns_nameservers` - See Argument Reference above.
 * `host_routes` - See Argument Reference above.
+* `subnetpool_id` - See Argument Reference above.
 
 ## Import
 
