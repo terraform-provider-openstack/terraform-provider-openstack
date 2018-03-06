@@ -82,6 +82,21 @@ func TestAccNetworkingV2SubnetDataSource_networkIdAttribute(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2SubnetDataSource_subnetPoolIdAttribute(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccOpenStackNetworkingSubnetV2DataSource_subnetPoolIdAttribute,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingSubnetV2DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -153,6 +168,25 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
+const testAccOpenStackNetworkingSubnetV2DataSource_subnetWithSubnetPool = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
+  name = "my_ipv4_pool"
+  prefixes = ["10.11.12.0/24"]
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "10.11.12.0/25"
+	network_id = "${openstack_networking_network_v2.network_1.id}"
+	subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+}
+`
+
 var testAccOpenStackNetworkingSubnetV2DataSource_basic = fmt.Sprintf(`
 %s
 
@@ -209,3 +243,11 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 
 `, testAccOpenStackNetworkingSubnetV2DataSource_subnet)
+
+var testAccOpenStackNetworkingSubnetV2DataSource_subnetPoolIdAttribute = fmt.Sprintf(`
+%s
+
+data "openstack_networking_subnet_v2" "subnet_1" {
+	subnetpool_id = "${openstack_networking_subnet_v2.subnet_1.subnetpool_id}"
+}
+`, testAccOpenStackNetworkingSubnetV2DataSource_subnetWithSubnetPool)

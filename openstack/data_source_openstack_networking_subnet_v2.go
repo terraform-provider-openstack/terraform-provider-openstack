@@ -46,13 +46,9 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 			},
 
 			"tenant_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"OS_TENANT_ID",
-					"OS_PROJECT_ID",
-				}, ""),
+				Type:        schema.TypeString,
+				Computed:    true,
+				Optional:    true,
 				Description: descriptions["tenant_id"],
 			},
 
@@ -148,6 +144,11 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 				Computed:     true,
 				ValidateFunc: validateSubnetV2IPv6Mode,
 			},
+			"subnetpool_id": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -204,6 +205,10 @@ func dataSourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) 
 		listOpts.IPv6RAMode = v.(string)
 	}
 
+	if v, ok := d.GetOk("subnetpool_id"); ok {
+		listOpts.SubnetPoolID = v.(string)
+	}
+
 	pages, err := subnets.List(networkingClient, listOpts).AllPages()
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve subnets: %s", err)
@@ -238,6 +243,7 @@ func dataSourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) 
 	d.Set("ipv6_ra_mode", subnet.IPv6RAMode)
 	d.Set("gateway_ip", subnet.GatewayIP)
 	d.Set("enable_dhcp", subnet.EnableDHCP)
+	d.Set("subnetpool_id", subnet.SubnetPoolID)
 	d.Set("region", GetRegion(d, config))
 
 	err = d.Set("dns_nameservers", subnet.DNSNameservers)

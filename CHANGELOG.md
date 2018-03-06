@@ -4,10 +4,21 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 * `openstack_compute_keypair_v2` can now generate a private key, however the private key will be stored in your Terraform state. Please use caution.
 
+FEATURES
+
+* __New Resource:__ `openstack_networking_subnetpool_v2` [GH-243]
+* __New Data Source:__ `openstack_networking_subnetpool_v2` [GH-243]
+
 IMPROVEMENTS
 
 * Added `additional_properties` to `openstack_compute_instance_v2` scheduler hints [GH-230]
 * `openstack_compute_keypair_v2` can now generate a private key [GH-217]
+* `openstack_networking_router_v2` can now optionally set a default gateway after it has been created [GH-209]
+* Added `subnetpool_id` to `openstack_networking_subnet_v2` resource and data source [GH-249]
+
+BUG FIXES
+
+* Fixed bug with `openstack_networking_network_v2` and `openstack_networking_subnet_v2` where the `OS_TENANT_ID` was incorrectly being used as a default value [GH-254]
 
 ## 1.2.0 (January 18, 2018)
 
