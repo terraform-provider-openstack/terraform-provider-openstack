@@ -438,6 +438,70 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Port_createExtraDHCPOpts(t *testing.T) {
+	var network networks.Network
+	var subnet subnets.Subnet
+	var port ports.Port
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccNetworkingV2Port_createExtraDHCPOpts,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.0.opt_name", "optionA"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.0.opt_value", "valueA"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.1.opt_name", "optionB"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.1.opt_value", "valueB"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
+	var network networks.Network
+	var subnet subnets.Subnet
+	var port ports.Port
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccNetworkingV2Port_basic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
+				),
+			},
+			resource.TestStep{
+				Config: testAccNetworkingV2Port_updateExtraDHCPOpts,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.0.opt_name", "optionC"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.0.opt_value", "valueC"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2PortDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
@@ -1512,6 +1576,49 @@ resource "openstack_networking_port_v2" "port_1" {
   fixed_ip {
     subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
     ip_address = "192.168.199.24"
+  }
+}
+`
+
+const testAccNetworkingV2Port_createExtraDHCPOpts = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  admin_state_up = "true"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  extra_dhcp_opts {
+    opt_name = "optionA"
+    opt_value = "valueA"
+  }
+
+  extra_dhcp_opts {
+    opt_name = "optionB"
+    opt_value = "valueB"
+  }
+}
+`
+
+const testAccNetworkingV2Port_updateExtraDHCPOpts = `
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  admin_state_up = "true"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  extra_dhcp_opts {
+    opt_name = "optionA"
+    opt_value = "valueA"
   }
 }
 `
