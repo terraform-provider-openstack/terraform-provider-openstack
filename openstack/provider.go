@@ -256,6 +256,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_objectstorage_object_v1":            resourceObjectStorageObjectV1(),
 			"openstack_vpnaas_ipsec_policy_v2":             resourceIPSecPolicyV2(),
 			"openstack_vpnaas_service_v2":                  resourceServiceV2(),
+			"openstack_vpnaas_ike_policy_v2":               resourceIKEPolicyV2(),
 		},
 
 		ConfigureFunc: configureProvider,
