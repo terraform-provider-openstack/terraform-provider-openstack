@@ -19,6 +19,7 @@ IMPROVEMENTS
 BUG FIXES
 
 * Fixed bug with `openstack_networking_network_v2` and `openstack_networking_subnet_v2` where the `OS_TENANT_ID` was incorrectly being used as a default value [GH-254]
+* Correctly detect if an object storage container is deleted [GH-261]
 
 ## 1.2.0 (January 18, 2018)
 
