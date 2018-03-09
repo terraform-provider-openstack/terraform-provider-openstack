@@ -94,6 +94,18 @@ func resourceObjectStorageContainerV1Create(d *schema.ResourceData, meta interfa
 
 func resourceObjectStorageContainerV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+
+	objectStorageClient, err := config.objectStorageV1Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack object storage client: %s", err)
+	}
+
+	result := containers.Get(objectStorageClient, d.Id())
+
+	if result.Err != nil {
+		return CheckDeleted(d, result.Err, "container")
+	}
+
 	d.Set("region", GetRegion(d, config))
 
 	return nil
