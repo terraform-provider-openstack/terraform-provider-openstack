@@ -7,7 +7,9 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 FEATURES
 
 * __New Resource:__ `openstack_networking_subnetpool_v2` [GH-243]
+* __New Resource:__ `openstack_identity_role_v3` [GH-250]
 * __New Data Source:__ `openstack_networking_subnetpool_v2` [GH-243]
+* __New Data Source:__ `openstack_identity_role_v3` [GH-250]
 
 IMPROVEMENTS
 
