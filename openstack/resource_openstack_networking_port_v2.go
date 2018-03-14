@@ -119,7 +119,6 @@ func resourceNetworkingPortV2() *schema.Resource {
 						"mac_address": &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
-							Computed: true,
 						},
 					},
 				},
@@ -252,7 +251,13 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	for _, pairObject := range p.AllowedAddressPairs {
 		pair := make(map[string]interface{})
 		pair["ip_address"] = pairObject.IPAddress
-		pair["mac_address"] = pairObject.MACAddress
+
+		// Only set the MAC address if it is different than the
+		// port's MAC. This means that a specific MAC was set.
+		if p.MACAddress != pairObject.MACAddress {
+			pair["mac_address"] = pairObject.MACAddress
+		}
+
 		pairs = append(pairs, pair)
 	}
 	d.Set("allowed_address_pairs", pairs)
