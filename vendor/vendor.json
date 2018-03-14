@@ -469,10 +469,10 @@
 			"revisionTime": "2017-03-10T01:59:53Z"
 		},
 		{
-			"checksumSHA1": "CHmnyRSFPivC+b/ojgfeEIY5ReM=",
+			"checksumSHA1": "w1Mm8OqxEelnDWKtvRf4gsEyjOo=",
 			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips",
-			"revision": "0f64da0e36de86a0ca1a8f2fc1b0570a0d3f7504",
-			"revisionTime": "2017-03-10T01:59:53Z"
+			"revision": "6da026c32e2d622cc242d32984259c77237aefe1",
+			"revisionTime": "2018-02-10T02:43:43Z"
 		},
 		{
 			"checksumSHA1": "X2qWZ68Xlfobx/EQR0EEGEpUJBk=",

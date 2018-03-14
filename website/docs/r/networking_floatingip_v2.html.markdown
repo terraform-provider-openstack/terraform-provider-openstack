@@ -43,7 +43,10 @@ The following arguments are supported:
     may or may not have a different address)
 
 * `fixed_ip` - Fixed IP of the port to associate with this floating IP. Required if
-the port has multiple fixed IPs.
+    the port has multiple fixed IPs.
+
+* `subnet_id` - (Optional) The subnet ID of the floating IP pool. Specify this if
+    the floating IP network has multiple subnets.
 
 * `value_specs` - (Optional) Map of additional options.
 
