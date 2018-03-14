@@ -3,6 +3,7 @@
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
 * `openstack_compute_keypair_v2` can now generate a private key, however the private key will be stored in your Terraform state. Please use caution.
+* The MAC addresses in `openstack_networking_port_v2.allowed_address_pairs` is no longer computed. This should not cause an issue for users since if an `allowed_address_pairs` MAC address was not specified, the AAP MAC will match `openstack_networking_port_v2.mac_address` [GH-244]
 
 FEATURES
 
@@ -22,6 +23,8 @@ BUG FIXES
 
 * Fixed bug with `openstack_networking_network_v2` and `openstack_networking_subnet_v2` where the `OS_TENANT_ID` was incorrectly being used as a default value [GH-254]
 * Correctly detect if an object storage container is deleted [GH-261]
+* Fixed a few small bugs with `openstack_fw_rule_v1` updating [GH-224]
+* Fixed an issue with `openstack_networking_port_v2` `allowed_address_pairs` and MAC addresses [GH-244]
 
 ## 1.2.0 (January 18, 2018)
 
