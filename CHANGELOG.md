@@ -18,6 +18,7 @@ IMPROVEMENTS
 * `openstack_compute_keypair_v2` can now generate a private key [GH-217]
 * `openstack_networking_router_v2` can now optionally set a default gateway after it has been created [GH-209]
 * Added `subnetpool_id` to `openstack_networking_subnet_v2` resource and data source [GH-249]
+* Added `extra_specs` to `openstack_compute_flavor_v2` [GH-241]
 
 BUG FIXES
 
