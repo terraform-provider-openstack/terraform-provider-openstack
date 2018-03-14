@@ -171,32 +171,82 @@ func resourceFWRuleV1Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	name := d.Get("name").(string)
-	description := d.Get("description").(string)
-	protocol := d.Get("protocol").(string)
-	action := d.Get("action").(string)
-	ipVersion := resourceFWRuleV1DetermineIPVersion(d.Get("ip_version").(int))
-	sourceIPAddress := d.Get("source_ip_address").(string)
-	sourcePort := d.Get("source_port").(string)
-	destinationIPAddress := d.Get("destination_ip_address").(string)
-	destinationPort := d.Get("destination_port").(string)
-	enabled := d.Get("enabled").(bool)
-
-	opts := rules.UpdateOpts{
-		Name:                 &name,
-		Description:          &description,
-		Protocol:             &protocol,
-		Action:               &action,
-		IPVersion:            &ipVersion,
-		SourceIPAddress:      &sourceIPAddress,
-		DestinationIPAddress: &destinationIPAddress,
-		SourcePort:           &sourcePort,
-		DestinationPort:      &destinationPort,
-		Enabled:              &enabled,
+	var updateOpts rules.UpdateOpts
+	if d.HasChange("name") {
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
 	}
 
-	log.Printf("[DEBUG] Updating firewall rules: %#v", opts)
-	err = rules.Update(networkingClient, d.Id(), opts).Err
+	if d.HasChange("description") {
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
+	}
+
+	if d.HasChange("protocol") {
+		protocol := d.Get("protocol").(string)
+		updateOpts.Protocol = &protocol
+	}
+
+	if d.HasChange("action") {
+		action := d.Get("action").(string)
+		updateOpts.Action = &action
+	}
+
+	if d.HasChange("ip_version") {
+		ipVersion := resourceFWRuleV1DetermineIPVersion(d.Get("ip_version").(int))
+		updateOpts.IPVersion = &ipVersion
+	}
+
+	if d.HasChange("source_ip_address") {
+		sourceIPAddress := d.Get("source_ip_address").(string)
+		updateOpts.SourceIPAddress = &sourceIPAddress
+
+		// Also include the ip_version.
+		ipVersion := resourceFWRuleV1DetermineIPVersion(d.Get("ip_version").(int))
+		updateOpts.IPVersion = &ipVersion
+	}
+
+	if d.HasChange("source_port") {
+		sourcePort := d.Get("source_port").(string)
+		if sourcePort == "" {
+			sourcePort = "0"
+		}
+		updateOpts.SourcePort = &sourcePort
+
+		// Also include the protocol.
+		protocol := d.Get("protocol").(string)
+		updateOpts.Protocol = &protocol
+	}
+
+	if d.HasChange("destination_ip_address") {
+		destinationIPAddress := d.Get("destination_ip_address").(string)
+		updateOpts.DestinationIPAddress = &destinationIPAddress
+
+		// Also include the ip_version.
+		ipVersion := resourceFWRuleV1DetermineIPVersion(d.Get("ip_version").(int))
+		updateOpts.IPVersion = &ipVersion
+	}
+
+	if d.HasChange("destination_port") {
+		destinationPort := d.Get("destination_port").(string)
+		if destinationPort == "" {
+			destinationPort = "0"
+		}
+
+		updateOpts.DestinationPort = &destinationPort
+
+		// Also include the protocol.
+		protocol := d.Get("protocol").(string)
+		updateOpts.Protocol = &protocol
+	}
+
+	if d.HasChange("enabled") {
+		enabled := d.Get("enabled").(bool)
+		updateOpts.Enabled = &enabled
+	}
+
+	log.Printf("[DEBUG] Updating firewall rules: %#v", updateOpts)
+	err = rules.Update(networkingClient, d.Id(), updateOpts).Err
 	if err != nil {
 		return err
 	}
