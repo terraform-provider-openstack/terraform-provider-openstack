@@ -1,24 +1,33 @@
-## 1.2.1 (Unreleased)
+## 1.4.0 (Unreleased)
+## 1.3.0 (March 14, 2018)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
 * `openstack_compute_keypair_v2` can now generate a private key, however the private key will be stored in your Terraform state. Please use caution.
+* The MAC addresses in `openstack_networking_port_v2.allowed_address_pairs` is no longer computed. This should not cause an issue for users since if an `allowed_address_pairs` MAC address was not specified, the AAP MAC will match `openstack_networking_port_v2.mac_address`.
 
 FEATURES
 
-* __New Resource:__ `openstack_networking_subnetpool_v2` [GH-243]
-* __New Data Source:__ `openstack_networking_subnetpool_v2` [GH-243]
+* __New Resource:__ `openstack_networking_subnetpool_v2` ([#243](https://github.com/terraform-providers/terraform-provider-openstack/issues/243))
+* __New Resource:__ `openstack_identity_role_v3` ([#250](https://github.com/terraform-providers/terraform-provider-openstack/issues/250))
+* __New Data Source:__ `openstack_networking_subnetpool_v2` ([#243](https://github.com/terraform-providers/terraform-provider-openstack/issues/243))
+* __New Data Source:__ `openstack_identity_role_v3` ([#250](https://github.com/terraform-providers/terraform-provider-openstack/issues/250))
 
 IMPROVEMENTS
 
-* Added `additional_properties` to `openstack_compute_instance_v2` scheduler hints [GH-230]
-* `openstack_compute_keypair_v2` can now generate a private key [GH-217]
-* `openstack_networking_router_v2` can now optionally set a default gateway after it has been created [GH-209]
-* Added `subnetpool_id` to `openstack_networking_subnet_v2` resource and data source [GH-249]
+* Added `additional_properties` to `openstack_compute_instance_v2` scheduler hints ([#230](https://github.com/terraform-providers/terraform-provider-openstack/issues/230))
+* `openstack_compute_keypair_v2` can now generate a private key ([#217](https://github.com/terraform-providers/terraform-provider-openstack/issues/217))
+* `openstack_networking_router_v2` can now optionally set a default gateway after it has been created ([#209](https://github.com/terraform-providers/terraform-provider-openstack/issues/209))
+* Added `subnetpool_id` to `openstack_networking_subnet_v2` resource and data source ([#249](https://github.com/terraform-providers/terraform-provider-openstack/issues/249))
+* Added `extra_specs` to `openstack_compute_flavor_v2` ([#241](https://github.com/terraform-providers/terraform-provider-openstack/issues/241))
+* Added `subnet_id` to `openstack_networking_floatingip_v2` ([#240](https://github.com/terraform-providers/terraform-provider-openstack/issues/240))
 
 BUG FIXES
 
-* Fixed bug with `openstack_networking_network_v2` and `openstack_networking_subnet_v2` where the `OS_TENANT_ID` was incorrectly being used as a default value [GH-254]
+* Fixed bug with `openstack_networking_network_v2` and `openstack_networking_subnet_v2` where the `OS_TENANT_ID` was incorrectly being used as a default value ([#254](https://github.com/terraform-providers/terraform-provider-openstack/issues/254))
+* Correctly detect if an object storage container is deleted ([#261](https://github.com/terraform-providers/terraform-provider-openstack/issues/261))
+* Fixed a few small bugs with `openstack_fw_rule_v1` updating ([#224](https://github.com/terraform-providers/terraform-provider-openstack/issues/224))
+* Fixed an issue with `openstack_networking_port_v2` `allowed_address_pairs` and MAC addresses ([#244](https://github.com/terraform-providers/terraform-provider-openstack/issues/244))
 
 ## 1.2.0 (January 18, 2018)
 

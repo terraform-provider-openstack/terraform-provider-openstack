@@ -62,6 +62,10 @@ func resourceNetworkingFloatingIPV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"subnet_id": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"value_specs": &schema.Schema{
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -91,6 +95,7 @@ func resourceNetworkFloatingIPV2Create(d *schema.ResourceData, meta interface{})
 			PortID:            d.Get("port_id").(string),
 			TenantID:          d.Get("tenant_id").(string),
 			FixedIP:           d.Get("fixed_ip").(string),
+			SubnetID:          d.Get("subnet_id").(string),
 		},
 		MapValueSpecs(d),
 	}

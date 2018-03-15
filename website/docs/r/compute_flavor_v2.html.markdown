@@ -18,6 +18,11 @@ resource "openstack_compute_flavor_v2" "test-flavor" {
   ram   = "8096"
   vcpus = "2"
   disk  = "20"
+
+  extra_specs {
+    "hw:cpu_policy" = "CPU-POLICY",
+    "hw:cpu_thread_policy" = "CPU-THREAD-POLICY"
+  }
 }
 ```
 
@@ -51,6 +56,8 @@ The following arguments are supported:
 * `is_public` - (Optional) Whether the flavor is public. Changing this creates
     a new flavor.
 
+* `extra_specs` - (Optional) Key/Value pairs of metadata for the flavor.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -63,6 +70,7 @@ The following attributes are exported:
 * `swap` - See Argument Reference above.
 * `rx_tx_factor` - See Argument Reference above.
 * `is_public` - See Argument Reference above.
+* `extra_specs` - See Argument Reference above.
 
 ## Import
 
