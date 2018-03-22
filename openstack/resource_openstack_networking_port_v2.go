@@ -226,11 +226,11 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		ports.Port
 		extradhcpopts.ExtraDHCPOptsExt
 	}
-	extraDHCPOpts := resourcePortExtraDHCPOpts(d)
-	if len(extraDHCPOpts) > 0 {
+	createExtraDHCPOpts := resourcePortCreateExtraDHCPOpts(d)
+	if len(createExtraDHCPOpts) > 0 {
 		extraDHCPOptsCreateOpts := extradhcpopts.CreateOptsExt{
 			CreateOptsBuilder: createOpts,
-			ExtraDHCPOpts:     extraDHCPOpts,
+			ExtraDHCPOpts:     createExtraDHCPOpts,
 		}
 		log.Printf("[DEBUG] Create Options: %#v", extraDHCPOptsCreateOpts)
 		err = ports.Create(networkingClient, extraDHCPOptsCreateOpts).ExtractInto(&p)
@@ -365,7 +365,10 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	var hasChange bool
 	var extraDHCPOptsChange bool
+	var extraDHCPOptsDeleteOld bool
+	var extraDHCPOptsAddNew bool
 	var updateOpts ports.UpdateOpts
+	var extraDHCPOptsDeleteOpts extradhcpopts.UpdateOptsExt
 	var extraDHCPOptsUpdateOpts extradhcpopts.UpdateOptsExt
 
 	if d.HasChange("allowed_address_pairs") {
@@ -417,28 +420,55 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("extra_dhcp_opts") {
 		hasChange = true
 		extraDHCPOptsChange = true
-		extraDHCPOpts := resourcePortExtraDHCPOpts(d)
-		extraDHCPOptsUpdateOpts = extradhcpopts.UpdateOptsExt{
-			UpdateOptsBuilder: updateOpts,
-			ExtraDHCPOpts:     extraDHCPOpts,
+		oldDCHPOpts, newDCHPOpts := d.GetChange("extra_dhcp_opts")
+
+		// Populate update options with the old DHCP opts. We will delete them
+		// prior to adding new updated DHCP opts for consistency.
+		if len(oldDCHPOpts.([]interface{})) != 0 {
+			extraDHCPOptsDeleteOld = true
+			deleteExtraDHCPOpts := resourcePortDeleteExtraDHCPOpts(oldDCHPOpts)
+			extraDHCPOptsDeleteOpts = extradhcpopts.UpdateOptsExt{
+				UpdateOptsBuilder: updateOpts,
+				ExtraDHCPOpts:     deleteExtraDHCPOpts,
+			}
+		}
+
+		// Populate update options with the new DHCP opts.
+		if len(newDCHPOpts.([]interface{})) != 0 {
+			extraDHCPOptsAddNew = true
+			updateExtraDHCPOpts := resourcePortUpdateExtraDHCPOpts(newDCHPOpts)
+			extraDHCPOptsUpdateOpts = extradhcpopts.UpdateOptsExt{
+				UpdateOptsBuilder: updateOpts,
+				ExtraDHCPOpts:     updateExtraDHCPOpts,
+			}
 		}
 	}
 
 	// Update a Neutron port and update extra DHCP options if they're changed.
 	if hasChange {
 		if extraDHCPOptsChange {
-			log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), extraDHCPOptsUpdateOpts)
-
-			_, err = ports.Update(networkingClient, d.Id(), extraDHCPOptsUpdateOpts).Extract()
-			if err != nil {
-				return fmt.Errorf("Error updating OpenStack Neutron Network: %s", err)
+			// Delete old DHCP options if needed.
+			if extraDHCPOptsDeleteOld {
+				log.Printf("[DEBUG] Deleting old DHCP opts for Port %s", d.Id())
+				_, err = ports.Update(networkingClient, d.Id(), extraDHCPOptsDeleteOpts).Extract()
+				if err != nil {
+					return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
+				}
+			}
+			// Add new DHCP options if needed.
+			if extraDHCPOptsAddNew {
+				log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), extraDHCPOptsUpdateOpts)
+				_, err = ports.Update(networkingClient, d.Id(), extraDHCPOptsUpdateOpts).Extract()
+				if err != nil {
+					return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
+				}
 			}
 		} else {
 			log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), updateOpts)
 
 			_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
 			if err != nil {
-				return fmt.Errorf("Error updating OpenStack Neutron Network: %s", err)
+				return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
 			}
 		}
 	}
@@ -542,23 +572,63 @@ func resourcePortAdminStateUpV2(d *schema.ResourceData) *bool {
 	return &value
 }
 
-func resourcePortExtraDHCPOpts(d *schema.ResourceData) []extradhcpopts.ExtraDHCPOpt {
+func resourcePortCreateExtraDHCPOpts(d *schema.ResourceData) []extradhcpopts.CreateExtraDHCPOpt {
 	rawExtraDHCPOpts := d.Get("extra_dhcp_opts").([]interface{})
 
 	if len(rawExtraDHCPOpts) == 0 {
 		return nil
 	}
 
-	extraDHCPOpts := make([]extradhcpopts.ExtraDHCPOpt, len(rawExtraDHCPOpts))
+	createExtraDHCPOpts := make([]extradhcpopts.CreateExtraDHCPOpt, len(rawExtraDHCPOpts))
 	for i, raw := range rawExtraDHCPOpts {
 		rawMap := raw.(map[string]interface{})
-		extraDHCPOpts[i] = extradhcpopts.ExtraDHCPOpt{
+		ipVersion := rawMap["ip_version"].(int)
+		createExtraDHCPOpts[i] = extradhcpopts.CreateExtraDHCPOpt{
 			OptName:   rawMap["opt_name"].(string),
 			OptValue:  rawMap["opt_value"].(string),
-			IPVersion: rawMap["ip_version"].(int),
+			IPVersion: gophercloud.IPVersion(ipVersion),
 		}
 	}
-	return extraDHCPOpts
+	return createExtraDHCPOpts
+}
+
+func resourcePortUpdateExtraDHCPOpts(newExtraDHCPOpts interface{}) []extradhcpopts.UpdateExtraDHCPOpt {
+	rawNewExtraDHCPOpts := newExtraDHCPOpts.([]interface{})
+
+	if len(rawNewExtraDHCPOpts) == 0 {
+		return nil
+	}
+
+	updateExtraDHCPOpts := make([]extradhcpopts.UpdateExtraDHCPOpt, len(rawNewExtraDHCPOpts))
+	for i, raw := range rawNewExtraDHCPOpts {
+		rawMap := raw.(map[string]interface{})
+		ipVersion := rawMap["ip_version"].(int)
+		optValue := rawMap["opt_value"].(string)
+		updateExtraDHCPOpts[i] = extradhcpopts.UpdateExtraDHCPOpt{
+			OptName:   rawMap["opt_name"].(string),
+			OptValue:  &optValue,
+			IPVersion: gophercloud.IPVersion(ipVersion),
+		}
+	}
+	return updateExtraDHCPOpts
+}
+
+func resourcePortDeleteExtraDHCPOpts(oldExtraDHCPOpts interface{}) []extradhcpopts.UpdateExtraDHCPOpt {
+	rawOldExtraDHCPOpts := oldExtraDHCPOpts.([]interface{})
+
+	if len(rawOldExtraDHCPOpts) == 0 {
+		return nil
+	}
+
+	deleteExtraDHCPOpts := make([]extradhcpopts.UpdateExtraDHCPOpt, len(rawOldExtraDHCPOpts))
+	for i, raw := range rawOldExtraDHCPOpts {
+		rawMap := raw.(map[string]interface{})
+		deleteExtraDHCPOpts[i] = extradhcpopts.UpdateExtraDHCPOpt{
+			OptName:  rawMap["opt_name"].(string),
+			OptValue: nil,
+		}
+	}
+	return deleteExtraDHCPOpts
 }
 
 func allowedAddressPairsHash(v interface{}) int {
