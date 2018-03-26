@@ -30,6 +30,23 @@ func TestAccIPSecPolicyV2_basic(t *testing.T) {
 	})
 }
 
+func TestAccIPSecPolicyV2_withLifetime(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckVPN(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccIPSecPolicyV2_withLifetime,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIPSecPolicyV2Exists(
+						"openstack_ipsec_policy_v2.policy_1", "", ""),
+				),
+			},
+		},
+	})
+}
+
 func TestAccIPSecPolicyV2_timeout(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckVPN(t) },
@@ -117,7 +134,16 @@ func testAccCheckIPSecPolicyV2Exists(n, name, description string) resource.TestC
 
 const testAccIPSecPolicyV2_basic = `
 resource "openstack_ipsec_policy_v2" "policy_1" {
+}
+`
+
+const testAccIPSecPolicyV2_withLifetime = `
+resource "openstack_ipsec_policy_v2" "policy_1" {
 	auth_algorithm = "sha1"
+	pfs = "group14"
+	lifetime {
+		units = "seconds"
+	}
 }
 `
 

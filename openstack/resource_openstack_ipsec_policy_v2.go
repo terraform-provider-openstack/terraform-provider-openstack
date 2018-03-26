@@ -70,17 +70,20 @@ func resourceIPSecPolicyV2() *schema.Resource {
 				Computed: true,
 			},
 			"lifetime": &schema.Schema{
-				Type:     schema.TypeSet,
+				Type:     schema.TypeMap,
 				Computed: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"units": &schema.Schema{
 							Type:     schema.TypeString,
 							Computed: true,
+							Optional: true,
 						},
 						"value": &schema.Schema{
 							Type:     schema.TypeInt,
-							Required: true,
+							Optional: true,
+							Computed: true,
 						},
 					},
 				},
