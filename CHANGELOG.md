@@ -1,4 +1,9 @@
 ## 1.4.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Added `member_status` to `openstack_images_image_v2` data source [GH-269]
+
 ## 1.3.0 (March 14, 2018)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
