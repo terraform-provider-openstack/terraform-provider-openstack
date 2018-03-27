@@ -34,6 +34,12 @@ func dataSourceImagesImageV2() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"member_status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			"owner": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -154,17 +160,19 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 	}
 
 	visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
+	member_status := resourceImagesImageV2MemberStatusFromString(d.Get("member_status").(string))
 
 	listOpts := images.ListOpts{
-		Name:       d.Get("name").(string),
-		Visibility: visibility,
-		Owner:      d.Get("owner").(string),
-		Status:     images.ImageStatusActive,
-		SizeMin:    int64(d.Get("size_min").(int)),
-		SizeMax:    int64(d.Get("size_max").(int)),
-		SortKey:    d.Get("sort_key").(string),
-		SortDir:    d.Get("sort_direction").(string),
-		Tag:        d.Get("tag").(string),
+		Name:         d.Get("name").(string),
+		Visibility:   visibility,
+		Owner:        d.Get("owner").(string),
+		Status:       images.ImageStatusActive,
+		SizeMin:      int64(d.Get("size_min").(int)),
+		SizeMax:      int64(d.Get("size_max").(int)),
+		SortKey:      d.Get("sort_key").(string),
+		SortDir:      d.Get("sort_direction").(string),
+		Tag:          d.Get("tag").(string),
+		MemberStatus: member_status,
 	}
 
 	log.Printf("[DEBUG] List Options: %#v", listOpts)
