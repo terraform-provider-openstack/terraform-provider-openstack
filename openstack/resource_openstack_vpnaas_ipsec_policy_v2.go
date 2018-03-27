@@ -174,45 +174,54 @@ func resourceIPSecPolicyV2Update(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	var hasChange bool
 	opts := ipsecpolicies.UpdateOpts{}
 
 	if d.HasChange("name") {
 		name := d.Get("name").(string)
 		opts.Name = &name
+		hasChange = true
 	}
 
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		opts.Description = &description
+		hasChange = true
 	}
 
 	if d.HasChange("auth_algorithm") {
-		opts.AuthAlgorithm = d.Get("auth_algorithm").(ipsecpolicies.AuthAlgorithm)
+		opts.AuthAlgorithm = IPSecPolicyV2GetAuthAlgorithm(d.Get("auth_algorithm").(string))
+		hasChange = true
 	}
 
 	if d.HasChange("encryption_algorithm") {
-		opts.EncryptionAlgorithm = d.Get("encryption_algorithm").(ipsecpolicies.EncryptionAlgorithm)
+		opts.EncryptionAlgorithm = IPSecPolicyV2GetEncryptionAlgorithm(d.Get("encryption_algorithm").(string))
+		hasChange = true
 	}
 
 	if d.HasChange("transform_protocol") {
-		opts.TransformProtocol = d.Get("transform_protocol").(ipsecpolicies.TransformProtocol)
+		opts.TransformProtocol = IPSecPolicyV2GetTransformProtocol(d.Get("transform_protocol").(string))
+		hasChange = true
 	}
 
 	if d.HasChange("pfs") {
-		opts.PFS = d.Get("pfs").(ipsecpolicies.PFS)
+		opts.PFS = IPSecPolicyV2GetPFS(d.Get("pfs").(string))
+		hasChange = true
 	}
 
 	if d.HasChange("encapsulation_mode") {
-		opts.EncapsulationMode = d.Get("encapsulation_mode").(ipsecpolicies.EncapsulationMode)
+		opts.EncapsulationMode = IPSecPolicyV2GetEncapsulationMode(d.Get("encapsulation_mode").(string))
+		hasChange = true
 	}
 
 	log.Printf("[DEBUG] Updating IPSec policy with id %s: %#v", d.Id(), opts)
 
-	err = ipsecpolicies.Update(networkingClient, d.Id(), opts).Err
-	if err != nil {
-		return err
+	if hasChange {
+		_, err = ipsecpolicies.Update(networkingClient, d.Id(), opts).Extract()
+		if err != nil {
+			return err
+		}
 	}
-
 	return resourceIPSecPolicyV2Read(d, meta)
 }
 

@@ -47,23 +47,6 @@ func TestAccIPSecPolicyV2_withLifetime(t *testing.T) {
 	})
 }
 
-func TestAccIPSecPolicyV2_timeout(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckVPN(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccIPSecPolicyV2_timeout,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIPSecPolicyV2Exists(
-						"openstack_vpnaas_ipsec_policy_v2.policy_1", "", ""),
-				),
-			},
-		},
-	})
-}
-
 func testAccCheckIPSecPolicyV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
@@ -144,13 +127,5 @@ resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
 	lifetime {
 		units = "seconds"
 	}
-}
-`
-
-const testAccIPSecPolicyV2_timeout = `
-resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
-  timeouts {
-    create = "5m"
-  }
 }
 `
