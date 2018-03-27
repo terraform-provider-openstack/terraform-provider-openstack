@@ -137,70 +137,6 @@ func resourceIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) error
 
 	return resourceIPSecPolicyV2Read(d, meta)
 }
-func IPSecPolicyV2GetTransformProtocol(trp string) ipsecpolicies.TransformProtocol {
-	var protocol ipsecpolicies.TransformProtocol
-	switch trp {
-	case "esp":
-		protocol = ipsecpolicies.TransformProtocolESP
-	case "ah":
-		protocol = ipsecpolicies.TransformProtocolAH
-	case "ah-esp":
-		protocol = ipsecpolicies.TransformProtocolAHESP
-	}
-	return protocol
-
-}
-func IPSecPolicyV2GetPFS(pfsString string) ipsecpolicies.PFS {
-	var pfs ipsecpolicies.PFS
-	switch pfsString {
-	case "group2":
-		pfs = ipsecpolicies.PFSGroup2
-	case "group5":
-		pfs = ipsecpolicies.PFSGroup5
-	case "group14":
-		pfs = ipsecpolicies.PFSGroup14
-	}
-	return pfs
-
-}
-func IPSecPolicyV2GetEncryptionAlgorithm(encryptionAlgo string) ipsecpolicies.EncryptionAlgorithm {
-	var alg ipsecpolicies.EncryptionAlgorithm
-	switch encryptionAlgo {
-	case "3des":
-		alg = ipsecpolicies.EncryptionAlgorithm3DES
-	case "aes-128":
-		alg = ipsecpolicies.EncryptionAlgorithmAES128
-	case "aes-256":
-		alg = ipsecpolicies.EncryptionAlgorithmAES256
-	case "aes-192":
-		alg = ipsecpolicies.EncryptionAlgorithmAES192
-	}
-	return alg
-}
-func IPSecPolicyV2GetAuthAlgorithm(authAlgo string) ipsecpolicies.AuthAlgorithm {
-	var alg ipsecpolicies.AuthAlgorithm
-	switch authAlgo {
-	case "sha1":
-		alg = ipsecpolicies.AuthAlgorithmSHA1
-	case "sha256":
-		alg = ipsecpolicies.AuthAlgorithmSHA256
-	case "sha384":
-		alg = ipsecpolicies.AuthAlgorithmSHA384
-	case "sha512":
-		alg = "sha384"
-	}
-	return alg
-}
-func IPSecPolicyV2GetEncapsulationMode(encMode string) ipsecpolicies.EncapsulationMode {
-	var mode ipsecpolicies.EncapsulationMode
-	switch encMode {
-	case "tunnel":
-		mode = ipsecpolicies.EncapsulationModeTunnel
-	case "transport":
-		mode = ipsecpolicies.EncapsulationModeTransport
-	}
-	return mode
-}
 
 func resourceIPSecPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Retrieve information about IPSec policy: %s", d.Id())
@@ -320,4 +256,69 @@ func waitForIPSecPolicyDeletion(networkingClient *gophercloud.ServiceClient, id 
 
 		return nil, "ACTIVE", err
 	}
+}
+
+func IPSecPolicyV2GetTransformProtocol(trp string) ipsecpolicies.TransformProtocol {
+	var protocol ipsecpolicies.TransformProtocol
+	switch trp {
+	case "esp":
+		protocol = ipsecpolicies.TransformProtocolESP
+	case "ah":
+		protocol = ipsecpolicies.TransformProtocolAH
+	case "ah-esp":
+		protocol = ipsecpolicies.TransformProtocolAHESP
+	}
+	return protocol
+
+}
+func IPSecPolicyV2GetPFS(pfsString string) ipsecpolicies.PFS {
+	var pfs ipsecpolicies.PFS
+	switch pfsString {
+	case "group2":
+		pfs = ipsecpolicies.PFSGroup2
+	case "group5":
+		pfs = ipsecpolicies.PFSGroup5
+	case "group14":
+		pfs = ipsecpolicies.PFSGroup14
+	}
+	return pfs
+
+}
+func IPSecPolicyV2GetEncryptionAlgorithm(encryptionAlgo string) ipsecpolicies.EncryptionAlgorithm {
+	var alg ipsecpolicies.EncryptionAlgorithm
+	switch encryptionAlgo {
+	case "3des":
+		alg = ipsecpolicies.EncryptionAlgorithm3DES
+	case "aes-128":
+		alg = ipsecpolicies.EncryptionAlgorithmAES128
+	case "aes-256":
+		alg = ipsecpolicies.EncryptionAlgorithmAES256
+	case "aes-192":
+		alg = ipsecpolicies.EncryptionAlgorithmAES192
+	}
+	return alg
+}
+func IPSecPolicyV2GetAuthAlgorithm(authAlgo string) ipsecpolicies.AuthAlgorithm {
+	var alg ipsecpolicies.AuthAlgorithm
+	switch authAlgo {
+	case "sha1":
+		alg = ipsecpolicies.AuthAlgorithmSHA1
+	case "sha256":
+		alg = ipsecpolicies.AuthAlgorithmSHA256
+	case "sha384":
+		alg = ipsecpolicies.AuthAlgorithmSHA384
+	case "sha512":
+		alg = "sha384"
+	}
+	return alg
+}
+func IPSecPolicyV2GetEncapsulationMode(encMode string) ipsecpolicies.EncapsulationMode {
+	var mode ipsecpolicies.EncapsulationMode
+	switch encMode {
+	case "tunnel":
+		mode = ipsecpolicies.EncapsulationModeTunnel
+	case "transport":
+		mode = ipsecpolicies.EncapsulationModeTransport
+	}
+	return mode
 }

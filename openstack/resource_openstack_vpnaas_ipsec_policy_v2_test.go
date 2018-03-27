@@ -23,7 +23,7 @@ func TestAccIPSecPolicyV2_basic(t *testing.T) {
 				Config: testAccIPSecPolicyV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(
-						"openstack_ipsec_policy_v2.policy_1", "", ""),
+						"openstack_vpnaas_ipsec_policy_v2.policy_1", "", ""),
 				),
 			},
 		},
@@ -40,7 +40,7 @@ func TestAccIPSecPolicyV2_withLifetime(t *testing.T) {
 				Config: testAccIPSecPolicyV2_withLifetime,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(
-						"openstack_ipsec_policy_v2.policy_1", "", ""),
+						"openstack_vpnaas_ipsec_policy_v2.policy_1", "", ""),
 				),
 			},
 		},
@@ -57,7 +57,7 @@ func TestAccIPSecPolicyV2_timeout(t *testing.T) {
 				Config: testAccIPSecPolicyV2_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(
-						"openstack_ipsec_policy_v2.policy_1", "", ""),
+						"openstack_vpnaas_ipsec_policy_v2.policy_1", "", ""),
 				),
 			},
 		},
@@ -71,7 +71,7 @@ func testAccCheckIPSecPolicyV2Destroy(s *terraform.State) error {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_ipsec_policy_v2" {
+		if rs.Type != "openstack_vpnaas_ipsec_policy_v2" {
 			continue
 		}
 		_, err = ipsecpolicies.Get(networkingClient, rs.Primary.ID).Extract()
@@ -133,12 +133,12 @@ func testAccCheckIPSecPolicyV2Exists(n, name, description string) resource.TestC
 }
 
 const testAccIPSecPolicyV2_basic = `
-resource "openstack_ipsec_policy_v2" "policy_1" {
+resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
 }
 `
 
 const testAccIPSecPolicyV2_withLifetime = `
-resource "openstack_ipsec_policy_v2" "policy_1" {
+resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
 	auth_algorithm = "sha1"
 	pfs = "group14"
 	lifetime {
@@ -148,7 +148,7 @@ resource "openstack_ipsec_policy_v2" "policy_1" {
 `
 
 const testAccIPSecPolicyV2_timeout = `
-resource "openstack_ipsec_policy_v2" "policy_1" {
+resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
   timeouts {
     create = "5m"
   }
