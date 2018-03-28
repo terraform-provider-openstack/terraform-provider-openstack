@@ -403,6 +403,21 @@ func resourceImagesImageV2ValidateContainerFormat(v interface{}, k string) (ws [
 	return
 }
 
+func resourceImagesImageV2MemberStatusFromString(v string) images.ImageMemberStatus {
+	switch v {
+	case "accepted":
+		return images.ImageMemberStatusAccepted
+	case "pending":
+		return images.ImageMemberStatusPending
+	case "rejected":
+		return images.ImageMemberStatusRejected
+	case "all":
+		return images.ImageMemberStatusAll
+	}
+
+	return ""
+}
+
 func resourceImagesImageV2VisibilityFromString(v string) images.ImageVisibility {
 	switch v {
 	case "public":
