@@ -46,6 +46,56 @@ func TestAccIPSecPolicyV2_withLifetime(t *testing.T) {
 	})
 }
 
+func TestAccIPSecPolicyV2_Update(t *testing.T) {
+	os.Setenv("TF_LOG", "Debug")
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckVPN(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccIPSecPolicyV2_basic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIPSecPolicyV2Exists(
+						"openstack_vpnaas_ipsec_policy_v2.policy_1", "", ""),
+				),
+			},
+			resource.TestStep{
+				Config: testAccIPSecPolicyV2_Update,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIPSecPolicyV2Exists(
+						"openstack_vpnaas_ipsec_policy_v2.policy_1", "updatedname", ""),
+				),
+			},
+		},
+	})
+}
+
+func TestAccIPSecPolicyV2_withLifetimeUpdate(t *testing.T) {
+	os.Setenv("TF_LOG", "Debug")
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckVPN(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccIPSecPolicyV2_withLifetime,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIPSecPolicyV2Exists(
+						"openstack_vpnaas_ipsec_policy_v2.policy_1", "", ""),
+				),
+			},
+			resource.TestStep{
+				Config: testAccIPSecPolicyV2_withLifetimeUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIPSecPolicyV2Exists(
+						"openstack_vpnaas_ipsec_policy_v2.policy_1", "", ""),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckIPSecPolicyV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
@@ -105,13 +155,27 @@ resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
 }
 `
 
+const testAccIPSecPolicyV2_Update = `
+resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
+	name = "updatedname"
+}
+`
+
 const testAccIPSecPolicyV2_withLifetime = `
 resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
-	auth_algorithm = "sha1"
+	auth_algorithm = "sha256"
 	pfs = "group14"
 	lifetime {
 		units = "seconds"
 		value = 1200
+	}
+}
+`
+
+const testAccIPSecPolicyV2_withLifetimeUpdate = `
+resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
+	lifetime {
+		value = 1400
 	}
 }
 `

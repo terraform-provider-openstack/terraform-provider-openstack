@@ -9,7 +9,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
-	"strconv"
 )
 
 func resourceIPSecPolicyV2() *schema.Resource {
@@ -71,7 +70,7 @@ func resourceIPSecPolicyV2() *schema.Resource {
 				Computed: true,
 			},
 			"lifetime": &schema.Schema{
-				Type:     schema.TypeMap,
+				Type:     schema.TypeSet,
 				Computed: true,
 				Optional: true,
 				Elem: &schema.Resource{
@@ -79,10 +78,12 @@ func resourceIPSecPolicyV2() *schema.Resource {
 						"units": &schema.Schema{
 							Type:     schema.TypeString,
 							Computed: true,
+							Optional: true,
 						},
 						"value": &schema.Schema{
 							Type:     schema.TypeInt,
 							Computed: true,
+							Optional: true,
 						},
 					},
 				},
@@ -108,7 +109,8 @@ func resourceIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) error
 	encryptionAlgorithm := IPSecPolicyV2GetEncryptionAlgorithm(d.Get("encryption_algorithm").(string))
 	pfs := IPSecPolicyV2GetPFS(d.Get("pfs").(string))
 	transformProtocol := IPSecPolicyV2GetTransformProtocol(d.Get("transform_protocol").(string))
-	lifetime := IPSecPolicyV2GetLifetimeCreateOpts(d.Get("lifetime").(map[string]interface{}))
+	lifetime := IPSecPolicyV2GetLifetimeCreateOpts(d.Get("lifetime").(*schema.Set))
+	log.Printf("LIFETIME: %+v", lifetime)
 
 	opts := IPSecPolicyCreateOpts{
 		ipsecpolicies.CreateOpts{
@@ -180,7 +182,9 @@ func resourceIPSecPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 	lifetimeMap = make(map[string]interface{})
 	lifetimeMap["units"] = policy.Lifetime.Units
 	lifetimeMap["value"] = policy.Lifetime.Value
-	d.Set("lifetime", &lifetimeMap)
+	var lifetime []map[string]interface{}
+	lifetime = append(lifetime, lifetimeMap)
+	d.Set("lifetime", &lifetime)
 
 	return nil
 }
@@ -233,7 +237,8 @@ func resourceIPSecPolicyV2Update(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if d.HasChange("lifetime") {
-		opts.Lifetime = IPSecPolicyV2GetLifetimeUpdateOpts(d.Get("lifetime").(schema.ResourceData))
+		lifetime := IPSecPolicyV2GetLifetimeUpdateOpts(d.Get("lifetime").(*schema.Set))
+		opts.Lifetime = &lifetime
 		hasChange = true
 	}
 
@@ -350,7 +355,7 @@ func IPSecPolicyV2GetAuthAlgorithm(authAlgo string) ipsecpolicies.AuthAlgorithm 
 	case "sha384":
 		alg = ipsecpolicies.AuthAlgorithmSHA384
 	case "sha512":
-		alg = "sha384"
+		alg = ipsecpolicies.AuthAlgorithmSHA512
 	}
 	return alg
 }
@@ -365,17 +370,15 @@ func IPSecPolicyV2GetEncapsulationMode(encMode string) ipsecpolicies.Encapsulati
 	return mode
 }
 
-func IPSecPolicyV2GetLifetimeCreateOpts(d map[string]interface{}) ipsecpolicies.LifetimeCreateOpts {
+func IPSecPolicyV2GetLifetimeCreateOpts(d *schema.Set) ipsecpolicies.LifetimeCreateOpts {
 	lifetime := ipsecpolicies.LifetimeCreateOpts{}
-	if val, ok := d["units"]; ok {
-		unit := IPSecPolicyV2GetUnit(val.(string))
-		lifetime.Units = unit
-	}
-	if val, ok := d["value"]; ok {
-		value, err := strconv.Atoi(val.(string))
-		if err != nil {
-			panic(err)
-		}
+
+	rawPairs := d.List()
+	for _, raw := range rawPairs {
+		rawMap := raw.(map[string]interface{})
+		lifetime.Units = IPSecPolicyV2GetUnit(rawMap["units"].(string))
+
+		value := rawMap["value"].(int)
 		lifetime.Value = value
 	}
 	return lifetime
@@ -392,15 +395,17 @@ func IPSecPolicyV2GetUnit(units string) ipsecpolicies.Unit {
 	return unit
 }
 
-func IPSecPolicyV2GetLifetimeUpdateOpts(d schema.ResourceData) *ipsecpolicies.LifetimeUpdateOpts {
-	var unit ipsecpolicies.Unit
-	var value int
-	unit = IPSecPolicyV2GetUnit(d.Get("units").(string))
-	value = d.Get("value").(int)
-	updateOpts := ipsecpolicies.LifetimeUpdateOpts{
-		Units: unit,
-		Value: value,
+func IPSecPolicyV2GetLifetimeUpdateOpts(d *schema.Set) ipsecpolicies.LifetimeUpdateOpts {
+	lifetimeUpdateOpts := ipsecpolicies.LifetimeUpdateOpts{}
+
+	rawPairs := d.List()
+	for _, raw := range rawPairs {
+		rawMap := raw.(map[string]interface{})
+		lifetimeUpdateOpts.Units = IPSecPolicyV2GetUnit(rawMap["units"].(string))
+
+		value := rawMap["value"].(int)
+		lifetimeUpdateOpts.Value = value
 	}
-	return &updateOpts
+	return lifetimeUpdateOpts
 
 }
