@@ -9,6 +9,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"strconv"
 )
 
 func resourceIPSecPolicyV2() *schema.Resource {
@@ -78,11 +79,9 @@ func resourceIPSecPolicyV2() *schema.Resource {
 						"units": &schema.Schema{
 							Type:     schema.TypeString,
 							Computed: true,
-							Optional: true,
 						},
 						"value": &schema.Schema{
 							Type:     schema.TypeInt,
-							Optional: true,
 							Computed: true,
 						},
 					},
@@ -109,6 +108,7 @@ func resourceIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) error
 	encryptionAlgorithm := IPSecPolicyV2GetEncryptionAlgorithm(d.Get("encryption_algorithm").(string))
 	pfs := IPSecPolicyV2GetPFS(d.Get("pfs").(string))
 	transformProtocol := IPSecPolicyV2GetTransformProtocol(d.Get("transform_protocol").(string))
+	lifetime := IPSecPolicyV2GetLifetimeCreateOpts(d.Get("lifetime").(map[string]interface{}))
 
 	opts := IPSecPolicyCreateOpts{
 		ipsecpolicies.CreateOpts{
@@ -120,6 +120,7 @@ func resourceIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) error
 			EncryptionAlgorithm: encryptionAlgorithm,
 			PFS:                 pfs,
 			TransformProtocol:   transformProtocol,
+			Lifetime:            &lifetime,
 		},
 		MapValueSpecs(d),
 	}
@@ -130,6 +131,16 @@ func resourceIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) error
 	if err != nil {
 		return err
 	}
+
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"PENDING_CREATE"},
+		Target:     []string{"ACTIVE"},
+		Refresh:    waitForIPSecPolicyCreation(networkingClient, policy.ID),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      0,
+		MinTimeout: 2 * time.Second,
+	}
+	_, err = stateConf.WaitForState()
 
 	log.Printf("[DEBUG] IPSec policy created: %#v", policy)
 
@@ -163,6 +174,13 @@ func resourceIPSecPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("pfs", policy.PFS)
 	d.Set("auth_algorithm", policy.AuthAlgorithm)
 	d.Set("region", GetRegion(d, config))
+
+	// Set the lifetime
+	var lifetimeMap map[string]interface{}
+	lifetimeMap = make(map[string]interface{})
+	lifetimeMap["units"] = policy.Lifetime.Units
+	lifetimeMap["value"] = policy.Lifetime.Value
+	d.Set("lifetime", &lifetimeMap)
 
 	return nil
 }
@@ -211,6 +229,11 @@ func resourceIPSecPolicyV2Update(d *schema.ResourceData, meta interface{}) error
 
 	if d.HasChange("encapsulation_mode") {
 		opts.EncapsulationMode = IPSecPolicyV2GetEncapsulationMode(d.Get("encapsulation_mode").(string))
+		hasChange = true
+	}
+
+	if d.HasChange("lifetime") {
+		opts.Lifetime = IPSecPolicyV2GetLifetimeUpdateOpts(d.Get("lifetime").(schema.ResourceData))
 		hasChange = true
 	}
 
@@ -264,6 +287,16 @@ func waitForIPSecPolicyDeletion(networkingClient *gophercloud.ServiceClient, id 
 		}
 
 		return nil, "ACTIVE", err
+	}
+}
+
+func waitForIPSecPolicyCreation(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		policy, err := ipsecpolicies.Get(networkingClient, id).Extract()
+		if err != nil {
+			return "", "PENDING_CREATE", nil
+		}
+		return policy, "ACTIVE", nil
 	}
 }
 
@@ -330,4 +363,44 @@ func IPSecPolicyV2GetEncapsulationMode(encMode string) ipsecpolicies.Encapsulati
 		mode = ipsecpolicies.EncapsulationModeTransport
 	}
 	return mode
+}
+
+func IPSecPolicyV2GetLifetimeCreateOpts(d map[string]interface{}) ipsecpolicies.LifetimeCreateOpts {
+	lifetime := ipsecpolicies.LifetimeCreateOpts{}
+	if val, ok := d["units"]; ok {
+		unit := IPSecPolicyV2GetUnit(val.(string))
+		lifetime.Units = unit
+	}
+	if val, ok := d["value"]; ok {
+		value, err := strconv.Atoi(val.(string))
+		if err != nil {
+			panic(err)
+		}
+		lifetime.Value = value
+	}
+	return lifetime
+}
+
+func IPSecPolicyV2GetUnit(units string) ipsecpolicies.Unit {
+	var unit ipsecpolicies.Unit
+	switch units {
+	case "seconds":
+		unit = ipsecpolicies.UnitSeconds
+	case "kilobytes":
+		unit = ipsecpolicies.UnitKilobytes
+	}
+	return unit
+}
+
+func IPSecPolicyV2GetLifetimeUpdateOpts(d schema.ResourceData) *ipsecpolicies.LifetimeUpdateOpts {
+	var unit ipsecpolicies.Unit
+	var value int
+	unit = IPSecPolicyV2GetUnit(d.Get("units").(string))
+	value = d.Get("value").(int)
+	updateOpts := ipsecpolicies.LifetimeUpdateOpts{
+		Units: unit,
+		Value: value,
+	}
+	return &updateOpts
+
 }

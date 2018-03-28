@@ -1,16 +1,14 @@
-// +build all vpn
-
 package openstack
 
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	"os"
 )
 
 func TestAccIPSecPolicyV2_basic(t *testing.T) {
@@ -31,6 +29,7 @@ func TestAccIPSecPolicyV2_basic(t *testing.T) {
 }
 
 func TestAccIPSecPolicyV2_withLifetime(t *testing.T) {
+	os.Setenv("TF_LOG", "Debug")
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckVPN(t) },
 		Providers:    testAccProviders,
@@ -85,21 +84,7 @@ func testAccCheckIPSecPolicyV2Exists(n, name, description string) resource.TestC
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		var found *ipsecpolicies.Policy
-		for i := 0; i < 5; i++ {
-			// IPSec policy creation is asynchronous. Retry some times
-			// if we get a 404 error. Fail on any other error.
-			found, err = ipsecpolicies.Get(networkingClient, rs.Primary.ID).Extract()
-			if err != nil {
-				if _, ok := err.(gophercloud.ErrDefault404); ok {
-					time.Sleep(time.Second)
-					continue
-				}
-				return err
-			}
-			break
-		}
-
+		found, err := ipsecpolicies.Get(networkingClient, rs.Primary.ID).Extract()
 		switch {
 		case name != found.Name:
 			err = fmt.Errorf("Expected name <%s>, but found <%s>", name, found.Name)
@@ -126,6 +111,7 @@ resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
 	pfs = "group14"
 	lifetime {
 		units = "seconds"
+		value = 1200
 	}
 }
 `
