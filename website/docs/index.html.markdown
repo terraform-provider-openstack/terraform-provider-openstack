@@ -72,7 +72,8 @@ The following arguments are supported:
   A token is an expiring, temporary means of access issued via the Keystone
   service. By specifying a token, you do not have to specify a username/password
   combination, since the token was already created by a username/password out of
-  band of Terraform. If omitted, the `OS_AUTH_TOKEN` environment variable is used.
+  band of Terraform. If omitted, the `OS_TOKEN` or `OS_AUTH_TOKEN` environment
+  variables are used.
 
 * `domain_id` - (Optional) The ID of the Domain to scope to (Identity v3). If
   If omitted, the following environment variables are checked (in this order):
