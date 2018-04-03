@@ -3,6 +3,7 @@
 IMPROVEMENTS
 
 * Added `member_status` to `openstack_images_image_v2` data source [GH-269]
+* Add support for `OS_TOKEN` environment variable [GH-272]
 
 ## 1.3.0 (March 14, 2018)
 

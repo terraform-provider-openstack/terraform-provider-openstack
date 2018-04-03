@@ -70,9 +70,12 @@ func Provider() terraform.ResourceProvider {
 			},
 
 			"token": &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_AUTH_TOKEN", ""),
+				Type:     schema.TypeString,
+				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"OS_TOKEN",
+					"OS_AUTH_TOKEN",
+				}, ""),
 				Description: descriptions["token"],
 			},
 
