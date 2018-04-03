@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/containers"
+	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects"
+	"github.com/gophercloud/gophercloud/pagination"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -56,6 +59,11 @@ func resourceObjectStorageContainerV1() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: false,
+			},
+			"force_destroy": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 		},
 	}
@@ -147,6 +155,37 @@ func resourceObjectStorageContainerV1Delete(d *schema.ResourceData, meta interfa
 
 	_, err = containers.Delete(objectStorageClient, d.Id()).Extract()
 	if err != nil {
+		gopherErr, ok := err.(gophercloud.ErrUnexpectedResponseCode)
+		if ok && gopherErr.Actual == 409 && d.Get("force_destroy").(bool) {
+			// Container may have things. Delete them.
+			log.Printf("[DEBUG] Attempting to forceDestroy Openstack container %+v", err)
+
+			container := d.Id()
+			opts := &objects.ListOpts{
+				Full: false,
+			}
+			// Retrieve a pager (i.e. a paginated collection)
+			pager := objects.List(objectStorageClient, container, opts)
+			// Define an anonymous function to be executed on each page's iteration
+			err := pager.EachPage(func(page pagination.Page) (bool, error) {
+
+				objectList, err := objects.ExtractNames(page)
+				if err != nil {
+					return false, fmt.Errorf("Error extracting names from objects from page %+v", err)
+				}
+				for _, object := range objectList {
+					_, err = objects.Delete(objectStorageClient, container, object, objects.DeleteOpts{}).Extract()
+					if err != nil {
+						return false, fmt.Errorf("Error deleting object from container %+v", err)
+					}
+				}
+				return true, nil
+			})
+			if err != nil {
+				return err
+			}
+			return resourceObjectStorageContainerV1Delete(d, meta)
+		}
 		return fmt.Errorf("Error deleting OpenStack container: %s", err)
 	}
 
