@@ -1,5 +1,9 @@
 ## 1.4.0 (Unreleased)
 
+FEATURES
+
+* __New Data Source__: `openstack_identity_project_v3` [GH-251]
+
 IMPROVEMENTS
 
 * Added `member_status` to `openstack_images_image_v2` data source [GH-269]
