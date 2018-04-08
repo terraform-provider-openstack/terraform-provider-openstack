@@ -16,6 +16,9 @@
     recheck-pike:
       jobs:
         - terraform-provider-openstack-acceptance-test-pike
+    recheck-queens:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-queens
     recheck-trove:
       jobs:
         - terraform-provider-openstack-acceptance-test-trove

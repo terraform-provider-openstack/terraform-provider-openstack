@@ -56,6 +56,8 @@ The following arguments are supported:
 * `content_type` - (Optional) The MIME type for the container. Changing this
     updates the MIME type.
 
+* `force_destroy` -  (Optional, Default:false ) A boolean that indicates all objects should be deleted from the container so that the container can be destroyed without error. These objects are not recoverable.
+
 ## Attributes Reference
 
 The following attributes are exported:
