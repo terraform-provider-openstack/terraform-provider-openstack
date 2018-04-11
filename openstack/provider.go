@@ -79,12 +79,46 @@ func Provider() terraform.ResourceProvider {
 				Description: descriptions["token"],
 			},
 
-			"domain_id": &schema.Schema{
+			"user_domain_name": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"OS_USER_DOMAIN_NAME",
+				}, ""),
+				Description: descriptions["user_domain_name"],
+			},
+
+			"user_domain_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 					"OS_USER_DOMAIN_ID",
+				}, ""),
+				Description: descriptions["user_domain_id"],
+			},
+
+			"project_domain_name": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"OS_PROJECT_DOMAIN_NAME",
+				}, ""),
+				Description: descriptions["project_domain_name"],
+			},
+
+			"project_domain_id": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 					"OS_PROJECT_DOMAIN_ID",
+				}, ""),
+				Description: descriptions["project_domain_id"],
+			},
+
+			"domain_id": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 					"OS_DOMAIN_ID",
 				}, ""),
 				Description: descriptions["domain_id"],
@@ -94,8 +128,6 @@ func Provider() terraform.ResourceProvider {
 				Type:     schema.TypeString,
 				Optional: true,
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"OS_USER_DOMAIN_NAME",
-					"OS_PROJECT_DOMAIN_NAME",
 					"OS_DOMAIN_NAME",
 					"OS_DEFAULT_DOMAIN",
 				}, ""),
@@ -245,6 +277,14 @@ func init() {
 
 		"token": "Authentication token to use as an alternative to username/password.",
 
+		"user_domain_name": "The name of the domain where the user resides (Identity v3).",
+
+		"user_domain_id": "The ID of the domain where the user resides (Identity v3).",
+
+		"project_domain_name": "The name of the domain where the project resides (Identity v3).",
+
+		"project_domain_id": "The ID of the domain where the proejct resides (Identity v3).",
+
 		"domain_id": "The ID of the Domain to scope to (Identity v3).",
 
 		"domain_name": "The name of the Domain to scope to (Identity v3).",
@@ -271,24 +311,28 @@ func init() {
 
 func configureProvider(d *schema.ResourceData) (interface{}, error) {
 	config := Config{
-		CACertFile:       d.Get("cacert_file").(string),
-		ClientCertFile:   d.Get("cert").(string),
-		ClientKeyFile:    d.Get("key").(string),
-		Cloud:            d.Get("cloud").(string),
-		DomainID:         d.Get("domain_id").(string),
-		DomainName:       d.Get("domain_name").(string),
-		EndpointType:     d.Get("endpoint_type").(string),
-		IdentityEndpoint: d.Get("auth_url").(string),
-		Insecure:         d.Get("insecure").(bool),
-		Password:         d.Get("password").(string),
-		Region:           d.Get("region").(string),
-		Swauth:           d.Get("swauth").(bool),
-		Token:            d.Get("token").(string),
-		TenantID:         d.Get("tenant_id").(string),
-		TenantName:       d.Get("tenant_name").(string),
-		Username:         d.Get("user_name").(string),
-		UserID:           d.Get("user_id").(string),
-		useOctavia:       d.Get("use_octavia").(bool),
+		CACertFile:        d.Get("cacert_file").(string),
+		ClientCertFile:    d.Get("cert").(string),
+		ClientKeyFile:     d.Get("key").(string),
+		Cloud:             d.Get("cloud").(string),
+		DomainID:          d.Get("domain_id").(string),
+		DomainName:        d.Get("domain_name").(string),
+		EndpointType:      d.Get("endpoint_type").(string),
+		IdentityEndpoint:  d.Get("auth_url").(string),
+		Insecure:          d.Get("insecure").(bool),
+		Password:          d.Get("password").(string),
+		ProjectDomainID:   d.Get("project_domain_id").(string),
+		ProjectDomainName: d.Get("project_domain_name").(string),
+		Region:            d.Get("region").(string),
+		Swauth:            d.Get("swauth").(bool),
+		Token:             d.Get("token").(string),
+		TenantID:          d.Get("tenant_id").(string),
+		TenantName:        d.Get("tenant_name").(string),
+		UserDomainID:      d.Get("user_domain_id").(string),
+		UserDomainName:    d.Get("user_domain_name").(string),
+		Username:          d.Get("user_name").(string),
+		UserID:            d.Get("user_id").(string),
+		useOctavia:        d.Get("use_octavia").(bool),
 	}
 
 	if err := config.LoadAndValidate(); err != nil {
