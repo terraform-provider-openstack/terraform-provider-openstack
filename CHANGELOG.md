@@ -3,6 +3,7 @@
 FEATURES
 
 * __New Data Source__: `openstack_identity_project_v3` [GH-251]
+* __New Data Source__: `openstack_identity_user_v3` [GH-252]
 
 IMPROVEMENTS
 
