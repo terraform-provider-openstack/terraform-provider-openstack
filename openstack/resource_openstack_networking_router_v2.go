@@ -67,10 +67,16 @@ func resourceNetworkingRouterV2() *schema.Resource {
 				ConflictsWith: []string{"external_gateway"},
 			},
 			"enable_snat": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: false,
-				Computed: true,
+				Type:          schema.TypeBool,
+				Optional:      true,
+				ForceNew:      false,
+				ConflictsWith: []string{"disable_snat"},
+			},
+			"disable_snat": &schema.Schema{
+				Type:          schema.TypeBool,
+				Optional:      true,
+				ForceNew:      false,
+				ConflictsWith: []string{"enable_snat"},
 			},
 			"external_fixed_ip": &schema.Schema{
 				Type:     schema.TypeList,
@@ -179,11 +185,19 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 		createOpts.GatewayInfo = &gatewayInfo
 	}
 
-	if esRaw, ok := d.GetOk("enable_snat"); ok {
+	if _, ok := d.GetOk("enable_snat"); ok {
 		if externalNetworkID == "" {
 			return fmt.Errorf("setting enable_snat requires external_network_id to be set")
 		}
-		es := esRaw.(bool)
+		es := true
+		createOpts.GatewayInfo.EnableSNAT = &es
+	}
+
+	if _, ok := d.GetOk("disable_snat"); ok {
+		if externalNetworkID == "" {
+			return fmt.Errorf("setting enable_snat requires external_network_id to be set")
+		}
+		es := false
 		createOpts.GatewayInfo.EnableSNAT = &es
 	}
 
@@ -267,7 +281,15 @@ func resourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) er
 	// Gateway settings
 	d.Set("external_gateway", n.GatewayInfo.NetworkID)
 	d.Set("external_network_id", n.GatewayInfo.NetworkID)
-	d.Set("enable_snat", n.GatewayInfo.EnableSNAT)
+
+	es := *n.GatewayInfo.EnableSNAT
+	if es {
+		d.Set("enable_snat", true)
+		d.Set("disable_snat", false)
+	} else {
+		d.Set("enable_snat", false)
+		d.Set("disable_snat", true)
+	}
 
 	var externalFixedIPs []map[string]string
 	for _, v := range n.GatewayInfo.ExternalFixedIPs {
@@ -329,14 +351,21 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 		updateGatewaySettings = true
 	}
 
-	if d.HasChange("enable_snat") {
+	if d.HasChange("enable_snat") || d.HasChange("disable_snat") {
 		updateGatewaySettings = true
 		if externalNetworkID == "" {
 			return fmt.Errorf("setting enable_snat requires external_network_id to be set")
 		}
 
-		enableSNAT := d.Get("enable_snat").(bool)
-		gatewayInfo.EnableSNAT = &enableSNAT
+		if _, ok := d.GetOk("enable_snat"); ok {
+			es := true
+			gatewayInfo.EnableSNAT = &es
+		}
+
+		if _, ok := d.GetOk("disable_snat"); ok {
+			es := false
+			gatewayInfo.EnableSNAT = &es
+		}
 	}
 
 	if d.HasChange("external_fixed_ip") {

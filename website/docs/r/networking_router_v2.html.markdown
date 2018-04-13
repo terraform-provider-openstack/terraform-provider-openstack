@@ -51,9 +51,15 @@ The following arguments are supported:
     compute instances or load balancers will be using floating IPs. Changing
     this updates the external gateway of the router.
 
-* `enable_snat` - (Optional) Enable Source NAT for the router. Valid values are
-    "true" or "false". An `external_network_id` has to be set in order to
-    set this property. Changing this updates the `enable_snat` of the router.
+* `enable_snat` - (Optional - conflicts with `disable_snat`) Enable Source NAT
+    for the router. Valid values are "true" or "false". An `external_network_id`
+    has to be set in order to set this property. Changing this updates
+    the `enable_snat` of the router.
+
+* `disable_snat` - (Optional - conflicts with `enable_snat`) Disables Source NAT
+    for the router. Valid values are "true" or "false". An `external_network_id`
+    has to be set in order to set this property. Changing this updates
+    the `enable_snat` of the router.
 
 * `external_fixed_ip` - (Optional) An external fixed IP for the router. This
     can be repeated. The structure is described below. An `external_network_id`
@@ -68,9 +74,10 @@ The following arguments are supported:
 * `vendor_options` - (Optional) Map of additional vendor-specific options.
     Supported options are described below.
 
-* `availability_zone_hints` -  (Optional) An availability zone is used to make 
-    network resources highly available. Used for resources with high availability so that they are scheduled on different availability zones. Changing
-    this creates a new router.
+* `availability_zone_hints` -  (Optional) An availability zone is used to make
+    network resources highly available. Used for resources with high
+    availability so that they are scheduled on different availability zones.
+    Changing this creates a new router.
 
 The `external_fixed_ip` block supports:
 
