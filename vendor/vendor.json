@@ -433,16 +433,16 @@
 			"revisionTime": "2017-10-29T05:30:20Z"
 		},
 		{
-			"checksumSHA1": "5+wNKnxGvSGV8lHS+7km0ZiNEts=",
+			"checksumSHA1": "I7QtHxTYPCZybsi+u/J5AQaNxxQ=",
 			"path": "github.com/gophercloud/gophercloud/openstack/imageservice/v2/imagedata",
-			"revision": "0f64da0e36de86a0ca1a8f2fc1b0570a0d3f7504",
-			"revisionTime": "2017-03-10T01:59:53Z"
+			"revision": "e02a6935a9a628ff8694e6072b9d0aac22623abd",
+			"revisionTime": "2018-04-17T21:29:20Z"
 		},
 		{
-			"checksumSHA1": "gnDqkD2hdbV0ek3m2eNgsc4opdg=",
+			"checksumSHA1": "Pop8rylL583hCZ0RjO+9TkrScCo=",
 			"path": "github.com/gophercloud/gophercloud/openstack/imageservice/v2/images",
-			"revision": "e764e6cf0316a135851b56f8eea946b906988707",
-			"revisionTime": "2017-09-08T04:14:34Z"
+			"revision": "e02a6935a9a628ff8694e6072b9d0aac22623abd",
+			"revisionTime": "2018-04-17T21:29:20Z"
 		},
 		{
 			"checksumSHA1": "YqqqrMdOCKY2xwFkwxskkx8XtTQ=",
