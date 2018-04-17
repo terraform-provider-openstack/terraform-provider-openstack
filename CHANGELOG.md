@@ -2,6 +2,7 @@
 
 FEATURES
 
+* __New Resource__: `openstack_identity_role_assignment_v3` [GH-265]
 * __New Data Source__: `openstack_identity_project_v3` [GH-251]
 * __New Data Source__: `openstack_identity_user_v3` [GH-252]
 
