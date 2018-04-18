@@ -41,7 +41,8 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 			},
 			"cidr": &schema.Schema{
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"name": &schema.Schema{
@@ -163,7 +164,6 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 	createOpts := SubnetCreateOpts{
 		subnets.CreateOpts{
 			NetworkID:       d.Get("network_id").(string),
-			CIDR:            d.Get("cidr").(string),
 			Name:            d.Get("name").(string),
 			TenantID:        d.Get("tenant_id").(string),
 			IPv6AddressMode: d.Get("ipv6_address_mode").(string),
@@ -175,6 +175,11 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 			EnableDHCP:      nil,
 		},
 		MapValueSpecs(d),
+	}
+
+	if v, ok := d.GetOk("cidr"); ok {
+		cidr := v.(string)
+		createOpts.CIDR = cidr
 	}
 
 	if v, ok := d.GetOk("gateway_ip"); ok {
