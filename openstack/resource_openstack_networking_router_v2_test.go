@@ -60,6 +60,44 @@ func TestAccNetworkingV2Router_updateExternalGateway(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Router_enableSNAT(t *testing.T) {
+	var router routers.Router
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccNetworkingV2Router_enableSNAT_1,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "external_network_id", OS_EXTGW_ID),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "enable_snat", "true"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "disable_snat", "false"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccNetworkingV2Router_enableSNAT_2,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "external_network_id", OS_EXTGW_ID),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "enable_snat", "false"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "disable_snat", "true"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccNetworkingV2Router_timeout(t *testing.T) {
 	var router routers.Router
 
@@ -208,3 +246,23 @@ resource "openstack_networking_router_v2" "router_1" {
   }
 }
 `
+
+var testAccNetworkingV2Router_enableSNAT_1 = fmt.Sprintf(`
+resource "openstack_networking_router_v2" "router_1" {
+	name = "router"
+	admin_state_up = "true"
+	distributed = "false"
+	external_network_id = "%s"
+	enable_snat = true
+}
+`, OS_EXTGW_ID)
+
+var testAccNetworkingV2Router_enableSNAT_2 = fmt.Sprintf(`
+resource "openstack_networking_router_v2" "router_1" {
+	name = "router"
+	admin_state_up = "true"
+	distributed = "false"
+	external_network_id = "%s"
+	disable_snat = true
+}
+`, OS_EXTGW_ID)
