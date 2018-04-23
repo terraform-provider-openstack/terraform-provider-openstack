@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gophercloud/gophercloud"
@@ -106,10 +107,11 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Set:      schema.HashString,
 			},
 			"availability_zone": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				Computed:         true,
+				DiffSuppressFunc: suppressAvailabilityZoneDetailDiffs,
 			},
 			"network": &schema.Schema{
 				Type:     schema.TypeList,
@@ -1091,4 +1093,20 @@ func resourceInstancePersonalityV2(d *schema.ResourceData) servers.Personality {
 	}
 
 	return personalities
+}
+
+// suppressAvailabilityZoneDetailDiffs will suppress diffs when a user specifies an
+// availability zone in the format of `az:host:node` and Nova/Compute responds with
+// only `az`.
+func suppressAvailabilityZoneDetailDiffs(k, old, new string, d *schema.ResourceData) bool {
+	if strings.Contains(new, ":") {
+		parts := strings.Split(new, ":")
+		az := parts[0]
+
+		if az == old {
+			return true
+		}
+	}
+
+	return false
 }
