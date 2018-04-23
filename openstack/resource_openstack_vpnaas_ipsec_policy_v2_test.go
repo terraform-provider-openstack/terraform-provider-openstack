@@ -29,7 +29,6 @@ func TestAccIPSecPolicyV2_basic(t *testing.T) {
 }
 
 func TestAccIPSecPolicyV2_withLifetime(t *testing.T) {
-	os.Setenv("TF_LOG", "Debug")
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckVPN(t) },
 		Providers:    testAccProviders,
@@ -47,7 +46,6 @@ func TestAccIPSecPolicyV2_withLifetime(t *testing.T) {
 }
 
 func TestAccIPSecPolicyV2_Update(t *testing.T) {
-	os.Setenv("TF_LOG", "Debug")
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckVPN(t) },
 		Providers:    testAccProviders,
@@ -72,7 +70,6 @@ func TestAccIPSecPolicyV2_Update(t *testing.T) {
 }
 
 func TestAccIPSecPolicyV2_withLifetimeUpdate(t *testing.T) {
-	os.Setenv("TF_LOG", "Debug")
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckVPN(t) },
 		Providers:    testAccProviders,
