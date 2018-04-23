@@ -8,7 +8,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"os"
 )
 
 func TestAccIPSecPolicyV2_basic(t *testing.T) {
