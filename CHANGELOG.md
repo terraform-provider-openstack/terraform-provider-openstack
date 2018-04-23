@@ -1,5 +1,9 @@
 ## 1.4.0 (Unreleased)
 
+BACKWARDS INCOMPATIBILITIES / NOTES:
+
+* The OpenStack provider now has additional authentication options for `project_domain_name`, `project_domain_id`, `user_domain_name`, and `user_domain_id`. This will allow for more fine-grainted authentication scoping. This should not cause any problems with existing deployments, but please report any authentication issues after upgrading.
+
 FEATURES
 
 * __New Resource__: `openstack_identity_role_assignment_v3` [GH-265]
@@ -12,6 +16,7 @@ IMPROVEMENTS
 * Add support for `OS_TOKEN` environment variable [GH-272]
 * Added `force_destroy` to `openstack_objectstorage_container_v1` which will cause all objects in the container to be deleted when the container is deleted [GH-276]
 * CIDR is now optional in `openstack_networking_subnet_v2` allowing a CIDR to be allocated from a subnet pool [GH-294]
+* Added additional authentication options for domain scoping [GH-290]
 
 BUG FIXES
 
