@@ -75,14 +75,25 @@ The following arguments are supported:
   band of Terraform. If omitted, the `OS_TOKEN` or `OS_AUTH_TOKEN` environment
   variables are used.
 
+* `user_domain_name` - (Optional) The domain name where the user is located. If
+  omitted, the `OS_USER_DOMAIN_NAME` environment variable is checked.
+
+* `user_domain_id` - (Optional) The domain ID where the user is located. If
+  omitted, the `OS_USER_DOMAIN_ID` environment variable is checked.
+
+* `project_domain_name` - (Optional) The domain name where the project is
+  located. If omitted, the `OS_PROJECT_DOMAIN_NAME` environment variable is
+  checked.
+
+* `project_domain_id` - (Optional) The domain ID where the project is located
+  If omitted, the `OS_PROJECT_DOMAIN_ID` environment variable is checked.
+
 * `domain_id` - (Optional) The ID of the Domain to scope to (Identity v3). If
-  If omitted, the following environment variables are checked (in this order):
-  `OS_USER_DOMAIN_ID`, `OS_PROJECT_DOMAIN_ID`, `OS_DOMAIN_ID`.
+  omitted, the `OS_DOMAIN_ID` environment variable is checked.
 
 * `domain_name` - (Optional) The Name of the Domain to scope to (Identity v3).
   If omitted, the following environment variables are checked (in this order):
-  `OS_USER_DOMAIN_NAME`, `OS_PROJECT_DOMAIN_NAME`, `OS_DOMAIN_NAME`,
-  `DEFAULT_DOMAIN`.
+  `OS_DOMAIN_NAME`, `OS_DEFAULT_DOMAIN`.
 
 * `insecure` - (Optional) Trust self-signed SSL certificates. If omitted, the
   `OS_INSECURE` environment variable is used.
