@@ -160,6 +160,24 @@ func TestAccNetworkingV2Subnet_subnetPool(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Subnet_subnetPoolNoCIDR(t *testing.T) {
+	var subnet subnets.Subnet
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccNetworkingV2Subnet_subnetPoolNoCIDR,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2SubnetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
@@ -366,6 +384,25 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "10.11.12.0/25"
   no_gateway = true
+	network_id = "${openstack_networking_network_v2.network_1.id}"
+	subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+}
+`
+
+const testAccNetworkingV2Subnet_subnetPoolNoCIDR = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
+  name = "my_ipv4_pool"
+  prefixes = ["10.11.12.0/24"]
+  min_prefixlen = "24"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
 	network_id = "${openstack_networking_network_v2.network_1.id}"
 	subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
 }
