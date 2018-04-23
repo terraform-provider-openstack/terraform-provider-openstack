@@ -13,6 +13,10 @@ IMPROVEMENTS
 * Added `force_destroy` to `openstack_objectstorage_container_v1` which will cause all objects in the container to be deleted when the container is deleted [GH-276]
 * CIDR is now optional in `openstack_networking_subnet_v2` allowing a CIDR to be allocated from a subnet pool [GH-294]
 
+BUG FIXES
+
+* `openstack_compute_instance_v2` resources can handle Availability Zones in the format of `az:host:node` [GH-291]
+
 ## 1.3.0 (March 14, 2018)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
