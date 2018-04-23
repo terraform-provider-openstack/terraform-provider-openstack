@@ -174,7 +174,10 @@ resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
 
 const testAccIPSecPolicyV2_withLifetimeUpdate = `
 resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
+	auth_algorithm = "sha256"
+	pfs = "group14"
 	lifetime {
+		units = "seconds"
 		value = 1400
 	}
 }
