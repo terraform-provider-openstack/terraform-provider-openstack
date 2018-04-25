@@ -17,24 +17,28 @@ import (
 )
 
 type Config struct {
-	CACertFile       string
-	ClientCertFile   string
-	ClientKeyFile    string
-	Cloud            string
-	DomainID         string
-	DomainName       string
-	EndpointType     string
-	IdentityEndpoint string
-	Insecure         bool
-	Password         string
-	Region           string
-	Swauth           bool
-	TenantID         string
-	TenantName       string
-	Token            string
-	Username         string
-	UserID           string
-	useOctavia       bool
+	CACertFile        string
+	ClientCertFile    string
+	ClientKeyFile     string
+	Cloud             string
+	UserDomainName    string
+	UserDomainID      string
+	ProjectDomainName string
+	ProjectDomainID   string
+	DomainID          string
+	DomainName        string
+	EndpointType      string
+	IdentityEndpoint  string
+	Insecure          bool
+	Password          string
+	Region            string
+	Swauth            bool
+	TenantID          string
+	TenantName        string
+	Token             string
+	Username          string
+	UserID            string
+	useOctavia        bool
 
 	OsClient *gophercloud.ProviderClient
 }
@@ -63,19 +67,11 @@ func (c *Config) LoadAndValidate() error {
 		return fmt.Errorf("Invalid endpoint type provided")
 	}
 
-	ao := &gophercloud.AuthOptions{}
+	clientOpts := new(clientconfig.ClientOpts)
 
 	// If a cloud entry was given, base AuthOptions on a clouds.yaml file.
 	if c.Cloud != "" {
-		clientOpts := &clientconfig.ClientOpts{
-			Cloud: c.Cloud,
-		}
-
-		var err error
-		ao, err = clientconfig.AuthOptions(clientOpts)
-		if err != nil {
-			return err
-		}
+		clientOpts.Cloud = c.Cloud
 
 		cloud, err := clientconfig.GetCloudFromYAML(clientOpts)
 		if err != nil {
@@ -86,17 +82,27 @@ func (c *Config) LoadAndValidate() error {
 			c.Region = cloud.RegionName
 		}
 	} else {
-		ao = &gophercloud.AuthOptions{
-			DomainID:         c.DomainID,
-			DomainName:       c.DomainName,
-			IdentityEndpoint: c.IdentityEndpoint,
-			Password:         c.Password,
-			TenantID:         c.TenantID,
-			TenantName:       c.TenantName,
-			TokenID:          c.Token,
-			Username:         c.Username,
-			UserID:           c.UserID,
+		authInfo := &clientconfig.AuthInfo{
+			AuthURL:           c.IdentityEndpoint,
+			DomainID:          c.DomainID,
+			DomainName:        c.DomainName,
+			Password:          c.Password,
+			ProjectDomainID:   c.ProjectDomainID,
+			ProjectDomainName: c.ProjectDomainName,
+			ProjectID:         c.TenantID,
+			ProjectName:       c.TenantName,
+			Token:             c.Token,
+			UserDomainID:      c.UserDomainID,
+			UserDomainName:    c.UserDomainName,
+			Username:          c.Username,
+			UserID:            c.UserID,
 		}
+		clientOpts.AuthInfo = authInfo
+	}
+
+	ao, err := clientconfig.AuthOptions(clientOpts)
+	if err != nil {
+		return err
 	}
 
 	client, err := openstack.NewClient(ao.IdentityEndpoint)
