@@ -162,6 +162,12 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 	visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
 	member_status := resourceImagesImageV2MemberStatusFromString(d.Get("member_status").(string))
 
+	var tags []string
+	tag := d.Get("tag").(string)
+	if tag != "" {
+		tags = append(tags, tag)
+	}
+
 	listOpts := images.ListOpts{
 		Name:         d.Get("name").(string),
 		Visibility:   visibility,
@@ -171,7 +177,7 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 		SizeMax:      int64(d.Get("size_max").(int)),
 		SortKey:      d.Get("sort_key").(string),
 		SortDir:      d.Get("sort_direction").(string),
-		Tag:          d.Get("tag").(string),
+		Tags:         tags,
 		MemberStatus: member_status,
 	}
 
