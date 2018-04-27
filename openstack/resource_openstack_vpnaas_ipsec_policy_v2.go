@@ -17,6 +17,9 @@ func resourceIPSecPolicyV2() *schema.Resource {
 		Read:   resourceIPSecPolicyV2Read,
 		Update: resourceIPSecPolicyV2Update,
 		Delete: resourceIPSecPolicyV2Delete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
