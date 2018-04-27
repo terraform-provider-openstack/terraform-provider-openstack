@@ -104,13 +104,12 @@ func resourceIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	encapsulationMode := IPSecPolicyV2GetEncapsulationMode(d.Get("encapsulation_mode").(string))
-	authAlgorithm := IPSecPolicyV2GetAuthAlgorithm(d.Get("auth_algorithm").(string))
-	encryptionAlgorithm := IPSecPolicyV2GetEncryptionAlgorithm(d.Get("encryption_algorithm").(string))
-	pfs := IPSecPolicyV2GetPFS(d.Get("pfs").(string))
-	transformProtocol := IPSecPolicyV2GetTransformProtocol(d.Get("transform_protocol").(string))
-	lifetime := IPSecPolicyV2GetLifetimeCreateOpts(d.Get("lifetime").(*schema.Set))
-	log.Printf("LIFETIME: %+v", lifetime)
+	encapsulationMode := resourceIPSecPolicyV2EncapsulationMode(d.Get("encapsulation_mode").(string))
+	authAlgorithm := resourceIPSecPolicyV2AuthAlgorithm(d.Get("auth_algorithm").(string))
+	encryptionAlgorithm := resourceIPSecPolicyV2EncryptionAlgorithm(d.Get("encryption_algorithm").(string))
+	pfs := resourceIPSecPolicyV2PFS(d.Get("pfs").(string))
+	transformProtocol := resourceIPSecPolicyV2TransformProtocol(d.Get("transform_protocol").(string))
+	lifetime := resourceIPSecPolicyV2LifetimeCreateOpts(d.Get("lifetime").(*schema.Set))
 
 	opts := IPSecPolicyCreateOpts{
 		ipsecpolicies.CreateOpts{
@@ -184,7 +183,9 @@ func resourceIPSecPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 	lifetimeMap["value"] = policy.Lifetime.Value
 	var lifetime []map[string]interface{}
 	lifetime = append(lifetime, lifetimeMap)
-	d.Set("lifetime", &lifetime)
+	if err := d.Set("lifetime", &lifetime); err != nil {
+		log.Printf("[WARN] unable to set IPSec policy lifetime")
+	}
 
 	return nil
 }
@@ -212,32 +213,32 @@ func resourceIPSecPolicyV2Update(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if d.HasChange("auth_algorithm") {
-		opts.AuthAlgorithm = IPSecPolicyV2GetAuthAlgorithm(d.Get("auth_algorithm").(string))
+		opts.AuthAlgorithm = resourceIPSecPolicyV2AuthAlgorithm(d.Get("auth_algorithm").(string))
 		hasChange = true
 	}
 
 	if d.HasChange("encryption_algorithm") {
-		opts.EncryptionAlgorithm = IPSecPolicyV2GetEncryptionAlgorithm(d.Get("encryption_algorithm").(string))
+		opts.EncryptionAlgorithm = resourceIPSecPolicyV2EncryptionAlgorithm(d.Get("encryption_algorithm").(string))
 		hasChange = true
 	}
 
 	if d.HasChange("transform_protocol") {
-		opts.TransformProtocol = IPSecPolicyV2GetTransformProtocol(d.Get("transform_protocol").(string))
+		opts.TransformProtocol = resourceIPSecPolicyV2TransformProtocol(d.Get("transform_protocol").(string))
 		hasChange = true
 	}
 
 	if d.HasChange("pfs") {
-		opts.PFS = IPSecPolicyV2GetPFS(d.Get("pfs").(string))
+		opts.PFS = resourceIPSecPolicyV2PFS(d.Get("pfs").(string))
 		hasChange = true
 	}
 
 	if d.HasChange("encapsulation_mode") {
-		opts.EncapsulationMode = IPSecPolicyV2GetEncapsulationMode(d.Get("encapsulation_mode").(string))
+		opts.EncapsulationMode = resourceIPSecPolicyV2EncapsulationMode(d.Get("encapsulation_mode").(string))
 		hasChange = true
 	}
 
 	if d.HasChange("lifetime") {
-		lifetime := IPSecPolicyV2GetLifetimeUpdateOpts(d.Get("lifetime").(*schema.Set))
+		lifetime := resourceIPSecPolicyV2LifetimeUpdateOpts(d.Get("lifetime").(*schema.Set))
 		opts.Lifetime = &lifetime
 		hasChange = true
 	}
@@ -247,6 +248,18 @@ func resourceIPSecPolicyV2Update(d *schema.ResourceData, meta interface{}) error
 	if hasChange {
 		_, err = ipsecpolicies.Update(networkingClient, d.Id(), opts).Extract()
 		if err != nil {
+			return err
+		}
+
+		stateConf := &resource.StateChangeConf{
+			Pending:    []string{"PENDING_UPDATE"},
+			Target:     []string{"ACTIVE"},
+			Refresh:    waitForIPSecPolicyUpdate(networkingClient, d.Id()),
+			Timeout:    d.Timeout(schema.TimeoutCreate),
+			Delay:      0,
+			MinTimeout: 2 * time.Second,
+		}
+		if _, err = stateConf.WaitForState(); err != nil {
 			return err
 		}
 	}
@@ -305,7 +318,17 @@ func waitForIPSecPolicyCreation(networkingClient *gophercloud.ServiceClient, id 
 	}
 }
 
-func IPSecPolicyV2GetTransformProtocol(trp string) ipsecpolicies.TransformProtocol {
+func waitForIPSecPolicyUpdate(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		policy, err := ipsecpolicies.Get(networkingClient, id).Extract()
+		if err != nil {
+			return "", "PENDING_UPDATE", nil
+		}
+		return policy, "ACTIVE", nil
+	}
+}
+
+func resourceIPSecPolicyV2TransformProtocol(trp string) ipsecpolicies.TransformProtocol {
 	var protocol ipsecpolicies.TransformProtocol
 	switch trp {
 	case "esp":
@@ -318,7 +341,7 @@ func IPSecPolicyV2GetTransformProtocol(trp string) ipsecpolicies.TransformProtoc
 	return protocol
 
 }
-func IPSecPolicyV2GetPFS(pfsString string) ipsecpolicies.PFS {
+func resourceIPSecPolicyV2PFS(pfsString string) ipsecpolicies.PFS {
 	var pfs ipsecpolicies.PFS
 	switch pfsString {
 	case "group2":
@@ -331,7 +354,7 @@ func IPSecPolicyV2GetPFS(pfsString string) ipsecpolicies.PFS {
 	return pfs
 
 }
-func IPSecPolicyV2GetEncryptionAlgorithm(encryptionAlgo string) ipsecpolicies.EncryptionAlgorithm {
+func resourceIPSecPolicyV2EncryptionAlgorithm(encryptionAlgo string) ipsecpolicies.EncryptionAlgorithm {
 	var alg ipsecpolicies.EncryptionAlgorithm
 	switch encryptionAlgo {
 	case "3des":
@@ -345,7 +368,7 @@ func IPSecPolicyV2GetEncryptionAlgorithm(encryptionAlgo string) ipsecpolicies.En
 	}
 	return alg
 }
-func IPSecPolicyV2GetAuthAlgorithm(authAlgo string) ipsecpolicies.AuthAlgorithm {
+func resourceIPSecPolicyV2AuthAlgorithm(authAlgo string) ipsecpolicies.AuthAlgorithm {
 	var alg ipsecpolicies.AuthAlgorithm
 	switch authAlgo {
 	case "sha1":
@@ -359,7 +382,7 @@ func IPSecPolicyV2GetAuthAlgorithm(authAlgo string) ipsecpolicies.AuthAlgorithm 
 	}
 	return alg
 }
-func IPSecPolicyV2GetEncapsulationMode(encMode string) ipsecpolicies.EncapsulationMode {
+func resourceIPSecPolicyV2EncapsulationMode(encMode string) ipsecpolicies.EncapsulationMode {
 	var mode ipsecpolicies.EncapsulationMode
 	switch encMode {
 	case "tunnel":
@@ -370,13 +393,13 @@ func IPSecPolicyV2GetEncapsulationMode(encMode string) ipsecpolicies.Encapsulati
 	return mode
 }
 
-func IPSecPolicyV2GetLifetimeCreateOpts(d *schema.Set) ipsecpolicies.LifetimeCreateOpts {
+func resourceIPSecPolicyV2LifetimeCreateOpts(d *schema.Set) ipsecpolicies.LifetimeCreateOpts {
 	lifetime := ipsecpolicies.LifetimeCreateOpts{}
 
 	rawPairs := d.List()
 	for _, raw := range rawPairs {
 		rawMap := raw.(map[string]interface{})
-		lifetime.Units = IPSecPolicyV2GetUnit(rawMap["units"].(string))
+		lifetime.Units = resourceIPSecPolicyV2Unit(rawMap["units"].(string))
 
 		value := rawMap["value"].(int)
 		lifetime.Value = value
@@ -384,7 +407,7 @@ func IPSecPolicyV2GetLifetimeCreateOpts(d *schema.Set) ipsecpolicies.LifetimeCre
 	return lifetime
 }
 
-func IPSecPolicyV2GetUnit(units string) ipsecpolicies.Unit {
+func resourceIPSecPolicyV2Unit(units string) ipsecpolicies.Unit {
 	var unit ipsecpolicies.Unit
 	switch units {
 	case "seconds":
@@ -395,13 +418,13 @@ func IPSecPolicyV2GetUnit(units string) ipsecpolicies.Unit {
 	return unit
 }
 
-func IPSecPolicyV2GetLifetimeUpdateOpts(d *schema.Set) ipsecpolicies.LifetimeUpdateOpts {
+func resourceIPSecPolicyV2LifetimeUpdateOpts(d *schema.Set) ipsecpolicies.LifetimeUpdateOpts {
 	lifetimeUpdateOpts := ipsecpolicies.LifetimeUpdateOpts{}
 
 	rawPairs := d.List()
 	for _, raw := range rawPairs {
 		rawMap := raw.(map[string]interface{})
-		lifetimeUpdateOpts.Units = IPSecPolicyV2GetUnit(rawMap["units"].(string))
+		lifetimeUpdateOpts.Units = resourceIPSecPolicyV2Unit(rawMap["units"].(string))
 
 		value := rawMap["value"].(int)
 		lifetimeUpdateOpts.Value = value
