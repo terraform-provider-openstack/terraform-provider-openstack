@@ -17,6 +17,7 @@ IMPROVEMENTS
 * Added `force_destroy` to `openstack_objectstorage_container_v1` which will cause all objects in the container to be deleted when the container is deleted [GH-276]
 * CIDR is now optional in `openstack_networking_subnet_v2` allowing a CIDR to be allocated from a subnet pool [GH-294]
 * Added additional authentication options for domain scoping [GH-290]
+* `openstack_images_image_v2` can now support OVA format [GH-302]
 
 BUG FIXES
 

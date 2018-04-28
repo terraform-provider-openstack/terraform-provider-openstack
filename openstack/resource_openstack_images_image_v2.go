@@ -390,7 +390,7 @@ func resourceImagesImageV2ValidateDiskFormat(v interface{}, k string) (ws []stri
 	return
 }
 
-var ContainerFormats = [9]string{"ami", "ari", "aki", "bare", "ovf"}
+var ContainerFormats = [9]string{"ami", "ari", "aki", "bare", "ovf", "ova"}
 
 func resourceImagesImageV2ValidateContainerFormat(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
