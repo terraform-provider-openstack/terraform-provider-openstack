@@ -1,0 +1,84 @@
+---
+layout: "openstack"
+page_title: "OpenStack: openstack_vpnaas_ipsec_policy_v2"
+sidebar_current: "docs-openstack-resource-vpnaas-ipsec-policy-v2"
+description: |-
+  Manages a V2 Neutron IPSec policy resource within OpenStack.
+---
+
+# openstack\_vpnaas\_ipsec_policy_v2
+
+Manages a V2 Neutron IPSec policy resource within OpenStack.
+
+## Example Usage
+
+```hcl
+resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
+  name = "my_policy"
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+* `region` - (Optional) The region in which to obtain the V2 Networking client.
+    A Networking client is needed to create a VPN service. If omitted, the
+    `region` argument of the provider is used. Changing this creates a new
+    service.
+
+* `name` - (Optional) The name of the policy. Changing this updates the name of
+    the existing policy.
+
+* `tenant_id` - (Optional) The owner of the policy. Required if admin wants to
+    create a service for another policy. Changing this creates a new policy.
+
+* `description` - (Optional) The human-readable description for the policy.
+    Changing this updates the description of the existing policy.
+
+* `auth_algorithm` - (Optional) The authentication hash algorithm. Valid values are sha1, sha256, sha384, sha512.
+    Default is sha1. Changing this updates the algorithm of the existing policy.
+
+* `encapsulation_mode` - (Optional) The encapsulation mode. Valid values are tunnel and transport. Default is tunnel.
+    Changing this updates the existing policy.
+
+* `encryption_algorithm` - (Optional) The encryption algorithm. Valid values are 3des, aes-128, aes-192 and so on.
+    The default value is aes-128. Changing this updates the existing policy.
+
+* `pfs` - (Optional) The perfect forward secrecy mode. Valid values are Group2, Group5 and Group14. Default is Group5.
+    Changing this updates the existing policy.
+
+* `transform_protocol` - (Optional) The transform protocol. Valid values are ESP, AH and AH-ESP.
+    Changing this updates the existing policy. Default is ESP.
+
+* `lifetime` - (Optional) The lifetime of the security association. Consists of Unit and Value.
+    - `unit` - (Optional) The units for the lifetime of the security association. Can be either seconds or kilobytes.
+    Default is seconds.
+    - `value` - (Optional) The value for the lifetime of the security association. Must be a positive integer.
+    Default is 3600.
+    
+* `value_specs` - (Optional) Map of additional options.
+
+## Attributes Reference
+
+The following attributes are exported:
+
+* `region` - See Argument Reference above.
+* `name` - See Argument Reference above.
+* `tenant_id` - See Argument Reference above.
+* `router_id` - See Argument Reference above.
+* `admin_state_up` - See Argument Reference above.
+* `subnet_id` - See Argument Reference above.
+* `status` - Indicates whether IPsec VPN service is currently operational. Values are ACTIVE, DOWN, BUILD, ERROR, PENDING_CREATE, PENDING_UPDATE, or PENDING_DELETE.
+* `external_v6_ip` - The read-only external (public) IPv6 address that is used for the VPN service.
+* `external_v4_ip` - The read-only external (public) IPv4 address that is used for the VPN service.
+* `description` - See Argument Reference above.
+* `value_specs` - See Argument Reference above.
+
+## Import
+
+Services can be imported using the `id`, e.g.
+
+```
+$ terraform import openstack_vpnaas_service_v2.service_1 832cb7f3-59fe-40cf-8f64-8350ffc03272
+```
