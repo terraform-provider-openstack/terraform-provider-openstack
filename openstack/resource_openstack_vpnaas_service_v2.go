@@ -124,6 +124,10 @@ func resourceServiceV2Create(d *schema.ResourceData, meta interface{}) error {
 	}
 	_, err = stateConf.WaitForState()
 
+	if err != nil {
+		return err
+	}
+
 	log.Printf("[DEBUG] Service created: %#v", service)
 
 	d.SetId(service.ID)
@@ -210,6 +214,10 @@ func resourceServiceV2Update(d *schema.ResourceData, meta interface{}) error {
 			MinTimeout: 2 * time.Second,
 		}
 		_, err = stateConf.WaitForState()
+
+		if err != nil {
+			return err
+		}
 
 		log.Printf("[DEBUG] Updated service with id %s", d.Id())
 	}

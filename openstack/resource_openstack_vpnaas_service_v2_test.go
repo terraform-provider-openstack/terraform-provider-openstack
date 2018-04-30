@@ -9,9 +9,11 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"regexp"
+	"strconv"
 )
 
 func TestAccServiceV2_basic(t *testing.T) {
+	var service services.Service
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckVPN(t) },
 		Providers:    testAccProviders,
@@ -21,7 +23,9 @@ func TestAccServiceV2_basic(t *testing.T) {
 				Config: testAccServiceV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceV2Exists(
-						"openstack_vpnaas_service_v2.service_1", "", ""),
+						"openstack_vpnaas_service_v2.service_1", &service),
+					resource.TestCheckResourceAttrPtr("openstack_vpnaas_service_v2.service_1", "router_id", &service.RouterID),
+					resource.TestCheckResourceAttr("openstack_vpnaas_service_v2.service_1", "admin_state_up", strconv.FormatBool(service.AdminStateUp)),
 				),
 			},
 		},
@@ -29,6 +33,7 @@ func TestAccServiceV2_basic(t *testing.T) {
 }
 
 func TestAccServiceV2_update(t *testing.T) {
+	var service services.Service
 	errorRegExp, err := regexp.Compile("openstack_vpnaas_service_v2.service_1: 1 error")
 	if err != nil {
 		t.Error("Couldn't compile regular expression")
@@ -42,7 +47,9 @@ func TestAccServiceV2_update(t *testing.T) {
 				Config: testAccServiceV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceV2Exists(
-						"openstack_vpnaas_service_v2.service_1", "", ""),
+						"openstack_vpnaas_service_v2.service_1", &service),
+					resource.TestCheckResourceAttrPtr("openstack_vpnaas_service_v2.service_1", "router_id", &service.RouterID),
+					resource.TestCheckResourceAttr("openstack_vpnaas_service_v2.service_1", "admin_state_up", strconv.FormatBool(service.AdminStateUp)),
 				),
 			},
 			// We expect the update to fail because a service cannot be updated while it
@@ -76,7 +83,7 @@ func testAccCheckServiceV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckServiceV2Exists(n, name, description string) resource.TestCheckFunc {
+func testAccCheckServiceV2Exists(n string, serv *services.Service) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -96,17 +103,10 @@ func testAccCheckServiceV2Exists(n, name, description string) resource.TestCheck
 		var found *services.Service
 
 		found, err = services.Get(networkingClient, rs.Primary.ID).Extract()
-
-		switch {
-		case name != found.Name:
-			err = fmt.Errorf("Expected name <%s>, but found <%s>", name, found.Name)
-		case description != found.Description:
-			err = fmt.Errorf("Expected description <%s>, but found <%s>", description, found.Description)
-		}
-
 		if err != nil {
 			return err
 		}
+		*serv = *found
 
 		return nil
 	}
