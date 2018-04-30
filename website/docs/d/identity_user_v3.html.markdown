@@ -35,7 +35,7 @@ The following arguments are supported:
 
 * `name` - (Optional) The name of the user.
 
-* `password_expires_at` - (Optional) Query for expired passwords. See the [https://developer.openstack.org/api-ref/identity/v3/#list-users](OpenStack API docs) for more information on the query format.
+* `password_expires_at` - (Optional) Query for expired passwords. See the [OpenStack API docs](https://developer.openstack.org/api-ref/identity/v3/#list-users) for more information on the query format.
 
 * `protocol_id` - (Optional) The protocol ID of the user.
 
