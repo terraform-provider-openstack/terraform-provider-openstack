@@ -56,7 +56,7 @@ The following arguments are supported:
     Default is seconds.
     - `value` - (Optional) The value for the lifetime of the security association. Must be a positive integer.
     Default is 3600.
-    
+
 * `value_specs` - (Optional) Map of additional options.
 
 ## Attributes Reference
@@ -66,19 +66,22 @@ The following attributes are exported:
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
-* `router_id` - See Argument Reference above.
-* `admin_state_up` - See Argument Reference above.
-* `subnet_id` - See Argument Reference above.
-* `status` - Indicates whether IPsec VPN service is currently operational. Values are ACTIVE, DOWN, BUILD, ERROR, PENDING_CREATE, PENDING_UPDATE, or PENDING_DELETE.
-* `external_v6_ip` - The read-only external (public) IPv6 address that is used for the VPN service.
-* `external_v4_ip` - The read-only external (public) IPv4 address that is used for the VPN service.
 * `description` - See Argument Reference above.
+* `auth_algorithm` - See Argument Reference above.
+* `encapsulation_mode` - See Argument Reference above.
+* `encryption_algorithm` - See Argument Reference above.
+* `pfs` - See Argument Reference above.
+* `transform_protocol` - See Argument Reference above.
+* `lifetime` - See Argument Reference above.
+ - `unit` - See Argument Reference above.
+ - `value` - See Argument Reference above.
 * `value_specs` - See Argument Reference above.
+
 
 ## Import
 
 Services can be imported using the `id`, e.g.
 
 ```
-$ terraform import openstack_vpnaas_service_v2.service_1 832cb7f3-59fe-40cf-8f64-8350ffc03272
+$ terraform import openstack_vpnaas_ipsec_policy_v2.policy_1 832cb7f3-59fe-40cf-8f64-8350ffc03272
 ```
