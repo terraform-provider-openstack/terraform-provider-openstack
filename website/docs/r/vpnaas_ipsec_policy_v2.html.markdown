@@ -73,8 +73,8 @@ The following attributes are exported:
 * `pfs` - See Argument Reference above.
 * `transform_protocol` - See Argument Reference above.
 * `lifetime` - See Argument Reference above.
- - `unit` - See Argument Reference above.
- - `value` - See Argument Reference above.
+    - `unit` - See Argument Reference above.
+    - `value` - See Argument Reference above.
 * `value_specs` - See Argument Reference above.
 
 
