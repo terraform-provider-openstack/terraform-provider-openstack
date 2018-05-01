@@ -34,8 +34,6 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 						"openstack_images_image_v2.image_1", "properties.foo", "bar"),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "properties.baz", "foo"),
-					resource.TestCheckResourceAttr(
-						"openstack_images_image_v2.image_1", "verify_checksum", "true"),
 				),
 			},
 		},
