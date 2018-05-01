@@ -1,4 +1,9 @@
 ## 1.5.0 (Unreleased)
+
+FEATURES
+
+* __New Resource__: `openstack_vpnaas_ipsec_policy_v2` [GH-270]
+
 ## 1.4.0 (May 01, 2018)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
