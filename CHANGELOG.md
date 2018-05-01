@@ -4,6 +4,10 @@ FEATURES
 
 * __New Resource__: `openstack_vpnaas_ipsec_policy_v2` [GH-270]
 
+IMPROVEMENTS
+
+* Added `verify_checksum` to `openstack_images_image_v2` resource so that checksum verification can be disabled [GH-305]
+
 ## 1.4.0 (May 01, 2018)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
