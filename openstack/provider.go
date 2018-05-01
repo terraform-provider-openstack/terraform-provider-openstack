@@ -250,6 +250,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_networking_subnetpool_v2":        resourceNetworkingSubnetPoolV2(),
 			"openstack_objectstorage_container_v1":      resourceObjectStorageContainerV1(),
 			"openstack_objectstorage_object_v1":         resourceObjectStorageObjectV1(),
+			"openstack_vpnaas_ipsec_policy_v2":          resourceIPSecPolicyV2(),
 		},
 
 		ConfigureFunc: configureProvider,
