@@ -192,6 +192,7 @@ func Provider() terraform.ResourceProvider {
 
 		DataSourcesMap: map[string]*schema.Resource{
 			"openstack_compute_flavor_v2":        dataSourceComputeFlavorV2(),
+			"openstack_compute_keypair_v2":       dataSourceComputeKeypairV2(),
 			"openstack_dns_zone_v2":              dataSourceDNSZoneV2(),
 			"openstack_identity_role_v3":         dataSourceIdentityRoleV3(),
 			"openstack_identity_project_v3":      dataSourceIdentityProjectV3(),
