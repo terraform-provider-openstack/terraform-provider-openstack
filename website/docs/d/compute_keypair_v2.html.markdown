@@ -23,7 +23,7 @@ data "openstack_compute_keypair_v2" "kp" {
 * `region` - (Optional) The region in which to obtain the V2 Compute client.
     If omitted, the `region` argument of the provider is used.
 
-* `name` - (Optional) The unique name of the keypair.
+* `name` - (Required) The unique name of the keypair.
 
 
 ## Attributes Reference
