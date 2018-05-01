@@ -70,6 +70,9 @@ The following arguments are supported:
 * `tags` - (Optional) The tags of the image. It must be a list of strings.
     At this time, it is not possible to delete all tags of an image.
 
+* `verify_checksum` - (Optional) If false, the checksum will not be verified
+    once the image is finished uploading. Defaults to true.
+
 * `visibility` - (Optional) The visibility of the image. Must be one of
    "public", "private", "community", or "shared". The ability to set the
    visibility depends upon the configuration of the OpenStack cloud.
