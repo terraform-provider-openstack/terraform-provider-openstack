@@ -1,4 +1,15 @@
-## 1.4.0 (Unreleased)
+## 1.5.0 (Unreleased)
+
+FEATURES
+
+* __New Resource__: `openstack_vpnaas_ipsec_policy_v2` [GH-270]
+* __New Data Source__: `openstack_compute_keypair_v2` [GH-307]
+
+IMPROVEMENTS
+
+* Added `verify_checksum` to `openstack_images_image_v2` resource so that checksum verification can be disabled [GH-305]
+
+## 1.4.0 (May 01, 2018)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
@@ -6,22 +17,22 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 FEATURES
 
-* __New Resource__: `openstack_identity_role_assignment_v3` [GH-265]
-* __New Data Source__: `openstack_identity_project_v3` [GH-251]
-* __New Data Source__: `openstack_identity_user_v3` [GH-252]
+* __New Resource__: `openstack_identity_role_assignment_v3` ([#265](https://github.com/terraform-providers/terraform-provider-openstack/issues/265))
+* __New Data Source__: `openstack_identity_project_v3` ([#251](https://github.com/terraform-providers/terraform-provider-openstack/issues/251))
+* __New Data Source__: `openstack_identity_user_v3` ([#252](https://github.com/terraform-providers/terraform-provider-openstack/issues/252))
 
 IMPROVEMENTS
 
-* Added `member_status` to `openstack_images_image_v2` data source [GH-269]
-* Add support for `OS_TOKEN` environment variable [GH-272]
-* Added `force_destroy` to `openstack_objectstorage_container_v1` which will cause all objects in the container to be deleted when the container is deleted [GH-276]
-* CIDR is now optional in `openstack_networking_subnet_v2` allowing a CIDR to be allocated from a subnet pool [GH-294]
-* Added additional authentication options for domain scoping [GH-290]
-* `openstack_images_image_v2` can now support OVA format [GH-302]
+* Added `member_status` to `openstack_images_image_v2` data source ([#269](https://github.com/terraform-providers/terraform-provider-openstack/issues/269))
+* Add support for `OS_TOKEN` environment variable ([#272](https://github.com/terraform-providers/terraform-provider-openstack/issues/272))
+* Added `force_destroy` to `openstack_objectstorage_container_v1` which will cause all objects in the container to be deleted when the container is deleted ([#276](https://github.com/terraform-providers/terraform-provider-openstack/issues/276))
+* CIDR is now optional in `openstack_networking_subnet_v2` allowing a CIDR to be allocated from a subnet pool ([#294](https://github.com/terraform-providers/terraform-provider-openstack/issues/294))
+* Added additional authentication options for domain scoping ([#290](https://github.com/terraform-providers/terraform-provider-openstack/issues/290))
+* `openstack_images_image_v2` can now support OVA format ([#302](https://github.com/terraform-providers/terraform-provider-openstack/issues/302))
 
 BUG FIXES
 
-* `openstack_compute_instance_v2` resources can handle Availability Zones in the format of `az:host:node` [GH-291]
+* `openstack_compute_instance_v2` resources can handle Availability Zones in the format of `az:host:node` ([#291](https://github.com/terraform-providers/terraform-provider-openstack/issues/291))
 
 ## 1.3.0 (March 14, 2018)
 

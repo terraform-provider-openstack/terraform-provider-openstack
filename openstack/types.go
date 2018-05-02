@@ -21,6 +21,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
@@ -354,5 +355,11 @@ func (opts ZoneCreateOpts) ToZoneCreateMap() (map[string]interface{}, error) {
 // SubnetPoolCreateOpts represents the attributes used when creating a new subnet pool.
 type SubnetPoolCreateOpts struct {
 	subnetpools.CreateOpts
+	ValueSpecs map[string]string `json:"value_specs,omitempty"`
+}
+
+// IPSecPolicyCreateOpts represents the attributes used when creating a new IPSec policy.
+type IPSecPolicyCreateOpts struct {
+	ipsecpolicies.CreateOpts
 	ValueSpecs map[string]string `json:"value_specs,omitempty"`
 }

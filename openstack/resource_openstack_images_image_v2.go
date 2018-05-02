@@ -156,6 +156,13 @@ func resourceImagesImageV2() *schema.Resource {
 				Computed: true,
 			},
 
+			"verify_checksum": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: false,
+				Default:  true,
+			},
+
 			"visibility": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -240,7 +247,7 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{string(images.ImageStatusQueued), string(images.ImageStatusSaving)},
 		Target:     []string{string(images.ImageStatusActive)},
-		Refresh:    resourceImagesImageV2RefreshFunc(imageClient, d.Id(), fileSize, fileChecksum),
+		Refresh:    resourceImagesImageV2RefreshFunc(imageClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -248,6 +255,16 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 
 	if _, err = stateConf.WaitForState(); err != nil {
 		return fmt.Errorf("Error waiting for Image: %s", err)
+	}
+
+	img, err := images.Get(imageClient, d.Id()).Extract()
+	if err != nil {
+		return CheckDeleted(d, err, "image")
+	}
+
+	verifyChecksum := d.Get("verify_checksum").(bool)
+	if img.Checksum != fileChecksum && verifyChecksum {
+		return fmt.Errorf("Error wrong checksum: got %q, expected %q", img.Checksum, fileChecksum)
 	}
 
 	d.Partial(false)
@@ -504,17 +521,13 @@ func resourceImagesImageV2File(d *schema.ResourceData) (string, error) {
 	}
 }
 
-func resourceImagesImageV2RefreshFunc(client *gophercloud.ServiceClient, id string, fileSize int64, checksum string) resource.StateRefreshFunc {
+func resourceImagesImageV2RefreshFunc(client *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		img, err := images.Get(client, id).Extract()
 		if err != nil {
 			return nil, "", err
 		}
 		log.Printf("[DEBUG] OpenStack image status is: %s", img.Status)
-
-		if img.Checksum != checksum || int64(img.SizeBytes) != fileSize {
-			return img, fmt.Sprintf("%s", img.Status), fmt.Errorf("Error wrong size %v or checksum %q", img.SizeBytes, img.Checksum)
-		}
 
 		return img, fmt.Sprintf("%s", img.Status), nil
 	}
