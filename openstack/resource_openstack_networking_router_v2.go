@@ -148,7 +148,7 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 		createOpts.AdminStateUp = &asu
 	}
 
-	if dRaw, ok := d.GetOk("distributed"); ok {
+	if dRaw, ok := d.GetOkExists("distributed"); ok {
 		d := dRaw.(bool)
 		createOpts.Distributed = &d
 	}
