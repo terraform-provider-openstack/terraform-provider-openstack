@@ -12,11 +12,34 @@ Manages a V2 Neutron subnetpool resource within OpenStack.
 
 ## Example Usage
 
+### Create a Subnet Pool
+
 ```hcl
 resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
-  name = "my_ipv6_pool"
+  name = "subnetpool_1"
   ip_version = 6
   prefixes = ["fdf7:b13d:dead:beef::/64", "fd65:86cc:a334:39b7::/64"]
+}
+```
+
+### Create a Subnet from a Subnet Pool
+
+```hcl
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
+  name = "subnetpool_1"
+  prefixes = ["10.11.12.0/24"]
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "10.11.12.0/25"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
 }
 ```
 
