@@ -242,6 +242,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_lb_monitor_v2":                   resourceMonitorV2(),
 			"openstack_networking_network_v2":           resourceNetworkingNetworkV2(),
 			"openstack_networking_subnet_v2":            resourceNetworkingSubnetV2(),
+			"openstack_networking_subnet_route_v2":      resourceNetworkingSubnetRouteV2(),
 			"openstack_networking_floatingip_v2":        resourceNetworkingFloatingIPV2(),
 			"openstack_networking_port_v2":              resourceNetworkingPortV2(),
 			"openstack_networking_router_v2":            resourceNetworkingRouterV2(),
