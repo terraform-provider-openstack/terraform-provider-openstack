@@ -25,7 +25,7 @@ func TestAccNetworkingV2FloatingIPAssociate_basic(t *testing.T) {
 					testAccCheckNetworkingV2FloatingIPExists(
 						"openstack_networking_floatingip_associate_v2.fip_1", &fip),
 					resource.TestCheckResourceAttrPtr(
-						"openstack_networking_floatingip_associate_v2.fip_1", "floatingip_id", &fip.ID),
+						"openstack_networking_floatingip_associate_v2.fip_1", "floating_ip", &fip.FloatingIP),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_networking_floatingip_associate_v2.fip_1", "port_id", &fip.PortID),
 				),
@@ -133,7 +133,7 @@ resource "openstack_networking_floatingip_v2" "fip_1" {
 }
 
 resource "openstack_networking_floatingip_associate_v2" "fip_1" {
-	floatingip_id = "${openstack_networking_floatingip_v2.fip_1.id}"
-	port_id = "${openstack_networking_port_v2.port_1.id}"
+  floating_ip = "${openstack_networking_floatingip_v2.fip_1.address}"
+  port_id = "${openstack_networking_port_v2.port_1.id}"
 }
 `, OS_EXTGW_ID, OS_POOL_NAME)

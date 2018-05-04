@@ -20,7 +20,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 
 resource "openstack_networking_floatingip_associate_v2" "fip_1" {
-  floatingip_id = "9477c46d-20fd-44cb-8f9a-1b0719a3b580"
+  floating_ip = "1.2.3.4"
   port_id = "${openstack_networking_port_v2.port_1.id}"
 }
 ```
@@ -35,7 +35,7 @@ The following arguments are supported:
     `region` argument of the provider is used. Changing this creates a new
     floating IP (which may or may not have a different address).
 
-* `floatingip_id` - (Required) ID of an existing floating IP.
+* `floating_ip` - (Required) IP Address of an existing floating IP.
 
 * `port_id` - (Required) ID of an existing port with at least one IP address to
     associate with this floating IP.
@@ -45,8 +45,8 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `region` - See Argument Reference above.
-* `floatingip_id` - ID of associated floating IP.
-* `port_id` - ID of associated port.
+* `floating_ip` - See Argument Reference above.
+* `port_id` - See Argument Reference above.
 
 ## Import
 
