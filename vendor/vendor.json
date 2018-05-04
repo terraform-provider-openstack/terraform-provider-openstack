@@ -613,6 +613,12 @@
 			"revisionTime": "2018-04-18T04:52:34Z"
 		},
 		{
+			"checksumSHA1": "HhRP7Hw7cS7RM4cxGmQYk/vI8uM=",
+			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ikepolicies",
+			"revision": "c51806d07f1d12dc4786b792fb9610679e96f549",
+			"revisionTime": "2018-04-20T19:30:33Z"
+		},
+		{
 			"checksumSHA1": "X6dtgVLZ6JZfuZ8dVIqROlRhNjQ=",
 			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies",
 			"revision": "3aef8e417612ddbdd8f7a76004af4307296cd1b6",
