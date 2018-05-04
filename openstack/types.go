@@ -22,6 +22,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/services"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
@@ -361,5 +362,11 @@ type SubnetPoolCreateOpts struct {
 // IPSecPolicyCreateOpts represents the attributes used when creating a new IPSec policy.
 type IPSecPolicyCreateOpts struct {
 	ipsecpolicies.CreateOpts
+	ValueSpecs map[string]string `json:"value_specs,omitempty"`
+}
+
+// ServiceCreateOpts represents the attributes used when creating a new VPN service.
+type ServiceCreateOpts struct {
+	services.CreateOpts
 	ValueSpecs map[string]string `json:"value_specs,omitempty"`
 }
