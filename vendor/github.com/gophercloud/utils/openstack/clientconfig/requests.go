@@ -168,7 +168,7 @@ func AuthOptions(opts *ClientOpts) (*gophercloud.AuthOptions, error) {
 
 	identityAPI := determineIdentityAPI(cloud, opts)
 	switch identityAPI {
-	case "2.0":
+	case "2.0", "2":
 		return v2auth(cloud, opts)
 	case "3":
 		return v3auth(cloud, opts)

@@ -673,10 +673,10 @@
 			"revisionTime": "2017-03-10T01:59:53Z"
 		},
 		{
-			"checksumSHA1": "G0ubM2UQpjFV27sk6wUm7d4PQe0=",
+			"checksumSHA1": "ZguAwNlZc+b2wSb+P4WddyBhNBA=",
 			"path": "github.com/gophercloud/utils/openstack/clientconfig",
-			"revision": "05053b3a01cead97709deec2e0fc283388ab77f0",
-			"revisionTime": "2018-04-14T02:40:29Z"
+			"revision": "ab2d1a6ae871c292eff4a11a0fc3878bd6148f53",
+			"revisionTime": "2018-05-04T17:16:17Z"
 		},
 		{
 			"checksumSHA1": "cdOCt0Yb+hdErz8NAQqayxPmRsY=",
