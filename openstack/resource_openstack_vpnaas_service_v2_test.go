@@ -8,7 +8,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/services"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"regexp"
 	"strconv"
 )
 
@@ -27,36 +26,6 @@ func TestAccServiceV2_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_service_v2.service_1", "router_id", &service.RouterID),
 					resource.TestCheckResourceAttr("openstack_vpnaas_service_v2.service_1", "admin_state_up", strconv.FormatBool(service.AdminStateUp)),
 				),
-			},
-		},
-	})
-}
-
-func TestAccServiceV2_update(t *testing.T) {
-	var service services.Service
-	errorRegExp, err := regexp.Compile("openstack_vpnaas_service_v2.service_1: 1 error")
-	if err != nil {
-		t.Error("Couldn't compile regular expression")
-	}
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckVPN(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckServiceV2Destroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccServiceV2_basic,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServiceV2Exists(
-						"openstack_vpnaas_service_v2.service_1", &service),
-					resource.TestCheckResourceAttrPtr("openstack_vpnaas_service_v2.service_1", "router_id", &service.RouterID),
-					resource.TestCheckResourceAttr("openstack_vpnaas_service_v2.service_1", "admin_state_up", strconv.FormatBool(service.AdminStateUp)),
-				),
-			},
-			// We expect the update to fail because a service cannot be updated while it
-			// is not being used in an IPSec site connection.
-			resource.TestStep{
-				Config:      testAccServiceV2_update,
-				ExpectError: errorRegExp,
 			},
 		},
 	})
@@ -122,19 +91,5 @@ var testAccServiceV2_basic = fmt.Sprintf(`
 	resource "openstack_vpnaas_service_v2" "service_1" {
 		router_id = "${openstack_networking_router_v2.router_1.id}",
 		admin_state_up = "false"
-	}
-	`, OS_EXTGW_ID)
-
-var testAccServiceV2_update = fmt.Sprintf(`
-	resource "openstack_networking_router_v2" "router_1" {
-	  name = "router_1"
-	  admin_state_up = "true"
-	  external_network_id = "%s"
-	}
-	
-	resource "openstack_vpnaas_service_v2" "service_1" {
-		router_id = "${openstack_networking_router_v2.router_1.id}",
-		admin_state_up = "true"
-		description = "An updated VPN service"
 	}
 	`, OS_EXTGW_ID)
