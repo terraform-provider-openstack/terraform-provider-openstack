@@ -313,7 +313,8 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if d.HasChange("host_routes") {
-		updateOpts.HostRoutes = resourceSubnetHostRoutesV2(d)
+		newHostRoutes := resourceSubnetHostRoutesV2(d)
+		updateOpts.HostRoutes = &newHostRoutes
 	}
 
 	if d.HasChange("enable_dhcp") {
