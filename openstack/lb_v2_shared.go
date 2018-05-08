@@ -23,7 +23,7 @@ func waitForLBV2Listener(networkingClient *gophercloud.ServiceClient, id string,
 		Pending:    pending,
 		Refresh:    resourceLBV2ListenerRefreshFunc(networkingClient, id),
 		Timeout:    timeout,
-		Delay:      5 * time.Second,
+		Delay:      1 * time.Second,
 		MinTimeout: 1 * time.Second,
 	}
 
@@ -63,7 +63,7 @@ func waitForLBV2LoadBalancer(networkingClient *gophercloud.ServiceClient, id str
 		Pending:    pending,
 		Refresh:    resourceLBV2LoadBalancerRefreshFunc(networkingClient, id),
 		Timeout:    timeout,
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 1 * time.Second,
 	}
 
@@ -102,7 +102,7 @@ func waitForLBV2Member(networkingClient *gophercloud.ServiceClient, poolID, memb
 		Pending:    pending,
 		Refresh:    resourceLBV2MemberRefreshFunc(networkingClient, poolID, memberID),
 		Timeout:    timeout,
-		Delay:      5 * time.Second,
+		Delay:      1 * time.Second,
 		MinTimeout: 1 * time.Second,
 	}
 
@@ -142,7 +142,7 @@ func waitForLBV2Monitor(networkingClient *gophercloud.ServiceClient, id string, 
 		Pending:    pending,
 		Refresh:    resourceLBV2MonitorRefreshFunc(networkingClient, id),
 		Timeout:    timeout,
-		Delay:      5 * time.Second,
+		Delay:      1 * time.Second,
 		MinTimeout: 1 * time.Second,
 	}
 
@@ -182,7 +182,7 @@ func waitForLBV2Pool(networkingClient *gophercloud.ServiceClient, id string, tar
 		Pending:    pending,
 		Refresh:    resourceLBV2PoolRefreshFunc(networkingClient, id),
 		Timeout:    timeout,
-		Delay:      5 * time.Second,
+		Delay:      1 * time.Second,
 		MinTimeout: 1 * time.Second,
 	}
 
