@@ -11,6 +11,7 @@ FEATURES
 IMPROVEMENTS
 
 * Added `verify_checksum` to `openstack_images_image_v2` resource so that checksum verification can be disabled [GH-305]
+* The LBaaS v2 resources have lower "delay" times when waiting for state changes. This should speed up creation of a Load Balancing stack [GH-297]
 
 BUG FIXES
 
