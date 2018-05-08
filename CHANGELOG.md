@@ -15,6 +15,7 @@ IMPROVEMENTS
 BUG FIXES
 
 * `openstack_networking_router_v2.distributed` will now pass `false` correctly [GH-308]
+* Fixed issue where `OS_IDENTITY_API_VERSION=2` was not recognized [GH-315]
 
 ## 1.4.0 (May 01, 2018)
 
