@@ -12,6 +12,10 @@ IMPROVEMENTS
 
 * Added `verify_checksum` to `openstack_images_image_v2` resource so that checksum verification can be disabled [GH-305]
 
+BUG FIXES
+
+* `openstack_networking_router_v2.distributed` will now pass `false` correctly [GH-308]
+
 ## 1.4.0 (May 01, 2018)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
