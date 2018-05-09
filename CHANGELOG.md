@@ -3,6 +3,7 @@
 FEATURES
 
 * __New Resource__: `openstack_networking_subnet_route_v2` [GH-314]
+* __New Resource__: `openstack_networking_floatingip_associate_v2` [GH-313]
 * __New Resource__: `openstack_vpnaas_ipsec_policy_v2` [GH-270]
 * __New Resource__: `openstack_vpnaas_service_v2` [GH-300]
 * __New Data Source__: `openstack_compute_keypair_v2` [GH-307]
