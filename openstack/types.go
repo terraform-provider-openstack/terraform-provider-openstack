@@ -21,6 +21,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/endpointgroups"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ikepolicies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/services"
@@ -381,5 +382,11 @@ type IPSecPolicyCreateOpts struct {
 // ServiceCreateOpts represents the attributes used when creating a new VPN service.
 type ServiceCreateOpts struct {
 	services.CreateOpts
+	ValueSpecs map[string]string `json:"value_specs,omitempty"`
+}
+
+// EndpointGroupCreateOpts represents the attributes used when creating a new endpoint group.
+type EndpointGroupCreateOpts struct {
+	endpointgroups.CreateOpts
 	ValueSpecs map[string]string `json:"value_specs,omitempty"`
 }
