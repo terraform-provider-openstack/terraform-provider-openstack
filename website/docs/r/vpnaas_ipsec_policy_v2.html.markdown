@@ -23,15 +23,15 @@ resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
 The following arguments are supported:
 
 * `region` - (Optional) The region in which to obtain the V2 Networking client.
-    A Networking client is needed to create a VPN service. If omitted, the
+    A Networking client is needed to create an IPSec policy. If omitted, the
     `region` argument of the provider is used. Changing this creates a new
-    service.
+    policy.
 
 * `name` - (Optional) The name of the policy. Changing this updates the name of
     the existing policy.
 
 * `tenant_id` - (Optional) The owner of the policy. Required if admin wants to
-    create a service for another policy. Changing this creates a new policy.
+    create a policy for another project. Changing this creates a new policy.
 
 * `description` - (Optional) The human-readable description for the policy.
     Changing this updates the description of the existing policy.
@@ -80,7 +80,7 @@ The following attributes are exported:
 
 ## Import
 
-Services can be imported using the `id`, e.g.
+Policies can be imported using the `id`, e.g.
 
 ```
 $ terraform import openstack_vpnaas_ipsec_policy_v2.policy_1 832cb7f3-59fe-40cf-8f64-8350ffc03272
