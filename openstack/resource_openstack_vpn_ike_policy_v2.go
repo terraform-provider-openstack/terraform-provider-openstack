@@ -134,6 +134,16 @@ func resourceIKEPolicyV2Create(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"PENDING_CREATE"},
+		Target:     []string{"ACTIVE"},
+		Refresh:    waitForIKEPolicyCreation(networkingClient, policy.ID),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      0,
+		MinTimeout: 2 * time.Second,
+	}
+	_, err = stateConf.WaitForState()
+
 	log.Printf("[DEBUG] IKE policy created: %#v", policy)
 
 	d.SetId(policy.ID)
@@ -238,6 +248,17 @@ func resourceIKEPolicyV2Update(d *schema.ResourceData, meta interface{}) error {
 		if err != nil {
 			return err
 		}
+		stateConf := &resource.StateChangeConf{
+			Pending:    []string{"PENDING_UPDATE"},
+			Target:     []string{"ACTIVE"},
+			Refresh:    waitForIKEPolicyUpdate(networkingClient, d.Id()),
+			Timeout:    d.Timeout(schema.TimeoutCreate),
+			Delay:      0,
+			MinTimeout: 2 * time.Second,
+		}
+		if _, err = stateConf.WaitForState(); err != nil {
+			return err
+		}
 	}
 
 	return resourceIKEPolicyV2Read(d, meta)
@@ -276,6 +297,26 @@ func waitForIKEPolicyDeletion(networkingClient *gophercloud.ServiceClient, id st
 		}
 
 		return nil, "ACTIVE", err
+	}
+}
+
+func waitForIKEPolicyCreation(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		policy, err := ikepolicies.Get(networkingClient, id).Extract()
+		if err != nil {
+			return "", "PENDING_CREATE", nil
+		}
+		return policy, "ACTIVE", nil
+	}
+}
+
+func waitForIKEPolicyUpdate(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		policy, err := ikepolicies.Get(networkingClient, id).Extract()
+		if err != nil {
+			return "", "PENDING_UPDATE", nil
+		}
+		return policy, "ACTIVE", nil
 	}
 }
 
