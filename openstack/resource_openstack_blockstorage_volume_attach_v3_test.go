@@ -11,45 +11,45 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 )
 
-func TestAccBlockStorageVolumeAttachV3_basic(t *testing.T) {
+func TestAccBlockStorageVolumeAttachV2_basic(t *testing.T) {
 	var va volumes.Attachment
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageVolumeAttachV3Destroy,
+		CheckDestroy: testAccCheckBlockStorageVolumeAttachV2Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccBlockStorageVolumeAttachV3_basic,
+				Config: testAccBlockStorageVolumeAttachV2_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageVolumeAttachV3Exists("openstack_blockstorage_volume_attach_v2.va_1", &va),
+					testAccCheckBlockStorageVolumeAttachV2Exists("openstack_blockstorage_volume_attach_v2.va_1", &va),
 				),
 			},
 		},
 	})
 }
 
-func TestAccBlockStorageVolumeAttachV3_timeout(t *testing.T) {
+func TestAccBlockStorageVolumeAttachV2_timeout(t *testing.T) {
 	var va volumes.Attachment
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageVolumeAttachV3Destroy,
+		CheckDestroy: testAccCheckBlockStorageVolumeAttachV2Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccBlockStorageVolumeAttachV3_timeout,
+				Config: testAccBlockStorageVolumeAttachV2_timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageVolumeAttachV3Exists("openstack_blockstorage_volume_attach_v2.va_1", &va),
+					testAccCheckBlockStorageVolumeAttachV2Exists("openstack_blockstorage_volume_attach_v2.va_1", &va),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckBlockStorageVolumeAttachV3Destroy(s *terraform.State) error {
+func testAccCheckBlockStorageVolumeAttachV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	client, err := config.blockStorageV3Client(OS_REGION_NAME)
+	client, err := config.blockStorageV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
@@ -59,7 +59,7 @@ func testAccCheckBlockStorageVolumeAttachV3Destroy(s *terraform.State) error {
 			continue
 		}
 
-		volumeId, attachmentId, err := blockStorageVolumeAttachV3ParseId(rs.Primary.ID)
+		volumeId, attachmentId, err := blockStorageVolumeAttachV2ParseId(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -82,7 +82,7 @@ func testAccCheckBlockStorageVolumeAttachV3Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckBlockStorageVolumeAttachV3Exists(n string, va *volumes.Attachment) resource.TestCheckFunc {
+func testAccCheckBlockStorageVolumeAttachV2Exists(n string, va *volumes.Attachment) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -94,12 +94,12 @@ func testAccCheckBlockStorageVolumeAttachV3Exists(n string, va *volumes.Attachme
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		client, err := config.blockStorageV3Client(OS_REGION_NAME)
+		client, err := config.blockStorageV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
 
-		volumeId, attachmentId, err := blockStorageVolumeAttachV3ParseId(rs.Primary.ID)
+		volumeId, attachmentId, err := blockStorageVolumeAttachV2ParseId(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -125,7 +125,7 @@ func testAccCheckBlockStorageVolumeAttachV3Exists(n string, va *volumes.Attachme
 	}
 }
 
-const testAccBlockStorageVolumeAttachV3_basic = `
+const testAccBlockStorageVolumeAttachV2_basic = `
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -143,7 +143,7 @@ resource "openstack_blockstorage_volume_attach_v2" "va_1" {
 }
 `
 
-const testAccBlockStorageVolumeAttachV3_timeout = `
+const testAccBlockStorageVolumeAttachV2_timeout = `
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
