@@ -208,7 +208,9 @@ func Provider() terraform.ResourceProvider {
 		ResourcesMap: map[string]*schema.Resource{
 			"openstack_blockstorage_volume_v1":             resourceBlockStorageVolumeV1(),
 			"openstack_blockstorage_volume_v2":             resourceBlockStorageVolumeV2(),
+			"openstack_blockstorage_volume_v3":             resourceBlockStorageVolumeV3(),
 			"openstack_blockstorage_volume_attach_v2":      resourceBlockStorageVolumeAttachV2(),
+			"openstack_blockstorage_volume_attach_v3":      resourceBlockStorageVolumeAttachV3(),
 			"openstack_compute_flavor_v2":                  resourceComputeFlavorV2(),
 			"openstack_compute_instance_v2":                resourceComputeInstanceV2(),
 			"openstack_compute_keypair_v2":                 resourceComputeKeypairV2(),
