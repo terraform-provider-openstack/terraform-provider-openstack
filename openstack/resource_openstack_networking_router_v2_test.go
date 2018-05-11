@@ -80,6 +80,29 @@ func TestAccNetworkingV2Router_vendor_opts(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Router_vendor_opts_no_snat(t *testing.T) {
+	var router routers.Router
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccNetworkingV2Router_vendor_opts_no_snat,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "external_gateway", OS_EXTGW_ID),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2RouterDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
@@ -165,6 +188,19 @@ resource "openstack_networking_router_v2" "router_1" {
 	vendor_options {
 		set_router_gateway_after_create = true
 	}
+}
+`, OS_EXTGW_ID)
+
+var testAccNetworkingV2Router_vendor_opts_no_snat = fmt.Sprintf(`
+resource "openstack_networking_router_v2" "router_1" {
+        name = "router_1"
+        admin_state_up = "true"
+        distributed = "false"
+        external_network_id = "%s"
+        enable_snat = "false"
+        vendor_options {
+                set_router_gateway_after_create = true
+        }
 }
 `, OS_EXTGW_ID)
 
