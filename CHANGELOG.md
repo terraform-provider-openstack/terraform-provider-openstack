@@ -17,6 +17,7 @@ IMPROVEMENTS
 BUG FIXES
 
 * Fixed issue where `OS_IDENTITY_API_VERSION=2` was not recognized [GH-315]
+* Fixed issue when using Identity v3 resources when an Identity v2 endpoint is published [GH-320]
 * `openstack_networking_router_v2.distributed` will now pass `false` correctly [GH-308]
 * `openstack_networking_router_v2.enable_snat` will now pass `false` correctly [GH-309]
 
