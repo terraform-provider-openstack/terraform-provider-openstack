@@ -13,11 +13,11 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func resourceBlockStorageVolumeAttachV3() *schema.Resource {
+func resourceBlockStorageVolumeAttachV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceBlockStorageVolumeAttachV3Create,
-		Read:   resourceBlockStorageVolumeAttachV3Read,
-		Delete: resourceBlockStorageVolumeAttachV3Delete,
+		Create: resourceBlockStorageVolumeAttachV2Create,
+		Read:   resourceBlockStorageVolumeAttachV2Read,
+		Delete: resourceBlockStorageVolumeAttachV2Delete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -134,9 +134,9 @@ func resourceBlockStorageVolumeAttachV3() *schema.Resource {
 	}
 }
 
-func resourceBlockStorageVolumeAttachV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageVolumeAttachV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.blockStorageV3Client(GetRegion(d, config))
+	client, err := config.blockStorageV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
@@ -212,7 +212,7 @@ func resourceBlockStorageVolumeAttachV3Create(d *schema.ResourceData, meta inter
 	}
 
 	// Once the connection has been made, tell Cinder to mark the volume as attached.
-	attachMode, err := blockStorageVolumeAttachV3AttachMode(d.Get("attach_mode").(string))
+	attachMode, err := blockStorageVolumeAttachV2AttachMode(d.Get("attach_mode").(string))
 	if err != nil {
 		return nil
 	}
@@ -235,7 +235,7 @@ func resourceBlockStorageVolumeAttachV3Create(d *schema.ResourceData, meta inter
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"available", "attaching"},
 		Target:     []string{"in-use"},
-		Refresh:    VolumeV3StateRefreshFunc(client, volumeId),
+		Refresh:    VolumeV2StateRefreshFunc(client, volumeId),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -271,17 +271,17 @@ func resourceBlockStorageVolumeAttachV3Create(d *schema.ResourceData, meta inter
 	id := fmt.Sprintf("%s/%s", volumeId, attachmentId)
 	d.SetId(id)
 
-	return resourceBlockStorageVolumeAttachV3Read(d, meta)
+	return resourceBlockStorageVolumeAttachV2Read(d, meta)
 }
 
-func resourceBlockStorageVolumeAttachV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageVolumeAttachV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.blockStorageV3Client(GetRegion(d, config))
+	client, err := config.blockStorageV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
-	volumeId, attachmentId, err := blockStorageVolumeAttachV3ParseId(d.Id())
+	volumeId, attachmentId, err := blockStorageVolumeAttachV2ParseId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -305,14 +305,14 @@ func resourceBlockStorageVolumeAttachV3Read(d *schema.ResourceData, meta interfa
 	return nil
 }
 
-func resourceBlockStorageVolumeAttachV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageVolumeAttachV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.blockStorageV3Client(GetRegion(d, config))
+	client, err := config.blockStorageV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
-	volumeId, attachmentId, err := blockStorageVolumeAttachV3ParseId(d.Id())
+	volumeId, attachmentId, err := blockStorageVolumeAttachV2ParseId(d.Id())
 
 	// Terminate the connection
 	termOpts := &volumeactions.TerminateConnectionOpts{}
@@ -373,7 +373,7 @@ func resourceBlockStorageVolumeAttachV3Delete(d *schema.ResourceData, meta inter
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"in-use", "attaching", "detaching"},
 		Target:     []string{"available"},
-		Refresh:    VolumeV3StateRefreshFunc(client, volumeId),
+		Refresh:    VolumeV2StateRefreshFunc(client, volumeId),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -387,7 +387,7 @@ func resourceBlockStorageVolumeAttachV3Delete(d *schema.ResourceData, meta inter
 	return nil
 }
 
-func blockStorageVolumeAttachV3AttachMode(v string) (volumeactions.AttachMode, error) {
+func blockStorageVolumeAttachV2AttachMode(v string) (volumeactions.AttachMode, error) {
 	var attachMode volumeactions.AttachMode
 	var attachError error
 	switch v {
@@ -404,7 +404,7 @@ func blockStorageVolumeAttachV3AttachMode(v string) (volumeactions.AttachMode, e
 	return attachMode, attachError
 }
 
-func blockStorageVolumeAttachV3ParseId(id string) (string, string, error) {
+func blockStorageVolumeAttachV2ParseId(id string) (string, string, error) {
 	parts := strings.Split(id, "/")
 	if len(parts) < 2 {
 		return "", "", fmt.Errorf("Unable to determine attachment ID")
