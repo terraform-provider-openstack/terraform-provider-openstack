@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 )
 
 func TestAccBlockStorageVolumeAttachV3_basic(t *testing.T) {
@@ -22,7 +22,7 @@ func TestAccBlockStorageVolumeAttachV3_basic(t *testing.T) {
 			resource.TestStep{
 				Config: testAccBlockStorageVolumeAttachV3_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageVolumeAttachV3Exists("openstack_blockstorage_volume_attach_v2.va_1", &va),
+					testAccCheckBlockStorageVolumeAttachV3Exists("openstack_blockstorage_volume_attach_v3.va_1", &va),
 				),
 			},
 		},
@@ -40,7 +40,7 @@ func TestAccBlockStorageVolumeAttachV3_timeout(t *testing.T) {
 			resource.TestStep{
 				Config: testAccBlockStorageVolumeAttachV3_timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageVolumeAttachV3Exists("openstack_blockstorage_volume_attach_v2.va_1", &va),
+					testAccCheckBlockStorageVolumeAttachV3Exists("openstack_blockstorage_volume_attach_v3.va_1", &va),
 				),
 			},
 		},
@@ -55,7 +55,7 @@ func testAccCheckBlockStorageVolumeAttachV3Destroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_blockstorage_volume_attach_v2" {
+		if rs.Type != "openstack_blockstorage_volume_attach_v3" {
 			continue
 		}
 
@@ -126,13 +126,13 @@ func testAccCheckBlockStorageVolumeAttachV3Exists(n string, va *volumes.Attachme
 }
 
 const testAccBlockStorageVolumeAttachV3_basic = `
-resource "openstack_blockstorage_volume_v2" "volume_1" {
+resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   size = 1
 }
 
-resource "openstack_blockstorage_volume_attach_v2" "va_1" {
-  volume_id = "${openstack_blockstorage_volume_v2.volume_1.id}"
+resource "openstack_blockstorage_volume_attach_v3" "va_1" {
+  volume_id = "${openstack_blockstorage_volume_v3.volume_1.id}"
   device = "auto"
 
   host_name = "devstack"
@@ -144,13 +144,13 @@ resource "openstack_blockstorage_volume_attach_v2" "va_1" {
 `
 
 const testAccBlockStorageVolumeAttachV3_timeout = `
-resource "openstack_blockstorage_volume_v2" "volume_1" {
+resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   size = 1
 }
 
-resource "openstack_blockstorage_volume_attach_v2" "va_1" {
-  volume_id = "${openstack_blockstorage_volume_v2.volume_1.id}"
+resource "openstack_blockstorage_volume_attach_v3" "va_1" {
+  volume_id = "${openstack_blockstorage_volume_v3.volume_1.id}"
   device = "auto"
 
   host_name = "devstack"
