@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 )
 
 func TestAccBlockStorageV3Volume_basic(t *testing.T) {
@@ -22,19 +22,19 @@ func TestAccBlockStorageV3Volume_basic(t *testing.T) {
 			resource.TestStep{
 				Config: testAccBlockStorageV3Volume_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v2.volume_1", &volume),
+					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
 					testAccCheckBlockStorageV3VolumeMetadata(&volume, "foo", "bar"),
 					resource.TestCheckResourceAttr(
-						"openstack_blockstorage_volume_v2.volume_1", "name", "volume_1"),
+						"openstack_blockstorage_volume_v3.volume_1", "name", "volume_1"),
 				),
 			},
 			resource.TestStep{
 				Config: testAccBlockStorageV3Volume_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v2.volume_1", &volume),
+					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
 					testAccCheckBlockStorageV3VolumeMetadata(&volume, "foo", "bar"),
 					resource.TestCheckResourceAttr(
-						"openstack_blockstorage_volume_v2.volume_1", "name", "volume_1-updated"),
+						"openstack_blockstorage_volume_v3.volume_1", "name", "volume_1-updated"),
 				),
 			},
 		},
@@ -52,9 +52,9 @@ func TestAccBlockStorageV3Volume_image(t *testing.T) {
 			resource.TestStep{
 				Config: testAccBlockStorageV3Volume_image,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v2.volume_1", &volume),
+					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
 					resource.TestCheckResourceAttr(
-						"openstack_blockstorage_volume_v2.volume_1", "name", "volume_1"),
+						"openstack_blockstorage_volume_v3.volume_1", "name", "volume_1"),
 				),
 			},
 		},
@@ -72,7 +72,7 @@ func TestAccBlockStorageV3Volume_timeout(t *testing.T) {
 			resource.TestStep{
 				Config: testAccBlockStorageV3Volume_timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v2.volume_1", &volume),
+					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
 				),
 			},
 		},
@@ -87,7 +87,7 @@ func testAccCheckBlockStorageV3VolumeDestroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_blockstorage_volume_v2" {
+		if rs.Type != "openstack_blockstorage_volume_v3" {
 			continue
 		}
 
@@ -176,7 +176,7 @@ func testAccCheckBlockStorageV3VolumeMetadata(
 }
 
 const testAccBlockStorageV3Volume_basic = `
-resource "openstack_blockstorage_volume_v2" "volume_1" {
+resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   description = "first test volume"
   metadata {
@@ -187,7 +187,7 @@ resource "openstack_blockstorage_volume_v2" "volume_1" {
 `
 
 const testAccBlockStorageV3Volume_update = `
-resource "openstack_blockstorage_volume_v2" "volume_1" {
+resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1-updated"
   description = "first test volume"
   metadata {
@@ -198,7 +198,7 @@ resource "openstack_blockstorage_volume_v2" "volume_1" {
 `
 
 var testAccBlockStorageV3Volume_image = fmt.Sprintf(`
-resource "openstack_blockstorage_volume_v2" "volume_1" {
+resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   size = 5
   image_id = "%s"
@@ -206,7 +206,7 @@ resource "openstack_blockstorage_volume_v2" "volume_1" {
 `, OS_IMAGE_ID)
 
 const testAccBlockStorageV3Volume_timeout = `
-resource "openstack_blockstorage_volume_v2" "volume_1" {
+resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   description = "first test volume"
   size = 1
