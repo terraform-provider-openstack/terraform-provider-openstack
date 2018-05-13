@@ -21,6 +21,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ikepolicies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/services"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
@@ -220,6 +221,18 @@ func (opts NetworkCreateOpts) ToNetworkCreateMap() (map[string]interface{}, erro
 // PolicyCreateOpts represents the attributes used when creating a new firewall policy.
 type PolicyCreateOpts struct {
 	policies.CreateOpts
+	ValueSpecs map[string]string `json:"value_specs,omitempty"`
+}
+
+// IKEPolicyCreateOpts represents the attributes used when creating a new IKE policy.
+type IKEPolicyCreateOpts struct {
+	ikepolicies.CreateOpts
+	ValueSpecs map[string]string `json:"value_specs,omitempty"`
+}
+
+// IKEPolicyLifetimeCreateOpts represents the attributes used when creating a new lifetime for an IKE policy.
+type IKEPolicyLifetimeCreateOpts struct {
+	ikepolicies.LifetimeCreateOpts
 	ValueSpecs map[string]string `json:"value_specs,omitempty"`
 }
 

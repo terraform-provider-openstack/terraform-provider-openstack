@@ -1,19 +1,19 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_vpnaas_ipsec_policy_v2"
-sidebar_current: "docs-openstack-resource-vpnaas-ipsec-policy-v2"
+page_title: "OpenStack: openstack_vpnaas_ike_policy_v2"
+sidebar_current: "docs-openstack-resource-vpnaas-ike-policy-v2"
 description: |-
-  Manages a V2 Neutron IPSec policy resource within OpenStack.
+  Manages a V2 Neutron IKE policy resource within OpenStack.
 ---
 
-# openstack\_vpnaas\_ipsec\_policy_v2
+# openstack\_vpnaas\_ike\_policy_v2
 
-Manages a V2 Neutron IPSec policy resource within OpenStack.
+Manages a V2 Neutron IKE policy resource within OpenStack.
 
 ## Example Usage
 
 ```hcl
-resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
+resource "openstack_vpnaas_ike_policy_v2" "policy_1" {
   name = "my_policy"
 }
 ```
@@ -39,17 +39,17 @@ The following arguments are supported:
 * `auth_algorithm` - (Optional) The authentication hash algorithm. Valid values are sha1, sha256, sha384, sha512.
     Default is sha1. Changing this updates the algorithm of the existing policy.
 
-* `encapsulation_mode` - (Optional) The encapsulation mode. Valid values are tunnel and transport. Default is tunnel.
-    Changing this updates the existing policy.
-
 * `encryption_algorithm` - (Optional) The encryption algorithm. Valid values are 3des, aes-128, aes-192 and so on.
     The default value is aes-128. Changing this updates the existing policy.
 
 * `pfs` - (Optional) The perfect forward secrecy mode. Valid values are Group2, Group5 and Group14. Default is Group5.
     Changing this updates the existing policy.
 
-* `transform_protocol` - (Optional) The transform protocol. Valid values are ESP, AH and AH-ESP.
-    Changing this updates the existing policy. Default is ESP.
+* `phase1_negotiation_mode` - (Optional) The IKE mode. A valid value is main, which is the default.
+    Changing this updates the existing policy.
+
+* `ike_version` - (Optional) The IKE mode. A valid value is v1 or v2. Default is v1.
+    Changing this updates the existing policy.
 
 * `lifetime` - (Optional) The lifetime of the security association. Consists of Unit and Value.
     - `unit` - (Optional) The units for the lifetime of the security association. Can be either seconds or kilobytes.
@@ -83,5 +83,5 @@ The following attributes are exported:
 Services can be imported using the `id`, e.g.
 
 ```
-$ terraform import openstack_vpnaas_ipsec_policy_v2.policy_1 832cb7f3-59fe-40cf-8f64-8350ffc03272
+$ terraform import openstack_vpnaas_ike_policy_v2.policy_1 832cb7f3-59fe-40cf-8f64-8350ffc03272
 ```
