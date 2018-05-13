@@ -211,6 +211,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_blockstorage_volume_v3":             resourceBlockStorageVolumeV3(),
 			"openstack_blockstorage_volume_attach_v2":      resourceBlockStorageVolumeAttachV2(),
 			"openstack_blockstorage_volume_attach_v3":      resourceBlockStorageVolumeAttachV3(),
+			"openstack_compute_attach_interface_v2":        resourceComputeAttachInterfaceV2(),
 			"openstack_compute_flavor_v2":                  resourceComputeFlavorV2(),
 			"openstack_compute_flavor_access_v2":           resourceComputeFlavorAccessV2(),
 			"openstack_compute_instance_v2":                resourceComputeInstanceV2(),
