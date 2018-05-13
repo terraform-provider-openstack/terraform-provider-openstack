@@ -228,8 +228,19 @@ func resourceBlockStorageVolumeV3Update(d *schema.ResourceData, meta interface{}
 		updateOpts.Metadata = resourceVolumeMetadataV3(d)
 	}
 
+	var v *volumes.Volume
 	if d.HasChange("size") {
-		blockStorageClient.Microversion = "3.42"
+		v, err = volumes.Get(blockStorageClient, d.Id()).Extract()
+		if err != nil {
+			return fmt.Errorf(
+				"Error extending volume (%s) (%s)",
+				d.Id(), err)
+		}
+
+		if v.Status == "in-use" {
+			blockStorageClient.Microversion = "3.42"
+		}
+
 		extendOpts := volumeactions.ExtendSizeOpts{d.Get("size").(int)}
 		err = volumeactions.ExtendSize(blockStorageClient, d.Id(), extendOpts).ExtractErr()
 		if err != nil {
@@ -253,8 +264,6 @@ func resourceBlockStorageVolumeV3Update(d *schema.ResourceData, meta interface{}
 				"Error waiting for volume (%s) to become ready (%s)",
 				d.Id(), err)
 		}
-
-		return resourceBlockStorageVolumeV3Read(d, meta)
 	}
 
 	_, err = volumes.Update(blockStorageClient, d.Id(), updateOpts).Extract()

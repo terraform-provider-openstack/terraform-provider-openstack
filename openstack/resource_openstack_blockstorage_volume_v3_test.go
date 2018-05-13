@@ -26,6 +26,8 @@ func TestAccBlockStorageV3Volume_basic(t *testing.T) {
 					testAccCheckBlockStorageV3VolumeMetadata(&volume, "foo", "bar"),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "name", "volume_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_volume_v3.volume_1", "size", "1"),
 				),
 			},
 			resource.TestStep{
@@ -35,6 +37,8 @@ func TestAccBlockStorageV3Volume_basic(t *testing.T) {
 					testAccCheckBlockStorageV3VolumeMetadata(&volume, "foo", "bar"),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "name", "volume_1-updated"),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_volume_v3.volume_1", "size", "2"),
 				),
 			},
 		},
@@ -193,7 +197,7 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   metadata {
     foo = "bar"
   }
-  size = 1
+  size = 2
 }
 `
 
