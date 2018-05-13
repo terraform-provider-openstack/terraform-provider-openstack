@@ -225,6 +225,7 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   description = "test volume"
   size = 1
+  enable_online_resize = true
 }
  
 resource "openstack_compute_volume_attach_v2" "va_1" {
@@ -244,6 +245,7 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   description = "test volume"
   size = 2
+  enable_online_resize = true
 }
  
 resource "openstack_compute_volume_attach_v2" "va_1" {

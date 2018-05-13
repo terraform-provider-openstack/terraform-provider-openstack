@@ -29,9 +29,11 @@ The following arguments are supported:
     omitted, the `region` argument of the provider is used. Changing this
     creates a new volume.
 
-* `size` - (Required) The size of the volume to create (in gigabytes). Note:
-    updating size of an attached volume requires Cinder support for version 3.42,
-    updating size of an attached volume on earlier versions creates new volume.
+* `size` - (Required) The size of the volume to create (in gigabytes).
+
+* `enable_online_resize` - (Optional) When this option is set it allows extending
+    attached volumes. Note: updating size of an attached volume requires Cinder
+    support for version 3.42 and a compatible storage driver.
 
 * `availability_zone` - (Optional) The availability zone for the volume.
     Changing this creates a new volume.

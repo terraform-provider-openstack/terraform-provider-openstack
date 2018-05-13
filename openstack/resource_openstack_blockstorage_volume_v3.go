@@ -42,6 +42,10 @@ func resourceBlockStorageVolumeV3() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
+			"enable_online_resize": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -238,6 +242,14 @@ func resourceBlockStorageVolumeV3Update(d *schema.ResourceData, meta interface{}
 		}
 
 		if v.Status == "in-use" {
+			if !d.Get("enable_online_resize").(bool) {
+				return fmt.Errorf(
+					`Error extending volume (%s), 
+					volume is attached to the instance and
+					resizing online is disabled,
+					see enable_online_resize option`, d.Id())
+			}
+
 			blockStorageClient.Microversion = "3.42"
 		}
 
