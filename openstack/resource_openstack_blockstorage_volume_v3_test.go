@@ -45,6 +45,30 @@ func TestAccBlockStorageV3Volume_basic(t *testing.T) {
 	})
 }
 
+func TestAccBlockStorageV3Volume_online_resize(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreOnlineResize(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccBlockStorageV3Volume_online_resize,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_volume_v3.volume_1", "size", "1"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccBlockStorageV3Volume_online_resize_update,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_volume_v3.volume_1", "size", "2"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccBlockStorageV3Volume_image(t *testing.T) {
 	var volume volumes.Volume
 
@@ -189,6 +213,44 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   size = 1
 }
 `
+
+var testAccBlockStorageV3Volume_online_resize = fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "basic" {
+  name            = "instance_1"
+  flavor_name     = "%s"
+  image_name      = "%s"
+}
+
+resource "openstack_blockstorage_volume_v3" "volume_1" {
+  name = "volume_1"
+  description = "test volume"
+  size = 1
+}
+ 
+resource "openstack_compute_volume_attach_v2" "va_1" {
+  instance_id = "${openstack_compute_instance_v2.basic.id}"
+  volume_id   = "${openstack_blockstorage_volume_v3.volume_1.id}"
+}
+`, OS_FLAVOR_NAME, OS_IMAGE_ID)
+
+var testAccBlockStorageV3Volume_online_resize_update = fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "basic" {
+  name            = "instance_1"
+  flavor_name     = "%s"
+  image_name      = "%s"
+}
+
+resource "openstack_blockstorage_volume_v3" "volume_1" {
+  name = "volume_1"
+  description = "test volume"
+  size = 2
+}
+ 
+resource "openstack_compute_volume_attach_v2" "va_1" {
+  instance_id = "${openstack_compute_instance_v2.basic.id}"
+  volume_id   = "${openstack_blockstorage_volume_v3.volume_1.id}"
+}
+`, OS_FLAVOR_NAME, OS_IMAGE_ID)
 
 const testAccBlockStorageV3Volume_update = `
 resource "openstack_blockstorage_volume_v3" "volume_1" {

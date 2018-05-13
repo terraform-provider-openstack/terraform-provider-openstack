@@ -134,6 +134,20 @@ func testAccPreCheckVPN(t *testing.T) {
 	}
 }
 
+func testAccPreOnlineResize(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	v := os.Getenv("OS_ONLINE_RESIZE")
+	if v == "" {
+		t.Skip("This environment does not support online blockstorage resize tests")
+	}
+
+	v = os.Getenv("OS_FLAVOR_NAME")
+	if v == "" {
+		t.Skip("OS_FLAVOR_NAME required to support online blockstorage resize tests")
+	}
+}
+
 func testAccPreCheckAdminOnly(t *testing.T) {
 	v := os.Getenv("OS_USERNAME")
 	if v != "admin" {
