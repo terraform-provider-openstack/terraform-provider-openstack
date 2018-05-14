@@ -262,7 +262,7 @@ func resourceBlockStorageVolumeV3Update(d *schema.ResourceData, meta interface{}
 		}
 
 		stateConf := &resource.StateChangeConf{
-			Pending:    []string{"available", "in-use"},
+			Pending:    []string{"extending"},
 			Target:     []string{"available", "in-use"},
 			Refresh:    VolumeV3StateRefreshFunc(blockStorageClient, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
