@@ -21,6 +21,7 @@ BUG FIXES
 * Fixed issue when using Identity v3 resources when an Identity v2 endpoint is published [GH-320]
 * `openstack_networking_router_v2.distributed` will now pass `false` correctly [GH-308]
 * `openstack_networking_router_v2.enable_snat` will now pass `false` correctly [GH-309]
+* Fixed bug where domain name and ID were flipped in `openstack_identity_auth_scope_v3` data source [GH-327]
 
 ## 1.4.0 (May 01, 2018)
 
