@@ -102,8 +102,8 @@ func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{})
 
 	d.Set("user_name", user.Name)
 	d.Set("user_id", user.Name)
-	d.Set("user_domain_name", user.Domain.ID)
-	d.Set("user_domain_id", user.Domain.Name)
+	d.Set("user_domain_name", user.Domain.Name)
+	d.Set("user_domain_id", user.Domain.ID)
 
 	project, err := result.ExtractProject()
 	if err != nil {
@@ -113,7 +113,7 @@ func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{})
 	d.Set("project_name", project.Name)
 	d.Set("project_id", project.ID)
 	d.Set("project_domain_name", project.Domain.Name)
-	d.Set("proejct_domain_id", project.Domain.ID)
+	d.Set("project_domain_id", project.Domain.ID)
 
 	roles, err := result.ExtractRoles()
 	if err != nil {
