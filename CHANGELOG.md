@@ -7,6 +7,7 @@ FEATURES
 * __New Resource__: `openstack_vpnaas_ipsec_policy_v2` [GH-270]
 * __New Resource__: `openstack_vpnaas_service_v2` [GH-300]
 * __New Resource__: `openstack_vpnaas_ike_policy_v2` [GH-316]
+* __New Resource__: `openstack_vpnaas_endpoint_group_v2` [GH-321]
 * __New Data Source__: `openstack_compute_keypair_v2` [GH-307]
 * __New Data Source__: `openstack_identity_auth_scope_v3` [GH-204]
 
