@@ -52,10 +52,12 @@ func resourceEndpointGroupV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
+				ForceNew: true,
 			},
 			"endpoints": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
+				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"value_specs": &schema.Schema{
