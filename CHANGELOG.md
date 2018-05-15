@@ -1,29 +1,29 @@
-## 1.5.0 (Unreleased)
+## 1.5.0 (May 15, 2018)
 
 FEATURES
 
-* __New Resource__: `openstack_blockstorage_volume_v3` [GH-324]
-* __New Resource__: `openstack_blockstorage_volume_attach_v3` [GH-324]
-* __New Resource__: `openstack_networking_subnet_route_v2` [GH-314]
-* __New Resource__: `openstack_networking_floatingip_associate_v2` [GH-313]
-* __New Resource__: `openstack_vpnaas_ipsec_policy_v2` [GH-270]
-* __New Resource__: `openstack_vpnaas_service_v2` [GH-300]
-* __New Resource__: `openstack_vpnaas_ike_policy_v2` [GH-316]
-* __New Resource__: `openstack_vpnaas_endpoint_group_v2` [GH-321]
-* __New Data Source__: `openstack_compute_keypair_v2` [GH-307]
-* __New Data Source__: `openstack_identity_auth_scope_v3` [GH-204]
+* __New Resource__: `openstack_blockstorage_volume_v3` ([#324](https://github.com/terraform-providers/terraform-provider-openstack/issues/324))
+* __New Resource__: `openstack_blockstorage_volume_attach_v3` ([#324](https://github.com/terraform-providers/terraform-provider-openstack/issues/324))
+* __New Resource__: `openstack_networking_subnet_route_v2` ([#314](https://github.com/terraform-providers/terraform-provider-openstack/issues/314))
+* __New Resource__: `openstack_networking_floatingip_associate_v2` ([#313](https://github.com/terraform-providers/terraform-provider-openstack/issues/313))
+* __New Resource__: `openstack_vpnaas_ipsec_policy_v2` ([#270](https://github.com/terraform-providers/terraform-provider-openstack/issues/270))
+* __New Resource__: `openstack_vpnaas_service_v2` ([#300](https://github.com/terraform-providers/terraform-provider-openstack/issues/300))
+* __New Resource__: `openstack_vpnaas_ike_policy_v2` ([#316](https://github.com/terraform-providers/terraform-provider-openstack/issues/316))
+* __New Resource__: `openstack_vpnaas_endpoint_group_v2` ([#321](https://github.com/terraform-providers/terraform-provider-openstack/issues/321))
+* __New Data Source__: `openstack_compute_keypair_v2` ([#307](https://github.com/terraform-providers/terraform-provider-openstack/issues/307))
+* __New Data Source__: `openstack_identity_auth_scope_v3` ([#204](https://github.com/terraform-providers/terraform-provider-openstack/issues/204))
 
 IMPROVEMENTS
 
-* Added `verify_checksum` to `openstack_images_image_v2` resource so that checksum verification can be disabled [GH-305]
-* The LBaaS v2 resources have lower "delay" times when waiting for state changes. This should speed up creation of a Load Balancing stack [GH-297]
+* Added `verify_checksum` to `openstack_images_image_v2` resource so that checksum verification can be disabled ([#305](https://github.com/terraform-providers/terraform-provider-openstack/issues/305))
+* The LBaaS v2 resources have lower "delay" times when waiting for state changes. This should speed up creation of a Load Balancing stack ([#297](https://github.com/terraform-providers/terraform-provider-openstack/issues/297))
 
 BUG FIXES
 
-* Fixed issue where `OS_IDENTITY_API_VERSION=2` was not recognized [GH-315]
-* Fixed issue when using Identity v3 resources when an Identity v2 endpoint is published [GH-320]
-* `openstack_networking_router_v2.distributed` will now pass `false` correctly [GH-308]
-* `openstack_networking_router_v2.enable_snat` will now pass `false` correctly [GH-309]
+* Fixed issue where `OS_IDENTITY_API_VERSION=2` was not recognized ([#315](https://github.com/terraform-providers/terraform-provider-openstack/issues/315))
+* Fixed issue when using Identity v3 resources when an Identity v2 endpoint is published ([#320](https://github.com/terraform-providers/terraform-provider-openstack/issues/320))
+* `openstack_networking_router_v2.distributed` will now pass `false` correctly ([#308](https://github.com/terraform-providers/terraform-provider-openstack/issues/308))
+* `openstack_networking_router_v2.enable_snat` will now pass `false` correctly ([#309](https://github.com/terraform-providers/terraform-provider-openstack/issues/309))
 
 ## 1.4.0 (May 01, 2018)
 
