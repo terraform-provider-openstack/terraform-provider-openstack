@@ -122,7 +122,7 @@ func resourceComputeAttachInterfaceV2Read(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	instanceId, attachmentId, err := parseComputeAttachInterfacementId(d.Id())
+	instanceId, attachmentId, err := parseComputeAttachInterfaceId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -147,7 +147,7 @@ func resourceComputeAttachInterfaceV2Delete(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	instanceId, attachmentId, err := parseComputeAttachInterfacementId(d.Id())
+	instanceId, attachmentId, err := parseComputeAttachInterfaceId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -215,7 +215,7 @@ func resourceComputeAttachInterfaceV2DetachFunc(
 	}
 }
 
-func parseComputeAttachInterfacementId(id string) (string, string, error) {
+func parseComputeAttachInterfaceId(id string) (string, string, error) {
 	idParts := strings.Split(id, "/")
 	if len(idParts) < 2 {
 		return "", "", fmt.Errorf("Unable to determine interface attachment ID")
