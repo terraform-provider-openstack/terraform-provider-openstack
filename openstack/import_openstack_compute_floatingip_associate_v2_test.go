@@ -22,6 +22,9 @@ func TestAccComputeV2FloatingIPAssociate_importBasic(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"wait_until_associated",
+				},
 			},
 		},
 	})
