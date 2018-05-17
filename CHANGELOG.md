@@ -1,4 +1,9 @@
 ## 1.6.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Add wait_until_associated to `openstack_compute_floatingip_associate_v2 [GH-310]
+
 ## 1.5.0 (May 15, 2018)
 
 FEATURES
