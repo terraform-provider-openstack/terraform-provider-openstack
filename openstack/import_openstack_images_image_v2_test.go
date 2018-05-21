@@ -27,6 +27,7 @@ func TestAccImagesImageV2_importBasic(t *testing.T) {
 					"local_file_path",
 					"image_cache_path",
 					"image_source_url",
+					"verify_checksum",
 				},
 			},
 		},

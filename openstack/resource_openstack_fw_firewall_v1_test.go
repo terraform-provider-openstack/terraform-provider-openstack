@@ -286,7 +286,6 @@ const testAccFWFirewallV1_router = `
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
-  distributed = "false"
 }
 
 resource "openstack_fw_policy_v1" "policy_1" {
@@ -305,13 +304,11 @@ const testAccFWFirewallV1_router_add = `
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
-  distributed = "false"
 }
 
 resource "openstack_networking_router_v2" "router_2" {
   name = "router_2"
   admin_state_up = "true"
-  distributed = "false"
 }
 
 resource "openstack_fw_policy_v1" "policy_1" {

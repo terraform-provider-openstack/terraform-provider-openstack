@@ -128,6 +128,27 @@ func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2FloatingIPAssociate_waitUntilAssociated(t *testing.T) {
+	var instance servers.Server
+	var fip floatingips.FloatingIP
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeV2FloatingIPAssociate_waitUntilAssociated,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
+					testAccCheckComputeV2FloatingIPAssociateAssociated(&fip, &instance, 1),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckComputeV2FloatingIPAssociateDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	computeClient, err := config.computeV2Client(OS_REGION_NAME)
@@ -332,5 +353,25 @@ resource "openstack_networking_floatingip_v2" "fip_2" {
 resource "openstack_compute_floatingip_associate_v2" "fip_1" {
   floating_ip = "${openstack_networking_floatingip_v2.fip_2.address}"
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+}
+`, OS_NETWORK_ID)
+
+var testAccComputeV2FloatingIPAssociate_waitUntilAssociated = fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
+}
+
+resource "openstack_networking_floatingip_v2" "fip_1" {
+}
+
+resource "openstack_compute_floatingip_associate_v2" "fip_1" {
+  floating_ip = "${openstack_networking_floatingip_v2.fip_1.address}"
+  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+
+  wait_until_associated = true
 }
 `, OS_NETWORK_ID)

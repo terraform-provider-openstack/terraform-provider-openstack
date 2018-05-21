@@ -29,6 +29,7 @@ var (
 	OS_SWIFT_ENVIRONMENT      = os.Getenv("OS_SWIFT_ENVIRONMENT")
 	OS_LB_ENVIRONMENT         = os.Getenv("OS_LB_ENVIRONMENT")
 	OS_FW_ENVIRONMENT         = os.Getenv("OS_FW_ENVIRONMENT")
+	OS_VPN_ENVIRONMENT        = os.Getenv("OS_VPN_ENVIRONMENT")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -122,6 +123,28 @@ func testAccPreCheckFW(t *testing.T) {
 
 	if OS_FW_ENVIRONMENT == "" {
 		t.Skip("This environment does not support FW tests")
+	}
+}
+
+func testAccPreCheckVPN(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_VPN_ENVIRONMENT == "" {
+		t.Skip("This environment does not support VPN tests")
+	}
+}
+
+func testAccPreOnlineResize(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	v := os.Getenv("OS_ONLINE_RESIZE")
+	if v == "" {
+		t.Skip("This environment does not support online blockstorage resize tests")
+	}
+
+	v = os.Getenv("OS_FLAVOR_NAME")
+	if v == "" {
+		t.Skip("OS_FLAVOR_NAME required to support online blockstorage resize tests")
 	}
 }
 

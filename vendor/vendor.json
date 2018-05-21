@@ -313,22 +313,22 @@
 			"revisionTime": "2018-03-28T16:31:53Z"
 		},
 		{
-			"checksumSHA1": "Mg2tY7tXB1WAIUkkdwRg3FeuPPg=",
+			"checksumSHA1": "0AU4HIWLs5yyyZcZx8V+a9BFt9w=",
 			"path": "github.com/gophercloud/gophercloud",
-			"revision": "020d890c61002325cdb4c2ab15db01b62bf3e00d",
-			"revisionTime": "2018-04-17T17:58:24Z"
+			"revision": "2c66bd8ca7ef07d4d0c38ed75457121c3f24aac8",
+			"revisionTime": "2018-05-10T02:17:00Z"
 		},
 		{
-			"checksumSHA1": "1qj5kmj/tNZEu92NWXjxMawBg0w=",
+			"checksumSHA1": "YDNvjFNQS+UxqZMLm/shFs7aLNU=",
 			"path": "github.com/gophercloud/gophercloud/openstack",
-			"revision": "754e57e7867bfa48062ff2a237caad538085700a",
-			"revisionTime": "2017-11-03T04:02:05Z"
+			"revision": "2c66bd8ca7ef07d4d0c38ed75457121c3f24aac8",
+			"revisionTime": "2018-05-10T02:17:00Z"
 		},
 		{
-			"checksumSHA1": "f2hdkOhYmmO2ljNtr+OThK8VAEI=",
+			"checksumSHA1": "8YtBD+Um7I8ee1Xf1ZAWu74eP7w=",
 			"path": "github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions",
-			"revision": "0f64da0e36de86a0ca1a8f2fc1b0570a0d3f7504",
-			"revisionTime": "2017-03-10T01:59:53Z"
+			"revision": "1ba3c5196d701270954c957d8696695713db199b",
+			"revisionTime": "2018-05-11T04:49:20Z"
 		},
 		{
 			"checksumSHA1": "9DTfNt/B4aZWXEmTNqXU5rNrrDc=",
@@ -341,6 +341,12 @@
 			"path": "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes",
 			"revision": "0f64da0e36de86a0ca1a8f2fc1b0570a0d3f7504",
 			"revisionTime": "2017-03-10T01:59:53Z"
+		},
+		{
+			"checksumSHA1": "vqXNCd2My0y/5tPC/Bs79uf6Q4E=",
+			"path": "github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes",
+			"revision": "86621fc7f55fde56303d29e49517a160f132714a",
+			"revisionTime": "2018-05-12T01:38:14Z"
 		},
 		{
 			"checksumSHA1": "y49Ur726Juznj85+23ZgqMvehgg=",
@@ -613,6 +619,30 @@
 			"revisionTime": "2018-04-18T04:52:34Z"
 		},
 		{
+			"checksumSHA1": "HhRP7Hw7cS7RM4cxGmQYk/vI8uM=",
+			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ikepolicies",
+			"revision": "c51806d07f1d12dc4786b792fb9610679e96f549",
+			"revisionTime": "2018-04-20T19:30:33Z"
+		},
+		{
+			"checksumSHA1": "grviOYvybawC80v7Fmw0XOBwr0A=",
+			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/endpointgroups",
+			"revision": "c51806d07f1d12dc4786b792fb9610679e96f549",
+			"revisionTime": "2018-04-20T19:30:33Z"
+		},
+		{
+			"checksumSHA1": "X6dtgVLZ6JZfuZ8dVIqROlRhNjQ=",
+			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies",
+			"revision": "3aef8e417612ddbdd8f7a76004af4307296cd1b6",
+			"revisionTime": "2018-03-21T00:01:40Z"
+		},
+		{
+			"checksumSHA1": "RnSw4UFgNNxmOuobe7c0GxGWwKM=",
+			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/services",
+			"revision": "c51806d07f1d12dc4786b792fb9610679e96f549",
+			"revisionTime": "2018-04-20T19:30:33Z"
+		},
+		{
 			"checksumSHA1": "XEVvG2f/dqATN4aCluZlPylW+9A=",
 			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/networks",
 			"revision": "482bcee3e503006779c2c99437c0613881160de1",
@@ -625,10 +655,10 @@
 			"revisionTime": "2018-04-18T04:52:34Z"
 		},
 		{
-			"checksumSHA1": "8ODTbSq44HuX4vKNSWAuN43km7w=",
+			"checksumSHA1": "oSLCi+kQy0xYTkWi6NalsQKKxn4=",
 			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/subnets",
-			"revision": "482bcee3e503006779c2c99437c0613881160de1",
-			"revisionTime": "2018-04-18T04:52:34Z"
+			"revision": "a3512ad52c42eeed0f51163174ed4cb8f7e8d2ce",
+			"revisionTime": "2018-05-04T15:57:42Z"
 		},
 		{
 			"checksumSHA1": "Q9VHGSztw2B4PmN4kyvY9TcJD6c=",
@@ -655,10 +685,10 @@
 			"revisionTime": "2017-03-10T01:59:53Z"
 		},
 		{
-			"checksumSHA1": "hOTxf5bdm8+cwSTO+OO/maDz6ss=",
+			"checksumSHA1": "8KE4bJzhbFZKsYMxcRg6xLqqfTg=",
 			"path": "github.com/gophercloud/gophercloud/openstack/utils",
-			"revision": "c7551a666c4fee120cc314dce91ba3d0663a86f3",
-			"revisionTime": "2017-10-29T05:30:20Z"
+			"revision": "2c66bd8ca7ef07d4d0c38ed75457121c3f24aac8",
+			"revisionTime": "2018-05-10T02:17:00Z"
 		},
 		{
 			"checksumSHA1": "FNy075ydQZXvnL2bNNIOCmy/ghs=",
@@ -667,10 +697,10 @@
 			"revisionTime": "2017-03-10T01:59:53Z"
 		},
 		{
-			"checksumSHA1": "G0ubM2UQpjFV27sk6wUm7d4PQe0=",
+			"checksumSHA1": "ZguAwNlZc+b2wSb+P4WddyBhNBA=",
 			"path": "github.com/gophercloud/utils/openstack/clientconfig",
-			"revision": "05053b3a01cead97709deec2e0fc283388ab77f0",
-			"revisionTime": "2018-04-14T02:40:29Z"
+			"revision": "ab2d1a6ae871c292eff4a11a0fc3878bd6148f53",
+			"revisionTime": "2018-05-04T17:16:17Z"
 		},
 		{
 			"checksumSHA1": "cdOCt0Yb+hdErz8NAQqayxPmRsY=",

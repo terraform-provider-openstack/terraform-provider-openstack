@@ -1,4 +1,37 @@
-## 1.4.0 (Unreleased)
+## 1.6.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Add wait_until_associated to `openstack_compute_floatingip_associate_v2 [GH-310]
+
+## 1.5.0 (May 15, 2018)
+
+FEATURES
+
+* __New Resource__: `openstack_blockstorage_volume_v3` ([#324](https://github.com/terraform-providers/terraform-provider-openstack/issues/324))
+* __New Resource__: `openstack_blockstorage_volume_attach_v3` ([#324](https://github.com/terraform-providers/terraform-provider-openstack/issues/324))
+* __New Resource__: `openstack_networking_subnet_route_v2` ([#314](https://github.com/terraform-providers/terraform-provider-openstack/issues/314))
+* __New Resource__: `openstack_networking_floatingip_associate_v2` ([#313](https://github.com/terraform-providers/terraform-provider-openstack/issues/313))
+* __New Resource__: `openstack_vpnaas_ipsec_policy_v2` ([#270](https://github.com/terraform-providers/terraform-provider-openstack/issues/270))
+* __New Resource__: `openstack_vpnaas_service_v2` ([#300](https://github.com/terraform-providers/terraform-provider-openstack/issues/300))
+* __New Resource__: `openstack_vpnaas_ike_policy_v2` ([#316](https://github.com/terraform-providers/terraform-provider-openstack/issues/316))
+* __New Resource__: `openstack_vpnaas_endpoint_group_v2` ([#321](https://github.com/terraform-providers/terraform-provider-openstack/issues/321))
+* __New Data Source__: `openstack_compute_keypair_v2` ([#307](https://github.com/terraform-providers/terraform-provider-openstack/issues/307))
+* __New Data Source__: `openstack_identity_auth_scope_v3` ([#204](https://github.com/terraform-providers/terraform-provider-openstack/issues/204))
+
+IMPROVEMENTS
+
+* Added `verify_checksum` to `openstack_images_image_v2` resource so that checksum verification can be disabled ([#305](https://github.com/terraform-providers/terraform-provider-openstack/issues/305))
+* The LBaaS v2 resources have lower "delay" times when waiting for state changes. This should speed up creation of a Load Balancing stack ([#297](https://github.com/terraform-providers/terraform-provider-openstack/issues/297))
+
+BUG FIXES
+
+* Fixed issue where `OS_IDENTITY_API_VERSION=2` was not recognized ([#315](https://github.com/terraform-providers/terraform-provider-openstack/issues/315))
+* Fixed issue when using Identity v3 resources when an Identity v2 endpoint is published ([#320](https://github.com/terraform-providers/terraform-provider-openstack/issues/320))
+* `openstack_networking_router_v2.distributed` will now pass `false` correctly ([#308](https://github.com/terraform-providers/terraform-provider-openstack/issues/308))
+* `openstack_networking_router_v2.enable_snat` will now pass `false` correctly ([#309](https://github.com/terraform-providers/terraform-provider-openstack/issues/309))
+
+## 1.4.0 (May 01, 2018)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
@@ -6,22 +39,22 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 FEATURES
 
-* __New Resource__: `openstack_identity_role_assignment_v3` [GH-265]
-* __New Data Source__: `openstack_identity_project_v3` [GH-251]
-* __New Data Source__: `openstack_identity_user_v3` [GH-252]
+* __New Resource__: `openstack_identity_role_assignment_v3` ([#265](https://github.com/terraform-providers/terraform-provider-openstack/issues/265))
+* __New Data Source__: `openstack_identity_project_v3` ([#251](https://github.com/terraform-providers/terraform-provider-openstack/issues/251))
+* __New Data Source__: `openstack_identity_user_v3` ([#252](https://github.com/terraform-providers/terraform-provider-openstack/issues/252))
 
 IMPROVEMENTS
 
-* Added `member_status` to `openstack_images_image_v2` data source [GH-269]
-* Add support for `OS_TOKEN` environment variable [GH-272]
-* Added `force_destroy` to `openstack_objectstorage_container_v1` which will cause all objects in the container to be deleted when the container is deleted [GH-276]
-* CIDR is now optional in `openstack_networking_subnet_v2` allowing a CIDR to be allocated from a subnet pool [GH-294]
-* Added additional authentication options for domain scoping [GH-290]
-* `openstack_images_image_v2` can now support OVA format [GH-302]
+* Added `member_status` to `openstack_images_image_v2` data source ([#269](https://github.com/terraform-providers/terraform-provider-openstack/issues/269))
+* Add support for `OS_TOKEN` environment variable ([#272](https://github.com/terraform-providers/terraform-provider-openstack/issues/272))
+* Added `force_destroy` to `openstack_objectstorage_container_v1` which will cause all objects in the container to be deleted when the container is deleted ([#276](https://github.com/terraform-providers/terraform-provider-openstack/issues/276))
+* CIDR is now optional in `openstack_networking_subnet_v2` allowing a CIDR to be allocated from a subnet pool ([#294](https://github.com/terraform-providers/terraform-provider-openstack/issues/294))
+* Added additional authentication options for domain scoping ([#290](https://github.com/terraform-providers/terraform-provider-openstack/issues/290))
+* `openstack_images_image_v2` can now support OVA format ([#302](https://github.com/terraform-providers/terraform-provider-openstack/issues/302))
 
 BUG FIXES
 
-* `openstack_compute_instance_v2` resources can handle Availability Zones in the format of `az:host:node` [GH-291]
+* `openstack_compute_instance_v2` resources can handle Availability Zones in the format of `az:host:node` ([#291](https://github.com/terraform-providers/terraform-provider-openstack/issues/291))
 
 ## 1.3.0 (March 14, 2018)
 

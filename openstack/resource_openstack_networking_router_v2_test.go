@@ -60,7 +60,7 @@ func TestAccNetworkingV2Router_updateExternalGateway(t *testing.T) {
 	})
 }
 
-func TestAccNetworkingV2Router_timeout(t *testing.T) {
+func TestAccNetworkingV2Router_vendor_opts(t *testing.T) {
 	var router routers.Router
 
 	resource.Test(t, resource.TestCase{
@@ -69,9 +69,34 @@ func TestAccNetworkingV2Router_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV2Router_timeout,
+				Config: testAccNetworkingV2Router_vendor_opts,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "external_gateway", OS_EXTGW_ID),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Router_vendor_opts_no_snat(t *testing.T) {
+	var router routers.Router
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccNetworkingV2Router_vendor_opts_no_snat,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "external_gateway", OS_EXTGW_ID),
 				),
 			},
 		},
@@ -135,72 +160,6 @@ const testAccNetworkingV2Router_basic = `
 resource "openstack_networking_router_v2" "router_1" {
 	name = "router_1"
 	admin_state_up = "true"
-	distributed = "false"
-}
-`
-
-func TestAccNetworkingV2Router_vendor_opts(t *testing.T) {
-	var router routers.Router
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccNetworkingV2Router_vendor_opts,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_router_v2.router_1", "external_gateway", OS_EXTGW_ID),
-				),
-			},
-		},
-	})
-}
-
-const testAccNetworkingV2Router_update = `
-resource "openstack_networking_router_v2" "router_1" {
-	name = "router_2"
-	admin_state_up = "true"
-	distributed = "false"
-}
-`
-
-var testAccNetworkingV2Router_vendor_opts = fmt.Sprintf(`
-resource "openstack_networking_router_v2" "router_1" {
-	name = "router_1"
-	admin_state_up = "true"
-	distributed = "false"
-	external_network_id = "%s"
-	vendor_options {
-		set_router_gateway_after_create = true
-	}
-}
-`, OS_EXTGW_ID)
-
-const testAccNetworkingV2Router_updateExternalGateway1 = `
-resource "openstack_networking_router_v2" "router_1" {
-	name = "router"
-	admin_state_up = "true"
-	distributed = "false"
-}
-`
-
-var testAccNetworkingV2Router_updateExternalGateway2 = fmt.Sprintf(`
-resource "openstack_networking_router_v2" "router_1" {
-	name = "router"
-	admin_state_up = "true"
-	distributed = "false"
-	external_network_id = "%s"
-}
-`, OS_EXTGW_ID)
-
-const testAccNetworkingV2Router_timeout = `
-resource "openstack_networking_router_v2" "router_1" {
-	name = "router_1"
-	admin_state_up = "true"
-	distributed = "false"
 
   timeouts {
     create = "5m"
@@ -208,3 +167,54 @@ resource "openstack_networking_router_v2" "router_1" {
   }
 }
 `
+
+const testAccNetworkingV2Router_update = `
+resource "openstack_networking_router_v2" "router_1" {
+	name = "router_2"
+	admin_state_up = "true"
+
+  timeouts {
+    create = "5m"
+    delete = "5m"
+  }
+}
+`
+
+var testAccNetworkingV2Router_vendor_opts = fmt.Sprintf(`
+resource "openstack_networking_router_v2" "router_1" {
+	name = "router_1"
+	admin_state_up = "true"
+	external_network_id = "%s"
+	vendor_options {
+		set_router_gateway_after_create = true
+	}
+}
+`, OS_EXTGW_ID)
+
+var testAccNetworkingV2Router_vendor_opts_no_snat = fmt.Sprintf(`
+resource "openstack_networking_router_v2" "router_1" {
+        name = "router_1"
+        admin_state_up = "true"
+        distributed = "false"
+        external_network_id = "%s"
+        enable_snat = "false"
+        vendor_options {
+                set_router_gateway_after_create = true
+        }
+}
+`, OS_EXTGW_ID)
+
+const testAccNetworkingV2Router_updateExternalGateway1 = `
+resource "openstack_networking_router_v2" "router_1" {
+	name = "router"
+	admin_state_up = "true"
+}
+`
+
+var testAccNetworkingV2Router_updateExternalGateway2 = fmt.Sprintf(`
+resource "openstack_networking_router_v2" "router_1" {
+	name = "router"
+	admin_state_up = "true"
+	external_network_id = "%s"
+}
+`, OS_EXTGW_ID)

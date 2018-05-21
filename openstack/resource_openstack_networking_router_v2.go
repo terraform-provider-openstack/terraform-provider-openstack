@@ -148,7 +148,7 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 		createOpts.AdminStateUp = &asu
 	}
 
-	if dRaw, ok := d.GetOk("distributed"); ok {
+	if dRaw, ok := d.GetOkExists("distributed"); ok {
 		d := dRaw.(bool)
 		createOpts.Distributed = &d
 	}
@@ -163,28 +163,23 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 
 	// Gateway settings
 	var externalNetworkID string
+	var gatewayInfo routers.GatewayInfo
 	if v := d.Get("external_gateway").(string); v != "" {
 		externalNetworkID = v
+		gatewayInfo.NetworkID = externalNetworkID
 	}
 
 	if v := d.Get("external_network_id").(string); v != "" {
 		externalNetworkID = v
+		gatewayInfo.NetworkID = externalNetworkID
 	}
 
-	if !vendorUpdateGateway && externalNetworkID != "" {
-		gatewayInfo := routers.GatewayInfo{
-			NetworkID: externalNetworkID,
-		}
-
-		createOpts.GatewayInfo = &gatewayInfo
-	}
-
-	if esRaw, ok := d.GetOk("enable_snat"); ok {
+	if esRaw, ok := d.GetOkExists("enable_snat"); ok {
 		if externalNetworkID == "" {
 			return fmt.Errorf("setting enable_snat requires external_network_id to be set")
 		}
 		es := esRaw.(bool)
-		createOpts.GatewayInfo.EnableSNAT = &es
+		gatewayInfo.EnableSNAT = &es
 	}
 
 	externalFixedIPs := resourceRouterExternalFixedIPsV2(d)
@@ -192,7 +187,15 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 		if externalNetworkID == "" {
 			return fmt.Errorf("setting an external_fixed_ip requires external_network_id to be set")
 		}
-		createOpts.GatewayInfo.ExternalFixedIPs = externalFixedIPs
+		gatewayInfo.ExternalFixedIPs = externalFixedIPs
+	}
+
+	// vendorUpdateGateway is a flag for certain vendor-specific virtual routers
+	// which do not allow gateway settings to be set during router creation.
+	// If this flag was not enabled, then we can safely set the gateway
+	// information during create.
+	if !vendorUpdateGateway && externalNetworkID != "" {
+		createOpts.GatewayInfo = &gatewayInfo
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -216,13 +219,12 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 
 	d.SetId(n.ID)
 
+	// If the vendorUpdateGateway flag was specified and if an external network
+	// was specified, then set the gateway information after router creation.
 	if vendorUpdateGateway && externalNetworkID != "" {
 		log.Printf("[DEBUG] Adding External Network %s to router ID %s", externalNetworkID, d.Id())
-		var updateOpts routers.UpdateOpts
 
-		gatewayInfo := routers.GatewayInfo{
-			NetworkID: externalNetworkID,
-		}
+		var updateOpts routers.UpdateOpts
 		updateOpts.GatewayInfo = &gatewayInfo
 
 		log.Printf("[DEBUG] Assigning external gateway to Router %s with options: %+v", d.Id(), updateOpts)
