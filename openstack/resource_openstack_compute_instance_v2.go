@@ -31,6 +31,9 @@ func resourceComputeInstanceV2() *schema.Resource {
 		Read:   resourceComputeInstanceV2Read,
 		Update: resourceComputeInstanceV2Update,
 		Delete: resourceComputeInstanceV2Delete,
+		Importer: &schema.ResourceImporter{
+			State: resourceOpenStackComputeInstanceV2ImportState,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
