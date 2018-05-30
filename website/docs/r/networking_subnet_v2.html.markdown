@@ -36,8 +36,9 @@ The following arguments are supported:
 * `network_id` - (Required) The UUID of the parent network. Changing this
     creates a new subnet.
 
-* `cidr` - (Required) CIDR representing IP range for this subnet, based on IP
-    version. Changing this creates a new subnet.
+* `cidr` - (Optional) CIDR representing IP range for this subnet, based on IP
+    version. You can omit this option if you are creating a subnet from a
+    subnet pool.
 
 * `ip_version` - (Optional) IP version, either 4 (default) or 6. Changing this creates a
     new subnet.
