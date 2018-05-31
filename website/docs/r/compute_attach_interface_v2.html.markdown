@@ -33,6 +33,28 @@ resource "openstack_compute_attach_interface_v2" "ai_1" {
 
 ```
 
+### Basic attachment of a network to to a single instance, auto-creating a port, and specifiying an IP address. NOTE: You must specify a network_id when using fixed_ip and that ip must lie in the range available on the network
+
+```hcl
+resource "openstack_networking_network_v2" "network_1" {
+  name           = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_compute_instance_v2" "instance_1" {
+  name            = "instance_1"
+  security_groups = ["default"]
+}
+
+resource "openstack_compute_attach_interface_v2" "ai_1" {
+  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+  network_id  = "${openstack_networking_port_v2.network_1.id}"
+  fixed_ip    = "10.0.10.10"
+}
+
+```
+
+
 ### Basic attachment of a single interface (a port) to a single instance
 
 ```hcl
@@ -136,6 +158,10 @@ The following arguments are supported:
 * `network_id` - (Optional) The ID of the Network to attach to an Instance. A port will be created automatically.
    _NOTE_: This option and `port_id` are mutually exclusive.
 
+* `fixed_ip` - (Optional) An IP address to assosciate with the port.
+   _NOTE_: This option cannot be used with port_id. You must specifiy a network_id. The IP address must lie in a range on the supplied network.
+
+
 
 ## Attributes Reference
 
@@ -143,6 +169,8 @@ The following attributes are exported:
 
 * `instance_id` - See Argument Reference above.
 * `port_id` - See Argument Reference above.
+* `network_id` - See Argument Reference above.
+* `fixed_ip  - See Argument Reference above.
 
 ## Import
 

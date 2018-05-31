@@ -47,6 +47,12 @@ func resourceComputeAttachInterfaceV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+
+			"fixed_ip": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -78,11 +84,16 @@ func resourceComputeAttachInterfaceV2Create(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("network_id and port_id are mutaully exclusive. Only one must be set")
 	}
 
-	// TODO - FixedIPs
+	// For some odd reason the API takes an array of IPs, but you can only have one element in the array.
+	var fixedIPs []attachinterfaces.FixedIP
+	if v, ok := d.GetOk("fixed_ip"); ok {
+		fixedIPs = append(fixedIPs, attachinterfaces.FixedIP{IPAddress: v.(string)})
+	}
 
 	attachOpts := attachinterfaces.CreateOpts{
 		PortID:    portId,
 		NetworkID: networkId,
+		FixedIPs:  fixedIPs,
 	}
 
 	log.Printf("[DEBUG] Creating interface attachment: %#v", attachOpts)
