@@ -10,7 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/attachinterfaces"
 )
 
-var FixedIP string = "10.119.100.100"
+var FixedIP string = "192.168.1.100"
 
 func TestAccComputeV2AttachInterface_basic(t *testing.T) {
 	var ai attachinterfaces.Interface
@@ -166,6 +166,19 @@ resource "openstack_compute_attach_interface_v2" "ai_1" {
 `, OS_NETWORK_ID, OS_NETWORK_ID)
 
 var testAccComputeV2AttachInterface_IP = fmt.Sprintf(`
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  cidr = "192.168.1.0/24"
+  ip_version = 4
+  enable_dhcp = true
+  no_gateway = true
+}
+
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -176,10 +189,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
 
 resource "openstack_compute_attach_interface_v2" "ai_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  network_id = "%s"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
   fixed_ip = "%s"
 }
-`, OS_NETWORK_ID, OS_NETWORK_ID, FixedIP)
+`, OS_NETWORK_ID, FixedIP)
 
 var testAccComputeV2AttachInterface_timeout = fmt.Sprintf(`
 resource "openstack_networking_port_v2" "port_1" {
