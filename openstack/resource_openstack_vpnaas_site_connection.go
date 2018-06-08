@@ -44,16 +44,16 @@ func resourceSiteConnectionV2() *schema.Resource {
 			},
 			"ikepolicy_id": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
 				ForceNew: true,
+				Required: true,
 			},
 			"peer_id": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"peer_address": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"peer_ep_group_id": &schema.Schema{
 				Type:     schema.TypeString,
@@ -65,8 +65,8 @@ func resourceSiteConnectionV2() *schema.Resource {
 			},
 			"vpnservice_id": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
 				ForceNew: true,
+				Required: true,
 			},
 			"local_ep_group_id": &schema.Schema{
 				Type:     schema.TypeString,
@@ -74,8 +74,8 @@ func resourceSiteConnectionV2() *schema.Resource {
 			},
 			"ipsecpolicy_id": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
 				ForceNew: true,
+				Required: true,
 			},
 			"admin_state_up": &schema.Schema{
 				Type:     schema.TypeBool,
@@ -84,7 +84,7 @@ func resourceSiteConnectionV2() *schema.Resource {
 			},
 			"psk": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"initiator": &schema.Schema{
 				Type:     schema.TypeString,

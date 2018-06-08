@@ -102,7 +102,7 @@ var testAccSiteConnectionV2_basic = fmt.Sprintf(`
 
 	resource "openstack_networking_router_v2" "router_1" {
   		name             = "my_router"
-  		external_gateway = "%s"
+  		external_network_id = "%s"
 	}
 
 	resource "openstack_networking_router_interface_v2" "router_interface_1" {
@@ -140,5 +140,6 @@ var testAccSiteConnectionV2_basic = fmt.Sprintf(`
 		local_ep_group_id = "${openstack_vpnaas_endpoint_group_v2.group_2.id}"
 		peer_ep_group_id = "${openstack_vpnaas_endpoint_group_v2.group_1.id}"
 		depends_on = ["openstack_networking_router_interface_v2.router_interface_1"]
+		peer_id = "9b00d6b0-6c93-4ca5-9747-b8ade7bb514f"
 	}
 	`, OS_EXTGW_ID)
