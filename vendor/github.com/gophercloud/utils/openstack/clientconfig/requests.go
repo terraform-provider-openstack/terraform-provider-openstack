@@ -15,14 +15,20 @@ import (
 type AuthType string
 
 const (
+	// AuthPassword defines an unknown version of the password
 	AuthPassword AuthType = "password"
-	AuthToken    AuthType = "token"
+	// AuthToken defined an unknown version of the token
+	AuthToken AuthType = "token"
 
+	// AuthV2Password defines version 2 of the password
 	AuthV2Password AuthType = "v2password"
-	AuthV2Token    AuthType = "v2token"
+	// AuthV2Token defines version 2 of the token
+	AuthV2Token AuthType = "v2token"
 
+	// AuthV3Password defines version 3 of the password
 	AuthV3Password AuthType = "v3password"
-	AuthV3Token    AuthType = "v3token"
+	// AuthV3Token defines version 3 of the token
+	AuthV3Token AuthType = "v3token"
 )
 
 // ClientOpts represents options to customize the way a client is
@@ -41,11 +47,16 @@ type ClientOpts struct {
 	// AuthInfo defines the authentication information needed to
 	// authenticate to a cloud when clouds.yaml isn't used.
 	AuthInfo *AuthInfo
+
+	// RegionName is the region to create a Service Client in.
+	// This will override a region in clouds.yaml or can be used
+	// when authenticating directly with AuthInfo.
+	RegionName string
 }
 
-// LoadYAML will load a clouds.yaml file and return the full config.
-func LoadYAML() (map[string]Cloud, error) {
-	content, err := findAndReadYAML()
+// LoadCloudsYAML will load a clouds.yaml file and return the full config.
+func LoadCloudsYAML() (map[string]Cloud, error) {
+	content, err := findAndReadCloudsYAML()
 	if err != nil {
 		return nil, err
 	}
@@ -59,9 +70,31 @@ func LoadYAML() (map[string]Cloud, error) {
 	return clouds.Clouds, nil
 }
 
+// LoadPublicCloudsYAML will load a clouds.yaml file and return the full config.
+func LoadPublicCloudsYAML() (map[string]PublicCloud, error) {
+	var publicClouds PublicClouds
+
+	content, err := findAndReadPublicCloudsYAML()
+	if err != nil {
+		if err.Error() == "no clouds-public.yaml file found" {
+			// clouds-public.yaml is optional so just ignore read error
+			return publicClouds.Clouds, nil
+		}
+
+		return nil, err
+	}
+
+	err = yaml.Unmarshal(content, &publicClouds)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal yaml: %v", err)
+	}
+
+	return publicClouds.Clouds, nil
+}
+
 // GetCloudFromYAML will return a cloud entry from a clouds.yaml file.
 func GetCloudFromYAML(opts *ClientOpts) (*Cloud, error) {
-	clouds, err := LoadYAML()
+	clouds, err := LoadCloudsYAML()
 	if err != nil {
 		return nil, fmt.Errorf("unable to load clouds.yaml: %s", err)
 	}
@@ -104,6 +137,31 @@ func GetCloudFromYAML(opts *ClientOpts) (*Cloud, error) {
 	if cloud == nil {
 		return nil, fmt.Errorf("Unable to determine a valid entry in clouds.yaml")
 	}
+
+	// Default is to verify SSL API requests
+	if cloud.Verify == nil {
+		iTrue := true
+		cloud.Verify = &iTrue
+	}
+
+	publicClouds, err := LoadPublicCloudsYAML()
+	if err != nil {
+		return nil, fmt.Errorf("unable to load clouds-public.yaml: %s", err)
+	}
+
+	var profileName = defaultIfEmpty(cloud.Profile, cloud.Cloud)
+	if profileName != "" {
+		publicCloud, ok := publicClouds[profileName]
+		if !ok {
+			return nil, fmt.Errorf("cloud %s does not exist in clouds-public.yaml", profileName)
+		}
+
+		updateAuthInfo(cloud, &publicCloud)
+	}
+
+	// TODO: this is where reading vendor files should go be considered when not found in
+	// clouds-public.yml
+	// https://github.com/openstack/openstacksdk/tree/master/openstack/config/vendors
 
 	return cloud, nil
 }
@@ -338,6 +396,10 @@ func v3auth(cloud *Cloud, opts *ClientOpts) (*gophercloud.AuthOptions, error) {
 		cloud.AuthInfo.DomainName = v
 	}
 
+	if v := os.Getenv(envPrefix + "DEFAULT_DOMAIN"); v != "" {
+		cloud.AuthInfo.DefaultDomain = v
+	}
+
 	if v := os.Getenv(envPrefix + "PROJECT_DOMAIN_ID"); v != "" {
 		cloud.AuthInfo.ProjectDomainID = v
 	}
@@ -426,24 +488,39 @@ func AuthenticatedClient(opts *ClientOpts) (*gophercloud.ProviderClient, error) 
 
 // NewServiceClient is a convenience function to get a new service client.
 func NewServiceClient(service string, opts *ClientOpts) (*gophercloud.ServiceClient, error) {
-	var cloud *Cloud
+	cloud := new(Cloud)
+
+	// If no opts were passed in, create an empty ClientOpts.
+	if opts == nil {
+		opts = new(ClientOpts)
+	}
+
+	// Determine if a clouds.yaml entry should be retrieved.
+	// Start by figuring out the cloud name.
+	// First check if one was explicitly specified in opts.
+	var cloudName string
 	if opts.Cloud != "" {
+		cloudName = opts.Cloud
+	}
+
+	// Next see if a cloud name was specified as an environment variable.
+	envPrefix := "OS_"
+	if opts.EnvPrefix != "" {
+		envPrefix = opts.EnvPrefix
+	}
+
+	if v := os.Getenv(envPrefix + "CLOUD"); v != "" {
+		cloudName = v
+	}
+
+	// If a cloud name was determined, try to look it up in clouds.yaml.
+	if cloudName != "" {
 		// Get the requested cloud.
 		var err error
 		cloud, err = GetCloudFromYAML(opts)
 		if err != nil {
 			return nil, err
 		}
-	}
-
-	if cloud == nil {
-		cloud.AuthInfo = opts.AuthInfo
-	}
-
-	// Environment variable overrides.
-	envPrefix := "OS_"
-	if opts != nil && opts.EnvPrefix != "" {
-		envPrefix = opts.EnvPrefix
 	}
 
 	// Get a Provider Client
@@ -453,11 +530,20 @@ func NewServiceClient(service string, opts *ClientOpts) (*gophercloud.ServiceCli
 	}
 
 	// Determine the region to use.
+	// First, see if the cloud entry has one.
 	var region string
 	if v := cloud.RegionName; v != "" {
-		region = cloud.RegionName
+		region = v
 	}
 
+	// Next, see if one was specified in the ClientOpts.
+	// If so, this takes precedence.
+	if v := opts.RegionName; v != "" {
+		region = v
+	}
+
+	// Finally, see if there's an environment variable.
+	// This should always override prior settings.
 	if v := os.Getenv(envPrefix + "REGION_NAME"); v != "" {
 		region = v
 	}
@@ -467,8 +553,12 @@ func NewServiceClient(service string, opts *ClientOpts) (*gophercloud.ServiceCli
 	}
 
 	switch service {
+	case "clustering":
+		return openstack.NewClusteringV1(pClient, eo)
 	case "compute":
 		return openstack.NewComputeV2(pClient, eo)
+	case "container":
+		return openstack.NewContainerV1(pClient, eo)
 	case "database":
 		return openstack.NewDBV1(pClient, eo)
 	case "dns":
@@ -489,6 +579,8 @@ func NewServiceClient(service string, opts *ClientOpts) (*gophercloud.ServiceCli
 		}
 	case "image":
 		return openstack.NewImageServiceV2(pClient, eo)
+	case "load-balancer":
+		return openstack.NewLoadBalancerV2(pClient, eo)
 	case "network":
 		return openstack.NewNetworkV2(pClient, eo)
 	case "object-store":
@@ -508,10 +600,64 @@ func NewServiceClient(service string, opts *ClientOpts) (*gophercloud.ServiceCli
 			return openstack.NewBlockStorageV1(pClient, eo)
 		case "v2", "2":
 			return openstack.NewBlockStorageV2(pClient, eo)
+		case "v3", "3":
+			return openstack.NewBlockStorageV3(pClient, eo)
 		default:
 			return nil, fmt.Errorf("invalid volume API version")
 		}
 	}
 
 	return nil, fmt.Errorf("unable to create a service client for %s", service)
+}
+
+// isProjectScoped determines if an auth struct is project scoped.
+func isProjectScoped(authInfo *AuthInfo) bool {
+	if authInfo.ProjectID == "" && authInfo.ProjectName == "" {
+		return false
+	}
+
+	return true
+}
+
+// setDomainIfNeeded will set a DomainID and DomainName
+// to ProjectDomain* and UserDomain* if not already set.
+func setDomainIfNeeded(cloud *Cloud) *Cloud {
+	if cloud.AuthInfo.DomainID != "" {
+		if cloud.AuthInfo.UserDomainID == "" {
+			cloud.AuthInfo.UserDomainID = cloud.AuthInfo.DomainID
+		}
+
+		if cloud.AuthInfo.ProjectDomainID == "" {
+			cloud.AuthInfo.ProjectDomainID = cloud.AuthInfo.DomainID
+		}
+
+		cloud.AuthInfo.DomainID = ""
+	}
+
+	if cloud.AuthInfo.DomainName != "" {
+		if cloud.AuthInfo.UserDomainName == "" {
+			cloud.AuthInfo.UserDomainName = cloud.AuthInfo.DomainName
+		}
+
+		if cloud.AuthInfo.ProjectDomainName == "" {
+			cloud.AuthInfo.ProjectDomainName = cloud.AuthInfo.DomainName
+		}
+
+		cloud.AuthInfo.DomainName = ""
+	}
+
+	// If Domain fields are still not set, and if DefaultDomain has a value,
+	// set UserDomainID and ProjectDomainID to DefaultDomain.
+	// https://github.com/openstack/osc-lib/blob/86129e6f88289ef14bfaa3f7c9cdfbea8d9fc944/osc_lib/cli/client_config.py#L117-L146
+	if cloud.AuthInfo.DefaultDomain != "" {
+		if cloud.AuthInfo.UserDomainName == "" && cloud.AuthInfo.UserDomainID == "" {
+			cloud.AuthInfo.UserDomainID = cloud.AuthInfo.DefaultDomain
+		}
+
+		if cloud.AuthInfo.ProjectDomainName == "" && cloud.AuthInfo.ProjectDomainID == "" {
+			cloud.AuthInfo.ProjectDomainID = cloud.AuthInfo.DefaultDomain
+		}
+	}
+
+	return cloud
 }

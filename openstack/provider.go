@@ -137,7 +137,7 @@ func Provider() terraform.ResourceProvider {
 			"insecure": &schema.Schema{
 				Type:        schema.TypeBool,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_INSECURE", ""),
+				DefaultFunc: schema.EnvDefaultFunc("OS_INSECURE", nil),
 				Description: descriptions["insecure"],
 			},
 
@@ -320,7 +320,20 @@ func init() {
 	}
 }
 
+func toBoolPtr(d *schema.ResourceData, key string) *bool {
+	in, inExists := d.GetOkExists(key)
+	if inExists {
+		var tmpValue = in.(bool)
+		return &tmpValue
+	}
+	return nil
+}
+
 func configureProvider(d *schema.ResourceData) (interface{}, error) {
+	// Config order of precedence
+	// 1. Terraform config
+	// 2. System Environment
+	// 3. OpenStack cloud config (only if cloud is defined)
 	config := Config{
 		CACertFile:        d.Get("cacert_file").(string),
 		ClientCertFile:    d.Get("cert").(string),
@@ -330,7 +343,7 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		DomainName:        d.Get("domain_name").(string),
 		EndpointType:      d.Get("endpoint_type").(string),
 		IdentityEndpoint:  d.Get("auth_url").(string),
-		Insecure:          d.Get("insecure").(bool),
+		Insecure:          toBoolPtr(d, "insecure"),
 		Password:          d.Get("password").(string),
 		ProjectDomainID:   d.Get("project_domain_id").(string),
 		ProjectDomainName: d.Get("project_domain_name").(string),

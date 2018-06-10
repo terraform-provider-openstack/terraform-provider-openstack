@@ -16,6 +16,24 @@ Example to Create a Provider Client From clouds.yaml
 	}
 
 
+Example to Manually Create a Provider Client
+
+	opts := &clientconfig.ClientOpts{
+		AuthInfo: &clientconfig.AuthInfo{
+			AuthURL:     "https://hi.example.com:5000/v3",
+			Username:    "jdoe",
+			Password:    "password",
+			ProjectName: "Some Project",
+			DomainName:  "default",
+		},
+	}
+
+	pClient, err := clientconfig.AuthenticatedClient(opts)
+	if err != nil {
+		panic(err)
+	}
+
+
 Example to Create a Service Client from clouds.yaml
 
 	opts := &clientconfig.ClientOpts{
