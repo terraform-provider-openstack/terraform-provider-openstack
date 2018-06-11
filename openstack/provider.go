@@ -330,10 +330,6 @@ func toBoolPtr(d *schema.ResourceData, key string) *bool {
 }
 
 func configureProvider(d *schema.ResourceData) (interface{}, error) {
-	// Config order of precedence
-	// 1. Terraform config
-	// 2. System Environment
-	// 3. OpenStack cloud config (only if cloud is defined)
 	config := Config{
 		CACertFile:        d.Get("cacert_file").(string),
 		ClientCertFile:    d.Get("cert").(string),

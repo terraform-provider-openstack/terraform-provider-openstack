@@ -95,8 +95,8 @@ func (c *Config) LoadAndValidate() error {
 		}
 
 		if c.Insecure == nil && cloud.Verify != nil {
-			// Insecure == No verification
-			c.Insecure = func(b bool) *bool { return &b }(!*cloud.Verify)
+			v := (!*cloud.Verify)
+			c.Insecure = &v
 		}
 	} else {
 		authInfo := &clientconfig.AuthInfo{
