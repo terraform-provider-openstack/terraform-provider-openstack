@@ -313,10 +313,10 @@
 			"revisionTime": "2018-03-28T16:31:53Z"
 		},
 		{
-			"checksumSHA1": "0AU4HIWLs5yyyZcZx8V+a9BFt9w=",
+			"checksumSHA1": "qduT9GZUhXc00XoHEwLx16Xn9gM=",
 			"path": "github.com/gophercloud/gophercloud",
-			"revision": "2c66bd8ca7ef07d4d0c38ed75457121c3f24aac8",
-			"revisionTime": "2018-05-10T02:17:00Z"
+			"revision": "7112fcd50da4ea27e8d4d499b30f04eea143bec2",
+			"revisionTime": "2018-05-31T02:06:30Z"
 		},
 		{
 			"checksumSHA1": "YDNvjFNQS+UxqZMLm/shFs7aLNU=",
@@ -619,14 +619,14 @@
 			"revisionTime": "2018-04-18T04:52:34Z"
 		},
 		{
-			"checksumSHA1": "HhRP7Hw7cS7RM4cxGmQYk/vI8uM=",
-			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ikepolicies",
+			"checksumSHA1": "grviOYvybawC80v7Fmw0XOBwr0A=",
+			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/endpointgroups",
 			"revision": "c51806d07f1d12dc4786b792fb9610679e96f549",
 			"revisionTime": "2018-04-20T19:30:33Z"
 		},
 		{
-			"checksumSHA1": "grviOYvybawC80v7Fmw0XOBwr0A=",
-			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/endpointgroups",
+			"checksumSHA1": "HhRP7Hw7cS7RM4cxGmQYk/vI8uM=",
+			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ikepolicies",
 			"revision": "c51806d07f1d12dc4786b792fb9610679e96f549",
 			"revisionTime": "2018-04-20T19:30:33Z"
 		},
