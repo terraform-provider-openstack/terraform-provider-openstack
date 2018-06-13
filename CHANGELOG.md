@@ -3,6 +3,7 @@
 IMPROVEMENTS
 
 * Add wait_until_associated to `openstack_compute_floatingip_associate_v2 [GH-310]
+* Added support for SSL settings in a `clouds.yaml` file [GH-340]
 
 ## 1.5.0 (May 15, 2018)
 
