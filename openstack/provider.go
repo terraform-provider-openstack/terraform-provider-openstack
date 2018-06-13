@@ -320,15 +320,6 @@ func init() {
 	}
 }
 
-func toBoolPtr(d *schema.ResourceData, key string) *bool {
-	in, inExists := d.GetOkExists(key)
-	if inExists {
-		var tmpValue = in.(bool)
-		return &tmpValue
-	}
-	return nil
-}
-
 func configureProvider(d *schema.ResourceData) (interface{}, error) {
 	config := Config{
 		CACertFile:        d.Get("cacert_file").(string),
@@ -339,7 +330,6 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		DomainName:        d.Get("domain_name").(string),
 		EndpointType:      d.Get("endpoint_type").(string),
 		IdentityEndpoint:  d.Get("auth_url").(string),
-		Insecure:          toBoolPtr(d, "insecure"),
 		Password:          d.Get("password").(string),
 		ProjectDomainID:   d.Get("project_domain_id").(string),
 		ProjectDomainName: d.Get("project_domain_name").(string),
@@ -353,6 +343,12 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		Username:          d.Get("user_name").(string),
 		UserID:            d.Get("user_id").(string),
 		useOctavia:        d.Get("use_octavia").(bool),
+	}
+
+	v, ok := d.GetOkExists("insecure")
+	if ok {
+		insecure := v.(bool)
+		config.Insecure = &insecure
 	}
 
 	if err := config.LoadAndValidate(); err != nil {
