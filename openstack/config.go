@@ -29,7 +29,7 @@ type Config struct {
 	DomainName        string
 	EndpointType      string
 	IdentityEndpoint  string
-	Insecure          bool
+	Insecure          *bool
 	Password          string
 	Region            string
 	Swauth            bool
@@ -81,6 +81,23 @@ func (c *Config) LoadAndValidate() error {
 		if c.Region == "" && cloud.RegionName != "" {
 			c.Region = cloud.RegionName
 		}
+
+		if c.CACertFile == "" && cloud.CACertFile != "" {
+			c.CACertFile = cloud.CACertFile
+		}
+
+		if c.ClientCertFile == "" && cloud.ClientCertFile != "" {
+			c.ClientCertFile = cloud.ClientCertFile
+		}
+
+		if c.ClientKeyFile == "" && cloud.ClientKeyFile != "" {
+			c.ClientKeyFile = cloud.ClientKeyFile
+		}
+
+		if c.Insecure == nil && cloud.Verify != nil {
+			v := (!*cloud.Verify)
+			c.Insecure = &v
+		}
 	} else {
 		authInfo := &clientconfig.AuthInfo{
 			AuthURL:           c.IdentityEndpoint,
@@ -125,8 +142,10 @@ func (c *Config) LoadAndValidate() error {
 		config.RootCAs = caCertPool
 	}
 
-	if c.Insecure {
-		config.InsecureSkipVerify = true
+	if c.Insecure == nil {
+		config.InsecureSkipVerify = false
+	} else {
+		config.InsecureSkipVerify = *c.Insecure
 	}
 
 	if c.ClientCertFile != "" && c.ClientKeyFile != "" {

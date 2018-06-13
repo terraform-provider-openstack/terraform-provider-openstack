@@ -137,7 +137,7 @@ func Provider() terraform.ResourceProvider {
 			"insecure": &schema.Schema{
 				Type:        schema.TypeBool,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_INSECURE", ""),
+				DefaultFunc: schema.EnvDefaultFunc("OS_INSECURE", nil),
 				Description: descriptions["insecure"],
 			},
 
@@ -330,7 +330,6 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		DomainName:        d.Get("domain_name").(string),
 		EndpointType:      d.Get("endpoint_type").(string),
 		IdentityEndpoint:  d.Get("auth_url").(string),
-		Insecure:          d.Get("insecure").(bool),
 		Password:          d.Get("password").(string),
 		ProjectDomainID:   d.Get("project_domain_id").(string),
 		ProjectDomainName: d.Get("project_domain_name").(string),
@@ -344,6 +343,12 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		Username:          d.Get("user_name").(string),
 		UserID:            d.Get("user_id").(string),
 		useOctavia:        d.Get("use_octavia").(bool),
+	}
+
+	v, ok := d.GetOkExists("insecure")
+	if ok {
+		insecure := v.(bool)
+		config.Insecure = &insecure
 	}
 
 	if err := config.LoadAndValidate(); err != nil {
