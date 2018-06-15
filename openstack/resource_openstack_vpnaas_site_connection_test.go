@@ -137,9 +137,9 @@ var testAccSiteConnectionV2_basic = fmt.Sprintf(`
 		vpnservice_id = "${openstack_vpnaas_service_v2.service_1.id}"
 		psk = "secret"
 		peer_address = "192.168.10.1"
+		peer_id = "192.168.10.1"
 		local_ep_group_id = "${openstack_vpnaas_endpoint_group_v2.group_2.id}"
 		peer_ep_group_id = "${openstack_vpnaas_endpoint_group_v2.group_1.id}"
 		depends_on = ["openstack_networking_router_interface_v2.router_interface_1"]
-		peer_id = "9b00d6b0-6c93-4ca5-9747-b8ade7bb514f"
 	}
 	`, OS_EXTGW_ID)
