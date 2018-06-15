@@ -240,9 +240,10 @@ func testAccCheckFWRuleV1Exists(n string, expected *rules.Rule) resource.TestChe
 		}
 
 		expected.ID = found.ID
-		// Erase the tenant id because we don't want to compare
+		// Erase the tenant id and project id because we don't want to compare
 		// it as long it is not present in the expected
 		found.TenantID = ""
+		found.ProjectID = ""
 
 		if !reflect.DeepEqual(expected, found) {
 			return fmt.Errorf("Expected:\n%#v\nFound:\n%#v", expected, found)
