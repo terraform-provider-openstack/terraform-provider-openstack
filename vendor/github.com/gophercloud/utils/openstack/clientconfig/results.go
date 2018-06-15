@@ -1,5 +1,17 @@
 package clientconfig
 
+// PublicClouds represents a collection of PublicCloud entries in clouds-public.yml file.
+// The format of the clouds-public.yml is documented at
+// https://docs.openstack.org/python-openstackclient/latest/configuration/
+type PublicClouds struct {
+	Clouds map[string]PublicCloud `yaml:"public-clouds"`
+}
+
+// PublicCloud represents an entry in a clouds-public.yml file.
+type PublicCloud struct {
+	AuthInfo *AuthInfo `yaml:"auth"`
+}
+
 // Clouds represents a collection of Cloud entries in a clouds.yaml file.
 // The format of clouds.yaml is documented at
 // https://docs.openstack.org/os-client-config/latest/user/configuration.html.
@@ -9,6 +21,8 @@ type Clouds struct {
 
 // Cloud represents an entry in a clouds.yaml file.
 type Cloud struct {
+	Cloud      string        `yaml:"cloud"`
+	Profile    string        `yaml:"profile"`
 	AuthInfo   *AuthInfo     `yaml:"auth"`
 	AuthType   AuthType      `yaml:"auth_type"`
 	RegionName string        `yaml:"region_name"`
@@ -17,9 +31,24 @@ type Cloud struct {
 	// API Version overrides.
 	IdentityAPIVersion string `yaml:"identity_api_version"`
 	VolumeAPIVersion   string `yaml:"volume_api_version"`
+
+	// Verify whether or not SSL API requests should be verified.
+	Verify *bool `yaml:"verify"`
+
+	// CACertFile a path to a CA Cert bundle that can be used as part of
+	// verifying SSL API requests.
+	CACertFile string `yaml:"cacert"`
+
+	// ClientCertFile a path to a client certificate to use as part of the SSL
+	// transaction.
+	ClientCertFile string `yaml:"cert"`
+
+	// ClientKeyFile a path to a client key to use as part of the SSL
+	// transaction.
+	ClientKeyFile string `yaml:"key"`
 }
 
-// Auth represents the auth section of a cloud entry or
+// AuthInfo represents the auth section of a cloud entry or
 // auth options entered explicitly in ClientOpts.
 type AuthInfo struct {
 	// AuthURL is the keystone/identity endpoint URL.
@@ -81,4 +110,8 @@ type AuthInfo struct {
 	// used as a default choice.
 	// It can also be used be used to specify a domain-only scope.
 	DomainID string `yaml:"domain_id"`
+
+	// DefaultDomain is the domain ID to fall back on if no other domain has
+	// been specified and a domain is required for scope.
+	DefaultDomain string `yaml:"default_domain"`
 }
