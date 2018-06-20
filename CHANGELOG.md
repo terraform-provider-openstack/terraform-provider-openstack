@@ -1,5 +1,9 @@
 ## 1.6.0 (Unreleased)
 
+FEATURES
+
+* __New Resource__: `openstack_vpnaas_site_connection_v2` [GH-330]
+
 IMPROVEMENTS
 
 * Add wait_until_associated to `openstack_compute_floatingip_associate_v2 [GH-310]
