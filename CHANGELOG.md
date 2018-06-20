@@ -1,13 +1,13 @@
-## 1.6.0 (Unreleased)
+## 1.6.0 (June 20, 2018)
 
 FEATURES
 
-* __New Resource__: `openstack_vpnaas_site_connection_v2` [GH-330]
+* __New Resource__: `openstack_vpnaas_site_connection_v2` ([#330](https://github.com/terraform-providers/terraform-provider-openstack/issues/330))
 
 IMPROVEMENTS
 
-* Added `wait_until_associated` to `openstack_compute_floatingip_associate_v2` [GH-310]
-* Added support for SSL settings in a `clouds.yaml` file [GH-340]
+* Added `wait_until_associated` to `openstack_compute_floatingip_associate_v2` ([#310](https://github.com/terraform-providers/terraform-provider-openstack/issues/310))
+* Added support for SSL settings in a `clouds.yaml` file ([#340](https://github.com/terraform-providers/terraform-provider-openstack/issues/340))
 
 ## 1.5.0 (May 15, 2018)
 
