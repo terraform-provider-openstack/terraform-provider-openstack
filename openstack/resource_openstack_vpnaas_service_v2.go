@@ -56,6 +56,7 @@ func resourceServiceV2() *schema.Resource {
 			"subnet_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 			"router_id": &schema.Schema{
 				Type:     schema.TypeString,
