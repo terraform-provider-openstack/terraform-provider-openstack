@@ -354,6 +354,8 @@ The following arguments are supported:
     forcefully deleted. This is useful for environments that have reclaim / soft
     deletion enabled.
 
+* `state` - (Optional) Provide the VM state. Only 'active' and 'shutoff' are supported values.
+
 
 The `network` block supports:
 
