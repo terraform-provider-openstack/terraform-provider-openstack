@@ -488,6 +488,32 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 			server.ID, err)
 	}
 
+	if d.Get("state").(string) != "" {
+		vmState := d.Get("state").(string)
+		if strings.ToLower(vmState) == "shutoff" {
+			err = startstop.Stop(computeClient, d.Id()).ExtractErr()
+			if err != nil {
+				log.Printf("[WARN] Error stopping OpenStack instance: %s", err)
+			} else {
+				stopStateConf := &resource.StateChangeConf{
+					//Pending:    []string{"ACTIVE"},
+					Target:     []string{"SHUTOFF"},
+					Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+					Timeout:    3 * time.Minute,
+					Delay:      10 * time.Second,
+					MinTimeout: 3 * time.Second,
+				}
+
+				log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
+				_, err = stopStateConf.WaitForState()
+				if err != nil {
+					log.Printf("[WARN] Error waiting for instance (%s) to stop: %s, proceeding to delete", d.Id(), err)
+				}
+			}
+
+		}
+	}
+
 	return resourceComputeInstanceV2Read(d, meta)
 }
 
@@ -592,7 +618,12 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 
 	//Set the current state:
 	if d.Get("state").(string) != "" {
-		d.Set("state", strings.ToLower(server.Status))
+		if strings.ToLower(server.Status) != "active" && strings.ToLower(server.Status) != "shutoff" {
+			return fmt.Errorf("Error changing the instance(%s) state. Invalid current state:%s ", d.Id(), server.Status)
+		} else {
+			d.Set("state", strings.ToLower(server.Status))
+		}
+
 	}
 
 	return nil
