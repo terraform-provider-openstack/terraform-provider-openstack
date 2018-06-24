@@ -1,4 +1,9 @@
-## 1.6.1 (Unreleased)
+## 1.7.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Allow resize for stopped instances [GH-348]
+
 ## 1.6.0 (June 20, 2018)
 
 FEATURES
