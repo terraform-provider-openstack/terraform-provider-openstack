@@ -727,7 +727,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 
 		stateConf = &resource.StateChangeConf{
 			Pending:    []string{"VERIFY_RESIZE"},
-			Target:     []string{"ACTIVE"},
+			Target:     []string{"ACTIVE", "SHUTOFF"},
 			Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutUpdate),
 			Delay:      10 * time.Second,
