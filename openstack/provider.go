@@ -260,6 +260,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_vpnaas_service_v2":                  resourceServiceV2(),
 			"openstack_vpnaas_ike_policy_v2":               resourceIKEPolicyV2(),
 			"openstack_vpnaas_endpoint_group_v2":           resourceEndpointGroupV2(),
+			"openstack_vpnaas_site_connection_v2":          resourceSiteConnectionV2(),
 		},
 
 		ConfigureFunc: configureProvider,
