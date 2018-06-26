@@ -634,6 +634,28 @@ func testAccCheckComputeV2InstanceInstanceIDsDoNotMatch(
 	}
 }
 
+func TestAccComputeV2Instance_state(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeV2Instance_state,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "state", "shutoff"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "state", "active"),
+				),
+			},
+		},
+	})
+}
+
 var testAccComputeV2Instance_basic = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
@@ -1180,6 +1202,17 @@ resource "openstack_compute_instance_v2" "instance_1" {
 
   network {
     port = "${openstack_networking_port_v2.port_4.id}"
+  }
+}
+`, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_state = fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  state = "active"
+  network {
+    uuid = "%s"
   }
 }
 `, OS_NETWORK_ID)
