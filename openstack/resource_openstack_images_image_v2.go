@@ -387,7 +387,7 @@ func resourceImagesImageV2ValidateVisibility(v interface{}, k string) (ws []stri
 
 func validatePositiveInt(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(int)
-	if value > 0 {
+	if value >= 0 {
 		return
 	}
 	errors = append(errors, fmt.Errorf("%q must be a positive integer", k))
