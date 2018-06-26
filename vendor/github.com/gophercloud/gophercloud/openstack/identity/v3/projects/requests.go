@@ -1,6 +1,9 @@
 package projects
 
 import (
+	"net/url"
+	"strings"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/pagination"
 )
@@ -11,7 +14,7 @@ type ListOptsBuilder interface {
 	ToProjectListQuery() (string, error)
 }
 
-// ListOpts allows you to query the List method.
+// ListOpts enables filtering of a list request.
 type ListOpts struct {
 	// DomainID filters the response by a domain ID.
 	DomainID string `q:"domain_id"`
@@ -28,15 +31,34 @@ type ListOpts struct {
 
 	// ParentID filters the response by projects of a given parent project.
 	ParentID string `q:"parent_id"`
+
+	// Filters filters the response by custom filters such as
+	// 'name__contains=foo'
+	Filters map[string]string `q:"-"`
 }
 
 // ToProjectListQuery formats a ListOpts into a query string.
 func (opts ListOpts) ToProjectListQuery() (string, error) {
 	q, err := gophercloud.BuildQueryString(opts)
+	if err != nil {
+		return "", err
+	}
+
+	params := q.Query()
+	for k, v := range opts.Filters {
+		i := strings.Index(k, "__")
+		if i > 0 && i < len(k)-2 {
+			params.Add(k, v)
+		} else {
+			return "", InvalidListFilter{FilterName: k}
+		}
+	}
+
+	q = &url.URL{RawQuery: params.Encode()}
 	return q.String(), err
 }
 
-// List enumerats the Projects to which the current token has access.
+// List enumerates the Projects to which the current token has access.
 func List(client *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pager {
 	url := listURL(client)
 	if opts != nil {
@@ -63,7 +85,7 @@ type CreateOptsBuilder interface {
 	ToProjectCreateMap() (map[string]interface{}, error)
 }
 
-// CreateOpts allows you to modify the details included in the Create request.
+// CreateOpts represents parameters used to create a project.
 type CreateOpts struct {
 	// DomainID is the ID this project will belong under.
 	DomainID string `json:"domain_id,omitempty"`
@@ -112,7 +134,7 @@ type UpdateOptsBuilder interface {
 	ToProjectUpdateMap() (map[string]interface{}, error)
 }
 
-// UpdateOpts allows you to modify the details included in the Update request.
+// UpdateOpts represents parameters to update a project.
 type UpdateOpts struct {
 	// DomainID is the ID this project will belong under.
 	DomainID string `json:"domain_id,omitempty"`
