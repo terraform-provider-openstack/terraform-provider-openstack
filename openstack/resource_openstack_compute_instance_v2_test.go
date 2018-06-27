@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -34,6 +35,45 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 						"openstack_compute_instance_v2.instance_1", "all_metadata.foo", "bar"),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_instance_v2.instance_1", "availability_zone", "nova"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_state(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeV2Instance_stateActive,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "state", "active"),
+					testAccCheckComputeV2InstanceState(&instance, "active"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccComputeV2Instance_stateShutoff,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "state", "shutoff"),
+					testAccCheckComputeV2InstanceState(&instance, "shutoff"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccComputeV2Instance_stateActive,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "state", "active"),
+					testAccCheckComputeV2InstanceState(&instance, "active"),
 				),
 			},
 		},
@@ -634,26 +674,15 @@ func testAccCheckComputeV2InstanceInstanceIDsDoNotMatch(
 	}
 }
 
-func TestAccComputeV2Instance_state(t *testing.T) {
-	var instance servers.Server
+func testAccCheckComputeV2InstanceState(
+	instance *servers.Server, state string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if strings.ToLower(instance.Status) != state {
+			return fmt.Errorf("Instance state is not match.")
+		}
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2Instance_state,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"openstack_compute_instance_v2.instance_1", "state", "shutoff"),
-					resource.TestCheckResourceAttr(
-						"openstack_compute_instance_v2.instance_1", "state", "active"),
-				),
-			},
-		},
-	})
+		return nil
+	}
 }
 
 var testAccComputeV2Instance_basic = fmt.Sprintf(`
@@ -1206,11 +1235,22 @@ resource "openstack_compute_instance_v2" "instance_1" {
 }
 `, OS_NETWORK_ID)
 
-var testAccComputeV2Instance_state = fmt.Sprintf(`
+var testAccComputeV2Instance_stateActive = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   state = "active"
+  network {
+    uuid = "%s"
+  }
+}
+`, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_stateShutoff = fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  state = "shutoff"
   network {
     uuid = "%s"
   }
