@@ -57,7 +57,7 @@ func resourceSiteConnectionV2() *schema.Resource {
 			},
 			"peer_ep_group_id": &schema.Schema{
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"local_id": &schema.Schema{
 				Type:     schema.TypeString,
