@@ -41,7 +41,7 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 	})
 }
 
-func TestAccComputeV2Instance_state(t *testing.T) {
+func TestAccComputeV2Instance_initialStateActive(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
@@ -54,7 +54,7 @@ func TestAccComputeV2Instance_state(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					resource.TestCheckResourceAttr(
-						"openstack_compute_instance_v2.instance_1", "state", "active"),
+						"openstack_compute_instance_v2.instance_1", "power_state", "active"),
 					testAccCheckComputeV2InstanceState(&instance, "active"),
 				),
 			},
@@ -63,7 +63,7 @@ func TestAccComputeV2Instance_state(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					resource.TestCheckResourceAttr(
-						"openstack_compute_instance_v2.instance_1", "state", "shutoff"),
+						"openstack_compute_instance_v2.instance_1", "power_state", "shutoff"),
 					testAccCheckComputeV2InstanceState(&instance, "shutoff"),
 				),
 			},
@@ -72,8 +72,47 @@ func TestAccComputeV2Instance_state(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					resource.TestCheckResourceAttr(
-						"openstack_compute_instance_v2.instance_1", "state", "active"),
+						"openstack_compute_instance_v2.instance_1", "power_state", "active"),
 					testAccCheckComputeV2InstanceState(&instance, "active"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeV2Instance_stateShutoff,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "power_state", "shutoff"),
+					testAccCheckComputeV2InstanceState(&instance, "shutoff"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccComputeV2Instance_stateActive,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "power_state", "active"),
+					testAccCheckComputeV2InstanceState(&instance, "active"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccComputeV2Instance_stateShutoff,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "power_state", "shutoff"),
+					testAccCheckComputeV2InstanceState(&instance, "shutoff"),
 				),
 			},
 		},
@@ -1239,7 +1278,7 @@ var testAccComputeV2Instance_stateActive = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
-  state = "active"
+  power_state = "active"
   network {
     uuid = "%s"
   }
@@ -1250,7 +1289,7 @@ var testAccComputeV2Instance_stateShutoff = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
-  state = "shutoff"
+  power_state = "shutoff"
   network {
     uuid = "%s"
   }

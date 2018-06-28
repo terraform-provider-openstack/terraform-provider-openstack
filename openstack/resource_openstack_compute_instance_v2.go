@@ -346,7 +346,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
-			"state": &schema.Schema{
+			"power_state": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
@@ -355,7 +355,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 					value := v.(string)
 					if strings.ToLower(value) != "active" && strings.ToLower(value) != "shutoff" {
 						errors = append(errors, fmt.Errorf(
-							"Only 'active' and 'shutoff' are supported values for 'state'"))
+							"Only 'active' and 'shutoff' are supported values for 'power_state'"))
 					}
 					return
 				},
@@ -489,28 +489,26 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 			server.ID, err)
 	}
 
-	vmState := d.Get("state").(string)
+	vmState := d.Get("power_state").(string)
 	if strings.ToLower(vmState) == "shutoff" {
 		err = startstop.Stop(computeClient, d.Id()).ExtractErr()
 		if err != nil {
 			return fmt.Errorf("Error stopping OpenStack instance: %s", err)
-		} else {
-			stopStateConf := &resource.StateChangeConf{
-				//Pending:    []string{"ACTIVE"},
-				Target:     []string{"SHUTOFF"},
-				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
-				Timeout:    d.Timeout(schema.TimeoutCreate),
-				Delay:      10 * time.Second,
-				MinTimeout: 3 * time.Second,
-			}
-
-			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
-			_, err = stopStateConf.WaitForState()
-			if err != nil {
-				return fmt.Errorf("Error waiting for instance (%s) to stop: %s, proceeding to delete", d.Id(), err)
-			}
+		}
+		stopStateConf := &resource.StateChangeConf{
+			//Pending:    []string{"ACTIVE"},
+			Target:     []string{"SHUTOFF"},
+			Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+			Timeout:    d.Timeout(schema.TimeoutCreate),
+			Delay:      10 * time.Second,
+			MinTimeout: 3 * time.Second,
 		}
 
+		log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
+		_, err = stopStateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf("Error waiting for instance (%s) to become inactive(shutoff): %s", d.Id(), err)
+		}
 	}
 
 	return resourceComputeInstanceV2Read(d, meta)
@@ -615,11 +613,11 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	// Set the region
 	d.Set("region", GetRegion(d, config))
 
-	//Set the current state:
+	//Set the current power_state:
 	if strings.ToLower(server.Status) != "active" && strings.ToLower(server.Status) != "shutoff" {
-		return fmt.Errorf("Error changing the instance(%s) state. Invalid current state:%s ", d.Id(), server.Status)
+		return fmt.Errorf("Error changing the instance(%s) power_state. Invalid current power_state:%s ", d.Id(), server.Status)
 	} else {
-		d.Set("state", strings.ToLower(server.Status))
+		d.Set("power_state", strings.ToLower(server.Status))
 	}
 
 	return nil
@@ -644,48 +642,46 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
-	if d.HasChange("state") {
-		vmState := d.Get("state").(string)
+	if d.HasChange("power_state") {
+		vmState := d.Get("power_state").(string)
 		if strings.ToLower(vmState) == "shutoff" {
 			err = startstop.Stop(computeClient, d.Id()).ExtractErr()
 			if err != nil {
 				return fmt.Errorf("Error stopping OpenStack instance: %s", err)
-			} else {
-				stopStateConf := &resource.StateChangeConf{
-					//Pending:    []string{"ACTIVE"},
-					Target:     []string{"SHUTOFF"},
-					Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
-					Timeout:    d.Timeout(schema.TimeoutCreate),
-					Delay:      10 * time.Second,
-					MinTimeout: 3 * time.Second,
-				}
+			}
+			stopStateConf := &resource.StateChangeConf{
+				//Pending:    []string{"ACTIVE"},
+				Target:     []string{"SHUTOFF"},
+				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutCreate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
 
-				log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
-				_, err = stopStateConf.WaitForState()
-				if err != nil {
-					return fmt.Errorf("Error waiting for instance (%s) to stop: %s, proceeding to delete", d.Id(), err)
-				}
+			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
+			_, err = stopStateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("Error waiting for instance (%s) to become inactive(shutoff): %s", d.Id(), err)
 			}
 		}
 		if strings.ToLower(vmState) == "active" {
 			err = startstop.Start(computeClient, d.Id()).ExtractErr()
 			if err != nil {
 				return fmt.Errorf("Error starting OpenStack instance: %s", err)
-			} else {
-				startStateConf := &resource.StateChangeConf{
-					//Pending:    []string{"SHUTOFF"},
-					Target:     []string{"ACTIVE"},
-					Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
-					Timeout:    d.Timeout(schema.TimeoutCreate),
-					Delay:      10 * time.Second,
-					MinTimeout: 3 * time.Second,
-				}
+			}
+			startStateConf := &resource.StateChangeConf{
+				//Pending:    []string{"SHUTOFF"},
+				Target:     []string{"ACTIVE"},
+				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutCreate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
 
-				log.Printf("[DEBUG] Waiting for instance (%s) to start", d.Id())
-				_, err = startStateConf.WaitForState()
-				if err != nil {
-					return fmt.Errorf("Error waiting for instance (%s) to start: %s, proceeding to delete", d.Id(), err)
-				}
+			log.Printf("[DEBUG] Waiting for instance (%s) to start", d.Id())
+			_, err = startStateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("Error waiting for instance (%s) to become active: %s", d.Id(), err)
 			}
 		}
 	}
