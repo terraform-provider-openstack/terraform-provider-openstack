@@ -653,7 +653,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 				//Pending:    []string{"ACTIVE"},
 				Target:     []string{"SHUTOFF"},
 				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
-				Timeout:    d.Timeout(schema.TimeoutCreate),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
 				Delay:      10 * time.Second,
 				MinTimeout: 3 * time.Second,
 			}
@@ -673,7 +673,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 				//Pending:    []string{"SHUTOFF"},
 				Target:     []string{"ACTIVE"},
 				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
-				Timeout:    d.Timeout(schema.TimeoutCreate),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
 				Delay:      10 * time.Second,
 				MinTimeout: 3 * time.Second,
 			}
