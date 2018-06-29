@@ -7,6 +7,7 @@ IMPROVEMENTS
 BUG FIXES
 
 * Allow explicit values of `0` for `min_disk_gb` and `min_ram_mb` in the `openstack_images_image_v2` resource [GH-351]
+* Make `peer_ep_group_id` optional in `openstack_vpnaas_site_connection` [GH-353]
 
 ## 1.6.0 (June 20, 2018)
 

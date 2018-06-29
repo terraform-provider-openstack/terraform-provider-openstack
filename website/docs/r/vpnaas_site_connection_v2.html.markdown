@@ -50,7 +50,7 @@ The following arguments are supported:
 
 * `vpnservice_id` - (Required) The ID of the VPN service. Changing this creates a new connection.
 
-* `local_ep_group_id` - (Required) The ID for the endpoint group that contains private subnets for the local side of the connection.
+* `local_ep_group_id` - (Optional) The ID for the endpoint group that contains private subnets for the local side of the connection.
     You must specify this parameter with the peer_ep_group_id parameter unless
 	in backward- compatible mode where peer_cidrs is provided with a subnet_id for the VPN service.
     Changing this updates the existing connection.
@@ -61,7 +61,7 @@ The following arguments are supported:
 	Typically, this value matches the peer_address value.
 	Changing this updates the existing policy.
 
-* `peer_ep_group_id` - (Required) The ID for the endpoint group that contains private CIDRs in the form < net_address > / < prefix > for the peer side of the connection.
+* `peer_ep_group_id` - (Optional) The ID for the endpoint group that contains private CIDRs in the form < net_address > / < prefix > for the peer side of the connection.
 	You must specify this parameter with the local_ep_group_id parameter unless in backward-compatible mode
 	where peer_cidrs is provided with a subnet_id for the VPN service.
 
