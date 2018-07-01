@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 )
@@ -48,6 +49,12 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				Computed: true,
 			},
 			"shared": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+				Computed: true,
+			},
+			"external": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
@@ -133,6 +140,15 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 		createOpts.Shared = &shared
 	}
 
+	networkIsExternal := false
+	externalRaw := d.Get("external").(string)
+	if externalRaw != "" {
+		networkIsExternal, err = strconv.ParseBool(externalRaw)
+		if err != nil {
+			return fmt.Errorf("external, if provided, must be either 'true' or 'false': %v", err)
+		}
+	}
+
 	segments := resourceNetworkingNetworkV2Segments(d)
 
 	n := &networks.Network{}
@@ -141,11 +157,29 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 			CreateOptsBuilder: createOpts,
 			Segments:          segments,
 		}
-		log.Printf("[DEBUG] Create Options: %#v", providerCreateOpts)
-		n, err = networks.Create(networkingClient, providerCreateOpts).Extract()
+		if networkIsExternal {
+			createExternalOpts := external.CreateOptsExt{
+				CreateOptsBuilder: providerCreateOpts,
+				External:          &networkIsExternal,
+			}
+			log.Printf("[DEBUG] Create Options: %#v", createExternalOpts)
+			n, err = networks.Create(networkingClient, createExternalOpts).Extract()
+		} else {
+			log.Printf("[DEBUG] Create Options: %#v", providerCreateOpts)
+			n, err = networks.Create(networkingClient, providerCreateOpts).Extract()
+		}
 	} else {
-		log.Printf("[DEBUG] Create Options: %#v", createOpts)
-		n, err = networks.Create(networkingClient, createOpts).Extract()
+		if networkIsExternal {
+			createExternalOpts := external.CreateOptsExt{
+				CreateOptsBuilder: createOpts,
+				External:          &networkIsExternal,
+			}
+			log.Printf("[DEBUG] Create Options: %#v", createExternalOpts)
+			n, err = networks.Create(networkingClient, createExternalOpts).Extract()
+		} else {
+			log.Printf("[DEBUG] Create Options: %#v", createOpts)
+			n, err = networks.Create(networkingClient, createOpts).Extract()
+		}
 	}
 
 	if err != nil {
@@ -179,7 +213,11 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	n, err := networks.Get(networkingClient, d.Id()).Extract()
+	var n struct {
+		networks.Network
+		external.NetworkExternalExt
+	}
+	err = networks.Get(networkingClient, d.Id()).ExtractInto(&n)
 	if err != nil {
 		return CheckDeleted(d, err, "network")
 	}
@@ -189,6 +227,7 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 	d.Set("name", n.Name)
 	d.Set("admin_state_up", strconv.FormatBool(n.AdminStateUp))
 	d.Set("shared", strconv.FormatBool(n.Shared))
+	d.Set("external", strconv.FormatBool(n.External))
 	d.Set("tenant_id", n.TenantID)
 	d.Set("region", GetRegion(d, config))
 
@@ -230,10 +269,29 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 			updateOpts.Shared = &shared
 		}
 	}
+	networkIsExternal := false
+	if d.HasChange("external") {
+		externalRaw := d.Get("external").(string)
+		if externalRaw != "" {
+			networkIsExternal, err = strconv.ParseBool(externalRaw)
+			if err != nil {
+				return fmt.Errorf("external, if provided, must be either 'true' or 'false': %v", err)
+			}
+		}
+	}
 
-	log.Printf("[DEBUG] Updating Network %s with options: %+v", d.Id(), updateOpts)
+	if networkIsExternal {
+		externalUpdateOpts := external.UpdateOptsExt{
+			UpdateOptsBuilder: updateOpts,
+			External:          &networkIsExternal,
+		}
+		log.Printf("[DEBUG] Updating Network %s with options: %+v", d.Id(), externalUpdateOpts)
+		_, err = networks.Update(networkingClient, d.Id(), externalUpdateOpts).Extract()
+	} else {
+		log.Printf("[DEBUG] Updating Network %s with options: %+v", d.Id(), updateOpts)
+		_, err = networks.Update(networkingClient, d.Id(), updateOpts).Extract()
+	}
 
-	_, err = networks.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error updating OpenStack Neutron Network: %s", err)
 	}
