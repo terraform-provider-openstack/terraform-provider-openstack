@@ -30,6 +30,8 @@ data "openstack_networking_network_v2" "network" {
 
 * `status` - (Optional) The status of the network.
 
+* `external` - (Optional) The external routing facility of the network.
+
 * `matching_subnet_cidr` - (Optional) The CIDR of a subnet within the network.
 
 * `tenant_id` - (Optional) The owner of the network.
@@ -45,6 +47,7 @@ are exported:
 * `admin_state_up` - (Optional) The administrative state of the network.
 * `name` - See Argument Reference above.
 * `region` - See Argument Reference above.
+* `external` - See Argument Reference above.
 * `shared` - (Optional)  Specifies whether the network resource can be accessed
     by any tenant or not.
 * `availability_zone_hints` - (Optional) The availability zone candidates for the network.

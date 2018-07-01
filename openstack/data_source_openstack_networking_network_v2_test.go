@@ -74,6 +74,30 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_networkID(t *testing.T) {
 	})
 }
 
+func TestAccOpenStackNetworkingNetworkV2DataSource_external(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccOpenStackNetworkingNetworkV2DataSource_networkExternal,
+			},
+			resource.TestStep{
+				Config: testAccOpenStackNetworkingNetworkV2DataSource_external,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.net"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_network_v2.net", "name", "tf_test_network"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_network_v2.net", "admin_state_up", "true"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_network_v2.net", "external", "true"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingNetworkV2DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -103,6 +127,14 @@ resource "openstack_networking_subnet_v2" "subnet" {
 }
 `
 
+const testAccOpenStackNetworkingNetworkV2DataSource_networkExternal = `
+resource "openstack_networking_network_v2" "net" {
+  name = "tf_test_network"
+  admin_state_up = "true"
+  external = "true"
+}
+`
+
 var testAccOpenStackNetworkingNetworkV2DataSource_basic = fmt.Sprintf(`
 %s
 
@@ -126,3 +158,12 @@ data "openstack_networking_network_v2" "net" {
 	network_id = "${openstack_networking_network_v2.net.id}"
 }
 `, testAccOpenStackNetworkingNetworkV2DataSource_network)
+
+var testAccOpenStackNetworkingNetworkV2DataSource_external = fmt.Sprintf(`
+%s
+
+data "openstack_networking_network_v2" "net" {
+	name = "${openstack_networking_network_v2.net.name}"
+	external = "true"
+}
+`, testAccOpenStackNetworkingNetworkV2DataSource_networkExternal)
