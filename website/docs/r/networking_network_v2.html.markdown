@@ -76,8 +76,8 @@ The following arguments are supported:
     existing network.
 
 * `external` - (Optional)  Specifies whether the network resource has the
-    external routing facility. Changing this updates the external attribute of
-    the existing network.
+    external routing facility. Valid values are true and false. Defaults to
+    false. Changing this updates the external attribute of the existing network.
 
 * `tenant_id` - (Optional) The owner of the network. Required if admin wants to
     create a network for another tenant. Changing this creates a new network.

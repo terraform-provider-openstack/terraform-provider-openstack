@@ -55,7 +55,7 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				Computed: true,
 			},
 			"external": &schema.Schema{
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
@@ -140,27 +140,19 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 		createOpts.Shared = &shared
 	}
 
-	networkIsExternal := false
-	externalRaw := d.Get("external").(string)
-	if externalRaw != "" {
-		networkIsExternal, err = strconv.ParseBool(externalRaw)
-		if err != nil {
-			return fmt.Errorf("external, if provided, must be either 'true' or 'false': %v", err)
-		}
-	}
-
 	segments := resourceNetworkingNetworkV2Segments(d)
 
+	isExternal := d.Get("external").(bool)
 	n := &networks.Network{}
 	if len(segments) > 0 {
 		providerCreateOpts := provider.CreateOptsExt{
 			CreateOptsBuilder: createOpts,
 			Segments:          segments,
 		}
-		if networkIsExternal {
+		if isExternal {
 			createExternalOpts := external.CreateOptsExt{
 				CreateOptsBuilder: providerCreateOpts,
-				External:          &networkIsExternal,
+				External:          &isExternal,
 			}
 			log.Printf("[DEBUG] Create Options: %#v", createExternalOpts)
 			n, err = networks.Create(networkingClient, createExternalOpts).Extract()
@@ -169,10 +161,10 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 			n, err = networks.Create(networkingClient, providerCreateOpts).Extract()
 		}
 	} else {
-		if networkIsExternal {
+		if isExternal {
 			createExternalOpts := external.CreateOptsExt{
 				CreateOptsBuilder: createOpts,
-				External:          &networkIsExternal,
+				External:          &isExternal,
 			}
 			log.Printf("[DEBUG] Create Options: %#v", createExternalOpts)
 			n, err = networks.Create(networkingClient, createExternalOpts).Extract()
@@ -269,21 +261,15 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 			updateOpts.Shared = &shared
 		}
 	}
-	networkIsExternal := false
+	isExternal := false
 	if d.HasChange("external") {
-		externalRaw := d.Get("external").(string)
-		if externalRaw != "" {
-			networkIsExternal, err = strconv.ParseBool(externalRaw)
-			if err != nil {
-				return fmt.Errorf("external, if provided, must be either 'true' or 'false': %v", err)
-			}
-		}
+		isExternal = d.Get("external").(bool)
 	}
 
-	if networkIsExternal {
+	if isExternal {
 		externalUpdateOpts := external.UpdateOptsExt{
 			UpdateOptsBuilder: updateOpts,
-			External:          &networkIsExternal,
+			External:          &isExternal,
 		}
 		log.Printf("[DEBUG] Updating Network %s with options: %+v", d.Id(), externalUpdateOpts)
 		_, err = networks.Update(networkingClient, d.Id(), externalUpdateOpts).Extract()
