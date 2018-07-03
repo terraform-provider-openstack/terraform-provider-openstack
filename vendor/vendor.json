@@ -685,10 +685,10 @@
 			"revisionTime": "2017-03-10T01:59:53Z"
 		},
 		{
-			"checksumSHA1": "F1gaBPZj2MGwEF7u8GARRa6XlvQ=",
+			"checksumSHA1": "aQ+OjOThpmPUF1KgniHIM37eaN8=",
 			"path": "github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects",
-			"revision": "e7fa81ec4cbb506026fa90fe7deeb9b7548a0728",
-			"revisionTime": "2017-11-01T04:49:27Z"
+			"revision": "10244f9e8a6751d9c0ac1656edb8d56aaaf97c32",
+			"revisionTime": "2018-04-21T02:00:55Z"
 		},
 		{
 			"checksumSHA1": "roxPPVwS2CjJhf0CApHNQxAX7EA=",
