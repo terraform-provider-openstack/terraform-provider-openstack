@@ -129,6 +129,58 @@ func TestAccNetworkingV2Network_multipleSegmentMappings(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Network_externalCreate(t *testing.T) {
+	var network networks.Network
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccNetworkingV2Network_external,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "external", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_externalUpdate(t *testing.T) {
+	var network networks.Network
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccNetworkingV2Network_basic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+				),
+			},
+			resource.TestStep{
+				Config: testAccNetworkingV2Network_external,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "external", "true"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2NetworkDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
@@ -287,5 +339,13 @@ resource "openstack_networking_network_v2" "network_1" {
     }
   ],
   admin_state_up = "true"
+}
+`
+
+const testAccNetworkingV2Network_external = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+	admin_state_up = "true"
+	external = "true"
 }
 `

@@ -75,6 +75,10 @@ The following arguments are supported:
     by any tenant or not. Changing this updates the sharing capabalities of the
     existing network.
 
+* `external` - (Optional)  Specifies whether the network resource has the
+    external routing facility. Valid values are true and false. Defaults to
+    false. Changing this updates the external attribute of the existing network.
+
 * `tenant_id` - (Optional) The owner of the network. Required if admin wants to
     create a network for another tenant. Changing this creates a new network.
 
@@ -104,6 +108,7 @@ The following attributes are exported:
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `shared` - See Argument Reference above.
+* `external` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
 * `availability_zone_hints` - See Argument Reference above.
