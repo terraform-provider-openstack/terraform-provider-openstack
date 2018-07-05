@@ -415,6 +415,15 @@ func flattenInstanceNetworks(
 					"fixed_ip_v6": instanceNIC.FixedIPv6,
 					"mac":         instanceNIC.MAC,
 				}
+
+				// Use the same method as getAllInstanceNetworks to get the network uuid
+				networkInfo, err := getInstanceNetworkInfo(d, meta, "name", instanceAddresses.NetworkName)
+				if err != nil {
+					log.Printf("[WARN] Error getting default network uuid: %s", err)
+				} else {
+					v["uuid"] = networkInfo["uuid"].(string)
+				}
+
 				networks = append(networks, v)
 			}
 		}
