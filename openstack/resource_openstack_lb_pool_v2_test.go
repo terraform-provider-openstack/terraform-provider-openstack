@@ -35,9 +35,9 @@ func TestAccLBV2Pool_basic(t *testing.T) {
 
 func testAccCheckLBV2PoolDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -45,7 +45,7 @@ func testAccCheckLBV2PoolDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := pools.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err := pools.Get(lbClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Pool still exists: %s", rs.Primary.ID)
 		}
@@ -66,12 +66,12 @@ func testAccCheckLBV2PoolExists(n string, pool *pools.Pool) resource.TestCheckFu
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
 
-		found, err := pools.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := pools.Get(lbClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
