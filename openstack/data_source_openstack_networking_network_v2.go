@@ -54,7 +54,7 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 				Computed: true,
 			},
 			"external": &schema.Schema{
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Optional: true,
 			},
 			"availability_zone_hints": &schema.Schema{
@@ -79,17 +79,10 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 		listOpts.Status = v.(string)
 	}
 
-	networkIsExternal := false
-	externalRaw := d.Get("external").(string)
-	if externalRaw != "" {
-		networkIsExternal, err = strconv.ParseBool(externalRaw)
-		if err != nil {
-			return fmt.Errorf("external, if provided, must be either 'true' or 'false': %v", err)
-		}
-	}
+	isExternal := d.Get("external").(bool)
 	listExternalOpts := external.ListOptsExt{
 		ListOptsBuilder: listOpts,
-		External:        &networkIsExternal,
+		External:        &isExternal,
 	}
 
 	pages, err := networks.List(networkingClient, listExternalOpts).AllPages()

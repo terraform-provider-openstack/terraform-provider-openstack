@@ -76,7 +76,10 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_networkID(t *testing.T) {
 
 func TestAccOpenStackNetworkingNetworkV2DataSource_external(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
