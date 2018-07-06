@@ -313,10 +313,10 @@
 			"revisionTime": "2018-03-28T16:31:53Z"
 		},
 		{
-			"checksumSHA1": "qduT9GZUhXc00XoHEwLx16Xn9gM=",
+			"checksumSHA1": "8yXacRqh4LK7u/1r6qxrUS2oACs=",
 			"path": "github.com/gophercloud/gophercloud",
-			"revision": "7112fcd50da4ea27e8d4d499b30f04eea143bec2",
-			"revisionTime": "2018-05-31T02:06:30Z"
+			"revision": "aac68cb146cb045a2c7c76ea060c81c9318f3dcd",
+			"revisionTime": "2018-07-06T03:57:03Z"
 		},
 		{
 			"checksumSHA1": "YDNvjFNQS+UxqZMLm/shFs7aLNU=",
