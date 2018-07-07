@@ -4,7 +4,8 @@ IMPROVEMENTS
 
 * Allow resize for stopped instances [GH-348]
 * Added `power_state` to `openstack_compute_instance_v2` [GH-350]
-* Added `external` to `openstack_networking_network_v2` [GH-357]
+* Added `external` to `openstack_networking_network_v2` resource [GH-357]
+* Added `external` to `openstack_networking_network_v2` data source [GH-358]
 * Return the default network uuid for `openstack_compute_instance_v2` [GH-365]
 
 BUG FIXES
