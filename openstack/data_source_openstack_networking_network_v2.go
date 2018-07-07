@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
@@ -52,6 +53,10 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"external": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"availability_zone_hints": &schema.Schema{
 				Type:     schema.TypeList,
 				Computed: true,
@@ -70,22 +75,31 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 		Name:     d.Get("name").(string),
 		TenantID: d.Get("tenant_id").(string),
 	}
-
 	if v, ok := d.GetOk("status"); ok {
 		listOpts.Status = v.(string)
 	}
 
-	pages, err := networks.List(networkingClient, listOpts).AllPages()
+	isExternal := d.Get("external").(bool)
+	listExternalOpts := external.ListOptsExt{
+		ListOptsBuilder: listOpts,
+		External:        &isExternal,
+	}
+
+	pages, err := networks.List(networkingClient, listExternalOpts).AllPages()
 	if err != nil {
 		return err
 	}
-
-	allNetworks, err := networks.ExtractNetworks(pages)
+	type networkWithExternalExt struct {
+		networks.Network
+		external.NetworkExternalExt
+	}
+	var allNetworks []networkWithExternalExt
+	err = networks.ExtractNetworksInto(pages, &allNetworks)
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve networks: %s", err)
 	}
 
-	var refinedNetworks []networks.Network
+	var refinedNetworks []networkWithExternalExt
 	if cidr := d.Get("matching_subnet_cidr").(string); cidr != "" {
 		for _, n := range allNetworks {
 			for _, s := range n.Subnets {
@@ -127,6 +141,7 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	d.Set("name", network.Name)
 	d.Set("admin_state_up", strconv.FormatBool(network.AdminStateUp))
 	d.Set("shared", strconv.FormatBool(network.Shared))
+	d.Set("external", strconv.FormatBool(network.External))
 	d.Set("tenant_id", network.TenantID)
 	d.Set("region", GetRegion(d, config))
 
