@@ -42,6 +42,8 @@ The following arguments are supported:
     belongs to the same tenant. Changing this creates a new floating IP (which
     may or may not have a different address)
 
+* `address` - (Optional) The actual/specific floating IP to obtain.
+
 * `fixed_ip` - Fixed IP of the port to associate with this floating IP. Required if
     the port has multiple fixed IPs.
 
