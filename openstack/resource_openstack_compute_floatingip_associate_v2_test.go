@@ -292,6 +292,8 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 
 resource "openstack_compute_instance_v2" "instance_1" {
+  depends_on = ["openstack_networking_subnet_v2.subnet_1"]
+
   name = "instance_1"
   security_groups = ["default"]
 
