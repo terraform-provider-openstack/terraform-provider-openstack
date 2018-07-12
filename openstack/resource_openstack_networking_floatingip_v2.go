@@ -38,7 +38,9 @@ func resourceNetworkingFloatingIPV2() *schema.Resource {
 			},
 			"address": &schema.Schema{
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"pool": &schema.Schema{
 				Type:        schema.TypeString,
@@ -92,6 +94,7 @@ func resourceNetworkFloatingIPV2Create(d *schema.ResourceData, meta interface{})
 	createOpts := FloatingIPCreateOpts{
 		floatingips.CreateOpts{
 			FloatingNetworkID: poolID,
+			FloatingIP:        d.Get("address").(string),
 			PortID:            d.Get("port_id").(string),
 			TenantID:          d.Get("tenant_id").(string),
 			FixedIP:           d.Get("fixed_ip").(string),
