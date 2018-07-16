@@ -49,24 +49,6 @@ func TestAccComputeV2AttachInterface_IP(t *testing.T) {
 	})
 }
 
-func TestAccComputeV2AttachInterface_timeout(t *testing.T) {
-	var ai attachinterfaces.Interface
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2AttachInterfaceDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2AttachInterface_timeout,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2AttachInterfaceExists("openstack_compute_attach_interface_v2.ai_1", &ai),
-				),
-			},
-		},
-	})
-}
-
 func testAccCheckComputeV2AttachInterfaceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	computeClient, err := config.computeV2Client(OS_REGION_NAME)
@@ -193,29 +175,3 @@ resource "openstack_compute_attach_interface_v2" "ai_1" {
   fixed_ip = "%s"
 }
 `, OS_NETWORK_ID, FixedIP)
-
-var testAccComputeV2AttachInterface_timeout = fmt.Sprintf(`
-resource "openstack_networking_port_v2" "port_1" {
-  name = "port_1"
-  network_id = "%s"
-  admin_state_up = "true"
-}
-
-resource "openstack_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
-  network {
-    uuid = "%s"
-  }
-}
-
-resource "openstack_compute_attach_interface_v2" "ai_1" {
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  port_id = "${openstack_networking_port_v2.port_1.id}"
-
-  timeouts {
-    create = "5m"
-    delete = "5m"
-  }
-}
-`, OS_NETWORK_ID, OS_NETWORK_ID)
