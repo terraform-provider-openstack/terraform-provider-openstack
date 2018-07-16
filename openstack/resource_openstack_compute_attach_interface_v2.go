@@ -152,6 +152,7 @@ func resourceComputeAttachInterfaceV2Read(d *schema.ResourceData, meta interface
 
 	d.Set("port_id", attachment.PortID)
 	d.Set("network_id", attachment.NetID)
+	d.Set("fixed_ip", attachment.FixedIPs[0])
 
 	return nil
 }
