@@ -36,17 +36,19 @@ func resourceComputeAttachInterfaceV2() *schema.Resource {
 			},
 
 			"port_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"network_id"},
 			},
 
 			"network_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"port_id"},
 			},
 
 			"instance_id": &schema.Schema{
@@ -85,10 +87,6 @@ func resourceComputeAttachInterfaceV2Create(d *schema.ResourceData, meta interfa
 
 	if networkId == "" && portId == "" {
 		return fmt.Errorf("Must set one of network_id and port_id")
-	}
-
-	if networkId != "" && portId != "" {
-		return fmt.Errorf("network_id and port_id are mutaully exclusive. Only one must be set")
 	}
 
 	// For some odd reason the API takes an array of IPs, but you can only have one element in the array.
