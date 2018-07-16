@@ -13,7 +13,7 @@ Compute (Nova) v2 API.
 
 ## Example Usage
 
-### Basic attachment of a network to to a single instance, auto-creating a port
+### Basic Attachment
 
 ```hcl
 resource "openstack_networking_network_v2" "network_1" {
