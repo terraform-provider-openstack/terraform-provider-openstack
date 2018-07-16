@@ -33,7 +33,7 @@ resource "openstack_compute_attach_interface_v2" "ai_1" {
 
 ```
 
-### Basic attachment of a network to to a single instance, auto-creating a port, and specifiying an IP address. NOTE: You must specify a network_id when using fixed_ip and that ip must lie in the range available on the network
+### Attachment Specifying a Fixed IP
 
 ```hcl
 resource "openstack_networking_network_v2" "network_1" {
