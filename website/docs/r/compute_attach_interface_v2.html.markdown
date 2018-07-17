@@ -55,7 +55,7 @@ resource "openstack_compute_attach_interface_v2" "ai_1" {
 ```
 
 
-### Basic attachment of a single interface (a port) to a single instance
+### Attachment Using an Existing Port
 
 ```hcl
 resource "openstack_networking_network_v2" "network_1" {
