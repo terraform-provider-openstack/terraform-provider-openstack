@@ -82,7 +82,7 @@ resource "openstack_compute_attach_interface_v2" "ai_1" {
 
 ```
 
-### Attaching multiple ports to a single instance
+### Attaching Multiple Interfaces
 
 ```hcl
 resource "openstack_networking_network_v2" "network_1" {
