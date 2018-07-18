@@ -152,7 +152,13 @@ func resourceComputeAttachInterfaceV2Read(d *schema.ResourceData, meta interface
 
 	d.Set("port_id", attachment.PortID)
 	d.Set("network_id", attachment.NetID)
-	d.Set("fixed_ip", attachment.FixedIPs[0])
+	d.Set("region", GetRegion(d, config))
+
+	if len(attachment.FixedIPs) == 1 {
+		d.Set("fixed_ip", attachment.FixedIPs[0])
+	} else {
+		log.Printf("[DEBUG] Length of attachment.FixedIPs is %d, not 1 - skipping Set of fixed_ip field", len(attachment.FixedIPs))
+	}
 
 	return nil
 }
