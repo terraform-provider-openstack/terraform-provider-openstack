@@ -42,7 +42,7 @@ The following arguments are supported:
 
 * `description` - (Optional) Human-readable description for the pool.
 
-* `protocol` = (Required) The protocol - can either be TCP, HTTP or HTTPS.
+* `protocol` = (Required) The protocol - can either be TCP, HTTP, HTTPS or PROXY.
     Changing this creates a new pool.
 
 * `loadbalancer_id` - (Optional) The load balancer on which to provision this
