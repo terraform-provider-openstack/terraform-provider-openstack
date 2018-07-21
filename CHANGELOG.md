@@ -8,6 +8,7 @@ IMPROVEMENTS
 * Added `external` to `openstack_networking_network_v2` data source [GH-358]
 * Return the default network uuid for `openstack_compute_instance_v2` [GH-365]
 * Allow a specific floating IP to be specified in `openstack_networking_floatingip_v2` [GH-371]
+* Allow `PROXY` protocol for `openstack_lb_pool_v2` [GH-375]
 
 BUG FIXES
 
