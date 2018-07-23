@@ -55,9 +55,9 @@ func resourcePoolV2() *schema.Resource {
 				ForceNew: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					value := v.(string)
-					if value != "TCP" && value != "HTTP" && value != "HTTPS" {
+					if value != "TCP" && value != "HTTP" && value != "HTTPS" && value != "PROXY" {
 						errors = append(errors, fmt.Errorf(
-							"Only 'TCP', 'HTTP', and 'HTTPS' are supported values for 'protocol'"))
+							"Only 'TCP', 'HTTP','HTTPS', and 'PROXY' are supported values for 'protocol'"))
 					}
 					return
 				},

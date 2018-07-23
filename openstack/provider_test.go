@@ -30,6 +30,7 @@ var (
 	OS_LB_ENVIRONMENT         = os.Getenv("OS_LB_ENVIRONMENT")
 	OS_FW_ENVIRONMENT         = os.Getenv("OS_FW_ENVIRONMENT")
 	OS_VPN_ENVIRONMENT        = os.Getenv("OS_VPN_ENVIRONMENT")
+	OS_USE_OCTAVIA            = os.Getenv("OS_USE_OCTAVIA")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
