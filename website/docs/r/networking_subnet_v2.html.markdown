@@ -95,6 +95,10 @@ The `host_routes` block supports:
 
 * `next_hop` - (Required) The next hop in the route.
 
+The `value_specs` block supports:
+
+* `prefixlen` - (Optional) The size of the CIDR to allocate from the subnetpool.
+
 ## Attributes Reference
 
 The following attributes are exported:
