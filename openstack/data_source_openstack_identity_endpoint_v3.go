@@ -31,12 +31,19 @@ func dataSourceIdentityEndpointV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Default:  "public",
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					value := v.(string)
+					if value != "public" && value != "internal" && value != "admin" {
+						errors = append(errors, fmt.Errorf(
+							"Only 'public', 'internal', 'public'  are supported values for 'interface'"))
+					}
+					return
+				},
 			},
 			"url": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 
 			"region": &schema.Schema{
@@ -83,16 +90,28 @@ func dataSourceIdentityEndpointV3Read(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Unable to retrieve endpoints: %s", err)
 	}
 
-	if len(allEndpoints) > 1 && d.Get("service_name") != "" {
+	serviceName := d.Get("service_name").(string)
+	if len(allEndpoints) > 1 && serviceName != "" {
 		var filteredEndpoints []endpoints.Endpoint
+		// Query all services to further filter results
+		allServicePages, err := services.List(identityClient, nil).AllPages()
+		if err != nil {
+			return fmt.Errorf("Unable to query services: %s", err)
+		}
+
+		allServices, err := services.ExtractServices(allServicePages)
+		if err != nil {
+			return fmt.Errorf("Unable to retrieve services: %s", err)
+		}
+
 		for _, endpoint := range allEndpoints {
-			service, err := services.Get(identityClient, endpoint.ServiceID).Extract()
-			if err != nil {
-				continue
-			}
-			if service.Extra["name"] == d.Get("service_name") {
-				endpoint.Name = service.Extra["name"].(string)
-				filteredEndpoints = append(filteredEndpoints, endpoint)
+			for _, service := range allServices {
+				if v, ok := service.Extra["name"].(string); ok {
+					if endpoint.ServiceID == service.ID && serviceName == v {
+						endpoint.Name = v
+						filteredEndpoints = append(filteredEndpoints, endpoint)
+					}
+				}
 			}
 		}
 		allEndpoints = filteredEndpoints
@@ -119,7 +138,6 @@ func dataSourceIdentityEndpointV3Attributes(d *schema.ResourceData, endpoint *en
 
 	d.SetId(endpoint.ID)
 	d.Set("interface", endpoint.Availability)
-	d.Set("name", endpoint.Name)
 	d.Set("region", endpoint.Region)
 	d.Set("service_id", endpoint.ServiceID)
 	d.Set("service_name", endpoint.Name)

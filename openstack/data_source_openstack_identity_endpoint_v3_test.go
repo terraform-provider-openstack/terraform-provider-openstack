@@ -9,7 +9,7 @@ import (
 )
 
 func TestAccOpenStackIdentityV3EndpointDataSource_basic(t *testing.T) {
-	endpointName := "swift"
+	endpointName := "identity"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -23,7 +23,7 @@ func TestAccOpenStackIdentityV3EndpointDataSource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityEndpointV3DataSourceID("data.openstack_identity_endpoint_v3.endpoint_1"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_identity_endpoint_v3.endpoint_1", "name", endpointName),
+						"data.openstack_identity_endpoint_v3.endpoint_1", "service_name", endpointName),
 				),
 			},
 		},
@@ -48,7 +48,7 @@ func testAccCheckIdentityEndpointV3DataSourceID(n string) resource.TestCheckFunc
 func testAccOpenStackIdentityEndpointV3DataSource_basic(name, iface string) string {
 	return fmt.Sprintf(`
 	data "openstack_identity_endpoint_v3" "endpoint_1" {
-      service_name = %s
+      service_name = "%s"
       interface = "%s"
 	}
 `, name, iface)
