@@ -1,5 +1,9 @@
 ## 1.7.0 (Unreleased)
 
+FEATURES
+
+* __New Data Source__: `openstack_identity_endpoint_v3` [GH-377]
+
 IMPROVEMENTS
 
 * Allow resize for stopped instances [GH-348]
