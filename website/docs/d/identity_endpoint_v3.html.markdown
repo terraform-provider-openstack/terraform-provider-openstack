@@ -10,6 +10,8 @@ description: |-
 
 Use this data source to get the ID of an OpenStack endpoint.
 
+Note: This usually requires admin privileges.
+
 ## Example Usage
 
 ```hcl
