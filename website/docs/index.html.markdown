@@ -96,8 +96,9 @@ The following arguments are supported:
   `OS_DOMAIN_NAME`.
 
 * `default_domain` - (Optional) The ID of the Domain to scope to if no other
-  domain is specified (Identity v3). Defaults to `default` and is also checked
-  via the `OS_DEFAULT_DOMAIN` environment variable.
+  domain is specified (Identity v3). If omitted, the environment variable
+  `OS_DEFAULT_DOMAIN` is checked or a default value of "default" will be
+  used.
 
 * `insecure` - (Optional) Trust self-signed SSL certificates. If omitted, the
   `OS_INSECURE` environment variable is used.
