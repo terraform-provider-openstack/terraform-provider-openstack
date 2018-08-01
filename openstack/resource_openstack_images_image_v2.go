@@ -305,8 +305,21 @@ func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("size_bytes", img.SizeBytes)
 	d.Set("tags", img.Tags)
 	d.Set("visibility", img.Visibility)
-	d.Set("properties", img.Properties)
 	d.Set("region", GetRegion(d, config))
+
+	// New versions of OpenStack are setting a property of os_hidden with a
+	// boolean value. This clashes with TypeMap which expects all values to
+	// be a string. For now, we'll filter out all non-string types.
+	properties := make(map[string]string)
+	for key, value := range img.Properties {
+		if v, ok := value.(string); ok {
+			properties[key] = v
+		}
+	}
+
+	if err := d.Set("properties", properties); err != nil {
+		log.Printf("[WARN] unable to set properties for image %s: %s", img.ID, err)
+	}
 
 	return nil
 }
