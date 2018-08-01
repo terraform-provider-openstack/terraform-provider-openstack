@@ -1,23 +1,23 @@
-## 1.7.0 (Unreleased)
+## 1.7.0 (August 01, 2018)
 
 FEATURES
 
-* __New Data Source__: `openstack_identity_endpoint_v3` [GH-377]
+* __New Data Source__: `openstack_identity_endpoint_v3` ([#377](https://github.com/terraform-providers/terraform-provider-openstack/issues/377))
 
 IMPROVEMENTS
 
-* Allow resize for stopped instances [GH-348]
-* Added `power_state` to `openstack_compute_instance_v2` [GH-350]
-* Added `external` to `openstack_networking_network_v2` resource [GH-357]
-* Added `external` to `openstack_networking_network_v2` data source [GH-358]
-* Return the default network uuid for `openstack_compute_instance_v2` [GH-365]
-* Allow a specific floating IP to be specified in `openstack_networking_floatingip_v2` [GH-371]
-* Allow `PROXY` protocol for `openstack_lb_pool_v2` [GH-375]
+* Allow resize for stopped instances ([#348](https://github.com/terraform-providers/terraform-provider-openstack/issues/348))
+* Added `power_state` to `openstack_compute_instance_v2` ([#350](https://github.com/terraform-providers/terraform-provider-openstack/issues/350))
+* Added `external` to `openstack_networking_network_v2` resource ([#357](https://github.com/terraform-providers/terraform-provider-openstack/issues/357))
+* Added `external` to `openstack_networking_network_v2` data source ([#358](https://github.com/terraform-providers/terraform-provider-openstack/issues/358))
+* Return the default network uuid for `openstack_compute_instance_v2` ([#365](https://github.com/terraform-providers/terraform-provider-openstack/issues/365))
+* Allow a specific floating IP to be specified in `openstack_networking_floatingip_v2` ([#371](https://github.com/terraform-providers/terraform-provider-openstack/issues/371))
+* Allow `PROXY` protocol for `openstack_lb_pool_v2` ([#375](https://github.com/terraform-providers/terraform-provider-openstack/issues/375))
 
 BUG FIXES
 
-* Allow explicit values of `0` for `min_disk_gb` and `min_ram_mb` in the `openstack_images_image_v2` resource [GH-351]
-* Make `peer_ep_group_id` optional in `openstack_vpnaas_site_connection` [GH-353]
+* Allow explicit values of `0` for `min_disk_gb` and `min_ram_mb` in the `openstack_images_image_v2` resource ([#351](https://github.com/terraform-providers/terraform-provider-openstack/issues/351))
+* Make `peer_ep_group_id` optional in `openstack_vpnaas_site_connection` ([#353](https://github.com/terraform-providers/terraform-provider-openstack/issues/353))
 
 ## 1.6.0 (June 20, 2018)
 
