@@ -33,7 +33,11 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "properties.foo", "bar"),
 					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "all_properties.foo", "bar"),
+					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "properties.baz", "foo"),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "all_properties.baz", "foo"),
 				),
 			},
 		},
@@ -282,7 +286,7 @@ func testAccCheckImagesImageV2TagCount(n string, expected int) resource.TestChec
 
 var testAccImagesImageV2_basic = `
   resource "openstack_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
+      name = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
@@ -292,9 +296,17 @@ var testAccImagesImageV2_basic = `
       }
   }`
 
+var testAccImagesImageV2_basicImport = `
+  resource "openstack_images_image_v2" "image_1" {
+      name = "Rancher TerraformAccTest"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      container_format = "bare"
+      disk_format = "qcow2"
+  }`
+
 var testAccImagesImageV2_name_1 = `
   resource "openstack_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
+      name = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
@@ -302,7 +314,7 @@ var testAccImagesImageV2_name_1 = `
 
 var testAccImagesImageV2_name_2 = `
   resource "openstack_images_image_v2" "image_1" {
-      name   = "TerraformAccTest Rancher"
+      name = "TerraformAccTest Rancher"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
@@ -310,7 +322,7 @@ var testAccImagesImageV2_name_2 = `
 
 var testAccImagesImageV2_tags_1 = `
   resource "openstack_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
+      name = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
@@ -319,7 +331,7 @@ var testAccImagesImageV2_tags_1 = `
 
 var testAccImagesImageV2_tags_2 = `
   resource "openstack_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
+      name = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
@@ -328,7 +340,7 @@ var testAccImagesImageV2_tags_2 = `
 
 var testAccImagesImageV2_tags_3 = `
   resource "openstack_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
+      name = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
@@ -337,7 +349,7 @@ var testAccImagesImageV2_tags_3 = `
 
 var testAccImagesImageV2_visibility_1 = `
   resource "openstack_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
+      name = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
@@ -346,7 +358,7 @@ var testAccImagesImageV2_visibility_1 = `
 
 var testAccImagesImageV2_visibility_2 = `
   resource "openstack_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
+      name = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
@@ -355,7 +367,7 @@ var testAccImagesImageV2_visibility_2 = `
 
 var testAccImagesImageV2_timeout = `
   resource "openstack_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
+      name = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"

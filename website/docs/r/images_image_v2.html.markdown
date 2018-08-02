@@ -57,7 +57,9 @@ The following arguments are supported:
 * `name` - (Required) The name of the image.
 
 * `properties` - (Optional) A map of key/value pairs to set freeform
-    information about an image.
+    information about an image. This will not include properties that have
+    been automatically set by the Image service. To see those properties,
+    use the `all_properties` attribute detailed below.
 
 * `protected` - (Optional) If true, image will not be deletable.
    Defaults to false.
@@ -97,6 +99,8 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `owner` - The id of the openstack user who owns the image.
 * `properties` - See Argument Reference above.
+* `all_properties` - All properties of the image, both user-defined
+  and service-defined.
 * `protected` - See Argument Reference above.
 * `region` - See Argument Reference above.
 * `schema` - The path to the JSON-schema that represent
