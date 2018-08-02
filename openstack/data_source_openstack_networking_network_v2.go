@@ -96,6 +96,19 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return err
 	}
+
+	// First extract into a normal networks.Network in order to see if
+	// there were any results at all.
+	tmpAllNetworks, err := networks.ExtractNetworks(pages)
+	if err != nil {
+		return err
+	}
+
+	if len(tmpAllNetworks) < 1 {
+		return fmt.Errorf("Your query reqturned no results. " +
+			"Please change your search criteria and try again.")
+	}
+
 	type networkWithExternalExt struct {
 		networks.Network
 		external.NetworkExternalExt
