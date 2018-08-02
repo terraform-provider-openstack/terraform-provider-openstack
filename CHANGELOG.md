@@ -1,4 +1,17 @@
-## 1.7.1 (Unreleased)
+## 1.8.0 (Unreleased)
+
+BACKWARDS INCOMPATIBILITIES / NOTES:
+
+* Support for `default_domain` has been added. This should not cause any issues, but please report any issues encountered.
+
+IMPROVEMENTS
+
+* Added support for `default_domain` during authentication [GH-329]
+
+BUG FIXES
+
+* Newer versions of OpenStack are automatically adding an image property of `os_hidden` which might cause `openstack_images_image_v2.properties` to show a diff. A fix has been made to address this [GH-381].
+
 ## 1.7.0 (August 01, 2018)
 
 FEATURES
