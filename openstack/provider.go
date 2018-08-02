@@ -80,58 +80,52 @@ func Provider() terraform.ResourceProvider {
 			},
 
 			"user_domain_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"OS_USER_DOMAIN_NAME",
-				}, ""),
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_USER_DOMAIN_NAME", ""),
 				Description: descriptions["user_domain_name"],
 			},
 
 			"user_domain_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"OS_USER_DOMAIN_ID",
-				}, ""),
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_USER_DOMAIN_ID", ""),
 				Description: descriptions["user_domain_id"],
 			},
 
 			"project_domain_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"OS_PROJECT_DOMAIN_NAME",
-				}, ""),
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_PROJECT_DOMAIN_NAME", ""),
 				Description: descriptions["project_domain_name"],
 			},
 
 			"project_domain_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"OS_PROJECT_DOMAIN_ID",
-				}, ""),
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_PROJECT_DOMAIN_ID", ""),
 				Description: descriptions["project_domain_id"],
 			},
 
 			"domain_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"OS_DOMAIN_ID",
-				}, ""),
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_DOMAIN_ID", ""),
 				Description: descriptions["domain_id"],
 			},
 
 			"domain_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"OS_DOMAIN_NAME",
-					"OS_DEFAULT_DOMAIN",
-				}, ""),
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_DOMAIN_NAME", ""),
 				Description: descriptions["domain_name"],
+			},
+
+			"default_domain": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_DEFAULT_DOMAIN", "default"),
+				Description: descriptions["default_domain"],
 			},
 
 			"insecure": &schema.Schema{
@@ -302,6 +296,8 @@ func init() {
 
 		"domain_name": "The name of the Domain to scope to (Identity v3).",
 
+		"default_domain": "The name of the Domain ID to scope to if no other domain is specified. Defaults to `default` (Identity v3).",
+
 		"insecure": "Trust self-signed certificates.",
 
 		"cacert_file": "A Custom CA certificate.",
@@ -328,6 +324,7 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		ClientCertFile:    d.Get("cert").(string),
 		ClientKeyFile:     d.Get("key").(string),
 		Cloud:             d.Get("cloud").(string),
+		DefaultDomain:     d.Get("default_domain").(string),
 		DomainID:          d.Get("domain_id").(string),
 		DomainName:        d.Get("domain_name").(string),
 		EndpointType:      d.Get("endpoint_type").(string),
