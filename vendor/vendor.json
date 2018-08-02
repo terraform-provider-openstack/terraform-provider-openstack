@@ -487,6 +487,12 @@
 			"revisionTime": "2018-07-27T00:43:57Z"
 		},
 		{
+			"checksumSHA1": "obpfSV89ht0YMt3WYLFmQj1rWLE=",
+			"path": "github.com/gophercloud/gophercloud/openstack/identity/v3/groups",
+			"revision": "a27e54c3801dfe3970de492059cd088aef65064c",
+			"revisionTime": "2018-08-02T04:17:03Z"
+		},
+		{
 			"checksumSHA1": "3W2lBfZVEu3kf9Nq3KFnBwG76nw=",
 			"path": "github.com/gophercloud/gophercloud/openstack/identity/v3/projects",
 			"revision": "062f2739aef0b03a8e68cd94865c34d416d753e0",
