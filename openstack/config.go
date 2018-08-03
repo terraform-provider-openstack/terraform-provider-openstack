@@ -40,6 +40,7 @@ type Config struct {
 	Username          string
 	UserID            string
 	useOctavia        bool
+	Validate          bool
 
 	OsClient *gophercloud.ProviderClient
 }
@@ -184,7 +185,7 @@ func (c *Config) LoadAndValidate() error {
 	}
 
 	// If using Swift Authentication, there's no need to validate authentication normally.
-	if !c.Swauth {
+	if !c.Swauth && c.Validate {
 		err = openstack.Authenticate(client, *ao)
 		if err != nil {
 			return err
