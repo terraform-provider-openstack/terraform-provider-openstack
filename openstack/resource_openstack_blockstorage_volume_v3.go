@@ -253,7 +253,9 @@ func resourceBlockStorageVolumeV3Update(d *schema.ResourceData, meta interface{}
 			blockStorageClient.Microversion = "3.42"
 		}
 
-		extendOpts := volumeactions.ExtendSizeOpts{d.Get("size").(int)}
+		extendOpts := volumeactions.ExtendSizeOpts{
+			NewSize: d.Get("size").(int),
+		}
 		err = volumeactions.ExtendSize(blockStorageClient, d.Id(), extendOpts).ExtractErr()
 		if err != nil {
 			return fmt.Errorf(
