@@ -193,6 +193,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_identity_user_v3":         dataSourceIdentityUserV3(),
 			"openstack_identity_auth_scope_v3":   dataSourceIdentityAuthScopeV3(),
 			"openstack_identity_endpoint_v3":     dataSourceIdentityEndpointV3(),
+			"openstack_identity_group_v3":        dataSourceIdentityGroupV3(),
 			"openstack_images_image_v2":          dataSourceImagesImageV2(),
 			"openstack_networking_network_v2":    dataSourceNetworkingNetworkV2(),
 			"openstack_networking_subnet_v2":     dataSourceNetworkingSubnetV2(),
