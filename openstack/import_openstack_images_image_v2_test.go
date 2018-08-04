@@ -15,7 +15,7 @@ func TestAccImagesImageV2_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccImagesImageV2_basic,
+				Config: testAccImagesImageV2_basicImport,
 			},
 
 			resource.TestStep{
@@ -28,6 +28,7 @@ func TestAccImagesImageV2_importBasic(t *testing.T) {
 					"image_cache_path",
 					"image_source_url",
 					"verify_checksum",
+					"properties",
 				},
 			},
 		},
