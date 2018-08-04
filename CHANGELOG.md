@@ -4,6 +4,10 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 * Support for `default_domain` has been added. This should not cause any issues, but please report any issues encountered.
 
+FEATURES
+
+* __New Data Source__: `openstack_identity_group_v3` [GH-385]
+
 IMPROVEMENTS
 
 * Added support for `default_domain` during authentication [GH-329]
