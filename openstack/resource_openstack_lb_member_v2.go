@@ -62,9 +62,9 @@ func resourceMemberV2() *schema.Resource {
 				Computed: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					value := v.(int)
-					if value < 1 {
+					if value < 0 || value > 256 {
 						errors = append(errors, fmt.Errorf(
-							"Only numbers greater than 0 are supported values for 'weight'"))
+							"Only numbers between 0 and 256 (inclusive) are supported values for 'weight'"))
 					}
 					return
 				},
