@@ -58,7 +58,7 @@ func resourceComputeFloatingIPAssociateV2() *schema.Resource {
 				Type:     schema.TypeBool,
 				Default:  false,
 				Optional: true,
-				ForceNew: true,
+				ForceNew: false,
 			},
 		},
 	}
