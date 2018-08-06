@@ -45,10 +45,12 @@ The following arguments are supported:
 * `protocol_port` - (Required) The port on which to listen for client traffic.
     Changing this creates a new member.
 
-* `weight` - (Optional)  A positive integer value that indicates the relative
-    portion of traffic that this member should receive from the pool. For
-    example, a member with a weight of 10 receives five times as much traffic
-    as a member with a weight of 2.
+* `weight` - (Optional)  An integer value between 0 and 256 (inclusive) that
+    indicates the relative portion of traffic that this member should receive
+    from the pool. For example, a member with a weight of 10 receives five
+    times as much traffic as a member with a weight of 2.
+    A value of 0 means the member does not receive new connections but
+    continues to service existing connections.
 
 * `admin_state_up` - (Optional) The administrative state of the member.
     A valid value is true (UP) or false (DOWN).
