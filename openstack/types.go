@@ -64,8 +64,20 @@ func (lrt *LogRoundTripper) RoundTrip(request *http.Request) (*http.Response, er
 	}
 
 	response, err := lrt.Rt.RoundTrip(request)
-	if response == nil {
-		return nil, err
+	retires := 5
+
+	//retriying connection
+	for i := 1; response == nil; i++ {
+		if i > retires {
+			if lrt.OsDebug {
+				log.Printf("[DEBUG] Openstack connection error, retries exhausted. Aborting")
+			}
+			return nil, err
+		}
+		if lrt.OsDebug {
+			log.Printf("[DEBUG] Openstack connection error, retry number %d", i)
+		}
+		response, err = lrt.Rt.RoundTrip(request)
 	}
 
 	if lrt.OsDebug {
