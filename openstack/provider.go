@@ -351,7 +351,13 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		Username:          d.Get("user_name").(string),
 		UserID:            d.Get("user_id").(string),
 		useOctavia:        d.Get("use_octavia").(bool),
-		Validate:          d.Get("validate").(bool),
+		Validate:          true,
+	}
+
+	if v := d.Get("validate"); v != nil {
+		if validate, ok := v.(bool); ok {
+			config.Validate = validate
+		}
 	}
 
 	v, ok := d.GetOkExists("insecure")

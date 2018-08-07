@@ -5,9 +5,17 @@ import (
 )
 
 func dataSourceOpenStackConfig() *schema.Resource {
+	providerSchema := getProviderSchema()
+
+	providerSchema["validate"] = &schema.Schema{
+		Type:     schema.TypeBool,
+		Optional: true,
+		Default:  "false",
+	}
+
 	return &schema.Resource{
 		Read:   dataSourceOpenStackConfigRead,
-		Schema: getProviderSchema(),
+		Schema: providerSchema,
 	}
 }
 
