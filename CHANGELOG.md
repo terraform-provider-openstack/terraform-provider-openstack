@@ -3,6 +3,7 @@
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
 * Support for `default_domain` has been added. This should not cause any issues, but please report any issues encountered.
+* `openstack_images_image_v2.properties` has been set to `ForceNew`. If properties are modified, the image will be recreated. Previously, updates to the properties were only happening in the Terraform state and not actually reflected on the image itself.
 
 FEATURES
 
@@ -12,10 +13,7 @@ FEATURES
 IMPROVEMENTS
 
 * Added support for `default_domain` during authentication [GH-329]
-
-BUG FIXES
-
-* Newer versions of OpenStack are automatically adding an image property of `os_hidden` which might cause `openstack_images_image_v2.properties` to show a diff. A fix has been made to address this [GH-381].
+* The upcoming OpenStack Rocky releaes will be automatically adding additional properties to the `openstack_images_image_v2` resource. This resource has been patched to account for this and to reconcile these server-provided properties with the user-provided properties. In addition, `openstack_images_image_v2.properties` has been set to `ForceNew` and will recreate the image when properties have been modified. Previously, any updates to the properties were only happening in the state and not actually reflected on the image itself. [GH-390]
 
 ## 1.7.0 (August 01, 2018)
 
