@@ -15,6 +15,10 @@ IMPROVEMENTS
 * Added support for `default_domain` during authentication [GH-329]
 * The upcoming OpenStack Rocky releaes will be automatically adding additional properties to the `openstack_images_image_v2` resource. This resource has been patched to account for this and to reconcile these server-provided properties with the user-provided properties. In addition, `openstack_images_image_v2.properties` has been set to `ForceNew` and will recreate the image when properties have been modified. Previously, any updates to the properties were only happening in the state and not actually reflected on the image itself. [GH-390]
 
+BUG FIXES
+
+* The addition of the `openstack_networking_network_v2.external` data source property caused unintended behavior of results only containing external or non-external networks. This bug has been fixed and we apologize for the inconvenience [GH-384]
+
 ## 1.7.0 (August 01, 2018)
 
 FEATURES
