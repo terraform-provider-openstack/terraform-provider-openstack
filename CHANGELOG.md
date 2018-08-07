@@ -7,6 +7,7 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 FEATURES
 
 * __New Data Source__: `openstack_identity_group_v3` [GH-385]
+* __New Data Source__: `openstack_networking_floatingip_v2` [GH-387]
 
 IMPROVEMENTS
 
