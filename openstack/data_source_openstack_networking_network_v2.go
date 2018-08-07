@@ -70,25 +70,45 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 
-	listOpts := networks.ListOpts{
+	var listOpts networks.ListOptsBuilder
+
+	var status string
+	if v, ok := d.GetOk("status"); ok {
+		status = v.(string)
+	}
+
+	listOpts = networks.ListOpts{
 		ID:       d.Get("network_id").(string),
 		Name:     d.Get("name").(string),
 		TenantID: d.Get("tenant_id").(string),
-	}
-	if v, ok := d.GetOk("status"); ok {
-		listOpts.Status = v.(string)
+		Status:   status,
 	}
 
-	isExternal := d.Get("external").(bool)
-	listExternalOpts := external.ListOptsExt{
-		ListOptsBuilder: listOpts,
-		External:        &isExternal,
+	if v, ok := d.GetOkExists("external"); ok {
+		isExternal := v.(bool)
+		listOpts = external.ListOptsExt{
+			ListOptsBuilder: listOpts,
+			External:        &isExternal,
+		}
 	}
 
-	pages, err := networks.List(networkingClient, listExternalOpts).AllPages()
+	pages, err := networks.List(networkingClient, listOpts).AllPages()
 	if err != nil {
 		return err
 	}
+
+	// First extract into a normal networks.Network in order to see if
+	// there were any results at all.
+	tmpAllNetworks, err := networks.ExtractNetworks(pages)
+	if err != nil {
+		return err
+	}
+
+	if len(tmpAllNetworks) < 1 {
+		return fmt.Errorf("Your query reqturned no results. " +
+			"Please change your search criteria and try again.")
+	}
+
 	type networkWithExternalExt struct {
 		networks.Network
 		external.NetworkExternalExt
@@ -141,7 +161,7 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	d.Set("name", network.Name)
 	d.Set("admin_state_up", strconv.FormatBool(network.AdminStateUp))
 	d.Set("shared", strconv.FormatBool(network.Shared))
-	d.Set("external", strconv.FormatBool(network.External))
+	d.Set("external", network.External)
 	d.Set("tenant_id", network.TenantID)
 	d.Set("region", GetRegion(d, config))
 
