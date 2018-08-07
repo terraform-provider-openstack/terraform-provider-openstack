@@ -17,7 +17,8 @@ IMPROVEMENTS
 
 BUG FIXES
 
-* The addition of the `openstack_networking_network_v2.external` data source property caused unintended behavior of results only containing external or non-external networks. This bug has been fixed and we apologize for the inconvenience [GH-384]
+* The addition of the `openstack_networking_network_v2.external` data source argument caused unintended behavior of results only containing external or non-external networks. This bug has been fixed and we apologize for the inconvenience [GH-384]
+* The addition of the `openstack_compute_floatingip_associate_v2.wait_until_associated` argument caused the floating IP association to be recreated when updating to a later release of this provider. This was unintended and this has been resolved [GH-395]
 
 ## 1.7.0 (August 01, 2018)
 
