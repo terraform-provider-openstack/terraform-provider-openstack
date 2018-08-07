@@ -199,6 +199,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_networking_subnet_v2":     dataSourceNetworkingSubnetV2(),
 			"openstack_networking_secgroup_v2":   dataSourceNetworkingSecGroupV2(),
 			"openstack_networking_subnetpool_v2": dataSourceNetworkingSubnetPoolV2(),
+			"openstack_networking_floatingip_v2": dataSourceNetworkingFloatingIPV2(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
