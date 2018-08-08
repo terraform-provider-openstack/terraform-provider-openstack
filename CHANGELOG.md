@@ -1,4 +1,4 @@
-## 1.8.0 (Unreleased)
+## 1.8.0 (August 08, 2018)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
@@ -7,18 +7,18 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 FEATURES
 
-* __New Data Source__: `openstack_identity_group_v3` [GH-385]
-* __New Data Source__: `openstack_networking_floatingip_v2` [GH-387]
+* __New Data Source__: `openstack_identity_group_v3` ([#385](https://github.com/terraform-providers/terraform-provider-openstack/issues/385))
+* __New Data Source__: `openstack_networking_floatingip_v2` ([#387](https://github.com/terraform-providers/terraform-provider-openstack/issues/387))
 
 IMPROVEMENTS
 
-* Added support for `default_domain` during authentication [GH-329]
-* The upcoming OpenStack Rocky release will be automatically adding additional properties to the `openstack_images_image_v2` resource. This resource has been patched to account for this and to reconcile these server-provided properties with the user-provided properties. In addition, `openstack_images_image_v2.properties` has been set to `ForceNew` and will recreate the image when properties have been modified. Previously, any updates to the properties were only happening in the state and not actually reflected on the image itself. [GH-390]
+* Added support for `default_domain` during authentication ([#329](https://github.com/terraform-providers/terraform-provider-openstack/issues/329))
+* The upcoming OpenStack Rocky release will be automatically adding additional properties to the `openstack_images_image_v2` resource. This resource has been patched to account for this and to reconcile these server-provided properties with the user-provided properties. In addition, `openstack_images_image_v2.properties` has been set to `ForceNew` and will recreate the image when properties have been modified. Previously, any updates to the properties were only happening in the state and not actually reflected on the image itself. ([#390](https://github.com/terraform-providers/terraform-provider-openstack/issues/390))
 
 BUG FIXES
 
-* The addition of the `openstack_networking_network_v2.external` data source argument caused unintended behavior of results only containing external or non-external networks. This bug has been fixed and we apologize for the inconvenience [GH-384]
-* The addition of the `openstack_compute_floatingip_associate_v2.wait_until_associated` argument caused the floating IP association to be recreated when updating to a later release of this provider. This was unintended and this has been resolved [GH-395]
+* The addition of the `openstack_networking_network_v2.external` data source argument caused unintended behavior of results only containing external or non-external networks. This bug has been fixed and we apologize for the inconvenience ([#384](https://github.com/terraform-providers/terraform-provider-openstack/issues/384))
+* The addition of the `openstack_compute_floatingip_associate_v2.wait_until_associated` argument caused the floating IP association to be recreated when updating to a later release of this provider. This was unintended and this has been resolved ([#395](https://github.com/terraform-providers/terraform-provider-openstack/issues/395))
 
 ## 1.7.0 (August 01, 2018)
 
