@@ -1,4 +1,9 @@
 ## 1.9.0 (Unreleased)
+
+FEATURES
+
+* __New Data Source__: `openstack_fw_policy_v1` [GH-398]
+
 ## 1.8.0 (August 08, 2018)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
