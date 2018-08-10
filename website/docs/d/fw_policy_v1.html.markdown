@@ -8,7 +8,7 @@ description: |-
 
 # openstack\_fw\_policy_v1
 
-Use this data source to get firewall policy information^ of an available OpenStack firewall policy.
+Use this data source to get firewall policy information of an available OpenStack firewall policy.
 
 ## Example Usage
 
