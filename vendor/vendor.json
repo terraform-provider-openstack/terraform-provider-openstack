@@ -433,6 +433,12 @@
 			"revisionTime": "2018-08-17T04:16:43Z"
 		},
 		{
+			"checksumSHA1": "MGvjsfqOSarUqCcot2lkJ3A4El0=",
+			"path": "github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clustertemplates",
+			"revision": "4ea085781bae939cfc932f7bf0d11534423dc84b",
+			"revisionTime": "2018-08-07T01:54:16Z"
+		},
+		{
 			"checksumSHA1": "paRHLRizEZWL2sm/vG38zr+DQRM=",
 			"path": "github.com/gophercloud/gophercloud/openstack/db/v1/configurations",
 			"revision": "185230dfbd12fc178f22e1e2a5c4cf0e3ef5ae45",
