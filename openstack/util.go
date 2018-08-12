@@ -145,3 +145,14 @@ func resourceNetworkingAvailabilityZoneHintsV2(d *schema.ResourceData) []string 
 	}
 	return azh
 }
+
+func resourceLinks(rawLinks []gophercloud.Link) []map[string]string {
+	links := make([]map[string]string, len(rawLinks))
+	for _, rawLink := range rawLinks {
+		links = append(links, map[string]string{
+			"rel":  rawLink.Rel,
+			"href": rawLink.Href,
+		})
+	}
+	return links
+}
