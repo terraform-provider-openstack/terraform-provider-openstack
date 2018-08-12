@@ -292,6 +292,13 @@ func (c *Config) databaseV1Client(region string) (*gophercloud.ServiceClient, er
 	})
 }
 
+func (c *Config) containerInfraV1Client(region string) (*gophercloud.ServiceClient, error) {
+	return openstack.NewContainerInfraV1(c.OsClient, gophercloud.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) getEndpointType() gophercloud.Availability {
 	if c.EndpointType == "internal" || c.EndpointType == "internalURL" {
 		return gophercloud.AvailabilityInternal
