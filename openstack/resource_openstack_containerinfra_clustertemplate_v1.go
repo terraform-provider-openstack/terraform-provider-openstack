@@ -4,12 +4,8 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"strings"
 	"time"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clustertemplates"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -112,33 +108,19 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 				ForceNew: false,
 				Computed: true,
 			},
-			"flavor_id": &schema.Schema{
+			"flavor": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    false,
 				Computed:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_FLAVOR_ID", nil),
+				DefaultFunc: schema.EnvDefaultFunc("OS_MAGNUM_FLAVOR", nil),
 			},
-			"flavor_name": &schema.Schema{
+			"master_flavor": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    false,
 				Computed:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_FLAVOR_NAME", nil),
-			},
-			"master_flavor_id": &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    false,
-				Computed:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_FLAVOR_ID", nil),
-			},
-			"master_flavor_name": &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    false,
-				Computed:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_FLAVOR_NAME", nil),
+				DefaultFunc: schema.EnvDefaultFunc("OS_MAGNUM_MASTER_FLAVOR", nil),
 			},
 			"floating_ip_enabled": &schema.Schema{
 				Type:     schema.TypeBool,
@@ -158,19 +140,11 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 				ForceNew: false,
 				Computed: true,
 			},
-			"image_id": &schema.Schema{
+			"image": &schema.Schema{
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				ForceNew:    false,
-				Computed:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_CONTAINERINFRA_IMAGE_ID", nil),
-			},
-			"image_name": &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    false,
-				Computed:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_CONTAINERINFRA_IMAGE_NAME", nil),
+				DefaultFunc: schema.EnvDefaultFunc("OS_MAGNUM_IMAGE", nil),
 			},
 			"insecure_registry": &schema.Schema{
 				Type:     schema.TypeString,
@@ -263,21 +237,9 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 
 func resourceContainerInfraClusterTemplateV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2Client(GetRegion(d, config))
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
-	}
 	containerInfraClient, err := config.containerInfraV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
-	}
-
-	// Get imageID using following rules:
-	//  - if an image_id was specified, use it
-	//  - if an image_name was specified, look up the ID, report if error
-	imageID, err := getContainerInfraImageID(computeClient, d)
-	if err != nil {
-		return err
 	}
 
 	// Get boolean parameters that will be passed by reference.
@@ -294,10 +256,12 @@ func resourceContainerInfraClusterTemplateV1Create(d *schema.ResourceData, meta 
 		ExternalNetworkID:   d.Get("external_network_id").(string),
 		FixedNetwork:        d.Get("fixed_network").(string),
 		FixedSubnet:         d.Get("fixed_subnet").(string),
+		FlavorID:            d.Get("flavor").(string),
+		MasterFlavorID:      d.Get("master_flavor").(string),
 		FloatingIPEnabled:   &floatingIPEnabled,
 		HTTPProxy:           d.Get("http_proxy").(string),
 		HTTPSProxy:          d.Get("https_proxy").(string),
-		ImageID:             imageID,
+		ImageID:             d.Get("image").(string),
 		InsecureRegistry:    d.Get("insecure_registry").(string),
 		KeyPairID:           d.Get("keypair_id").(string),
 		Labels:              resourceClusterTemplateLabelsV1(d),
@@ -310,26 +274,6 @@ func resourceContainerInfraClusterTemplateV1Create(d *schema.ResourceData, meta 
 		ServerType:          d.Get("server_type").(string),
 		TLSDisabled:         &tlsDisabled,
 		VolumeDriver:        d.Get("volume_driver").(string),
-	}
-
-	// Get nodes and masters flavors using following rules:
-	//  - if a flavor_id was specified, use it for regular nodes
-	//  - if a flavor_name was specified, look up the ID, report if error
-	//  - if a master_flavor_id was specified, use it for regular nodes
-	//  - if a master_flavor_name was specified, look up the ID, report if error
-	flavorID, err := getContainerInfraFlavorID(computeClient, d, "")
-	if err != nil {
-		return err
-	}
-	if flavorID != "" {
-		createOpts.FlavorID = flavorID
-	}
-	masterFlavorID, err := getContainerInfraFlavorID(computeClient, d, "master")
-	if err != nil {
-		return err
-	}
-	if masterFlavorID != "" {
-		createOpts.MasterFlavorID = masterFlavorID
 	}
 
 	// Set int parameters that will be passed by reference.
@@ -355,10 +299,6 @@ func resourceContainerInfraClusterTemplateV1Create(d *schema.ResourceData, meta 
 
 func resourceContainerInfraClusterTemplateV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2Client(GetRegion(d, config))
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
-	}
 	containerInfraClient, err := config.containerInfraV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
@@ -404,22 +344,6 @@ func resourceContainerInfraClusterTemplateV1Read(d *schema.ResourceData, meta in
 	d.Set("created_at", s.CreatedAt)
 	d.Set("updated_at", s.UpdatedAt)
 
-	// Set flavors names.
-	if s.FlavorID != "" {
-		flavor, err := flavors.Get(computeClient, s.FlavorID).Extract()
-		if err != nil {
-			return err
-		}
-		d.Set("flavor_name", flavor.Name)
-	}
-	if s.MasterFlavorID != "" {
-		masterFlavor, err := flavors.Get(computeClient, s.MasterFlavorID).Extract()
-		if err != nil {
-			return err
-		}
-		d.Set("master_flavor_name", masterFlavor.Name)
-	}
-
 	// Set apiserver_port.
 	if s.APIServerPort != "" {
 		apiServerPort, err := strconv.Atoi(s.APIServerPort)
@@ -457,43 +381,6 @@ func validateClusterTemplateAPIServerPortV1(v interface{}, k string) (ws []strin
 		errors = append(errors, err)
 	}
 	return
-}
-
-func getContainerInfraImageID(computeClient *gophercloud.ServiceClient, d *schema.ResourceData) (string, error) {
-	if imageID := d.Get("image_id").(string); imageID != "" {
-		return imageID, nil
-	}
-
-	if imageName := d.Get("image_name").(string); imageName != "" {
-		imageID, err := images.IDFromName(computeClient, imageName)
-		if err != nil {
-			return "", err
-		}
-		return imageID, nil
-	}
-
-	return "", fmt.Errorf("Neither an image_id or image_name were able to be determined.")
-}
-
-func getContainerInfraFlavorID(client *gophercloud.ServiceClient, d *schema.ResourceData, prefix string) (string, error) {
-	attrID := "flavor_id"
-	attrName := "flavor_name"
-	if prefix != "" {
-		attrID = strings.Join([]string{prefix, attrID}, "_")
-		attrName = strings.Join([]string{prefix, attrName}, "_")
-	}
-
-	flavorID := d.Get("flavor_id").(string)
-	if flavorID != "" {
-		return flavorID, nil
-	}
-
-	flavorName := d.Get("flavor_name").(string)
-	if flavorName == "" {
-		return "", nil
-	}
-
-	return flavors.IDFromName(client, flavorName)
 }
 
 func resourceClusterTemplateLabelsV1(d *schema.ResourceData) map[string]string {
