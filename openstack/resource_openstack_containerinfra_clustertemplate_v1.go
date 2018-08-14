@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clustertemplates"
@@ -14,7 +15,7 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceContainerInfraClusterTemplateV1Create,
 		Read:   resourceContainerInfraClusterTemplateV1Read,
-		// Update: resourceContainerInfraClusterTemplateV1Update,
+		Update: resourceContainerInfraClusterTemplateV1Update,
 		Delete: resourceContainerInfraClusterTemplateV1Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -264,7 +265,7 @@ func resourceContainerInfraClusterTemplateV1Create(d *schema.ResourceData, meta 
 		ImageID:             d.Get("image").(string),
 		InsecureRegistry:    d.Get("insecure_registry").(string),
 		KeyPairID:           d.Get("keypair_id").(string),
-		Labels:              resourceClusterTemplateLabelsV1(d),
+		Labels:              resourceClusterTemplateLabelsMapV1(d),
 		MasterLBEnabled:     &masterLBEnabled,
 		Name:                d.Get("name").(string),
 		NetworkDriver:       d.Get("network_driver").(string),
@@ -356,9 +357,106 @@ func resourceContainerInfraClusterTemplateV1Read(d *schema.ResourceData, meta in
 	return nil
 }
 
-// func resourceContainerInfraClusterTemplateV1Update(d *schema.ResourceData, meta interface{}) error {
-//
-// }
+func resourceContainerInfraClusterTemplateV1Update(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	containerInfraClient, err := config.containerInfraV1Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
+	}
+
+	updateOpts := []clustertemplates.UpdateOptsBuilder{}
+
+	if d.HasChange("name") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "name", d.Get("name").(string))
+	}
+	if d.HasChange("apiserver_port") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "apiserver_port", strconv.Itoa(d.Get("apiserver_port").(int)))
+	}
+	if d.HasChange("coe") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "coe", d.Get("coe").(string))
+	}
+	if d.HasChange("cluster_distro") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "cluster_distro", d.Get("cluster_distro").(string))
+	}
+	if d.HasChange("dns_nameserver") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "dns_nameserver", d.Get("dns_nameserver").(string))
+	}
+	if d.HasChange("docker_storage_driver") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "docker_storage_driver", d.Get("docker_storage_driver").(string))
+	}
+	if d.HasChange("docker_volume_size") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "docker_volume_size", strconv.Itoa(d.Get("docker_volume_size").(int)))
+	}
+	if d.HasChange("external_network_id") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "external_network_id", d.Get("external_network_id").(string))
+	}
+	if d.HasChange("fixed_network") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "fixed_network", d.Get("fixed_network").(string))
+	}
+	if d.HasChange("fixed_subnet") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "fixed_subnet", d.Get("fixed_subnet").(string))
+	}
+	if d.HasChange("flavor") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "flavor_id", d.Get("flavor").(string))
+	}
+	if d.HasChange("master_flavor") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "master_flavor_id", d.Get("master_flavor").(string))
+	}
+	if d.HasChange("floating_ip_enabled") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "floating_ip_enabled", strconv.FormatBool(d.Get("floating_ip_enabled").(bool)))
+	}
+	if d.HasChange("http_proxy") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "http_proxy", d.Get("http_proxy").(string))
+	}
+	if d.HasChange("https_proxy") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "https_proxy", d.Get("https_proxy").(string))
+	}
+	if d.HasChange("image") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "image_id", d.Get("image").(string))
+	}
+	if d.HasChange("insecure_registry") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "insecure_registry", d.Get("insecure_registry").(string))
+	}
+	if d.HasChange("keypair_id") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "keypair_id", d.Get("keypair_id").(string))
+	}
+	if d.HasChange("labels") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "labels", resourceClusterTemplateLabelsStringV1(d.Get("labels").(map[string]interface{})))
+	}
+	if d.HasChange("master_lb_enabled") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "master_lb_enabled", strconv.FormatBool(d.Get("master_lb_enabled").(bool)))
+	}
+	if d.HasChange("network_driver") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "network_driver", d.Get("network_driver").(string))
+	}
+	if d.HasChange("no_proxy") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "no_proxy", d.Get("no_proxy").(string))
+	}
+	if d.HasChange("public") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "public", strconv.FormatBool(d.Get("public").(bool)))
+	}
+	if d.HasChange("registry_enabled") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "registry_enabled", strconv.FormatBool(d.Get("registry_enabled").(bool)))
+	}
+	if d.HasChange("server_type") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "server_type", d.Get("server_type").(string))
+	}
+	if d.HasChange("tls_disabled") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "tls_disabled", strconv.FormatBool(d.Get("tls_disabled").(bool)))
+	}
+	if d.HasChange("volume_driver") {
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "volume_driver", d.Get("volume_driver").(string))
+	}
+
+	log.Printf("[DEBUG] Updating Cluster template %s with options: %+v", d.Id(), updateOpts)
+
+	_, err = clustertemplates.Update(containerInfraClient, d.Id(), updateOpts).Extract()
+	if err != nil {
+		return fmt.Errorf("Error updating OpenStack container infra Cluster template: %s", err)
+	}
+
+	return resourceContainerInfraClusterTemplateV1Read(d, meta)
+}
 
 func resourceContainerInfraClusterTemplateV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
@@ -383,10 +481,32 @@ func validateClusterTemplateAPIServerPortV1(v interface{}, k string) (ws []strin
 	return
 }
 
-func resourceClusterTemplateLabelsV1(d *schema.ResourceData) map[string]string {
+func resourceClusterTemplateLabelsMapV1(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
 	for key, val := range d.Get("labels").(map[string]interface{}) {
 		m[key] = val.(string)
 	}
 	return m
+}
+
+func resourceClusterTemplateLabelsStringV1(labels map[string]interface{}) string {
+	var formattedLabels string
+	for labelKey, labelValue := range labels {
+		formattedLabels = strings.Join([]string{
+			formattedLabels,
+			fmt.Sprintf("%s=%s", labelKey, labelValue.(string)),
+		}, ",")
+	}
+	formattedLabels = strings.Trim(formattedLabels, ",")
+
+	return formattedLabels
+}
+
+func resourceClusterTemplateAppendUpdateOptsV1(updateOpts []clustertemplates.UpdateOptsBuilder, attribute string, value string) []clustertemplates.UpdateOptsBuilder {
+	updateOpts = append(updateOpts, clustertemplates.UpdateOpts{
+		Op:    clustertemplates.ReplaceOp,
+		Path:  strings.Join([]string{"/", attribute}, ""),
+		Value: value,
+	})
+	return updateOpts
 }
