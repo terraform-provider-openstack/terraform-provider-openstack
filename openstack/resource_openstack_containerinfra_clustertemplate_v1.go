@@ -312,6 +312,7 @@ func resourceContainerInfraClusterTemplateV1Read(d *schema.ResourceData, meta in
 
 	log.Printf("[DEBUG] Retrieved Clustertemplate %s: %#v", d.Id(), s)
 
+	d.Set("apiserver_port", s.APIServerPort)
 	d.Set("coe", s.COE)
 	d.Set("cluster_distro", s.ClusterDistro)
 	d.Set("dns_nameserver", s.DNSNameServer)
@@ -344,15 +345,6 @@ func resourceContainerInfraClusterTemplateV1Read(d *schema.ResourceData, meta in
 	d.Set("user_id", s.UserID)
 	d.Set("created_at", s.CreatedAt)
 	d.Set("updated_at", s.UpdatedAt)
-
-	// Set apiserver_port.
-	if s.APIServerPort != "" {
-		apiServerPort, err := strconv.Atoi(s.APIServerPort)
-		if err != nil {
-			return fmt.Errorf("Error setting Cluster template API server port: %v", s.APIServerPort)
-		}
-		d.Set("apiserver_port", apiServerPort)
-	}
 
 	return nil
 }
@@ -474,8 +466,8 @@ func resourceContainerInfraClusterTemplateV1Delete(d *schema.ResourceData, meta 
 
 func validateClusterTemplateAPIServerPortV1(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(int)
-	if value < 1024 {
-		err := fmt.Errorf("%s should be greater or equal to 1024", k)
+	if value < 1024 || value > 65535 {
+		err := fmt.Errorf("%s should be between 1024 and 65535", k)
 		errors = append(errors, err)
 	}
 	return
