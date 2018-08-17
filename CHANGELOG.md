@@ -3,6 +3,7 @@
 FEATURES
 
 * __New Data Source__: `openstack_fw_policy_v1` [GH-398]
+* __New Data Source__: `openstack_networking_router_v2` [GH-401]
 
 ## 1.8.0 (August 08, 2018)
 
