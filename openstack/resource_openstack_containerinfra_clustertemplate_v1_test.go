@@ -17,6 +17,7 @@ func TestAccContainerInfraV1ClusterTemplateBasic(t *testing.T) {
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
 	imageName := acctest.RandomWithPrefix("tf-acc-image")
 	dockerVolumeSize := 5
+	resourceName := fmt.Sprintf("openstack_containerinfra_clustertemplate_v1.%s", clusterTemplateName)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -26,22 +27,16 @@ func TestAccContainerInfraV1ClusterTemplateBasic(t *testing.T) {
 			resource.TestStep{
 				Config: testAccContainerInfraV1ClusterTemplateBasic(clusterTemplateName, imageName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerInfraV1ClusterTemplateExists("openstack_containerinfra_clustertemplate_v1.clustertemplate_1", &clusterTemplate),
-					resource.TestCheckResourceAttr(
-						"openstack_containerinfra_clustertemplate_v1.clustertemplate_1", "name", clusterTemplateName),
+					testAccCheckContainerInfraV1ClusterTemplateExists(resourceName, &clusterTemplate),
+					resource.TestCheckResourceAttr(resourceName, "name", clusterTemplateName),
 				),
 			},
 			resource.TestStep{
 				Config: testAccContainerInfraV1ClusterTemplateUpdate(clusterTemplateName, imageName, dockerVolumeSize),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"openstack_containerinfra_clustertemplate_v1.clustertemplate_1", "name", clusterTemplateName),
-					resource.TestCheckResourceAttr(
-						"openstack_containerinfra_clustertemplate_v1.clustertemplate_1", "coe", "kubernetes"),
-					resource.TestCheckResourceAttr(
-						"openstack_containerinfra_clustertemplate_v1.clustertemplate_1", "docker_storage_driver", "devicemapper"),
-					resource.TestCheckResourceAttr(
-						"openstack_containerinfra_clustertemplate_v1.clustertemplate_1", "docker_volume_size", strconv.Itoa(dockerVolumeSize)),
+					resource.TestCheckResourceAttr(resourceName, "coe", "kubernetes"),
+					resource.TestCheckResourceAttr(resourceName, "docker_storage_driver", "devicemapper"),
+					resource.TestCheckResourceAttr(resourceName, "docker_volume_size", strconv.Itoa(dockerVolumeSize)),
 				),
 			},
 		},
@@ -117,12 +112,12 @@ resource "openstack_images_image_v2" "%s" {
 	}
 }
 
-resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
+resource "openstack_containerinfra_clustertemplate_v1" "%s" {
   name = "%s"
   image = "${openstack_images_image_v2.%s.id}"
 	coe = "kubernetes"
 }
-`, imageName, imageName, clusterTemplateName, imageName)
+`, imageName, imageName, clusterTemplateName, clusterTemplateName, imageName)
 }
 
 func testAccContainerInfraV1ClusterTemplateUpdate(clusterTemplateName, imageName string, dockerVolumeSize int) string {
@@ -141,12 +136,12 @@ resource "openstack_images_image_v2" "%s" {
   }
 }
 
-resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
+resource "openstack_containerinfra_clustertemplate_v1" "%s" {
   name = "%s"
   image = "${openstack_images_image_v2.%s.id}"
   coe = "kubernetes"
   docker_storage_driver = "devicemapper"
   docker_volume_size = %d
 }
-`, imageName, imageName, clusterTemplateName, imageName, dockerVolumeSize)
+`, imageName, imageName, clusterTemplateName, clusterTemplateName, imageName, dockerVolumeSize)
 }
