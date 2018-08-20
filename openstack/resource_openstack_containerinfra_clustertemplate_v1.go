@@ -60,7 +60,6 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     false,
-				Computed:     true,
 				ValidateFunc: validateClusterTemplateAPIServerPortV1,
 			},
 			"coe": &schema.Schema{
@@ -70,6 +69,7 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 			},
 			"cluster_distro": &schema.Schema{
 				Type:     schema.TypeString,
+				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
@@ -77,69 +77,58 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"docker_storage_driver": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"docker_volume_size": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"external_network_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"fixed_network": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"fixed_subnet": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"flavor": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    false,
-				Computed:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_MAGNUM_FLAVOR", nil),
 			},
 			"master_flavor": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    false,
-				Computed:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_MAGNUM_MASTER_FLAVOR", nil),
 			},
 			"floating_ip_enabled": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"http_proxy": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"https_proxy": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"image": &schema.Schema{
 				Type:        schema.TypeString,
@@ -151,19 +140,16 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"keypair_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"labels": &schema.Schema{
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"links": &schema.Schema{
 				Type: schema.TypeList,
@@ -188,7 +174,6 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"network_driver": &schema.Schema{
 				Type:     schema.TypeString,
@@ -200,19 +185,16 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"public": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"registry_enabled": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"server_type": &schema.Schema{
 				Type:     schema.TypeString,
@@ -224,13 +206,11 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 			"volume_driver": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 		},
 	}
@@ -495,10 +475,17 @@ func resourceClusterTemplateLabelsStringV1(labels map[string]interface{}) string
 }
 
 func resourceClusterTemplateAppendUpdateOptsV1(updateOpts []clustertemplates.UpdateOptsBuilder, attribute string, value string) []clustertemplates.UpdateOptsBuilder {
-	updateOpts = append(updateOpts, clustertemplates.UpdateOpts{
-		Op:    clustertemplates.ReplaceOp,
-		Path:  strings.Join([]string{"/", attribute}, ""),
-		Value: value,
-	})
+	if value == "" {
+		updateOpts = append(updateOpts, clustertemplates.UpdateOpts{
+			Op:   clustertemplates.RemoveOp,
+			Path: strings.Join([]string{"/", attribute}, ""),
+		})
+	} else {
+		updateOpts = append(updateOpts, clustertemplates.UpdateOpts{
+			Op:    clustertemplates.ReplaceOp,
+			Path:  strings.Join([]string{"/", attribute}, ""),
+			Value: value,
+		})
+	}
 	return updateOpts
 }

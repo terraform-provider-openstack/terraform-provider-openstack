@@ -29,12 +29,16 @@ func TestAccContainerInfraV1ClusterTemplateBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1ClusterTemplateExists(resourceName, &clusterTemplate),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterTemplateName),
+					resource.TestCheckResourceAttr(resourceName, "coe", "kubernetes"),
+					resource.TestCheckResourceAttr(resourceName, "http_proxy", "127.0.0.1:8801"),
 				),
 			},
 			resource.TestStep{
 				Config: testAccContainerInfraV1ClusterTemplateUpdate(clusterTemplateName, imageName, dockerVolumeSize),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", clusterTemplateName),
 					resource.TestCheckResourceAttr(resourceName, "coe", "kubernetes"),
+					resource.TestCheckResourceAttr(resourceName, "http_proxy", ""),
 					resource.TestCheckResourceAttr(resourceName, "docker_storage_driver", "devicemapper"),
 					resource.TestCheckResourceAttr(resourceName, "docker_volume_size", strconv.Itoa(dockerVolumeSize)),
 				),
@@ -116,6 +120,7 @@ resource "openstack_containerinfra_clustertemplate_v1" "%s" {
   name = "%s"
   image = "${openstack_images_image_v2.%s.id}"
 	coe = "kubernetes"
+	http_proxy = "127.0.0.1:8801"
 }
 `, imageName, imageName, clusterTemplateName, clusterTemplateName, imageName)
 }
