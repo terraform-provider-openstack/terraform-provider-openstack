@@ -105,7 +105,7 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	}
 
 	if len(tmpAllNetworks) < 1 {
-		return fmt.Errorf("Your query reqturned no results. " +
+		return fmt.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
