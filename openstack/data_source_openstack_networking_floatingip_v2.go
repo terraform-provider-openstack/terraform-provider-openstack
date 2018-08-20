@@ -74,7 +74,7 @@ func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface
 
 	pages, err := floatingips.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		fmt.Errorf("Unable to list Floating IPs: %s", err)
+		return fmt.Errorf("Unable to list Floating IPs: %s", err)
 	}
 
 	allFloatingIPs, err := floatingips.ExtractFloatingIPs(pages)
