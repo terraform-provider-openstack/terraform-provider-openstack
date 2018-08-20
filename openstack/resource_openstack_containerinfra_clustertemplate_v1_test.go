@@ -47,6 +47,30 @@ func TestAccContainerInfraV1ClusterTemplateBasic(t *testing.T) {
 	})
 }
 
+func TestAccContainerInfraV1ClusterTemplateLabels(t *testing.T) {
+
+	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
+	imageName := acctest.RandomWithPrefix("tf-acc-image")
+	resourceName := fmt.Sprintf("openstack_containerinfra_clustertemplate_v1.%s", clusterTemplateName)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerInfraV1ClusterTemplateDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccContainerInfraV1ClusterTemplateLabels(clusterTemplateName, imageName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "labels.kube_tag", "1.11.1"),
+					resource.TestCheckResourceAttr(resourceName, "labels.prometheus_monitoring", "true"),
+					resource.TestCheckResourceAttr(resourceName, "labels.influx_grafana_dashboard_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "labels.kube_dashboard_enabled", "true"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckContainerInfraV1ClusterTemplateExists(n string, clustertemplate *clustertemplates.ClusterTemplate) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -149,4 +173,34 @@ resource "openstack_containerinfra_clustertemplate_v1" "%s" {
   docker_volume_size = %d
 }
 `, imageName, imageName, clusterTemplateName, clusterTemplateName, imageName, dockerVolumeSize)
+}
+
+func testAccContainerInfraV1ClusterTemplateLabels(clusterTemplateName, imageName string) string {
+	return fmt.Sprintf(`
+resource "openstack_images_image_v2" "%s" {
+  name   = "%s"
+  image_source_url = "https://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img"
+  container_format = "bare"
+  disk_format = "raw"
+  properties {
+    os_distro = "fedora-atomic"
+  }
+
+  timeouts {
+    create = "10m"
+  }
+}
+
+resource "openstack_containerinfra_clustertemplate_v1" "%s" {
+  name = "%s"
+  image = "${openstack_images_image_v2.%s.id}"
+  coe = "kubernetes"
+  labels = {
+		kube_tag = "1.11.1"
+		prometheus_monitoring = "true"
+		influx_grafana_dashboard_enabled = "true"
+		kube_dashboard_enabled = "true"
+	}
+}
+`, imageName, imageName, clusterTemplateName, clusterTemplateName, imageName)
 }
