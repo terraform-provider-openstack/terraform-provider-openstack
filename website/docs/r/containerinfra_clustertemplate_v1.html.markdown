@@ -88,11 +88,13 @@ The following arguments are supported:
     cluster. Changing this updates the fixed subnet of the existing cluster
     template.
 
-* `flavor` - (Optional) The flavor for the nodes of the cluster. Changing this
-    updates the flavor of the existing cluster template.
+* `flavor` - (Optional) The flavor for the nodes of the cluster. Can be set via
+    the `OS_MAGNUM_FLAVOR` environment variable. Changing this updates the
+    flavor of the existing cluster template.
 
-* `master_flavor` - (Optional) The flavor for the master nodes. Changing this
-    updates the master flavor of the existing cluster template.
+* `master_flavor` - (Optional) The flavor for the master nodes. Can be set via
+    the `OS_MAGNUM_MASTER_FLAVOR` environment variable. Changing this updates
+    the master flavor of the existing cluster template.
 
 * `floating_ip_enabled` - (Optional) Indicates whether created cluster should
     create floating IP for every node or not. Changing this updates the
@@ -107,8 +109,8 @@ The following arguments are supported:
     the existing cluster template.
 
 * `image` - (Required) The reference to an image that is used for nodes of the
-    cluster. Changing this updates the image attribute of the existing cluster
-    template.
+    cluster. Can be set via the `OS_MAGNUM_IMAGE` environment variable.
+    Changing this updates the image attribute of the existing cluster template.
 
 * `insecure_registry` - (Optional) The insecure registry URL for the cluster
     template. Changing this updates the insecure registry attribute of the
