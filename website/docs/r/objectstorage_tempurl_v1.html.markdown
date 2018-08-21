@@ -25,19 +25,21 @@ resource "openstack_objectstorage_tempurl_v1" "obj_tempurl" {
 
 The following arguments are supported:
 
+* `region` - (Optional) The region the tempurl is located in.
+
 * `container` - (Required) The container name the object belongs to.
 
 * `object` - (Required) The object name the tempurl is for.
 
-* `ttl` - (Required) The TTL, in seconds, for the URL. For how long it should be valid.
+* `ttl` - (Required) The TTL, in seconds, for the URL. For how long it should
+  be valid.
 
-* `method` - (Optional) What methods are allowed for this URL. Valid values are `GET`, and `POST`. Default is `GET`.
-
-* `region` - (Optional) The region the tempurl is located in.
+* `method` - (Optional) What methods are allowed for this URL.
+  Valid values are `GET`, and `POST`. Default is `GET`.
 
 ## Attributes Reference
 
-* `Id` - Computed md5 hash based on the generated url
+* `id` - Computed md5 hash based on the generated url
 * `container` - See Argument Reference above.
 * `object` - See Argument Reference above.
 * `ttl` - See Argument Reference above.
