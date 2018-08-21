@@ -67,6 +67,12 @@ func resourceObjectstorageTempurlV1() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"regenerate": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			"url": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -134,8 +140,10 @@ func resourceObjectstorageTempurlV1Read(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("Failed to parse the temp url expiration time: %s", qp.Get("temp_url_expires"))
 	}
 
+	// Regenerate the URL if it has expired and if the user requested it to be.
+	regen := d.Get("regenerate").(bool)
 	now := time.Now().Unix()
-	if expiry < now {
+	if expiry < now && regen {
 		log.Printf("[DEBUG] URL expired, generating a new one")
 		d.SetId("")
 	}

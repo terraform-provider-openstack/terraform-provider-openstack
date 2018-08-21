@@ -10,6 +10,13 @@ description: |-
 
 Use this resource to generate an OpenStack Object Storage temporary URL.
 
+The temporary URL will be valid for as long as TTL is set to (in seconds).
+Once the URL has expired, it will no longer be valid, but the resource
+will remain in place. If you wish to automatically regenerate a URL, set
+the `regenerate` argument to `true`. This will create a new resource with
+a new ID and URL.
+
+
 ## Example Usage
 
 ```hcl
@@ -36,6 +43,10 @@ The following arguments are supported:
 
 * `method` - (Optional) What methods are allowed for this URL.
   Valid values are `GET`, and `POST`. Default is `GET`.
+
+* `regenerate` - (Optional) Whether to automatically regenerate the URL when
+  it has expired. If set to true, this will create a new resource with a new
+  ID and new URL. Defaults to false.
 
 ## Attributes Reference
 
