@@ -14,7 +14,7 @@ Use this data source to get the ID of an available OpenStack floating IP.
 
 ```hcl
 data "openstack_networking_floatingip_v2" "floatingip_1" {
-  address = "192.168.0.4."
+  address = "192.168.0.4"
 }
 ```
 
