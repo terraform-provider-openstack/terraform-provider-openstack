@@ -329,58 +329,79 @@ func resourceContainerInfraClusterTemplateV1Update(d *schema.ResourceData, meta 
 	updateOpts := []clustertemplates.UpdateOptsBuilder{}
 
 	if d.HasChange("name") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "name", d.Get("name").(string))
+		v := d.Get("name").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "name", v)
 	}
 	if d.HasChange("apiserver_port") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "apiserver_port", strconv.Itoa(d.Get("apiserver_port").(int)))
+		v := d.Get("apiserver_port").(int)
+		apiServerPort := strconv.Itoa(v)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "apiserver_port", apiServerPort)
 	}
 	if d.HasChange("coe") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "coe", d.Get("coe").(string))
+		v := d.Get("coe").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "coe", v)
 	}
 	if d.HasChange("cluster_distro") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "cluster_distro", d.Get("cluster_distro").(string))
+		v := d.Get("cluster_distro").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "cluster_distro", v)
 	}
 	if d.HasChange("dns_nameserver") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "dns_nameserver", d.Get("dns_nameserver").(string))
+		v := d.Get("dns_nameserver").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "dns_nameserver", v)
 	}
 	if d.HasChange("docker_storage_driver") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "docker_storage_driver", d.Get("docker_storage_driver").(string))
+		v := d.Get("docker_storage_driver").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "docker_storage_driver", v)
 	}
 	if d.HasChange("docker_volume_size") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "docker_volume_size", strconv.Itoa(d.Get("docker_volume_size").(int)))
+		v := d.Get("docker_volume_size").(int)
+		dockerVolumeSize := strconv.Itoa(v)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "docker_volume_size", dockerVolumeSize)
 	}
 	if d.HasChange("external_network_id") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "external_network_id", d.Get("external_network_id").(string))
+		v := d.Get("external_network_id").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "external_network_id", v)
 	}
 	if d.HasChange("fixed_network") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "fixed_network", d.Get("fixed_network").(string))
+		v := d.Get("fixed_network").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "fixed_network", v)
 	}
 	if d.HasChange("fixed_subnet") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "fixed_subnet", d.Get("fixed_subnet").(string))
+		v := d.Get("fixed_subnet").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "fixed_subnet", v)
 	}
 	if d.HasChange("flavor") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "flavor_id", d.Get("flavor").(string))
+		v := d.Get("flavor").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "flavor_id", v)
 	}
 	if d.HasChange("master_flavor") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "master_flavor_id", d.Get("master_flavor").(string))
+		v := d.Get("master_flavor").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "master_flavor_id", v)
 	}
 	if d.HasChange("floating_ip_enabled") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "floating_ip_enabled", strconv.FormatBool(d.Get("floating_ip_enabled").(bool)))
+		v := d.Get("floating_ip_enabled").(bool)
+		floatingIPEnabled := strconv.FormatBool(v)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "floating_ip_enabled", floatingIPEnabled)
 	}
 	if d.HasChange("http_proxy") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "http_proxy", d.Get("http_proxy").(string))
+		v := d.Get("http_proxy").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "http_proxy", v)
 	}
 	if d.HasChange("https_proxy") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "https_proxy", d.Get("https_proxy").(string))
+		v := d.Get("https_proxy").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "https_proxy", v)
 	}
 	if d.HasChange("image") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "image_id", d.Get("image").(string))
+		v := d.Get("image").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "image_id", v)
 	}
 	if d.HasChange("insecure_registry") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "insecure_registry", d.Get("insecure_registry").(string))
+		v := d.Get("insecure_registry").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "insecure_registry", v)
 	}
 	if d.HasChange("keypair_id") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "keypair_id", d.Get("keypair_id").(string))
+		v := d.Get("keypair_id").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "keypair_id", v)
 	}
 	if d.HasChange("labels") {
 		v, err := resourceClusterTemplateLabelsStringV1(d)
@@ -390,28 +411,40 @@ func resourceContainerInfraClusterTemplateV1Update(d *schema.ResourceData, meta 
 		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "labels", v)
 	}
 	if d.HasChange("master_lb_enabled") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "master_lb_enabled", strconv.FormatBool(d.Get("master_lb_enabled").(bool)))
+		v := d.Get("master_lb_enabled").(bool)
+		masterLBEnabled := strconv.FormatBool(v)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "master_lb_enabled", masterLBEnabled)
 	}
 	if d.HasChange("network_driver") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "network_driver", d.Get("network_driver").(string))
+		v := d.Get("network_driver").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "network_driver", v)
 	}
 	if d.HasChange("no_proxy") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "no_proxy", d.Get("no_proxy").(string))
+		v := d.Get("no_proxy").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "no_proxy", v)
 	}
 	if d.HasChange("public") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "public", strconv.FormatBool(d.Get("public").(bool)))
+		v := d.Get("public").(bool)
+		public := strconv.FormatBool(v)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "public", public)
 	}
 	if d.HasChange("registry_enabled") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "registry_enabled", strconv.FormatBool(d.Get("registry_enabled").(bool)))
+		v := d.Get("registry_enabled").(bool)
+		registryEnabled := strconv.FormatBool(v)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "registry_enabled", registryEnabled)
 	}
 	if d.HasChange("server_type") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "server_type", d.Get("server_type").(string))
+		v := d.Get("server_type").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "server_type", v)
 	}
 	if d.HasChange("tls_disabled") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "tls_disabled", strconv.FormatBool(d.Get("tls_disabled").(bool)))
+		v := d.Get("tls_disabled").(bool)
+		tlsDisabled := strconv.FormatBool(v)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "tls_disabled", tlsDisabled)
 	}
 	if d.HasChange("volume_driver") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "volume_driver", d.Get("volume_driver").(string))
+		v := d.Get("volume_driver").(string)
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "volume_driver", v)
 	}
 
 	log.Printf("[DEBUG] Updating Cluster template %s with options: %+v", d.Id(), updateOpts)
