@@ -152,25 +152,6 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
-			"links": &schema.Schema{
-				Type: schema.TypeList,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"href": &schema.Schema{
-							Type:     schema.TypeString,
-							ForceNew: false,
-							Computed: true,
-						},
-						"rel": &schema.Schema{
-							Type:     schema.TypeString,
-							ForceNew: false,
-							Computed: true,
-						},
-					},
-				},
-				ForceNew: false,
-				Computed: true,
-			},
 			"master_lb_enabled": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -311,7 +292,6 @@ func resourceContainerInfraClusterTemplateV1Read(d *schema.ResourceData, meta in
 	d.Set("insecure_registry", s.InsecureRegistry)
 	d.Set("keypair_id", s.KeyPairID)
 	d.Set("labels", s.Labels)
-	d.Set("links", resourceLinks(s.Links))
 	d.Set("master_lb_enabled", s.MasterLBEnabled)
 	d.Set("network_driver", s.NetworkDriver)
 	d.Set("no_proxy", s.NoProxy)
