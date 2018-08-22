@@ -9,6 +9,7 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clustertemplates"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func resourceContainerInfraClusterTemplateV1() *schema.Resource {
@@ -60,7 +61,7 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     false,
-				ValidateFunc: validateClusterTemplateAPIServerPortV1,
+				ValidateFunc: validation.IntBetween(1024, 65535),
 			},
 			"coe": &schema.Schema{
 				Type:     schema.TypeString,
@@ -442,15 +443,6 @@ func resourceContainerInfraClusterTemplateV1Delete(d *schema.ResourceData, meta 
 	}
 
 	return nil
-}
-
-func validateClusterTemplateAPIServerPortV1(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(int)
-	if value < 1024 || value > 65535 {
-		err := fmt.Errorf("%s should be between 1024 and 65535", k)
-		errors = append(errors, err)
-	}
-	return
 }
 
 func resourceClusterTemplateLabelsMapV1(d *schema.ResourceData) map[string]string {
