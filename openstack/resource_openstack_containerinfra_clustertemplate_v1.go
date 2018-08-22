@@ -212,6 +212,12 @@ func resourceContainerInfraClusterTemplateV1Create(d *schema.ResourceData, meta 
 	registryEnabled := d.Get("registry_enabled").(bool)
 	tlsDisabled := d.Get("tls_disabled").(bool)
 
+	// Get and check labels map.
+	labels, err := resourceClusterTemplateLabelsMapV1(d)
+	if err != nil {
+		return err
+	}
+
 	createOpts := clustertemplates.CreateOpts{
 		COE:                 d.Get("coe").(string),
 		DNSNameServer:       d.Get("dns_nameserver").(string),
@@ -227,7 +233,7 @@ func resourceContainerInfraClusterTemplateV1Create(d *schema.ResourceData, meta 
 		ImageID:             d.Get("image").(string),
 		InsecureRegistry:    d.Get("insecure_registry").(string),
 		KeyPairID:           d.Get("keypair_id").(string),
-		Labels:              resourceClusterTemplateLabelsMapV1(d),
+		Labels:              labels,
 		MasterLBEnabled:     &masterLBEnabled,
 		Name:                d.Get("name").(string),
 		NetworkDriver:       d.Get("network_driver").(string),
@@ -274,6 +280,10 @@ func resourceContainerInfraClusterTemplateV1Read(d *schema.ResourceData, meta in
 
 	log.Printf("[DEBUG] Retrieved Clustertemplate %s: %#v", d.Id(), s)
 
+	if err := d.Set("labels", s.Labels); err != nil {
+		return fmt.Errorf("Unable to set labels: %s", err)
+	}
+
 	d.Set("apiserver_port", s.APIServerPort)
 	d.Set("coe", s.COE)
 	d.Set("cluster_distro", s.ClusterDistro)
@@ -291,7 +301,6 @@ func resourceContainerInfraClusterTemplateV1Read(d *schema.ResourceData, meta in
 	d.Set("image_id", s.ImageID)
 	d.Set("insecure_registry", s.InsecureRegistry)
 	d.Set("keypair_id", s.KeyPairID)
-	d.Set("labels", s.Labels)
 	d.Set("master_lb_enabled", s.MasterLBEnabled)
 	d.Set("network_driver", s.NetworkDriver)
 	d.Set("no_proxy", s.NoProxy)
@@ -374,7 +383,11 @@ func resourceContainerInfraClusterTemplateV1Update(d *schema.ResourceData, meta 
 		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "keypair_id", d.Get("keypair_id").(string))
 	}
 	if d.HasChange("labels") {
-		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "labels", resourceClusterTemplateLabelsStringV1(d.Get("labels").(map[string]interface{})))
+		v, err := resourceClusterTemplateLabelsStringV1(d)
+		if err != nil {
+			return err
+		}
+		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "labels", v)
 	}
 	if d.HasChange("master_lb_enabled") {
 		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "master_lb_enabled", strconv.FormatBool(d.Get("master_lb_enabled").(bool)))
@@ -425,25 +438,33 @@ func resourceContainerInfraClusterTemplateV1Delete(d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceClusterTemplateLabelsMapV1(d *schema.ResourceData) map[string]string {
+func resourceClusterTemplateLabelsMapV1(d *schema.ResourceData) (map[string]string, error) {
 	m := make(map[string]string)
 	for key, val := range d.Get("labels").(map[string]interface{}) {
-		m[key] = val.(string)
+		labelValue, ok := val.(string)
+		if !ok {
+			return nil, fmt.Errorf("label %s value should be string", key)
+		}
+		m[key] = labelValue
 	}
-	return m
+	return m, nil
 }
 
-func resourceClusterTemplateLabelsStringV1(labels map[string]interface{}) string {
+func resourceClusterTemplateLabelsStringV1(d *schema.ResourceData) (string, error) {
 	var formattedLabels string
-	for labelKey, labelValue := range labels {
+	for key, val := range d.Get("labels").(map[string]interface{}) {
+		labelValue, ok := val.(string)
+		if !ok {
+			return "", fmt.Errorf("label %s value should be string", key)
+		}
 		formattedLabels = strings.Join([]string{
 			formattedLabels,
-			fmt.Sprintf("%s=%s", labelKey, labelValue.(string)),
+			fmt.Sprintf("%s=%s", key, labelValue),
 		}, ",")
 	}
 	formattedLabels = strings.Trim(formattedLabels, ",")
 
-	return formattedLabels
+	return formattedLabels, nil
 }
 
 func resourceClusterTemplateAppendUpdateOptsV1(updateOpts []clustertemplates.UpdateOptsBuilder, attribute string, value string) []clustertemplates.UpdateOptsBuilder {
