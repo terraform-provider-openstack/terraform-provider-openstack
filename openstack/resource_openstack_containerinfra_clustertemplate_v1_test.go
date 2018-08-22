@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestAccContainerInfraV1ClusterTemplateBasic(t *testing.T) {
+func TestAccContainerInfraV1ClusterTemplate_basic(t *testing.T) {
 	var clusterTemplate clustertemplates.ClusterTemplate
 
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
@@ -47,7 +47,7 @@ func TestAccContainerInfraV1ClusterTemplateBasic(t *testing.T) {
 	})
 }
 
-func TestAccContainerInfraV1ClusterTemplateLabels(t *testing.T) {
+func TestAccContainerInfraV1ClusterTemplate_labels(t *testing.T) {
 
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
 	imageName := acctest.RandomWithPrefix("tf-acc-image")
