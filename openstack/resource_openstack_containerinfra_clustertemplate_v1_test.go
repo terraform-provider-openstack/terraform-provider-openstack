@@ -20,7 +20,7 @@ func TestAccContainerInfraV1ClusterTemplate_basic(t *testing.T) {
 	dockerVolumeSize := 5
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckContainerInfra(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerInfraV1ClusterTemplateDestroy,
 		Steps: []resource.TestStep{
@@ -54,7 +54,7 @@ func TestAccContainerInfraV1ClusterTemplate_labels(t *testing.T) {
 	imageName := acctest.RandomWithPrefix("tf-acc-image")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckContainerInfra(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerInfraV1ClusterTemplateDestroy,
 		Steps: []resource.TestStep{
