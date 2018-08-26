@@ -14,7 +14,7 @@ func TestAccContainerInfraV1ClusterTemplateImportBasic(t *testing.T) {
 	resourceName := fmt.Sprintf("openstack_containerinfra_clustertemplate_v1.%s", clusterTemplateName)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckContainerInfra(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerInfraV1ClusterTemplateDestroy,
 		Steps: []resource.TestStep{
