@@ -49,7 +49,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
 resource "openstack_compute_volume_attach_v2" "attachments" {
   count       = 2
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  volume_id   = "${element(openstack_blockstorage_volume_v2.volumes.*.id, count.index)}"
+  volume_id   = "${openstack_blockstorage_volume_v2.volumes.*.id[count.index]}"
 }
 
 output "volume devices" {

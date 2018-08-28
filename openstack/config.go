@@ -21,21 +21,22 @@ type Config struct {
 	ClientCertFile    string
 	ClientKeyFile     string
 	Cloud             string
-	UserDomainName    string
-	UserDomainID      string
-	ProjectDomainName string
-	ProjectDomainID   string
+	DefaultDomain     string
 	DomainID          string
 	DomainName        string
 	EndpointType      string
 	IdentityEndpoint  string
 	Insecure          *bool
 	Password          string
+	ProjectDomainName string
+	ProjectDomainID   string
 	Region            string
 	Swauth            bool
 	TenantID          string
 	TenantName        string
 	Token             string
+	UserDomainName    string
+	UserDomainID      string
 	Username          string
 	UserID            string
 	useOctavia        bool
@@ -101,6 +102,7 @@ func (c *Config) LoadAndValidate() error {
 	} else {
 		authInfo := &clientconfig.AuthInfo{
 			AuthURL:           c.IdentityEndpoint,
+			DefaultDomain:     c.DefaultDomain,
 			DomainID:          c.DomainID,
 			DomainName:        c.DomainName,
 			Password:          c.Password,

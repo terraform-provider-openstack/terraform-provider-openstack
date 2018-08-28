@@ -80,58 +80,52 @@ func Provider() terraform.ResourceProvider {
 			},
 
 			"user_domain_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"OS_USER_DOMAIN_NAME",
-				}, ""),
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_USER_DOMAIN_NAME", ""),
 				Description: descriptions["user_domain_name"],
 			},
 
 			"user_domain_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"OS_USER_DOMAIN_ID",
-				}, ""),
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_USER_DOMAIN_ID", ""),
 				Description: descriptions["user_domain_id"],
 			},
 
 			"project_domain_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"OS_PROJECT_DOMAIN_NAME",
-				}, ""),
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_PROJECT_DOMAIN_NAME", ""),
 				Description: descriptions["project_domain_name"],
 			},
 
 			"project_domain_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"OS_PROJECT_DOMAIN_ID",
-				}, ""),
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_PROJECT_DOMAIN_ID", ""),
 				Description: descriptions["project_domain_id"],
 			},
 
 			"domain_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"OS_DOMAIN_ID",
-				}, ""),
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_DOMAIN_ID", ""),
 				Description: descriptions["domain_id"],
 			},
 
 			"domain_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"OS_DOMAIN_NAME",
-					"OS_DEFAULT_DOMAIN",
-				}, ""),
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_DOMAIN_NAME", ""),
 				Description: descriptions["domain_name"],
+			},
+
+			"default_domain": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_DEFAULT_DOMAIN", "default"),
+				Description: descriptions["default_domain"],
 			},
 
 			"insecure": &schema.Schema{
@@ -194,15 +188,20 @@ func Provider() terraform.ResourceProvider {
 			"openstack_compute_flavor_v2":        dataSourceComputeFlavorV2(),
 			"openstack_compute_keypair_v2":       dataSourceComputeKeypairV2(),
 			"openstack_dns_zone_v2":              dataSourceDNSZoneV2(),
+			"openstack_fw_policy_v1":             dataSourceFWPolicyV1(),
 			"openstack_identity_role_v3":         dataSourceIdentityRoleV3(),
 			"openstack_identity_project_v3":      dataSourceIdentityProjectV3(),
 			"openstack_identity_user_v3":         dataSourceIdentityUserV3(),
 			"openstack_identity_auth_scope_v3":   dataSourceIdentityAuthScopeV3(),
+			"openstack_identity_endpoint_v3":     dataSourceIdentityEndpointV3(),
+			"openstack_identity_group_v3":        dataSourceIdentityGroupV3(),
 			"openstack_images_image_v2":          dataSourceImagesImageV2(),
 			"openstack_networking_network_v2":    dataSourceNetworkingNetworkV2(),
 			"openstack_networking_subnet_v2":     dataSourceNetworkingSubnetV2(),
 			"openstack_networking_secgroup_v2":   dataSourceNetworkingSecGroupV2(),
 			"openstack_networking_subnetpool_v2": dataSourceNetworkingSubnetPoolV2(),
+			"openstack_networking_floatingip_v2": dataSourceNetworkingFloatingIPV2(),
+			"openstack_networking_router_v2":     dataSourceNetworkingRouterV2(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -256,6 +255,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_networking_subnetpool_v2":           resourceNetworkingSubnetPoolV2(),
 			"openstack_objectstorage_container_v1":         resourceObjectStorageContainerV1(),
 			"openstack_objectstorage_object_v1":            resourceObjectStorageObjectV1(),
+			"openstack_objectstorage_tempurl_v1":           resourceObjectstorageTempurlV1(),
 			"openstack_vpnaas_ipsec_policy_v2":             resourceIPSecPolicyV2(),
 			"openstack_vpnaas_service_v2":                  resourceServiceV2(),
 			"openstack_vpnaas_ike_policy_v2":               resourceIKEPolicyV2(),
@@ -301,6 +301,8 @@ func init() {
 
 		"domain_name": "The name of the Domain to scope to (Identity v3).",
 
+		"default_domain": "The name of the Domain ID to scope to if no other domain is specified. Defaults to `default` (Identity v3).",
+
 		"insecure": "Trust self-signed certificates.",
 
 		"cacert_file": "A Custom CA certificate.",
@@ -327,6 +329,7 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		ClientCertFile:    d.Get("cert").(string),
 		ClientKeyFile:     d.Get("key").(string),
 		Cloud:             d.Get("cloud").(string),
+		DefaultDomain:     d.Get("default_domain").(string),
 		DomainID:          d.Get("domain_id").(string),
 		DomainName:        d.Get("domain_name").(string),
 		EndpointType:      d.Get("endpoint_type").(string),

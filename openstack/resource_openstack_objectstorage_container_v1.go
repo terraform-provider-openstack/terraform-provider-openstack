@@ -108,7 +108,7 @@ func resourceObjectStorageContainerV1Read(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Error creating OpenStack object storage client: %s", err)
 	}
 
-	result := containers.Get(objectStorageClient, d.Id())
+	result := containers.Get(objectStorageClient, d.Id(), nil)
 
 	if result.Err != nil {
 		return CheckDeleted(d, result.Err, "container")

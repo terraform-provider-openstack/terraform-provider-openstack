@@ -75,27 +75,6 @@ func TestAccComputeV2FloatingIPAssociate_attachToFirstNetwork(t *testing.T) {
 	})
 }
 
-func TestAccComputeV2FloatingIPAssociate_attachToSecondNetwork(t *testing.T) {
-	var instance servers.Server
-	var fip floatingips.FloatingIP
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2FloatingIPAssociate_attachToSecondNetwork,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
-					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
-					testAccCheckComputeV2FloatingIPAssociateAssociated(&fip, &instance, 2),
-				),
-			},
-		},
-	})
-}
-
 func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 	var instance servers.Server
 	var fip_1 floatingips.FloatingIP
@@ -274,45 +253,6 @@ resource "openstack_compute_floatingip_associate_v2" "fip_1" {
   floating_ip = "${openstack_networking_floatingip_v2.fip_1.address}"
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   fixed_ip = "${openstack_compute_instance_v2.instance_1.network.0.fixed_ip_v4}"
-}
-`, OS_NETWORK_ID)
-
-var testAccComputeV2FloatingIPAssociate_attachToSecondNetwork = fmt.Sprintf(`
-resource "openstack_networking_network_v2" "network_1" {
-  name = "network_1"
-}
-
-resource "openstack_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-  cidr = "192.168.1.0/24"
-  ip_version = 4
-  enable_dhcp = true
-  no_gateway = true
-}
-
-resource "openstack_compute_instance_v2" "instance_1" {
-  depends_on = ["openstack_networking_subnet_v2.subnet_1"]
-
-  name = "instance_1"
-  security_groups = ["default"]
-
-  network {
-    uuid = "${openstack_networking_network_v2.network_1.id}"
-  }
-
-  network {
-    uuid = "%s"
-  }
-}
-
-resource "openstack_networking_floatingip_v2" "fip_1" {
-}
-
-resource "openstack_compute_floatingip_associate_v2" "fip_1" {
-  floating_ip = "${openstack_networking_floatingip_v2.fip_1.address}"
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  fixed_ip = "${openstack_compute_instance_v2.instance_1.network.1.fixed_ip_v4}"
 }
 `, OS_NETWORK_ID)
 

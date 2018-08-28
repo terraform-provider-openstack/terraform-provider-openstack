@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/gophercloud/gophercloud"
@@ -29,6 +30,8 @@ func resourceImagesImageV2() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
+		CustomizeDiff: resourceImagesImageV2UpdateComputedAttributes,
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 		},
@@ -41,21 +44,11 @@ func resourceImagesImageV2() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"checksum": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"container_format": &schema.Schema{
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: resourceImagesImageV2ValidateContainerFormat,
-			},
-
-			"created_at": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 
 			"disk_format": &schema.Schema{
@@ -90,11 +83,6 @@ func resourceImagesImageV2() *schema.Resource {
 				ConflictsWith: []string{"image_source_url"},
 			},
 
-			"metadata": &schema.Schema{
-				Type:     schema.TypeMap,
-				Computed: true,
-			},
-
 			"min_disk_gb": &schema.Schema{
 				Type:         schema.TypeInt,
 				Optional:     true,
@@ -117,11 +105,6 @@ func resourceImagesImageV2() *schema.Resource {
 				ForceNew: false,
 			},
 
-			"owner": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"protected": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -129,31 +112,11 @@ func resourceImagesImageV2() *schema.Resource {
 				Default:  false,
 			},
 
-			"schema": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"size_bytes": &schema.Schema{
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-
-			"status": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"tags": &schema.Schema{
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
-			},
-
-			"update_at": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 
 			"verify_checksum": &schema.Schema{
@@ -174,6 +137,48 @@ func resourceImagesImageV2() *schema.Resource {
 			"properties": &schema.Schema{
 				Type:     schema.TypeMap,
 				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+
+			// Computed-only
+			"checksum": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"created_at": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"metadata": &schema.Schema{
+				Type:     schema.TypeMap,
+				Computed: true,
+			},
+
+			"owner": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"schema": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"size_bytes": &schema.Schema{
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+
+			"status": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"update_at": &schema.Schema{
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -305,8 +310,12 @@ func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("size_bytes", img.SizeBytes)
 	d.Set("tags", img.Tags)
 	d.Set("visibility", img.Visibility)
-	d.Set("properties", img.Properties)
 	d.Set("region", GetRegion(d, config))
+
+	properties := resourceImagesImageV2ExpandProperties(img.Properties)
+	if err := d.Set("properties", properties); err != nil {
+		log.Printf("[WARN] unable to set properties for image %s: %s", img.ID, err)
+	}
 
 	return nil
 }
@@ -551,4 +560,61 @@ func resourceImagesImageV2ExpandProperties(v map[string]interface{}) map[string]
 	}
 
 	return properties
+}
+
+func resourceImagesImageV2UpdateComputedAttributes(diff *schema.ResourceDiff, meta interface{}) error {
+	if diff.HasChange("properties") {
+		// Only check if the image has been created.
+		if diff.Id() != "" {
+			// Try to reconcile the properties set by the server
+			// with the properties set by the user.
+			//
+			// old = user properties + server properties
+			// new = user properties only
+			old, new := diff.GetChange("properties")
+
+			oldProperties := resourceImagesImageV2ExpandProperties(old.(map[string]interface{}))
+			newProperties := resourceImagesImageV2ExpandProperties(new.(map[string]interface{}))
+
+			// If there is a new property that is not part of the old properties,
+			// then the user has explicitly set a new property and we need to ForceNew
+			// since updating properties in images is not supported.
+			for newKey, newValue := range newProperties {
+				var found bool
+				for oldKey, oldValue := range oldProperties {
+					if newKey == oldKey && newValue == oldValue {
+						found = true
+					}
+				}
+
+				if !found {
+					log.Printf("[DEBUG] Triggering rebuild of image %s due to new user properties %#v => %#v",
+						diff.Id(), oldProperties, newProperties)
+
+					diff.ForceNew("properties")
+					return nil
+				}
+			}
+
+			// If the user did not change any properties, try to reconcile
+			// the properties that the server has set with the properties
+			// that the user set.
+			for oldKey, oldValue := range old.(map[string]interface{}) {
+				if strings.HasPrefix(oldKey, "os_") {
+					if v, ok := oldValue.(string); ok {
+						newProperties[oldKey] = v
+					}
+				}
+			}
+
+			// Set the diff to the newProperties, which includes the server-side
+			// os_ properties.
+			//
+			// If the user has removed properties, they will be caught at this
+			// point, too.
+			diff.SetNew("properties", newProperties)
+		}
+	}
+
+	return nil
 }

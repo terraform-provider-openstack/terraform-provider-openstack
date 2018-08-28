@@ -1,19 +1,53 @@
-## 1.7.0 (Unreleased)
+## 1.9.0 (Unreleased)
+
+FEATURES
+
+* __New Resource__: `openstack_objectstorage_tempurl_v1` [GH-379]
+* __New Data Source__: `openstack_fw_policy_v1` [GH-398]
+* __New Data Source__: `openstack_networking_router_v2` [GH-401]
+
+## 1.8.0 (August 08, 2018)
+
+BACKWARDS INCOMPATIBILITIES / NOTES:
+
+* Support for `default_domain` has been added. This should not cause any issues, but please report any issues encountered.
+* `openstack_images_image_v2.properties` has been set to `ForceNew`. If properties are modified, the image will be recreated. Previously, updates to the properties were only happening in the Terraform state and not actually reflected on the image itself.
+
+FEATURES
+
+* __New Data Source__: `openstack_identity_group_v3` ([#385](https://github.com/terraform-providers/terraform-provider-openstack/issues/385))
+* __New Data Source__: `openstack_networking_floatingip_v2` ([#387](https://github.com/terraform-providers/terraform-provider-openstack/issues/387))
 
 IMPROVEMENTS
 
-* Allow resize for stopped instances [GH-348]
-* Added `power_state` to `openstack_compute_instance_v2` [GH-350]
-* Added `external` to `openstack_networking_network_v2` resource [GH-357]
-* Added `external` to `openstack_networking_network_v2` data source [GH-358]
-* Return the default network uuid for `openstack_compute_instance_v2` [GH-365]
-* Allow a specific floating IP to be specified in `openstack_networking_floatingip_v2` [GH-371]
-* Allow `PROXY` protocol for `openstack_lb_pool_v2` [GH-375]
+* Added support for `default_domain` during authentication ([#329](https://github.com/terraform-providers/terraform-provider-openstack/issues/329))
+* The upcoming OpenStack Rocky release will be automatically adding additional properties to the `openstack_images_image_v2` resource. This resource has been patched to account for this and to reconcile these server-provided properties with the user-provided properties. In addition, `openstack_images_image_v2.properties` has been set to `ForceNew` and will recreate the image when properties have been modified. Previously, any updates to the properties were only happening in the state and not actually reflected on the image itself. ([#390](https://github.com/terraform-providers/terraform-provider-openstack/issues/390))
 
 BUG FIXES
 
-* Allow explicit values of `0` for `min_disk_gb` and `min_ram_mb` in the `openstack_images_image_v2` resource [GH-351]
-* Make `peer_ep_group_id` optional in `openstack_vpnaas_site_connection` [GH-353]
+* The addition of the `openstack_networking_network_v2.external` data source argument caused unintended behavior of results only containing external or non-external networks. This bug has been fixed and we apologize for the inconvenience ([#384](https://github.com/terraform-providers/terraform-provider-openstack/issues/384))
+* The addition of the `openstack_compute_floatingip_associate_v2.wait_until_associated` argument caused the floating IP association to be recreated when updating to a later release of this provider. This was unintended and this has been resolved ([#395](https://github.com/terraform-providers/terraform-provider-openstack/issues/395))
+
+## 1.7.0 (August 01, 2018)
+
+FEATURES
+
+* __New Data Source__: `openstack_identity_endpoint_v3` ([#377](https://github.com/terraform-providers/terraform-provider-openstack/issues/377))
+
+IMPROVEMENTS
+
+* Allow resize for stopped instances ([#348](https://github.com/terraform-providers/terraform-provider-openstack/issues/348))
+* Added `power_state` to `openstack_compute_instance_v2` ([#350](https://github.com/terraform-providers/terraform-provider-openstack/issues/350))
+* Added `external` to `openstack_networking_network_v2` resource ([#357](https://github.com/terraform-providers/terraform-provider-openstack/issues/357))
+* Added `external` to `openstack_networking_network_v2` data source ([#358](https://github.com/terraform-providers/terraform-provider-openstack/issues/358))
+* Return the default network uuid for `openstack_compute_instance_v2` ([#365](https://github.com/terraform-providers/terraform-provider-openstack/issues/365))
+* Allow a specific floating IP to be specified in `openstack_networking_floatingip_v2` ([#371](https://github.com/terraform-providers/terraform-provider-openstack/issues/371))
+* Allow `PROXY` protocol for `openstack_lb_pool_v2` ([#375](https://github.com/terraform-providers/terraform-provider-openstack/issues/375))
+
+BUG FIXES
+
+* Allow explicit values of `0` for `min_disk_gb` and `min_ram_mb` in the `openstack_images_image_v2` resource ([#351](https://github.com/terraform-providers/terraform-provider-openstack/issues/351))
+* Make `peer_ep_group_id` optional in `openstack_vpnaas_site_connection` ([#353](https://github.com/terraform-providers/terraform-provider-openstack/issues/353))
 
 ## 1.6.0 (June 20, 2018)
 

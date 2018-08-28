@@ -598,7 +598,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	// Build a custom struct for the availability zone extension
 	var serverWithAZ struct {
 		servers.Server
-		availabilityzones.ServerExt
+		availabilityzones.ServerAvailabilityZoneExt
 	}
 
 	// Do another Get so the above work is not disturbed.
