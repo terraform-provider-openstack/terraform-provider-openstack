@@ -348,39 +348,33 @@ func resourceImagesImageV2Update(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if d.HasChange("properties") {
-		old, new := d.GetChange("properties")
-		oldProperties := resourceImagesImageV2ExpandProperties(old.(map[string]interface{}))
-		newProperties := resourceImagesImageV2ExpandProperties(new.(map[string]interface{}))
+		o, n := d.GetChange("properties")
+		oldProperties := resourceImagesImageV2ExpandProperties(o.(map[string]interface{}))
+		newProperties := resourceImagesImageV2ExpandProperties(n.(map[string]interface{}))
 
 		// Check for new and changed properties
 		for newKey, newValue := range newProperties {
-			var found bool
 			var changed bool
-			for oldKey, oldValue := range oldProperties {
-				if newKey == oldKey {
-					found = true
-				}
 
-				if newValue != oldValue {
-					changed = true
-				}
+			oldValue, found := oldProperties[newKey]
+			if found && (newValue != oldValue) {
+				changed = true
+			}
 
-				// os_ keys are provided by the OpenStack Image service.
-				// These are read-only properties that cannot be modified.
-				// Ignore them here and let CustomizeDiff handle them.
-				if strings.HasPrefix(newKey, "os_") {
-					found = true
-					changed = false
-				}
+			// os_ keys are provided by the OpenStack Image service.
+			// These are read-only properties that cannot be modified.
+			// Ignore them here and let CustomizeDiff handle them.
+			if strings.HasPrefix(newKey, "os_") {
+				found = true
+				changed = false
+			}
 
-				// direct_url is provided by some storage drivers.
-				// This is a read-only property that cannot be modified.
-				// Ignore it here and let CustomizeDiff handle it.
-				if newKey == "direct_url" {
-					found = true
-					changed = false
-				}
-
+			// direct_url is provided by some storage drivers.
+			// This is a read-only property that cannot be modified.
+			// Ignore it here and let CustomizeDiff handle it.
+			if newKey == "direct_url" {
+				found = true
+				changed = false
 			}
 
 			if !found {
@@ -405,13 +399,8 @@ func resourceImagesImageV2Update(d *schema.ResourceData, meta interface{}) error
 		}
 
 		// Check for removed properties
-		for oldKey, _ := range oldProperties {
-			var found bool
-			for newKey, _ := range newProperties {
-				if oldKey == newKey {
-					found = true
-				}
-			}
+		for oldKey := range oldProperties {
+			_, found := newProperties[oldKey]
 
 			if !found {
 				v := images.UpdateImageProperty{
@@ -647,11 +636,11 @@ func resourceImagesImageV2UpdateComputedAttributes(diff *schema.ResourceDiff, me
 			//
 			// old = user properties + server properties
 			// new = user properties only
-			old, new := diff.GetChange("properties")
+			o, n := diff.GetChange("properties")
 
-			newProperties := resourceImagesImageV2ExpandProperties(new.(map[string]interface{}))
+			newProperties := resourceImagesImageV2ExpandProperties(n.(map[string]interface{}))
 
-			for oldKey, oldValue := range old.(map[string]interface{}) {
+			for oldKey, oldValue := range o.(map[string]interface{}) {
 				// os_ keys are provided by the OpenStack Image service.
 				if strings.HasPrefix(oldKey, "os_") {
 					if v, ok := oldValue.(string); ok {
