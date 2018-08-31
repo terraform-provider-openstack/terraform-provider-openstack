@@ -16,7 +16,6 @@ will remain in place. If you wish to automatically regenerate a URL, set
 the `regenerate` argument to `true`. This will create a new resource with
 a new ID and URL.
 
-
 ## Example Usage
 
 ```hcl
@@ -41,7 +40,7 @@ The following arguments are supported:
 * `ttl` - (Required) The TTL, in seconds, for the URL. For how long it should
   be valid.
 
-* `method` - (Optional) What methods are allowed for this URL.
+* `method` - (Optional) The method allowed when accessing this URL.
   Valid values are `GET`, and `POST`. Default is `GET`.
 
 * `regenerate` - (Optional) Whether to automatically regenerate the URL when
