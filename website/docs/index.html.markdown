@@ -338,7 +338,7 @@ We recommend running tests with logging set to `DEBUG`:
 $ TF_LOG=DEBUG make testacc TEST=./openstack TESTARGS="-run=TestAccComputeV2Keypair_basic -count=1"
 ```
 
-And you can even enable OpenStack debugging to see the API traffic:
+And you can even enable OpenStack debugging to see the actual HTTP API requests:
 
 ```shell
 $ TF_LOG=DEBUG OS_DEBUG=1 make testacc TEST=./openstack TESTARGS="-run=TestAccComputeV2Keypair_basic -count=1"
