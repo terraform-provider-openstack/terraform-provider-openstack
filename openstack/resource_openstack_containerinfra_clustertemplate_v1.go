@@ -314,10 +314,10 @@ func resourceContainerInfraClusterTemplateV1Read(d *schema.ResourceData, meta in
 	d.Set("project_id", s.ProjectID)
 	d.Set("user_id", s.UserID)
 
-	if err := d.Set("created_at", s.CreatedAt); err != nil {
+	if err := d.Set("created_at", s.CreatedAt.Format(time.RFC3339)); err != nil {
 		log.Printf("[DEBUG] created_at: %s", err)
 	}
-	if err := d.Set("updated_at", s.CreatedAt); err != nil {
+	if err := d.Set("updated_at", s.UpdatedAt.Format(time.RFC3339)); err != nil {
 		log.Printf("[DEBUG] updated_at: %s", err)
 	}
 
