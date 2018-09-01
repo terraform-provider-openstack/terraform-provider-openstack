@@ -12,6 +12,7 @@ Maintainers
 
 This provider plugin is maintained by:
 
+* Andrei Ozerov ([@ozerovandrei](https://github.com/ozerovandrei))
 * Gavin Williams ([@fatmcgav](https://github.com/fatmcgav))
 * Joe Topjian ([@jtopjian](https://github.com/jtopjian))
 
