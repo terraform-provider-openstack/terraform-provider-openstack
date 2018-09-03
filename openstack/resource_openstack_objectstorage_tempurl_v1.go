@@ -66,34 +66,19 @@ func resourceObjectstorageTempurlV1() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+
+			"regenerate": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			"url": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
 	}
-}
-
-// resourceObjectstorageTempurlV1Read performs the image lookup.
-func resourceObjectstorageTempurlV1Read(d *schema.ResourceData, meta interface{}) error {
-	turl := d.Get("url").(string)
-	u, err := url.Parse(turl)
-	if err != nil {
-		return fmt.Errorf("Failed to read the temp url: %s", turl)
-	}
-
-	qp, _ := url.ParseQuery(u.RawQuery)
-	expiry, err := strconv.ParseInt(qp.Get("temp_url_expires"), 10, 64)
-	if err != nil {
-		return fmt.Errorf("Failed to parse the temp url expiration time: %s", qp.Get("temp_url_expires"))
-	}
-	now := time.Now().Unix()
-	if expiry < now {
-		log.Printf("[DEBUG] URL expired, generating a new one")
-		d.SetId("")
-	}
-
-	return nil
 }
 
 // resourceObjectstorageTempurlV1Create performs the image lookup.
@@ -123,11 +108,11 @@ func resourceObjectstorageTempurlV1Create(d *schema.ResourceData, meta interface
 	containerName := d.Get("container").(string)
 	objectName := d.Get("object").(string)
 
-	log.Printf("[DEBUG] Create TempURL Options: %#v", turlOptions)
+	log.Printf("[DEBUG] Create temporary url Options: %#v", turlOptions)
 
 	url, err := objects.CreateTempURL(objectStorageClient, containerName, objectName, turlOptions)
 	if err != nil {
-		return fmt.Errorf("Unable to generate a TempURL for the object %s in container %s: %s",
+		return fmt.Errorf("Unable to generate a temporary url for the object %s in container %s: %s",
 			objectName, containerName, err)
 	}
 
@@ -138,5 +123,37 @@ func resourceObjectstorageTempurlV1Create(d *schema.ResourceData, meta interface
 	hasher.Write([]byte(url))
 	d.SetId(hex.EncodeToString(hasher.Sum(nil)))
 	d.Set("url", url)
+	return nil
+}
+
+// resourceObjectstorageTempurlV1Read performs the image lookup.
+func resourceObjectstorageTempurlV1Read(d *schema.ResourceData, meta interface{}) error {
+	turl := d.Get("url").(string)
+	u, err := url.Parse(turl)
+	if err != nil {
+		return fmt.Errorf("Failed to read the temporary url %s: %s", turl, err)
+	}
+
+	qp, err := url.ParseQuery(u.RawQuery)
+	if err != nil {
+		return fmt.Errorf("Failed to parse the temporary url %s query string: %s", turl, err)
+	}
+
+	tempURLExpires := qp.Get("temp_url_expires")
+	expiry, err := strconv.ParseInt(tempURLExpires, 10, 64)
+	if err != nil {
+		return fmt.Errorf(
+			"Failed to parse the temporary url %s expiration time %s: %s",
+			turl, tempURLExpires, err)
+	}
+
+	// Regenerate the URL if it has expired and if the user requested it to be.
+	regen := d.Get("regenerate").(bool)
+	now := time.Now().Unix()
+	if expiry < now && regen {
+		log.Printf("[DEBUG] temporary url %s expired, generating a new one", turl)
+		d.SetId("")
+	}
+
 	return nil
 }
