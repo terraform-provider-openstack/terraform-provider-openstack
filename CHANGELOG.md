@@ -6,6 +6,10 @@ FEATURES
 * __New Data Source__: `openstack_fw_policy_v1` [GH-398]
 * __New Data Source__: `openstack_networking_router_v2` [GH-401]
 
+IMPROVEMENTS
+
+* The `openstack_images_image_v2` resource can now finally update properties. This update has been in progress over the last two release cycles. Please let us know if you encounter any problems [GH-409]
+
 ## 1.8.0 (August 08, 2018)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
