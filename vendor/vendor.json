@@ -433,6 +433,12 @@
 			"revisionTime": "2018-08-17T04:16:43Z"
 		},
 		{
+			"checksumSHA1": "VxqXejG0O0WC7oYiC1V4Hx2OKTU=",
+			"path": "github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clustertemplates",
+			"revision": "185230dfbd12fc178f22e1e2a5c4cf0e3ef5ae45",
+			"revisionTime": "2018-08-17T04:16:43Z"
+		},
+		{
 			"checksumSHA1": "paRHLRizEZWL2sm/vG38zr+DQRM=",
 			"path": "github.com/gophercloud/gophercloud/openstack/db/v1/configurations",
 			"revision": "185230dfbd12fc178f22e1e2a5c4cf0e3ef5ae45",
@@ -1052,6 +1058,20 @@
 		{
 			"checksumSHA1": "1yCGh/Wl4H4ODBBRmIRFcV025b0=",
 			"path": "github.com/hashicorp/terraform/helper/shadow",
+			"revision": "41e50bd32a8825a84535e353c3674af8ce799161",
+			"revisionTime": "2018-04-10T16:50:42Z",
+			"version": "v0.11.7",
+			"versionExact": "v0.11.7"
+		},
+		{
+			"checksumSHA1": "Fzbv+N7hFXOtrR6E7ZcHT3jEE9s=",
+			"path": "github.com/hashicorp/terraform/helper/structure",
+			"revision": "313108201dd0b2f639776890ada0ac08e0a88b84",
+			"revisionTime": "2018-08-20T14:44:34Z"
+		},
+		{
+			"checksumSHA1": "nEC56vB6M60BJtGPe+N9rziHqLg=",
+			"path": "github.com/hashicorp/terraform/helper/validation",
 			"revision": "41e50bd32a8825a84535e353c3674af8ce799161",
 			"revisionTime": "2018-04-10T16:50:42Z",
 			"version": "v0.11.7",
