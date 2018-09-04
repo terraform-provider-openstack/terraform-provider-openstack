@@ -3,6 +3,7 @@
 FEATURES
 
 * __New Resource__: `openstack_objectstorage_tempurl_v1` [GH-379]
+* __New Resource__: `openstack_containerinfra_clustertemplate_v1` [GH-403]
 * __New Data Source__: `openstack_fw_policy_v1` [GH-398]
 * __New Data Source__: `openstack_networking_router_v2` [GH-401]
 
