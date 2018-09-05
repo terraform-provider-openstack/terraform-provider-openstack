@@ -1,15 +1,15 @@
-## 1.9.0 (Unreleased)
+## 1.9.0 (September 05, 2018)
 
 FEATURES
 
-* __New Resource__: `openstack_objectstorage_tempurl_v1` [GH-379]
-* __New Resource__: `openstack_containerinfra_clustertemplate_v1` [GH-403]
-* __New Data Source__: `openstack_fw_policy_v1` [GH-398]
-* __New Data Source__: `openstack_networking_router_v2` [GH-401]
+* __New Resource__: `openstack_objectstorage_tempurl_v1` ([#379](https://github.com/terraform-providers/terraform-provider-openstack/issues/379))
+* __New Resource__: `openstack_containerinfra_clustertemplate_v1` ([#403](https://github.com/terraform-providers/terraform-provider-openstack/issues/403))
+* __New Data Source__: `openstack_fw_policy_v1` ([#398](https://github.com/terraform-providers/terraform-provider-openstack/issues/398))
+* __New Data Source__: `openstack_networking_router_v2` ([#401](https://github.com/terraform-providers/terraform-provider-openstack/issues/401))
 
 IMPROVEMENTS
 
-* The `openstack_images_image_v2` resource can now finally update properties. This update has been in progress over the last two release cycles. Please let us know if you encounter any problems [GH-409]
+* The `openstack_images_image_v2` resource can now finally update properties. This update has been in progress over the last two release cycles. Please let us know if you encounter any problems ([#409](https://github.com/terraform-providers/terraform-provider-openstack/issues/409))
 
 ## 1.8.0 (August 08, 2018)
 
