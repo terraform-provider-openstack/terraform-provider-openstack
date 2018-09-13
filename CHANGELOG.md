@@ -1,4 +1,9 @@
 ## 1.10.0 (Unreleased)
+
+FEATURES
+
+* __New Data Source__: `openstack_containerinfra_clustertemplate_v1` [GH-415]
+
 ## 1.9.0 (September 05, 2018)
 
 FEATURES
