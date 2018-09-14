@@ -138,7 +138,6 @@ func resourceImagesImageV2() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 
 			// Computed-only
@@ -346,6 +345,72 @@ func resourceImagesImageV2Update(d *schema.ResourceData, meta interface{}) error
 			NewTags: resourceImagesImageV2BuildTags(tags),
 		}
 		updateOpts = append(updateOpts, v)
+	}
+
+	if d.HasChange("properties") {
+		o, n := d.GetChange("properties")
+		oldProperties := resourceImagesImageV2ExpandProperties(o.(map[string]interface{}))
+		newProperties := resourceImagesImageV2ExpandProperties(n.(map[string]interface{}))
+
+		// Check for new and changed properties
+		for newKey, newValue := range newProperties {
+			var changed bool
+
+			oldValue, found := oldProperties[newKey]
+			if found && (newValue != oldValue) {
+				changed = true
+			}
+
+			// os_ keys are provided by the OpenStack Image service.
+			// These are read-only properties that cannot be modified.
+			// Ignore them here and let CustomizeDiff handle them.
+			if strings.HasPrefix(newKey, "os_") {
+				found = true
+				changed = false
+			}
+
+			// direct_url is provided by some storage drivers.
+			// This is a read-only property that cannot be modified.
+			// Ignore it here and let CustomizeDiff handle it.
+			if newKey == "direct_url" {
+				found = true
+				changed = false
+			}
+
+			if !found {
+				v := images.UpdateImageProperty{
+					Op:    images.AddOp,
+					Name:  newKey,
+					Value: newValue,
+				}
+
+				updateOpts = append(updateOpts, v)
+			}
+
+			if found && changed {
+				v := images.UpdateImageProperty{
+					Op:    images.ReplaceOp,
+					Name:  newKey,
+					Value: newValue,
+				}
+
+				updateOpts = append(updateOpts, v)
+			}
+		}
+
+		// Check for removed properties
+		for oldKey := range oldProperties {
+			_, found := newProperties[oldKey]
+
+			if !found {
+				v := images.UpdateImageProperty{
+					Op:   images.RemoveOp,
+					Name: oldKey,
+				}
+
+				updateOpts = append(updateOpts, v)
+			}
+		}
 	}
 
 	log.Printf("[DEBUG] Update Options: %#v", updateOpts)
@@ -571,36 +636,20 @@ func resourceImagesImageV2UpdateComputedAttributes(diff *schema.ResourceDiff, me
 			//
 			// old = user properties + server properties
 			// new = user properties only
-			old, new := diff.GetChange("properties")
+			o, n := diff.GetChange("properties")
 
-			oldProperties := resourceImagesImageV2ExpandProperties(old.(map[string]interface{}))
-			newProperties := resourceImagesImageV2ExpandProperties(new.(map[string]interface{}))
+			newProperties := resourceImagesImageV2ExpandProperties(n.(map[string]interface{}))
 
-			// If there is a new property that is not part of the old properties,
-			// then the user has explicitly set a new property and we need to ForceNew
-			// since updating properties in images is not supported.
-			for newKey, newValue := range newProperties {
-				var found bool
-				for oldKey, oldValue := range oldProperties {
-					if newKey == oldKey && newValue == oldValue {
-						found = true
+			for oldKey, oldValue := range o.(map[string]interface{}) {
+				// os_ keys are provided by the OpenStack Image service.
+				if strings.HasPrefix(oldKey, "os_") {
+					if v, ok := oldValue.(string); ok {
+						newProperties[oldKey] = v
 					}
 				}
 
-				if !found {
-					log.Printf("[DEBUG] Triggering rebuild of image %s due to new user properties %#v => %#v",
-						diff.Id(), oldProperties, newProperties)
-
-					diff.ForceNew("properties")
-					return nil
-				}
-			}
-
-			// If the user did not change any properties, try to reconcile
-			// the properties that the server has set with the properties
-			// that the user set.
-			for oldKey, oldValue := range old.(map[string]interface{}) {
-				if strings.HasPrefix(oldKey, "os_") {
+				// direct_url is provided by some storage drivers.
+				if oldKey == "direct_url" {
 					if v, ok := oldValue.(string); ok {
 						newProperties[oldKey] = v
 					}
@@ -610,7 +659,7 @@ func resourceImagesImageV2UpdateComputedAttributes(diff *schema.ResourceDiff, me
 			// Set the diff to the newProperties, which includes the server-side
 			// os_ properties.
 			//
-			// If the user has removed properties, they will be caught at this
+			// If the user has changed properties, they will be caught at this
 			// point, too.
 			diff.SetNew("properties", newProperties)
 		}

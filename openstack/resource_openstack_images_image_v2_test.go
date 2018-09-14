@@ -165,7 +165,6 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 						"openstack_images_image_v2.image_1", "properties.bar", "foo"),
 					resource.TestCheckResourceAttrSet(
 						"openstack_images_image_v2.image_1", "properties.os_hash_value"),
-					testAccCheckImagesImageV2NewImage(&image_1, &image_2),
 				),
 			},
 			resource.TestStep{
@@ -176,7 +175,6 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 						"openstack_images_image_v2.image_1", "properties.foo", "bar"),
 					resource.TestCheckResourceAttrSet(
 						"openstack_images_image_v2.image_1", "properties.os_hash_value"),
-					testAccCheckImagesImageV2NewImage(&image_2, &image_3),
 				),
 			},
 			resource.TestStep{
@@ -187,7 +185,6 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 						"openstack_images_image_v2.image_1", "properties.foo", "baz"),
 					resource.TestCheckResourceAttrSet(
 						"openstack_images_image_v2.image_1", "properties.os_hash_value"),
-					testAccCheckImagesImageV2NewImage(&image_3, &image_4),
 				),
 			},
 			resource.TestStep{
@@ -200,7 +197,6 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 						"openstack_images_image_v2.image_1", "properties.bar", "foo"),
 					resource.TestCheckResourceAttrSet(
 						"openstack_images_image_v2.image_1", "properties.os_hash_value"),
-					testAccCheckImagesImageV2NewImage(&image_4, &image_5),
 				),
 			},
 		},
@@ -327,16 +323,6 @@ func testAccCheckImagesImageV2TagCount(n string, expected int) resource.TestChec
 		}
 
 		return nil
-	}
-}
-
-func testAccCheckImagesImageV2NewImage(image_1, image_2 *images.Image) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		if &image_1.ID != &image_2.ID {
-			return nil
-		}
-
-		return fmt.Errorf("New image was not generated")
 	}
 }
 
