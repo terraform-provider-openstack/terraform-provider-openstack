@@ -40,6 +40,8 @@ The following arguments are supported:
     `region` argument of the provider is used. Changing this creates a new
     security group rule.
 
+* `description` - (Optional) A description of the rule. Changing this creates a new security group rule.
+
 * `direction` - (Required) The direction of the rule, valid values are __ingress__
     or __egress__. Changing this creates a new security group rule.
 
@@ -97,6 +99,7 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `region` - See Argument Reference above.
+* `description` - See Argument Reference above.
 * `direction` - See Argument Reference above.
 * `ethertype` - See Argument Reference above.
 * `protocol` - See Argument Reference above.
