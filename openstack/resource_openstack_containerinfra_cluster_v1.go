@@ -203,12 +203,12 @@ func resourceContainerInfraClusterV1Create(d *schema.ResourceData, meta interfac
 
 	log.Printf("[DEBUG] Waiting for Cluster (%s) to become ready", s)
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"CREATE_IN_PROGRESS"},
-		Target:     []string{"CREATE_COMPLETE"},
-		Refresh:    ContainerInfraClusterV1StateRefreshFunc(containerInfraClient, s),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      60 * time.Second,
-		MinTimeout: 60 * time.Minute,
+		Pending:      []string{"CREATE_IN_PROGRESS"},
+		Target:       []string{"CREATE_COMPLETE"},
+		Refresh:      ContainerInfraClusterV1StateRefreshFunc(containerInfraClient, s),
+		Timeout:      1 * time.Hour,
+		Delay:        2 * time.Minute,
+		PollInterval: 20 * time.Second,
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
@@ -295,12 +295,12 @@ func resourceContainerInfraClusterV1Update(d *schema.ResourceData, meta interfac
 
 	log.Printf("[DEBUG] Waiting for Cluster (%s) to become updated", d.Id())
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"UPDATE_IN_PROGRESS"},
-		Target:     []string{"UPDATE_COMPLETE"},
-		Refresh:    ContainerInfraClusterV1StateRefreshFunc(containerInfraClient, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      30 * time.Second,
-		MinTimeout: 30 * time.Minute,
+		Pending:      []string{"UPDATE_IN_PROGRESS"},
+		Target:       []string{"UPDATE_COMPLETE"},
+		Refresh:      ContainerInfraClusterV1StateRefreshFunc(containerInfraClient, d.Id()),
+		Timeout:      30 * time.Minute,
+		Delay:        30 * time.Minute,
+		PollInterval: 20 * time.Second,
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
@@ -325,12 +325,12 @@ func resourceContainerInfraClusterV1Delete(d *schema.ResourceData, meta interfac
 
 	log.Printf("[DEBUG] Waiting for Cluster (%s) to become deleted", d.Id())
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"DELETE_IN_PROGRESS"},
-		Target:     []string{"DELETE_COMPLETE"},
-		Refresh:    ContainerInfraClusterV1StateRefreshFunc(containerInfraClient, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      20 * time.Second,
-		MinTimeout: 5 * time.Minute,
+		Pending:      []string{"DELETE_IN_PROGRESS"},
+		Target:       []string{"DELETE_COMPLETE"},
+		Refresh:      ContainerInfraClusterV1StateRefreshFunc(containerInfraClient, d.Id()),
+		Timeout:      10 * time.Minute,
+		Delay:        20 * time.Second,
+		PollInterval: 10 * time.Second,
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {

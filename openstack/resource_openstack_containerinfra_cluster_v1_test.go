@@ -40,6 +40,7 @@ func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
 			resource.TestStep{
 				Config: testAccContainerInfraV1ClusterUpdate(imageName, keypairName, flavorName, clusterTemplateName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
+					testAccCheckContainerInfraV1ClusterExists(resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
 					resource.TestCheckResourceAttr(resourceName, "master_count", strconv.Itoa(1)),
 					resource.TestCheckResourceAttr(resourceName, "node_count", strconv.Itoa(2)),
