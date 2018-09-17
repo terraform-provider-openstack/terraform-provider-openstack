@@ -241,6 +241,7 @@ func resourceContainerInfraClusterV1Read(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("Unable to set labels: %s", err)
 	}
 
+	d.Set("name", s.Name)
 	d.Set("api_address", s.APIAddress)
 	d.Set("coe_version", s.COEVersion)
 	d.Set("cluster_template_id", s.ClusterTemplateID)
