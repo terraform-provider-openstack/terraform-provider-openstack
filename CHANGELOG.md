@@ -4,6 +4,10 @@ FEATURES
 
 * __New Data Source__: `openstack_containerinfra_clustertemplate_v1` [GH-415]
 
+IMPROVEMENTS
+
+* Added `description` argument for the `openstack_networking_secgroup_rule_v2` resource [GH-416]
+
 ## 1.9.0 (September 05, 2018)
 
 FEATURES
