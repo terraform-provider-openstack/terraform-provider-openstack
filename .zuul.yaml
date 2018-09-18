@@ -1,5 +1,5 @@
 - project:
-    name: terraform-providers/terraform-provider-openstack
+    name: theopenlab/terraform-provider-openstack
     check:
       jobs:
         - terraform-provider-openstack-unittest
@@ -19,6 +19,9 @@
     recheck-queens:
       jobs:
         - terraform-provider-openstack-acceptance-test-queens
+    recheck-rocky:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-rocky
     recheck-trove:
       jobs:
         - terraform-provider-openstack-acceptance-test-trove
@@ -31,3 +34,7 @@
     recheck-fwaas:
       jobs:
         - terraform-provider-openstack-acceptance-test-fwaas
+    periodic:
+      jobs:
+        - terraform-provider-openstack-unittest
+        - terraform-provider-openstack-acceptance-test
