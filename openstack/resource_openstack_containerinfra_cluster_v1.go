@@ -24,7 +24,8 @@ func resourceContainerInfraClusterV1() *schema.Resource {
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(60 * time.Minute),
-			Delete: schema.DefaultTimeout(10 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"region": &schema.Schema{
@@ -206,8 +207,8 @@ func resourceContainerInfraClusterV1Create(d *schema.ResourceData, meta interfac
 		Pending:      []string{"CREATE_IN_PROGRESS"},
 		Target:       []string{"CREATE_COMPLETE"},
 		Refresh:      ContainerInfraClusterV1StateRefreshFunc(containerInfraClient, s),
-		Timeout:      1 * time.Hour,
-		Delay:        2 * time.Minute,
+		Timeout:      d.Timeout(schema.TimeoutCreate),
+		Delay:        1 * time.Minute,
 		PollInterval: 20 * time.Second,
 	}
 	_, err = stateConf.WaitForState()
@@ -299,8 +300,8 @@ func resourceContainerInfraClusterV1Update(d *schema.ResourceData, meta interfac
 		Pending:      []string{"UPDATE_IN_PROGRESS"},
 		Target:       []string{"UPDATE_COMPLETE"},
 		Refresh:      ContainerInfraClusterV1StateRefreshFunc(containerInfraClient, d.Id()),
-		Timeout:      30 * time.Minute,
-		Delay:        30 * time.Minute,
+		Timeout:      d.Timeout(schema.TimeoutUpdate),
+		Delay:        1 * time.Minute,
 		PollInterval: 20 * time.Second,
 	}
 	_, err = stateConf.WaitForState()
@@ -329,8 +330,8 @@ func resourceContainerInfraClusterV1Delete(d *schema.ResourceData, meta interfac
 		Pending:      []string{"DELETE_IN_PROGRESS"},
 		Target:       []string{"DELETE_COMPLETE"},
 		Refresh:      ContainerInfraClusterV1StateRefreshFunc(containerInfraClient, d.Id()),
-		Timeout:      10 * time.Minute,
-		Delay:        20 * time.Second,
+		Timeout:      d.Timeout(schema.TimeoutDelete),
+		Delay:        30 * time.Second,
 		PollInterval: 10 * time.Second,
 	}
 	_, err = stateConf.WaitForState()
