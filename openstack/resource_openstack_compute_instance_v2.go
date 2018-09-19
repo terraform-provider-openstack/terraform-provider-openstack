@@ -360,6 +360,21 @@ func resourceComputeInstanceV2() *schema.Resource {
 					return
 				},
 			},
+			"vendor_options": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"ignore_resize_confirmation": &schema.Schema{
+							Type:     schema.TypeBool,
+							Default:  false,
+							Optional: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -767,6 +782,14 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if d.HasChange("flavor_id") || d.HasChange("flavor_name") {
+		// Get vendor_options
+		vendorOptionsRaw := d.Get("vendor_options").(*schema.Set)
+		var ignoreResizeConfirmation bool
+		if vendorOptionsRaw.Len() > 0 {
+			vendorOptions := expandVendorOptions(vendorOptionsRaw.List())
+			ignoreResizeConfirmation = vendorOptions["ignore_resize_confirmation"].(bool)
+		}
+
 		var newFlavorId string
 		var err error
 		if d.HasChange("flavor_id") {
@@ -791,39 +814,56 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		// Wait for the instance to finish resizing.
 		log.Printf("[DEBUG] Waiting for instance (%s) to finish resizing", d.Id())
 
-		stateConf := &resource.StateChangeConf{
-			Pending:    []string{"RESIZE"},
-			Target:     []string{"VERIFY_RESIZE"},
-			Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
-			Timeout:    d.Timeout(schema.TimeoutUpdate),
-			Delay:      10 * time.Second,
-			MinTimeout: 3 * time.Second,
-		}
+		// Resize instance without confirmation if specified by user.
+		if ignoreResizeConfirmation {
+			stateConf := &resource.StateChangeConf{
+				Pending:    []string{"RESIZE", "VERIFY_RESIZE"},
+				Target:     []string{"ACTIVE", "SHUTOFF"},
+				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
 
-		_, err = stateConf.WaitForState()
-		if err != nil {
-			return fmt.Errorf("Error waiting for instance (%s) to resize: %s", d.Id(), err)
-		}
+			_, err = stateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("Error waiting for instance (%s) to resize: %s", d.Id(), err)
+			}
+		} else {
+			stateConf := &resource.StateChangeConf{
+				Pending:    []string{"RESIZE"},
+				Target:     []string{"VERIFY_RESIZE"},
+				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
 
-		// Confirm resize.
-		log.Printf("[DEBUG] Confirming resize")
-		err = servers.ConfirmResize(computeClient, d.Id()).ExtractErr()
-		if err != nil {
-			return fmt.Errorf("Error confirming resize of OpenStack server: %s", err)
-		}
+			_, err = stateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("Error waiting for instance (%s) to resize: %s", d.Id(), err)
+			}
 
-		stateConf = &resource.StateChangeConf{
-			Pending:    []string{"VERIFY_RESIZE"},
-			Target:     []string{"ACTIVE", "SHUTOFF"},
-			Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
-			Timeout:    d.Timeout(schema.TimeoutUpdate),
-			Delay:      10 * time.Second,
-			MinTimeout: 3 * time.Second,
-		}
+			// Confirm resize.
+			log.Printf("[DEBUG] Confirming resize")
+			err = servers.ConfirmResize(computeClient, d.Id()).ExtractErr()
+			if err != nil {
+				return fmt.Errorf("Error confirming resize of OpenStack server: %s", err)
+			}
 
-		_, err = stateConf.WaitForState()
-		if err != nil {
-			return fmt.Errorf("Error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
+			stateConf = &resource.StateChangeConf{
+				Pending:    []string{"VERIFY_RESIZE"},
+				Target:     []string{"ACTIVE", "SHUTOFF"},
+				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
+
+			_, err = stateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("Error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
+			}
 		}
 	}
 

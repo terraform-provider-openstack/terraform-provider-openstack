@@ -359,6 +359,8 @@ The following arguments are supported:
     the VM will be stopped immediately after build and the provisioners like
     remote-exec or files are not supported.
 
+* `vendor_options` - (Optional) Map of additional vendor-specific options.
+    Supported options are described below.
 
 The `network` block supports:
 
@@ -431,6 +433,13 @@ The `personality` block supports:
 * `file` - (Required) The absolute path of the destination file.
 
 * `contents` - (Required) The contents of the file. Limited to 255 bytes.
+
+The `vendor_options` block supports:
+
+* `ignore_resize_confirmation` - (Optional) Boolean to control whether
+    to ignore manual confirmation of the instance resizing. This can be helpful
+    to work with some OpenStack clouds which automatically confirm resizing of
+    instances after some timeout.
 
 ## Attributes Reference
 

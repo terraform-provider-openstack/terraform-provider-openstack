@@ -145,3 +145,16 @@ func resourceNetworkingAvailabilityZoneHintsV2(d *schema.ResourceData) []string 
 	}
 	return azh
 }
+
+func expandVendorOptions(vendOptsRaw []interface{}) map[string]interface{} {
+	vendorOptions := make(map[string]interface{})
+
+	for _, option := range vendOptsRaw {
+		for optKey, optValue := range option.(map[string]interface{}) {
+			vendorOptions[optKey] = optValue
+		}
+
+	}
+
+	return vendorOptions
+}

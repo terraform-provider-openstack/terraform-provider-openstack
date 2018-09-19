@@ -446,16 +446,3 @@ func resourceRouterExternalFixedIPsV2(d *schema.ResourceData) []routers.External
 
 	return externalFixedIPs
 }
-
-func expandVendorOptions(vendOptsRaw []interface{}) map[string]interface{} {
-	vendorOptions := make(map[string]interface{})
-
-	for _, option := range vendOptsRaw {
-		for optKey, optValue := range option.(map[string]interface{}) {
-			vendorOptions[optKey] = optValue
-		}
-
-	}
-
-	return vendorOptions
-}
