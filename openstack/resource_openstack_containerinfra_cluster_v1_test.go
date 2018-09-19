@@ -18,7 +18,6 @@ func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
 	clusterName := acctest.RandomWithPrefix("tf-acc-cluster")
 	imageName := acctest.RandomWithPrefix("tf-acc-image")
 	keypairName := acctest.RandomWithPrefix("tf-acc-keypair")
-	flavorName := acctest.RandomWithPrefix("tf-acc-flavor")
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
 
 	resource.Test(t, resource.TestCase{
@@ -27,7 +26,7 @@ func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
 		CheckDestroy: testAccCheckContainerInfraV1ClusterDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccContainerInfraV1ClusterBasic(imageName, keypairName, flavorName, clusterTemplateName, clusterName),
+				Config: testAccContainerInfraV1ClusterBasic(imageName, keypairName, clusterTemplateName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1ClusterExists(resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
@@ -38,7 +37,7 @@ func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config: testAccContainerInfraV1ClusterUpdate(imageName, keypairName, flavorName, clusterTemplateName, clusterName),
+				Config: testAccContainerInfraV1ClusterUpdate(imageName, keypairName, clusterTemplateName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1ClusterExists(resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
@@ -105,7 +104,7 @@ func testAccCheckContainerInfraV1ClusterDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccContainerInfraV1ClusterBasic(imageName, keypairName, flavorName, clusterTemplateName, clusterName string) string {
+func testAccContainerInfraV1ClusterBasic(imageName, keypairName, clusterTemplateName, clusterName string) string {
 	return fmt.Sprintf(`
 resource "openstack_images_image_v2" "image_1" {
   name             = "%s"
@@ -121,19 +120,12 @@ resource "openstack_compute_keypair_v2" "keypair_1" {
   name = "%s"
 }
 
-resource "openstack_compute_flavor_v2" "flavor_1" {
-  name = "%s"
-  ram = 1024
-  vcpus = 1
-  disk = 7
-}
-
 resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   name                  = "%s"
   image                 = "${openstack_images_image_v2.image_1.name}"
   coe                   = "kubernetes"
-  master_flavor         = "${openstack_compute_flavor_v2.flavor_1.id}"
-  flavor                = "${openstack_compute_flavor_v2.flavor_1.id}"
+  master_flavor         = "%s"
+  flavor                = "%s"
   floating_ip_enabled   = false
   external_network_id   = "%s"
   network_driver        = "flannel"
@@ -149,10 +141,10 @@ resource "openstack_containerinfra_cluster_v1" "cluster_1" {
   node_count           = 1
   keypair              = "${openstack_compute_keypair_v2.keypair_1.name}"
 }
-`, imageName, keypairName, flavorName, clusterTemplateName, OS_EXTGW_ID, clusterName)
+`, imageName, keypairName, clusterTemplateName, OS_MAGNUM_FLAVOR, OS_MAGNUM_FLAVOR, OS_EXTGW_ID, clusterName)
 }
 
-func testAccContainerInfraV1ClusterUpdate(imageName, keypairName, flavorName, clusterTemplateName, clusterName string) string {
+func testAccContainerInfraV1ClusterUpdate(imageName, keypairName, clusterTemplateName, clusterName string) string {
 	return fmt.Sprintf(`
 resource "openstack_images_image_v2" "image_1" {
   name             = "%s"
@@ -168,19 +160,12 @@ resource "openstack_compute_keypair_v2" "keypair_1" {
   name = "%s"
 }
 
-resource "openstack_compute_flavor_v2" "flavor_1" {
-  name = "%s"
-  ram = 1024
-  vcpus = 1
-  disk = 7
-}
-
 resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   name                  = "%s"
   image                 = "${openstack_images_image_v2.image_1.name}"
   coe                   = "kubernetes"
-  master_flavor         = "${openstack_compute_flavor_v2.flavor_1.id}"
-  flavor                = "${openstack_compute_flavor_v2.flavor_1.id}"
+  master_flavor         = "%s"
+  flavor                = "%s"
   floating_ip_enabled   = false
   external_network_id   = "%s"
   network_driver        = "flannel"
@@ -196,5 +181,5 @@ resource "openstack_containerinfra_cluster_v1" "cluster_1" {
   node_count           = 2
   keypair              = "${openstack_compute_keypair_v2.keypair_1.name}"
 }
-`, imageName, keypairName, flavorName, clusterTemplateName, OS_EXTGW_ID, clusterName)
+`, imageName, keypairName, clusterTemplateName, OS_MAGNUM_FLAVOR, OS_MAGNUM_FLAVOR, OS_EXTGW_ID, clusterName)
 }

@@ -23,6 +23,7 @@ var (
 	OS_FLAVOR_NAME                 = os.Getenv("OS_FLAVOR_NAME")
 	OS_IMAGE_ID                    = os.Getenv("OS_IMAGE_ID")
 	OS_IMAGE_NAME                  = os.Getenv("OS_IMAGE_NAME")
+	OS_MAGNUM_FLAVOR               = os.Getenv("OS_MAGNUM_FLAVOR")
 	OS_NETWORK_ID                  = os.Getenv("OS_NETWORK_ID")
 	OS_POOL_NAME                   = os.Getenv("OS_POOL_NAME")
 	OS_REGION_NAME                 = os.Getenv("OS_REGION_NAME")
