@@ -202,6 +202,9 @@ func resourceContainerInfraClusterV1Create(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Error creating OpenStack container infra Cluster: %s", err)
 	}
 
+	// Store the Cluster ID.
+	d.SetId(s)
+
 	log.Printf("[DEBUG] Waiting for Cluster (%s) to become ready", s)
 	stateConf := &resource.StateChangeConf{
 		Pending:      []string{"CREATE_IN_PROGRESS"},
@@ -356,8 +359,18 @@ func ContainerInfraClusterV1StateRefreshFunc(client *gophercloud.ServiceClient, 
 			return nil, "", err
 		}
 
-		if c.Status == "error" {
-			return c, c.Status, fmt.Errorf("There was an error creating the container infra Cluster")
+		errorStatuses := []string{
+			"CREATE_FAILED",
+			"UPDATE_FAILED",
+			"DELETE_FAILED",
+			"RESUME_FAILED",
+			"ROLLBACK_FAILED",
+		}
+		for _, errorStatus := range errorStatuses {
+			if c.Status == errorStatus {
+				err = fmt.Errorf("There was an error creating the container infra cluster: %s", c.StatusReason)
+				return c, c.Status, err
+			}
 		}
 
 		return c, c.Status, nil
