@@ -23,6 +23,7 @@ import (
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func resourceComputeInstanceV2() *schema.Resource {
@@ -351,14 +352,10 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 				Default:  "active",
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if strings.ToLower(value) != "active" && strings.ToLower(value) != "shutoff" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'active' and 'shutoff' are supported values for 'power_state'"))
-					}
-					return
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"active", "shutoff",
+				}, true),
+				DiffSuppressFunc: suppressPowerStateDiffs,
 			},
 			"vendor_options": &schema.Schema{
 				Type:     schema.TypeSet,
@@ -628,12 +625,19 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	// Set the region
 	d.Set("region", GetRegion(d, config))
 
-	//Set the current power_state:
-	if strings.ToLower(server.Status) != "active" && strings.ToLower(server.Status) != "shutoff" {
-		return fmt.Errorf("Error changing the instance(%s) power_state. Invalid current power_state:%s ", d.Id(), server.Status)
-	} else {
-		d.Set("power_state", strings.ToLower(server.Status))
+	// Set the current power_state
+	var validStatus bool
+	currentStatus := strings.ToLower(server.Status)
+	switch currentStatus {
+	case "active", "shutoff", "error":
+		validStatus = true
 	}
+
+	if !validStatus {
+		return fmt.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
+	}
+
+	d.Set("power_state", currentStatus)
 
 	return nil
 }
@@ -1233,6 +1237,16 @@ func suppressAvailabilityZoneDetailDiffs(k, old, new string, d *schema.ResourceD
 		if az == old {
 			return true
 		}
+	}
+
+	return false
+}
+
+// suppressPowerStateDiffs will allow a state of "error" even though we don't
+// allow it as a user input.
+func suppressPowerStateDiffs(k, old, new string, d *schema.ResourceData) bool {
+	if old == "error" {
+		return true
 	}
 
 	return false
