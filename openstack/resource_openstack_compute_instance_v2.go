@@ -45,7 +45,6 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
@@ -342,6 +341,11 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"destroy_on_error": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true, // i'm lazy and set this to true while testing so i wouldn't have to update my terraform code
+			},
 			"all_metadata": &schema.Schema{
 				Type:     schema.TypeMap,
 				Computed: true,
@@ -353,9 +357,9 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Default:  "active",
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					value := v.(string)
-					if strings.ToLower(value) != "active" && strings.ToLower(value) != "shutoff" {
+					if strings.ToLower(value) != "active" && strings.ToLower(value) != "shutoff" && strings.ToLower(value) != "error" {
 						errors = append(errors, fmt.Errorf(
-							"Only 'active' and 'shutoff' are supported values for 'power_state'"))
+							"Only 'active', 'shutoff', and 'error' are supported values for 'power_state'"))
 					}
 					return
 				},
@@ -629,10 +633,17 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	d.Set("region", GetRegion(d, config))
 
 	//Set the current power_state:
-	if strings.ToLower(server.Status) != "active" && strings.ToLower(server.Status) != "shutoff" {
-		return fmt.Errorf("Error changing the instance(%s) power_state. Invalid current power_state:%s ", d.Id(), server.Status)
-	} else {
+	switch strings.ToLower(server.Status) {
+	case "active", "shutoff":
 		d.Set("power_state", strings.ToLower(server.Status))
+	case "error":
+		if d.Get("destroy_on_error").(bool) {
+			d.Set("power_state", strings.ToLower(server.Status))
+		} else {
+			return fmt.Errorf("Error changing the instance (%s) power_state. Invalid current power_state: %s", d.Id(), server.Status)
+		}
+	default:
+		return fmt.Errorf("Error changing the instance (%s) power_state. Invalid current power_state: %s", d.Id(), server.Status)
 	}
 
 	return nil
