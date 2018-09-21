@@ -2,6 +2,7 @@
 
 FEATURES
 
+* __New Resource__: `openstack_containerinfra_cluster_v1` [GH-421]
 * __New Data Source__: `openstack_containerinfra_clustertemplate_v1` [GH-415]
 
 IMPROVEMENTS
