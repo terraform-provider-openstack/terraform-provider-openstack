@@ -213,7 +213,7 @@ func resourceContainerInfraClusterTemplateV1Create(d *schema.ResourceData, meta 
 	tlsDisabled := d.Get("tls_disabled").(bool)
 
 	// Get and check labels map.
-	labels, err := resourceClusterTemplateLabelsMapV1(d)
+	labels, err := containerInfraLabelsMapV1(d)
 	if err != nil {
 		return err
 	}
@@ -409,7 +409,7 @@ func resourceContainerInfraClusterTemplateV1Update(d *schema.ResourceData, meta 
 		updateOpts = resourceClusterTemplateAppendUpdateOptsV1(updateOpts, "keypair_id", v)
 	}
 	if d.HasChange("labels") {
-		v, err := resourceClusterTemplateLabelsStringV1(d)
+		v, err := containerInfraLabelsStringV1(d)
 		if err != nil {
 			return err
 		}
@@ -474,35 +474,6 @@ func resourceContainerInfraClusterTemplateV1Delete(d *schema.ResourceData, meta 
 	}
 
 	return nil
-}
-
-func resourceClusterTemplateLabelsMapV1(d *schema.ResourceData) (map[string]string, error) {
-	m := make(map[string]string)
-	for key, val := range d.Get("labels").(map[string]interface{}) {
-		labelValue, ok := val.(string)
-		if !ok {
-			return nil, fmt.Errorf("label %s value should be string", key)
-		}
-		m[key] = labelValue
-	}
-	return m, nil
-}
-
-func resourceClusterTemplateLabelsStringV1(d *schema.ResourceData) (string, error) {
-	var formattedLabels string
-	for key, val := range d.Get("labels").(map[string]interface{}) {
-		labelValue, ok := val.(string)
-		if !ok {
-			return "", fmt.Errorf("label %s value should be string", key)
-		}
-		formattedLabels = strings.Join([]string{
-			formattedLabels,
-			fmt.Sprintf("%s=%s", key, labelValue),
-		}, ",")
-	}
-	formattedLabels = strings.Trim(formattedLabels, ",")
-
-	return formattedLabels, nil
 }
 
 func resourceClusterTemplateAppendUpdateOptsV1(updateOpts []clustertemplates.UpdateOptsBuilder, attribute string, value string) []clustertemplates.UpdateOptsBuilder {
