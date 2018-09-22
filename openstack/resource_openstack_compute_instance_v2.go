@@ -626,18 +626,13 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	d.Set("region", GetRegion(d, config))
 
 	// Set the current power_state
-	var validStatus bool
 	currentStatus := strings.ToLower(server.Status)
 	switch currentStatus {
 	case "active", "shutoff", "error":
-		validStatus = true
-	}
-
-	if !validStatus {
+		d.Set("power_state", currentStatus)
+	default:
 		return fmt.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
 	}
-
-	d.Set("power_state", currentStatus)
 
 	return nil
 }
