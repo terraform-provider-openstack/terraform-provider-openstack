@@ -89,9 +89,10 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Computed: true,
 			},
 			"fixed_ip": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				ForceNew: false,
+				Type:          schema.TypeList,
+				Optional:      true,
+				ForceNew:      false,
+				ConflictsWith: []string{"no_fixed_ip"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"subnet_id": &schema.Schema{
@@ -104,6 +105,12 @@ func resourceNetworkingPortV2() *schema.Resource {
 						},
 					},
 				},
+			},
+			"no_fixed_ip": &schema.Schema{
+				Type:          schema.TypeBool,
+				Optional:      true,
+				ForceNew:      false,
+				ConflictsWith: []string{"fixed_ip"},
 			},
 			"allowed_address_pairs": &schema.Schema{
 				Type:     schema.TypeSet,
@@ -160,6 +167,20 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set")
 	}
 
+	// Parse the fixed_ips
+	fixedIPs := resourcePortFixedIpsV2(d)
+
+	// Check if the user specified no_fixed_ip.
+	//
+	// Since fixed_ip and no_fixed_ip are mutually exclusive,
+	// we can safely overwrite the previous fixedIPs variable.
+	//
+	// Since we're only concerned about a value of "true",
+	// GetOk is used.
+	if _, ok := d.GetOk("no_fixed_ip"); ok {
+		fixedIPs = []interface{}{}
+	}
+
 	createOpts := PortCreateOpts{
 		ports.CreateOpts{
 			Name:                d.Get("name").(string),
@@ -169,7 +190,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 			TenantID:            d.Get("tenant_id").(string),
 			DeviceOwner:         d.Get("device_owner").(string),
 			DeviceID:            d.Get("device_id").(string),
-			FixedIPs:            resourcePortFixedIpsV2(d),
+			FixedIPs:            fixedIPs,
 			AllowedAddressPairs: resourceAllowedAddressPairsV2(d),
 		},
 		MapValueSpecs(d),
@@ -330,6 +351,13 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("fixed_ip") {
 		hasChange = true
 		updateOpts.FixedIPs = resourcePortFixedIpsV2(d)
+	}
+
+	if d.HasChange("no_fixed_ip") {
+		if _, ok := d.GetOk("no_fixed_ip"); ok {
+			hasChange = true
+			updateOpts.FixedIPs = []interface{}{}
+		}
 	}
 
 	if hasChange {
