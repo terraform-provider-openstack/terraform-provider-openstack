@@ -99,6 +99,10 @@ func resourceBlockStorageVolumeV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"multiattach": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"attachment": &schema.Schema{
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -143,6 +147,7 @@ func resourceBlockStorageVolumeV3Create(d *schema.ResourceData, meta interface{}
 		SourceReplica:      d.Get("source_replica").(string),
 		SourceVolID:        d.Get("source_vol_id").(string),
 		VolumeType:         d.Get("volume_type").(string),
+		Multiattach:        d.Get("multiattach").(bool),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
