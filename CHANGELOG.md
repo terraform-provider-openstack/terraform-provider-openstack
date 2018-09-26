@@ -9,6 +9,7 @@ IMPROVEMENTS
 
 * Added `description` argument for the `openstack_networking_secgroup_rule_v2` resource [GH-416]
 * Added a vendor option of `ignore_resize_confirmation` to `openstack_compute_instance_v2` [GH-422]
+* `openstack_compute_instance_v2` IP addresses are now visible in Rackspace. This provider still does not officially support Rackspace, though. [GH-426]
 
 BUG FIXES
 
