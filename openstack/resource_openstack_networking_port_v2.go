@@ -167,20 +167,6 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set")
 	}
 
-	// Parse the fixed_ips
-	fixedIPs := resourcePortFixedIpsV2(d)
-
-	// Check if the user specified no_fixed_ip.
-	//
-	// Since fixed_ip and no_fixed_ip are mutually exclusive,
-	// we can safely overwrite the previous fixedIPs variable.
-	//
-	// Since we're only concerned about a value of "true",
-	// GetOk is used.
-	if _, ok := d.GetOk("no_fixed_ip"); ok {
-		fixedIPs = []interface{}{}
-	}
-
 	createOpts := PortCreateOpts{
 		ports.CreateOpts{
 			Name:                d.Get("name").(string),
@@ -190,7 +176,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 			TenantID:            d.Get("tenant_id").(string),
 			DeviceOwner:         d.Get("device_owner").(string),
 			DeviceID:            d.Get("device_id").(string),
-			FixedIPs:            fixedIPs,
+			FixedIPs:            resourcePortFixedIpsV2(d),
 			AllowedAddressPairs: resourceAllowedAddressPairsV2(d),
 		},
 		MapValueSpecs(d),
@@ -348,16 +334,9 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		updateOpts.DeviceID = d.Get("device_id").(string)
 	}
 
-	if d.HasChange("fixed_ip") {
+	if d.HasChange("fixed_ip") || d.HasChange("no_fixed_ip") {
 		hasChange = true
 		updateOpts.FixedIPs = resourcePortFixedIpsV2(d)
-	}
-
-	if d.HasChange("no_fixed_ip") {
-		if _, ok := d.GetOk("no_fixed_ip"); ok {
-			hasChange = true
-			updateOpts.FixedIPs = []interface{}{}
-		}
 	}
 
 	if hasChange {
@@ -406,6 +385,16 @@ func resourcePortSecurityGroupsV2(v *schema.Set) []string {
 }
 
 func resourcePortFixedIpsV2(d *schema.ResourceData) interface{} {
+	// if no_fixed_ip was specified, then just return
+	// an empty array. Since no_fixed_ip is mutually
+	// exclusive to fixed_ip, we can safely do this.
+	//
+	// Since we're only concerned about no_fixed_ip
+	// being set to "true", GetOk is used.
+	if _, ok := d.GetOk("no_fixed_ip"); ok {
+		return []interface{}{}
+	}
+
 	rawIP := d.Get("fixed_ip").([]interface{})
 
 	if len(rawIP) == 0 {
