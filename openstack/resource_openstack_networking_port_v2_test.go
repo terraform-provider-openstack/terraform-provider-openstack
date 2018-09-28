@@ -386,6 +386,58 @@ func TestAccNetworkingV2Port_noSecurityGroups(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
+	var port ports.Port
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccNetworkingV2Port_noFixedIP_1,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "all_fixed_ips.#", "0"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccNetworkingV2Port_noFixedIP_2,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "all_fixed_ips.#", "1"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccNetworkingV2Port_noFixedIP_1,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "all_fixed_ips.#", "0"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccNetworkingV2Port_noFixedIP_3,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "all_fixed_ips.#", "2"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccNetworkingV2Port_noFixedIP_1,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "all_fixed_ips.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2PortDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
@@ -1384,6 +1436,82 @@ resource "openstack_networking_port_v2" "instance_port" {
 
   allowed_address_pairs {
     ip_address = "${openstack_networking_port_v2.vrrp_port_2.fixed_ip.0.ip_address}"
+  }
+}
+`
+
+const testAccNetworkingV2Port_noFixedIP_1 = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  admin_state_up = "true"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+	no_fixed_ip = true
+}
+`
+
+const testAccNetworkingV2Port_noFixedIP_2 = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  admin_state_up = "true"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  fixed_ip {
+    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.199.23"
+  }
+}
+`
+
+const testAccNetworkingV2Port_noFixedIP_3 = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  admin_state_up = "true"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  fixed_ip {
+    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.199.23"
+  }
+
+  fixed_ip {
+    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.199.24"
   }
 }
 `

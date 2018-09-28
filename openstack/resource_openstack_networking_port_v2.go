@@ -89,9 +89,10 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Computed: true,
 			},
 			"fixed_ip": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				ForceNew: false,
+				Type:          schema.TypeList,
+				Optional:      true,
+				ForceNew:      false,
+				ConflictsWith: []string{"no_fixed_ip"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"subnet_id": &schema.Schema{
@@ -104,6 +105,12 @@ func resourceNetworkingPortV2() *schema.Resource {
 						},
 					},
 				},
+			},
+			"no_fixed_ip": &schema.Schema{
+				Type:          schema.TypeBool,
+				Optional:      true,
+				ForceNew:      false,
+				ConflictsWith: []string{"fixed_ip"},
 			},
 			"allowed_address_pairs": &schema.Schema{
 				Type:     schema.TypeSet,
@@ -327,7 +334,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		updateOpts.DeviceID = d.Get("device_id").(string)
 	}
 
-	if d.HasChange("fixed_ip") {
+	if d.HasChange("fixed_ip") || d.HasChange("no_fixed_ip") {
 		hasChange = true
 		updateOpts.FixedIPs = resourcePortFixedIpsV2(d)
 	}
@@ -378,6 +385,16 @@ func resourcePortSecurityGroupsV2(v *schema.Set) []string {
 }
 
 func resourcePortFixedIpsV2(d *schema.ResourceData) interface{} {
+	// if no_fixed_ip was specified, then just return
+	// an empty array. Since no_fixed_ip is mutually
+	// exclusive to fixed_ip, we can safely do this.
+	//
+	// Since we're only concerned about no_fixed_ip
+	// being set to "true", GetOk is used.
+	if _, ok := d.GetOk("no_fixed_ip"); ok {
+		return []interface{}{}
+	}
+
 	rawIP := d.Get("fixed_ip").([]interface{})
 
 	if len(rawIP) == 0 {
