@@ -1,20 +1,20 @@
-## 1.10.0 (Unreleased)
+## 1.10.0 (October 01, 2018)
 
 FEATURES
 
-* __New Resource__: `openstack_containerinfra_cluster_v1` [GH-421]
-* __New Data Source__: `openstack_containerinfra_clustertemplate_v1` [GH-415]
+* __New Resource__: `openstack_containerinfra_cluster_v1` ([#421](https://github.com/terraform-providers/terraform-provider-openstack/issues/421))
+* __New Data Source__: `openstack_containerinfra_clustertemplate_v1` ([#415](https://github.com/terraform-providers/terraform-provider-openstack/issues/415))
 
 IMPROVEMENTS
 
-* Added `description` argument for the `openstack_networking_secgroup_rule_v2` resource [GH-416]
-* Added a vendor option of `ignore_resize_confirmation` to `openstack_compute_instance_v2` [GH-422]
-* `openstack_compute_instance_v2` IP addresses are now visible in Rackspace. This provider still does not officially support Rackspace, though. [GH-426]
-* Added `no_fixed_ip` argument to `openstack_networking_port_v2` which allows the port to not have an IP address [GH-433]
+* Added `description` argument for the `openstack_networking_secgroup_rule_v2` resource ([#416](https://github.com/terraform-providers/terraform-provider-openstack/issues/416))
+* Added a vendor option of `ignore_resize_confirmation` to `openstack_compute_instance_v2` ([#422](https://github.com/terraform-providers/terraform-provider-openstack/issues/422))
+* `openstack_compute_instance_v2` IP addresses are now visible in Rackspace. This provider still does not officially support Rackspace, though. ([#426](https://github.com/terraform-providers/terraform-provider-openstack/issues/426))
+* Added `no_fixed_ip` argument to `openstack_networking_port_v2` which allows the port to not have an IP address ([#433](https://github.com/terraform-providers/terraform-provider-openstack/issues/433))
 
 BUG FIXES
 
-* Enabled instances to be in an `ERROR` state so they can be cleanly deleted [GH-428]
+* Enabled instances to be in an `ERROR` state so they can be cleanly deleted ([#428](https://github.com/terraform-providers/terraform-provider-openstack/issues/428))
 
 ## 1.9.0 (September 05, 2018)
 
