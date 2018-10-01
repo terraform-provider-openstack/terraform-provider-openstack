@@ -103,6 +103,8 @@ func TestAccBlockStorageV3Volume_image_multiattach(t *testing.T) {
 					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "name", "volume_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_volume_v3.volume_1", "multiattach", "true"),
 				),
 			},
 		},
