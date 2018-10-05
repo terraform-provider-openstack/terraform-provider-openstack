@@ -1,4 +1,9 @@
 ## 1.11.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Added `multiattach` argument and attribute for the `resource_openstack_blockstorage_volume_v3` resource [GH-431]
+
 ## 1.10.0 (October 01, 2018)
 
 FEATURES
