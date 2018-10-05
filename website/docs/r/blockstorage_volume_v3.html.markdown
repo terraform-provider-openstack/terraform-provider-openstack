@@ -64,6 +64,8 @@ The following arguments are supported:
 * `volume_type` - (Optional) The type of volume to create.
     Changing this creates a new volume.
 
+* `multiattach` - (Optional) Allow the volume to be attached to more than one Compute instance.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -81,6 +83,7 @@ The following attributes are exported:
 * `attachment` - If a volume is attached to an instance, this attribute will
     display the Attachment ID, Instance ID, and the Device as the Instance
     sees it.
+* `multiattach` - See Argument Reference above.
 
 ## Import
 

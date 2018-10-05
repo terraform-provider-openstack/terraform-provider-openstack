@@ -89,6 +89,28 @@ func TestAccBlockStorageV3Volume_image(t *testing.T) {
 	})
 }
 
+func TestAccBlockStorageV3Volume_image_multiattach(t *testing.T) {
+	var volume volumes.Volume
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccBlockStorageV3Volume_image_multiattach,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_volume_v3.volume_1", "name", "volume_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_volume_v3.volume_1", "multiattach", "true"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccBlockStorageV3Volume_timeout(t *testing.T) {
 	var volume volumes.Volume
 
@@ -270,6 +292,15 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   size = 5
   image_id = "%s"
+}
+`, OS_IMAGE_ID)
+
+var testAccBlockStorageV3Volume_image_multiattach = fmt.Sprintf(`
+resource "openstack_blockstorage_volume_v3" "volume_1" {
+  name = "volume_1"
+  size = 5
+  image_id = "%s"
+  multiattach = true
 }
 `, OS_IMAGE_ID)
 
