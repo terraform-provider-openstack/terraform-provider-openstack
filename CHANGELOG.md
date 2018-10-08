@@ -2,7 +2,7 @@
 
 IMPROVEMENTS
 
-* Added `multiattach` argument and attribute for the `resource_openstack_blockstorage_volume_v3` resource [GH-431]
+* Added `multiattach` argument and attribute for the `openstack_blockstorage_volume_v3` resource [GH-431]
 
 BUG FIXES
 
