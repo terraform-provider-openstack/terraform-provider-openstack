@@ -4,6 +4,11 @@ IMPROVEMENTS
 
 * Added `multiattach` argument and attribute for the `resource_openstack_blockstorage_volume_v3` resource [GH-431]
 
+BUG FIXES
+
+* Fixed an issue where environment variables were overwriting specified arguments [GH-436]
+* Fixed an issue where security group rule descriptions were not working with older verisons of OpenStack [GH-438]
+
 ## 1.10.0 (October 01, 2018)
 
 FEATURES
