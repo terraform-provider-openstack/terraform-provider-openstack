@@ -1,6 +1,7 @@
 package clientconfig
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -18,14 +19,71 @@ func defaultIfEmpty(value string, defaultValue string) string {
 	return value
 }
 
-// updateAuthInfo updates AuthInfo in Cloud struct with AuthInfo in PublicCloud.
-func updateAuthInfo(cloud *Cloud, publicCloud *PublicCloud) {
-	s := reflect.ValueOf(publicCloud.AuthInfo).Elem()
-	for i := 0; i < s.NumField(); i++ {
-		v := s.Field(i).Interface().(string)
-		if v != "" {
-			reflect.ValueOf(cloud.AuthInfo).Elem().Field(i).SetString(v)
+// mergeCLouds merges two Clouds recursively (the AuthInfo also gets merged).
+// In case both Clouds define a value, the value in the 'override' cloud takes precedence
+func mergeClouds(override, cloud interface{}) (*Cloud, error) {
+	overrideJson, err := json.Marshal(override)
+	if err != nil {
+		return nil, err
+	}
+	cloudJson, err := json.Marshal(cloud)
+	if err != nil {
+		return nil, err
+	}
+	var overrideInterface interface{}
+	err = json.Unmarshal(overrideJson, &overrideInterface)
+	if err != nil {
+		return nil, err
+	}
+	var cloudInterface interface{}
+	err = json.Unmarshal(cloudJson, &cloudInterface)
+	if err != nil {
+		return nil, err
+	}
+	var mergedCloud Cloud
+	mergedInterface := mergeInterfaces(overrideInterface, cloudInterface)
+	mergedJson, err := json.Marshal(mergedInterface)
+	json.Unmarshal(mergedJson, &mergedCloud)
+	return &mergedCloud, nil
+}
+
+// merges two interfaces. In cases where a value is defined for both 'overridingInterface' and
+// 'inferiorInterface' the value in 'overridingInterface' will take precedence.
+func mergeInterfaces(overridingInterface, inferiorInterface interface{}) interface{} {
+	switch overriding := overridingInterface.(type) {
+	case map[string]interface{}:
+		interfaceMap, ok := inferiorInterface.(map[string]interface{})
+		if !ok {
+			return overriding
 		}
+		for k, v := range interfaceMap {
+			if overridingValue, ok := overriding[k]; ok {
+				overriding[k] = mergeInterfaces(overridingValue, v)
+			} else {
+				overriding[k] = v
+			}
+		}
+	case []interface{}:
+		list, ok := inferiorInterface.([]interface{})
+		if !ok {
+			return overriding
+		}
+		for i := range list {
+			overriding = append(overriding, list[i])
+		}
+		return overriding
+	case nil:
+		// mergeClouds(nil, map[string]interface{...}) -> map[string]interface{...}
+		v, ok := inferiorInterface.(map[string]interface{})
+		if ok {
+			return v
+		}
+	}
+	// We don't want to override with empty values
+	if reflect.DeepEqual(overridingInterface, nil) || reflect.DeepEqual(reflect.Zero(reflect.TypeOf(overridingInterface)).Interface(), overridingInterface) {
+		return inferiorInterface
+	} else {
+		return overridingInterface
 	}
 }
 
@@ -51,6 +109,10 @@ func findAndReadCloudsYAML() ([]byte, error) {
 
 func findAndReadPublicCloudsYAML() ([]byte, error) {
 	return findAndReadYAML("clouds-public.yaml")
+}
+
+func findAndReadSecureCloudsYAML() ([]byte, error) {
+	return findAndReadYAML("secure.yaml")
 }
 
 func findAndReadYAML(yamlFile string) ([]byte, error) {
