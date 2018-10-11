@@ -7,14 +7,12 @@ variable "flavor" {
 }
 
 variable "ssh_key_file" {
-  default = "~/.ssh/id_rsa.terraform"
+  default = "~/.ssh/id_rsa"
 }
 
 variable "ssh_user_name" {
   default = "ubuntu"
 }
-
-variable "external_gateway" {}
 
 variable "pool" {
   default = "public"

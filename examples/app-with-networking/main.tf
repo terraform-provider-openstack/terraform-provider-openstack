@@ -17,9 +17,9 @@ resource "openstack_networking_subnet_v2" "terraform" {
 }
 
 resource "openstack_networking_router_v2" "terraform" {
-  name             = "terraform"
-  admin_state_up   = "true"
-  external_network_id = "${var.external_gateway}"
+  name                = "terraform"
+  admin_state_up      = "true"
+  external_network_id = "${data.openstack_networking_network_v2.terraform.id}"
 }
 
 resource "openstack_networking_router_interface_v2" "terraform" {
@@ -27,35 +27,41 @@ resource "openstack_networking_router_interface_v2" "terraform" {
   subnet_id = "${openstack_networking_subnet_v2.terraform.id}"
 }
 
-resource "openstack_compute_secgroup_v2" "terraform" {
+resource "openstack_networking_secgroup_v2" "terraform" {
   name        = "terraform"
   description = "Security group for the Terraform example instances"
-
-  rule {
-    from_port   = 22
-    to_port     = 22
-    ip_protocol = "tcp"
-    cidr        = "0.0.0.0/0"
-  }
-
-  rule {
-    from_port   = 80
-    to_port     = 80
-    ip_protocol = "tcp"
-    cidr        = "0.0.0.0/0"
-  }
-
-  rule {
-    from_port   = -1
-    to_port     = -1
-    ip_protocol = "icmp"
-    cidr        = "0.0.0.0/0"
-  }
 }
 
-resource "openstack_compute_floatingip_v2" "terraform" {
-  pool       = "${var.pool}"
-  depends_on = ["openstack_networking_router_interface_v2.terraform"]
+resource "openstack_networking_secgroup_rule_v2" "terraform_22" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 22
+  port_range_max    = 22
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = "${openstack_networking_secgroup_v2.terraform.id}"
+}
+
+resource "openstack_networking_secgroup_rule_v2" "terraform_80" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 80
+  port_range_max    = 80
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = "${openstack_networking_secgroup_v2.terraform.id}"
+}
+
+resource "openstack_networking_secgroup_rule_v2" "terraform" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "icmp"
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = "${openstack_networking_secgroup_v2.terraform.id}"
+}
+
+resource "openstack_networking_floatingip_v2" "terraform" {
+  pool = "${var.pool}"
 }
 
 resource "openstack_compute_instance_v2" "terraform" {
@@ -63,22 +69,21 @@ resource "openstack_compute_instance_v2" "terraform" {
   image_name      = "${var.image}"
   flavor_name     = "${var.flavor}"
   key_pair        = "${openstack_compute_keypair_v2.terraform.name}"
-  security_groups = ["${openstack_compute_secgroup_v2.terraform.name}"]
+  security_groups = ["${openstack_networking_secgroup_v2.terraform.name}"]
 
   network {
     uuid = "${openstack_networking_network_v2.terraform.id}"
   }
-
 }
 
 resource "openstack_compute_floatingip_associate_v2" "terraform" {
-  floating_ip = "${openstack_compute_floatingip_v2.terraform.address}"
+  floating_ip = "${openstack_networking_floatingip_v2.terraform.address}"
   instance_id = "${openstack_compute_instance_v2.terraform.id}"
 
   provisioner "remote-exec" {
     connection {
-      host = "${openstack_compute_floatingip_v2.terraform.address}"
-      user     = "${var.ssh_user_name}"
+      host        = "${openstack_networking_floatingip_v2.terraform.address}"
+      user        = "${var.ssh_user_name}"
       private_key = "${file(var.ssh_key_file)}"
     }
 
@@ -88,5 +93,4 @@ resource "openstack_compute_floatingip_associate_v2" "terraform" {
       "sudo service nginx start",
     ]
   }
-
 }

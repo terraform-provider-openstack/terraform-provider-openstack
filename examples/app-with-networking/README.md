@@ -24,7 +24,6 @@ Afterwards run with a command like this:
 
 ```
 terraform apply \
-  -var 'external_gateway=fd21df30-693b-496a-ac69-8637b9c24cd3' \
   -var 'pool=public'
 ```
 
