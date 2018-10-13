@@ -51,6 +51,31 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 	})
 }
 
+func TestAccDNSV2RecordSet_ipv6(t *testing.T) {
+	var recordset recordsets.RecordSet
+	zoneName := randomZoneName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckDNS(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccDNSV2RecordSet_ipv6(zoneName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
+					resource.TestCheckResourceAttr(
+						"openstack_dns_recordset_v2.recordset_1", "description", "a record set"),
+					resource.TestCheckResourceAttr(
+						"openstack_dns_recordset_v2.recordset_1", "records.0", "fd2b:db7f:6ae:dd8d::1"),
+					resource.TestCheckResourceAttr(
+						"openstack_dns_recordset_v2.recordset_1", "records.1", "fd2b:db7f:6ae:dd8d::2"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 	var recordset recordsets.RecordSet
 	zoneName := randomZoneName()
@@ -66,25 +91,6 @@ func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
 					resource.TestMatchResourceAttr(
 						"openstack_dns_recordset_v2.recordset_1", "ttl", regexp.MustCompile("^[0-9]+$")),
-				),
-			},
-		},
-	})
-}
-
-func TestAccDNSV2RecordSet_timeout(t *testing.T) {
-	var recordset recordsets.RecordSet
-	zoneName := randomZoneName()
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDNS(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccDNSV2RecordSet_timeout(zoneName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
 				),
 			},
 		},
@@ -215,12 +221,12 @@ func testAccDNSV2RecordSet_readTTL(zoneName string) string {
 	`, zoneName, zoneName)
 }
 
-func testAccDNSV2RecordSet_timeout(zoneName string) string {
+func testAccDNSV2RecordSet_ipv6(zoneName string) string {
 	return fmt.Sprintf(`
 		resource "openstack_dns_zone_v2" "zone_1" {
 			name = "%s"
 			email = "email2@example.com"
-			description = "an updated zone"
+			description = "a zone"
 			ttl = 6000
 			type = "PRIMARY"
 		}
@@ -228,15 +234,13 @@ func testAccDNSV2RecordSet_timeout(zoneName string) string {
 		resource "openstack_dns_recordset_v2" "recordset_1" {
 			zone_id = "${openstack_dns_zone_v2.zone_1.id}"
 			name = "%s"
-			type = "A"
+			type = "AAAA"
+			description = "a record set"
 			ttl = 3000
-			records = ["10.1.0.3"]
-
-			timeouts {
-				create = "5m"
-				update = "5m"
-				delete = "5m"
-			}
+			records = [
+				"[fd2b:db7f:6ae:dd8d::1]",
+				"fd2b:db7f:6ae:dd8d::2"
+			]
 		}
 	`, zoneName, zoneName)
 }
