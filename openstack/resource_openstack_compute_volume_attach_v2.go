@@ -52,6 +52,12 @@ func resourceComputeVolumeAttachV2() *schema.Resource {
 				Computed: true,
 				Optional: true,
 			},
+
+			"multiattach": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -77,6 +83,10 @@ func resourceComputeVolumeAttachV2Create(d *schema.ResourceData, meta interface{
 	}
 
 	log.Printf("[DEBUG] Creating volume attachment: %#v", attachOpts)
+
+	if v := d.Get("multiattach").(bool); v {
+		computeClient.Microversion = "2.60"
+	}
 
 	attachment, err := volumeattach.Create(computeClient, instanceId, attachOpts).Extract()
 	if err != nil {
