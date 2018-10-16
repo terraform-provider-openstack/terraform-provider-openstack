@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strings"
 
+	snapshots_v2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/snapshots"
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets"
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/firewalls"
@@ -370,4 +371,22 @@ type EndpointGroupCreateOpts struct {
 type SiteConnectionCreateOpts struct {
 	siteconnections.CreateOpts
 	ValueSpecs map[string]string `json:"value_specs,omitempty"`
+}
+
+// blockStorageV2SnapshotSort represents a sortable slice of block storage
+// v2 snapshots.
+type blockStorageV2SnapshotSort []snapshots_v2.Snapshot
+
+func (snaphot blockStorageV2SnapshotSort) Len() int {
+	return len(snaphot)
+}
+
+func (snaphot blockStorageV2SnapshotSort) Swap(i, j int) {
+	snaphot[i], snaphot[j] = snaphot[j], snaphot[i]
+}
+
+func (snaphot blockStorageV2SnapshotSort) Less(i, j int) bool {
+	itime := snaphot[i].CreatedAt
+	jtime := snaphot[j].CreatedAt
+	return itime.Unix() < jtime.Unix()
 }
