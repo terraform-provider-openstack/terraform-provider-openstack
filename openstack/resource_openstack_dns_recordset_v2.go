@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 
@@ -52,10 +53,11 @@ func resourceDNSRecordSetV2() *schema.Resource {
 				ForceNew: false,
 			},
 			"records": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				ForceNew: false,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:             schema.TypeList,
+				Optional:         true,
+				ForceNew:         false,
+				Elem:             &schema.Schema{Type: schema.TypeString},
+				DiffSuppressFunc: suppressRecordsDiffs,
 			},
 			"ttl": &schema.Schema{
 				Type:     schema.TypeInt,
@@ -85,11 +87,7 @@ func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
-	recordsraw := d.Get("records").([]interface{})
-	records := make([]string, len(recordsraw))
-	for i, recordraw := range recordsraw {
-		records[i] = recordraw.(string)
-	}
+	records := formatDNSV2Records(d.Get("records").([]interface{}))
 
 	createOpts := RecordSetCreateOpts{
 		recordsets.CreateOpts{
@@ -173,11 +171,7 @@ func resourceDNSRecordSetV2Update(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if d.HasChange("records") {
-		recordsraw := d.Get("records").([]interface{})
-		records := make([]string, len(recordsraw))
-		for i, recordraw := range recordsraw {
-			records[i] = recordraw.(string)
-		}
+		records := formatDNSV2Records(d.Get("records").([]interface{}))
 		updateOpts.Records = records
 	}
 
@@ -273,4 +267,34 @@ func parseDNSV2RecordSetID(id string) (string, string, error) {
 	recordsetID := idParts[1]
 
 	return zoneID, recordsetID, nil
+}
+
+func formatDNSV2Records(recordsraw []interface{}) []string {
+	records := make([]string, len(recordsraw))
+
+	// Strip out any [ ] characters in the address.
+	// This is to format IPv6 records in a way that DNSaaS / Designate wants.
+	re := regexp.MustCompile("[][]")
+	for i, recordraw := range recordsraw {
+		record := recordraw.(string)
+		record = re.ReplaceAllString(record, "")
+		records[i] = record
+	}
+
+	return records
+}
+
+// suppressRecordsDiffs will suppress diffs when the format of a record
+// is different yet still a valid DNS record. For example, if a user
+// specifies an IPv6 address using [bracket] notation, but the record is
+// returned without brackets, it is still a valid record.
+func suppressRecordsDiffs(k, old, new string, d *schema.ResourceData) bool {
+	re := regexp.MustCompile("[][]")
+	new = re.ReplaceAllString(new, "")
+
+	if old == new {
+		return true
+	}
+
+	return false
 }
