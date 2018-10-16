@@ -3,6 +3,7 @@
 IMPROVEMENTS
 
 * Added `multiattach` argument and attribute for the `openstack_blockstorage_volume_v3` resource [GH-431]
+* `openstack_dns_recordset_v2` can now accept IPv6 addresses with and without brackets [GH-443]
 
 BUG FIXES
 
