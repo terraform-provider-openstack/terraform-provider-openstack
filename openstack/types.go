@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	snapshots_v2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/snapshots"
+	snapshots_v3 "github.com/gophercloud/gophercloud/openstack/blockstorage/v3/snapshots"
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets"
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/firewalls"
@@ -386,6 +387,24 @@ func (snaphot blockStorageV2SnapshotSort) Swap(i, j int) {
 }
 
 func (snaphot blockStorageV2SnapshotSort) Less(i, j int) bool {
+	itime := snaphot[i].CreatedAt
+	jtime := snaphot[j].CreatedAt
+	return itime.Unix() < jtime.Unix()
+}
+
+// blockStorageV3SnapshotSort represents a sortable slice of block storage
+// v3 snapshots.
+type blockStorageV3SnapshotSort []snapshots_v3.Snapshot
+
+func (snaphot blockStorageV3SnapshotSort) Len() int {
+	return len(snaphot)
+}
+
+func (snaphot blockStorageV3SnapshotSort) Swap(i, j int) {
+	snaphot[i], snaphot[j] = snaphot[j], snaphot[i]
+}
+
+func (snaphot blockStorageV3SnapshotSort) Less(i, j int) bool {
 	itime := snaphot[i].CreatedAt
 	jtime := snaphot[j].CreatedAt
 	return itime.Unix() < jtime.Unix()
