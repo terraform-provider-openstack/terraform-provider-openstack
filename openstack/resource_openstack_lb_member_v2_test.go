@@ -129,6 +129,7 @@ resource "openstack_lb_member_v2" "member_1" {
   protocol_port = 8080
   pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  weight = 0
 
   timeouts {
     create = "5m"
