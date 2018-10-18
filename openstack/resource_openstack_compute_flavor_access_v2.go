@@ -94,16 +94,16 @@ func resourceComputeFlavorAccessV2Delete(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	fa, err := getFlavorAccess(computeClient, d)
+	flavorAccess, err := getFlavorAccess(computeClient, d)
 	if err != nil {
 		return fmt.Errorf("Error getting flavor access: %s", err)
 	}
 
-	removeAccessOpts := flavors.RemoveAccessOpts{Tenant: fa.TenantID}
+	removeAccessOpts := flavors.RemoveAccessOpts{Tenant: flavorAccess.TenantID}
 	log.Printf("[DEBUG] RemoveAccess Options: %#v", removeAccessOpts)
 
-	if _, err := flavors.RemoveAccess(computeClient, fa.FlavorID, removeAccessOpts).Extract(); err != nil {
-		return fmt.Errorf("Error remove tenant %s access from flavor %s: %s", fa.TenantID, fa.FlavorID, err)
+	if _, err := flavors.RemoveAccess(computeClient, flavorAccess.FlavorID, removeAccessOpts).Extract(); err != nil {
+		return fmt.Errorf("Error remove tenant %s access from flavor %s: %s", flavorAccess.TenantID, flavorAccess.FlavorID, err)
 	}
 
 	return nil
