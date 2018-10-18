@@ -95,6 +95,8 @@ The following arguments are supported:
     so that they are scheduled on different availability zones. Changing this 
     creates a new network.
 
+* `tags` - (Optional) A set of string tags for the network. 
+
 The `segments` block supports:
 
 * `physical_network` - The phisical network where this network is implemented.
@@ -112,6 +114,7 @@ The following attributes are exported:
 * `tenant_id` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
 * `availability_zone_hints` - See Argument Reference above.
+* `tags` - See Argument Reference above.
 
 ## Import
 
