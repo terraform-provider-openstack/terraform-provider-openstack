@@ -103,7 +103,7 @@ func resourceComputeFlavorAccessV2Delete(d *schema.ResourceData, meta interface{
 	log.Printf("[DEBUG] RemoveAccess Options: %#v", removeAccessOpts)
 
 	if _, err := flavors.RemoveAccess(computeClient, flavorAccess.FlavorID, removeAccessOpts).Extract(); err != nil {
-		return fmt.Errorf("Error remove tenant %s access from flavor %s: %s", flavorAccess.TenantID, flavorAccess.FlavorID, err)
+		return fmt.Errorf("Error removing tenant %s access from flavor %s: %s", flavorAccess.TenantID, flavorAccess.FlavorID, err)
 	}
 
 	return nil
