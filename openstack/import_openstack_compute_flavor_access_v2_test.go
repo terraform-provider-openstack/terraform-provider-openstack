@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-func TestAccComputeV2FloatingIPAssociate_importBasic(t *testing.T) {
+func TestAccComputeV2FlavorAccess_importBasic(t *testing.T) {
 	resourceName := "openstack_compute_flavor_access_v2.access_1"
 
 	flavorName := fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
