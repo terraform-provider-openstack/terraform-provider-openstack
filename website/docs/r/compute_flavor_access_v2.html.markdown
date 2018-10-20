@@ -18,11 +18,11 @@ this resource.
 ## Example Usage
 
 ```hcl
-resource "openstack_identity_project_v3" "test_project" {
+resource "openstack_identity_project_v3" "project_1" {
   name = "my-project"
 }
 
-resource "openstack_compute_flavor_v2" "test_flavor" {
+resource "openstack_compute_flavor_v2" "flavor_1" {
   name  = "my-flavor"
   ram   = "8096"
   vcpus = "2"
@@ -30,9 +30,9 @@ resource "openstack_compute_flavor_v2" "test_flavor" {
   is_public = false
 }
 
-resource "openstack_compute_flavor_access_v2" "test_project_test_flavor_access" {
-  tenant_id = "${openstack_identity_project_v3.test_project.id}"
-  flavor_id = "${openstack_compute_flavor_v2.test_flavor.id}"
+resource "openstack_compute_flavor_access_v2" "access_1" {
+  tenant_id = "${openstack_identity_project_v3.project_1.id}"
+  flavor_id = "${openstack_compute_flavor_v2.flavor_1.id}"
 }
 ```
 
