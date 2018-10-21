@@ -15,7 +15,10 @@ func TestAccComputeV2FlavorAccess_importBasic(t *testing.T) {
 	projectName := fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2FlavorAccessDestroy,
 		Steps: []resource.TestStep{
