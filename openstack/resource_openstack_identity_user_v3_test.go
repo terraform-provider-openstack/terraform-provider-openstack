@@ -31,10 +31,10 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3UserExists("openstack_identity_user_v3.user_1", &user),
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_user_v3.user_1", "name", userName),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_user_v3.user_1", "description", "A user"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_user_v3.user_1", "name", &user.Name),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_user_v3.user_1", "description", &user.Description),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_user_v3.user_1", "enabled", "true"),
 					resource.TestCheckResourceAttr(
@@ -59,10 +59,10 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 				Config: testAccIdentityV3User_update(projectName, userName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3UserExists("openstack_identity_user_v3.user_1", &user),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_user_v3.user_1", "name", userName),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_user_v3.user_1", "description", "Some user"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_user_v3.user_1", "name", &user.Name),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_user_v3.user_1", "description", &user.Description),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_user_v3.user_1", "enabled", "false"),
 					resource.TestCheckResourceAttr(
@@ -120,7 +120,7 @@ func testAccCheckIdentityV3UserExists(n string, user *users.User) resource.TestC
 		}
 
 		found, err := users.Get(identityClient, rs.Primary.ID).Extract()
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

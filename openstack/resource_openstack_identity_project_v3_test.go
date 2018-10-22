@@ -27,10 +27,10 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 				Config: testAccIdentityV3Project_basic(projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "name", projectName),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "description", "A project"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_project_v3.project_1", "name", &project.Name),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_project_v3.project_1", "description", &project.Description),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_project_v3.project_1", "domain_id", "default"),
 					resource.TestCheckResourceAttr(
@@ -43,10 +43,10 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 				Config: testAccIdentityV3Project_update(projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "name", projectName),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "description", "Some project"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_project_v3.project_1", "name", &project.Name),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_project_v3.project_1", "description", &project.Description),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_project_v3.project_1", "domain_id", "default"),
 					resource.TestCheckResourceAttr(
@@ -98,7 +98,7 @@ func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) re
 		}
 
 		found, err := projects.Get(identityClient, rs.Primary.ID).Extract()
-		if err == nil {
+		if err != nil {
 			return err
 		}
 
