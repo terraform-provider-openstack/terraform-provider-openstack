@@ -77,7 +77,7 @@ func resourceComputeFlavorAccessV2Read(d *schema.ResourceData, meta interface{})
 
 	flavorAccess, err := getFlavorAccess(computeClient, d)
 	if err != nil {
-		return fmt.Errorf("Error getting flavor access: %s", err)
+		return CheckDeleted(d, err, "Error getting flavor access")
 	}
 
 	d.Set("region", GetRegion(d, config))
