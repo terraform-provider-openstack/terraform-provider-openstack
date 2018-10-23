@@ -144,13 +144,13 @@ func testAccComputeV2FlavorAccess_basic(flavorName, tenantName string) string {
       is_public = false
     }
 
-    resource "openstack_identity_project_v3" "tenant_1" {
+    resource "openstack_identity_project_v3" "project_1" {
       name = "%s"
     }
 
     resource "openstack_compute_flavor_access_v2" "access_1" {
       flavor_id = "${openstack_compute_flavor_v2.flavor_1.id}"
-      tenant_id = "${openstack_identity_project_v3.tenant_1.id}"
+      tenant_id = "${openstack_identity_project_v3.project_1.id}"
     }
     `, flavorName, tenantName)
 }
