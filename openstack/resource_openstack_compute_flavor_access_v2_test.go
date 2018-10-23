@@ -35,10 +35,10 @@ func TestAccComputeV2FlavorAccess_basic(t *testing.T) {
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
 					testAccCheckComputeV2FlavorExists("openstack_compute_flavor_v2.flavor_1", &flavor),
 					testAccCheckComputeV2FlavorAccessExists("openstack_compute_flavor_access_v2.access_1", &flavorAccess),
-					resource.TestCheckResourceAttr(
-						"openstack_compute_flavor_access_v2.access_1", "flavor_id", flavor.ID),
-					resource.TestCheckResourceAttr(
-						"openstack_compute_flavor_access_v2.access_1", "tenant_id", project.ID),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_compute_flavor_access_v2.access_1", "flavor_id", &flavor.ID),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_compute_flavor_access_v2.access_1", "tenant_id", &project.ID),
 				),
 			},
 		},
