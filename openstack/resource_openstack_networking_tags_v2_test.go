@@ -22,6 +22,9 @@ func TestAccNetworkingV2_tags(t *testing.T) {
 					testAccCheckNetworkingV2Tags(
 						"openstack_networking_subnet_v2.subnet_1",
 						[]string{"a", "b", "c"}),
+					testAccCheckNetworkingV2Tags(
+						"openstack_networking_subnetpool_v2.subnetpool_1",
+						[]string{"a", "b", "c"}),
 				),
 			},
 			resource.TestStep{
@@ -32,6 +35,9 @@ func TestAccNetworkingV2_tags(t *testing.T) {
 						[]string{"a", "b", "c", "d"}),
 					testAccCheckNetworkingV2Tags(
 						"openstack_networking_subnet_v2.subnet_1",
+						[]string{"a", "b", "c", "d"}),
+					testAccCheckNetworkingV2Tags(
+						"openstack_networking_subnetpool_v2.subnetpool_1",
 						[]string{"a", "b", "c", "d"}),
 				),
 			},
@@ -58,6 +64,21 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   }
 
   tags = %[1]s
+}
+
+resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
+    name = "subnetpool_1"
+    description = "terraform subnetpool acceptance test"
+
+    prefixes = ["10.10.0.0/16", "10.11.11.0/24"]
+
+    default_quota = 4
+
+    default_prefixlen = 25
+    min_prefixlen = 24
+    max_prefixlen = 30
+
+    tags = %[1]s
 }
 `
 
