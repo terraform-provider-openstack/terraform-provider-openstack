@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
 	"github.com/gophercloud/gophercloud/pagination"
@@ -79,6 +80,9 @@ func testAccCheckComputeV2FlavorAccessDestroy(s *terraform.State) error {
 		})
 
 		if err != nil {
+			if _, ok := err.(gophercloud.ErrDefault404); ok {
+				return nil
+			}
 			return err
 		}
 	}
