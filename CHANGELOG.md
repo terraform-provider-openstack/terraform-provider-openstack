@@ -1,5 +1,9 @@
 ## 1.11.0 (Unreleased)
 
+FEATURES
+
+* __New Resource__: `openstack_networking_trunk-v2` [GH-446]
+
 IMPROVEMENTS
 
 * Added `multiattach` argument and attribute for the `openstack_blockstorage_volume_v3` resource [GH-431]
