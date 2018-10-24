@@ -29,6 +29,11 @@ func resourceNetworkingPortExtraDHCPOptionsV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"name": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"port_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
@@ -73,8 +78,9 @@ func resourceNetworkingPortExtraDHCPOptionsV2Create(d *schema.ResourceData, meta
 	extraDHCPOpts := expandDHCPOptionsV2Add(dhcpOpts)
 
 	log.Printf("[DEBUG] Adding DHCP options %+v for port %s", extraDHCPOpts, portID)
-	if _, err = ports.Update(networkingClient, d.Id(), extradhcpopts.UpdateOptsExt{
-		ExtraDHCPOpts: extraDHCPOpts,
+	if _, err = ports.Update(networkingClient, portID, extradhcpopts.UpdateOptsExt{
+		ports.UpdateOpts{},
+		extraDHCPOpts,
 	}).Extract(); err != nil {
 		return fmt.Errorf("Error updating DHCP options for port: %s", err)
 	}
@@ -121,7 +127,8 @@ func resourceNetworkingPortExtraDHCPOptionsV2Delete(d *schema.ResourceData, meta
 
 	log.Printf("[DEBUG] Deleting DHCP options from port %s", d.Id())
 	if _, err = ports.Update(networkingClient, d.Id(), extradhcpopts.UpdateOptsExt{
-		ExtraDHCPOpts: extraDHCPOpts,
+		ports.UpdateOpts{},
+		extraDHCPOpts,
 	}).Extract(); err != nil {
 		return fmt.Errorf("Error updating DHCP options for port: %s", err)
 	}

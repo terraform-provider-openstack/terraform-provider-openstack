@@ -4,76 +4,86 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
+	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestAccNetworkingV2PortExtraDHCPOptions_create(t *testing.T) {
+func TestAccNetworkingV2PortExtraDHCPOptions_basic(t *testing.T) {
 	var network networks.Network
 	var subnet subnets.Subnet
 	var port ports.Port
 
+	resourceName := "openstack_networking_port_extradhcp_options_v2.opts_1"
+	networkName := acctest.RandomWithPrefix("tf-acc-network")
+	subnetName := acctest.RandomWithPrefix("tf-acc-subnet")
+	portName := acctest.RandomWithPrefix("tf-acc-port")
+	optsName := acctest.RandomWithPrefix("tf-acc-extradhcp-opts")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		CheckDestroy: testAccCheckNetworkingV2PortExtraDHCPOptionsDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV2PortExtraDHCPOptions_create,
+				Config: testAccNetworkingV2PortExtraDHCPOptions_basic(networkName, subnetName, portName, optsName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_port_extradhcp_options_v2.opts_1", "extra_dhcp_opts.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "extra_dhcp_opts.#", "2"),
 				),
 			},
 		},
 	})
 }
 
-const testAccNetworkingV2PortExtraDHCPOptions_create = `
+func testAccNetworkingV2PortExtraDHCPOptions_basic(networkName, subnetName, portName, optsName string) string {
+	return fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
-  name = "network_1"
+  name           = "%s"
   admin_state_up = "true"
 }
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
+  name       = "%s"
+  cidr       = "192.168.199.0/24"
   ip_version = 4
   network_id = "${openstack_networking_network_v2.network_1.id}"
 }
 
 resource "openstack_networking_port_v2" "port_1" {
-  name = "port_1"
+  name           = "%s"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id     = "${openstack_networking_network_v2.network_1.id}"
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id  =  "${openstack_networking_subnet_v2.subnet_1.id}"
     ip_address = "192.168.199.23"
   }
 }
 
 resource "openstack_networking_port_extradhcp_options_v2" "opts_1" {
-  port_id = "${openstack_networking_subnet_v2.port_1.id}"
+  name    = "%s"
+  port_id = "${openstack_networking_port_v2.port_1.id}"
 
   extra_dhcp_opts {
-    opt_name = "optionA"
+    opt_name  = "optionA"
     opt_value = "valueA"
   }
-	
+
   extra_dhcp_opts {
-    opt_name = "optionB"
+    opt_name  = "optionB"
     opt_value = "valueB"
   }
 }
-`
+`, networkName, subnetName, portName, optsName)
+}
 
 func testAccCheckNetworkingV2PortExtraDHCPOptionsDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
@@ -93,6 +103,9 @@ func testAccCheckNetworkingV2PortExtraDHCPOptionsDestroy(s *terraform.State) err
 		}
 		err = ports.Get(networkingClient, rs.Primary.ID).ExtractInto(&port)
 		if err != nil {
+			if _, ok := err.(gophercloud.ErrDefault404); ok {
+				return nil
+			}
 			return fmt.Errorf("Error getting OpenStack Neutron port: %s", err)
 		}
 

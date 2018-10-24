@@ -79,7 +79,7 @@ func hashDHCPOptionsV2(v interface{}) int {
 	m := v.(map[string]interface{})
 	buf.WriteString(fmt.Sprintf("%s-", m["opt_name"].(string)))
 	if m["ip_version"] != "" {
-		buf.WriteString(fmt.Sprintf("%s-", m["ip_version"].(string)))
+		buf.WriteString(fmt.Sprintf("%d-", m["ip_version"].(int)))
 	}
 	return hashcode.String(buf.String())
 }
