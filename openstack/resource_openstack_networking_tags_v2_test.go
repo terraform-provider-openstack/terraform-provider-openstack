@@ -25,6 +25,9 @@ func TestAccNetworkingV2_tags(t *testing.T) {
 					testAccCheckNetworkingV2Tags(
 						"openstack_networking_subnetpool_v2.subnetpool_1",
 						[]string{"a", "b", "c"}),
+					testAccCheckNetworkingV2Tags(
+						"openstack_networking_port_v2.port_1",
+						[]string{"a", "b", "c"}),
 				),
 			},
 			resource.TestStep{
@@ -38,6 +41,9 @@ func TestAccNetworkingV2_tags(t *testing.T) {
 						[]string{"a", "b", "c", "d"}),
 					testAccCheckNetworkingV2Tags(
 						"openstack_networking_subnetpool_v2.subnetpool_1",
+						[]string{"a", "b", "c", "d"}),
+					testAccCheckNetworkingV2Tags(
+						"openstack_networking_port_v2.port_1",
 						[]string{"a", "b", "c", "d"}),
 				),
 			},
@@ -79,6 +85,19 @@ resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
     max_prefixlen = 30
 
     tags = %[1]s
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  admin_state_up = "true"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  fixed_ip {
+    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.199.23"
+  }
+
+  tags = %[1]s
 }
 `
 

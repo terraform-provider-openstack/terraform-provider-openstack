@@ -97,6 +97,8 @@ The `allowed_address_pairs` block supports:
 
 * `mac_address` - (Optional) The additional MAC address.
 
+* `tags` - (Optional) A set of string tags for the port.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -113,6 +115,7 @@ The following attributes are exported:
   order returned by the Network v2 API.
 * `all_security_group_ids` - The collection of Security Group IDs on the port
   which have been explicitly and implicitly added.
+* `tags` - See Argument Reference above.
 
 ## Import
 
