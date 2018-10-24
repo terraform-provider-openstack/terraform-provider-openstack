@@ -78,9 +78,6 @@ The following arguments are supported:
     addresses that can be active on this port. The structure is described
     below.
 
-* `extra_dhcp_opts` - (Optional) An array of desired DHCP options that needs to
-    be configured on the port. The structure is described below.
-
 * `value_specs` - (Optional) Map of additional options.
 
 The `fixed_ip` block supports:
@@ -122,7 +119,6 @@ The following attributes are exported:
 * `security_group_ids` - See Argument Reference above.
 * `device_id` - See Argument Reference above.
 * `fixed_ip` - See Argument Reference above.
-* `extra_dhcp_opts` - See Argument Reference above.
 * `all_fixed_ips` - The collection of Fixed IP addresses on the port in the
   order returned by the Network v2 API.
 * `all_security_group_ids` - The collection of Security Group IDs on the port
