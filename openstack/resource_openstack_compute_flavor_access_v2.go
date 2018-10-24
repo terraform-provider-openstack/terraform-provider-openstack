@@ -33,7 +33,6 @@ func resourceComputeFlavorAccessV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-
 			"tenant_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
