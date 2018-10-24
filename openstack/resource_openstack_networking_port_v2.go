@@ -8,7 +8,6 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
@@ -131,28 +130,6 @@ func resourceNetworkingPortV2() *schema.Resource {
 					},
 				},
 			},
-			"extra_dhcp_opts": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				ForceNew: false,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"opt_name": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"opt_value": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"ip_version": &schema.Schema{
-							Type:     schema.TypeInt,
-							Default:  4,
-							Optional: true,
-						},
-					},
-				},
-			},
 			"value_specs": &schema.Schema{
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -221,31 +198,12 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		createOpts.SecurityGroups = &securityGroups
 	}
 
-	// Create a Neutron port and set extra DHCP options if they're specified.
-	var p struct {
-		ports.Port
-		extradhcpopts.ExtraDHCPOptsExt
+	log.Printf("[DEBUG] Create Options: %#v", createOpts)
+	p, err := ports.Create(networkingClient, createOpts).Extract()
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack Neutron network: %s", err)
 	}
-	createExtraDHCPOpts := resourcePortCreateExtraDHCPOpts(d)
-	if len(createExtraDHCPOpts) > 0 {
-		extraDHCPOptsCreateOpts := extradhcpopts.CreateOptsExt{
-			CreateOptsBuilder: createOpts,
-			ExtraDHCPOpts:     createExtraDHCPOpts,
-		}
-		log.Printf("[DEBUG] Create Options: %#v", extraDHCPOptsCreateOpts)
-		err = ports.Create(networkingClient, extraDHCPOptsCreateOpts).ExtractInto(&p)
-		if err != nil {
-			return fmt.Errorf("Error creating OpenStack Neutron port: %s", err)
-		}
-	} else {
-		log.Printf("[DEBUG] Create Options: %#v", createOpts)
-		err = ports.Create(networkingClient, createOpts).ExtractInto(&p)
-		if err != nil {
-			return fmt.Errorf("Error creating OpenStack Neutron port: %s", err)
-		}
-	}
-
-	log.Printf("[INFO] Port ID: %s", p.ID)
+	log.Printf("[INFO] Network ID: %s", p.ID)
 
 	log.Printf("[DEBUG] Waiting for OpenStack Neutron Port (%s) to become available.", p.ID)
 
@@ -281,11 +239,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	var p struct {
-		ports.Port
-		extradhcpopts.ExtraDHCPOptsExt
-	}
-	err = ports.Get(networkingClient, d.Id()).ExtractInto(&p)
+	p, err := ports.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "port")
 	}
@@ -315,7 +269,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	// the port can have the "default" group automatically applied.
 	d.Set("all_security_group_ids", p.SecurityGroups)
 
-	// Convert AllowedAddressPairs to a list of maps.
+	// Convert AllowedAddressPairs to list of map
 	var pairs []map[string]interface{}
 	for _, pairObject := range p.AllowedAddressPairs {
 		pair := make(map[string]interface{})
@@ -330,17 +284,6 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 		pairs = append(pairs, pair)
 	}
 	d.Set("allowed_address_pairs", pairs)
-
-	// Convert ExtraDHCPOpts to a list of maps.
-	var extraDHCPOpts []map[string]interface{}
-	for _, extraDHCPOpt := range p.ExtraDHCPOpts {
-		opts := make(map[string]interface{})
-		opts["opt_name"] = extraDHCPOpt.OptName
-		opts["opt_value"] = extraDHCPOpt.OptValue
-		opts["ip_version"] = extraDHCPOpt.IPVersion
-		extraDHCPOpts = append(extraDHCPOpts, opts)
-	}
-	d.Set("extra_dhcp_opts", extraDHCPOpts)
 
 	d.Set("region", GetRegion(d, config))
 
@@ -364,12 +307,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 	}
 
 	var hasChange bool
-	var extraDHCPOptsChange bool
-	var extraDHCPOptsDeleteOld bool
-	var extraDHCPOptsAddNew bool
 	var updateOpts ports.UpdateOpts
-	var extraDHCPOptsDeleteOpts extradhcpopts.UpdateOptsExt
-	var extraDHCPOptsUpdateOpts extradhcpopts.UpdateOptsExt
 
 	if d.HasChange("allowed_address_pairs") {
 		hasChange = true
@@ -417,59 +355,12 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		updateOpts.FixedIPs = resourcePortFixedIpsV2(d)
 	}
 
-	if d.HasChange("extra_dhcp_opts") {
-		hasChange = true
-		extraDHCPOptsChange = true
-		oldDCHPOpts, newDCHPOpts := d.GetChange("extra_dhcp_opts")
-
-		// Populate update options with the old DHCP opts. We will delete them
-		// prior to adding new updated DHCP opts for consistency.
-		if len(oldDCHPOpts.([]interface{})) != 0 {
-			extraDHCPOptsDeleteOld = true
-			deleteExtraDHCPOpts := resourcePortDeleteExtraDHCPOpts(oldDCHPOpts)
-			extraDHCPOptsDeleteOpts = extradhcpopts.UpdateOptsExt{
-				UpdateOptsBuilder: updateOpts,
-				ExtraDHCPOpts:     deleteExtraDHCPOpts,
-			}
-		}
-
-		// Populate update options with the new DHCP opts.
-		if len(newDCHPOpts.([]interface{})) != 0 {
-			extraDHCPOptsAddNew = true
-			updateExtraDHCPOpts := resourcePortUpdateExtraDHCPOpts(newDCHPOpts)
-			extraDHCPOptsUpdateOpts = extradhcpopts.UpdateOptsExt{
-				UpdateOptsBuilder: updateOpts,
-				ExtraDHCPOpts:     updateExtraDHCPOpts,
-			}
-		}
-	}
-
-	// Update a Neutron port and update extra DHCP options if they're changed.
 	if hasChange {
-		if extraDHCPOptsChange {
-			// Delete old DHCP options if needed.
-			if extraDHCPOptsDeleteOld {
-				log.Printf("[DEBUG] Deleting old DHCP opts for Port %s", d.Id())
-				_, err = ports.Update(networkingClient, d.Id(), extraDHCPOptsDeleteOpts).Extract()
-				if err != nil {
-					return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
-				}
-			}
-			// Add new DHCP options if needed.
-			if extraDHCPOptsAddNew {
-				log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), extraDHCPOptsUpdateOpts)
-				_, err = ports.Update(networkingClient, d.Id(), extraDHCPOptsUpdateOpts).Extract()
-				if err != nil {
-					return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
-				}
-			}
-		} else {
-			log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), updateOpts)
+		log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), updateOpts)
 
-			_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
-			if err != nil {
-				return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
-			}
+		_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenStack Neutron Network: %s", err)
 		}
 	}
 
@@ -570,65 +461,6 @@ func resourcePortAdminStateUpV2(d *schema.ResourceData) *bool {
 	}
 
 	return &value
-}
-
-func resourcePortCreateExtraDHCPOpts(d *schema.ResourceData) []extradhcpopts.CreateExtraDHCPOpt {
-	rawExtraDHCPOpts := d.Get("extra_dhcp_opts").([]interface{})
-
-	if len(rawExtraDHCPOpts) == 0 {
-		return nil
-	}
-
-	createExtraDHCPOpts := make([]extradhcpopts.CreateExtraDHCPOpt, len(rawExtraDHCPOpts))
-	for i, raw := range rawExtraDHCPOpts {
-		rawMap := raw.(map[string]interface{})
-		ipVersion := rawMap["ip_version"].(int)
-		createExtraDHCPOpts[i] = extradhcpopts.CreateExtraDHCPOpt{
-			OptName:   rawMap["opt_name"].(string),
-			OptValue:  rawMap["opt_value"].(string),
-			IPVersion: gophercloud.IPVersion(ipVersion),
-		}
-	}
-	return createExtraDHCPOpts
-}
-
-func resourcePortUpdateExtraDHCPOpts(newExtraDHCPOpts interface{}) []extradhcpopts.UpdateExtraDHCPOpt {
-	rawNewExtraDHCPOpts := newExtraDHCPOpts.([]interface{})
-
-	if len(rawNewExtraDHCPOpts) == 0 {
-		return nil
-	}
-
-	updateExtraDHCPOpts := make([]extradhcpopts.UpdateExtraDHCPOpt, len(rawNewExtraDHCPOpts))
-	for i, raw := range rawNewExtraDHCPOpts {
-		rawMap := raw.(map[string]interface{})
-		ipVersion := rawMap["ip_version"].(int)
-		optValue := rawMap["opt_value"].(string)
-		updateExtraDHCPOpts[i] = extradhcpopts.UpdateExtraDHCPOpt{
-			OptName:   rawMap["opt_name"].(string),
-			OptValue:  &optValue,
-			IPVersion: gophercloud.IPVersion(ipVersion),
-		}
-	}
-	return updateExtraDHCPOpts
-}
-
-func resourcePortDeleteExtraDHCPOpts(oldExtraDHCPOpts interface{}) []extradhcpopts.UpdateExtraDHCPOpt {
-	rawOldExtraDHCPOpts := oldExtraDHCPOpts.([]interface{})
-
-	if len(rawOldExtraDHCPOpts) == 0 {
-		return nil
-	}
-
-	deleteExtraDHCPOpts := make([]extradhcpopts.UpdateExtraDHCPOpt, len(rawOldExtraDHCPOpts))
-	for i, raw := range rawOldExtraDHCPOpts {
-		rawMap := raw.(map[string]interface{})
-		deleteExtraDHCPOpts[i] = extradhcpopts.UpdateExtraDHCPOpt{
-			OptName:  rawMap["opt_name"].(string),
-			OptValue: nil,
-		}
-	}
-	return deleteExtraDHCPOpts
 }
 
 func allowedAddressPairsHash(v interface{}) int {
