@@ -79,8 +79,8 @@ func resourceNetworkingPortExtraDHCPOptionsV2Create(d *schema.ResourceData, meta
 
 	log.Printf("[DEBUG] Adding DHCP options %+v for port %s", extraDHCPOpts, portID)
 	if _, err = ports.Update(networkingClient, portID, extradhcpopts.UpdateOptsExt{
-		ports.UpdateOpts{},
-		extraDHCPOpts,
+		UpdateOptsBuilder: ports.UpdateOpts{},
+		ExtraDHCPOpts:     extraDHCPOpts,
 	}).Extract(); err != nil {
 		return fmt.Errorf("Error updating DHCP options for port: %s", err)
 	}
