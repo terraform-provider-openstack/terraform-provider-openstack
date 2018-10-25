@@ -110,6 +110,7 @@ func resourceNetworkingPortExtraDHCPOptionsV2Read(d *schema.ResourceData, meta i
 
 	extraDHCPOpts := flattenDHCPOptionsV2(port.ExtraDHCPOptsExt)
 	d.Set("extra_dhcp_opts", extraDHCPOpts)
+	d.Set("port_id", port.ID)
 	d.Set("region", GetRegion(d, config))
 
 	return nil
