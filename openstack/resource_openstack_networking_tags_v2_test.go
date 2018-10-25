@@ -34,6 +34,9 @@ func TestAccNetworkingV2_tags(t *testing.T) {
 					testAccCheckNetworkingV2Tags(
 						"openstack_networking_floatingip_v2.fip_1",
 						[]string{"a", "b", "c"}),
+					testAccCheckNetworkingV2Tags(
+						"openstack_networking_router_v2.router_1",
+						[]string{"a", "b", "c"}),
 				),
 			},
 			resource.TestStep{
@@ -56,6 +59,9 @@ func TestAccNetworkingV2_tags(t *testing.T) {
 						[]string{"a", "b", "c", "d"}),
 					testAccCheckNetworkingV2Tags(
 						"openstack_networking_floatingip_v2.fip_1",
+						[]string{"a", "b", "c", "d"}),
+					testAccCheckNetworkingV2Tags(
+						"openstack_networking_router_v2.router_1",
 						[]string{"a", "b", "c", "d"}),
 				),
 			},
@@ -120,6 +126,12 @@ resource "openstack_networking_secgroup_v2" "secgroup_1" {
 
 resource "openstack_networking_floatingip_v2" "fip_1" {
 	    tags = %[1]s
+}
+
+resource "openstack_networking_router_v2" "router_1" {
+    name = "router_1"
+    admin_state_up = "true"
+    tags = %[1]s
 }
 `
 
