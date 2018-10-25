@@ -60,38 +60,6 @@ func TestAccNetworkingV2Trunk_subports(t *testing.T) {
 	})
 }
 
-func TestAccNetworkingV2Trunk_tags(t *testing.T) {
-	var parent_port_1 ports.Port
-	var trunk_1 trunks.Trunk
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckAdminOnly(t)
-		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccNetworkingV2Trunk_tags_1,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.parent_port_1", &parent_port_1),
-					testAccCheckNetworkingV2TrunkExists("openstack_networking_trunk_v2.trunk_1", []string{}, &trunk_1),
-					testAccCheckNetworkingV2Tags("openstack_networking_trunk_v2.trunk_1", []string{"a", "b", "c"}),
-				),
-			},
-			resource.TestStep{
-				Config: testAccNetworkingV2Trunk_tags_2,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.parent_port_1", &parent_port_1),
-					testAccCheckNetworkingV2TrunkExists("openstack_networking_trunk_v2.trunk_1", []string{}, &trunk_1),
-					testAccCheckNetworkingV2Tags("openstack_networking_trunk_v2.trunk_1", []string{"c", "d", "e"}),
-				),
-			},
-		},
-	})
-}
-
 func TestAccNetworkingV2Trunk_trunkUpdateSubports(t *testing.T) {
 	var parent_port_1, subport_1, subport_2, subport_3, subport_4 ports.Port
 	var trunk_1 trunks.Trunk
@@ -645,61 +613,5 @@ resource "openstack_compute_instance_v2" "instance_1" {
   network {
     port = "${openstack_networking_trunk_v2.trunk_1.port_id}"
   }
-}
-`
-
-const testAccNetworkingV2Trunk_tags_1 = `
-resource "openstack_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "openstack_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-}
-
-resource "openstack_networking_port_v2" "parent_port_1" {
-  name = "parent_port_1"
-  admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-}
-
-resource "openstack_networking_trunk_v2" "trunk_1" {
-  name = "trunk_1"
-  port_id = "${openstack_networking_port_v2.parent_port_1.id}"
-  admin_state_up = "true"
-
-  tags = ["a", "b", "c"]
-}
-`
-
-const testAccNetworkingV2Trunk_tags_2 = `
-resource "openstack_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "openstack_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-}
-
-resource "openstack_networking_port_v2" "parent_port_1" {
-  name = "parent_port_1"
-  admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-}
-
-resource "openstack_networking_trunk_v2" "trunk_1" {
-  name = "trunk_1"
-  port_id = "${openstack_networking_port_v2.parent_port_1.id}"
-  admin_state_up = "true"
-
-  tags = ["c", "d", "e"]
 }
 `
