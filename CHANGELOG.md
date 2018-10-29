@@ -1,21 +1,21 @@
-## 1.11.0 (Unreleased)
+## 1.11.0 (October 29, 2018)
 
 FEATURES
 
-* __New Resource__: `openstack_networking_trunk_v2` [GH-446]
-* __New Resource__: `openstack_compute_flavor_access_v2` [GH-447]
+* __New Resource__: `openstack_networking_trunk_v2` ([#446](https://github.com/terraform-providers/terraform-provider-openstack/issues/446))
+* __New Resource__: `openstack_compute_flavor_access_v2` ([#447](https://github.com/terraform-providers/terraform-provider-openstack/issues/447))
 
 IMPROVEMENTS
 
-* Added `multiattach` argument and attribute for the `openstack_blockstorage_volume_v3` resource [GH-431]
-* `openstack_dns_recordset_v2` can now accept IPv6 addresses with and without brackets [GH-443]
-* Added `multiattach` argument for the `openstack_compute_volume_attach_v2` resource [GH-442]
-* `openstack_lb_member_v2` resources can now use a weight of 0 [GH-451]
+* Added `multiattach` argument and attribute for the `openstack_blockstorage_volume_v3` resource ([#431](https://github.com/terraform-providers/terraform-provider-openstack/issues/431))
+* `openstack_dns_recordset_v2` can now accept IPv6 addresses with and without brackets ([#443](https://github.com/terraform-providers/terraform-provider-openstack/issues/443))
+* Added `multiattach` argument for the `openstack_compute_volume_attach_v2` resource ([#442](https://github.com/terraform-providers/terraform-provider-openstack/issues/442))
+* `openstack_lb_member_v2` resources can now use a weight of 0 ([#451](https://github.com/terraform-providers/terraform-provider-openstack/issues/451))
 
 BUG FIXES
 
-* Fixed an issue where environment variables were overwriting specified arguments [GH-436]
-* Fixed an issue where security group rule descriptions were not working with older verisons of OpenStack [GH-438]
+* Fixed an issue where environment variables were overwriting specified arguments ([#436](https://github.com/terraform-providers/terraform-provider-openstack/issues/436))
+* Fixed an issue where security group rule descriptions were not working with older verisons of OpenStack ([#438](https://github.com/terraform-providers/terraform-provider-openstack/issues/438))
 
 ## 1.10.0 (October 01, 2018)
 
