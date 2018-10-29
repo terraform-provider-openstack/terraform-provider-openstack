@@ -2,7 +2,7 @@
 
 FEATURES
 
-* __New Resource__: `openstack_networking_trunk-v2` [GH-446]
+* __New Resource__: `openstack_networking_trunk_v2` [GH-446]
 * __New Resource__: `openstack_compute_flavor_access_v2` [GH-447]
 
 IMPROVEMENTS
