@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
@@ -94,6 +95,11 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
+			},
+			"tags": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"availability_zone_hints": &schema.Schema{
 				Type:     schema.TypeList,
@@ -180,6 +186,16 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 
 	log.Printf("[INFO] Network ID: %s", n.ID)
 
+	tags := networkV2AttributesTags(d)
+	if len(tags) > 0 {
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "networks", n.ID, tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error creating Tags on Network: %s", err)
+		}
+		log.Printf("[DEBUG] Set Tags = %+v on Network %+v", tags, n.ID)
+	}
+
 	log.Printf("[DEBUG] Waiting for Network (%s) to become available", n.ID)
 
 	stateConf := &resource.StateChangeConf{
@@ -222,6 +238,7 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 	d.Set("external", strconv.FormatBool(n.External))
 	d.Set("tenant_id", n.TenantID)
 	d.Set("region", GetRegion(d, config))
+	d.Set("tags", n.Tags)
 
 	if err := d.Set("availability_zone_hints", n.AvailabilityZoneHints); err != nil {
 		log.Printf("[DEBUG] unable to set availability_zone_hints: %s", err)
@@ -240,6 +257,15 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 	var updateOpts networks.UpdateOpts
 	if d.HasChange("name") {
 		updateOpts.Name = d.Get("name").(string)
+	}
+	if d.HasChange("tags") {
+		tags := networkV2AttributesTags(d)
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "networks", d.Id(), tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating Tags on Network: %s", err)
+		}
+		log.Printf("[DEBUG] Updated Tags = %+v on Network %+v", tags, d.Id())
 	}
 	if d.HasChange("admin_state_up") {
 		asuRaw := d.Get("admin_state_up").(string)

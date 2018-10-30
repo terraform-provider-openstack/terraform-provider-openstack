@@ -84,6 +84,8 @@ The following arguments are supported:
 
 * `value_specs` - (Optional) Map of additional options.
 
+* `tags` - (Optional) A set of string tags for the subnet.
+
 The `allocation_pools` block supports:
 
 * `start` - (Required) The starting address.
@@ -112,6 +114,7 @@ The following attributes are exported:
 * `dns_nameservers` - See Argument Reference above.
 * `host_routes` - See Argument Reference above.
 * `subnetpool_id` - See Argument Reference above.
+* `tags` - See Argument Reference above.
 
 ## Import
 
