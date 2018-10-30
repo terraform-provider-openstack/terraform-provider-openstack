@@ -4,6 +4,10 @@ IMPROVEMENTS
 
 * Added `tags` to `openstack_networking_network_v2` [GH-454]
 * Added `tags` to `openstack_networking_subnet_v2` [GH-459]
+* Added `tags` to `openstack_networking_subnetpool_v2` [GH-460]
+* Added `tags` to `openstack_networking_port_v2` [GH-461]
+* Added `tags` to `openstack_networking_secgroup_v2` [GH-463]
+
 
 ## 1.11.0 (October 29, 2018)
 
