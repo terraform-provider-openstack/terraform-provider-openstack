@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools"
 )
 
@@ -125,6 +126,11 @@ func resourceNetworkingSubnetPoolV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"tags": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -174,6 +180,16 @@ func resourceNetworkingSubnetPoolV2Create(d *schema.ResourceData, meta interface
 
 	d.SetId(s.ID)
 
+	tags := networkV2AttributesTags(d)
+	if len(tags) > 0 {
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "subnetpools", s.ID, tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error creating Tags on Subnetpool: %s", err)
+		}
+		log.Printf("[DEBUG] Set Tags = %+v on Subnetpool %+v", tags, s.ID)
+	}
+
 	log.Printf("[DEBUG] Created Subnetpool %s: %#v", s.ID, s)
 	return resourceNetworkingSubnetPoolV2Read(d, meta)
 }
@@ -207,6 +223,7 @@ func resourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface{}
 	d.Set("description", s.Description)
 	d.Set("revision_number", s.RevisionNumber)
 	d.Set("region", GetRegion(d, config))
+	d.Set("tags", s.Tags)
 
 	if err := d.Set("prefixes", s.Prefixes); err != nil {
 		log.Printf("[WARN] unable to set prefixes: %s", err)
@@ -273,6 +290,16 @@ func resourceNetworkingSubnetPoolV2Update(d *schema.ResourceData, meta interface
 	_, err = subnetpools.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error updating OpenStack Neutron Subnetpool: %s", err)
+	}
+
+	if d.HasChange("tags") {
+		tags := networkV2AttributesTags(d)
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "subnetpools", d.Id(), tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating Tags on Subnetpool: %s", err)
+		}
+		log.Printf("[DEBUG] Updated Tags = %+v on Subnetpool %+v", tags, d.Id())
 	}
 
 	return resourceNetworkingSubnetPoolV2Read(d, meta)

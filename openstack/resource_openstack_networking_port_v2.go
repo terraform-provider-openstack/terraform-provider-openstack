@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 )
 
@@ -146,6 +147,11 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
+			"tags": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -214,6 +220,16 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 
 	d.SetId(p.ID)
 
+	tags := networkV2AttributesTags(d)
+	if len(tags) > 0 {
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "ports", p.ID, tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error creating Tags on Port: %s", err)
+		}
+		log.Printf("[DEBUG] Set Tags = %+v on Port %+v", tags, p.ID)
+	}
+
 	return resourceNetworkingPortV2Read(d, meta)
 }
 
@@ -238,6 +254,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	d.Set("tenant_id", p.TenantID)
 	d.Set("device_owner", p.DeviceOwner)
 	d.Set("device_id", p.DeviceID)
+	d.Set("tags", p.Tags)
 
 	// Create a slice of all returned Fixed IPs.
 	// This will be in the order returned by the API,
@@ -346,6 +363,16 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		if err != nil {
 			return fmt.Errorf("Error updating OpenStack Neutron Network: %s", err)
 		}
+	}
+
+	if d.HasChange("tags") {
+		tags := networkV2AttributesTags(d)
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "ports", d.Id(), tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating Tags on Port: %s", err)
+		}
+		log.Printf("[DEBUG] Updated Tags = %+v on Port %+v", tags, d.Id())
 	}
 
 	return resourceNetworkingPortV2Read(d, meta)

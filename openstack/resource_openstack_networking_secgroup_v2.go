@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules"
 )
@@ -54,6 +55,11 @@ func resourceNetworkingSecGroupV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"tags": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -98,6 +104,16 @@ func resourceNetworkingSecGroupV2Create(d *schema.ResourceData, meta interface{}
 
 	d.SetId(security_group.ID)
 
+	tags := networkV2AttributesTags(d)
+	if len(tags) > 0 {
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "security-groups", security_group.ID, tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error creating Tags on SecurityGroup: %s", err)
+		}
+		log.Printf("[DEBUG] Set Tags = %+v on SecurityGroup %+v", tags, security_group.ID)
+	}
+
 	return resourceNetworkingSecGroupV2Read(d, meta)
 }
 
@@ -120,6 +136,7 @@ func resourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}) 
 	d.Set("tenant_id", security_group.TenantID)
 	d.Set("name", security_group.Name)
 	d.Set("region", GetRegion(d, config))
+	d.Set("tags", security_group.Tags)
 
 	return nil
 }
@@ -150,6 +167,16 @@ func resourceNetworkingSecGroupV2Update(d *schema.ResourceData, meta interface{}
 		if err != nil {
 			return fmt.Errorf("Error updating OpenStack SecGroup: %s", err)
 		}
+	}
+
+	if d.HasChange("tags") {
+		tags := networkV2AttributesTags(d)
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "security-groups", d.Id(), tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating Tags on SecurityGroup: %s", err)
+		}
+		log.Printf("[DEBUG] Updated Tags = %+v on SecurityGroup %+v", tags, d.Id())
 	}
 
 	return resourceNetworkingSecGroupV2Read(d, meta)

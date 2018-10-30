@@ -99,6 +99,8 @@ The following arguments are supported:
 
 * `value_specs` - (Optional) Map of additional options.
 
+* `tags` - (Optional) A set of string tags for the subnetpool.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -120,6 +122,7 @@ The following attributes are exported:
 * `is_default` - See Argument Reference above.
 * `revision_number` - The revision number of the subnetpool.
 * `value_specs` - See Argument Reference above.
+* `tags` - See Argument Reference above.
 
 ## Import
 
