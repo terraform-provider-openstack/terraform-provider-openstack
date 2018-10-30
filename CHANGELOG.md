@@ -1,4 +1,10 @@
 ## 1.12.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Added `tags` to `openstack_networking_network_v2` [GH-454]
+* Added `tags` to `openstack_networking_subnet_v2` [GH-459]
+
 ## 1.11.0 (October 29, 2018)
 
 FEATURES
