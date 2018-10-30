@@ -55,6 +55,11 @@ func resourceObjectStorageContainerV1() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
+			"versions_location": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+			},
 			"metadata": &schema.Schema{
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -84,6 +89,7 @@ func resourceObjectStorageContainerV1Create(d *schema.ResourceData, meta interfa
 		ContainerSyncKey: d.Get("container_sync_key").(string),
 		ContainerWrite:   d.Get("container_write").(string),
 		ContentType:      d.Get("content_type").(string),
+		VersionsLocation: d.Get("versions_location").(string),
 		Metadata:         resourceContainerMetadataV2(d),
 	}
 
@@ -132,6 +138,11 @@ func resourceObjectStorageContainerV1Update(d *schema.ResourceData, meta interfa
 		ContainerSyncKey: d.Get("container_sync_key").(string),
 		ContainerWrite:   d.Get("container_write").(string),
 		ContentType:      d.Get("content_type").(string),
+		VersionsLocation: d.Get("versions_location").(string),
+	}
+
+	if d.HasChange("versions_location") && d.Get("versions_location").(string) == "" {
+		updateOpts.RemoveVersionsLocation = "true"
 	}
 
 	if d.HasChange("metadata") {

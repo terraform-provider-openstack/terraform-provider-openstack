@@ -50,6 +50,8 @@ The following arguments are supported:
 * `container_write` - (Optional) Sets an ACL that grants write access.
     Changing this updates the access control list write access.
 
+* `versions_location` - (Optional) A container which will store the objects versions.
+
 * `metadata` - (Optional) Custom key/value pairs to associate with the container.
     Changing this updates the existing container metadata.
 
@@ -68,5 +70,6 @@ The following attributes are exported:
 * `container_sync_to` - See Argument Reference above.
 * `container_sync_key` - See Argument Reference above.
 * `container_write` - See Argument Reference above.
+* `versions_location` - See Argument Reference above.
 * `metadata` - See Argument Reference above.
 * `content_type` - See Argument Reference above.
