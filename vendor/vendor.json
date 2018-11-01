@@ -355,6 +355,18 @@
 			"revisionTime": "2018-10-19T01:49:21Z"
 		},
 		{
+			"checksumSHA1": "VVSFrp4kBIDK62D+uCgV8IScwD0=",
+			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/attachinterfaces",
+			"revision": "0719c6b22f30132b0ae6c90b038e0d50992107b0",
+			"revisionTime": "2018-10-19T01:49:21Z"
+		},
+		{
+			"checksumSHA1": "tHW4ajx6KpesbhMfizNicJ6g9Ks=",
+			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/attachinterfaces/testing",
+			"revision": "0719c6b22f30132b0ae6c90b038e0d50992107b0",
+			"revisionTime": "2018-10-19T01:49:21Z"
+		},
+		{
 			"checksumSHA1": "nQlviweyWynvpsXf1Ms0AecMzO8=",
 			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones",
 			"revision": "0719c6b22f30132b0ae6c90b038e0d50992107b0",
@@ -759,6 +771,18 @@
 		{
 			"checksumSHA1": "/Wkc4WKxF/P87dOmUh5XUXcfmz8=",
 			"path": "github.com/gophercloud/gophercloud/pagination",
+			"revision": "0719c6b22f30132b0ae6c90b038e0d50992107b0",
+			"revisionTime": "2018-10-19T01:49:21Z"
+		},
+		{
+			"checksumSHA1": "b8tetZflGv6Pg22zYyodQGce7nc=",
+			"path": "github.com/gophercloud/gophercloud/testhelper",
+			"revision": "0719c6b22f30132b0ae6c90b038e0d50992107b0",
+			"revisionTime": "2018-10-19T01:49:21Z"
+		},
+		{
+			"checksumSHA1": "XHWKJUGCvXQNDmRrev0ZOVcISSM=",
+			"path": "github.com/gophercloud/gophercloud/testhelper/client",
 			"revision": "0719c6b22f30132b0ae6c90b038e0d50992107b0",
 			"revisionTime": "2018-10-19T01:49:21Z"
 		},
