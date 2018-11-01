@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 )
 
@@ -123,6 +124,11 @@ func resourceNetworkingRouterV2() *schema.Resource {
 					},
 				},
 			},
+			"tags": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -234,6 +240,16 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 		}
 	}
 
+	tags := networkV2AttributesTags(d)
+	if len(tags) > 0 {
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "routers", n.ID, tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error creating Tags on Router: %s", err)
+		}
+		log.Printf("[DEBUG] Set Tags = %+v on Router %+v", tags, n.ID)
+	}
+
 	return resourceNetworkingRouterV2Read(d, meta)
 }
 
@@ -261,6 +277,7 @@ func resourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("distributed", n.Distributed)
 	d.Set("tenant_id", n.TenantID)
 	d.Set("region", GetRegion(d, config))
+	d.Set("tags", n.Tags)
 
 	if err := d.Set("availability_zone_hints", n.AvailabilityZoneHints); err != nil {
 		log.Printf("[DEBUG] unable to set availability_zone_hints: %s", err)
@@ -362,6 +379,16 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 	_, err = routers.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error updating OpenStack Neutron Router: %s", err)
+	}
+
+	if d.HasChange("tags") {
+		tags := networkV2AttributesTags(d)
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "routers", d.Id(), tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating Tags on Router: %s", err)
+		}
+		log.Printf("[DEBUG] Updated Tags = %+v on Router %+v", tags, d.Id())
 	}
 
 	return resourceNetworkingRouterV2Read(d, meta)

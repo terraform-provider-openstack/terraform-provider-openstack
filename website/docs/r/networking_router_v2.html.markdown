@@ -65,6 +65,8 @@ The following arguments are supported:
 
 * `value_specs` - (Optional) Map of additional driver-specific options.
 
+* `tags` - (Optional) A set of string tags for the router.
+
 * `vendor_options` - (Optional) Map of additional vendor-specific options.
     Supported options are described below.
 
@@ -98,6 +100,7 @@ The following attributes are exported:
 * `tenant_id` - See Argument Reference above.
 * `value_specs` - See Argument Reference above.
 * `availability_zone_hints` - See Argument Reference above.
+* `tags` - See Argument Reference above.
 
 ## Import
 
