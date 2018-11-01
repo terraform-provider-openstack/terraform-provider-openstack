@@ -53,7 +53,7 @@ resource "openstack_compute_instance_v2" "myinstance" {
 }
 
 resource "openstack_compute_volume_attach_v2" "attached" {
-  compute_id = "${openstack_compute_instance_v2.myinstance.id}"
+  instance_id = "${openstack_compute_instance_v2.myinstance.id}"
   volume_id = "${openstack_blockstorage_volume_v2.myvol.id}"
 }
 ```
