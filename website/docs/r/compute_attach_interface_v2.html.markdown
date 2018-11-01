@@ -145,10 +145,13 @@ resource "openstack_compute_attach_interface_v2" "ai_2" {
 }
 ```
 
-
 ## Argument Reference
 
 The following arguments are supported:
+
+* `region` - (Optional) The region in which to create the interface attachment.
+    If omitted, the `region` argument of the provider is used. Changing this
+    creates a new attachment.
 
 * `instance_id` - (Required) The ID of the Instance to attach the Port or Network to.
 
@@ -161,16 +164,15 @@ The following arguments are supported:
 * `fixed_ip` - (Optional) An IP address to assosciate with the port.
    _NOTE_: This option cannot be used with port_id. You must specifiy a network_id. The IP address must lie in a range on the supplied network.
 
-
-
 ## Attributes Reference
 
 The following attributes are exported:
 
+* `region` - See Argument Reference above.
 * `instance_id` - See Argument Reference above.
 * `port_id` - See Argument Reference above.
 * `network_id` - See Argument Reference above.
-* `fixed_ip  - See Argument Reference above.
+* `fixed_ip`  - See Argument Reference above.
 
 ## Import
 
