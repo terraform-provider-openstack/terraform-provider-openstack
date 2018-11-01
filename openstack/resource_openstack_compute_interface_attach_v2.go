@@ -13,11 +13,11 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func resourceComputeAttachInterfaceV2() *schema.Resource {
+func resourceComputeInterfaceAttachV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceComputeAttachInterfaceV2Create,
-		Read:   resourceComputeAttachInterfaceV2Read,
-		Delete: resourceComputeAttachInterfaceV2Delete,
+		Create: resourceComputeInterfaceAttachV2Create,
+		Read:   resourceComputeInterfaceAttachV2Read,
+		Delete: resourceComputeInterfaceAttachV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -66,7 +66,7 @@ func resourceComputeAttachInterfaceV2() *schema.Resource {
 	}
 }
 
-func resourceComputeAttachInterfaceV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeInterfaceAttachV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
@@ -111,10 +111,10 @@ func resourceComputeAttachInterfaceV2Create(d *schema.ResourceData, meta interfa
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ATTACHING"},
 		Target:     []string{"ATTACHED"},
-		Refresh:    resourceComputeAttachInterfaceV2AttachFunc(computeClient, instanceId, attachment.PortID),
+		Refresh:    resourceComputeInterfaceAttachV2AttachFunc(computeClient, instanceId, attachment.PortID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      30 * time.Second,
-		MinTimeout: 15 * time.Second,
+		Delay:      5 * time.Second,
+		MinTimeout: 5 * time.Second,
 	}
 
 	if _, err = stateConf.WaitForState(); err != nil {
@@ -128,17 +128,17 @@ func resourceComputeAttachInterfaceV2Create(d *schema.ResourceData, meta interfa
 
 	d.SetId(id)
 
-	return resourceComputeAttachInterfaceV2Read(d, meta)
+	return resourceComputeInterfaceAttachV2Read(d, meta)
 }
 
-func resourceComputeAttachInterfaceV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeInterfaceAttachV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	instanceId, attachmentId, err := parseComputeAttachInterfaceId(d.Id())
+	instanceId, attachmentId, err := parseComputeInterfaceAttachId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -157,14 +157,14 @@ func resourceComputeAttachInterfaceV2Read(d *schema.ResourceData, meta interface
 	return nil
 }
 
-func resourceComputeAttachInterfaceV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeInterfaceAttachV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	instanceId, attachmentId, err := parseComputeAttachInterfaceId(d.Id())
+	instanceId, attachmentId, err := parseComputeInterfaceAttachId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -172,10 +172,10 @@ func resourceComputeAttachInterfaceV2Delete(d *schema.ResourceData, meta interfa
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{""},
 		Target:     []string{"DETACHED"},
-		Refresh:    resourceComputeAttachInterfaceV2DetachFunc(computeClient, instanceId, attachmentId),
+		Refresh:    resourceComputeInterfaceAttachV2DetachFunc(computeClient, instanceId, attachmentId),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      15 * time.Second,
-		MinTimeout: 15 * time.Second,
+		Delay:      5 * time.Second,
+		MinTimeout: 5 * time.Second,
 	}
 
 	if _, err = stateConf.WaitForState(); err != nil {
@@ -185,7 +185,7 @@ func resourceComputeAttachInterfaceV2Delete(d *schema.ResourceData, meta interfa
 	return nil
 }
 
-func resourceComputeAttachInterfaceV2AttachFunc(
+func resourceComputeInterfaceAttachV2AttachFunc(
 	computeClient *gophercloud.ServiceClient, instanceId, attachmentId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		va, err := attachinterfaces.Get(computeClient, instanceId, attachmentId).Extract()
@@ -200,7 +200,7 @@ func resourceComputeAttachInterfaceV2AttachFunc(
 	}
 }
 
-func resourceComputeAttachInterfaceV2DetachFunc(
+func resourceComputeInterfaceAttachV2DetachFunc(
 	computeClient *gophercloud.ServiceClient, instanceId, attachmentId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to detach OpenStack interface %s from instance %s",
@@ -232,7 +232,7 @@ func resourceComputeAttachInterfaceV2DetachFunc(
 	}
 }
 
-func parseComputeAttachInterfaceId(id string) (string, string, error) {
+func parseComputeInterfaceAttachId(id string) (string, string, error) {
 	idParts := strings.Split(id, "/")
 	if len(idParts) < 2 {
 		return "", "", fmt.Errorf("Unable to determine interface attachment ID")

@@ -1,12 +1,12 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_compute_attach_interface_v2"
-sidebar_current: "docs-openstack-resource-compute-attach-interface-v2"
+page_title: "OpenStack: openstack_compute_interface_attach_v2"
+sidebar_current: "docs-openstack-resource-compute-interface-attach-v2"
 description: |-
   Attaches a Network Interface to an Instance.
 ---
 
-# openstack\_compute\_attach\_interface\_v2
+# openstack\_compute\_interface\_attach_v2
 
 Attaches a Network Interface (a Port) to an Instance using the OpenStack
 Compute (Nova) v2 API.
@@ -26,7 +26,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   security_groups = ["default"]
 }
 
-resource "openstack_compute_attach_interface_v2" "ai_1" {
+resource "openstack_compute_interface_attach_v2" "ai_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   network_id  = "${openstack_networking_port_v2.network_1.id}"
 }
@@ -46,7 +46,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   security_groups = ["default"]
 }
 
-resource "openstack_compute_attach_interface_v2" "ai_1" {
+resource "openstack_compute_interface_attach_v2" "ai_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   network_id  = "${openstack_networking_port_v2.network_1.id}"
   fixed_ip    = "10.0.10.10"
@@ -75,7 +75,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   security_groups = ["default"]
 }
 
-resource "openstack_compute_attach_interface_v2" "ai_1" {
+resource "openstack_compute_interface_attach_v2" "ai_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   port_id     = "${openstack_networking_port_v2.port_1.id}"
 }
@@ -102,7 +102,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   security_groups = ["default"]
 }
 
-resource "openstack_compute_attach_interface_v2" "attachments" {
+resource "openstack_compute_interface_attach_v2" "attachments" {
   count          = 2
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   port_id     = "${openstack_networking_port_v2.ports.*.id[count.index]}"
@@ -134,12 +134,12 @@ resource "openstack_compute_instance_v2" "instance_1" {
   security_groups = ["default"]
 }
 
-resource "openstack_compute_attach_interface_v2" "ai_1" {
+resource "openstack_compute_interface_attach_v2" "ai_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   port_id     = "${openstack_networking_port_v2.ports.*.id[0]}"
 }
 
-resource "openstack_compute_attach_interface_v2" "ai_2" {
+resource "openstack_compute_interface_attach_v2" "ai_2" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   port_id     = "${openstack_networking_port_v2.ports.*.id[1]}"
 }
@@ -180,5 +180,5 @@ Interface Attachments can be imported using the Instance ID and Port ID
 separated by a slash, e.g.
 
 ```
-$ terraform import openstack_compute_attach_interface_v2.ai_1 89c60255-9bd6-460c-822a-e2b959ede9d2/45670584-225f-46c3-b33e-6707b589b666
+$ terraform import openstack_compute_interface_attach_v2.ai_1 89c60255-9bd6-460c-822a-e2b959ede9d2/45670584-225f-46c3-b33e-6707b589b666
 ```

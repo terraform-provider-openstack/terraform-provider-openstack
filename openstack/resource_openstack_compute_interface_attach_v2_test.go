@@ -12,44 +12,44 @@ import (
 
 var FixedIP string = "192.168.1.100"
 
-func TestAccComputeV2AttachInterface_basic(t *testing.T) {
+func TestAccComputeV2InterfaceAttach_basic(t *testing.T) {
 	var ai attachinterfaces.Interface
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2AttachInterfaceDestroy,
+		CheckDestroy: testAccCheckComputeV2InterfaceAttachDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccComputeV2AttachInterface_basic,
+				Config: testAccComputeV2InterfaceAttach_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2AttachInterfaceExists("openstack_compute_attach_interface_v2.ai_1", &ai),
+					testAccCheckComputeV2InterfaceAttachExists("openstack_compute_interface_attach_v2.ai_1", &ai),
 				),
 			},
 		},
 	})
 }
 
-func TestAccComputeV2AttachInterface_IP(t *testing.T) {
+func TestAccComputeV2InterfaceAttach_IP(t *testing.T) {
 	var ai attachinterfaces.Interface
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2AttachInterfaceDestroy,
+		CheckDestroy: testAccCheckComputeV2InterfaceAttachDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccComputeV2AttachInterface_IP,
+				Config: testAccComputeV2InterfaceAttach_IP,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2AttachInterfaceExists("openstack_compute_attach_interface_v2.ai_1", &ai),
-					testAccCheckComputeV2AttachInterfaceIP(&ai, FixedIP),
+					testAccCheckComputeV2InterfaceAttachExists("openstack_compute_interface_attach_v2.ai_1", &ai),
+					testAccCheckComputeV2InterfaceAttachIP(&ai, FixedIP),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckComputeV2AttachInterfaceDestroy(s *terraform.State) error {
+func testAccCheckComputeV2InterfaceAttachDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	computeClient, err := config.computeV2Client(OS_REGION_NAME)
 	if err != nil {
@@ -57,11 +57,11 @@ func testAccCheckComputeV2AttachInterfaceDestroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_compute_attach_interface_v2" {
+		if rs.Type != "openstack_compute_interface_attach_v2" {
 			continue
 		}
 
-		instanceId, portId, err := parseComputeAttachInterfaceId(rs.Primary.ID)
+		instanceId, portId, err := parseComputeInterfaceAttachId(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -75,7 +75,7 @@ func testAccCheckComputeV2AttachInterfaceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckComputeV2AttachInterfaceExists(n string, ai *attachinterfaces.Interface) resource.TestCheckFunc {
+func testAccCheckComputeV2InterfaceAttachExists(n string, ai *attachinterfaces.Interface) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -92,7 +92,7 @@ func testAccCheckComputeV2AttachInterfaceExists(n string, ai *attachinterfaces.I
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		instanceId, portId, err := parseComputeAttachInterfaceId(rs.Primary.ID)
+		instanceId, portId, err := parseComputeInterfaceAttachId(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -104,7 +104,7 @@ func testAccCheckComputeV2AttachInterfaceExists(n string, ai *attachinterfaces.I
 
 		//if found.instanceID != instanceID || found.PortID != portId {
 		if found.PortID != portId {
-			return fmt.Errorf("AttachInterface not found")
+			return fmt.Errorf("InterfaceAttach not found")
 		}
 
 		*ai = *found
@@ -113,7 +113,7 @@ func testAccCheckComputeV2AttachInterfaceExists(n string, ai *attachinterfaces.I
 	}
 }
 
-func testAccCheckComputeV2AttachInterfaceIP(
+func testAccCheckComputeV2InterfaceAttachIP(
 	ai *attachinterfaces.Interface, ip string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, i := range ai.FixedIPs {
@@ -126,7 +126,7 @@ func testAccCheckComputeV2AttachInterfaceIP(
 	}
 }
 
-var testAccComputeV2AttachInterface_basic = fmt.Sprintf(`
+var testAccComputeV2InterfaceAttach_basic = fmt.Sprintf(`
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   network_id = "%s"
@@ -141,13 +141,13 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 
-resource "openstack_compute_attach_interface_v2" "ai_1" {
+resource "openstack_compute_interface_attach_v2" "ai_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   port_id = "${openstack_networking_port_v2.port_1.id}"
 }
 `, OS_NETWORK_ID, OS_NETWORK_ID)
 
-var testAccComputeV2AttachInterface_IP = fmt.Sprintf(`
+var testAccComputeV2InterfaceAttach_IP = fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -169,7 +169,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 
-resource "openstack_compute_attach_interface_v2" "ai_1" {
+resource "openstack_compute_interface_attach_v2" "ai_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   network_id = "${openstack_networking_network_v2.network_1.id}"
   fixed_ip = "%s"
