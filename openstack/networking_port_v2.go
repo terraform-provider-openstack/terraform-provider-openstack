@@ -85,7 +85,7 @@ func flattenDHCPOptionsV2(dhcpOpts extradhcpopts.ExtraDHCPOptsExt) *schema.Set {
 
 // dhcpOptionsV2Schema returns *schema.Resource from the "extra_dhcp_opts" attribute.
 func dhcpOptionsV2Schema() *schema.Resource {
-	return resourceNetworkingPortExtraDHCPOptionsV2().Schema["extra_dhcp_opts"].Elem.(*schema.Resource)
+	return resourceNetworkingPortV2().Schema["extra_dhcp_opts"].Elem.(*schema.Resource)
 }
 
 // dhcpOptionsV2HashSetFunc returns schema.SchemaSetFunc that can be used to
