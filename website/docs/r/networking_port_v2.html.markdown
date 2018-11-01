@@ -78,7 +78,7 @@ The following arguments are supported:
     addresses that can be active on this port. The structure is described
     below.
 
-* `extra_dhcp_opts` - (Required) An array of desired DHCP options that needs to
+* `extra_dhcp_opts` - (Optional) An array of desired DHCP options that needs to
     be configured on the port. The structure is described below.
 
 * `value_specs` - (Optional) Map of additional options.
