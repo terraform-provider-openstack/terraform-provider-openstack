@@ -10,7 +10,28 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func expandDHCPOptionsV2Add(dhcpOpts *schema.Set) []extradhcpopts.UpdateExtraDHCPOpt {
+func expandDHCPOptionsV2Create(dhcpOpts *schema.Set) []extradhcpopts.CreateExtraDHCPOpt {
+	rawDHCPOpts := dhcpOpts.List()
+
+	extraDHCPOpts := make([]extradhcpopts.CreateExtraDHCPOpt, dhcpOpts.Len())
+	for i, raw := range rawDHCPOpts {
+		rawMap := raw.(map[string]interface{})
+
+		ipVersion := rawMap["ip_version"].(int)
+		optName := rawMap["opt_name"].(string)
+		optValue := rawMap["opt_value"].(string)
+
+		extraDHCPOpts[i] = extradhcpopts.CreateExtraDHCPOpt{
+			OptName:   optName,
+			OptValue:  optValue,
+			IPVersion: gophercloud.IPVersion(ipVersion),
+		}
+	}
+
+	return extraDHCPOpts
+}
+
+func expandDHCPOptionsV2Update(dhcpOpts *schema.Set) []extradhcpopts.UpdateExtraDHCPOpt {
 	rawDHCPOpts := dhcpOpts.List()
 
 	extraDHCPOpts := make([]extradhcpopts.UpdateExtraDHCPOpt, dhcpOpts.Len())

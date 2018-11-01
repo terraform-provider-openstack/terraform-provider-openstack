@@ -9,7 +9,45 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func TestExpandDHCPOptionsV2Add(t *testing.T) {
+func TestExpandDHCPOptionsV2Create(t *testing.T) {
+	dhcpOptsA := map[string]interface{}{
+		"ip_version": 4,
+		"opt_name":   "A",
+		"opt_value":  "true",
+	}
+	dhcpOptsB := map[string]interface{}{
+		"ip_version": 6,
+		"opt_name":   "B",
+		"opt_value":  "false",
+	}
+	dhcpOptsSet := &schema.Set{
+		F: dhcpOptionsV2HashSetFunc(),
+	}
+	dhcpOptsSet.Add(dhcpOptsA)
+	dhcpOptsSet.Add(dhcpOptsB)
+
+	expectedDHCPOptions := []extradhcpopts.CreateExtraDHCPOpt{
+		{
+			OptName:   "A",
+			OptValue:  "true",
+			IPVersion: gophercloud.IPVersion(4),
+		},
+		{
+			OptName:   "B",
+			OptValue:  "false",
+			IPVersion: gophercloud.IPVersion(6),
+		},
+	}
+
+	actualDHCPOptions := expandDHCPOptionsV2Create(dhcpOptsSet)
+
+	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
+		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
+			expectedDHCPOptions, actualDHCPOptions)
+	}
+}
+
+func TestExpandDHCPOptionsV2Update(t *testing.T) {
 	dhcpOptsA := map[string]interface{}{
 		"ip_version": 4,
 		"opt_name":   "A",
@@ -41,7 +79,7 @@ func TestExpandDHCPOptionsV2Add(t *testing.T) {
 		},
 	}
 
-	actualDHCPOptions := expandDHCPOptionsV2Add(dhcpOptsSet)
+	actualDHCPOptions := expandDHCPOptionsV2Update(dhcpOptsSet)
 
 	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
 		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",

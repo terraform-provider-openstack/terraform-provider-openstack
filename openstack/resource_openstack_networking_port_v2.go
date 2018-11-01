@@ -8,6 +8,7 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
@@ -130,6 +131,29 @@ func resourceNetworkingPortV2() *schema.Resource {
 					},
 				},
 			},
+			"extra_dhcp_opts": &schema.Schema{
+				Type:     schema.TypeSet,
+				Set:      hashDHCPOptionsV2,
+				Optional: true,
+				ForceNew: false,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"opt_name": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"opt_value": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"ip_version": &schema.Schema{
+							Type:     schema.TypeInt,
+							Default:  4,
+							Optional: true,
+						},
+					},
+				},
+			},
 			"value_specs": &schema.Schema{
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -198,11 +222,30 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		createOpts.SecurityGroups = &securityGroups
 	}
 
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	p, err := ports.Create(networkingClient, createOpts).Extract()
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Neutron network: %s", err)
+	// Create a Neutron port and set extra DHCP options if they're specified.
+	var p struct {
+		ports.Port
+		extradhcpopts.ExtraDHCPOptsExt
 	}
+	dhcpOpts := d.Get("extra_dhcp_opts").(*schema.Set)
+	if dhcpOpts.Len() > 0 {
+		extraDHCPOptsCreateOpts := extradhcpopts.CreateOptsExt{
+			CreateOptsBuilder: createOpts,
+			ExtraDHCPOpts:     expandDHCPOptionsV2Create(dhcpOpts),
+		}
+		log.Printf("[DEBUG] Create Options: %#v", extraDHCPOptsCreateOpts)
+		err = ports.Create(networkingClient, extraDHCPOptsCreateOpts).ExtractInto(&p)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack Neutron port: %s", err)
+		}
+	} else {
+		log.Printf("[DEBUG] Create Options: %#v", createOpts)
+		err = ports.Create(networkingClient, createOpts).ExtractInto(&p)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack Neutron port: %s", err)
+		}
+	}
+
 	log.Printf("[INFO] Network ID: %s", p.ID)
 
 	log.Printf("[DEBUG] Waiting for OpenStack Neutron Port (%s) to become available.", p.ID)
@@ -239,7 +282,11 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	p, err := ports.Get(networkingClient, d.Id()).Extract()
+	var p struct {
+		ports.Port
+		extradhcpopts.ExtraDHCPOptsExt
+	}
+	err = ports.Get(networkingClient, d.Id()).ExtractInto(&p)
 	if err != nil {
 		return CheckDeleted(d, err, "port")
 	}
@@ -284,6 +331,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 		pairs = append(pairs, pair)
 	}
 	d.Set("allowed_address_pairs", pairs)
+	d.Set("extra_dhcp_opts", flattenDHCPOptionsV2(p.ExtraDHCPOptsExt))
 
 	d.Set("region", GetRegion(d, config))
 
@@ -307,7 +355,12 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 	}
 
 	var hasChange bool
+	var extraDHCPOptsChange bool
+	var extraDHCPOptsDeleteOld bool
+	var extraDHCPOptsAddNew bool
 	var updateOpts ports.UpdateOpts
+	var extraDHCPOptsDeleteOpts extradhcpopts.UpdateOptsExt
+	var extraDHCPOptsUpdateOpts extradhcpopts.UpdateOptsExt
 
 	if d.HasChange("allowed_address_pairs") {
 		hasChange = true
@@ -355,12 +408,64 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		updateOpts.FixedIPs = resourcePortFixedIpsV2(d)
 	}
 
-	if hasChange {
-		log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), updateOpts)
+	if d.HasChange("extra_dhcp_opts") {
+		hasChange = true
+		extraDHCPOptsChange = true
+		oldDCHPOptsRaw, newDCHPOptsRaw := d.GetChange("extra_dhcp_opts")
+		oldDCHPOpts := oldDCHPOptsRaw.(*schema.Set)
+		newDCHPOpts := newDCHPOptsRaw.(*schema.Set)
 
-		_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
-		if err != nil {
-			return fmt.Errorf("Error updating OpenStack Neutron Network: %s", err)
+		// Populate update options with the old DHCP opts. We will delete them
+		// prior to adding new updated DHCP opts for consistency.
+		if oldDCHPOpts.Len() != 0 {
+			extraDHCPOptsDeleteOld = true
+			oldDCHPOpts := oldDCHPOptsRaw.(*schema.Set)
+			deleteExtraDHCPOpts := expandDHCPOptionsV2Delete(oldDCHPOpts)
+			extraDHCPOptsDeleteOpts = extradhcpopts.UpdateOptsExt{
+				UpdateOptsBuilder: updateOpts,
+				ExtraDHCPOpts:     deleteExtraDHCPOpts,
+			}
+		}
+
+		// Populate update options with the new DHCP opts.
+		if newDCHPOpts.Len() != 0 {
+			extraDHCPOptsAddNew = true
+			updateExtraDHCPOpts := expandDHCPOptionsV2Update(newDCHPOpts)
+			extraDHCPOptsUpdateOpts = extradhcpopts.UpdateOptsExt{
+				UpdateOptsBuilder: updateOpts,
+				ExtraDHCPOpts:     updateExtraDHCPOpts,
+			}
+		}
+	}
+
+	// Update a Neutron port and update extra DHCP options if they're changed.
+	if hasChange {
+		if extraDHCPOptsChange {
+			// Delete old DHCP options if needed.
+			if extraDHCPOptsDeleteOld {
+				log.Printf("[DEBUG] Deleting old DHCP opts for Port %s", d.Id())
+
+				_, err = ports.Update(networkingClient, d.Id(), extraDHCPOptsDeleteOpts).Extract()
+				if err != nil {
+					return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
+				}
+			}
+			// Add new DHCP options if needed.
+			if extraDHCPOptsAddNew {
+				log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), extraDHCPOptsUpdateOpts)
+
+				_, err = ports.Update(networkingClient, d.Id(), extraDHCPOptsUpdateOpts).Extract()
+				if err != nil {
+					return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
+				}
+			}
+		} else {
+			log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), updateOpts)
+
+			_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
+			if err != nil {
+				return fmt.Errorf("Error updating OpenStack Neutron Network: %s", err)
+			}
 		}
 	}
 
