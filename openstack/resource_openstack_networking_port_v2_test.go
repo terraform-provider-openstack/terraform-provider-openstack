@@ -454,13 +454,7 @@ func TestAccNetworkingV2Port_createExtraDHCPOpts(t *testing.T) {
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.0.opt_name", "optionA"),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.0.opt_value", "valueA"),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.1.opt_name", "optionB"),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.1.opt_value", "valueB"),
+						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.#", "2"),
 				),
 			},
 		},
@@ -492,9 +486,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.0.opt_name", "optionC"),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.0.opt_value", "valueC"),
+						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.#", "1"),
 				),
 			},
 			resource.TestStep{
@@ -504,13 +496,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.0.opt_name", "optionC"),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.0.opt_value", "valueC"),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.1.opt_name", "optionD"),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.1.opt_value", "valueD"),
+						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.#", "2"),
 				),
 			},
 			resource.TestStep{
@@ -520,13 +506,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.0.opt_name", "optionD"),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.0.opt_value", "valueD"),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.1.opt_name", "optionE"),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.1.opt_value", "valueE"),
+						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.#", "2"),
 				),
 			},
 			resource.TestStep{
@@ -536,9 +516,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckNoResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.0.opt_name"),
-					resource.TestCheckNoResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.0.opt_value"),
+						"openstack_networking_port_v2.port_1", "extra_dhcp_opts"),
 				),
 			},
 		},
