@@ -3,10 +3,11 @@ package openstack
 import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func expandDHCPOptionsV2Create(dhcpOpts *schema.Set) []extradhcpopts.CreateExtraDHCPOpt {
+func expandNetworkingPortDHCPOptsV2Create(dhcpOpts *schema.Set) []extradhcpopts.CreateExtraDHCPOpt {
 	rawDHCPOpts := dhcpOpts.List()
 
 	extraDHCPOpts := make([]extradhcpopts.CreateExtraDHCPOpt, dhcpOpts.Len())
@@ -27,7 +28,7 @@ func expandDHCPOptionsV2Create(dhcpOpts *schema.Set) []extradhcpopts.CreateExtra
 	return extraDHCPOpts
 }
 
-func expandDHCPOptionsV2Update(dhcpOpts *schema.Set) []extradhcpopts.UpdateExtraDHCPOpt {
+func expandNetworkingPortDHCPOptsV2Update(dhcpOpts *schema.Set) []extradhcpopts.UpdateExtraDHCPOpt {
 	rawDHCPOpts := dhcpOpts.List()
 
 	extraDHCPOpts := make([]extradhcpopts.UpdateExtraDHCPOpt, dhcpOpts.Len())
@@ -48,7 +49,7 @@ func expandDHCPOptionsV2Update(dhcpOpts *schema.Set) []extradhcpopts.UpdateExtra
 	return extraDHCPOpts
 }
 
-func expandDHCPOptionsV2Delete(dhcpOpts *schema.Set) []extradhcpopts.UpdateExtraDHCPOpt {
+func expandNetworkingPortDHCPOptsV2Delete(dhcpOpts *schema.Set) []extradhcpopts.UpdateExtraDHCPOpt {
 	rawDHCPOpts := dhcpOpts.List()
 
 	extraDHCPOpts := make([]extradhcpopts.UpdateExtraDHCPOpt, dhcpOpts.Len())
@@ -63,9 +64,9 @@ func expandDHCPOptionsV2Delete(dhcpOpts *schema.Set) []extradhcpopts.UpdateExtra
 	return extraDHCPOpts
 }
 
-func flattenDHCPOptionsV2(dhcpOpts extradhcpopts.ExtraDHCPOptsExt) *schema.Set {
+func flattenNetworkingPortDHCPOptsV2(dhcpOpts extradhcpopts.ExtraDHCPOptsExt) *schema.Set {
 	dhcpOptsSet := &schema.Set{
-		F: dhcpOptionsV2HashSetFunc(),
+		F: networkingPortDHCPOptsV2HashSetFunc(),
 	}
 
 	for _, dhcpOpt := range dhcpOpts.ExtraDHCPOpts {
@@ -79,13 +80,22 @@ func flattenDHCPOptionsV2(dhcpOpts extradhcpopts.ExtraDHCPOptsExt) *schema.Set {
 	return dhcpOptsSet
 }
 
+// ensureNetworkingPortV2UpdateOpts checks the provided ports.UpdateOpts
+// reference and returns an empty ports.UpdateOpts{} if provided reference is nil.
+func ensureNetworkingPortV2UpdateOpts(opts *ports.UpdateOpts) ports.UpdateOpts {
+	if opts == nil {
+		return ports.UpdateOpts{}
+	}
+	return *opts
+}
+
 // dhcpOptionsV2Schema returns *schema.Resource from the "extra_dhcp_opts" attribute.
-func dhcpOptionsV2Schema() *schema.Resource {
+func networkingPortDHCPOptsV2Schema() *schema.Resource {
 	return resourceNetworkingPortV2().Schema["extra_dhcp_opts"].Elem.(*schema.Resource)
 }
 
 // dhcpOptionsV2HashSetFunc returns schema.SchemaSetFunc that can be used to
 // create a new schema.Set for the "extra_dhcp_opts" attribute.
-func dhcpOptionsV2HashSetFunc() schema.SchemaSetFunc {
-	return schema.HashResource(dhcpOptionsV2Schema())
+func networkingPortDHCPOptsV2HashSetFunc() schema.SchemaSetFunc {
+	return schema.HashResource(networkingPortDHCPOptsV2Schema())
 }
