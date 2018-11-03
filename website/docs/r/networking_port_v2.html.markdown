@@ -104,9 +104,9 @@ The `allowed_address_pairs` block supports:
 
 The `extra_dhcp_opts` block supports:
 
-* `ip_address` - (Required) Name of the DHCP option.
+* `opt_name` - (Required) Name of the DHCP option.
 
-* `ip_address` - (Required) Value of the DHCP option.
+* `opt_value` - (Required) Value of the DHCP option.
 
 * `ip_version` - (Optional) IP protocol version. Defaults to 4.
 
