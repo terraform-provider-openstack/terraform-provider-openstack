@@ -48,6 +48,21 @@ func TestExpandNetworkingPortDHCPOptsV2Create(t *testing.T) {
 	}
 }
 
+func TestExpandNetworkingPortDHCPOptsEmptyV2Create(t *testing.T) {
+	dhcpOptsSet := &schema.Set{
+		F: networkingPortDHCPOptsV2HashSetFunc(),
+	}
+
+	expectedDHCPOptions := []extradhcpopts.CreateExtraDHCPOpt{}
+
+	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Create(dhcpOptsSet)
+
+	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
+		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
+			expectedDHCPOptions, actualDHCPOptions)
+	}
+}
+
 func TestExpandNetworkingPortDHCPOptsV2Update(t *testing.T) {
 	dhcpOptsA := map[string]interface{}{
 		"ip_version": 4,
@@ -79,6 +94,21 @@ func TestExpandNetworkingPortDHCPOptsV2Update(t *testing.T) {
 			IPVersion: gophercloud.IPVersion(6),
 		},
 	}
+
+	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Update(dhcpOptsSet)
+
+	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
+		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
+			expectedDHCPOptions, actualDHCPOptions)
+	}
+}
+
+func TestExpandNetworkingPortDHCPOptsEmptyV2Update(t *testing.T) {
+	dhcpOptsSet := &schema.Set{
+		F: networkingPortDHCPOptsV2HashSetFunc(),
+	}
+
+	expectedDHCPOptions := []extradhcpopts.UpdateExtraDHCPOpt{}
 
 	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Update(dhcpOptsSet)
 

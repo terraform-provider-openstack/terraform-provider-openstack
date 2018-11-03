@@ -8,6 +8,10 @@ import (
 )
 
 func expandNetworkingPortDHCPOptsV2Create(dhcpOpts *schema.Set) []extradhcpopts.CreateExtraDHCPOpt {
+	if dhcpOpts == nil {
+		return []extradhcpopts.CreateExtraDHCPOpt{}
+	}
+
 	rawDHCPOpts := dhcpOpts.List()
 
 	extraDHCPOpts := make([]extradhcpopts.CreateExtraDHCPOpt, dhcpOpts.Len())
@@ -29,6 +33,10 @@ func expandNetworkingPortDHCPOptsV2Create(dhcpOpts *schema.Set) []extradhcpopts.
 }
 
 func expandNetworkingPortDHCPOptsV2Update(dhcpOpts *schema.Set) []extradhcpopts.UpdateExtraDHCPOpt {
+	if dhcpOpts == nil {
+		return []extradhcpopts.UpdateExtraDHCPOpt{}
+	}
+
 	rawDHCPOpts := dhcpOpts.List()
 
 	extraDHCPOpts := make([]extradhcpopts.UpdateExtraDHCPOpt, dhcpOpts.Len())
@@ -50,6 +58,10 @@ func expandNetworkingPortDHCPOptsV2Update(dhcpOpts *schema.Set) []extradhcpopts.
 }
 
 func expandNetworkingPortDHCPOptsV2Delete(dhcpOpts *schema.Set) []extradhcpopts.UpdateExtraDHCPOpt {
+	if dhcpOpts == nil {
+		return []extradhcpopts.UpdateExtraDHCPOpt{}
+	}
+
 	rawDHCPOpts := dhcpOpts.List()
 
 	extraDHCPOpts := make([]extradhcpopts.UpdateExtraDHCPOpt, dhcpOpts.Len())
