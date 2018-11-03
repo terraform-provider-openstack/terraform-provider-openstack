@@ -227,22 +227,14 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		extradhcpopts.ExtraDHCPOptsExt
 	}
 	dhcpOpts := d.Get("extra_dhcp_opts").(*schema.Set)
-	if dhcpOpts.Len() > 0 {
-		extraDHCPOptsCreateOpts := extradhcpopts.CreateOptsExt{
-			CreateOptsBuilder: createOpts,
-			ExtraDHCPOpts:     expandDHCPOptionsV2Create(dhcpOpts),
-		}
-		log.Printf("[DEBUG] Create Options: %#v", extraDHCPOptsCreateOpts)
-		err = ports.Create(networkingClient, extraDHCPOptsCreateOpts).ExtractInto(&p)
-		if err != nil {
-			return fmt.Errorf("Error creating OpenStack Neutron port: %s", err)
-		}
-	} else {
-		log.Printf("[DEBUG] Create Options: %#v", createOpts)
-		err = ports.Create(networkingClient, createOpts).ExtractInto(&p)
-		if err != nil {
-			return fmt.Errorf("Error creating OpenStack Neutron port: %s", err)
-		}
+	extendedCreateOpts := extradhcpopts.CreateOptsExt{
+		CreateOptsBuilder: createOpts,
+		ExtraDHCPOpts:     expandDHCPOptionsV2Create(dhcpOpts),
+	}
+	log.Printf("[DEBUG] Create Options: %#v", extendedCreateOpts)
+	err = ports.Create(networkingClient, extendedCreateOpts).ExtractInto(&p)
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack Neutron port: %s", err)
 	}
 
 	log.Printf("[INFO] Network ID: %s", p.ID)
