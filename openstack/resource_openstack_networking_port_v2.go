@@ -133,7 +133,6 @@ func resourceNetworkingPortV2() *schema.Resource {
 			},
 			"extra_dhcp_opts": &schema.Schema{
 				Type:     schema.TypeSet,
-				Set:      hashDHCPOptionsV2,
 				Optional: true,
 				ForceNew: false,
 				Elem: &schema.Resource{

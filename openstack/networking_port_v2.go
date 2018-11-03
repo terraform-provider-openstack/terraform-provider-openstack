@@ -1,12 +1,8 @@
 package openstack
 
 import (
-	"bytes"
-	"fmt"
-
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
-	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -92,15 +88,4 @@ func dhcpOptionsV2Schema() *schema.Resource {
 // create a new schema.Set for the "extra_dhcp_opts" attribute.
 func dhcpOptionsV2HashSetFunc() schema.SchemaSetFunc {
 	return schema.HashResource(dhcpOptionsV2Schema())
-}
-
-// hashDHCPOptionsV2 is a hash function to use with the "extra_dhcp_opts" set.
-func hashDHCPOptionsV2(v interface{}) int {
-	var buf bytes.Buffer
-	m := v.(map[string]interface{})
-	buf.WriteString(fmt.Sprintf("%s-", m["opt_name"].(string)))
-	if m["ip_version"] != "" {
-		buf.WriteString(fmt.Sprintf("%d-", m["ip_version"].(int)))
-	}
-	return hashcode.String(buf.String())
 }
