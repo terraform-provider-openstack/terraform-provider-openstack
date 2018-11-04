@@ -30,24 +30,29 @@ func resourceComputeKeypairV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+
 			"public_key": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"private_key": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"fingerprint": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
+
 			"value_specs": &schema.Schema{
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
+			},
+
+			// computed-only
+			"private_key": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"fingerprint": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -60,18 +65,20 @@ func resourceComputeKeypairV2Create(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	createOpts := KeyPairCreateOpts{
+	name := d.Get("name").(string)
+	createOpts := ComputeKeyPairV2CreateOpts{
 		keypairs.CreateOpts{
-			Name:      d.Get("name").(string),
+			Name:      name,
 			PublicKey: d.Get("public_key").(string),
 		},
 		MapValueSpecs(d),
 	}
 
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
+	log.Printf("[DEBUG] openstack_compute_keypair_v2 create options: %#v", createOpts)
+
 	kp, err := keypairs.Create(computeClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack keypair: %s", err)
+		return CheckDeleted(d, err, "Error retrieving openstack_compute_keypair_v2")
 	}
 
 	d.SetId(kp.Name)
@@ -94,6 +101,8 @@ func resourceComputeKeypairV2Read(d *schema.ResourceData, meta interface{}) erro
 		return CheckDeleted(d, err, "keypair")
 	}
 
+	log.Printf("[DEBUG] Retrieved openstack_compute_keypair_v2 %s: %#v", d.Id(), kp)
+
 	d.Set("name", kp.Name)
 	d.Set("public_key", kp.PublicKey)
 	d.Set("fingerprint", kp.Fingerprint)
@@ -111,8 +120,8 @@ func resourceComputeKeypairV2Delete(d *schema.ResourceData, meta interface{}) er
 
 	err = keypairs.Delete(computeClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack keypair: %s", err)
+		return fmt.Errorf("Error deleting openstack_compute_keypair_v2 %s: %s", d.Id(), err)
 	}
-	d.SetId("")
+
 	return nil
 }
