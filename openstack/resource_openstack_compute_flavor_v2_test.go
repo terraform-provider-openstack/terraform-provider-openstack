@@ -13,7 +13,7 @@ import (
 
 func TestAccComputeV2Flavor_basic(t *testing.T) {
 	var flavor flavors.Flavor
-	var flavorName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+	var flavorName = acctest.RandomWithPrefix("tf-acc-flavor")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -41,7 +41,7 @@ func TestAccComputeV2Flavor_basic(t *testing.T) {
 
 func TestAccComputeV2Flavor_extraSpecs(t *testing.T) {
 	var flavor flavors.Flavor
-	var flavorName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+	var flavorName = acctest.RandomWithPrefix("tf-acc-flavor")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
