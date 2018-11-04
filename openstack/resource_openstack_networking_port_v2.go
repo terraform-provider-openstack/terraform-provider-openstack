@@ -221,18 +221,28 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		createOpts.SecurityGroups = &securityGroups
 	}
 
+	// Declare a finalCreateOpts interface to hold either the
+	// base create options or the extended dhcp options.
+	var finalCreateOpts ports.CreateOptsBuilder
+	finalCreateOpts = createOpts
+
+	dhcpOpts := d.Get("extra_dhcp_opts").(*schema.Set)
+	if dhcpOpts.Len() > 0 {
+		finalCreateOpts = extradhcpopts.CreateOptsExt{
+			CreateOptsBuilder: createOpts,
+			ExtraDHCPOpts:     expandNetworkingPortDHCPOptsV2Create(dhcpOpts),
+		}
+	}
+
+	log.Printf("[DEBUG] Create Options: %#v", finalCreateOpts)
+
 	// Create a Neutron port and set extra DHCP options if they're specified.
 	var p struct {
 		ports.Port
 		extradhcpopts.ExtraDHCPOptsExt
 	}
-	dhcpOpts := d.Get("extra_dhcp_opts").(*schema.Set)
-	extendedCreateOpts := extradhcpopts.CreateOptsExt{
-		CreateOptsBuilder: createOpts,
-		ExtraDHCPOpts:     expandNetworkingPortDHCPOptsV2Create(dhcpOpts),
-	}
-	log.Printf("[DEBUG] Create Options: %#v", extendedCreateOpts)
-	err = ports.Create(networkingClient, extendedCreateOpts).ExtractInto(&p)
+
+	err = ports.Create(networkingClient, finalCreateOpts).ExtractInto(&p)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack Neutron port: %s", err)
 	}
@@ -345,17 +355,8 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set")
 	}
 
-	var (
-		hasChange              bool
-		extraDHCPOptsDeleteOld bool
-
-		updateOpts ports.UpdateOpts
-
-		extendedUpdateOpts      extradhcpopts.UpdateOptsExt
-		extraDHCPOptsDeleteOpts extradhcpopts.UpdateOptsExt
-
-		newDCHPOpts *schema.Set
-	)
+	var hasChange bool
+	var updateOpts ports.UpdateOpts
 
 	if d.HasChange("allowed_address_pairs") {
 		hasChange = true
@@ -403,49 +404,53 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		updateOpts.FixedIPs = resourcePortFixedIpsV2(d)
 	}
 
-	if d.HasChange("extra_dhcp_opts") {
-		hasChange = true
-		oldDCHPOptsRaw, newDCHPOptsRaw := d.GetChange("extra_dhcp_opts")
-		oldDCHPOpts := oldDCHPOptsRaw.(*schema.Set)
-		newDCHPOpts = newDCHPOptsRaw.(*schema.Set)
-
-		// Populate update options with the old DHCP opts. We will delete them
-		// prior to adding new updated DHCP opts for consistency.
-		if oldDCHPOpts.Len() != 0 {
-			extraDHCPOptsDeleteOld = true
-			oldDCHPOpts := oldDCHPOptsRaw.(*schema.Set)
-			deleteExtraDHCPOpts := expandNetworkingPortDHCPOptsV2Delete(oldDCHPOpts)
-			extraDHCPOptsDeleteOpts = extradhcpopts.UpdateOptsExt{
-				UpdateOptsBuilder: ensureNetworkingPortV2UpdateOpts(&updateOpts),
-				ExtraDHCPOpts:     deleteExtraDHCPOpts,
-			}
-		}
-	}
-
-	// Populate update options with extended DHCP opts.
-	updateExtraDHCPOpts := expandNetworkingPortDHCPOptsV2Update(newDCHPOpts)
-	extendedUpdateOpts = extradhcpopts.UpdateOptsExt{
-		UpdateOptsBuilder: ensureNetworkingPortV2UpdateOpts(&updateOpts),
-		ExtraDHCPOpts:     updateExtraDHCPOpts,
-	}
-
-	// Update a Neutron port and set extra DHCP options if they're changed.
+	// At this point, perform the update for all "standard" port changes.
 	if hasChange {
-		// Delete old DHCP options if needed.
-		if extraDHCPOptsDeleteOld {
-			log.Printf("[DEBUG] Deleting old DHCP opts for Port %s", d.Id())
-			_, err = ports.Update(networkingClient, d.Id(), extraDHCPOptsDeleteOpts).Extract()
-			if err != nil {
-				return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
-			}
-		}
-		log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), extendedUpdateOpts)
-		_, err = ports.Update(networkingClient, d.Id(), extendedUpdateOpts).Extract()
+		_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
 		}
 	}
 
+	// Next, perform any dhcp option changes.
+	if d.HasChange("extra_dhcp_opts") {
+		o, n := d.GetChange("extra_dhcp_opts")
+		oldDHCPOpts := o.(*schema.Set)
+		newDHCPOpts := n.(*schema.Set)
+
+		// Delete all old DHCP options, regardless of if they still exist.
+		// If they do still exist, they will be re-added below.
+		if oldDHCPOpts.Len() != 0 {
+			deleteExtraDHCPOpts := expandNetworkingPortDHCPOptsV2Delete(oldDHCPOpts)
+			dhcpUpdateOpts := extradhcpopts.UpdateOptsExt{
+				UpdateOptsBuilder: &ports.UpdateOpts{},
+				ExtraDHCPOpts:     deleteExtraDHCPOpts,
+			}
+
+			log.Printf("[DEBUG] Deleting old DHCP opts for Port %s", d.Id())
+			_, err = ports.Update(networkingClient, d.Id(), dhcpUpdateOpts).Extract()
+			if err != nil {
+				return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
+			}
+		}
+
+		// Add any new DHCP options and re-add previously set DHCP options.
+		if newDHCPOpts.Len() != 0 {
+			updateExtraDHCPOpts := expandNetworkingPortDHCPOptsV2Update(newDHCPOpts)
+			dhcpUpdateOpts := extradhcpopts.UpdateOptsExt{
+				UpdateOptsBuilder: &ports.UpdateOpts{},
+				ExtraDHCPOpts:     updateExtraDHCPOpts,
+			}
+
+			log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), dhcpUpdateOpts)
+			_, err = ports.Update(networkingClient, d.Id(), dhcpUpdateOpts).Extract()
+			if err != nil {
+				return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
+			}
+		}
+	}
+
+	// Next, perform any required updates to the tags.
 	if d.HasChange("tags") {
 		tags := networkV2AttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}

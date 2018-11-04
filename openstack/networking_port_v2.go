@@ -3,7 +3,6 @@ package openstack
 import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -77,9 +76,7 @@ func expandNetworkingPortDHCPOptsV2Delete(dhcpOpts *schema.Set) []extradhcpopts.
 }
 
 func flattenNetworkingPortDHCPOptsV2(dhcpOpts extradhcpopts.ExtraDHCPOptsExt) *schema.Set {
-	dhcpOptsSet := &schema.Set{
-		F: networkingPortDHCPOptsV2HashSetFunc(),
-	}
+	dhcpOptsSet := &schema.Set{}
 
 	for _, dhcpOpt := range dhcpOpts.ExtraDHCPOpts {
 		dhcpOptsSet.Add(map[string]interface{}{
@@ -90,24 +87,4 @@ func flattenNetworkingPortDHCPOptsV2(dhcpOpts extradhcpopts.ExtraDHCPOptsExt) *s
 	}
 
 	return dhcpOptsSet
-}
-
-// ensureNetworkingPortV2UpdateOpts checks the provided ports.UpdateOpts
-// reference and returns an empty ports.UpdateOpts{} if provided reference is nil.
-func ensureNetworkingPortV2UpdateOpts(opts *ports.UpdateOpts) ports.UpdateOpts {
-	if opts == nil {
-		return ports.UpdateOpts{}
-	}
-	return *opts
-}
-
-// dhcpOptionsV2Schema returns *schema.Resource from the "extra_dhcp_opts" attribute.
-func networkingPortDHCPOptsV2Schema() *schema.Resource {
-	return resourceNetworkingPortV2().Schema["extra_dhcp_opts"].Elem.(*schema.Resource)
-}
-
-// dhcpOptionsV2HashSetFunc returns schema.SchemaSetFunc that can be used to
-// create a new schema.Set for the "extra_dhcp_opts" attribute.
-func networkingPortDHCPOptsV2HashSetFunc() schema.SchemaSetFunc {
-	return schema.HashResource(networkingPortDHCPOptsV2Schema())
 }
