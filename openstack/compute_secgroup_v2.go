@@ -51,10 +51,10 @@ func computeSecGroupV2RulesCheckForErrors(d *schema.ResourceData) error {
 }
 
 func expandComputeSecGroupV2CreateRules(d *schema.ResourceData) []secgroups.CreateRuleOpts {
-	rawRules := d.Get("rule").(*schema.Set)
-	createRuleOptsList := make([]secgroups.CreateRuleOpts, rawRules.Len())
+	rawRules := d.Get("rule").(*schema.Set).List()
+	createRuleOptsList := make([]secgroups.CreateRuleOpts, len(rawRules))
 
-	for i, rawRule := range rawRules.List() {
+	for i, rawRule := range rawRules {
 		createRuleOptsList[i] = expandComputeSecGroupV2CreateRule(d, rawRule)
 	}
 
