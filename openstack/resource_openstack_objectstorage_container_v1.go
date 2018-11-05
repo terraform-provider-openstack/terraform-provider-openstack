@@ -9,6 +9,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects"
 	"github.com/gophercloud/gophercloud/pagination"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func resourceObjectStorageContainerV1() *schema.Resource {
@@ -55,10 +56,25 @@ func resourceObjectStorageContainerV1() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
-			"versions_location": &schema.Schema{
-				Type:     schema.TypeString,
+			"versioning": &schema.Schema{
+				Type:     schema.TypeSet,
 				Optional: true,
-				ForceNew: false,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"type": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"versions", "history",
+							}, true),
+						},
+						"location": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
 			},
 			"metadata": &schema.Schema{
 				Type:     schema.TypeMap,
@@ -89,8 +105,15 @@ func resourceObjectStorageContainerV1Create(d *schema.ResourceData, meta interfa
 		ContainerSyncKey: d.Get("container_sync_key").(string),
 		ContainerWrite:   d.Get("container_write").(string),
 		ContentType:      d.Get("content_type").(string),
-		VersionsLocation: d.Get("versions_location").(string),
 		Metadata:         resourceContainerMetadataV2(d),
+	}
+
+	if versioning, ok := d.Get("versioning").(*schema.Set); ok && versioning.Len() > 0 {
+		vParams := versioning.List()[0].(map[string]interface{})
+		switch vParams["type"].(string) {
+		case "versions":
+			createOpts.VersionsLocation = vParams["location"].(string)
+		}
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -138,11 +161,18 @@ func resourceObjectStorageContainerV1Update(d *schema.ResourceData, meta interfa
 		ContainerSyncKey: d.Get("container_sync_key").(string),
 		ContainerWrite:   d.Get("container_write").(string),
 		ContentType:      d.Get("content_type").(string),
-		VersionsLocation: d.Get("versions_location").(string),
 	}
 
-	if d.HasChange("versions_location") && d.Get("versions_location").(string) == "" {
-		updateOpts.RemoveVersionsLocation = "true"
+	if versioning, ok := d.Get("versioning").(*schema.Set); ok && d.HasChange("versioning") {
+		if versioning.Len() == 0 {
+			updateOpts.RemoveVersionsLocation = "true"
+		} else {
+			vParams := versioning.List()[0].(map[string]interface{})
+			switch vParams["type"].(string) {
+			case "versions":
+				updateOpts.VersionsLocation = vParams["location"].(string)
+			}
+		}
 	}
 
 	if d.HasChange("metadata") {
