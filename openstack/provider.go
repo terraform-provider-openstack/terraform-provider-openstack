@@ -214,6 +214,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_compute_flavor_v2":                  resourceComputeFlavorV2(),
 			"openstack_compute_flavor_access_v2":           resourceComputeFlavorAccessV2(),
 			"openstack_compute_instance_v2":                resourceComputeInstanceV2(),
+			"openstack_compute_interface_attach_v2":        resourceComputeInterfaceAttachV2(),
 			"openstack_compute_keypair_v2":                 resourceComputeKeypairV2(),
 			"openstack_compute_secgroup_v2":                resourceComputeSecGroupV2(),
 			"openstack_compute_servergroup_v2":             resourceComputeServerGroupV2(),
