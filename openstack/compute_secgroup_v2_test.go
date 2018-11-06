@@ -68,3 +68,32 @@ func TestExpandComputeSecGroupV2CreateRules(t *testing.T) {
 		t.Fatalf("Rules differ. Want: %#v, but got: %#v", expectedRules, actualRules)
 	}
 }
+
+func TestExpandComputeSecGroupV2Rule(t *testing.T) {
+	r := resourceComputeSecGroupV2()
+	d := r.TestResourceData()
+	d.SetId("1")
+
+	rule1 := map[string]interface{}{
+		"id":          "2",
+		"from_port":   22,
+		"to_port":     22,
+		"ip_protocol": "tcp",
+		"cidr":        "0.0.0.0/0",
+	}
+
+	expectedRules := secgroups.Rule{
+		ParentGroupID: "1",
+		ID:            "2",
+		FromPort:      22,
+		ToPort:        22,
+		IPProtocol:    "tcp",
+		IPRange:       secgroups.IPRange{CIDR: "0.0.0.0/0"},
+	}
+
+	actualRules := expandComputeSecGroupV2Rule(d, rule1)
+
+	if !reflect.DeepEqual(expectedRules, actualRules) {
+		t.Fatalf("Results differ. Want: %#v, but got: %#v", expectedRules, actualRules)
+	}
+}
