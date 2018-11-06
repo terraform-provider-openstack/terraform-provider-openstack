@@ -1,5 +1,9 @@
 ## 1.12.0 (Unreleased)
 
+FEATURES
+
+* __New Resource__: `openstack_compute_interface_attach_v2` [GH-470]
+
 IMPROVEMENTS
 
 * Added `tags` to `openstack_networking_network_v2` [GH-454]
