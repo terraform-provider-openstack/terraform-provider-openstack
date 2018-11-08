@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -23,6 +24,7 @@ func dataSourceComputeKeypairV2() *schema.Resource {
 				Required: true,
 			},
 
+			// computed-only
 			"public_key": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
@@ -41,10 +43,12 @@ func dataSourceComputeKeypairV2Read(d *schema.ResourceData, meta interface{}) er
 	name := d.Get("name").(string)
 	kp, err := keypairs.Get(computeClient, name).Extract()
 	if err != nil {
-		return fmt.Errorf("Error getting OpenStack keypair: %s", err)
+		return fmt.Errorf("Error retrieving openstack_compute_keypair_v2 %s: %s", name, err)
 	}
 
 	d.SetId(name)
+
+	log.Printf("[DEBUG] Retrieved openstack_compute_keypair_v2 %s: %#v", d.Id(), kp)
 
 	d.Set("public_key", kp.PublicKey)
 	d.Set("region", GetRegion(d, config))
