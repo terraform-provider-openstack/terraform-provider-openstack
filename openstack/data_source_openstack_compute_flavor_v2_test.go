@@ -8,13 +8,13 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestAccOpenStackComputeV2FlavorDataSource_basic(t *testing.T) {
+func TestAccComputeV2FlavorDataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccOpenStackComputeV2FlavorDataSource_basic,
+				Config: testAccComputeV2FlavorDataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
@@ -35,13 +35,13 @@ func TestAccOpenStackComputeV2FlavorDataSource_basic(t *testing.T) {
 	})
 }
 
-func TestAccOpenStackComputeV2FlavorDataSource_testQueries(t *testing.T) {
+func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccOpenStackComputeV2FlavorDataSource_queryDisk,
+				Config: testAccComputeV2FlavorDataSource_queryDisk,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
@@ -59,7 +59,7 @@ func TestAccOpenStackComputeV2FlavorDataSource_testQueries(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config: testAccOpenStackComputeV2FlavorDataSource_queryMinDisk,
+				Config: testAccComputeV2FlavorDataSource_queryMinDisk,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
@@ -77,7 +77,7 @@ func TestAccOpenStackComputeV2FlavorDataSource_testQueries(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config: testAccOpenStackComputeV2FlavorDataSource_queryMinRAM,
+				Config: testAccComputeV2FlavorDataSource_queryMinRAM,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
@@ -95,7 +95,7 @@ func TestAccOpenStackComputeV2FlavorDataSource_testQueries(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config: testAccOpenStackComputeV2FlavorDataSource_queryVCPUs,
+				Config: testAccComputeV2FlavorDataSource_queryVCPUs,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
@@ -131,33 +131,33 @@ func testAccCheckComputeV2FlavorDataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-const testAccOpenStackComputeV2FlavorDataSource_basic = `
+const testAccComputeV2FlavorDataSource_basic = `
 data "openstack_compute_flavor_v2" "flavor_1" {
   name = "m1.acctest"
 }
 `
 
-const testAccOpenStackComputeV2FlavorDataSource_queryDisk = `
+const testAccComputeV2FlavorDataSource_queryDisk = `
 data "openstack_compute_flavor_v2" "flavor_1" {
   disk = 6
 }
 `
 
-const testAccOpenStackComputeV2FlavorDataSource_queryMinDisk = `
+const testAccComputeV2FlavorDataSource_queryMinDisk = `
 data "openstack_compute_flavor_v2" "flavor_1" {
   name = "m1.acctest"
   min_disk = 5
 }
 `
 
-const testAccOpenStackComputeV2FlavorDataSource_queryMinRAM = `
+const testAccComputeV2FlavorDataSource_queryMinRAM = `
 data "openstack_compute_flavor_v2" "flavor_1" {
   name = "m1.acctest"
   min_ram = 512
 }
 `
 
-const testAccOpenStackComputeV2FlavorDataSource_queryVCPUs = `
+const testAccComputeV2FlavorDataSource_queryVCPUs = `
 data "openstack_compute_flavor_v2" "flavor_1" {
   name = "m1.acctest"
   vcpus = 1

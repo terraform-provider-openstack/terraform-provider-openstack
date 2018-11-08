@@ -92,17 +92,17 @@ func dataSourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) err
 		AccessType: flavors.PublicAccess,
 	}
 
-	log.Printf("[DEBUG] List Options: %#v", listOpts)
+	log.Printf("[DEBUG] openstack_compute_flavor_v2 ListOpts: %#v", listOpts)
 
 	var flavor flavors.Flavor
 	allPages, err := flavors.ListDetail(computeClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query flavors: %s", err)
+		return fmt.Errorf("Unable to query OpenStack flavors: %s", err)
 	}
 
 	allFlavors, err := flavors.ExtractFlavors(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve flavors: %s", err)
+		return fmt.Errorf("Unable to retrieve OpenStack flavors: %s", err)
 	}
 
 	// Loop through all flavors to find a more specific one.
@@ -161,17 +161,16 @@ func dataSourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) err
 		log.Printf("[DEBUG] Multiple results found: %#v", allFlavors)
 		return fmt.Errorf("Your query returned more than one result. " +
 			"Please try a more specific search criteria")
-	} else {
-		flavor = allFlavors[0]
 	}
 
-	log.Printf("[DEBUG] Single Flavor found: %s", flavor.ID)
+	flavor = allFlavors[0]
+
 	return dataSourceComputeFlavorV2Attributes(d, &flavor)
 }
 
 // dataSourceComputeFlavorV2Attributes populates the fields of an Image resource.
 func dataSourceComputeFlavorV2Attributes(d *schema.ResourceData, flavor *flavors.Flavor) error {
-	log.Printf("[DEBUG] openstack_compute_flavor_v2 details: %#v", flavor)
+	log.Printf("[DEBUG] Retrieved openstack_compute_flavor_v2 %s: %#v", flavor.ID, flavor)
 
 	d.SetId(flavor.ID)
 	d.Set("name", flavor.Name)
