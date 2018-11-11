@@ -7,13 +7,9 @@ import (
 )
 
 func expandNetworkingPortDHCPOptsV2Create(dhcpOpts *schema.Set) []extradhcpopts.CreateExtraDHCPOpt {
-	if dhcpOpts == nil {
-		return []extradhcpopts.CreateExtraDHCPOpt{}
-	}
-
 	rawDHCPOpts := dhcpOpts.List()
 
-	extraDHCPOpts := make([]extradhcpopts.CreateExtraDHCPOpt, dhcpOpts.Len())
+	extraDHCPOpts := make([]extradhcpopts.CreateExtraDHCPOpt, len(rawDHCPOpts))
 	for i, raw := range rawDHCPOpts {
 		rawMap := raw.(map[string]interface{})
 
@@ -32,13 +28,9 @@ func expandNetworkingPortDHCPOptsV2Create(dhcpOpts *schema.Set) []extradhcpopts.
 }
 
 func expandNetworkingPortDHCPOptsV2Update(dhcpOpts *schema.Set) []extradhcpopts.UpdateExtraDHCPOpt {
-	if dhcpOpts == nil {
-		return []extradhcpopts.UpdateExtraDHCPOpt{}
-	}
-
 	rawDHCPOpts := dhcpOpts.List()
 
-	extraDHCPOpts := make([]extradhcpopts.UpdateExtraDHCPOpt, dhcpOpts.Len())
+	extraDHCPOpts := make([]extradhcpopts.UpdateExtraDHCPOpt, len(rawDHCPOpts))
 	for i, raw := range rawDHCPOpts {
 		rawMap := raw.(map[string]interface{})
 
@@ -63,7 +55,7 @@ func expandNetworkingPortDHCPOptsV2Delete(dhcpOpts *schema.Set) []extradhcpopts.
 
 	rawDHCPOpts := dhcpOpts.List()
 
-	extraDHCPOpts := make([]extradhcpopts.UpdateExtraDHCPOpt, dhcpOpts.Len())
+	extraDHCPOpts := make([]extradhcpopts.UpdateExtraDHCPOpt, len(rawDHCPOpts))
 	for i, raw := range rawDHCPOpts {
 		rawMap := raw.(map[string]interface{})
 		extraDHCPOpts[i] = extradhcpopts.UpdateExtraDHCPOpt{
@@ -75,15 +67,15 @@ func expandNetworkingPortDHCPOptsV2Delete(dhcpOpts *schema.Set) []extradhcpopts.
 	return extraDHCPOpts
 }
 
-func flattenNetworkingPortDHCPOptsV2(dhcpOpts extradhcpopts.ExtraDHCPOptsExt) *schema.Set {
-	dhcpOptsSet := &schema.Set{}
+func flattenNetworkingPortDHCPOptsV2(dhcpOpts extradhcpopts.ExtraDHCPOptsExt) []map[string]interface{} {
+	dhcpOptsSet := make([]map[string]interface{}, len(dhcpOpts.ExtraDHCPOpts))
 
-	for _, dhcpOpt := range dhcpOpts.ExtraDHCPOpts {
-		dhcpOptsSet.Add(map[string]interface{}{
+	for i, dhcpOpt := range dhcpOpts.ExtraDHCPOpts {
+		dhcpOptsSet[i] = map[string]interface{}{
 			"ip_version": dhcpOpt.IPVersion,
 			"opt_name":   dhcpOpt.OptName,
 			"opt_value":  dhcpOpt.OptValue,
-		})
+		}
 	}
 
 	return dhcpOptsSet

@@ -6,26 +6,25 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func TestExpandNetworkingPortDHCPOptsV2Create(t *testing.T) {
-	dhcpOptsA := map[string]interface{}{
+	r := resourceNetworkingPortV2()
+	d := r.TestResourceData()
+	d.SetId("1")
+	dhcpOpts1 := map[string]interface{}{
 		"ip_version": 4,
 		"opt_name":   "A",
 		"opt_value":  "true",
 	}
-	dhcpOptsB := map[string]interface{}{
+	dhcpOpts2 := map[string]interface{}{
 		"ip_version": 6,
 		"opt_name":   "B",
 		"opt_value":  "false",
 	}
-	dhcpOptsSet := &schema.Set{
-		F: networkingPortDHCPOptsV2HashSetFunc(),
-	}
-	dhcpOptsSet.Add(dhcpOptsA)
-	dhcpOptsSet.Add(dhcpOptsB)
+	extraDHCPOpts := []map[string]interface{}{dhcpOpts1, dhcpOpts2}
+	d.Set("extra_dhcp_opts", extraDHCPOpts)
 
 	expectedDHCPOptions := []extradhcpopts.CreateExtraDHCPOpt{
 		{
@@ -40,7 +39,7 @@ func TestExpandNetworkingPortDHCPOptsV2Create(t *testing.T) {
 		},
 	}
 
-	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Create(dhcpOptsSet)
+	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Create(d.Get("extra_dhcp_opts").(*schema.Set))
 
 	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
 		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
@@ -49,13 +48,13 @@ func TestExpandNetworkingPortDHCPOptsV2Create(t *testing.T) {
 }
 
 func TestExpandNetworkingPortDHCPOptsEmptyV2Create(t *testing.T) {
-	dhcpOptsSet := &schema.Set{
-		F: networkingPortDHCPOptsV2HashSetFunc(),
-	}
+	r := resourceNetworkingPortV2()
+	d := r.TestResourceData()
+	d.SetId("1")
 
 	expectedDHCPOptions := []extradhcpopts.CreateExtraDHCPOpt{}
 
-	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Create(dhcpOptsSet)
+	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Create(d.Get("extra_dhcp_opts").(*schema.Set))
 
 	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
 		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
@@ -64,21 +63,21 @@ func TestExpandNetworkingPortDHCPOptsEmptyV2Create(t *testing.T) {
 }
 
 func TestExpandNetworkingPortDHCPOptsV2Update(t *testing.T) {
-	dhcpOptsA := map[string]interface{}{
+	r := resourceNetworkingPortV2()
+	d := r.TestResourceData()
+	d.SetId("1")
+	dhcpOpts1 := map[string]interface{}{
 		"ip_version": 4,
 		"opt_name":   "A",
 		"opt_value":  "true",
 	}
-	dhcpOptsB := map[string]interface{}{
+	dhcpOpts2 := map[string]interface{}{
 		"ip_version": 6,
 		"opt_name":   "B",
 		"opt_value":  "false",
 	}
-	dhcpOptsSet := &schema.Set{
-		F: networkingPortDHCPOptsV2HashSetFunc(),
-	}
-	dhcpOptsSet.Add(dhcpOptsA)
-	dhcpOptsSet.Add(dhcpOptsB)
+	extraDHCPOpts := []map[string]interface{}{dhcpOpts1, dhcpOpts2}
+	d.Set("extra_dhcp_opts", extraDHCPOpts)
 
 	optsValueTrue := "true"
 	optsValueFalse := "false"
@@ -95,7 +94,7 @@ func TestExpandNetworkingPortDHCPOptsV2Update(t *testing.T) {
 		},
 	}
 
-	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Update(dhcpOptsSet)
+	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Update(d.Get("extra_dhcp_opts").(*schema.Set))
 
 	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
 		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
@@ -104,13 +103,13 @@ func TestExpandNetworkingPortDHCPOptsV2Update(t *testing.T) {
 }
 
 func TestExpandNetworkingPortDHCPOptsEmptyV2Update(t *testing.T) {
-	dhcpOptsSet := &schema.Set{
-		F: networkingPortDHCPOptsV2HashSetFunc(),
-	}
+	r := resourceNetworkingPortV2()
+	d := r.TestResourceData()
+	d.SetId("1")
 
 	expectedDHCPOptions := []extradhcpopts.UpdateExtraDHCPOpt{}
 
-	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Update(dhcpOptsSet)
+	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Update(d.Get("extra_dhcp_opts").(*schema.Set))
 
 	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
 		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
@@ -119,21 +118,21 @@ func TestExpandNetworkingPortDHCPOptsEmptyV2Update(t *testing.T) {
 }
 
 func TestExpandNetworkingPortDHCPOptsV2Delete(t *testing.T) {
-	dhcpOptsA := map[string]interface{}{
+	r := resourceNetworkingPortV2()
+	d := r.TestResourceData()
+	d.SetId("1")
+	dhcpOpts1 := map[string]interface{}{
 		"ip_version": 4,
 		"opt_name":   "A",
 		"opt_value":  "true",
 	}
-	dhcpOptsB := map[string]interface{}{
+	dhcpOpts2 := map[string]interface{}{
 		"ip_version": 6,
 		"opt_name":   "B",
 		"opt_value":  "false",
 	}
-	dhcpOptsSet := &schema.Set{
-		F: networkingPortDHCPOptsV2HashSetFunc(),
-	}
-	dhcpOptsSet.Add(dhcpOptsA)
-	dhcpOptsSet.Add(dhcpOptsB)
+	extraDHCPOpts := []map[string]interface{}{dhcpOpts1, dhcpOpts2}
+	d.Set("extra_dhcp_opts", extraDHCPOpts)
 
 	expectedDHCPOptions := []extradhcpopts.UpdateExtraDHCPOpt{
 		{
@@ -144,7 +143,7 @@ func TestExpandNetworkingPortDHCPOptsV2Delete(t *testing.T) {
 		},
 	}
 
-	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Delete(dhcpOptsSet)
+	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Delete(d.Get("extra_dhcp_opts").(*schema.Set))
 
 	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
 		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
@@ -168,53 +167,23 @@ func TestFlattenNetworkingPort2DHCPOptionsV2(t *testing.T) {
 		},
 	}
 
-	expectedDHCPOptsA := map[string]interface{}{
-		"ip_version": 4,
-		"opt_name":   "A",
-		"opt_value":  "true",
+	expectedDHCPOptions := []map[string]interface{}{
+		map[string]interface{}{
+			"ip_version": 4,
+			"opt_name":   "A",
+			"opt_value":  "true",
+		},
+		map[string]interface{}{
+			"ip_version": 6,
+			"opt_name":   "B",
+			"opt_value":  "false",
+		},
 	}
-	expectedDHCPOptsB := map[string]interface{}{
-		"ip_version": 6,
-		"opt_name":   "B",
-		"opt_value":  "false",
-	}
-	expectedDHCPOptionsSet := &schema.Set{
-		F: networkingPortDHCPOptsV2HashSetFunc(),
-	}
-	expectedDHCPOptionsSet.Add(expectedDHCPOptsA)
-	expectedDHCPOptionsSet.Add(expectedDHCPOptsB)
 
-	actualDHCPOptionsSet := flattenNetworkingPortDHCPOptsV2(dhcpOptions)
+	actualDHCPOptions := flattenNetworkingPortDHCPOptsV2(dhcpOptions)
 
-	if !actualDHCPOptionsSet.Equal(expectedDHCPOptionsSet) {
+	if !reflect.DeepEqual(actualDHCPOptions, expectedDHCPOptions) {
 		t.Fatalf("DHCP options set differs, want: %+v, but got: %+v",
-			expectedDHCPOptionsSet, actualDHCPOptionsSet)
-	}
-}
-
-func TestEnsureEmptyNetworkingPortV2UpdateOpts(t *testing.T) {
-	var updateOpts ports.UpdateOpts
-
-	expected := ports.UpdateOpts{}
-
-	actual := ensureNetworkingPortV2UpdateOpts(&updateOpts)
-
-	if actual != expected {
-		t.Fatalf("expected empty ports.UpdateOpts{}, but got %v", actual)
-	}
-}
-
-func TestEnsurePopulatedNetworkingPortV2UpdateOpts(t *testing.T) {
-	adminStateUp := true
-
-	expected := ports.UpdateOpts{
-		Name:         "eth1",
-		AdminStateUp: &adminStateUp,
-	}
-
-	actual := ensureNetworkingPortV2UpdateOpts(&expected)
-
-	if actual != expected {
-		t.Fatalf("expected empty ports.UpdateOpts{}, but got %v", actual)
+			expectedDHCPOptions, actualDHCPOptions)
 	}
 }
