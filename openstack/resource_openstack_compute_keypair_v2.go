@@ -78,7 +78,7 @@ func resourceComputeKeypairV2Create(d *schema.ResourceData, meta interface{}) er
 
 	kp, err := keypairs.Create(computeClient, createOpts).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_compute_keypair_v2")
+		return fmt.Errorf("Unable to create openstack_compute_keypair_v2 %s: %s", name, err)
 	}
 
 	d.SetId(kp.Name)
@@ -98,7 +98,7 @@ func resourceComputeKeypairV2Read(d *schema.ResourceData, meta interface{}) erro
 
 	kp, err := keypairs.Get(computeClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "keypair")
+		return CheckDeleted(d, err, "Error retrieving openstack_compute_keypair_v2")
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_keypair_v2 %s: %#v", d.Id(), kp)
