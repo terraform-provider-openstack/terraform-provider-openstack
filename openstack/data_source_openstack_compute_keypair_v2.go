@@ -25,6 +25,11 @@ func dataSourceComputeKeypairV2() *schema.Resource {
 			},
 
 			// computed-only
+			"fingerprint": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"public_key": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
@@ -50,6 +55,7 @@ func dataSourceComputeKeypairV2Read(d *schema.ResourceData, meta interface{}) er
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_keypair_v2 %s: %#v", d.Id(), kp)
 
+	d.Set("fingerprint", kp.Fingerprint)
 	d.Set("public_key", kp.PublicKey)
 	d.Set("region", GetRegion(d, config))
 
