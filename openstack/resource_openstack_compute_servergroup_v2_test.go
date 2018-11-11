@@ -23,6 +23,10 @@ func TestAccComputeV2ServerGroup_basic(t *testing.T) {
 				Config: testAccComputeV2ServerGroup_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_servergroup_v2.sg_1", "policies.#", "1"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_servergroup_v2.sg_1", "policies.0", "affinity"),
 				),
 			},
 		},
@@ -44,6 +48,10 @@ func TestAccComputeV2ServerGroup_affinity(t *testing.T) {
 					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckComputeV2InstanceInServerGroup(&instance, &sg),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_servergroup_v2.sg_1", "policies.#", "1"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_servergroup_v2.sg_1", "policies.0", "affinity"),
 				),
 			},
 		},
