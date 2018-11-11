@@ -107,7 +107,7 @@ func resourceComputeFlavorV2Create(d *schema.ResourceData, meta interface{}) err
 		Ephemeral:  &ephemeral,
 	}
 
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
+	log.Printf("[DEBUG] openstack_compute_flavor_v2 create options: %#v", createOpts)
 	fl, err := flavors.Create(computeClient, &createOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error creating openstack_compute_flavor_v2 %s: %s", name, err)
