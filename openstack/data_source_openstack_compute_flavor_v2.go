@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -70,6 +71,11 @@ func dataSourceComputeFlavorV2() *schema.Resource {
 			},
 
 			// Computed values
+			"extra_specs": &schema.Schema{
+				Type:     schema.TypeMap,
+				Computed: true,
+			},
+
 			"is_public": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -78,7 +84,7 @@ func dataSourceComputeFlavorV2() *schema.Resource {
 	}
 }
 
-// dataSourceComputeFlavorV2Read performs the image lookup.
+// dataSourceComputeFlavorV2Read performs the flavor lookup.
 func dataSourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
@@ -165,11 +171,13 @@ func dataSourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) err
 
 	flavor = allFlavors[0]
 
-	return dataSourceComputeFlavorV2Attributes(d, &flavor)
+	return dataSourceComputeFlavorV2Attributes(d, computeClient, &flavor)
 }
 
-// dataSourceComputeFlavorV2Attributes populates the fields of an Image resource.
-func dataSourceComputeFlavorV2Attributes(d *schema.ResourceData, flavor *flavors.Flavor) error {
+// dataSourceComputeFlavorV2Attributes populates the fields of a Flavor resource.
+func dataSourceComputeFlavorV2Attributes(
+	d *schema.ResourceData, computeClient *gophercloud.ServiceClient, flavor *flavors.Flavor) error {
+
 	log.Printf("[DEBUG] Retrieved openstack_compute_flavor_v2 %s: %#v", flavor.ID, flavor)
 
 	d.SetId(flavor.ID)
@@ -180,6 +188,15 @@ func dataSourceComputeFlavorV2Attributes(d *schema.ResourceData, flavor *flavors
 	d.Set("swap", flavor.Swap)
 	d.Set("vcpus", flavor.VCPUs)
 	d.Set("is_public", flavor.IsPublic)
+
+	es, err := flavors.ListExtraSpecs(computeClient, d.Id()).Extract()
+	if err != nil {
+		return err
+	}
+
+	if err := d.Set("extra_specs", es); err != nil {
+		log.Printf("[WARN] Unable to set extra_specs for openstack_compute_flavor_v2 %s: %s", d.Id(), err)
+	}
 
 	return nil
 }
