@@ -123,11 +123,15 @@ func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]Instanc
 		}
 
 		v := InstanceNetwork{
-			UUID:          networkInfo["uuid"].(string),
-			Name:          networkInfo["name"].(string),
 			Port:          portID,
 			FixedIP:       network["fixed_ip_v4"].(string),
 			AccessNetwork: network["access_network"].(bool),
+		}
+		if networkInfo["uuid"] != nil {
+			v.UUID = networkInfo["uuid"].(string)
+		}
+		if networkInfo["name"] != nil {
+			v.Name = networkInfo["name"].(string)
 		}
 
 		instanceNetworks = append(instanceNetworks, v)
@@ -186,6 +190,39 @@ func getInstanceNetworkInfoNovaNet(
 	if queryType == "port" {
 		return nil, fmt.Errorf(
 			"Unable to query a port (%s) using the Nova API", queryTerm)
+	}
+
+	// test to see if the tenantnetworks api is available
+	log.Printf("[DEBUG] testing for os-tenant-networks")
+	tenantNetworksAvailable := true
+	if _, err := tenantnetworks.List(client).AllPages(); err != nil {
+		if _, ok := err.(gophercloud.ErrDefault404); ok {
+			log.Printf("[DEBUG] os-tenant-networks disabled")
+			tenantNetworksAvailable = false
+		}
+		log.Printf("[DEBUG] Err(type: %T) looks like: %+v", err, err)
+		switch errType := err.(type) {
+		case gophercloud.ErrUnexpectedResponseCode:
+			if errType.Actual == 403 {
+				log.Printf("[DEBUG] os-tenant-networks disabled.")
+				tenantNetworksAvailable = false
+			} else {
+				log.Printf("[DEBUG] unexpected os-tenant-networks error: %s", err)
+				tenantNetworksAvailable = false
+			}
+		case gophercloud.ErrDefault403:
+			log.Printf("[DEBUG] os-tenant-networks disabled.")
+			tenantNetworksAvailable = false
+		default:
+			log.Printf("[DEBUG] unexpected os-tenant-networks error: %s", err)
+			tenantNetworksAvailable = false
+		}
+	}
+
+	if !tenantNetworksAvailable {
+		// we can't query the APIs for more information, but in some cases
+		// the information provided is enough
+		return map[string]interface{}{queryType: queryTerm}, nil
 	}
 
 	allPages, err := tenantnetworks.List(client).AllPages()
