@@ -195,40 +195,27 @@ func getInstanceNetworkInfoNovaNet(
 	// test to see if the tenantnetworks api is available
 	log.Printf("[DEBUG] testing for os-tenant-networks")
 	tenantNetworksAvailable := true
-	if _, err := tenantnetworks.List(client).AllPages(); err != nil {
-		if _, ok := err.(gophercloud.ErrDefault404); ok {
-			log.Printf("[DEBUG] os-tenant-networks disabled")
+
+	allPages, err := tenantnetworks.List(client).AllPages()
+	if err != nil {
+		switch err.(type) {
+		case gophercloud.ErrDefault404:
 			tenantNetworksAvailable = false
-		}
-		log.Printf("[DEBUG] Err(type: %T) looks like: %+v", err, err)
-		switch errType := err.(type) {
-		case gophercloud.ErrUnexpectedResponseCode:
-			if errType.Actual == 403 {
-				log.Printf("[DEBUG] os-tenant-networks disabled.")
-				tenantNetworksAvailable = false
-			} else {
-				log.Printf("[DEBUG] unexpected os-tenant-networks error: %s", err)
-				tenantNetworksAvailable = false
-			}
 		case gophercloud.ErrDefault403:
-			log.Printf("[DEBUG] os-tenant-networks disabled.")
+			tenantNetworksAvailable = false
+		case gophercloud.ErrUnexpectedResponseCode:
 			tenantNetworksAvailable = false
 		default:
-			log.Printf("[DEBUG] unexpected os-tenant-networks error: %s", err)
-			tenantNetworksAvailable = false
+			return nil, fmt.Errorf(
+				"An error occurred while querying the Nova API for network information: %s", err)
 		}
 	}
 
 	if !tenantNetworksAvailable {
 		// we can't query the APIs for more information, but in some cases
 		// the information provided is enough
+		log.Printf("[DEBUG] os-tenant-networks disabled.")
 		return map[string]interface{}{queryType: queryTerm}, nil
-	}
-
-	allPages, err := tenantnetworks.List(client).AllPages()
-	if err != nil {
-		return nil, fmt.Errorf(
-			"An error occurred while querying the Nova API for network information: %s", err)
 	}
 
 	networkList, err := tenantnetworks.ExtractNetworks(allPages)
