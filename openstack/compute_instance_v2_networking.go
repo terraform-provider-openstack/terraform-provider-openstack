@@ -458,7 +458,11 @@ func flattenInstanceNetworks(
 				if err != nil {
 					log.Printf("[WARN] Error getting default network uuid: %s", err)
 				} else {
-					v["uuid"] = networkInfo["uuid"].(string)
+					if v["uuid"] != nil {
+						v["uuid"] = networkInfo["uuid"].(string)
+					} else {
+						log.Printf("[WARN] Could not get default network uuid")
+					}
 				}
 
 				networks = append(networks, v)
