@@ -28,14 +28,14 @@ func TestExpandNetworkingPortDHCPOptsV2Create(t *testing.T) {
 
 	expectedDHCPOptions := []extradhcpopts.CreateExtraDHCPOpt{
 		{
-			OptName:   "A",
-			OptValue:  "true",
-			IPVersion: gophercloud.IPVersion(4),
-		},
-		{
 			OptName:   "B",
 			OptValue:  "false",
 			IPVersion: gophercloud.IPVersion(6),
+		},
+		{
+			OptName:   "A",
+			OptValue:  "true",
+			IPVersion: gophercloud.IPVersion(4),
 		},
 	}
 
@@ -83,14 +83,14 @@ func TestExpandNetworkingPortDHCPOptsV2Update(t *testing.T) {
 	optsValueFalse := "false"
 	expectedDHCPOptions := []extradhcpopts.UpdateExtraDHCPOpt{
 		{
-			OptName:   "A",
-			OptValue:  &optsValueTrue,
-			IPVersion: gophercloud.IPVersion(4),
-		},
-		{
 			OptName:   "B",
 			OptValue:  &optsValueFalse,
 			IPVersion: gophercloud.IPVersion(6),
+		},
+		{
+			OptName:   "A",
+			OptValue:  &optsValueTrue,
+			IPVersion: gophercloud.IPVersion(4),
 		},
 	}
 
@@ -136,10 +136,10 @@ func TestExpandNetworkingPortDHCPOptsV2Delete(t *testing.T) {
 
 	expectedDHCPOptions := []extradhcpopts.UpdateExtraDHCPOpt{
 		{
-			OptName: "A",
+			OptName: "B",
 		},
 		{
-			OptName: "B",
+			OptName: "A",
 		},
 	}
 
