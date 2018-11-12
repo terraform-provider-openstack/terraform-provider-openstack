@@ -78,6 +78,9 @@ The following arguments are supported:
     addresses that can be active on this port. The structure is described
     below.
 
+* `extra_dhcp_opts` - (Optional) An array of desired DHCP options that needs to
+    be configured on the port. The structure is described below.
+
 * `value_specs` - (Optional) Map of additional options.
 
 The `fixed_ip` block supports:
@@ -99,6 +102,14 @@ The `allowed_address_pairs` block supports:
 
 * `tags` - (Optional) A set of string tags for the port.
 
+The `extra_dhcp_opts` block supports:
+
+* `opt_name` - (Required) Name of the DHCP option.
+
+* `opt_value` - (Required) Value of the DHCP option.
+
+* `ip_version` - (Optional) IP protocol version. Defaults to 4.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -115,6 +126,7 @@ The following attributes are exported:
   order returned by the Network v2 API.
 * `all_security_group_ids` - The collection of Security Group IDs on the port
   which have been explicitly and implicitly added.
+* `extra_dhcp_opts` - See Argument Reference above.
 * `tags` - See Argument Reference above.
 
 ## Import
