@@ -131,17 +131,17 @@ func resourceNetworkingPortV2() *schema.Resource {
 					},
 				},
 			},
-			"extra_dhcp_opts": &schema.Schema{
+			"extra_dhcp_option": &schema.Schema{
 				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: false,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"opt_name": &schema.Schema{
+						"name": &schema.Schema{
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"opt_value": &schema.Schema{
+						"value": &schema.Schema{
 							Type:     schema.TypeString,
 							Required: true,
 						},
@@ -226,7 +226,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 	var finalCreateOpts ports.CreateOptsBuilder
 	finalCreateOpts = createOpts
 
-	dhcpOpts := d.Get("extra_dhcp_opts").(*schema.Set)
+	dhcpOpts := d.Get("extra_dhcp_option").(*schema.Set)
 	if dhcpOpts.Len() > 0 {
 		finalCreateOpts = extradhcpopts.CreateOptsExt{
 			CreateOptsBuilder: createOpts,
@@ -332,7 +332,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 		pairs = append(pairs, pair)
 	}
 	d.Set("allowed_address_pairs", pairs)
-	d.Set("extra_dhcp_opts", flattenNetworkingPortDHCPOptsV2(p.ExtraDHCPOptsExt))
+	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(p.ExtraDHCPOptsExt))
 
 	d.Set("region", GetRegion(d, config))
 
@@ -413,8 +413,8 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 	}
 
 	// Next, perform any dhcp option changes.
-	if d.HasChange("extra_dhcp_opts") {
-		o, n := d.GetChange("extra_dhcp_opts")
+	if d.HasChange("extra_dhcp_option") {
+		o, n := d.GetChange("extra_dhcp_option")
 		oldDHCPOpts := o.(*schema.Set)
 		newDHCPOpts := n.(*schema.Set)
 

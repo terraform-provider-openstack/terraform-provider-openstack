@@ -14,8 +14,8 @@ func expandNetworkingPortDHCPOptsV2Create(dhcpOpts *schema.Set) []extradhcpopts.
 		rawMap := raw.(map[string]interface{})
 
 		ipVersion := rawMap["ip_version"].(int)
-		optName := rawMap["opt_name"].(string)
-		optValue := rawMap["opt_value"].(string)
+		optName := rawMap["name"].(string)
+		optValue := rawMap["value"].(string)
 
 		extraDHCPOpts[i] = extradhcpopts.CreateExtraDHCPOpt{
 			OptName:   optName,
@@ -35,8 +35,8 @@ func expandNetworkingPortDHCPOptsV2Update(dhcpOpts *schema.Set) []extradhcpopts.
 		rawMap := raw.(map[string]interface{})
 
 		ipVersion := rawMap["ip_version"].(int)
-		optName := rawMap["opt_name"].(string)
-		optValue := rawMap["opt_value"].(string)
+		optName := rawMap["name"].(string)
+		optValue := rawMap["value"].(string)
 
 		extraDHCPOpts[i] = extradhcpopts.UpdateExtraDHCPOpt{
 			OptName:   optName,
@@ -59,7 +59,7 @@ func expandNetworkingPortDHCPOptsV2Delete(dhcpOpts *schema.Set) []extradhcpopts.
 	for i, raw := range rawDHCPOpts {
 		rawMap := raw.(map[string]interface{})
 		extraDHCPOpts[i] = extradhcpopts.UpdateExtraDHCPOpt{
-			OptName:  rawMap["opt_name"].(string),
+			OptName:  rawMap["name"].(string),
 			OptValue: nil,
 		}
 	}
@@ -73,8 +73,8 @@ func flattenNetworkingPortDHCPOptsV2(dhcpOpts extradhcpopts.ExtraDHCPOptsExt) []
 	for i, dhcpOpt := range dhcpOpts.ExtraDHCPOpts {
 		dhcpOptsSet[i] = map[string]interface{}{
 			"ip_version": dhcpOpt.IPVersion,
-			"opt_name":   dhcpOpt.OptName,
-			"opt_value":  dhcpOpt.OptValue,
+			"name":       dhcpOpt.OptName,
+			"value":      dhcpOpt.OptValue,
 		}
 	}
 
