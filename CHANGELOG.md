@@ -17,6 +17,10 @@ IMPROVEMENTS
 * Added `fingerprint` to `openstack_compute_keypair_v2` data source [GH-481]
 * Added `extra_specs` to `openstack_compute_flavor_v2` data source [GH-480]
 
+BUG FIXES
+
+* Fixed issue with nova-network based environments having the `tenantnetworks` API disabled [GH-485]
+
 
 ## 1.11.0 (October 29, 2018)
 
