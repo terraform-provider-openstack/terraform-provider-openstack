@@ -123,11 +123,15 @@ func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]Instanc
 		}
 
 		v := InstanceNetwork{
-			UUID:          networkInfo["uuid"].(string),
-			Name:          networkInfo["name"].(string),
 			Port:          portID,
 			FixedIP:       network["fixed_ip_v4"].(string),
 			AccessNetwork: network["access_network"].(bool),
+		}
+		if networkInfo["uuid"] != nil {
+			v.UUID = networkInfo["uuid"].(string)
+		}
+		if networkInfo["name"] != nil {
+			v.Name = networkInfo["name"].(string)
 		}
 
 		instanceNetworks = append(instanceNetworks, v)
@@ -188,10 +192,30 @@ func getInstanceNetworkInfoNovaNet(
 			"Unable to query a port (%s) using the Nova API", queryTerm)
 	}
 
+	// test to see if the tenantnetworks api is available
+	log.Printf("[DEBUG] testing for os-tenant-networks")
+	tenantNetworksAvailable := true
+
 	allPages, err := tenantnetworks.List(client).AllPages()
 	if err != nil {
-		return nil, fmt.Errorf(
-			"An error occurred while querying the Nova API for network information: %s", err)
+		switch err.(type) {
+		case gophercloud.ErrDefault404:
+			tenantNetworksAvailable = false
+		case gophercloud.ErrDefault403:
+			tenantNetworksAvailable = false
+		case gophercloud.ErrUnexpectedResponseCode:
+			tenantNetworksAvailable = false
+		default:
+			return nil, fmt.Errorf(
+				"An error occurred while querying the Nova API for network information: %s", err)
+		}
+	}
+
+	if !tenantNetworksAvailable {
+		// we can't query the APIs for more information, but in some cases
+		// the information provided is enough
+		log.Printf("[DEBUG] os-tenant-networks disabled.")
+		return map[string]interface{}{queryType: queryTerm}, nil
 	}
 
 	networkList, err := tenantnetworks.ExtractNetworks(allPages)
@@ -421,7 +445,11 @@ func flattenInstanceNetworks(
 				if err != nil {
 					log.Printf("[WARN] Error getting default network uuid: %s", err)
 				} else {
-					v["uuid"] = networkInfo["uuid"].(string)
+					if v["uuid"] != nil {
+						v["uuid"] = networkInfo["uuid"].(string)
+					} else {
+						log.Printf("[WARN] Could not get default network uuid")
+					}
 				}
 
 				networks = append(networks, v)
