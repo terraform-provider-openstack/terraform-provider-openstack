@@ -1,25 +1,25 @@
-## 1.12.0 (Unreleased)
+## 1.12.0 (November 13, 2018)
 
 FEATURES
 
-* __New Resource__: `openstack_compute_interface_attach_v2` [GH-470]
+* __New Resource__: `openstack_compute_interface_attach_v2` ([#470](https://github.com/terraform-providers/terraform-provider-openstack/issues/470))
 
 IMPROVEMENTS
 
-* Added `tags` to `openstack_networking_network_v2` [GH-454]
-* Added `tags` to `openstack_networking_subnet_v2` [GH-459]
-* Added `tags` to `openstack_networking_subnetpool_v2` [GH-460]
-* Added `tags` to `openstack_networking_port_v2` [GH-461]
-* Added `tags` to `openstack_networking_secgroup_v2` [GH-463]
-* Added `tags` to `openstack_networking_floatingip_v2` [GH-466]
-* Added `tags` to `openstack_networking_router_v2` [GH-467]
-* Added `extra_dhcp_options` to `openstack_networking_port_v2` [GH-258]
-* Added `fingerprint` to `openstack_compute_keypair_v2` data source [GH-481]
-* Added `extra_specs` to `openstack_compute_flavor_v2` data source [GH-480]
+* Added `tags` to `openstack_networking_network_v2` ([#454](https://github.com/terraform-providers/terraform-provider-openstack/issues/454))
+* Added `tags` to `openstack_networking_subnet_v2` ([#459](https://github.com/terraform-providers/terraform-provider-openstack/issues/459))
+* Added `tags` to `openstack_networking_subnetpool_v2` ([#460](https://github.com/terraform-providers/terraform-provider-openstack/issues/460))
+* Added `tags` to `openstack_networking_port_v2` ([#461](https://github.com/terraform-providers/terraform-provider-openstack/issues/461))
+* Added `tags` to `openstack_networking_secgroup_v2` ([#463](https://github.com/terraform-providers/terraform-provider-openstack/issues/463))
+* Added `tags` to `openstack_networking_floatingip_v2` ([#466](https://github.com/terraform-providers/terraform-provider-openstack/issues/466))
+* Added `tags` to `openstack_networking_router_v2` ([#467](https://github.com/terraform-providers/terraform-provider-openstack/issues/467))
+* Added `extra_dhcp_options` to `openstack_networking_port_v2` ([#258](https://github.com/terraform-providers/terraform-provider-openstack/issues/258))
+* Added `fingerprint` to `openstack_compute_keypair_v2` data source ([#481](https://github.com/terraform-providers/terraform-provider-openstack/issues/481))
+* Added `extra_specs` to `openstack_compute_flavor_v2` data source ([#480](https://github.com/terraform-providers/terraform-provider-openstack/issues/480))
 
 BUG FIXES
 
-* Fixed issue with nova-network based environments having the `tenantnetworks` API disabled [GH-485]
+* Fixed issue with nova-network based environments having the `tenantnetworks` API disabled ([#485](https://github.com/terraform-providers/terraform-provider-openstack/issues/485))
 
 
 ## 1.11.0 (October 29, 2018)
