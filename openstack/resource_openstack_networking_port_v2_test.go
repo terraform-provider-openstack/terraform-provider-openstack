@@ -454,7 +454,7 @@ func TestAccNetworkingV2Port_createExtraDHCPOpts(t *testing.T) {
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.#", "2"),
+						"openstack_networking_port_v2.port_1", "extra_dhcp_option.#", "2"),
 				),
 			},
 		},
@@ -486,7 +486,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.#", "1"),
+						"openstack_networking_port_v2.port_1", "extra_dhcp_option.#", "1"),
 				),
 			},
 			resource.TestStep{
@@ -496,7 +496,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.#", "2"),
+						"openstack_networking_port_v2.port_1", "extra_dhcp_option.#", "2"),
 				),
 			},
 			resource.TestStep{
@@ -506,7 +506,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts.#", "2"),
+						"openstack_networking_port_v2.port_1", "extra_dhcp_option.#", "2"),
 				),
 			},
 			resource.TestStep{
@@ -516,7 +516,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckNoResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_opts"),
+						"openstack_networking_port_v2.port_1", "extra_dhcp_option"),
 				),
 			},
 		},
@@ -1622,13 +1622,13 @@ resource "openstack_networking_port_v2" "port_1" {
     subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
     ip_address = "192.168.199.23"
   }
-  extra_dhcp_opts {
-    opt_name = "optionA"
-    opt_value = "valueA"
+  extra_dhcp_option {
+    name = "optionA"
+    value = "valueA"
   }
-  extra_dhcp_opts {
-    opt_name = "optionB"
-    opt_value = "valueB"
+  extra_dhcp_option {
+    name = "optionB"
+    value = "valueB"
   }
 }
 `
@@ -1654,9 +1654,9 @@ resource "openstack_networking_port_v2" "port_1" {
     subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
     ip_address = "192.168.199.23"
   }
-  extra_dhcp_opts {
-    opt_name = "optionC"
-    opt_value = "valueC"
+  extra_dhcp_option {
+    name = "optionC"
+    value = "valueC"
   }
 }
 `
@@ -1682,13 +1682,13 @@ resource "openstack_networking_port_v2" "port_1" {
     subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
     ip_address = "192.168.199.23"
   }
-  extra_dhcp_opts {
-    opt_name = "optionC"
-    opt_value = "valueC"
+  extra_dhcp_option {
+    name = "optionC"
+    value = "valueC"
   }
-  extra_dhcp_opts {
-    opt_name = "optionD"
-    opt_value = "valueD"
+  extra_dhcp_option {
+    name = "optionD"
+    value = "valueD"
   }
 }
 `
@@ -1714,13 +1714,13 @@ resource "openstack_networking_port_v2" "port_1" {
     subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
     ip_address = "192.168.199.23"
   }
-  extra_dhcp_opts {
-    opt_name = "optionD"
-    opt_value = "valueD"
+  extra_dhcp_option {
+    name = "optionD"
+    value = "valueD"
   }
-  extra_dhcp_opts {
-    opt_name = "optionE"
-    opt_value = "valueE"
+  extra_dhcp_option {
+    name = "optionE"
+    value = "valueE"
   }
 }
 `
