@@ -14,6 +14,7 @@ IMPROVEMENTS
 * Added `tags` to `openstack_networking_floatingip_v2` [GH-466]
 * Added `tags` to `openstack_networking_router_v2` [GH-467]
 * Added `extra_dhcp_options` to `openstack_networking_port_v2` [GH-258]
+* Added `fingerprint` to `openstack_compute_keypair_v2` data source [GH-481]
 
 
 ## 1.11.0 (October 29, 2018)
