@@ -113,6 +113,8 @@ func resourceObjectStorageContainerV1Create(d *schema.ResourceData, meta interfa
 		switch vParams["type"].(string) {
 		case "versions":
 			createOpts.VersionsLocation = vParams["location"].(string)
+		case "history":
+			createOpts.HistoryLocation = vParams["location"].(string)
 		}
 	}
 
@@ -166,11 +168,14 @@ func resourceObjectStorageContainerV1Update(d *schema.ResourceData, meta interfa
 	if versioning, ok := d.Get("versioning").(*schema.Set); ok && d.HasChange("versioning") {
 		if versioning.Len() == 0 {
 			updateOpts.RemoveVersionsLocation = "true"
+			updateOpts.RemoveHistoryLocation = "true"
 		} else {
 			vParams := versioning.List()[0].(map[string]interface{})
 			switch vParams["type"].(string) {
 			case "versions":
 				updateOpts.VersionsLocation = vParams["location"].(string)
+			case "history":
+				updateOpts.HistoryLocation = vParams["location"].(string)
 			}
 		}
 	}
