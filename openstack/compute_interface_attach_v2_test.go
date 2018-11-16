@@ -2,6 +2,8 @@ package openstack
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestComputeInterfaceAttachV2ParseID(t *testing.T) {
@@ -16,11 +18,6 @@ func TestComputeInterfaceAttachV2ParseID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expectedInstanceID != actualInstanceID {
-		t.Fatalf("Instance IDs differ. Want %s, but got %s", expectedInstanceID, actualInstanceID)
-	}
-
-	if expectedAttachmentID != actualAttachmentID {
-		t.Fatalf("Attachment IDs differ. Want %s, but got %s", expectedAttachmentID, actualAttachmentID)
-	}
+	assert.Equal(t, expectedInstanceID, actualInstanceID)
+	assert.Equal(t, expectedAttachmentID, actualAttachmentID)
 }
