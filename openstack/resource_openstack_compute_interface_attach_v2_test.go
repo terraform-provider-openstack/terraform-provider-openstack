@@ -10,8 +10,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/attachinterfaces"
 )
 
-var FixedIP string = "192.168.1.100"
-
 func TestAccComputeV2InterfaceAttach_basic(t *testing.T) {
 	var ai attachinterfaces.Interface
 
@@ -42,7 +40,7 @@ func TestAccComputeV2InterfaceAttach_IP(t *testing.T) {
 				Config: testAccComputeV2InterfaceAttach_IP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InterfaceAttachExists("openstack_compute_interface_attach_v2.ai_1", &ai),
-					testAccCheckComputeV2InterfaceAttachIP(&ai, FixedIP),
+					testAccCheckComputeV2InterfaceAttachIP(&ai, "192.168.1.100"),
 				),
 			},
 		},
@@ -61,7 +59,7 @@ func testAccCheckComputeV2InterfaceAttachDestroy(s *terraform.State) error {
 			continue
 		}
 
-		instanceId, portId, err := parseComputeInterfaceAttachId(rs.Primary.ID)
+		instanceId, portId, err := computeInterfaceAttachV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -92,7 +90,7 @@ func testAccCheckComputeV2InterfaceAttachExists(n string, ai *attachinterfaces.I
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		instanceId, portId, err := parseComputeInterfaceAttachId(rs.Primary.ID)
+		instanceId, portId, err := computeInterfaceAttachV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -172,6 +170,6 @@ resource "openstack_compute_instance_v2" "instance_1" {
 resource "openstack_compute_interface_attach_v2" "ai_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   network_id = "${openstack_networking_network_v2.network_1.id}"
-  fixed_ip = "%s"
+  fixed_ip = "192.168.1.100"
 }
-`, OS_NETWORK_ID, FixedIP)
+`, OS_NETWORK_ID)
