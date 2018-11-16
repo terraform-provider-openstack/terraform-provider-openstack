@@ -126,7 +126,9 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   coe                   = "kubernetes"
   master_flavor         = "%s"
   flavor                = "%s"
-  floating_ip_enabled   = false
+  floating_ip_enabled   = true
+  volume_driver         = "cinder"
+  docker_storage_driver = "devicemapper"
   external_network_id   = "%s"
   network_driver        = "flannel"
   labels {
