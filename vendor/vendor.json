@@ -1308,6 +1308,12 @@
 			"revisionTime": "2018-03-08T00:51:04Z"
 		},
 		{
+			"checksumSHA1": "LuFv4/jlrmFNnDb/5SCSEPAM9vU=",
+			"path": "github.com/pmezard/go-difflib/difflib",
+			"revision": "792786c7400a136282c1664665ae0a8db921c6c2",
+			"revisionTime": "2016-01-10T10:55:54Z"
+		},
+		{
 			"checksumSHA1": "eKclqCehbe7JsvlemLF7TfjMWf0=",
 			"path": "github.com/posener/complete",
 			"revision": "e037c22b2fcfa85e74495388f03892ed194bba76",
@@ -1342,6 +1348,12 @@
 			"path": "github.com/satori/go.uuid",
 			"revision": "b061729afc07e77a8aa4fad0a2fd840958f1942a",
 			"revisionTime": "2016-09-27T10:08:44Z"
+		},
+		{
+			"checksumSHA1": "v3LEmqP4Cb6qGCIP7mJk7l2ZXw8=",
+			"path": "github.com/stretchr/testify/assert",
+			"revision": "8019298d9fa5a04fc2ad10ae03349df3483096a6",
+			"revisionTime": "2018-10-28T12:27:15Z"
 		},
 		{
 			"checksumSHA1": "qgMa75aMGbkFY0jIqqqgVnCUoNA=",
