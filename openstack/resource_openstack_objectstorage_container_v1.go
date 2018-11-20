@@ -108,13 +108,16 @@ func resourceObjectStorageContainerV1Create(d *schema.ResourceData, meta interfa
 		Metadata:         resourceContainerMetadataV2(d),
 	}
 
-	if versioning, ok := d.Get("versioning").(*schema.Set); ok && versioning.Len() > 0 {
-		vParams := versioning.List()[0].(map[string]interface{})
-		switch vParams["type"].(string) {
-		case "versions":
-			createOpts.VersionsLocation = vParams["location"].(string)
-		case "history":
-			createOpts.HistoryLocation = vParams["location"].(string)
+	versioning := d.Get("versioning").(*schema.Set)
+	if versioning.Len() > 0 {
+		vParams := versioning.List()[0]
+		if vRaw, ok := vParams.(map[string]interface{}); ok {
+			switch vRaw["type"].(string) {
+			case "versions":
+				createOpts.VersionsLocation = vRaw["location"].(string)
+			case "history":
+				createOpts.HistoryLocation = vRaw["location"].(string)
+			}
 		}
 	}
 
@@ -165,17 +168,24 @@ func resourceObjectStorageContainerV1Update(d *schema.ResourceData, meta interfa
 		ContentType:      d.Get("content_type").(string),
 	}
 
-	if versioning, ok := d.Get("versioning").(*schema.Set); ok && d.HasChange("versioning") {
+	if d.HasChange("versioning") {
+		versioning := d.Get("versioning").(*schema.Set)
 		if versioning.Len() == 0 {
 			updateOpts.RemoveVersionsLocation = "true"
 			updateOpts.RemoveHistoryLocation = "true"
 		} else {
-			vParams := versioning.List()[0].(map[string]interface{})
-			switch vParams["type"].(string) {
-			case "versions":
-				updateOpts.VersionsLocation = vParams["location"].(string)
-			case "history":
-				updateOpts.HistoryLocation = vParams["location"].(string)
+			vParams := versioning.List()[0]
+			if vRaw, ok := vParams.(map[string]interface{}); ok {
+				if len(vRaw["location"].(string)) == 0 || len(vRaw["type"].(string)) == 0 {
+					updateOpts.RemoveVersionsLocation = "true"
+					updateOpts.RemoveHistoryLocation = "true"
+				}
+				switch vRaw["type"].(string) {
+				case "versions":
+					updateOpts.VersionsLocation = vRaw["location"].(string)
+				case "history":
+					updateOpts.HistoryLocation = vRaw["location"].(string)
+				}
 			}
 		}
 	}
