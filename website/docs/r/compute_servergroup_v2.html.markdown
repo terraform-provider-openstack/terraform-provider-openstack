@@ -30,10 +30,9 @@ The following arguments are supported:
 * `name` - (Required) A unique name for the server group. Changing this creates
     a new server group.
 
-* `policies` - (Required) The set of policies for the server group. Only two
-    two policies are available right now, and both are mutually exclusive. See
-    the Policies section for more information. Changing this creates a new
-    server group.
+* `policies` - (Required) The set of policies for the server group. All policies
+    are mutually exclusive. See the Policies section for more information.
+    Changing this creates a new server group.
 
 * `value_specs` - (Optional) Map of additional options.
 
@@ -44,6 +43,14 @@ The following arguments are supported:
 
 * `anti-affinity` - All instances/servers launched in this group will be
     hosted on different compute nodes.
+
+* `soft-affinity` - All instances/servers launched in this group will be hosted
+    on the same compute node if possible, but if not possible they
+    still will be scheduled instead of failure.
+
+* `soft-anti-affinity` - All instances/servers launched in this group will be
+    hosted on different compute nodes if possible, but if not possible they
+    still will be scheduled instead of failure.
 
 ## Attributes Reference
 
