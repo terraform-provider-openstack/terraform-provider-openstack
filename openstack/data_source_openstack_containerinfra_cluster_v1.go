@@ -140,7 +140,7 @@ func dataSourceContainerInfraClusterRead(d *schema.ResourceData, meta interface{
 	d.Set("stack_id", c.StackID)
 
 	if err := d.Set("labels", c.Labels); err != nil {
-		log.Printf("[DEBUG] labels: %s", err)
+		log.Printf("[DEBUG] Unable to set labels for cluster %s: %s", c.UUID, err)
 	}
 	if err := d.Set("created_at", c.CreatedAt.Format(time.RFC3339)); err != nil {
 		log.Printf("[DEBUG] created_at: %s", err)
