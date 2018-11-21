@@ -1,12 +1,12 @@
 package openstack
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/servergroups"
 	th "github.com/gophercloud/gophercloud/testhelper"
 	thclient "github.com/gophercloud/gophercloud/testhelper/client"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestComputeServerGroupV2CreateOpts(t *testing.T) {
@@ -29,13 +29,9 @@ func TestComputeServerGroupV2CreateOpts(t *testing.T) {
 	}
 
 	actual, err := createOpts.ToServerGroupCreateMap()
-	if err != nil {
-		t.Fatal(err)
-	}
 
-	if !reflect.DeepEqual(expected, actual) {
-		t.Fatalf("Maps differ. Want: %#v, but got: %#v", expected, actual)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, expected, actual)
 }
 
 func TestExpandComputeServerGroupV2Policies(t *testing.T) {
@@ -44,20 +40,18 @@ func TestExpandComputeServerGroupV2Policies(t *testing.T) {
 	raw := []interface{}{
 		"affinity",
 	}
+	client := thclient.ServiceClient()
 
-	expected := []string{
+	expectedPolicies := []string{
 		"affinity",
 	}
+	expectedMicroversion := ""
 
-	client := thclient.ServiceClient()
-	actual := expandComputeServerGroupV2Policies(client, raw)
+	actualPolicies := expandComputeServerGroupV2Policies(client, raw)
+	actualMicroversion := client.Microversion
 
-	if client.Microversion != "" {
-		t.Fatalf("Expected no microversion in client, but got %s", client.Microversion)
-	}
-	if !reflect.DeepEqual(expected, actual) {
-		t.Fatalf("Results differ. Want: #%v, but got %#v", expected, actual)
-	}
+	assert.Equal(t, expectedMicroversion, actualMicroversion)
+	assert.Equal(t, expectedPolicies, actualPolicies)
 }
 
 func TestExpandComputeServerGroupV2PoliciesMicroversions(t *testing.T) {
@@ -68,20 +62,18 @@ func TestExpandComputeServerGroupV2PoliciesMicroversions(t *testing.T) {
 		"soft-anti-affinity",
 		"soft-affinity",
 	}
+	client := thclient.ServiceClient()
 
-	expected := []string{
+	expectedPolicies := []string{
 		"affinity",
 		"soft-anti-affinity",
 		"soft-affinity",
 	}
+	expectedMicroversion := "2.15"
 
-	client := thclient.ServiceClient()
-	actual := expandComputeServerGroupV2Policies(client, raw)
+	actualPolicies := expandComputeServerGroupV2Policies(client, raw)
+	actualMicroversion := client.Microversion
 
-	if client.Microversion != "2.15" {
-		t.Fatalf("Expected 2.15 microversion in client, but got %s", client.Microversion)
-	}
-	if !reflect.DeepEqual(expected, actual) {
-		t.Fatalf("Results differ. Want: #%v, but got %#v", expected, actual)
-	}
+	assert.Equal(t, expectedMicroversion, actualMicroversion)
+	assert.Equal(t, expectedPolicies, actualPolicies)
 }
