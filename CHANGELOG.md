@@ -1,4 +1,9 @@
 ## 1.13.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Added object versioning to `openstack_objectstorage_container_v1` [GH-465]
+
 ## 1.12.0 (November 13, 2018)
 
 FEATURES
