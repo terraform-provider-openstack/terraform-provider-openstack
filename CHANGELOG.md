@@ -1,5 +1,9 @@
 ## 1.13.0 (Unreleased)
 
+FEATURES
+
+* __New Data Source__: `openstack_containerinfra_cluster_v1` [GH-488]
+
 IMPROVEMENTS
 
 * Added object versioning to `openstack_objectstorage_container_v1` [GH-465]
