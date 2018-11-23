@@ -7,6 +7,7 @@ FEATURES
 IMPROVEMENTS
 
 * Added object versioning to `openstack_objectstorage_container_v1` [GH-465]
+* Added support for soft affinities in `openstack_compute_servergroup_v2` [GH-490]
 
 ## 1.12.0 (November 13, 2018)
 
