@@ -1,7 +1,13 @@
 package openstack
 
 import (
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/servergroups"
+)
+
+const (
+	softAntiAffinityPolicy = "soft-anti-affinity"
+	softAffinityPolicy     = "soft-affinity"
 )
 
 // ServerGroupCreateOpts is a custom ServerGroup struct to include the
@@ -17,10 +23,16 @@ func (opts ComputeServerGroupV2CreateOpts) ToServerGroupCreateMap() (map[string]
 	return BuildRequest(opts, "server_group")
 }
 
-func expandComputeServerGroupV2Policies(raw []interface{}) []string {
+func expandComputeServerGroupV2Policies(client *gophercloud.ServiceClient, raw []interface{}) []string {
 	policies := make([]string, len(raw))
 	for i, v := range raw {
-		policies[i] = v.(string)
+		policy := v.(string)
+		policies[i] = policy
+
+		// Set microversion for new policies.
+		if policy == softAntiAffinityPolicy || policy == softAffinityPolicy {
+			client.Microversion = "2.15"
+		}
 	}
 
 	return policies

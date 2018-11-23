@@ -64,7 +64,7 @@ func resourceComputeServerGroupV2Create(d *schema.ResourceData, meta interface{}
 	name := d.Get("name").(string)
 
 	rawPolicies := d.Get("policies").([]interface{})
-	policies := expandComputeServerGroupV2Policies(rawPolicies)
+	policies := expandComputeServerGroupV2Policies(computeClient, rawPolicies)
 
 	createOpts := ComputeServerGroupV2CreateOpts{
 		servergroups.CreateOpts{

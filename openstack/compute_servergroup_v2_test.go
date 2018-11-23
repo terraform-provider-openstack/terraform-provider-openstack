@@ -1,10 +1,12 @@
 package openstack
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/servergroups"
+	th "github.com/gophercloud/gophercloud/testhelper"
+	thclient "github.com/gophercloud/gophercloud/testhelper/client"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestComputeServerGroupV2CreateOpts(t *testing.T) {
@@ -27,27 +29,51 @@ func TestComputeServerGroupV2CreateOpts(t *testing.T) {
 	}
 
 	actual, err := createOpts.ToServerGroupCreateMap()
-	if err != nil {
-		t.Fatal(err)
-	}
 
-	if !reflect.DeepEqual(expected, actual) {
-		t.Fatalf("Maps differ. Want: %#v, but got: %#v", expected, actual)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, expected, actual)
 }
 
 func TestExpandComputeServerGroupV2Policies(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
 	raw := []interface{}{
 		"affinity",
 	}
+	client := thclient.ServiceClient()
 
-	expected := []string{
+	expectedPolicies := []string{
 		"affinity",
 	}
+	expectedMicroversion := ""
 
-	actual := expandComputeServerGroupV2Policies(raw)
+	actualPolicies := expandComputeServerGroupV2Policies(client, raw)
+	actualMicroversion := client.Microversion
 
-	if !reflect.DeepEqual(expected, actual) {
-		t.Fatalf("Results differ. Want: #%v, but got %#v", expected, actual)
+	assert.Equal(t, expectedMicroversion, actualMicroversion)
+	assert.Equal(t, expectedPolicies, actualPolicies)
+}
+
+func TestExpandComputeServerGroupV2PoliciesMicroversions(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+	raw := []interface{}{
+		"affinity",
+		"soft-anti-affinity",
+		"soft-affinity",
 	}
+	client := thclient.ServiceClient()
+
+	expectedPolicies := []string{
+		"affinity",
+		"soft-anti-affinity",
+		"soft-affinity",
+	}
+	expectedMicroversion := "2.15"
+
+	actualPolicies := expandComputeServerGroupV2Policies(client, raw)
+	actualMicroversion := client.Microversion
+
+	assert.Equal(t, expectedMicroversion, actualMicroversion)
+	assert.Equal(t, expectedPolicies, actualPolicies)
 }

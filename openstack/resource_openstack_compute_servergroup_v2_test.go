@@ -58,6 +58,31 @@ func TestAccComputeV2ServerGroup_affinity(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2ServerGroup_soft_affinity(t *testing.T) {
+	var instance servers.Server
+	var sg servergroups.ServerGroup
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2ServerGroupDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeV2ServerGroup_soft_affinity,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2InstanceInServerGroup(&instance, &sg),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_servergroup_v2.sg_1", "policies.#", "1"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_servergroup_v2.sg_1", "policies.0", "soft-affinity"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckComputeV2ServerGroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	computeClient, err := config.computeV2Client(OS_REGION_NAME)
@@ -136,6 +161,24 @@ var testAccComputeV2ServerGroup_affinity = fmt.Sprintf(`
 resource "openstack_compute_servergroup_v2" "sg_1" {
   name = "sg_1"
   policies = ["affinity"]
+}
+
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  scheduler_hints {
+    group = "${openstack_compute_servergroup_v2.sg_1.id}"
+  }
+  network {
+    uuid = "%s"
+  }
+}
+`, OS_NETWORK_ID)
+
+var testAccComputeV2ServerGroup_soft_affinity = fmt.Sprintf(`
+resource "openstack_compute_servergroup_v2" "sg_1" {
+  name = "sg_1"
+  policies = ["soft-affinity"]
 }
 
 resource "openstack_compute_instance_v2" "instance_1" {
