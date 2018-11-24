@@ -1,4 +1,5 @@
 - project:
+    name: h00130372/terraform-provider-openstack
     check:
       jobs:
         - terraform-provider-openstack-unittest
