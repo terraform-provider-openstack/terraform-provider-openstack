@@ -131,7 +131,7 @@ func Provider() terraform.ResourceProvider {
 			"insecure": &schema.Schema{
 				Type:        schema.TypeBool,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_INSECURE", nil),
+				DefaultFunc: schema.EnvDefaultFunc("OS_INSECURE", false),
 				Description: descriptions["insecure"],
 			},
 
@@ -165,14 +165,14 @@ func Provider() terraform.ResourceProvider {
 			"swauth": &schema.Schema{
 				Type:        schema.TypeBool,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_SWAUTH", ""),
+				DefaultFunc: schema.EnvDefaultFunc("OS_SWAUTH", false),
 				Description: descriptions["swauth"],
 			},
 
 			"use_octavia": &schema.Schema{
 				Type:        schema.TypeBool,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_USE_OCTAVIA", ""),
+				DefaultFunc: schema.EnvDefaultFunc("OS_USE_OCTAVIA", false),
 				Description: descriptions["use_octavia"],
 			},
 
