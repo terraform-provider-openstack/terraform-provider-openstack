@@ -353,7 +353,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 				ForceNew: false,
 				Default:  "active",
 				ValidateFunc: validation.StringInSlice([]string{
-					"active", "shutoff", "migrating",
+					"active", "shutoff",
 				}, true),
 				DiffSuppressFunc: suppressPowerStateDiffs,
 			},
