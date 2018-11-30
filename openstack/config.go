@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
@@ -257,10 +258,22 @@ func (c *Config) imageV2Client(region string) (*gophercloud.ServiceClient, error
 }
 
 func (c *Config) networkingV2Client(region string) (*gophercloud.ServiceClient, error) {
-	return openstack.NewNetworkV2(c.OsClient, gophercloud.EndpointOpts{
+	client, err := openstack.NewNetworkV2(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType(),
 	})
+
+	if err != nil {
+		return client, err
+	}
+
+	// If the service's endpoint already has a suffix of v2.0,
+	// set the ResourceBase to an empty string to prevent /v2.0/v2.0.
+	if strings.HasSuffix(client.Endpoint, "v2.0/") {
+		client.ResourceBase = ""
+	}
+
+	return client, nil
 }
 
 func (c *Config) objectStorageV1Client(region string) (*gophercloud.ServiceClient, error) {
