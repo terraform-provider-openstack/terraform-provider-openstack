@@ -628,7 +628,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	// Set the current power_state
 	currentStatus := strings.ToLower(server.Status)
 	switch currentStatus {
-	case "active", "shutoff", "error":
+	case "active", "shutoff", "error", "migrating":
 		d.Set("power_state", currentStatus)
 	default:
 		return fmt.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
@@ -1237,10 +1237,10 @@ func suppressAvailabilityZoneDetailDiffs(k, old, new string, d *schema.ResourceD
 	return false
 }
 
-// suppressPowerStateDiffs will allow a state of "error" even though we don't
-// allow it as a user input.
+// suppressPowerStateDiffs will allow a state of "error" or "migrating" even though we don't
+// allow them as a user input.
 func suppressPowerStateDiffs(k, old, new string, d *schema.ResourceData) bool {
-	if old == "error" {
+	if old == "error" || old == "migrating" {
 		return true
 	}
 
