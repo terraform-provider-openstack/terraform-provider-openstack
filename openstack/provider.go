@@ -189,6 +189,12 @@ func Provider() terraform.ResourceProvider {
 				Default:     0,
 				Description: descriptions["max_retries"],
 			},
+
+			"endpoint_overrides": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: descriptions["endpoint_overrides"],
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -345,6 +351,9 @@ func init() {
 		"cloud": "An entry in a `clouds.yaml` file to use.",
 
 		"max_retries": "How many times HTTP connection should be retried until giving up.",
+
+		"endpoint_overrides": "A map of services with an endpoint to override what was\n" +
+			"from the Keystone catalog",
 	}
 }
 
@@ -357,6 +366,7 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		DefaultDomain:     d.Get("default_domain").(string),
 		DomainID:          d.Get("domain_id").(string),
 		DomainName:        d.Get("domain_name").(string),
+		EndpointOverrides: d.Get("endpoint_overrides").(map[string]interface{}),
 		EndpointType:      d.Get("endpoint_type").(string),
 		IdentityEndpoint:  d.Get("auth_url").(string),
 		Password:          d.Get("password").(string),

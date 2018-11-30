@@ -119,6 +119,12 @@ The following arguments are supported:
   service catalog. It can be set using the OS_ENDPOINT_TYPE environment
   variable. If not set, public endpoints is used.
 
+* `endpoint_overrides` - (Optional) A set of key/value pairs that can
+  override an endpoint for a specified OpenStack service. Setting an override
+  requires you to specify the full and complete endpoint URL. This might
+  also invalidate any region you have set, too. Please see below for more details.
+  Please use this at your own risk.
+
 * `swauth` - (Optional) Set to `true` to authenticate against Swauth, a
   Swift-native authentication system. If omitted, the `OS_SWAUTH` environment
   variable is used. You must also set `username` to the Swauth/Swift username
@@ -128,6 +134,48 @@ The following arguments are supported:
 
 * `use_octavia` - (Optional) If set to `true`, API requests will go the Load Balancer
   service (Octavia) instead of the Networking service (Neutron).
+
+## Overriding Service API Endpoints
+
+There might be a situation in which you want or need to override an API endpoint
+rather than use the endpoint which was returned to you in the service catalog.
+You can do this by configuring the `endpoint_overrides` argument in the provider
+configuration:
+
+```hcl
+provider "openstack" {
+
+  endpoint_overrides = {
+    "network"  = "https://example.com:9696/v2.0/"
+    "volumev2" = "https://volumes.example.com:8776/v2/3eb25ae78e7b42d68276e9bca66c8e44/"
+  }
+
+}
+```
+
+Note how each URL ends in a "/" and the `volumev2` service includes the
+tenant/project UUID. You must make sure you specify the full and complete
+endpoint URL for this to work.
+
+The service keys are the standard service entries used in the OpenStack
+Identity/Keystone service catalog. This provider supports:
+
+* `compute`: Compute / Nova v2
+* `container-infra`: Container Infra / Magnum v1
+* `database`: Database / Trove v1
+* `dns`: DNS / Designate v2
+* `identity`: Identity / Keystone v3
+* `image`: Image / Glance v2
+* `network`: Networking / Neutron v2
+* `object-store`: Object Storage / Swift v1
+* `octavia`: Load Balancing as a Service / Octavia v2
+* `sharev2`: Shared Filesystem / Manila v2
+* `volume`: Block Storage / Cinder v1
+* `volumev2`: Block Storage / Cinder v2
+* `volumev3`: Block Storage / Cinder v3
+
+Please use this feature at your own risk. If you are unsure about needing
+to override an endpoint, you most likely do not need to override one.
 
 ## Additional Logging
 
