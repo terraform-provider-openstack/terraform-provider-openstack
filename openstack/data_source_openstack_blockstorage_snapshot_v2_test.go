@@ -112,7 +112,7 @@ func testAccBlockStorageV2DeleteVolumeAndSnapshot(t *testing.T, volumeID, snapsh
 		}
 	}
 
-	err = volumes.Delete(bsClient, volumeID).ExtractErr()
+	err = volumes.Delete(bsClient, volumeID, nil).ExtractErr()
 	if err != nil {
 		t.Fatal(err)
 	}
