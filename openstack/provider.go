@@ -185,6 +185,8 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
+			"openstack_blockstorage_snapshot_v2":          dataSourceBlockStorageSnapshotV2(),
+			"openstack_blockstorage_snapshot_v3":          dataSourceBlockStorageSnapshotV3(),
 			"openstack_compute_flavor_v2":                 dataSourceComputeFlavorV2(),
 			"openstack_compute_keypair_v2":                dataSourceComputeKeypairV2(),
 			"openstack_containerinfra_clustertemplate_v1": dataSourceContainerInfraClusterTemplateV1(),

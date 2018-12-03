@@ -343,8 +343,20 @@
 			"revisionTime": "2018-11-14T20:47:05Z"
 		},
 		{
+			"checksumSHA1": "SDNVeLqHv7OhjKCAU0/McJUeWgo=",
+			"path": "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/snapshots",
+			"revision": "3a7818a07cfc862267a0b03635075a444c92dcda",
+			"revisionTime": "2018-11-14T20:47:05Z"
+		},
+		{
 			"checksumSHA1": "ZpRvYEfOMMeugDA7yd+QgxSApsk=",
 			"path": "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes",
+			"revision": "3a7818a07cfc862267a0b03635075a444c92dcda",
+			"revisionTime": "2018-11-14T20:47:05Z"
+		},
+		{
+			"checksumSHA1": "vw46Q7Z5GKbrutRNXVqobqQcLdA=",
+			"path": "github.com/gophercloud/gophercloud/openstack/blockstorage/v3/snapshots",
 			"revision": "3a7818a07cfc862267a0b03635075a444c92dcda",
 			"revisionTime": "2018-11-14T20:47:05Z"
 		},
