@@ -6,6 +6,7 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -185,5 +186,71 @@ func TestFlattenNetworkingPort2DHCPOptionsV2(t *testing.T) {
 	if !reflect.DeepEqual(actualDHCPOptions, expectedDHCPOptions) {
 		t.Fatalf("DHCP options set differs, want: %+v, but got: %+v",
 			expectedDHCPOptions, actualDHCPOptions)
+	}
+}
+
+func TestExpandNetworkingPortAllowedAddressPairsV2(t *testing.T) {
+	r := resourceNetworkingPortV2()
+	d := r.TestResourceData()
+	d.SetId("1")
+	addressPairs1 := map[string]interface{}{
+		"ip_address":  "192.0.2.1",
+		"mac_address": "mac1",
+	}
+	addressPairs2 := map[string]interface{}{
+		"ip_address":  "198.51.100.1",
+		"mac_address": "mac2",
+	}
+	allowedAddressPairs := []map[string]interface{}{addressPairs1, addressPairs2}
+	d.Set("allowed_address_pairs", allowedAddressPairs)
+
+	expectedAllowedAddressPairs := []ports.AddressPair{
+		{
+			IPAddress:  "192.0.2.1",
+			MACAddress: "mac1",
+		},
+		{
+			IPAddress:  "198.51.100.1",
+			MACAddress: "mac2",
+		},
+	}
+
+	actualAllowedAddressPairs := expandNetworkingPortAllowedAddressPairsV2(d.Get("allowed_address_pairs").(*schema.Set))
+
+	if !reflect.DeepEqual(expectedAllowedAddressPairs, actualAllowedAddressPairs) {
+		t.Fatalf("Allowed address pairs differs, want: %+v, but got: %+v",
+			expectedAllowedAddressPairs, actualAllowedAddressPairs)
+	}
+}
+
+func TestFlattenNetworkingPortAllowedAddressPairsV2(t *testing.T) {
+	allowedAddressPairs := []ports.AddressPair{
+		{
+			IPAddress:  "192.0.2.1",
+			MACAddress: "mac1",
+		},
+		{
+			IPAddress:  "198.51.100.1",
+			MACAddress: "mac2",
+		},
+	}
+	mac := "mac3"
+
+	expectedAllowedAddressPairs := []map[string]interface{}{
+		map[string]interface{}{
+			"ip_address":  "192.0.2.1",
+			"mac_address": "mac1",
+		},
+		map[string]interface{}{
+			"ip_address":  "198.51.100.1",
+			"mac_address": "mac2",
+		},
+	}
+
+	actualAllowedAddressPairs := flattenNetworkingPortAllowedAddressPairsV2(mac, allowedAddressPairs)
+
+	if !reflect.DeepEqual(actualAllowedAddressPairs, expectedAllowedAddressPairs) {
+		t.Fatalf("Allowed address pairs differs, want: %+v, but got: %+v",
+			expectedAllowedAddressPairs, actualAllowedAddressPairs)
 	}
 }
