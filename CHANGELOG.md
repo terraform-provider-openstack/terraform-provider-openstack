@@ -3,6 +3,8 @@
 FEATURES
 
 * __New Data Source__: `openstack_containerinfra_cluster_v1` [GH-488]
+* __New Data Source__: `openstack_blockstorage_snapshot_v2` [GH-448]
+* __New Data Source__: `openstack_blockstorage_snapshot_v3` [GH-448]
 
 IMPROVEMENTS
 
