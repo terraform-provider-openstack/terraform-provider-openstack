@@ -182,6 +182,13 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("OS_CLOUD", ""),
 				Description: descriptions["cloud"],
 			},
+
+			"max_retries": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     0,
+				Description: descriptions["max_retries"],
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -329,6 +336,8 @@ func init() {
 			"service (Octavia) instead of the Networking service (Neutron).",
 
 		"cloud": "An entry in a `clouds.yaml` file to use.",
+
+		"max_retries": "How many times an http connection should be retried until giving up",
 	}
 }
 
@@ -356,6 +365,7 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		Username:          d.Get("user_name").(string),
 		UserID:            d.Get("user_id").(string),
 		useOctavia:        d.Get("use_octavia").(bool),
+		MaxRetries:        d.Get("max_retries").(uint),
 	}
 
 	v, ok := d.GetOkExists("insecure")

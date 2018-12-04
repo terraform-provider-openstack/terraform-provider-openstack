@@ -40,6 +40,7 @@ type Config struct {
 	Username          string
 	UserID            string
 	useOctavia        bool
+	MaxRetries        uint
 
 	OsClient *gophercloud.ProviderClient
 }
@@ -178,8 +179,9 @@ func (c *Config) LoadAndValidate() error {
 	transport := &http.Transport{Proxy: http.ProxyFromEnvironment, TLSClientConfig: config}
 	client.HTTPClient = http.Client{
 		Transport: &LogRoundTripper{
-			Rt:      transport,
-			OsDebug: osDebug,
+			Rt:         transport,
+			OsDebug:    osDebug,
+			MaxRetries: c.MaxRetries,
 		},
 	}
 
