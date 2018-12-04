@@ -57,7 +57,8 @@ The following arguments are supported:
 * `name` - (Required) The name of the image.
 
 * `properties` - (Optional) A map of key/value pairs to set freeform
-    information about an image.
+    information about an image. See the "Notes" section for further
+    information about properties.
 
 * `protected` - (Optional) If true, image will not be deletable.
    Defaults to false.
@@ -107,6 +108,22 @@ The following attributes are exported:
 * `tags` - See Argument Reference above.
 * `update_at` - The date the image was last updated.
 * `visibility` - See Argument Reference above.
+
+## Notes
+
+### Properties
+
+This resource supports the ability to add properties to a resource during
+creation as well as add, update, and delete properties during an update of this
+resource.
+
+Newer versions of OpenStack are adding some read-only properties to each image.
+These properties start with the prefix `os_`. If these properties are detected,
+this resource will automatically reconcile these with the user-provided
+properties.
+
+In addition, the `direct_url` property is also automatically reconciled if the
+Image Service set it.
 
 ## Import
 

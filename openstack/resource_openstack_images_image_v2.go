@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/gophercloud/gophercloud"
@@ -29,6 +30,8 @@ func resourceImagesImageV2() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
+		CustomizeDiff: resourceImagesImageV2UpdateComputedAttributes,
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 		},
@@ -41,21 +44,11 @@ func resourceImagesImageV2() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"checksum": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"container_format": &schema.Schema{
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: resourceImagesImageV2ValidateContainerFormat,
-			},
-
-			"created_at": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 
 			"disk_format": &schema.Schema{
@@ -90,11 +83,6 @@ func resourceImagesImageV2() *schema.Resource {
 				ConflictsWith: []string{"image_source_url"},
 			},
 
-			"metadata": &schema.Schema{
-				Type:     schema.TypeMap,
-				Computed: true,
-			},
-
 			"min_disk_gb": &schema.Schema{
 				Type:         schema.TypeInt,
 				Optional:     true,
@@ -117,11 +105,6 @@ func resourceImagesImageV2() *schema.Resource {
 				ForceNew: false,
 			},
 
-			"owner": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"protected": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -129,31 +112,11 @@ func resourceImagesImageV2() *schema.Resource {
 				Default:  false,
 			},
 
-			"schema": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"size_bytes": &schema.Schema{
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-
-			"status": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"tags": &schema.Schema{
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
-			},
-
-			"update_at": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 
 			"verify_checksum": &schema.Schema{
@@ -174,6 +137,47 @@ func resourceImagesImageV2() *schema.Resource {
 			"properties": &schema.Schema{
 				Type:     schema.TypeMap,
 				Optional: true,
+				Computed: true,
+			},
+
+			// Computed-only
+			"checksum": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"created_at": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"metadata": &schema.Schema{
+				Type:     schema.TypeMap,
+				Computed: true,
+			},
+
+			"owner": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"schema": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"size_bytes": &schema.Schema{
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+
+			"status": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"update_at": &schema.Schema{
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -307,16 +311,7 @@ func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("visibility", img.Visibility)
 	d.Set("region", GetRegion(d, config))
 
-	// New versions of OpenStack are setting a property of os_hidden with a
-	// boolean value. This clashes with TypeMap which expects all values to
-	// be a string. For now, we'll filter out all non-string types.
-	properties := make(map[string]string)
-	for key, value := range img.Properties {
-		if v, ok := value.(string); ok {
-			properties[key] = v
-		}
-	}
-
+	properties := resourceImagesImageV2ExpandProperties(img.Properties)
 	if err := d.Set("properties", properties); err != nil {
 		log.Printf("[WARN] unable to set properties for image %s: %s", img.ID, err)
 	}
@@ -350,6 +345,72 @@ func resourceImagesImageV2Update(d *schema.ResourceData, meta interface{}) error
 			NewTags: resourceImagesImageV2BuildTags(tags),
 		}
 		updateOpts = append(updateOpts, v)
+	}
+
+	if d.HasChange("properties") {
+		o, n := d.GetChange("properties")
+		oldProperties := resourceImagesImageV2ExpandProperties(o.(map[string]interface{}))
+		newProperties := resourceImagesImageV2ExpandProperties(n.(map[string]interface{}))
+
+		// Check for new and changed properties
+		for newKey, newValue := range newProperties {
+			var changed bool
+
+			oldValue, found := oldProperties[newKey]
+			if found && (newValue != oldValue) {
+				changed = true
+			}
+
+			// os_ keys are provided by the OpenStack Image service.
+			// These are read-only properties that cannot be modified.
+			// Ignore them here and let CustomizeDiff handle them.
+			if strings.HasPrefix(newKey, "os_") {
+				found = true
+				changed = false
+			}
+
+			// direct_url is provided by some storage drivers.
+			// This is a read-only property that cannot be modified.
+			// Ignore it here and let CustomizeDiff handle it.
+			if newKey == "direct_url" {
+				found = true
+				changed = false
+			}
+
+			if !found {
+				v := images.UpdateImageProperty{
+					Op:    images.AddOp,
+					Name:  newKey,
+					Value: newValue,
+				}
+
+				updateOpts = append(updateOpts, v)
+			}
+
+			if found && changed {
+				v := images.UpdateImageProperty{
+					Op:    images.ReplaceOp,
+					Name:  newKey,
+					Value: newValue,
+				}
+
+				updateOpts = append(updateOpts, v)
+			}
+		}
+
+		// Check for removed properties
+		for oldKey := range oldProperties {
+			_, found := newProperties[oldKey]
+
+			if !found {
+				v := images.UpdateImageProperty{
+					Op:   images.RemoveOp,
+					Name: oldKey,
+				}
+
+				updateOpts = append(updateOpts, v)
+			}
+		}
 	}
 
 	log.Printf("[DEBUG] Update Options: %#v", updateOpts)
@@ -564,4 +625,45 @@ func resourceImagesImageV2ExpandProperties(v map[string]interface{}) map[string]
 	}
 
 	return properties
+}
+
+func resourceImagesImageV2UpdateComputedAttributes(diff *schema.ResourceDiff, meta interface{}) error {
+	if diff.HasChange("properties") {
+		// Only check if the image has been created.
+		if diff.Id() != "" {
+			// Try to reconcile the properties set by the server
+			// with the properties set by the user.
+			//
+			// old = user properties + server properties
+			// new = user properties only
+			o, n := diff.GetChange("properties")
+
+			newProperties := resourceImagesImageV2ExpandProperties(n.(map[string]interface{}))
+
+			for oldKey, oldValue := range o.(map[string]interface{}) {
+				// os_ keys are provided by the OpenStack Image service.
+				if strings.HasPrefix(oldKey, "os_") {
+					if v, ok := oldValue.(string); ok {
+						newProperties[oldKey] = v
+					}
+				}
+
+				// direct_url is provided by some storage drivers.
+				if oldKey == "direct_url" {
+					if v, ok := oldValue.(string); ok {
+						newProperties[oldKey] = v
+					}
+				}
+			}
+
+			// Set the diff to the newProperties, which includes the server-side
+			// os_ properties.
+			//
+			// If the user has changed properties, they will be caught at this
+			// point, too.
+			diff.SetNew("properties", newProperties)
+		}
+	}
+
+	return nil
 }

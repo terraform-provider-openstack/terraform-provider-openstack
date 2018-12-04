@@ -107,6 +107,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
   vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_address = "192.168.199.10"
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
@@ -124,10 +125,11 @@ resource "openstack_lb_pool_v2" "pool_1" {
 }
 
 resource "openstack_lb_member_v2" "member_1" {
-  address = "192.168.199.10"
+  address = "192.168.199.110"
   protocol_port = 8080
   pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  weight = 0
 
   timeouts {
     create = "5m"
@@ -137,7 +139,7 @@ resource "openstack_lb_member_v2" "member_1" {
 }
 
 resource "openstack_lb_member_v2" "member_2" {
-  address = "192.168.199.11"
+  address = "192.168.199.111"
   protocol_port = 8080
   pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
@@ -183,7 +185,7 @@ resource "openstack_lb_pool_v2" "pool_1" {
 }
 
 resource "openstack_lb_member_v2" "member_1" {
-  address = "192.168.199.10"
+  address = "192.168.199.110"
   protocol_port = 8080
   weight = 10
   admin_state_up = "true"
@@ -198,7 +200,7 @@ resource "openstack_lb_member_v2" "member_1" {
 }
 
 resource "openstack_lb_member_v2" "member_2" {
-  address = "192.168.199.11"
+  address = "192.168.199.111"
   protocol_port = 8080
   weight = 15
   admin_state_up = "true"

@@ -50,7 +50,7 @@ func testAccCheckObjectStorageV1ContainerDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := containers.Get(objectStorageClient, rs.Primary.ID).Extract()
+		_, err := containers.Get(objectStorageClient, rs.Primary.ID, nil).Extract()
 		if err == nil {
 			return fmt.Errorf("Container still exists")
 		}

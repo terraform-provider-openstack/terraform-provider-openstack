@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -70,6 +71,11 @@ func dataSourceComputeFlavorV2() *schema.Resource {
 			},
 
 			// Computed values
+			"extra_specs": &schema.Schema{
+				Type:     schema.TypeMap,
+				Computed: true,
+			},
+
 			"is_public": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -78,7 +84,7 @@ func dataSourceComputeFlavorV2() *schema.Resource {
 	}
 }
 
-// dataSourceComputeFlavorV2Read performs the image lookup.
+// dataSourceComputeFlavorV2Read performs the flavor lookup.
 func dataSourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
@@ -92,17 +98,17 @@ func dataSourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) err
 		AccessType: flavors.PublicAccess,
 	}
 
-	log.Printf("[DEBUG] List Options: %#v", listOpts)
+	log.Printf("[DEBUG] openstack_compute_flavor_v2 ListOpts: %#v", listOpts)
 
 	var flavor flavors.Flavor
 	allPages, err := flavors.ListDetail(computeClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query flavors: %s", err)
+		return fmt.Errorf("Unable to query OpenStack flavors: %s", err)
 	}
 
 	allFlavors, err := flavors.ExtractFlavors(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve flavors: %s", err)
+		return fmt.Errorf("Unable to retrieve OpenStack flavors: %s", err)
 	}
 
 	// Loop through all flavors to find a more specific one.
@@ -161,17 +167,18 @@ func dataSourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) err
 		log.Printf("[DEBUG] Multiple results found: %#v", allFlavors)
 		return fmt.Errorf("Your query returned more than one result. " +
 			"Please try a more specific search criteria")
-	} else {
-		flavor = allFlavors[0]
 	}
 
-	log.Printf("[DEBUG] Single Flavor found: %s", flavor.ID)
-	return dataSourceComputeFlavorV2Attributes(d, &flavor)
+	flavor = allFlavors[0]
+
+	return dataSourceComputeFlavorV2Attributes(d, computeClient, &flavor)
 }
 
-// dataSourceComputeFlavorV2Attributes populates the fields of an Image resource.
-func dataSourceComputeFlavorV2Attributes(d *schema.ResourceData, flavor *flavors.Flavor) error {
-	log.Printf("[DEBUG] openstack_compute_flavor_v2 details: %#v", flavor)
+// dataSourceComputeFlavorV2Attributes populates the fields of a Flavor resource.
+func dataSourceComputeFlavorV2Attributes(
+	d *schema.ResourceData, computeClient *gophercloud.ServiceClient, flavor *flavors.Flavor) error {
+
+	log.Printf("[DEBUG] Retrieved openstack_compute_flavor_v2 %s: %#v", flavor.ID, flavor)
 
 	d.SetId(flavor.ID)
 	d.Set("name", flavor.Name)
@@ -181,6 +188,15 @@ func dataSourceComputeFlavorV2Attributes(d *schema.ResourceData, flavor *flavors
 	d.Set("swap", flavor.Swap)
 	d.Set("vcpus", flavor.VCPUs)
 	d.Set("is_public", flavor.IsPublic)
+
+	es, err := flavors.ListExtraSpecs(computeClient, d.Id()).Extract()
+	if err != nil {
+		return err
+	}
+
+	if err := d.Set("extra_specs", es); err != nil {
+		log.Printf("[WARN] Unable to set extra_specs for openstack_compute_flavor_v2 %s: %s", d.Id(), err)
+	}
 
 	return nil
 }

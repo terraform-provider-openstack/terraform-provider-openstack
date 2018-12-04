@@ -49,7 +49,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
 resource "openstack_compute_volume_attach_v2" "attachments" {
   count       = 2
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  volume_id   = "${element(openstack_blockstorage_volume_v2.volumes.*.id, count.index)}"
+  volume_id   = "${openstack_blockstorage_volume_v2.volumes.*.id[count.index]}"
 }
 
 output "volume devices" {
@@ -93,6 +93,45 @@ output "volume devices" {
 }
 ```
 
+### Using Multiattach-enabled volumes
+
+Multiattach Volumes are dependent upon your OpenStack cloud and not all
+clouds support multiattach.
+
+```hcl
+resource "openstack_blockstorage_volume_v3" "volume_1" {
+  name        = "volume_1"
+  size        = 1
+  multiattach = true
+}
+
+resource "openstack_compute_instance_v2" "instance_1" {
+  name            = "instance_1"
+  security_groups = ["default"]
+}
+
+resource "openstack_compute_instance_v2" "instance_2" {
+  name            = "instance_2"
+  security_groups = ["default"]
+}
+
+resource "openstack_compute_volume_attach_v2" "va_1" {
+  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+  volume_id   = "${openstack_blockstorage_volume_v2.volume_1.id}"
+  multiattach = true
+}
+
+resource "openstack_compute_volume_attach_v2" "va_2" {
+  instance_id = "${openstack_compute_instance_v2.instance_2.id}"
+  volume_id   = "${openstack_blockstorage_volume_v2.volume_1.id}"
+  multiattach = true
+
+  depends_on  = ["openstack_compute_volume_attach_v2.va_1"]
+}
+```
+
+It is recommended to use `depends_on` for the attach resources
+to enforce the volume attachments to happen one at a time.
 
 ## Argument Reference
 
@@ -114,6 +153,8 @@ The following arguments are supported:
   to update the device upon subsequent applying which will cause the volume
   to be detached and reattached indefinitely. Please use with caution.
 
+* `multiattach` - (Optional) Enable attachment of multiattach-capable volumes.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -124,6 +165,7 @@ The following attributes are exported:
 * `device` - See Argument Reference above. _NOTE_: The correctness of this
   information is dependent upon the hypervisor in use. In some cases, this
   should not be used as an authoritative piece of information.
+* `multiattach` - See Argument Reference above.
 
 ## Import
 

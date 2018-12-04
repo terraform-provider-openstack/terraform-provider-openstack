@@ -33,6 +33,10 @@ func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", &secgroup_rule_1),
 					testAccCheckNetworkingV2SecGroupRuleExists(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_2", &secgroup_rule_2),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", "description", "secgroup_rule_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_secgroup_rule_v2.secgroup_rule_2", "description", ""),
 				),
 			},
 		},
@@ -290,6 +294,7 @@ resource "openstack_networking_secgroup_rule_v2" "secgroup_rule_1" {
   protocol = "tcp"
   remote_ip_prefix = "0.0.0.0/0"
   security_group_id = "${openstack_networking_secgroup_v2.secgroup_1.id}"
+	description = "secgroup_rule_1"
 }
 
 resource "openstack_networking_secgroup_rule_v2" "secgroup_rule_2" {

@@ -25,47 +25,56 @@ func resourceComputeFlavorV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
+
 			"ram": &schema.Schema{
 				Type:     schema.TypeInt,
 				Required: true,
 				ForceNew: true,
 			},
+
 			"vcpus": &schema.Schema{
 				Type:     schema.TypeInt,
 				Required: true,
 				ForceNew: true,
 			},
+
 			"disk": &schema.Schema{
 				Type:     schema.TypeInt,
 				Required: true,
 				ForceNew: true,
 			},
+
 			"swap": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
 			},
+
 			"rx_tx_factor": &schema.Schema{
 				Type:     schema.TypeFloat,
 				Optional: true,
 				ForceNew: true,
 				Default:  1,
 			},
+
 			"is_public": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
 			},
+
 			"ephemeral": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
 			},
+
 			"extra_specs": &schema.Schema{
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -82,12 +91,13 @@ func resourceComputeFlavorV2Create(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
+	name := d.Get("name").(string)
 	disk := d.Get("disk").(int)
 	swap := d.Get("swap").(int)
 	isPublic := d.Get("is_public").(bool)
 	ephemeral := d.Get("ephemeral").(int)
 	createOpts := flavors.CreateOpts{
-		Name:       d.Get("name").(string),
+		Name:       name,
 		RAM:        d.Get("ram").(int),
 		VCPUs:      d.Get("vcpus").(int),
 		Disk:       &disk,
@@ -97,24 +107,21 @@ func resourceComputeFlavorV2Create(d *schema.ResourceData, meta interface{}) err
 		Ephemeral:  &ephemeral,
 	}
 
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
+	log.Printf("[DEBUG] openstack_compute_flavor_v2 create options: %#v", createOpts)
 	fl, err := flavors.Create(computeClient, &createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack flavor: %s", err)
+		return fmt.Errorf("Error creating openstack_compute_flavor_v2 %s: %s", name, err)
 	}
 
 	d.SetId(fl.ID)
 
 	extraSpecsRaw := d.Get("extra_specs").(map[string]interface{})
 	if len(extraSpecsRaw) > 0 {
-		extraSpecs := make(flavors.ExtraSpecsOpts, len(extraSpecsRaw))
-		for k, v := range extraSpecsRaw {
-			extraSpecs[k] = v.(string)
-		}
+		extraSpecs := expandComputeFlavorV2ExtraSpecs(extraSpecsRaw)
 
 		_, err := flavors.CreateExtraSpecs(computeClient, fl.ID, extraSpecs).Extract()
 		if err != nil {
-			return fmt.Errorf("Error creating extra specs for flavor %s: %s", fl.ID, err)
+			return fmt.Errorf("Error creating extra_specs for openstack_compute_flavor_v2 %s: %s", fl.ID, err)
 		}
 	}
 
@@ -130,8 +137,10 @@ func resourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) error
 
 	fl, err := flavors.Get(computeClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "flavor")
+		return CheckDeleted(d, err, "Error retrieving openstack_compute_flavor_v2")
 	}
+
+	log.Printf("[DEBUG] Retrieved openstack_compute_flavor_v2 %s: %#v", d.Id(), fl)
 
 	d.Set("name", fl.Name)
 	d.Set("ram", fl.RAM)
@@ -145,11 +154,11 @@ func resourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) error
 
 	es, err := flavors.ListExtraSpecs(computeClient, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Error reading extra specs for flavor %s: %s", d.Id(), err)
+		return fmt.Errorf("Error reading extra_specs for openstack_compute_flavor_v2 %s: %s", d.Id(), err)
 	}
 
 	if err := d.Set("extra_specs", es); err != nil {
-		log.Printf("[WARN] Unable to set extra specs for flavor %s: %s", d.Id(), err)
+		log.Printf("[WARN] Unable to set extra_specs for openstack_compute_flavor_v2 %s: %s", d.Id(), err)
 	}
 
 	return nil
@@ -168,21 +177,18 @@ func resourceComputeFlavorV2Update(d *schema.ResourceData, meta interface{}) err
 		// Delete all old extra specs.
 		for oldKey, _ := range oldES.(map[string]interface{}) {
 			if err := flavors.DeleteExtraSpec(computeClient, d.Id(), oldKey).ExtractErr(); err != nil {
-				return fmt.Errorf("Error deleting extra spec %s from flavor %s: %s", oldKey, d.Id(), err)
+				return fmt.Errorf("Error deleting extra_spec %s from openstack_compute_flavor_v2 %s: %s", oldKey, d.Id(), err)
 			}
 		}
 
 		// Add new extra specs.
 		newESRaw := newES.(map[string]interface{})
 		if len(newESRaw) > 0 {
-			extraSpecs := make(flavors.ExtraSpecsOpts, len(newESRaw))
-			for k, v := range newESRaw {
-				extraSpecs[k] = v.(string)
-			}
+			extraSpecs := expandComputeFlavorV2ExtraSpecs(newESRaw)
 
 			_, err := flavors.CreateExtraSpecs(computeClient, d.Id(), extraSpecs).Extract()
 			if err != nil {
-				return fmt.Errorf("Error creating extra specs for flavor %s: %s", d.Id(), err)
+				return fmt.Errorf("Error creating extra_specs for openstack_compute_flavor_v2 %s: %s", d.Id(), err)
 			}
 		}
 	}
@@ -199,8 +205,8 @@ func resourceComputeFlavorV2Delete(d *schema.ResourceData, meta interface{}) err
 
 	err = flavors.Delete(computeClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack flavor: %s", err)
+		return fmt.Errorf("Error deleting openstack_compute_flavor_v2 %s: %s", d.Id(), err)
 	}
-	d.SetId("")
+
 	return nil
 }

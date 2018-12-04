@@ -24,16 +24,16 @@ func TestAccIdentityV3Role_basic(t *testing.T) {
 				Config: testAccIdentityV3Role_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3RoleExists("openstack_identity_role_v3.role_1", &role),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_role_v3.role_1", "name", "role_1"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_role_v3.role_1", "name", &role.Name),
 				),
 			},
 			resource.TestStep{
 				Config: testAccIdentityV3Role_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3RoleExists("openstack_identity_role_v3.role_1", &role),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_role_v3.role_1", "name", "role_2"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_role_v3.role_1", "name", &role.Name),
 				),
 			},
 		},
@@ -79,7 +79,7 @@ func testAccCheckIdentityV3RoleExists(n string, role *roles.Role) resource.TestC
 		}
 
 		found, err := roles.Get(identityClient, rs.Primary.ID).Extract()
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

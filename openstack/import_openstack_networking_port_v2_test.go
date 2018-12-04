@@ -77,3 +77,27 @@ func TestAccNetworkingV2Port_importAllowedAddressPairsNoMAC(t *testing.T) {
 		},
 	})
 }
+
+func TestAccNetworkingV2Port_importDHCPOpts(t *testing.T) {
+	resourceName := "openstack_networking_port_v2.port_1"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccNetworkingV2Port_createExtraDHCPOpts,
+			},
+
+			resource.TestStep{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"fixed_ip",
+				},
+			},
+		},
+	})
+}

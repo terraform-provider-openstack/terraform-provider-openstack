@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 )
@@ -57,17 +58,10 @@ func resourceMemberV2() *schema.Resource {
 			},
 
 			"weight": &schema.Schema{
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(int)
-					if value < 1 {
-						errors = append(errors, fmt.Errorf(
-							"Only numbers greater than 0 are supported values for 'weight'"))
-					}
-					return
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntAtLeast(0),
 			},
 
 			"subnet_id": &schema.Schema{
@@ -104,13 +98,19 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 		TenantID:     d.Get("tenant_id").(string),
 		Address:      d.Get("address").(string),
 		ProtocolPort: d.Get("protocol_port").(int),
-		Weight:       d.Get("weight").(int),
 		AdminStateUp: &adminStateUp,
 	}
 
 	// Must omit if not set
 	if v, ok := d.GetOk("subnet_id"); ok {
 		createOpts.SubnetID = v.(string)
+	}
+
+	// Set the weight only if it's defined in the configuration.
+	// This prevents all members from being created with a default weight of 0.
+	if v, ok := d.GetOkExists("weight"); ok {
+		weight := v.(int)
+		createOpts.Weight = &weight
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -186,7 +186,8 @@ func resourceMemberV2Update(d *schema.ResourceData, meta interface{}) error {
 		updateOpts.Name = d.Get("name").(string)
 	}
 	if d.HasChange("weight") {
-		updateOpts.Weight = d.Get("weight").(int)
+		weight := d.Get("weight").(int)
+		updateOpts.Weight = &weight
 	}
 	if d.HasChange("admin_state_up") {
 		asu := d.Get("admin_state_up").(bool)

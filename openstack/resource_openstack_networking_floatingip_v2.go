@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/pagination"
@@ -73,6 +74,11 @@ func resourceNetworkingFloatingIPV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"tags": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -126,6 +132,16 @@ func resourceNetworkFloatingIPV2Create(d *schema.ResourceData, meta interface{})
 
 	d.SetId(floatingIP.ID)
 
+	tags := networkV2AttributesTags(d)
+	if len(tags) > 0 {
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "floatingips", floatingIP.ID, tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error creating Tags on FloatingIP: %s", err)
+		}
+		log.Printf("[DEBUG] Set Tags = %+v on FloatingIP %+v", tags, floatingIP.ID)
+	}
+
 	return resourceNetworkFloatingIPV2Read(d, meta)
 }
 
@@ -152,6 +168,7 @@ func resourceNetworkFloatingIPV2Read(d *schema.ResourceData, meta interface{}) e
 	d.Set("tenant_id", floatingIP.TenantID)
 
 	d.Set("region", GetRegion(d, config))
+	d.Set("tags", floatingIP.Tags)
 
 	return nil
 }
@@ -175,6 +192,16 @@ func resourceNetworkFloatingIPV2Update(d *schema.ResourceData, meta interface{})
 	_, err = floatingips.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error updating floating IP: %s", err)
+	}
+
+	if d.HasChange("tags") {
+		tags := networkV2AttributesTags(d)
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "floatingips", d.Id(), tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating Tags on FloatingIP: %s", err)
+		}
+		log.Printf("[DEBUG] Updated Tags = %+v on FloatingIP %+v", tags, d.Id())
 	}
 
 	return resourceNetworkFloatingIPV2Read(d, meta)

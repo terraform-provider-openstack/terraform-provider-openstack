@@ -56,7 +56,6 @@ func resourceComputeFloatingIPAssociateV2() *schema.Resource {
 
 			"wait_until_associated": &schema.Schema{
 				Type:     schema.TypeBool,
-				Default:  false,
 				Optional: true,
 				ForceNew: true,
 			},
@@ -88,9 +87,16 @@ func resourceComputeFloatingIPAssociateV2Create(d *schema.ResourceData, meta int
 
 	// This API call should be synchronous, but we've had reports where it isn't.
 	// If the user opted in to wait for association, then poll here.
-	waitUntilAssociated := d.Get("wait_until_associated").(bool)
+	var waitUntilAssociated bool
+	if v, ok := d.GetOkExists("wait_until_associated"); ok {
+		if wua, ok := v.(bool); ok {
+			waitUntilAssociated = wua
+		}
+	}
 
 	if waitUntilAssociated {
+		log.Printf("[DEBUG] Waiting until %s is associated with %s", instanceId, floatingIP)
+
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"NOT_ASSOCIATED"},
 			Target:     []string{"ASSOCIATED"},

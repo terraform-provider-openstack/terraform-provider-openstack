@@ -67,12 +67,20 @@ The following arguments are supported:
 * `device_id` - (Optional) The ID of the device attached to the port. Changing this
     creates a new port.
 
-* `fixed_ip` - (Optional) An array of desired IPs for this port. The structure is
-    described below.
+* `fixed_ip` - (Optional - Conflicts with `no_fixed_ip`) An array of desired IPs for
+    this port. The structure is described below.
+
+* `no_fixed_ip` - (Optional - Conflicts with `fixed_ip`) Create a port with no fixed
+    IP address. This will also remove any fixed IPs previously set on a port. `true`
+    is the only valid value for this argument.
 
 * `allowed_address_pairs` - (Optional) An IP/MAC Address pair of additional IP
     addresses that can be active on this port. The structure is described
     below.
+
+* `extra_dhcp_option` - (Optional) An extra DHCP option that needs to be configured
+    on the port. The structure is described below. Can be specified multiple
+    times.
 
 * `value_specs` - (Optional) Map of additional options.
 
@@ -84,14 +92,24 @@ this port.
 * `ip_address` - (Optional) IP address desired in the subnet for this port. If
 you don't specify `ip_address`, an available IP address from the specified
 subnet will be allocated to this port. This field will not be populated if it
-is left blank. To retrieve the assigned IP address, use the `all_fixed_ips`
-attribute.
+is left blank or omitted. To retrieve the assigned IP address, use the
+`all_fixed_ips` attribute.
 
 The `allowed_address_pairs` block supports:
 
 * `ip_address` - (Required) The additional IP address.
 
 * `mac_address` - (Optional) The additional MAC address.
+
+* `tags` - (Optional) A set of string tags for the port.
+
+The `extra_dhcp_option` block supports:
+
+* `name` - (Required) Name of the DHCP option.
+
+* `value` - (Required) Value of the DHCP option.
+
+* `ip_version` - (Optional) IP protocol version. Defaults to 4.
 
 ## Attributes Reference
 
@@ -109,6 +127,8 @@ The following attributes are exported:
   order returned by the Network v2 API.
 * `all_security_group_ids` - The collection of Security Group IDs on the port
   which have been explicitly and implicitly added.
+* `extra_dhcp_option` - See Argument Reference above.
+* `tags` - See Argument Reference above.
 
 ## Import
 

@@ -1,20 +1,115 @@
-## 1.8.0 (Unreleased)
+## 1.13.0 (Unreleased)
+
+FEATURES
+
+* __New Data Source__: `openstack_containerinfra_cluster_v1` [GH-488]
+* __New Data Source__: `openstack_blockstorage_snapshot_v2` [GH-448]
+* __New Data Source__: `openstack_blockstorage_snapshot_v3` [GH-448]
+
+IMPROVEMENTS
+
+* Added object versioning to `openstack_objectstorage_container_v1` [GH-465]
+* Added support for soft affinities in `openstack_compute_servergroup_v2` [GH-490]
+
+BUG FIXES
+
+* Allow instances to be in a state of `migrating` when performing a plan/refresh [GH-496]
+
+## 1.12.0 (November 13, 2018)
+
+FEATURES
+
+* __New Resource__: `openstack_compute_interface_attach_v2` ([#470](https://github.com/terraform-providers/terraform-provider-openstack/issues/470))
+
+IMPROVEMENTS
+
+* Added `tags` to `openstack_networking_network_v2` ([#454](https://github.com/terraform-providers/terraform-provider-openstack/issues/454))
+* Added `tags` to `openstack_networking_subnet_v2` ([#459](https://github.com/terraform-providers/terraform-provider-openstack/issues/459))
+* Added `tags` to `openstack_networking_subnetpool_v2` ([#460](https://github.com/terraform-providers/terraform-provider-openstack/issues/460))
+* Added `tags` to `openstack_networking_port_v2` ([#461](https://github.com/terraform-providers/terraform-provider-openstack/issues/461))
+* Added `tags` to `openstack_networking_secgroup_v2` ([#463](https://github.com/terraform-providers/terraform-provider-openstack/issues/463))
+* Added `tags` to `openstack_networking_floatingip_v2` ([#466](https://github.com/terraform-providers/terraform-provider-openstack/issues/466))
+* Added `tags` to `openstack_networking_router_v2` ([#467](https://github.com/terraform-providers/terraform-provider-openstack/issues/467))
+* Added `extra_dhcp_options` to `openstack_networking_port_v2` ([#258](https://github.com/terraform-providers/terraform-provider-openstack/issues/258))
+* Added `fingerprint` to `openstack_compute_keypair_v2` data source ([#481](https://github.com/terraform-providers/terraform-provider-openstack/issues/481))
+* Added `extra_specs` to `openstack_compute_flavor_v2` data source ([#480](https://github.com/terraform-providers/terraform-provider-openstack/issues/480))
+
+BUG FIXES
+
+* Fixed issue with nova-network based environments having the `tenantnetworks` API disabled ([#485](https://github.com/terraform-providers/terraform-provider-openstack/issues/485))
+
+
+## 1.11.0 (October 29, 2018)
+
+FEATURES
+
+* __New Resource__: `openstack_networking_trunk_v2` ([#446](https://github.com/terraform-providers/terraform-provider-openstack/issues/446))
+* __New Resource__: `openstack_compute_flavor_access_v2` ([#447](https://github.com/terraform-providers/terraform-provider-openstack/issues/447))
+
+IMPROVEMENTS
+
+* Added `multiattach` argument and attribute for the `openstack_blockstorage_volume_v3` resource ([#431](https://github.com/terraform-providers/terraform-provider-openstack/issues/431))
+* `openstack_dns_recordset_v2` can now accept IPv6 addresses with and without brackets ([#443](https://github.com/terraform-providers/terraform-provider-openstack/issues/443))
+* Added `multiattach` argument for the `openstack_compute_volume_attach_v2` resource ([#442](https://github.com/terraform-providers/terraform-provider-openstack/issues/442))
+* `openstack_lb_member_v2` resources can now use a weight of 0 ([#451](https://github.com/terraform-providers/terraform-provider-openstack/issues/451))
+
+BUG FIXES
+
+* Fixed an issue where environment variables were overwriting specified arguments ([#436](https://github.com/terraform-providers/terraform-provider-openstack/issues/436))
+* Fixed an issue where security group rule descriptions were not working with older verisons of OpenStack ([#438](https://github.com/terraform-providers/terraform-provider-openstack/issues/438))
+
+## 1.10.0 (October 01, 2018)
+
+FEATURES
+
+* __New Resource__: `openstack_containerinfra_cluster_v1` ([#421](https://github.com/terraform-providers/terraform-provider-openstack/issues/421))
+* __New Data Source__: `openstack_containerinfra_clustertemplate_v1` ([#415](https://github.com/terraform-providers/terraform-provider-openstack/issues/415))
+
+IMPROVEMENTS
+
+* Added `description` argument for the `openstack_networking_secgroup_rule_v2` resource ([#416](https://github.com/terraform-providers/terraform-provider-openstack/issues/416))
+* Added a vendor option of `ignore_resize_confirmation` to `openstack_compute_instance_v2` ([#422](https://github.com/terraform-providers/terraform-provider-openstack/issues/422))
+* `openstack_compute_instance_v2` IP addresses are now visible in Rackspace. This provider still does not officially support Rackspace, though. ([#426](https://github.com/terraform-providers/terraform-provider-openstack/issues/426))
+* Added `no_fixed_ip` argument to `openstack_networking_port_v2` which allows the port to not have an IP address ([#433](https://github.com/terraform-providers/terraform-provider-openstack/issues/433))
+
+BUG FIXES
+
+* Enabled instances to be in an `ERROR` state so they can be cleanly deleted ([#428](https://github.com/terraform-providers/terraform-provider-openstack/issues/428))
+
+## 1.9.0 (September 05, 2018)
+
+FEATURES
+
+* __New Resource__: `openstack_objectstorage_tempurl_v1` ([#379](https://github.com/terraform-providers/terraform-provider-openstack/issues/379))
+* __New Resource__: `openstack_containerinfra_clustertemplate_v1` ([#403](https://github.com/terraform-providers/terraform-provider-openstack/issues/403))
+* __New Data Source__: `openstack_fw_policy_v1` ([#398](https://github.com/terraform-providers/terraform-provider-openstack/issues/398))
+* __New Data Source__: `openstack_networking_router_v2` ([#401](https://github.com/terraform-providers/terraform-provider-openstack/issues/401))
+
+IMPROVEMENTS
+
+* The `openstack_images_image_v2` resource can now finally update properties. This update has been in progress over the last two release cycles. Please let us know if you encounter any problems ([#409](https://github.com/terraform-providers/terraform-provider-openstack/issues/409))
+
+## 1.8.0 (August 08, 2018)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
 * Support for `default_domain` has been added. This should not cause any issues, but please report any issues encountered.
+* `openstack_images_image_v2.properties` has been set to `ForceNew`. If properties are modified, the image will be recreated. Previously, updates to the properties were only happening in the Terraform state and not actually reflected on the image itself.
 
 FEATURES
 
-* __New Data Source__: `openstack_identity_group_v3` [GH-385]
+* __New Data Source__: `openstack_identity_group_v3` ([#385](https://github.com/terraform-providers/terraform-provider-openstack/issues/385))
+* __New Data Source__: `openstack_networking_floatingip_v2` ([#387](https://github.com/terraform-providers/terraform-provider-openstack/issues/387))
 
 IMPROVEMENTS
 
-* Added support for `default_domain` during authentication [GH-329]
+* Added support for `default_domain` during authentication ([#329](https://github.com/terraform-providers/terraform-provider-openstack/issues/329))
+* The upcoming OpenStack Rocky release will be automatically adding additional properties to the `openstack_images_image_v2` resource. This resource has been patched to account for this and to reconcile these server-provided properties with the user-provided properties. In addition, `openstack_images_image_v2.properties` has been set to `ForceNew` and will recreate the image when properties have been modified. Previously, any updates to the properties were only happening in the state and not actually reflected on the image itself. ([#390](https://github.com/terraform-providers/terraform-provider-openstack/issues/390))
 
 BUG FIXES
 
-* Newer versions of OpenStack are automatically adding an image property of `os_hidden` which might cause `openstack_images_image_v2.properties` to show a diff. A fix has been made to address this [GH-381].
+* The addition of the `openstack_networking_network_v2.external` data source argument caused unintended behavior of results only containing external or non-external networks. This bug has been fixed and we apologize for the inconvenience ([#384](https://github.com/terraform-providers/terraform-provider-openstack/issues/384))
+* The addition of the `openstack_compute_floatingip_associate_v2.wait_until_associated` argument caused the floating IP association to be recreated when updating to a later release of this provider. This was unintended and this has been resolved ([#395](https://github.com/terraform-providers/terraform-provider-openstack/issues/395))
 
 ## 1.7.0 (August 01, 2018)
 

@@ -30,10 +30,6 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 						"openstack_images_image_v2.image_1", "disk_format", "qcow2"),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "schema", "/v2/schemas/image"),
-					resource.TestCheckResourceAttr(
-						"openstack_images_image_v2.image_1", "properties.foo", "bar"),
-					resource.TestCheckResourceAttr(
-						"openstack_images_image_v2.image_1", "properties.baz", "foo"),
 				),
 			},
 		},
@@ -139,8 +135,12 @@ func TestAccImagesImageV2_visibility(t *testing.T) {
 	})
 }
 
-func TestAccImagesImageV2_timeout(t *testing.T) {
-	var image images.Image
+func TestAccImagesImageV2_properties(t *testing.T) {
+	var image_1 images.Image
+	var image_2 images.Image
+	var image_3 images.Image
+	var image_4 images.Image
+	var image_5 images.Image
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -148,9 +148,55 @@ func TestAccImagesImageV2_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccImagesImageV2_timeout,
+				Config: testAccImagesImageV2_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
+					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image_1),
+					resource.TestCheckResourceAttrSet(
+						"openstack_images_image_v2.image_1", "properties.os_hash_value"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccImagesImageV2_properties_1,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image_2),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "properties.foo", "bar"),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "properties.bar", "foo"),
+					resource.TestCheckResourceAttrSet(
+						"openstack_images_image_v2.image_1", "properties.os_hash_value"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccImagesImageV2_properties_2,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image_3),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "properties.foo", "bar"),
+					resource.TestCheckResourceAttrSet(
+						"openstack_images_image_v2.image_1", "properties.os_hash_value"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccImagesImageV2_properties_3,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image_4),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "properties.foo", "baz"),
+					resource.TestCheckResourceAttrSet(
+						"openstack_images_image_v2.image_1", "properties.os_hash_value"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccImagesImageV2_properties_4,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image_5),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "properties.foo", "baz"),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "properties.bar", "foo"),
+					resource.TestCheckResourceAttrSet(
+						"openstack_images_image_v2.image_1", "properties.os_hash_value"),
 				),
 			},
 		},
@@ -280,80 +326,7 @@ func testAccCheckImagesImageV2TagCount(n string, expected int) resource.TestChec
 	}
 }
 
-var testAccImagesImageV2_basic = `
-  resource "openstack_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-      properties {
-        foo = "bar"
-        baz = "foo"
-      }
-  }`
-
-var testAccImagesImageV2_name_1 = `
-  resource "openstack_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-  }`
-
-var testAccImagesImageV2_name_2 = `
-  resource "openstack_images_image_v2" "image_1" {
-      name   = "TerraformAccTest Rancher"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-  }`
-
-var testAccImagesImageV2_tags_1 = `
-  resource "openstack_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-      tags = ["foo","bar"]
-  }`
-
-var testAccImagesImageV2_tags_2 = `
-  resource "openstack_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-      tags = ["foo","bar","baz"]
-  }`
-
-var testAccImagesImageV2_tags_3 = `
-  resource "openstack_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-      tags = ["foo","baz"]
-  }`
-
-var testAccImagesImageV2_visibility_1 = `
-  resource "openstack_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-      visibility = "private"
-  }`
-
-var testAccImagesImageV2_visibility_2 = `
-  resource "openstack_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-      visibility = "public"
-  }`
-
-var testAccImagesImageV2_timeout = `
+const testAccImagesImageV2_basic = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
@@ -362,5 +335,116 @@ var testAccImagesImageV2_timeout = `
 
       timeouts {
         create = "10m"
+      }
+  }`
+
+const testAccImagesImageV2_name_1 = `
+  resource "openstack_images_image_v2" "image_1" {
+      name   = "Rancher TerraformAccTest"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      container_format = "bare"
+      disk_format = "qcow2"
+  }`
+
+const testAccImagesImageV2_name_2 = `
+  resource "openstack_images_image_v2" "image_1" {
+      name   = "TerraformAccTest Rancher"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      container_format = "bare"
+      disk_format = "qcow2"
+  }`
+
+const testAccImagesImageV2_tags_1 = `
+  resource "openstack_images_image_v2" "image_1" {
+      name   = "Rancher TerraformAccTest"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      container_format = "bare"
+      disk_format = "qcow2"
+      tags = ["foo","bar"]
+  }`
+
+const testAccImagesImageV2_tags_2 = `
+  resource "openstack_images_image_v2" "image_1" {
+      name   = "Rancher TerraformAccTest"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      container_format = "bare"
+      disk_format = "qcow2"
+      tags = ["foo","bar","baz"]
+  }`
+
+const testAccImagesImageV2_tags_3 = `
+  resource "openstack_images_image_v2" "image_1" {
+      name   = "Rancher TerraformAccTest"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      container_format = "bare"
+      disk_format = "qcow2"
+      tags = ["foo","baz"]
+  }`
+
+const testAccImagesImageV2_visibility_1 = `
+  resource "openstack_images_image_v2" "image_1" {
+      name   = "Rancher TerraformAccTest"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      container_format = "bare"
+      disk_format = "qcow2"
+      visibility = "private"
+  }`
+
+const testAccImagesImageV2_visibility_2 = `
+  resource "openstack_images_image_v2" "image_1" {
+      name   = "Rancher TerraformAccTest"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      container_format = "bare"
+      disk_format = "qcow2"
+      visibility = "public"
+  }`
+
+const testAccImagesImageV2_properties_1 = `
+  resource "openstack_images_image_v2" "image_1" {
+      name   = "Rancher TerraformAccTest"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      container_format = "bare"
+      disk_format = "qcow2"
+
+      properties {
+        foo = "bar"
+        bar = "foo"
+      }
+  }`
+
+const testAccImagesImageV2_properties_2 = `
+  resource "openstack_images_image_v2" "image_1" {
+      name   = "Rancher TerraformAccTest"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      container_format = "bare"
+      disk_format = "qcow2"
+
+      properties {
+        foo = "bar"
+      }
+  }`
+
+const testAccImagesImageV2_properties_3 = `
+  resource "openstack_images_image_v2" "image_1" {
+      name   = "Rancher TerraformAccTest"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      container_format = "bare"
+      disk_format = "qcow2"
+
+      properties {
+        foo = "baz"
+      }
+  }`
+
+const testAccImagesImageV2_properties_4 = `
+  resource "openstack_images_image_v2" "image_1" {
+      name   = "Rancher TerraformAccTest"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      container_format = "bare"
+      disk_format = "qcow2"
+
+      properties {
+        foo = "baz"
+        bar = "foo"
       }
   }`

@@ -46,4 +46,6 @@ data "openstack_compute_flavor_v2" "small" {
 `id` is set to the ID of the found flavor. In addition, the following attributes
 are exported:
 
+* `extra_specs` - Key/Value pairs of metadata for the flavor.
+
 * `is_public` - Whether the flavor is public or private.

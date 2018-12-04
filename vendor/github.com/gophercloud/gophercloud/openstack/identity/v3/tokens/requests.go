@@ -52,19 +52,28 @@ type AuthOptions struct {
 	// authentication token ID.
 	TokenID string `json:"-"`
 
+	// Authentication through Application Credentials requires supplying name, project and secret
+	// For project we can use TenantID
+	ApplicationCredentialID     string `json:"-"`
+	ApplicationCredentialName   string `json:"-"`
+	ApplicationCredentialSecret string `json:"-"`
+
 	Scope Scope `json:"-"`
 }
 
 // ToTokenV3CreateMap builds a request body from AuthOptions.
 func (opts *AuthOptions) ToTokenV3CreateMap(scope map[string]interface{}) (map[string]interface{}, error) {
 	gophercloudAuthOpts := gophercloud.AuthOptions{
-		Username:    opts.Username,
-		UserID:      opts.UserID,
-		Password:    opts.Password,
-		DomainID:    opts.DomainID,
-		DomainName:  opts.DomainName,
-		AllowReauth: opts.AllowReauth,
-		TokenID:     opts.TokenID,
+		Username:                    opts.Username,
+		UserID:                      opts.UserID,
+		Password:                    opts.Password,
+		DomainID:                    opts.DomainID,
+		DomainName:                  opts.DomainName,
+		AllowReauth:                 opts.AllowReauth,
+		TokenID:                     opts.TokenID,
+		ApplicationCredentialID:     opts.ApplicationCredentialID,
+		ApplicationCredentialName:   opts.ApplicationCredentialName,
+		ApplicationCredentialSecret: opts.ApplicationCredentialSecret,
 	}
 
 	return gophercloudAuthOpts.ToTokenV3CreateMap(scope)
@@ -133,7 +142,7 @@ func Get(c *gophercloud.ServiceClient, token string) (r GetResult) {
 
 // Validate determines if a specified token is valid or not.
 func Validate(c *gophercloud.ServiceClient, token string) (bool, error) {
-	resp, err := c.Request("HEAD", tokenURL(c), &gophercloud.RequestOpts{
+	resp, err := c.Head(tokenURL(c), &gophercloud.RequestOpts{
 		MoreHeaders: subjectTokenHeaders(c, token),
 		OkCodes:     []int{200, 204, 404},
 	})

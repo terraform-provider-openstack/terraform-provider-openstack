@@ -99,6 +99,10 @@ func resourceBlockStorageVolumeV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"multiattach": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"attachment": &schema.Schema{
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -143,6 +147,7 @@ func resourceBlockStorageVolumeV3Create(d *schema.ResourceData, meta interface{}
 		SourceReplica:      d.Get("source_replica").(string),
 		SourceVolID:        d.Get("source_vol_id").(string),
 		VolumeType:         d.Get("volume_type").(string),
+		Multiattach:        d.Get("multiattach").(bool),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -244,7 +249,7 @@ func resourceBlockStorageVolumeV3Update(d *schema.ResourceData, meta interface{}
 		if v.Status == "in-use" {
 			if !d.Get("enable_online_resize").(bool) {
 				return fmt.Errorf(
-					`Error extending volume (%s), 
+					`Error extending volume (%s),
 					volume is attached to the instance and
 					resizing online is disabled,
 					see enable_online_resize option`, d.Id())
@@ -253,7 +258,9 @@ func resourceBlockStorageVolumeV3Update(d *schema.ResourceData, meta interface{}
 			blockStorageClient.Microversion = "3.42"
 		}
 
-		extendOpts := volumeactions.ExtendSizeOpts{d.Get("size").(int)}
+		extendOpts := volumeactions.ExtendSizeOpts{
+			NewSize: d.Get("size").(int),
+		}
 		err = volumeactions.ExtendSize(blockStorageClient, d.Id(), extendOpts).ExtractErr()
 		if err != nil {
 			return fmt.Errorf(
@@ -333,7 +340,7 @@ func resourceBlockStorageVolumeV3Delete(d *schema.ResourceData, meta interface{}
 	// in a "deleting" state from when the instance was terminated.
 	// If this is true, just move on. It'll eventually delete.
 	if v.Status != "deleting" {
-		if err := volumes.Delete(blockStorageClient, d.Id()).ExtractErr(); err != nil {
+		if err := volumes.Delete(blockStorageClient, d.Id(), nil).ExtractErr(); err != nil {
 			return CheckDeleted(d, err, "volume")
 		}
 	}

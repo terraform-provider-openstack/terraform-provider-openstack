@@ -3,14 +3,18 @@ package openstack
 import (
 	"fmt"
 	"net/http"
+	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/Unknwon/com"
 	"github.com/gophercloud/gophercloud"
+	"github.com/hashicorp/terraform/flatmap"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/terraform"
 )
 
 // BuildRequest takes an opts struct and builds a request body for
@@ -144,4 +148,90 @@ func resourceNetworkingAvailabilityZoneHintsV2(d *schema.ResourceData) []string 
 		azh[i] = raw.(string)
 	}
 	return azh
+}
+
+func expandVendorOptions(vendOptsRaw []interface{}) map[string]interface{} {
+	vendorOptions := make(map[string]interface{})
+
+	for _, option := range vendOptsRaw {
+		for optKey, optValue := range option.(map[string]interface{}) {
+			vendorOptions[optKey] = optValue
+		}
+
+	}
+
+	return vendorOptions
+}
+
+func containerInfraLabelsMapV1(d *schema.ResourceData) (map[string]string, error) {
+	m := make(map[string]string)
+	for key, val := range d.Get("labels").(map[string]interface{}) {
+		labelValue, ok := val.(string)
+		if !ok {
+			return nil, fmt.Errorf("label %s value should be string", key)
+		}
+		m[key] = labelValue
+	}
+	return m, nil
+}
+
+func containerInfraLabelsStringV1(d *schema.ResourceData) (string, error) {
+	var formattedLabels string
+	for key, val := range d.Get("labels").(map[string]interface{}) {
+		labelValue, ok := val.(string)
+		if !ok {
+			return "", fmt.Errorf("label %s value should be string", key)
+		}
+		formattedLabels = strings.Join([]string{
+			formattedLabels,
+			fmt.Sprintf("%s=%s", key, labelValue),
+		}, ",")
+	}
+	formattedLabels = strings.Trim(formattedLabels, ",")
+
+	return formattedLabels, nil
+}
+
+func networkV2AttributesTags(d *schema.ResourceData) (tags []string) {
+	rawTags := d.Get("tags").(*schema.Set).List()
+	tags = make([]string, len(rawTags))
+
+	for i, raw := range rawTags {
+		tags[i] = raw.(string)
+	}
+	return
+}
+
+func testAccCheckNetworkingV2Tags(name string, tags []string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[name]
+
+		if !ok {
+			return fmt.Errorf("resource not found: %s", name)
+		}
+
+		var tagLen int64
+		var err error
+		if count, ok := rs.Primary.Attributes["tags.#"]; !ok {
+			return fmt.Errorf("resource tags not found: %s.tags", name)
+		} else {
+			tagLen, err = strconv.ParseInt(count, 10, 64)
+			if err != nil {
+				return fmt.Errorf("Failed to parse tag amount: %s", err)
+			}
+		}
+
+		rtags := make([]string, tagLen)
+		itags := flatmap.Expand(rs.Primary.Attributes, "tags").([]interface{})
+		for i, val := range itags {
+			rtags[i] = val.(string)
+		}
+		sort.Strings(rtags)
+		sort.Strings(tags)
+		if !reflect.DeepEqual(rtags, tags) {
+			return fmt.Errorf(
+				"%s.tags: expected: %#v, got %#v", name, tags, rtags)
+		}
+		return nil
+	}
 }

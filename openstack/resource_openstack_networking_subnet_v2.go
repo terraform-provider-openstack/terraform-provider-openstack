@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
 
@@ -146,6 +147,11 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"tags": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -219,6 +225,16 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 
 	d.SetId(s.ID)
 
+	tags := networkV2AttributesTags(d)
+	if len(tags) > 0 {
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "subnets", s.ID, tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error creating Tags on Subnet: %s", err)
+		}
+		log.Printf("[DEBUG] Set Tags = %+v on Subnet %+v", tags, s.ID)
+	}
+
 	log.Printf("[DEBUG] Created Subnet %s: %#v", s.ID, s)
 	return resourceNetworkingSubnetV2Read(d, meta)
 }
@@ -249,6 +265,7 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("ipv6_address_mode", s.IPv6AddressMode)
 	d.Set("ipv6_ra_mode", s.IPv6RAMode)
 	d.Set("subnetpool_id", s.SubnetPoolID)
+	d.Set("tags", s.Tags)
 
 	// Set the allocation_pools
 	var allocationPools []map[string]interface{}
@@ -331,6 +348,16 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 	_, err = subnets.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error updating OpenStack Neutron Subnet: %s", err)
+	}
+
+	if d.HasChange("tags") {
+		tags := networkV2AttributesTags(d)
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "subnets", d.Id(), tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating Tags on Subnet: %s", err)
+		}
+		log.Printf("[DEBUG] Updated Tags = %+v on Subnet %+v", tags, d.Id())
 	}
 
 	return resourceNetworkingSubnetV2Read(d, meta)

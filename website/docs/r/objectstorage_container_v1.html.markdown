@@ -22,6 +22,11 @@ resource "openstack_objectstorage_container_v1" "container_1" {
   }
 
   content_type = "application/json"
+
+  versioning {
+    type = "versions"
+    location = "tf-test-container-versions"
+  }
 }
 ```
 
@@ -50,6 +55,8 @@ The following arguments are supported:
 * `container_write` - (Optional) Sets an ACL that grants write access.
     Changing this updates the access control list write access.
 
+* `versioning` - (Optional) Enable object versioning. The structure is described below.
+
 * `metadata` - (Optional) Custom key/value pairs to associate with the container.
     Changing this updates the existing container metadata.
 
@@ -57,6 +64,12 @@ The following arguments are supported:
     updates the MIME type.
 
 * `force_destroy` -  (Optional, Default:false ) A boolean that indicates all objects should be deleted from the container so that the container can be destroyed without error. These objects are not recoverable.
+
+The `versioning` block supports:
+
+  * `type` - (Required) Versioning type which can be `versions` or `history` according to [Openstack documentation](https://docs.openstack.org/swift/latest/overview_object_versioning.html).
+  * `location` - (Required) Container in which versions will be stored.
+
 
 ## Attributes Reference
 
@@ -68,5 +81,6 @@ The following attributes are exported:
 * `container_sync_to` - See Argument Reference above.
 * `container_sync_key` - See Argument Reference above.
 * `container_write` - See Argument Reference above.
+* `versioning` - See Argument Reference above.
 * `metadata` - See Argument Reference above.
 * `content_type` - See Argument Reference above.

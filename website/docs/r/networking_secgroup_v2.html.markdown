@@ -42,6 +42,8 @@ The following arguments are supported:
     egress security rules. This is `false` by default. See the below note
     for more information.
 
+* `tags` - (Optional) A set of string tags for the security group.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -50,6 +52,7 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
+* `tags` - See Argument Reference above.
 
 ## Default Security Group Rules
 

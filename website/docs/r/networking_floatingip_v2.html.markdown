@@ -55,6 +55,8 @@ The following arguments are supported:
 
 * `value_specs` - (Optional) Map of additional options.
 
+* `tags` - (Optional) A set of string tags for the floating IP.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -65,6 +67,7 @@ The following attributes are exported:
 * `port_id` - ID of associated port.
 * `tenant_id` - the ID of the tenant in which to create the floating IP.
 * `fixed_ip` - The fixed IP which the floating IP maps to.
+* `tags` - See Argument Reference above.
 
 ## Import
 

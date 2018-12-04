@@ -23,6 +23,7 @@ import (
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func resourceComputeInstanceV2() *schema.Resource {
@@ -351,13 +352,24 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 				Default:  "active",
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if strings.ToLower(value) != "active" && strings.ToLower(value) != "shutoff" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'active' and 'shutoff' are supported values for 'power_state'"))
-					}
-					return
+				ValidateFunc: validation.StringInSlice([]string{
+					"active", "shutoff",
+				}, true),
+				DiffSuppressFunc: suppressPowerStateDiffs,
+			},
+			"vendor_options": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"ignore_resize_confirmation": &schema.Schema{
+							Type:     schema.TypeBool,
+							Default:  false,
+							Optional: true,
+						},
+					},
 				},
 			},
 		},
@@ -598,7 +610,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	// Build a custom struct for the availability zone extension
 	var serverWithAZ struct {
 		servers.Server
-		availabilityzones.ServerExt
+		availabilityzones.ServerAvailabilityZoneExt
 	}
 
 	// Do another Get so the above work is not disturbed.
@@ -613,11 +625,13 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	// Set the region
 	d.Set("region", GetRegion(d, config))
 
-	//Set the current power_state:
-	if strings.ToLower(server.Status) != "active" && strings.ToLower(server.Status) != "shutoff" {
-		return fmt.Errorf("Error changing the instance(%s) power_state. Invalid current power_state:%s ", d.Id(), server.Status)
-	} else {
-		d.Set("power_state", strings.ToLower(server.Status))
+	// Set the current power_state
+	currentStatus := strings.ToLower(server.Status)
+	switch currentStatus {
+	case "active", "shutoff", "error", "migrating":
+		d.Set("power_state", currentStatus)
+	default:
+		return fmt.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
 	}
 
 	return nil
@@ -767,6 +781,14 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if d.HasChange("flavor_id") || d.HasChange("flavor_name") {
+		// Get vendor_options
+		vendorOptionsRaw := d.Get("vendor_options").(*schema.Set)
+		var ignoreResizeConfirmation bool
+		if vendorOptionsRaw.Len() > 0 {
+			vendorOptions := expandVendorOptions(vendorOptionsRaw.List())
+			ignoreResizeConfirmation = vendorOptions["ignore_resize_confirmation"].(bool)
+		}
+
 		var newFlavorId string
 		var err error
 		if d.HasChange("flavor_id") {
@@ -791,39 +813,56 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		// Wait for the instance to finish resizing.
 		log.Printf("[DEBUG] Waiting for instance (%s) to finish resizing", d.Id())
 
-		stateConf := &resource.StateChangeConf{
-			Pending:    []string{"RESIZE"},
-			Target:     []string{"VERIFY_RESIZE"},
-			Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
-			Timeout:    d.Timeout(schema.TimeoutUpdate),
-			Delay:      10 * time.Second,
-			MinTimeout: 3 * time.Second,
-		}
+		// Resize instance without confirmation if specified by user.
+		if ignoreResizeConfirmation {
+			stateConf := &resource.StateChangeConf{
+				Pending:    []string{"RESIZE", "VERIFY_RESIZE"},
+				Target:     []string{"ACTIVE", "SHUTOFF"},
+				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
 
-		_, err = stateConf.WaitForState()
-		if err != nil {
-			return fmt.Errorf("Error waiting for instance (%s) to resize: %s", d.Id(), err)
-		}
+			_, err = stateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("Error waiting for instance (%s) to resize: %s", d.Id(), err)
+			}
+		} else {
+			stateConf := &resource.StateChangeConf{
+				Pending:    []string{"RESIZE"},
+				Target:     []string{"VERIFY_RESIZE"},
+				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
 
-		// Confirm resize.
-		log.Printf("[DEBUG] Confirming resize")
-		err = servers.ConfirmResize(computeClient, d.Id()).ExtractErr()
-		if err != nil {
-			return fmt.Errorf("Error confirming resize of OpenStack server: %s", err)
-		}
+			_, err = stateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("Error waiting for instance (%s) to resize: %s", d.Id(), err)
+			}
 
-		stateConf = &resource.StateChangeConf{
-			Pending:    []string{"VERIFY_RESIZE"},
-			Target:     []string{"ACTIVE", "SHUTOFF"},
-			Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
-			Timeout:    d.Timeout(schema.TimeoutUpdate),
-			Delay:      10 * time.Second,
-			MinTimeout: 3 * time.Second,
-		}
+			// Confirm resize.
+			log.Printf("[DEBUG] Confirming resize")
+			err = servers.ConfirmResize(computeClient, d.Id()).ExtractErr()
+			if err != nil {
+				return fmt.Errorf("Error confirming resize of OpenStack server: %s", err)
+			}
 
-		_, err = stateConf.WaitForState()
-		if err != nil {
-			return fmt.Errorf("Error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
+			stateConf = &resource.StateChangeConf{
+				Pending:    []string{"VERIFY_RESIZE"},
+				Target:     []string{"ACTIVE", "SHUTOFF"},
+				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
+
+			_, err = stateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("Error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
+			}
 		}
 	}
 
@@ -1193,6 +1232,16 @@ func suppressAvailabilityZoneDetailDiffs(k, old, new string, d *schema.ResourceD
 		if az == old {
 			return true
 		}
+	}
+
+	return false
+}
+
+// suppressPowerStateDiffs will allow a state of "error" or "migrating" even though we don't
+// allow them as a user input.
+func suppressPowerStateDiffs(k, old, new string, d *schema.ResourceData) bool {
+	if old == "error" || old == "migrating" {
+		return true
 	}
 
 	return false
