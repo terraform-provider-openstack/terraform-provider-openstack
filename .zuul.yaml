@@ -19,6 +19,6 @@
     check-generic-cloud:
       jobs:
         - terraform-provider-openstack-acceptance-test-telefonica
-       # - terraform-provider-openstack-acceptance-test-huaweicloud
+        - terraform-provider-openstack-acceptance-test-huaweicloud
         - terraform-provider-openstack-acceptance-test-orange
         - terraform-provider-openstack-acceptance-test-opentelekomcloud
