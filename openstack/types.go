@@ -36,7 +36,7 @@ import (
 type LogRoundTripper struct {
 	Rt         http.RoundTripper
 	OsDebug    bool
-	MaxRetries uint
+	MaxRetries int
 }
 
 // RoundTrip performs a round-trip HTTP request and logs relevant information about it.
@@ -67,7 +67,7 @@ func (lrt *LogRoundTripper) RoundTrip(request *http.Request) (*http.Response, er
 	response, err := lrt.Rt.RoundTrip(request)
 
 	//retrying connection
-	var retry uint = 0
+	retry := 1
 	for response == nil {
 
 		if retry > lrt.MaxRetries {

@@ -184,7 +184,7 @@ func Provider() terraform.ResourceProvider {
 			},
 
 			"max_retries": &schema.Schema{
-				Type:        schema.TypeString,
+				Type:        schema.TypeInt,
 				Optional:    true,
 				Default:     0,
 				Description: descriptions["max_retries"],
@@ -365,7 +365,7 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		Username:          d.Get("user_name").(string),
 		UserID:            d.Get("user_id").(string),
 		useOctavia:        d.Get("use_octavia").(bool),
-		MaxRetries:        d.Get("max_retries").(uint),
+		MaxRetries:        d.Get("max_retries").(int),
 	}
 
 	v, ok := d.GetOkExists("insecure")

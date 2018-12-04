@@ -40,7 +40,7 @@ type Config struct {
 	Username          string
 	UserID            string
 	useOctavia        bool
-	MaxRetries        uint
+	MaxRetries        int
 
 	OsClient *gophercloud.ProviderClient
 }
@@ -191,6 +191,10 @@ func (c *Config) LoadAndValidate() error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if c.MaxRetries < 0 {
+		return fmt.Errorf("max_retries should be a positive value")
 	}
 
 	c.OsClient = client
