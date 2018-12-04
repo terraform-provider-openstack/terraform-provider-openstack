@@ -1,13 +1,13 @@
 package openstack
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestExpandNetworkingPortDHCPOptsV2Create(t *testing.T) {
@@ -42,10 +42,7 @@ func TestExpandNetworkingPortDHCPOptsV2Create(t *testing.T) {
 
 	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Create(d.Get("extra_dhcp_option").(*schema.Set))
 
-	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
-		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
-			expectedDHCPOptions, actualDHCPOptions)
-	}
+	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
 func TestExpandNetworkingPortDHCPOptsEmptyV2Create(t *testing.T) {
@@ -57,10 +54,7 @@ func TestExpandNetworkingPortDHCPOptsEmptyV2Create(t *testing.T) {
 
 	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Create(d.Get("extra_dhcp_option").(*schema.Set))
 
-	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
-		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
-			expectedDHCPOptions, actualDHCPOptions)
-	}
+	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
 func TestExpandNetworkingPortDHCPOptsV2Update(t *testing.T) {
@@ -97,10 +91,7 @@ func TestExpandNetworkingPortDHCPOptsV2Update(t *testing.T) {
 
 	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Update(d.Get("extra_dhcp_option").(*schema.Set))
 
-	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
-		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
-			expectedDHCPOptions, actualDHCPOptions)
-	}
+	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
 func TestExpandNetworkingPortDHCPOptsEmptyV2Update(t *testing.T) {
@@ -112,10 +103,7 @@ func TestExpandNetworkingPortDHCPOptsEmptyV2Update(t *testing.T) {
 
 	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Update(d.Get("extra_dhcp_option").(*schema.Set))
 
-	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
-		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
-			expectedDHCPOptions, actualDHCPOptions)
-	}
+	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
 func TestExpandNetworkingPortDHCPOptsV2Delete(t *testing.T) {
@@ -146,10 +134,7 @@ func TestExpandNetworkingPortDHCPOptsV2Delete(t *testing.T) {
 
 	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Delete(d.Get("extra_dhcp_option").(*schema.Set))
 
-	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
-		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
-			expectedDHCPOptions, actualDHCPOptions)
-	}
+	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
 func TestFlattenNetworkingPort2DHCPOptionsV2(t *testing.T) {
@@ -183,10 +168,7 @@ func TestFlattenNetworkingPort2DHCPOptionsV2(t *testing.T) {
 
 	actualDHCPOptions := flattenNetworkingPortDHCPOptsV2(dhcpOptions)
 
-	if !reflect.DeepEqual(actualDHCPOptions, expectedDHCPOptions) {
-		t.Fatalf("DHCP options set differs, want: %+v, but got: %+v",
-			expectedDHCPOptions, actualDHCPOptions)
-	}
+	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
 func TestExpandNetworkingPortAllowedAddressPairsV2(t *testing.T) {
@@ -217,10 +199,7 @@ func TestExpandNetworkingPortAllowedAddressPairsV2(t *testing.T) {
 
 	actualAllowedAddressPairs := expandNetworkingPortAllowedAddressPairsV2(d.Get("allowed_address_pairs").(*schema.Set))
 
-	if !reflect.DeepEqual(expectedAllowedAddressPairs, actualAllowedAddressPairs) {
-		t.Fatalf("Allowed address pairs differs, want: %+v, but got: %+v",
-			expectedAllowedAddressPairs, actualAllowedAddressPairs)
-	}
+	assert.ElementsMatch(t, expectedAllowedAddressPairs, actualAllowedAddressPairs)
 }
 
 func TestFlattenNetworkingPortAllowedAddressPairsV2(t *testing.T) {
@@ -249,8 +228,5 @@ func TestFlattenNetworkingPortAllowedAddressPairsV2(t *testing.T) {
 
 	actualAllowedAddressPairs := flattenNetworkingPortAllowedAddressPairsV2(mac, allowedAddressPairs)
 
-	if !reflect.DeepEqual(actualAllowedAddressPairs, expectedAllowedAddressPairs) {
-		t.Fatalf("Allowed address pairs differs, want: %+v, but got: %+v",
-			expectedAllowedAddressPairs, actualAllowedAddressPairs)
-	}
+	assert.ElementsMatch(t, expectedAllowedAddressPairs, actualAllowedAddressPairs)
 }
