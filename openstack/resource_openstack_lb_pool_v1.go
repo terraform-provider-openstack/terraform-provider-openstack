@@ -182,7 +182,8 @@ func resourceLBPoolV1Update(d *schema.ResourceData, meta interface{}) error {
 	// If either option changed, update both.
 	// Gophercloud complains if one is empty.
 	if d.HasChange("name") || d.HasChange("lb_method") {
-		updateOpts.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
 
 		lbMethod := resourceLBPoolV1DetermineLBMethod(d.Get("lb_method").(string))
 		updateOpts.LBMethod = lbMethod

@@ -155,7 +155,8 @@ func resourceIdentityProjectV3Update(d *schema.ResourceData, meta interface{}) e
 
 	if d.HasChange("description") {
 		hasChange = true
-		updateOpts.Description = d.Get("description").(string)
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
 	}
 
 	if hasChange {

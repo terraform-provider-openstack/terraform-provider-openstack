@@ -209,7 +209,8 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 		updateOpts.AdminStateUp = &asu
 	}
 	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
 	}
 	if d.HasChange("http_method") {
 		updateOpts.HTTPMethod = d.Get("http_method").(string)

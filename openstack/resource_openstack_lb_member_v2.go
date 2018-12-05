@@ -183,7 +183,8 @@ func resourceMemberV2Update(d *schema.ResourceData, meta interface{}) error {
 
 	var updateOpts pools.UpdateMemberOpts
 	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
 	}
 	if d.HasChange("weight") {
 		weight := d.Get("weight").(int)

@@ -221,7 +221,8 @@ func resourceIdentityUserV3Update(d *schema.ResourceData, meta interface{}) erro
 
 	if d.HasChange("description") {
 		hasChange = true
-		updateOpts.Description = d.Get("description").(string)
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
 	}
 
 	if d.HasChange("domain_id") {

@@ -179,7 +179,8 @@ func resourceNetworkingTrunkV2Update(d *schema.ResourceData, meta interface{}) e
 
 	if d.HasChange("name") {
 		updateTrunk = true
-		updateOpts.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
 	}
 	if d.HasChange("admin_state_up") {
 		updateTrunk = true
