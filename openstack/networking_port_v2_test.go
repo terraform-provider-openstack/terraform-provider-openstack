@@ -1,12 +1,13 @@
 package openstack
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestExpandNetworkingPortDHCPOptsV2Create(t *testing.T) {
@@ -41,10 +42,7 @@ func TestExpandNetworkingPortDHCPOptsV2Create(t *testing.T) {
 
 	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Create(d.Get("extra_dhcp_option").(*schema.Set))
 
-	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
-		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
-			expectedDHCPOptions, actualDHCPOptions)
-	}
+	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
 func TestExpandNetworkingPortDHCPOptsEmptyV2Create(t *testing.T) {
@@ -56,10 +54,7 @@ func TestExpandNetworkingPortDHCPOptsEmptyV2Create(t *testing.T) {
 
 	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Create(d.Get("extra_dhcp_option").(*schema.Set))
 
-	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
-		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
-			expectedDHCPOptions, actualDHCPOptions)
-	}
+	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
 func TestExpandNetworkingPortDHCPOptsV2Update(t *testing.T) {
@@ -96,10 +91,7 @@ func TestExpandNetworkingPortDHCPOptsV2Update(t *testing.T) {
 
 	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Update(d.Get("extra_dhcp_option").(*schema.Set))
 
-	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
-		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
-			expectedDHCPOptions, actualDHCPOptions)
-	}
+	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
 func TestExpandNetworkingPortDHCPOptsEmptyV2Update(t *testing.T) {
@@ -111,10 +103,7 @@ func TestExpandNetworkingPortDHCPOptsEmptyV2Update(t *testing.T) {
 
 	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Update(d.Get("extra_dhcp_option").(*schema.Set))
 
-	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
-		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
-			expectedDHCPOptions, actualDHCPOptions)
-	}
+	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
 func TestExpandNetworkingPortDHCPOptsV2Delete(t *testing.T) {
@@ -145,10 +134,7 @@ func TestExpandNetworkingPortDHCPOptsV2Delete(t *testing.T) {
 
 	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Delete(d.Get("extra_dhcp_option").(*schema.Set))
 
-	if !reflect.DeepEqual(expectedDHCPOptions, actualDHCPOptions) {
-		t.Fatalf("DHCP options differs, want: %+v, but got: %+v",
-			expectedDHCPOptions, actualDHCPOptions)
-	}
+	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
 func TestFlattenNetworkingPort2DHCPOptionsV2(t *testing.T) {
@@ -182,8 +168,65 @@ func TestFlattenNetworkingPort2DHCPOptionsV2(t *testing.T) {
 
 	actualDHCPOptions := flattenNetworkingPortDHCPOptsV2(dhcpOptions)
 
-	if !reflect.DeepEqual(actualDHCPOptions, expectedDHCPOptions) {
-		t.Fatalf("DHCP options set differs, want: %+v, but got: %+v",
-			expectedDHCPOptions, actualDHCPOptions)
+	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
+}
+
+func TestExpandNetworkingPortAllowedAddressPairsV2(t *testing.T) {
+	r := resourceNetworkingPortV2()
+	d := r.TestResourceData()
+	d.SetId("1")
+	addressPairs1 := map[string]interface{}{
+		"ip_address":  "192.0.2.1",
+		"mac_address": "mac1",
 	}
+	addressPairs2 := map[string]interface{}{
+		"ip_address":  "198.51.100.1",
+		"mac_address": "mac2",
+	}
+	allowedAddressPairs := []map[string]interface{}{addressPairs1, addressPairs2}
+	d.Set("allowed_address_pairs", allowedAddressPairs)
+
+	expectedAllowedAddressPairs := []ports.AddressPair{
+		{
+			IPAddress:  "192.0.2.1",
+			MACAddress: "mac1",
+		},
+		{
+			IPAddress:  "198.51.100.1",
+			MACAddress: "mac2",
+		},
+	}
+
+	actualAllowedAddressPairs := expandNetworkingPortAllowedAddressPairsV2(d.Get("allowed_address_pairs").(*schema.Set))
+
+	assert.ElementsMatch(t, expectedAllowedAddressPairs, actualAllowedAddressPairs)
+}
+
+func TestFlattenNetworkingPortAllowedAddressPairsV2(t *testing.T) {
+	allowedAddressPairs := []ports.AddressPair{
+		{
+			IPAddress:  "192.0.2.1",
+			MACAddress: "mac1",
+		},
+		{
+			IPAddress:  "198.51.100.1",
+			MACAddress: "mac2",
+		},
+	}
+	mac := "mac3"
+
+	expectedAllowedAddressPairs := []map[string]interface{}{
+		map[string]interface{}{
+			"ip_address":  "192.0.2.1",
+			"mac_address": "mac1",
+		},
+		map[string]interface{}{
+			"ip_address":  "198.51.100.1",
+			"mac_address": "mac2",
+		},
+	}
+
+	actualAllowedAddressPairs := flattenNetworkingPortAllowedAddressPairsV2(mac, allowedAddressPairs)
+
+	assert.ElementsMatch(t, expectedAllowedAddressPairs, actualAllowedAddressPairs)
 }

@@ -195,6 +195,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set")
 	}
 
+	allowedAddressPairs := d.Get("allowed_address_pairs").(*schema.Set)
 	createOpts := PortCreateOpts{
 		ports.CreateOpts{
 			Name:                d.Get("name").(string),
@@ -205,7 +206,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 			DeviceOwner:         d.Get("device_owner").(string),
 			DeviceID:            d.Get("device_id").(string),
 			FixedIPs:            resourcePortFixedIpsV2(d),
-			AllowedAddressPairs: resourceAllowedAddressPairsV2(d),
+			AllowedAddressPairs: expandNetworkingPortAllowedAddressPairsV2(allowedAddressPairs),
 		},
 		MapValueSpecs(d),
 	}
@@ -317,21 +318,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	// the port can have the "default" group automatically applied.
 	d.Set("all_security_group_ids", p.SecurityGroups)
 
-	// Convert AllowedAddressPairs to list of map
-	var pairs []map[string]interface{}
-	for _, pairObject := range p.AllowedAddressPairs {
-		pair := make(map[string]interface{})
-		pair["ip_address"] = pairObject.IPAddress
-
-		// Only set the MAC address if it is different than the
-		// port's MAC. This means that a specific MAC was set.
-		if p.MACAddress != pairObject.MACAddress {
-			pair["mac_address"] = pairObject.MACAddress
-		}
-
-		pairs = append(pairs, pair)
-	}
-	d.Set("allowed_address_pairs", pairs)
+	d.Set("allowed_address_pairs", flattenNetworkingPortAllowedAddressPairsV2(p.MACAddress, p.AllowedAddressPairs))
 	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(p.ExtraDHCPOptsExt))
 
 	d.Set("region", GetRegion(d, config))
@@ -360,7 +347,8 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("allowed_address_pairs") {
 		hasChange = true
-		aap := resourceAllowedAddressPairsV2(d)
+		allowedAddressPairs := d.Get("allowed_address_pairs").(*schema.Set)
+		aap := expandNetworkingPortAllowedAddressPairsV2(allowedAddressPairs)
 		updateOpts.AllowedAddressPairs = &aap
 	}
 
@@ -523,21 +511,6 @@ func resourcePortFixedIpsV2(d *schema.ResourceData) interface{} {
 		}
 	}
 	return ip
-}
-
-func resourceAllowedAddressPairsV2(d *schema.ResourceData) []ports.AddressPair {
-	// ports.AddressPair
-	rawPairs := d.Get("allowed_address_pairs").(*schema.Set).List()
-
-	pairs := make([]ports.AddressPair, len(rawPairs))
-	for i, raw := range rawPairs {
-		rawMap := raw.(map[string]interface{})
-		pairs[i] = ports.AddressPair{
-			IPAddress:  rawMap["ip_address"].(string),
-			MACAddress: rawMap["mac_address"].(string),
-		}
-	}
-	return pairs
 }
 
 func resourcePortAdminStateUpV2(d *schema.ResourceData) *bool {
