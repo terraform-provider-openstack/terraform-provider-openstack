@@ -189,6 +189,10 @@ type CreateOpts struct {
 	// ServiceClient will allow calls to be made to retrieve an image or
 	// flavor ID by name.
 	ServiceClient *gophercloud.ServiceClient `json:"-"`
+
+	// Tags allows a server to be tagged with single-word metadata.
+	// Requires microversion 2.52 or later.
+	Tags []string `json:"tags,omitempty"`
 }
 
 // ToServerCreateMap assembles a request body based on the contents of a
@@ -303,6 +307,14 @@ func ForceDelete(client *gophercloud.ServiceClient, id string) (r ActionResult) 
 func Get(client *gophercloud.ServiceClient, id string) (r GetResult) {
 	_, r.Err = client.Get(getURL(client, id), &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200, 203},
+	})
+	return
+}
+
+//Lists all tags for a server.
+func GetSeverTags(client *gophercloud.ServiceClient, id string) (r GetResult) {
+	_, r.Err = client.Get(listServerTagsURL(client, id), &r.Body, &gophercloud.RequestOpts{
+		OkCodes: []int{200},
 	})
 	return
 }

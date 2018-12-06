@@ -16,6 +16,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/pagination"
+	"reflect"
 )
 
 func TestAccComputeV2Instance_basic(t *testing.T) {
@@ -35,6 +36,26 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 						"openstack_compute_instance_v2.instance_1", "all_metadata.foo", "bar"),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_instance_v2.instance_1", "availability_zone", "nova"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_tags(t *testing.T) {
+	var instance servers.Server
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeV2Instance_tags,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.tags_1", &instance),
+					testAccCheckComputeV2InstanceTags(
+						&instance,
+						[]string{"a", "b", "c"}),
 				),
 			},
 		},
@@ -611,6 +632,26 @@ func testAccCheckComputeV2InstanceExists(n string, instance *servers.Server) res
 	}
 }
 
+func testAccCheckComputeV2InstanceTags(instance *servers.Server, tags []string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
+		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		}
+		result := servers.GetSeverTags(computeClient, instance.ID)
+		v, ok := result.Body.(map[string][]string)
+		if ok {
+			if !reflect.DeepEqual(v["tags"], tags) {
+				return fmt.Errorf(
+					"server tags: expected: %#v, got %#v", tags, v["tags"])
+			}
+			return nil
+		}
+		return fmt.Errorf("tags not found: %s", tags)
+	}
+}
+
 func testAccCheckComputeV2InstanceDoesNotExist(n string, instance *servers.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
@@ -731,6 +772,17 @@ resource "openstack_compute_instance_v2" "instance_1" {
   metadata {
     foo = "bar"
   }
+  network {
+    uuid = "%s"
+  }
+}
+`, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_tags = fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "tags_1" {
+  name = "tags_1"
+  security_groups = ["default"]
+  tags=["a","b","c"]
   network {
     uuid = "%s"
   }
