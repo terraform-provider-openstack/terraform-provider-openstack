@@ -109,10 +109,18 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
 }
 
+resource "openstack_lb_pool_v2" "pool_1" {
+  name            = "pool_1"
+  protocol        = "HTTP"
+  lb_method       = "ROUND_ROBIN"
+  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+}
+
 resource "openstack_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
+  default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
 
 	timeouts {
@@ -147,6 +155,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
   protocol_port = 8080
   connection_limit = 100
   admin_state_up = "true"
+  default_pool_id = ""
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
 
 	timeouts {

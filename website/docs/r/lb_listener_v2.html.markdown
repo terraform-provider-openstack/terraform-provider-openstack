@@ -46,7 +46,7 @@ The following arguments are supported:
     to be unique.
 
 * `default_pool_id` - (Optional) The ID of the default pool with which the
-    Listener is associated. Changing this creates a new Listener.
+    Listener is associated.
 
 * `description` - (Optional) Human-readable description for the Listener.
 
