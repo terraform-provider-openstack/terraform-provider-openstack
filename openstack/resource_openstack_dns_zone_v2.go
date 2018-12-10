@@ -188,7 +188,8 @@ func resourceDNSZoneV2Update(d *schema.ResourceData, meta interface{}) error {
 		updateOpts.Masters = masters
 	}
 	if d.HasChange("description") {
-		updateOpts.Description = d.Get("description").(string)
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
 	}
 
 	log.Printf("[DEBUG] Updating Zone %s with options: %#v", d.Id(), updateOpts)

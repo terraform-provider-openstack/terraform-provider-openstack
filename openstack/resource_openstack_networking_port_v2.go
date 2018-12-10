@@ -369,7 +369,8 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("name") {
 		hasChange = true
-		updateOpts.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
 	}
 
 	if d.HasChange("admin_state_up") {
@@ -379,12 +380,14 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("device_owner") {
 		hasChange = true
-		updateOpts.DeviceOwner = d.Get("device_owner").(string)
+		deviceOwner := d.Get("device_owner").(string)
+		updateOpts.DeviceOwner = &deviceOwner
 	}
 
 	if d.HasChange("device_id") {
 		hasChange = true
-		updateOpts.DeviceID = d.Get("device_id").(string)
+		deviceId := d.Get("device_id").(string)
+		updateOpts.DeviceID = &deviceId
 	}
 
 	if d.HasChange("fixed_ip") || d.HasChange("no_fixed_ip") {

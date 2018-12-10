@@ -262,10 +262,12 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 		updateOpts.LBMethod = pools.LBMethod(d.Get("lb_method").(string))
 	}
 	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
 	}
 	if d.HasChange("description") {
-		updateOpts.Description = d.Get("description").(string)
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
 	}
 	if d.HasChange("admin_state_up") {
 		asu := d.Get("admin_state_up").(bool)

@@ -155,11 +155,13 @@ func resourceFWPolicyV1Update(d *schema.ResourceData, meta interface{}) error {
 	opts := policies.UpdateOpts{}
 
 	if d.HasChange("name") {
-		opts.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		opts.Name = &name
 	}
 
 	if d.HasChange("description") {
-		opts.Description = d.Get("description").(string)
+		description := d.Get("description").(string)
+		opts.Description = &description
 	}
 
 	if d.HasChange("rules") {

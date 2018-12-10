@@ -154,10 +154,13 @@ type UpdateOptsBuilder interface {
 // UpdateOpts represents options for updating a Listener.
 type UpdateOpts struct {
 	// Human-readable name for the Listener. Does not have to be unique.
-	Name string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty"`
+
+	// The ID of the default pool with which the Listener is associated.
+	DefaultPoolID *string `json:"default_pool_id,omitempty"`
 
 	// Human-readable description for the Listener.
-	Description string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty"`
 
 	// The maximum number of connections allowed for the Listener.
 	ConnLimit *int `json:"connection_limit,omitempty"`

@@ -208,9 +208,11 @@ func resourceBlockStorageVolumeV1Update(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
+	name := d.Get("name").(string)
+	description := d.Get("description").(string)
 	updateOpts := volumes.UpdateOpts{
-		Name:        d.Get("name").(string),
-		Description: d.Get("description").(string),
+		Name:        &name,
+		Description: &description,
 	}
 
 	if d.HasChange("metadata") {

@@ -194,11 +194,13 @@ func resourceFWFirewallV1Update(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	if d.HasChange("name") {
-		opts.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		opts.Name = &name
 	}
 
 	if d.HasChange("description") {
-		opts.Description = d.Get("description").(string)
+		description := d.Get("description").(string)
+		opts.Description = &description
 	}
 
 	if d.HasChange("admin_state_up") {

@@ -182,9 +182,10 @@ func resourceComputeSecGroupV2Update(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
+	description := d.Get("description").(string)
 	updateOpts := secgroups.UpdateOpts{
 		Name:        d.Get("name").(string),
-		Description: d.Get("description").(string),
+		Description: &description,
 	}
 
 	log.Printf("[DEBUG] openstack_compute_secgroup_v2 %s Update Options: %#v", d.Id(), updateOpts)
