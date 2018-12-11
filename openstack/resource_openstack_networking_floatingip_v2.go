@@ -185,13 +185,12 @@ func resourceNetworkFloatingIPV2Update(d *schema.ResourceData, meta interface{})
 	if d.HasChange("port_id") {
 		portID := d.Get("port_id").(string)
 		updateOpts.PortID = &portID
-	}
 
-	log.Printf("[DEBUG] Update Options: %#v", updateOpts)
-
-	_, err = floatingips.Update(networkingClient, d.Id(), updateOpts).Extract()
-	if err != nil {
-		return fmt.Errorf("Error updating floating IP: %s", err)
+		log.Printf("[DEBUG] Update Options: %#v", updateOpts)
+		_, err = floatingips.Update(networkingClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating floating IP: %s", err)
+		}
 	}
 
 	if d.HasChange("tags") {

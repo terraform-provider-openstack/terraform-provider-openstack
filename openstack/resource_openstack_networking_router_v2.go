@@ -314,11 +314,14 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	var hasChange bool
 	var updateOpts routers.UpdateOpts
 	if d.HasChange("name") {
+		hasChange = true
 		updateOpts.Name = d.Get("name").(string)
 	}
 	if d.HasChange("admin_state_up") {
+		hasChange = true
 		asu := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &asu
 	}
@@ -371,14 +374,16 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if updateGatewaySettings {
+		hasChange = true
 		updateOpts.GatewayInfo = &gatewayInfo
 	}
 
-	log.Printf("[DEBUG] Updating Router %s with options: %+v", d.Id(), updateOpts)
-
-	_, err = routers.Update(networkingClient, d.Id(), updateOpts).Extract()
-	if err != nil {
-		return fmt.Errorf("Error updating OpenStack Neutron Router: %s", err)
+	if hasChange {
+		log.Printf("[DEBUG] Updating Router %s with options: %+v", d.Id(), updateOpts)
+		_, err = routers.Update(networkingClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenStack Neutron Router: %s", err)
+		}
 	}
 
 	if d.HasChange("tags") {
