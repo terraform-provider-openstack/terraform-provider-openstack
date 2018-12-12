@@ -171,6 +171,7 @@ func resourceSharedfilesystemSecurityserviceV2Read(d *schema.ResourceData, meta 
 	d.Set("dns_ip", securityservice.DNSIP)
 	d.Set("user", securityservice.User)
 	d.Set("server", securityservice.Server)
+	d.Set("region", GetRegion(d, config))
 
 	if ouErr == nil {
 		d.Set("ou", securityservice.OU)

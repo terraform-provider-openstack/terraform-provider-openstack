@@ -168,6 +168,7 @@ func resourceSharedfilesystemSharenetworkV2Read(d *schema.ResourceData, meta int
 	d.Set("neutron_net_id", sharenetwork.NeutronNetID)
 	d.Set("neutron_subnet_id", sharenetwork.NeutronSubnetID)
 	d.Set("project_id", sharenetwork.ProjectID)
+	d.Set("region", GetRegion(d, config))
 	// Computed
 	d.Set("network_type", sharenetwork.NetworkType)
 	d.Set("segmentation_id", sharenetwork.SegmentationID)
