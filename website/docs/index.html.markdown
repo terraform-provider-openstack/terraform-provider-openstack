@@ -318,6 +318,9 @@ the feature or bug you're testing:
 * `OS_VPN_ENVIRONMENT` - Required if your'e working on the `openstack_vpn_*`
   resources. Set this value to "1" to enable testing these resources.
 
+* `OS_SFS_ENVIRONMENT` - Required if your'e working on the `openstack_openstack_sharedfilesystem_*`
+  resources. Set this value to "1" to enable testing these resources.
+
 We recommend only running the acceptance tests related to the feature or bug
 you're working on. To do this, run:
 
