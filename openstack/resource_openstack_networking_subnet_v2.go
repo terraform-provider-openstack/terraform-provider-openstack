@@ -301,13 +301,16 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	var hasChange bool
 	var updateOpts subnets.UpdateOpts
 
 	if d.HasChange("name") {
+		hasChange = true
 		updateOpts.Name = d.Get("name").(string)
 	}
 
 	if d.HasChange("gateway_ip") {
+		hasChange = true
 		updateOpts.GatewayIP = nil
 		if v, ok := d.GetOk("gateway_ip"); ok {
 			gatewayIP := v.(string)
@@ -317,6 +320,7 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 
 	if d.HasChange("no_gateway") {
 		if d.Get("no_gateway").(bool) {
+			hasChange = true
 			gatewayIP := ""
 			updateOpts.GatewayIP = &gatewayIP
 		}
@@ -326,28 +330,33 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 		if err = resourceSubnetDNSNameserversV2CheckIsSet(d); err != nil {
 			return err
 		}
+		hasChange = true
 		updateOpts.DNSNameservers = resourceSubnetDNSNameserversV2(d)
 	}
 
 	if d.HasChange("host_routes") {
+		hasChange = true
 		newHostRoutes := resourceSubnetHostRoutesV2(d)
 		updateOpts.HostRoutes = &newHostRoutes
 	}
 
 	if d.HasChange("enable_dhcp") {
+		hasChange = true
 		v := d.Get("enable_dhcp").(bool)
 		updateOpts.EnableDHCP = &v
 	}
 
 	if d.HasChange("allocation_pools") {
+		hasChange = true
 		updateOpts.AllocationPools = resourceSubnetAllocationPoolsV2(d)
 	}
 
-	log.Printf("[DEBUG] Updating Subnet %s with options: %+v", d.Id(), updateOpts)
-
-	_, err = subnets.Update(networkingClient, d.Id(), updateOpts).Extract()
-	if err != nil {
-		return fmt.Errorf("Error updating OpenStack Neutron Subnet: %s", err)
+	if hasChange {
+		log.Printf("[DEBUG] Updating Subnet %s with options: %+v", d.Id(), updateOpts)
+		_, err = subnets.Update(networkingClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenStack Neutron Subnet: %s", err)
+		}
 	}
 
 	if d.HasChange("tags") {

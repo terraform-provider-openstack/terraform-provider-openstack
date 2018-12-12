@@ -239,57 +239,69 @@ func resourceNetworkingSubnetPoolV2Update(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	var hasChange bool
 	var updateOpts subnetpools.UpdateOpts
 
 	if d.HasChange("name") {
+		hasChange = true
 		updateOpts.Name = d.Get("name").(string)
 	}
 
 	if d.HasChange("default_quota") {
+		hasChange = true
 		v := d.Get("default_quota").(int)
 		updateOpts.DefaultQuota = &v
 	}
 
 	if d.HasChange("project_id") {
+		hasChange = true
 		updateOpts.ProjectID = d.Get("project_id").(string)
 	}
 
 	if d.HasChange("prefixes") {
+		hasChange = true
 		updateOpts.Prefixes = resourceSubnetPoolPrefixesV2(d)
 	}
 
 	if d.HasChange("default_prefixlen") {
+		hasChange = true
 		updateOpts.DefaultPrefixLen = d.Get("default_prefixlen").(int)
 	}
 
 	if d.HasChange("min_prefixlen") {
+		hasChange = true
 		updateOpts.MinPrefixLen = d.Get("min_prefixlen").(int)
 	}
 
 	if d.HasChange("max_prefixlen") {
+		hasChange = true
 		updateOpts.MaxPrefixLen = d.Get("max_prefixlen").(int)
 	}
 
 	if d.HasChange("address_scope_id") {
+		hasChange = true
 		v := d.Get("address_scope_id").(string)
 		updateOpts.AddressScopeID = &v
 	}
 
 	if d.HasChange("description") {
+		hasChange = true
 		v := d.Get("description").(string)
 		updateOpts.Description = &v
 	}
 
 	if d.HasChange("is_default") {
+		hasChange = true
 		v := d.Get("is_default").(bool)
 		updateOpts.IsDefault = &v
 	}
 
-	log.Printf("[DEBUG] Updating Subnetpool %s with options: %+v", d.Id(), updateOpts)
-
-	_, err = subnetpools.Update(networkingClient, d.Id(), updateOpts).Extract()
-	if err != nil {
-		return fmt.Errorf("Error updating OpenStack Neutron Subnetpool: %s", err)
+	if hasChange {
+		log.Printf("[DEBUG] Updating Subnetpool %s with options: %+v", d.Id(), updateOpts)
+		_, err = subnetpools.Update(networkingClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenStack Neutron Subnetpool: %s", err)
+		}
 	}
 
 	if d.HasChange("tags") {
