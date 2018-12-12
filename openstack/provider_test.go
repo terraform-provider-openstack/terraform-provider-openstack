@@ -33,6 +33,7 @@ var (
 	OS_VPN_ENVIRONMENT             = os.Getenv("OS_VPN_ENVIRONMENT")
 	OS_USE_OCTAVIA                 = os.Getenv("OS_USE_OCTAVIA")
 	OS_CONTAINER_INFRA_ENVIRONMENT = os.Getenv("OS_CONTAINER_INFRA_ENVIRONMENT")
+	OS_SFS_ENVIRONMENT             = os.Getenv("OS_SFS_ENVIRONMENT")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -142,6 +143,15 @@ func testAccPreCheckContainerInfra(t *testing.T) {
 
 	if OS_CONTAINER_INFRA_ENVIRONMENT == "" {
 		t.Skip("This environment does not support Container Infra tests")
+	}
+}
+
+func testAccPreCheckSFS(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	// TODO: enable when ready in OpenLab
+	if false && OS_SFS_ENVIRONMENT == "" {
+		t.Skip("This environment does not support Shared File Systems tests")
 	}
 }
 
