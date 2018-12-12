@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"sort"
 	"strings"
 	"testing"
 
@@ -230,6 +231,9 @@ func testAccCheckSFSV2SharenetworkSecSvcExists(n string) resource.TestCheckFunc 
 				tf_security_service_ids = append(tf_security_service_ids, v)
 			}
 		}
+
+		sort.Strings(api_security_service_ids)
+		sort.Strings(tf_security_service_ids)
 
 		if !reflect.DeepEqual(api_security_service_ids, tf_security_service_ids) {
 			return fmt.Errorf("API and Terraform security service IDs don't correspond: %#v != %#v", api_security_service_ids, tf_security_service_ids)
