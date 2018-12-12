@@ -15,6 +15,7 @@ IMPROVEMENTS
 BUG FIXES
 
 * Allow instances to be in a state of `migrating` when performing a plan/refresh [GH-496]
+* Fix issue when `openstack_networking_floatingip_v2`, `openstack_networking_router_v2`, `openstack_networking_subnet_v2`, and `openstack_networking_subnetpool_v2` tag updates send empty updates for the resource. [GH-519]
 
 ## 1.12.0 (November 13, 2018)
 
