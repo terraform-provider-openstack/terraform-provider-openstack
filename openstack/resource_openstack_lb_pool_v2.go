@@ -177,21 +177,12 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutCreate)
-	lbID := createOpts.LoadbalancerID
-	listenerID := createOpts.ListenerID
-	if lbID != "" {
-		err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
-		if err != nil {
-			return err
-		}
-	} else if listenerID != "" {
-		// Wait for Listener to become active before continuing
-		err = waitForLBV2Listener(lbClient, listenerID, "ACTIVE", nil, timeout)
-		if err != nil {
-			return err
-		}
+
+	// Wait for LoadBalancer to become active before continuing
+	err = waitForLBV2viaLBorListener(lbClient, createOpts.LoadbalancerID, createOpts.ListenerID, "ACTIVE", []string{"PENDING_CREATE", "PENDING_UPDATE"}, timeout)
+	if err != nil {
+		return err
 	}
 
 	log.Printf("[DEBUG] Attempting to create pool")
@@ -209,12 +200,7 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for LoadBalancer to become active before continuing
-	if lbID != "" {
-		err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
-	} else {
-		// Pool exists by now so we can ask for lbID
-		err = waitForLBV2viaPool(lbClient, pool.ID, "ACTIVE", timeout)
-	}
+	err = waitForLBV2viaLBorListener(lbClient, createOpts.LoadbalancerID, createOpts.ListenerID, "ACTIVE", []string{"PENDING_CREATE", "PENDING_UPDATE"}, timeout)
 	if err != nil {
 		return err
 	}
@@ -238,6 +224,16 @@ func resourcePoolV2Read(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Retrieved pool %s: %#v", d.Id(), pool)
 
+	if len(pool.Loadbalancers) > 0 {
+		d.Set("loadbalancer_id", pool.Loadbalancers[0].ID)
+	} else {
+		d.Set("loadbalancer_id", "")
+	}
+	if len(pool.Listeners) > 0 {
+		d.Set("listener_id", pool.Listeners[0].ID)
+	} else {
+		d.Set("listener_id", "")
+	}
 	d.Set("lb_method", pool.LBMethod)
 	d.Set("protocol", pool.Protocol)
 	d.Set("description", pool.Description)
@@ -277,11 +273,8 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	lbID := d.Get("loadbalancer_id").(string)
-	if lbID != "" {
-		err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
-	} else {
-		err = waitForLBV2viaPool(lbClient, d.Id(), "ACTIVE", timeout)
-	}
+	listenerID := d.Get("listener_id").(string)
+	err = waitForLBV2viaLBorListener(lbClient, lbID, listenerID, "ACTIVE", []string{"PENDING_CREATE", "PENDING_UPDATE"}, timeout)
 	if err != nil {
 		return err
 	}
@@ -300,11 +293,7 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for LoadBalancer to become active before continuing
-	if lbID != "" {
-		err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
-	} else {
-		err = waitForLBV2viaPool(lbClient, d.Id(), "ACTIVE", timeout)
-	}
+	err = waitForLBV2viaLBorListener(lbClient, lbID, listenerID, "ACTIVE", []string{"PENDING_CREATE", "PENDING_UPDATE"}, timeout)
 	if err != nil {
 		return err
 	}
@@ -322,11 +311,11 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutDelete)
 	lbID := d.Get("loadbalancer_id").(string)
-	if lbID != "" {
-		err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
-		if err != nil {
-			return err
-		}
+	listenerID := d.Get("listener_id").(string)
+
+	err = waitForLBV2viaLBorListener(lbClient, lbID, listenerID, "ACTIVE", []string{"PENDING_CREATE", "PENDING_UPDATE"}, timeout)
+	if err != nil {
+		return err
 	}
 
 	log.Printf("[DEBUG] Attempting to delete pool %s", d.Id())
@@ -338,12 +327,17 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	})
 
-	if lbID != "" {
-		err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
-	} else {
-		// Wait for Pool to delete
-		err = waitForLBV2Pool(lbClient, d.Id(), "DELETED", nil, timeout)
+	if err != nil {
+		return fmt.Errorf("Unale to delete pool %s: %s", d.Id(), err)
 	}
+
+	// Wait for Pool to delete
+	err = waitForLBV2Pool(lbClient, d.Id(), "DELETED", nil, timeout)
+	if err != nil {
+		return err
+	}
+
+	err = waitForLBV2viaLBorListener(lbClient, lbID, listenerID, "ACTIVE", []string{"PENDING_CREATE", "PENDING_UPDATE"}, timeout)
 	if err != nil {
 		return err
 	}

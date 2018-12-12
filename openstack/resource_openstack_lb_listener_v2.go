@@ -74,7 +74,6 @@ func resourceListenerV2() *schema.Resource {
 			"default_pool_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 			},
 
 			"description": &schema.Schema{
@@ -145,7 +144,7 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 	// Wait for LoadBalancer to become active before continuing
 	lbID := createOpts.LoadbalancerID
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
+	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", []string{"PENDING_CREATE", "PENDING_UPDATE"}, timeout)
 	if err != nil {
 		return err
 	}
@@ -159,12 +158,13 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 		}
 		return nil
 	})
+
 	if err != nil {
 		return fmt.Errorf("Error creating listener: %s", err)
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
+	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", []string{"PENDING_CREATE", "PENDING_UPDATE"}, timeout)
 	if err != nil {
 		return err
 	}
@@ -247,7 +247,7 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	// Wait for LoadBalancer to become active before continuing
 	lbID := d.Get("loadbalancer_id").(string)
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
+	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", []string{"PENDING_CREATE", "PENDING_UPDATE"}, timeout)
 	if err != nil {
 		return err
 	}
@@ -266,7 +266,7 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
+	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", []string{"PENDING_CREATE", "PENDING_UPDATE"}, timeout)
 	if err != nil {
 		return err
 	}
@@ -285,7 +285,7 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 	// Wait for LoadBalancer to become active before continuing
 	lbID := d.Get("loadbalancer_id").(string)
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
+	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", []string{"PENDING_CREATE", "PENDING_UPDATE"}, timeout)
 	if err != nil {
 		return err
 	}
@@ -304,7 +304,7 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", nil, timeout)
+	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", []string{"PENDING_CREATE", "PENDING_UPDATE"}, timeout)
 	if err != nil {
 		return err
 	}

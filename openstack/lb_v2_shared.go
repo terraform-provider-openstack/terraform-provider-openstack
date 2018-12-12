@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/monitors"
@@ -234,31 +235,84 @@ func resourceLBV2PoolRefreshFunc(lbClient *gophercloud.ServiceClient, poolID str
 	}
 }
 
-func waitForLBV2viaPool(lbClient *gophercloud.ServiceClient, id string, target string, timeout time.Duration) error {
+func waitForLBV2viaPool(lbClient *gophercloud.ServiceClient, id string, target string, pending []string, timeout time.Duration) error {
 	pool, err := pools.Get(lbClient, id).Extract()
 	if err != nil {
 		return err
 	}
 
-	if pool.Loadbalancers != nil {
-		// each pool has an LB in Octavia lbaasv2 API
-		lbID := pool.Loadbalancers[0].ID
-		return waitForLBV2LoadBalancer(lbClient, lbID, target, nil, timeout)
+	lbID := ""
+	listenerID := ""
+	if len(pool.Loadbalancers) > 0 {
+		lbID = pool.Loadbalancers[0].ID
+	}
+	if len(pool.Listeners) > 0 {
+		listenerID = pool.Listeners[0].ID
 	}
 
-	if pool.Listeners != nil {
-		// each pool has a listener in Neutron lbaasv2 API
-		listenerID := pool.Listeners[0].ID
-		listener, err := listeners.Get(lbClient, listenerID).Extract()
+	return waitForLBV2viaLBorListener(lbClient, lbID, listenerID, target, pending, timeout)
+}
+
+func waitForLBV2viaLBorListener(lbClient *gophercloud.ServiceClient, lbID string, listenerID string, target string, pending []string, timeout time.Duration) error {
+	if lbID != "" {
+		return waitForLBV2LoadBalancer(lbClient, lbID, target, pending, timeout)
+	}
+	if listenerID != "" {
+		return waitForLBV2viaListener(lbClient, listenerID, target, pending, timeout)
+	}
+	return fmt.Errorf("Neither Load Balancer ID nor Listener ID were provided")
+}
+
+func waitForLBV2viaListener(lbClient *gophercloud.ServiceClient, id string, target string, pending []string, timeout time.Duration) error {
+	listener, err := listeners.Get(lbClient, id).Extract()
+	if err != nil {
+		return err
+	}
+	if len(listener.Loadbalancers) > 0 {
+		lbID := listener.Loadbalancers[0].ID
+		return waitForLBV2LoadBalancer(lbClient, lbID, target, pending, timeout)
+	}
+
+	// got a listener but no LB - this is wrong
+	return fmt.Errorf("No Load Balancer on listener %s", id)
+}
+
+func waitForLBV2L7policy(lbClient *gophercloud.ServiceClient, id string, target string, pending []string, timeout time.Duration) error {
+	log.Printf("[DEBUG] Waiting for l7policy %s to become %s.", id, target)
+
+	stateConf := &resource.StateChangeConf{
+		Target:     []string{target},
+		Pending:    pending,
+		Refresh:    resourceLBV2L7policyRefreshFunc(lbClient, id),
+		Timeout:    timeout,
+		Delay:      1 * time.Second,
+		MinTimeout: 1 * time.Second,
+	}
+
+	_, err := stateConf.WaitForState()
+	if err != nil {
+		if _, ok := err.(gophercloud.ErrDefault404); ok {
+			switch target {
+			case "DELETED":
+				return nil
+			default:
+				return fmt.Errorf("Error: l7policy %s not found: %s", id, err)
+			}
+		}
+		return fmt.Errorf("Error waiting for l7policy %s to become %s: %s", id, target, err)
+	}
+
+	return nil
+}
+
+func resourceLBV2L7policyRefreshFunc(lbClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		l7policy, err := l7policies.Get(lbClient, id).Extract()
 		if err != nil {
-			return err
+			return nil, "", err
 		}
-		if listener.Loadbalancers != nil {
-			lbID := listener.Loadbalancers[0].ID
-			return waitForLBV2LoadBalancer(lbClient, lbID, target, nil, timeout)
-		}
-	}
 
-	// got a pool but no LB - this is wrong
-	return fmt.Errorf("No Load Balancer on pool %s", id)
+		// The l7policy resource has no Status attribute, so a successful Get is the best we can do
+		return l7policy, "ACTIVE", nil
+	}
 }
