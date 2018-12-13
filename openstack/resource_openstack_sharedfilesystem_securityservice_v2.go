@@ -11,6 +11,11 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/securityservices"
 )
 
+const (
+	minManilaMicroversion   = "2.7"
+	minOUManilaMicroversion = "2.44"
+)
+
 func resourceSharedFilesystemSecurityServiceV2() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceSharedFilesystemSecurityServiceV2Create,
@@ -99,10 +104,7 @@ func resourceSharedFilesystemSecurityServiceV2Create(d *schema.ResourceData, met
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	mvSet, ouErr := setManilaMicroversion(sfsClient)
-	if !mvSet && ouErr != nil {
-		return ouErr
-	}
+	sfsClient.Microversion = minManilaMicroversion
 
 	createOpts := securityservices.CreateOpts{
 		Name:        d.Get("name").(string),
@@ -115,11 +117,9 @@ func resourceSharedFilesystemSecurityServiceV2Create(d *schema.ResourceData, met
 	}
 
 	if v, ok := d.GetOkExists("ou"); ok {
-		if ouErr == nil {
-			createOpts.OU = v.(string)
-		} else {
-			return ouErr
-		}
+		createOpts.OU = v.(string)
+
+		sfsClient.Microversion = minOUManilaMicroversion
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -142,14 +142,24 @@ func resourceSharedFilesystemSecurityServiceV2Read(d *schema.ResourceData, meta 
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	mvSet, ouErr := setManilaMicroversion(sfsClient)
-	if !mvSet && ouErr != nil {
-		return ouErr
+	sfsClient.Microversion = minManilaMicroversion
+
+	if _, ok := d.GetOkExists("ou"); ok {
+		sfsClient.Microversion = minOUManilaMicroversion
 	}
 
 	securityservice, err := securityservices.Get(sfsClient, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "securityservice")
+	}
+
+	// Workaround for resource import
+	if securityservice.OU == "" {
+		sfsClient.Microversion = minOUManilaMicroversion
+		securityserviceOU, err := securityservices.Get(sfsClient, d.Id()).Extract()
+		if err == nil {
+			d.Set("ou", securityserviceOU.OU)
+		}
 	}
 
 	nopassword := securityservice
@@ -166,10 +176,6 @@ func resourceSharedFilesystemSecurityServiceV2Read(d *schema.ResourceData, meta 
 	d.Set("server", securityservice.Server)
 	d.Set("region", GetRegion(d, config))
 
-	if ouErr == nil {
-		d.Set("ou", securityservice.OU)
-	}
-
 	return nil
 }
 
@@ -180,10 +186,7 @@ func resourceSharedFilesystemSecurityServiceV2Update(d *schema.ResourceData, met
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	mvSet, ouErr := setManilaMicroversion(sfsClient)
-	if !mvSet && ouErr != nil {
-		return ouErr
-	}
+	sfsClient.Microversion = minManilaMicroversion
 
 	var updateOpts securityservices.UpdateOpts
 	// Name should always be sent, otherwise it is vanished by manila backend
@@ -201,12 +204,10 @@ func resourceSharedFilesystemSecurityServiceV2Update(d *schema.ResourceData, met
 		updateOpts.DNSIP = &dnsIP
 	}
 	if d.HasChange("ou") {
-		if ouErr == nil {
-			ou := d.Get("ou").(string)
-			updateOpts.OU = &ou
-		} else {
-			return ouErr
-		}
+		ou := d.Get("ou").(string)
+		updateOpts.OU = &ou
+
+		sfsClient.Microversion = minOUManilaMicroversion
 	}
 	if d.HasChange("user") {
 		user := d.Get("user").(string)
