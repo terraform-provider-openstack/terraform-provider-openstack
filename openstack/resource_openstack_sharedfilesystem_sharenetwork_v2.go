@@ -37,9 +37,7 @@ func resourceSharedfilesystemSharenetworkV2() *schema.Resource {
 
 			"project_id": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 
 			"name": &schema.Schema{
@@ -118,14 +116,12 @@ func resourceSharedfilesystemSharenetworkV2Create(d *schema.ResourceData, meta i
 	d.SetId(sharenetwork.ID)
 
 	securityServiceIDs := resourceSharedfilesystemSharenetworkSecurityServicesV2(d.Get("security_service_ids").(*schema.Set))
-	if len(securityServiceIDs) > 0 {
-		for _, securityServiceID := range securityServiceIDs {
-			log.Printf("[DEBUG] Adding %s security service to sharenetwork %s", securityServiceID, sharenetwork.ID)
-			securityServiceOpts := sharenetworks.AddSecurityServiceOpts{SecurityServiceID: securityServiceID}
-			_, err = sharenetworks.AddSecurityService(sfsClient, sharenetwork.ID, securityServiceOpts).Extract()
-			if err != nil {
-				return fmt.Errorf("Error adding %s security service to sharenetwork: %s", securityServiceID, err)
-			}
+	for _, securityServiceID := range securityServiceIDs {
+		log.Printf("[DEBUG] Adding %s security service to sharenetwork %s", securityServiceID, sharenetwork.ID)
+		securityServiceOpts := sharenetworks.AddSecurityServiceOpts{SecurityServiceID: securityServiceID}
+		_, err = sharenetworks.AddSecurityService(sfsClient, sharenetwork.ID, securityServiceOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error adding %s security service to sharenetwork: %s", securityServiceID, err)
 		}
 	}
 
@@ -211,26 +207,25 @@ func resourceSharedfilesystemSharenetworkV2Update(d *schema.ResourceData, meta i
 
 	if d.HasChange("security_service_ids") {
 		old, new := d.GetChange("security_service_ids")
-		oldSecurityServiceIDs := resourceSharedfilesystemSharenetworkSecurityServicesV2(old.(*schema.Set))
-		newSecurityServiceIDs := resourceSharedfilesystemSharenetworkSecurityServicesV2(new.(*schema.Set))
-		for _, newSecurityServiceID := range newSecurityServiceIDs {
-			if !inArray(newSecurityServiceID, &oldSecurityServiceIDs) {
-				log.Printf("[DEBUG] Adding new %s security service to sharenetwork %s", newSecurityServiceID, d.Id())
-				securityServiceOpts := sharenetworks.AddSecurityServiceOpts{SecurityServiceID: newSecurityServiceID}
-				_, err = sharenetworks.AddSecurityService(sfsClient, d.Id(), securityServiceOpts).Extract()
-				if err != nil {
-					return fmt.Errorf("Error adding new %s security service to sharenetwork: %s", newSecurityServiceID, err)
-				}
+
+		oldList, newList := old.(*schema.Set), new.(*schema.Set)
+		newSecurityServiceIDs := newList.Difference(oldList)
+		oldSecurityServiceIDs := oldList.Difference(newList)
+
+		for _, newSecurityServiceID := range newSecurityServiceIDs.List() {
+			log.Printf("[DEBUG] Adding new %s security service to sharenetwork %s", newSecurityServiceID, d.Id())
+			securityServiceOpts := sharenetworks.AddSecurityServiceOpts{SecurityServiceID: newSecurityServiceID.(string)}
+			_, err = sharenetworks.AddSecurityService(sfsClient, d.Id(), securityServiceOpts).Extract()
+			if err != nil {
+				return fmt.Errorf("Error adding new %s security service to sharenetwork: %s", newSecurityServiceID, err)
 			}
 		}
-		for _, oldSecurityServiceID := range oldSecurityServiceIDs {
-			if !inArray(oldSecurityServiceID, &newSecurityServiceIDs) {
-				log.Printf("[DEBUG] Removing old %s security service from sharenetwork %s", oldSecurityServiceID, d.Id())
-				securityServiceOpts := sharenetworks.RemoveSecurityServiceOpts{SecurityServiceID: oldSecurityServiceID}
-				_, err = sharenetworks.RemoveSecurityService(sfsClient, d.Id(), securityServiceOpts).Extract()
-				if err != nil {
-					return fmt.Errorf("Error removing old %s security service from sharenetwork: %s", oldSecurityServiceID, err)
-				}
+		for _, oldSecurityServiceID := range oldSecurityServiceIDs.List() {
+			log.Printf("[DEBUG] Removing old %s security service from sharenetwork %s", oldSecurityServiceID, d.Id())
+			securityServiceOpts := sharenetworks.RemoveSecurityServiceOpts{SecurityServiceID: oldSecurityServiceID.(string)}
+			_, err = sharenetworks.RemoveSecurityService(sfsClient, d.Id(), securityServiceOpts).Extract()
+			if err != nil {
+				return fmt.Errorf("Error removing old %s security service from sharenetwork: %s", oldSecurityServiceID, err)
 			}
 		}
 	}
@@ -251,8 +246,6 @@ func resourceSharedfilesystemSharenetworkV2Delete(d *schema.ResourceData, meta i
 		return fmt.Errorf("Error deleting sharenetwork: %s", err)
 	}
 
-	d.SetId("")
-
 	return nil
 }
 
@@ -270,13 +263,4 @@ func resourceSharedfilesystemSharenetworkSecurityServices2IDsV2(v *[]securityser
 		securityServicesIDs = append(securityServicesIDs, securityService.ID)
 	}
 	return securityServicesIDs
-}
-
-func inArray(a string, s *[]string) bool {
-	for _, b := range *s {
-		if a == b {
-			return true
-		}
-	}
-	return false
 }

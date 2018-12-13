@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/securityservices"
 )
@@ -36,9 +37,7 @@ func resourceSharedfilesystemSecurityserviceV2() *schema.Resource {
 
 			"project_id": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 
 			"name": &schema.Schema{
@@ -54,14 +53,9 @@ func resourceSharedfilesystemSecurityserviceV2() *schema.Resource {
 			"type": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if value != "active_directory" && value != "kerberos" && value != "ldap" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'active_directory', 'kerberos' and 'ldap' are supported values for 'type'"))
-					}
-					return
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"active_directory", "kerberos", "ldap",
+				}, true),
 			},
 
 			"dns_ip": &schema.Schema{
@@ -120,10 +114,9 @@ func resourceSharedfilesystemSecurityserviceV2Create(d *schema.ResourceData, met
 		Server:      d.Get("server").(string),
 	}
 
-	ou := d.Get("ou").(string)
-	if ou != "" {
+	if v, ok := d.GetOkExists("ou"); ok {
 		if ouErr == nil {
-			createOpts.OU = ou
+			createOpts.OU = v.(string)
 		} else {
 			return ouErr
 		}
@@ -175,8 +168,6 @@ func resourceSharedfilesystemSecurityserviceV2Read(d *schema.ResourceData, meta 
 
 	if ouErr == nil {
 		d.Set("ou", securityservice.OU)
-	} else {
-		d.Set("ou", "")
 	}
 
 	return nil
@@ -257,8 +248,6 @@ func resourceSharedfilesystemSecurityserviceV2Delete(d *schema.ResourceData, met
 	if err != nil {
 		return fmt.Errorf("Error deleting securityservice: %s", err)
 	}
-
-	d.SetId("")
 
 	return nil
 }

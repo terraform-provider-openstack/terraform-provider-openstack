@@ -85,10 +85,6 @@ The following arguments are supported:
     `region` argument of the provider is used. Changing this creates a new
     share network.
 
-* `project_id` - (Optional) The owner of the subnetpool. Required if admin wants to
-    create a subnetpool for another project. Changing this creates a new
-    share network.
-
 * `name` - (Optional) The name of the share network. Changing this updates the name
     of the existing share network.
 
@@ -110,7 +106,7 @@ The following arguments are supported:
 
 * `id` - The unique ID for the Share Network.
 * `region` - See Argument Reference above.
-* `project_id` - See Argument Reference above.
+* `project_id` - The owner of the Share Network.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `neutron_net_id` - See Argument Reference above.

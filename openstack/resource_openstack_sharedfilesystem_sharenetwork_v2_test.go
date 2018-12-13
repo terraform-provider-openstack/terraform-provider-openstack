@@ -349,10 +349,6 @@ resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_2" {
   type        = "kerberos"
   server      = "192.168.199.11"
   dns_ip      = "192.168.199.11"
-  domain      = ""
-  ou          = ""
-  user        = ""
-  password    = ""
 }
 
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
@@ -400,10 +396,6 @@ resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_2" {
   type        = "kerberos"
   server      = "192.168.199.11"
   dns_ip      = "192.168.199.11"
-  domain      = ""
-  ou          = ""
-  user        = ""
-  password    = ""
 }
 
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
@@ -452,10 +444,6 @@ resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_2" {
   type        = "kerberos"
   server      = "192.168.199.11"
   dns_ip      = "192.168.199.11"
-  domain      = ""
-  ou          = ""
-  user        = ""
-  password    = ""
 }
 
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
@@ -499,14 +487,9 @@ resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
 
 resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_2" {
   name        = "security_through_obscurity"
-  description = ""
   type        = "kerberos"
   server      = "192.168.199.11"
   dns_ip      = "192.168.199.11"
-  domain      = ""
-  ou          = ""
-  user        = ""
-  password    = ""
 }
 
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {

@@ -152,9 +152,5 @@ resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
   type        = "kerberos"
   server      = "192.168.199.11"
   dns_ip      = "192.168.199.11"
-  domain      = ""
-  ou          = ""
-  user        = ""
-  password    = ""
 }
 `

@@ -42,10 +42,6 @@ The following arguments are supported:
     `region` argument of the provider is used. Changing this creates a new
     security service.
 
-* `project_id` - (Optional) The owner of the subnetpool. Required if admin wants to
-    create a subnetpool for another project. Changing this creates a new
-    security service.
-
 * `name` - (Optional) The name of the security service. Changing this updates the name
     of the existing security service.
 
@@ -74,7 +70,7 @@ The following arguments are supported:
 
 * `id` - The unique ID for the Security Service.
 * `region` - See Argument Reference above.
-* `project_id` - See Argument Reference above.
+* `project_id` - The owner of the Security Service.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `type` - See Argument Reference above.
