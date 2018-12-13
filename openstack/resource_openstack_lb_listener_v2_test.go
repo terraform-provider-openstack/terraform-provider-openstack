@@ -82,7 +82,7 @@ func testAccCheckLBV2ListenerExists(n string, listener *listeners.Listener) reso
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Member not found")
+			return fmt.Errorf("Listener not found")
 		}
 
 		*listener = *found
