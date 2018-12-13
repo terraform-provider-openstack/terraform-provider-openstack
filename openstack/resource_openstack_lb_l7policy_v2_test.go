@@ -262,7 +262,6 @@ resource "openstack_lb_pool_v2" "pool_1" {
 resource "openstack_lb_l7policy_v2" "l7policy_1" {
   name             = "test_updated"
   action           = "REDIRECT_TO_POOL"
-  description      = ""
   position         = 1
   listener_id      = "${openstack_lb_listener_v2.listener_1.id}"
   redirect_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
@@ -307,7 +306,6 @@ resource "openstack_lb_pool_v2" "pool_1" {
 resource "openstack_lb_l7policy_v2" "l7policy_1" {
   name             = "test_updated"
   action           = "REJECT"
-  description      = ""
   position         = 1
   listener_id      = "${openstack_lb_listener_v2.listener_1.id}"
 }

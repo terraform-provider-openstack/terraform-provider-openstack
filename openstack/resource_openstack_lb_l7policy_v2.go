@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
@@ -57,14 +58,9 @@ func resourceL7policyV2() *schema.Resource {
 			"action": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if value != "REDIRECT_TO_POOL" && value != "REDIRECT_TO_URL" && value != "REJECT" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'REDIRECT_TO_POOL', 'REDIRECT_TO_URL' and 'REJECT' are supported values for 'action'"))
-					}
-					return
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"REDIRECT_TO_POOL", "REDIRECT_TO_URL", "REJECT",
+				}, true),
 			},
 
 			"listener_id": &schema.Schema{
