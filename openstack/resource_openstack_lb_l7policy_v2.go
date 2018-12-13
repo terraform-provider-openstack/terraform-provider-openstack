@@ -335,6 +335,12 @@ func checkL7policyAction(lbClient *gophercloud.ServiceClient, opts interface{}, 
 	default:
 		return fmt.Errorf(`Invalid type: %s`, t)
 	}
+	if redirectURL == nil {
+		redirectURL = new(string)
+	}
+	if redirectPoolID == nil {
+		redirectPoolID = new(string)
+	}
 
 	if action == "REJECT" {
 		if *redirectURL != "" {
@@ -342,6 +348,11 @@ func checkL7policyAction(lbClient *gophercloud.ServiceClient, opts interface{}, 
 		}
 		if *redirectPoolID != "" {
 			return fmt.Errorf(`"redirect_pool_id" should be empty, when "action" is set to %s`, action)
+		}
+		if update != nil {
+			// We have to unset the value in order to change the "action" type
+			update.RedirectURL = nil
+			update.RedirectPoolID = nil
 		}
 	} else {
 		if action == "REDIRECT_TO_POOL" && *redirectURL == "" {
