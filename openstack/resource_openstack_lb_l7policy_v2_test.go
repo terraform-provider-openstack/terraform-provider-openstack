@@ -20,7 +20,7 @@ func TestAccLBV2L7policy_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2L7policyDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccCheckLBV2L7policyConfig_basic,
+				Config: testAccCheckLBV2L7policyConfig + testAccCheckLBV2L7policyConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7policyExists("openstack_lb_l7policy_v2.l7policy_1", &l7policy),
 					resource.TestCheckResourceAttr(
@@ -37,7 +37,7 @@ func TestAccLBV2L7policy_basic(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config: testAccCheckLBV2L7policyConfig_update1,
+				Config: testAccCheckLBV2L7policyConfig + testAccCheckLBV2L7policyConfig_update1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7policyExists("openstack_lb_l7policy_v2.l7policy_1", &l7policy),
 					resource.TestCheckResourceAttr(
@@ -56,7 +56,7 @@ func TestAccLBV2L7policy_basic(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config: testAccCheckLBV2L7policyConfig_update2,
+				Config: testAccCheckLBV2L7policyConfig + testAccCheckLBV2L7policyConfig_update2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7policyExists("openstack_lb_l7policy_v2.l7policy_1", &l7policy),
 					resource.TestCheckResourceAttr(
@@ -76,7 +76,7 @@ func TestAccLBV2L7policy_basic(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config: testAccCheckLBV2L7policyConfig_update3,
+				Config: testAccCheckLBV2L7policyConfig + testAccCheckLBV2L7policyConfig_update3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7policyExists("openstack_lb_l7policy_v2.l7policy_1", &l7policy),
 					resource.TestCheckResourceAttr(
@@ -149,7 +149,7 @@ func testAccCheckLBV2L7policyExists(n string, l7policy *l7policies.L7Policy) res
 	}
 }
 
-const testAccCheckLBV2L7policyConfig_basic = `
+const testAccCheckLBV2L7policyConfig = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -176,7 +176,9 @@ resource "openstack_lb_listener_v2" "listener_1" {
   protocol_port = 8080
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
 }
+`
 
+const testAccCheckLBV2L7policyConfig_basic = `
 resource "openstack_lb_l7policy_v2" "l7policy_1" {
   name         = "test"
   action       = "REJECT"
@@ -187,33 +189,6 @@ resource "openstack_lb_l7policy_v2" "l7policy_1" {
 `
 
 const testAccCheckLBV2L7policyConfig_update1 = `
-resource "openstack_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-  lifecycle {
-    ignore_changes = ["tags"]
-  }
-}
-
-resource "openstack_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-}
-
-resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
-  name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
-}
-
-resource "openstack_lb_listener_v2" "listener_1" {
-  name = "listener_1"
-  protocol = "HTTP"
-  protocol_port = 8080
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
-}
-
 resource "openstack_lb_l7policy_v2" "l7policy_1" {
   name         = "test"
   action       = "REDIRECT_TO_URL"
@@ -225,33 +200,6 @@ resource "openstack_lb_l7policy_v2" "l7policy_1" {
 `
 
 const testAccCheckLBV2L7policyConfig_update2 = `
-resource "openstack_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-  lifecycle {
-    ignore_changes = ["tags"]
-  }
-}
-
-resource "openstack_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-}
-
-resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
-  name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
-}
-
-resource "openstack_lb_listener_v2" "listener_1" {
-  name = "listener_1"
-  protocol = "HTTP"
-  protocol_port = 8080
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
-}
-
 resource "openstack_lb_pool_v2" "pool_1" {
   name            = "pool_1"
   protocol        = "HTTP"
@@ -269,33 +217,6 @@ resource "openstack_lb_l7policy_v2" "l7policy_1" {
 `
 
 const testAccCheckLBV2L7policyConfig_update3 = `
-resource "openstack_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-  lifecycle {
-    ignore_changes = ["tags"]
-  }
-}
-
-resource "openstack_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-}
-
-resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
-  name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
-}
-
-resource "openstack_lb_listener_v2" "listener_1" {
-  name = "listener_1"
-  protocol = "HTTP"
-  protocol_port = 8080
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
-}
-
 resource "openstack_lb_pool_v2" "pool_1" {
   name            = "pool_1"
   protocol        = "HTTP"
