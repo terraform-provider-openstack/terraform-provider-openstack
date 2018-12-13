@@ -270,8 +270,8 @@ func Provider() terraform.ResourceProvider {
 			"openstack_vpnaas_ike_policy_v2":                resourceIKEPolicyV2(),
 			"openstack_vpnaas_endpoint_group_v2":            resourceEndpointGroupV2(),
 			"openstack_vpnaas_site_connection_v2":           resourceSiteConnectionV2(),
-			"openstack_sharedfilesystem_securityservice_v2": resourceSharedfilesystemSecurityserviceV2(),
-			"openstack_sharedfilesystem_sharenetwork_v2":    resourceSharedfilesystemSharenetworkV2(),
+			"openstack_sharedfilesystem_securityservice_v2": resourceSharedFilesystemSecurityServiceV2(),
+			"openstack_sharedfilesystem_sharenetwork_v2":    resourceSharedFilesystemShareNetworkV2(),
 		},
 
 		ConfigureFunc: configureProvider,

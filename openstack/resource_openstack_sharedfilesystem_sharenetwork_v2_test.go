@@ -15,19 +15,19 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/sharenetworks"
 )
 
-func TestAccSFSV2Sharenetwork_basic(t *testing.T) {
+func TestAccSFSV2ShareNetwork_basic(t *testing.T) {
 	var sharenetwork1 sharenetworks.ShareNetwork
 	var sharenetwork2 sharenetworks.ShareNetwork
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckSFS(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSFSV2SharenetworkDestroy,
+		CheckDestroy: testAccCheckSFSV2ShareNetworkDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccSFSV2SharenetworkConfig_basic,
+				Config: testAccSFSV2ShareNetworkConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSFSV2SharenetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork1),
+					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork1),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "name", "test_sharenetwork"),
 					resource.TestCheckResourceAttr(
@@ -41,9 +41,9 @@ func TestAccSFSV2Sharenetwork_basic(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config: testAccSFSV2SharenetworkConfig_update,
+				Config: testAccSFSV2ShareNetworkConfig_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSFSV2SharenetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork2),
+					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork2),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "name", "test_sharenetwork_new_net"),
 					resource.TestCheckResourceAttr(
@@ -54,78 +54,78 @@ func TestAccSFSV2Sharenetwork_basic(t *testing.T) {
 					resource.TestMatchResourceAttr(
 						"openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "neutron_subnet_id",
 						regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
-					testAccCheckSFSV2SharenetworkNetDiffers(&sharenetwork1, &sharenetwork2),
+					testAccCheckSFSV2ShareNetworkNetDiffers(&sharenetwork1, &sharenetwork2),
 				),
 			},
 		},
 	})
 }
 
-func TestAccSFSV2Sharenetwork_secservice(t *testing.T) {
+func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 	var sharenetwork sharenetworks.ShareNetwork
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckSFS(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSFSV2SharenetworkDestroy,
+		CheckDestroy: testAccCheckSFSV2ShareNetworkDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccSFSV2SharenetworkConfig_secservice_1,
+				Config: testAccSFSV2ShareNetworkConfig_secservice_1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSFSV2SharenetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
+					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "name", "test_sharenetwork_secure"),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "description", "share the secure love"),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "security_service_ids.#", "1"),
-					testAccCheckSFSV2SharenetworkSecSvcExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1"),
+					testAccCheckSFSV2ShareNetworkSecSvcExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1"),
 				),
 			},
 			resource.TestStep{
-				Config: testAccSFSV2SharenetworkConfig_secservice_2,
+				Config: testAccSFSV2ShareNetworkConfig_secservice_2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSFSV2SharenetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
+					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "name", "test_sharenetwork_secure"),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "description", "share the secure love"),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "security_service_ids.#", "2"),
-					testAccCheckSFSV2SharenetworkSecSvcExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1"),
+					testAccCheckSFSV2ShareNetworkSecSvcExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1"),
 				),
 			},
 			resource.TestStep{
-				Config: testAccSFSV2SharenetworkConfig_secservice_3,
+				Config: testAccSFSV2ShareNetworkConfig_secservice_3,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSFSV2SharenetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
+					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "name", "test_sharenetwork_secure"),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "description", "share the secure love"),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "security_service_ids.#", "1"),
-					testAccCheckSFSV2SharenetworkSecSvcExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1"),
+					testAccCheckSFSV2ShareNetworkSecSvcExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1"),
 				),
 			},
 			resource.TestStep{
-				Config: testAccSFSV2SharenetworkConfig_secservice_4,
+				Config: testAccSFSV2ShareNetworkConfig_secservice_4,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSFSV2SharenetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
+					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "name", "test_sharenetwork"),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "description", "share the love"),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "security_service_ids.#", "0"),
-					testAccCheckSFSV2SharenetworkSecSvcExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1"),
+					testAccCheckSFSV2ShareNetworkSecSvcExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckSFSV2SharenetworkDestroy(s *terraform.State) error {
+func testAccCheckSFSV2ShareNetworkDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	sfsClient, err := config.sharedfilesystemV2Client(OS_REGION_NAME)
 	if err != nil {
@@ -150,7 +150,7 @@ func testAccCheckSFSV2SharenetworkDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckSFSV2SharenetworkExists(n string, sharenetwork *sharenetworks.ShareNetwork) resource.TestCheckFunc {
+func testAccCheckSFSV2ShareNetworkExists(n string, sharenetwork *sharenetworks.ShareNetwork) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -186,7 +186,7 @@ func testAccCheckSFSV2SharenetworkExists(n string, sharenetwork *sharenetworks.S
 	}
 }
 
-func testAccCheckSFSV2SharenetworkSecSvcExists(n string) resource.TestCheckFunc {
+func testAccCheckSFSV2ShareNetworkSecSvcExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -219,7 +219,7 @@ func testAccCheckSFSV2SharenetworkSecSvcExists(n string) resource.TestCheckFunc 
 
 		api_security_service_ids := []string{}
 		if len(securityServiceList) > 0 {
-			api_security_service_ids = resourceSharedfilesystemSharenetworkSecurityServices2IDsV2(&securityServiceList)
+			api_security_service_ids = resourceSharedFilesystemShareNetworkSecurityServices2IDsV2(&securityServiceList)
 		}
 
 		tf_security_service_ids := []string{}
@@ -243,7 +243,7 @@ func testAccCheckSFSV2SharenetworkSecSvcExists(n string) resource.TestCheckFunc 
 	}
 }
 
-func testAccCheckSFSV2SharenetworkNetDiffers(sharenetwork1, sharenetwork2 *sharenetworks.ShareNetwork) resource.TestCheckFunc {
+func testAccCheckSFSV2ShareNetworkNetDiffers(sharenetwork1, sharenetwork2 *sharenetworks.ShareNetwork) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if sharenetwork1.NeutronNetID != sharenetwork2.NeutronNetID && sharenetwork1.NeutronSubnetID != sharenetwork2.NeutronSubnetID {
 			return nil
@@ -252,7 +252,7 @@ func testAccCheckSFSV2SharenetworkNetDiffers(sharenetwork1, sharenetwork2 *share
 	}
 }
 
-const testAccSFSV2SharenetworkConfig_basic = `
+const testAccSFSV2ShareNetworkConfig_basic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -276,7 +276,7 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
 }
 `
 
-const testAccSFSV2SharenetworkConfig_update = `
+const testAccSFSV2ShareNetworkConfig_update = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -315,7 +315,7 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
 }
 `
 
-const testAccSFSV2SharenetworkConfig_secservice_1 = `
+const testAccSFSV2ShareNetworkConfig_secservice_1 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -362,7 +362,7 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
 }
 `
 
-const testAccSFSV2SharenetworkConfig_secservice_2 = `
+const testAccSFSV2ShareNetworkConfig_secservice_2 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -410,7 +410,7 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
 }
 `
 
-const testAccSFSV2SharenetworkConfig_secservice_3 = `
+const testAccSFSV2ShareNetworkConfig_secservice_3 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -457,7 +457,7 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
 }
 `
 
-const testAccSFSV2SharenetworkConfig_secservice_4 = `
+const testAccSFSV2ShareNetworkConfig_secservice_4 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

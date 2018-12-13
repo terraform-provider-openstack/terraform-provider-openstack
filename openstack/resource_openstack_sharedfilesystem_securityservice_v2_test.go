@@ -10,18 +10,18 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/securityservices"
 )
 
-func TestAccSFSV2Securityservice_basic(t *testing.T) {
+func TestAccSFSV2SecurityService_basic(t *testing.T) {
 	var securityservice securityservices.SecurityService
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckSFS(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSFSV2SecurityserviceDestroy,
+		CheckDestroy: testAccCheckSFSV2SecurityServiceDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccSFSV2SecurityserviceConfig_basic,
+				Config: testAccSFSV2SecurityServiceConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSFSV2SecurityserviceExists("openstack_sharedfilesystem_securityservice_v2.securityservice_1", &securityservice),
+					testAccCheckSFSV2SecurityServiceExists("openstack_sharedfilesystem_securityservice_v2.securityservice_1", &securityservice),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_securityservice_v2.securityservice_1", "name", "security"),
 					resource.TestCheckResourceAttr(
@@ -43,9 +43,9 @@ func TestAccSFSV2Securityservice_basic(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config: testAccSFSV2SecurityserviceConfig_update,
+				Config: testAccSFSV2SecurityServiceConfig_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSFSV2SecurityserviceExists("openstack_sharedfilesystem_securityservice_v2.securityservice_1", &securityservice),
+					testAccCheckSFSV2SecurityServiceExists("openstack_sharedfilesystem_securityservice_v2.securityservice_1", &securityservice),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_securityservice_v2.securityservice_1", "name", "security_through_obscurity"),
 					resource.TestCheckResourceAttr(
@@ -70,7 +70,7 @@ func TestAccSFSV2Securityservice_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckSFSV2SecurityserviceDestroy(s *terraform.State) error {
+func testAccCheckSFSV2SecurityServiceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	sfsClient, err := config.sharedfilesystemV2Client(OS_REGION_NAME)
 	if err != nil {
@@ -95,7 +95,7 @@ func testAccCheckSFSV2SecurityserviceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckSFSV2SecurityserviceExists(n string, securityservice *securityservices.SecurityService) resource.TestCheckFunc {
+func testAccCheckSFSV2SecurityServiceExists(n string, securityservice *securityservices.SecurityService) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -131,7 +131,7 @@ func testAccCheckSFSV2SecurityserviceExists(n string, securityservice *securitys
 	}
 }
 
-const testAccSFSV2SecurityserviceConfig_basic = `
+const testAccSFSV2SecurityServiceConfig_basic = `
 resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
   name        = "security"
   description = "created by terraform"
@@ -145,7 +145,7 @@ resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
 }
 `
 
-const testAccSFSV2SecurityserviceConfig_update = `
+const testAccSFSV2SecurityServiceConfig_update = `
 resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
   name        = "security_through_obscurity"
   description = ""

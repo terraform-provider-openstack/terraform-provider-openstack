@@ -11,12 +11,12 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/securityservices"
 )
 
-func resourceSharedfilesystemSecurityserviceV2() *schema.Resource {
+func resourceSharedFilesystemSecurityServiceV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSharedfilesystemSecurityserviceV2Create,
-		Read:   resourceSharedfilesystemSecurityserviceV2Read,
-		Update: resourceSharedfilesystemSecurityserviceV2Update,
-		Delete: resourceSharedfilesystemSecurityserviceV2Delete,
+		Create: resourceSharedFilesystemSecurityServiceV2Create,
+		Read:   resourceSharedFilesystemSecurityServiceV2Read,
+		Update: resourceSharedFilesystemSecurityServiceV2Update,
+		Delete: resourceSharedFilesystemSecurityServiceV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -92,7 +92,7 @@ func resourceSharedfilesystemSecurityserviceV2() *schema.Resource {
 	}
 }
 
-func resourceSharedfilesystemSecurityserviceV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemSecurityServiceV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	sfsClient, err := config.sharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
@@ -132,10 +132,10 @@ func resourceSharedfilesystemSecurityserviceV2Create(d *schema.ResourceData, met
 
 	d.SetId(securityservice.ID)
 
-	return resourceSharedfilesystemSecurityserviceV2Read(d, meta)
+	return resourceSharedFilesystemSecurityServiceV2Read(d, meta)
 }
 
-func resourceSharedfilesystemSecurityserviceV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemSecurityServiceV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	sfsClient, err := config.sharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
@@ -173,7 +173,7 @@ func resourceSharedfilesystemSecurityserviceV2Read(d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceSharedfilesystemSecurityserviceV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemSecurityServiceV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	sfsClient, err := config.sharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
@@ -233,10 +233,10 @@ func resourceSharedfilesystemSecurityserviceV2Update(d *schema.ResourceData, met
 		return fmt.Errorf("Unable to update securityservice %s: %s", d.Id(), err)
 	}
 
-	return resourceSharedfilesystemSecurityserviceV2Read(d, meta)
+	return resourceSharedFilesystemSecurityServiceV2Read(d, meta)
 }
 
-func resourceSharedfilesystemSecurityserviceV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemSecurityServiceV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	sfsClient, err := config.sharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {

@@ -11,12 +11,12 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/sharenetworks"
 )
 
-func resourceSharedfilesystemSharenetworkV2() *schema.Resource {
+func resourceSharedFilesystemShareNetworkV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSharedfilesystemSharenetworkV2Create,
-		Read:   resourceSharedfilesystemSharenetworkV2Read,
-		Update: resourceSharedfilesystemSharenetworkV2Update,
-		Delete: resourceSharedfilesystemSharenetworkV2Delete,
+		Create: resourceSharedFilesystemShareNetworkV2Create,
+		Read:   resourceSharedFilesystemShareNetworkV2Read,
+		Update: resourceSharedFilesystemShareNetworkV2Update,
+		Delete: resourceSharedFilesystemShareNetworkV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -90,7 +90,7 @@ func resourceSharedfilesystemSharenetworkV2() *schema.Resource {
 	}
 }
 
-func resourceSharedfilesystemSharenetworkV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemShareNetworkV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	sfsClient, err := config.sharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
@@ -115,7 +115,7 @@ func resourceSharedfilesystemSharenetworkV2Create(d *schema.ResourceData, meta i
 
 	d.SetId(sharenetwork.ID)
 
-	securityServiceIDs := resourceSharedfilesystemSharenetworkSecurityServicesV2(d.Get("security_service_ids").(*schema.Set))
+	securityServiceIDs := resourceSharedFilesystemShareNetworkSecurityServicesV2(d.Get("security_service_ids").(*schema.Set))
 	for _, securityServiceID := range securityServiceIDs {
 		log.Printf("[DEBUG] Adding %s security service to sharenetwork %s", securityServiceID, sharenetwork.ID)
 		securityServiceOpts := sharenetworks.AddSecurityServiceOpts{SecurityServiceID: securityServiceID}
@@ -125,10 +125,10 @@ func resourceSharedfilesystemSharenetworkV2Create(d *schema.ResourceData, meta i
 		}
 	}
 
-	return resourceSharedfilesystemSharenetworkV2Read(d, meta)
+	return resourceSharedFilesystemShareNetworkV2Read(d, meta)
 }
 
-func resourceSharedfilesystemSharenetworkV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemShareNetworkV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	sfsClient, err := config.sharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
@@ -154,7 +154,7 @@ func resourceSharedfilesystemSharenetworkV2Read(d *schema.ResourceData, meta int
 	log.Printf("[DEBUG] Retrieved security services for sharenetwork %s: %#v", d.Id(), securityServiceList)
 
 	if len(securityServiceList) > 0 {
-		d.Set("security_service_ids", resourceSharedfilesystemSharenetworkSecurityServices2IDsV2(&securityServiceList))
+		d.Set("security_service_ids", resourceSharedFilesystemShareNetworkSecurityServices2IDsV2(&securityServiceList))
 	} else {
 		d.Set("security_service_ids", []string{})
 	}
@@ -174,7 +174,7 @@ func resourceSharedfilesystemSharenetworkV2Read(d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceSharedfilesystemSharenetworkV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemShareNetworkV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	sfsClient, err := config.sharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
@@ -230,10 +230,10 @@ func resourceSharedfilesystemSharenetworkV2Update(d *schema.ResourceData, meta i
 		}
 	}
 
-	return resourceSharedfilesystemSharenetworkV2Read(d, meta)
+	return resourceSharedFilesystemShareNetworkV2Read(d, meta)
 }
 
-func resourceSharedfilesystemSharenetworkV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemShareNetworkV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	sfsClient, err := config.sharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
@@ -249,7 +249,7 @@ func resourceSharedfilesystemSharenetworkV2Delete(d *schema.ResourceData, meta i
 	return nil
 }
 
-func resourceSharedfilesystemSharenetworkSecurityServicesV2(v *schema.Set) []string {
+func resourceSharedFilesystemShareNetworkSecurityServicesV2(v *schema.Set) []string {
 	var securityServices []string
 	for _, v := range v.List() {
 		securityServices = append(securityServices, v.(string))
@@ -257,7 +257,7 @@ func resourceSharedfilesystemSharenetworkSecurityServicesV2(v *schema.Set) []str
 	return securityServices
 }
 
-func resourceSharedfilesystemSharenetworkSecurityServices2IDsV2(v *[]securityservices.SecurityService) []string {
+func resourceSharedFilesystemShareNetworkSecurityServices2IDsV2(v *[]securityservices.SecurityService) []string {
 	var securityServicesIDs []string
 	for _, securityService := range *v {
 		securityServicesIDs = append(securityServicesIDs, securityService.ID)
