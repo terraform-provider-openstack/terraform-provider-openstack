@@ -149,10 +149,11 @@ func testAccPreCheckContainerInfra(t *testing.T) {
 func testAccPreCheckSFS(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	// TODO: enable when ready in OpenLab
-	if false && OS_SFS_ENVIRONMENT == "" {
+	/* TODO: enable when ready in OpenLab
+	if OS_SFS_ENVIRONMENT == "" {
 		t.Skip("This environment does not support Shared File Systems tests")
 	}
+	*/
 }
 
 func testAccPreOnlineResize(t *testing.T) {

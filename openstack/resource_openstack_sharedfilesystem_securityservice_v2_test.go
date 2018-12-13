@@ -76,10 +76,6 @@ func testAccCheckSFSV2SecurityServiceDestroy(s *terraform.State) error {
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
-	mvSet, ouErr := setManilaMicroversion(sfsClient)
-	if !mvSet && ouErr != nil {
-		return ouErr
-	}
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "openstack_sharedfilesystem_securityservice_v2" {
@@ -110,10 +106,6 @@ func testAccCheckSFSV2SecurityServiceExists(n string, securityservice *securitys
 		sfsClient, err := config.sharedfilesystemV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
-		}
-		mvSet, ouErr := setManilaMicroversion(sfsClient)
-		if !mvSet && ouErr != nil {
-			return ouErr
 		}
 
 		found, err := securityservices.Get(sfsClient, rs.Primary.ID).Extract()
