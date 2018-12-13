@@ -249,6 +249,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_lb_pool_v2":                         resourcePoolV2(),
 			"openstack_lb_member_v2":                       resourceMemberV2(),
 			"openstack_lb_monitor_v2":                      resourceMonitorV2(),
+			"openstack_lb_l7policy_v2":                     resourceL7policyV2(),
 			"openstack_networking_floatingip_v2":           resourceNetworkingFloatingIPV2(),
 			"openstack_networking_floatingip_associate_v2": resourceNetworkingFloatingIPAssociateV2(),
 			"openstack_networking_network_v2":              resourceNetworkingNetworkV2(),
