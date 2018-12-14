@@ -145,27 +145,23 @@ func resourceSharedFilesystemShareNetworkV2Read(d *schema.ResourceData, meta int
 	securityServiceListOpts := securityservices.ListOpts{ShareNetworkID: d.Id()}
 	securityServicePages, err := securityservices.List(sfsClient, securityServiceListOpts).AllPages()
 	if err != nil {
-		return err
+		return fmt.Errorf("Unable to list security services for sharenetwork %s: %s", d.Id(), err)
 	}
 	securityServiceList, err := securityservices.ExtractSecurityServices(securityServicePages)
 	if err != nil {
-		return err
+		return fmt.Errorf("Unable to extract security services for sharenetwork %s: %s", d.Id(), err)
 	}
 	log.Printf("[DEBUG] Retrieved security services for sharenetwork %s: %#v", d.Id(), securityServiceList)
 
-	if len(securityServiceList) > 0 {
-		d.Set("security_service_ids", resourceSharedFilesystemShareNetworkSecurityServices2IDsV2(&securityServiceList))
-	} else {
-		d.Set("security_service_ids", []string{})
-	}
+	d.Set("security_service_ids", resourceSharedFilesystemShareNetworkSecurityServices2IDsV2(&securityServiceList))
 
 	d.Set("name", sharenetwork.Name)
 	d.Set("description", sharenetwork.Description)
 	d.Set("neutron_net_id", sharenetwork.NeutronNetID)
 	d.Set("neutron_subnet_id", sharenetwork.NeutronSubnetID)
+	// Computed
 	d.Set("project_id", sharenetwork.ProjectID)
 	d.Set("region", GetRegion(d, config))
-	// Computed
 	d.Set("network_type", sharenetwork.NetworkType)
 	d.Set("segmentation_id", sharenetwork.SegmentationID)
 	d.Set("cidr", sharenetwork.CIDR)

@@ -116,3 +116,11 @@ The following arguments are supported:
 * `segmentation_id` - The share network segmentation ID.
 * `cidr` - The share network CIDR.
 * `ip_version` - The IP version of the share network. Can either be 4 or 6.
+
+## Import
+
+This resource can be imported by specifying the ID of the share network:
+
+```
+$ terraform import openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1 <id>
+```

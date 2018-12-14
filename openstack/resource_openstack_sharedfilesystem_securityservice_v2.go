@@ -169,11 +169,12 @@ func resourceSharedFilesystemSecurityServiceV2Read(d *schema.ResourceData, meta 
 	d.Set("name", securityservice.Name)
 	d.Set("description", securityservice.Description)
 	d.Set("type", securityservice.Type)
-	d.Set("project_id", securityservice.ProjectID)
 	d.Set("domain", securityservice.Domain)
 	d.Set("dns_ip", securityservice.DNSIP)
 	d.Set("user", securityservice.User)
 	d.Set("server", securityservice.Server)
+	// Computed
+	d.Set("project_id", securityservice.ProjectID)
 	d.Set("region", GetRegion(d, config))
 
 	return nil

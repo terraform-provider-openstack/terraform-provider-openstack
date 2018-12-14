@@ -80,3 +80,11 @@ The following arguments are supported:
 * `password` - See Argument Reference above.
 * `domain` - See Argument Reference above.
 * `server` - See Argument Reference above.
+
+## Import
+
+This resource can be imported by specifying the ID of the security service:
+
+```
+$ terraform import openstack_sharedfilesystem_securityservice_v2.securityservice_1 <id>
+```
