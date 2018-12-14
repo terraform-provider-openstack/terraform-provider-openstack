@@ -205,12 +205,9 @@ func testAccCheckSFSV2ShareNetworkSecSvcExists(n string) resource.TestCheckFunc 
 			return err
 		}
 
-		api_security_service_ids := []string{}
-		if len(securityServiceList) > 0 {
-			api_security_service_ids = resourceSharedFilesystemShareNetworkSecurityServices2IDsV2(&securityServiceList)
-		}
+		api_security_service_ids := resourceSharedFilesystemShareNetworkV2SecSvcToArray(&securityServiceList)
 
-		tf_security_service_ids := []string{}
+		var tf_security_service_ids []string
 		for k, v := range rs.Primary.Attributes {
 			if strings.HasPrefix(k, "security_service_ids.#") {
 				continue

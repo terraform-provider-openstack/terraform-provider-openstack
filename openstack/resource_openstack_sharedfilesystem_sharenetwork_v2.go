@@ -115,7 +115,7 @@ func resourceSharedFilesystemShareNetworkV2Create(d *schema.ResourceData, meta i
 
 	d.SetId(sharenetwork.ID)
 
-	securityServiceIDs := resourceSharedFilesystemShareNetworkSecurityServicesV2(d.Get("security_service_ids").(*schema.Set))
+	securityServiceIDs := resourceSharedFilesystemShareNetworkV2SecSvcToArray(d.Get("security_service_ids").(*schema.Set))
 	for _, securityServiceID := range securityServiceIDs {
 		log.Printf("[DEBUG] Adding %s security service to sharenetwork %s", securityServiceID, sharenetwork.ID)
 		securityServiceOpts := sharenetworks.AddSecurityServiceOpts{SecurityServiceID: securityServiceID}
@@ -153,7 +153,7 @@ func resourceSharedFilesystemShareNetworkV2Read(d *schema.ResourceData, meta int
 	}
 	log.Printf("[DEBUG] Retrieved security services for sharenetwork %s: %#v", d.Id(), securityServiceList)
 
-	d.Set("security_service_ids", resourceSharedFilesystemShareNetworkSecurityServices2IDsV2(&securityServiceList))
+	d.Set("security_service_ids", resourceSharedFilesystemShareNetworkV2SecSvcToArray(&securityServiceList))
 
 	d.Set("name", sharenetwork.Name)
 	d.Set("description", sharenetwork.Description)
@@ -245,18 +245,21 @@ func resourceSharedFilesystemShareNetworkV2Delete(d *schema.ResourceData, meta i
 	return nil
 }
 
-func resourceSharedFilesystemShareNetworkSecurityServicesV2(v *schema.Set) []string {
-	var securityServices []string
-	for _, v := range v.List() {
-		securityServices = append(securityServices, v.(string))
-	}
-	return securityServices
-}
-
-func resourceSharedFilesystemShareNetworkSecurityServices2IDsV2(v *[]securityservices.SecurityService) []string {
+func resourceSharedFilesystemShareNetworkV2SecSvcToArray(v interface{}) []string {
 	var securityServicesIDs []string
-	for _, securityService := range *v {
-		securityServicesIDs = append(securityServicesIDs, securityService.ID)
+
+	switch t := v.(type) {
+	case *schema.Set:
+		for _, securityService := range (*v.(*schema.Set)).List() {
+			securityServicesIDs = append(securityServicesIDs, securityService.(string))
+		}
+	case *[]securityservices.SecurityService:
+		for _, securityService := range *v.(*[]securityservices.SecurityService) {
+			securityServicesIDs = append(securityServicesIDs, securityService.ID)
+		}
+	default:
+		log.Printf("[DEBUG] Invalid type provided to get the list of security service IDs: %s", t)
 	}
+
 	return securityServicesIDs
 }
