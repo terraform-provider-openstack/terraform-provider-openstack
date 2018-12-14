@@ -2,6 +2,8 @@
 
 FEATURES
 
+* __New Resource__: `openstack_sharedfilesystem_securityservice_v2` [GH-515]
+* __New Resource__: `openstack_sharedfilesystem_sharenetwork_v2` [GH-515]
 * __New Data Source__: `openstack_containerinfra_cluster_v1` [GH-488]
 * __New Data Source__: `openstack_blockstorage_snapshot_v2` [GH-448]
 * __New Data Source__: `openstack_blockstorage_snapshot_v3` [GH-448]
