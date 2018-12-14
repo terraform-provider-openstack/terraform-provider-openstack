@@ -81,3 +81,11 @@ The following attributes are exported:
 * `http_method` - See Argument Reference above.
 * `expected_codes` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
+
+## Import
+
+Load Balancer Pool Monitor can be imported using the Monitor ID, e.g.:
+
+```
+$ terraform import openstack_lb_monitor_v2.monitor_1 47c26fc3-2403-427a-8c79-1589bd0533c2
+```

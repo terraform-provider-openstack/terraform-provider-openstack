@@ -72,3 +72,11 @@ The following attributes are exported:
 * `loadbalancer_provider` - See Argument Reference above.
 * `security_group_ids` - See Argument Reference above.
 * `vip_port_id` - The Port ID of the Load Balancer IP.
+
+## Import
+
+Load Balancer can be imported using the Load Balancer ID, e.g.:
+
+```
+$ terraform import openstack_lb_loadbalancer_v2.loadbalancer_1 19bcfdc7-c521-4a7e-9459-6750bd16df76
+```

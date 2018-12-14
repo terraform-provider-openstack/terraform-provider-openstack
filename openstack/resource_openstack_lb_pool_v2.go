@@ -17,6 +17,9 @@ func resourcePoolV2() *schema.Resource {
 		Read:   resourcePoolV2Read,
 		Update: resourcePoolV2Update,
 		Delete: resourcePoolV2Delete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -226,6 +229,14 @@ func resourcePoolV2Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] Retrieved pool %s: %#v", d.Id(), pool)
+
+	// Required by import
+	if len(pool.Listeners) > 0 && pool.Listeners[0].ID != "" {
+		d.Set("listener_id", pool.Listeners[0].ID)
+	}
+	if len(pool.Loadbalancers) > 0 && pool.Loadbalancers[0].ID != "" {
+		d.Set("loadbalancer_id", pool.Loadbalancers[0].ID)
+	}
 
 	d.Set("lb_method", pool.LBMethod)
 	d.Set("protocol", pool.Protocol)

@@ -82,3 +82,11 @@ The following attributes are exported:
 * `default_tls_container_ref` - See Argument Reference above.
 * `sni_container_refs` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
+
+## Import
+
+Load Balancer Listener can be imported using the Listener ID, e.g.:
+
+```
+$ terraform import openstack_lb_listener_v2.listener_1 b67ce64e-8b26-405d-afeb-4a078901f15a
+```
