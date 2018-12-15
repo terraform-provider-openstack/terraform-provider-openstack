@@ -14,6 +14,7 @@ IMPROVEMENTS
 * Added support for soft affinities in `openstack_compute_servergroup_v2` [GH-490]
 * Allow `default_pool_id` to be updated in `openstack_lb_listener_v2` [GH-516]
 * Added `description` to `openstack_networking_router_v2` [GH-529]
+* Added `description` to `openstack_networking_port_v2` [GH-531]
 
 BUG FIXES
 
