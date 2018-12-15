@@ -42,6 +42,10 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
+			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"network_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
@@ -199,6 +203,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 	createOpts := PortCreateOpts{
 		ports.CreateOpts{
 			Name:                d.Get("name").(string),
+			Description:         d.Get("description").(string),
 			AdminStateUp:        resourcePortAdminStateUpV2(d),
 			NetworkID:           d.Get("network_id").(string),
 			MACAddress:          d.Get("mac_address").(string),
@@ -296,6 +301,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	log.Printf("[DEBUG] Retrieved Port %s: %+v", d.Id(), p)
 
 	d.Set("name", p.Name)
+	d.Set("description", p.Description)
 	d.Set("admin_state_up", p.AdminStateUp)
 	d.Set("network_id", p.NetworkID)
 	d.Set("mac_address", p.MACAddress)
@@ -371,6 +377,12 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		hasChange = true
 		name := d.Get("name").(string)
 		updateOpts.Name = &name
+	}
+
+	if d.HasChange("description") {
+		hasChange = true
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
 	}
 
 	if d.HasChange("admin_state_up") {

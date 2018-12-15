@@ -37,6 +37,9 @@ The following arguments are supported:
 * `name` - (Optional) A unique name for the port. Changing this
     updates the `name` of an existing port.
 
+* `description` - (Optional) Human-readable description of the floating IP. Changing
+    this updates the `description` of an existing port.
+
 * `network_id` - (Required) The ID of the network to attach the port to. Changing
     this creates a new port.
 
@@ -116,6 +119,7 @@ The `extra_dhcp_option` block supports:
 The following attributes are exported:
 
 * `region` - See Argument Reference above.
+* `description` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
 * `mac_address` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
