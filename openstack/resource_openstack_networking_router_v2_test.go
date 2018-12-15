@@ -22,6 +22,8 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 				Config: testAccNetworkingV2Router_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "description", "router description"),
 				),
 			},
 			resource.TestStep{
@@ -29,6 +31,8 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_router_v2.router_1", "name", "router_2"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "description", ""),
 				),
 			},
 		},
@@ -158,8 +162,9 @@ func testAccCheckNetworkingV2RouterExists(n string, router *routers.Router) reso
 
 const testAccNetworkingV2Router_basic = `
 resource "openstack_networking_router_v2" "router_1" {
-	name = "router_1"
-	admin_state_up = "true"
+  name = "router_1"
+  description = "router description"
+  admin_state_up = "true"
 
   timeouts {
     create = "5m"
@@ -170,8 +175,8 @@ resource "openstack_networking_router_v2" "router_1" {
 
 const testAccNetworkingV2Router_update = `
 resource "openstack_networking_router_v2" "router_1" {
-	name = "router_2"
-	admin_state_up = "true"
+  name = "router_2"
+  admin_state_up = "true"
 
   timeouts {
     create = "5m"

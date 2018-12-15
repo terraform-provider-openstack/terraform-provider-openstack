@@ -32,6 +32,8 @@ The following arguments are supported:
 * `name` - (Optional) A unique name for the router. Changing this
     updates the `name` of an existing router.
 
+* `description` - (Optional) Human-readable description for the router.
+
 * `admin_state_up` - (Optional) Administrative up/down status for the router
     (must be "true" or "false" if provided). Changing this updates the
     `admin_state_up` of an existing router.
@@ -92,6 +94,7 @@ The following attributes are exported:
 * `id` - ID of the router.
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
+* `description` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
 * `external_gateway` - See Argument Reference above.
 * `external_network_id` - See Argument Reference above.

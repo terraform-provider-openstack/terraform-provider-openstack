@@ -40,6 +40,11 @@ func resourceNetworkingRouterV2() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
+			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+			},
 			"admin_state_up": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -143,6 +148,7 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 	createOpts := RouterCreateOpts{
 		routers.CreateOpts{
 			Name:                  d.Get("name").(string),
+			Description:           d.Get("description").(string),
 			TenantID:              d.Get("tenant_id").(string),
 			AvailabilityZoneHints: resourceNetworkingAvailabilityZoneHintsV2(d),
 		},
@@ -273,6 +279,7 @@ func resourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) er
 	log.Printf("[DEBUG] Retrieved Router %s: %+v", d.Id(), n)
 
 	d.Set("name", n.Name)
+	d.Set("description", n.Description)
 	d.Set("admin_state_up", n.AdminStateUp)
 	d.Set("distributed", n.Distributed)
 	d.Set("tenant_id", n.TenantID)
@@ -319,6 +326,11 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 	if d.HasChange("name") {
 		hasChange = true
 		updateOpts.Name = d.Get("name").(string)
+	}
+	if d.HasChange("description") {
+		hasChange = true
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
 	}
 	if d.HasChange("admin_state_up") {
 		hasChange = true
