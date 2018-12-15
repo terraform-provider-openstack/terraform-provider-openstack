@@ -31,6 +31,8 @@ The following arguments are supported:
     `region` argument of the provider is used. Changing this creates a new
     floating IP (which may or may not have a different address).
 
+* `description` - (Optional) Human-readable description for the floating IP.
+
 * `pool` - (Required) The name of the pool from which to obtain the floating
     IP. Changing this creates a new floating IP.
 
@@ -62,6 +64,7 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `region` - See Argument Reference above.
+* `description` - See Argument Reference above.
 * `pool` - See Argument Reference above.
 * `address` - The actual floating IP address itself.
 * `port_id` - ID of associated port.
