@@ -37,6 +37,10 @@ func resourceNetworkingFloatingIPV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"address": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -100,6 +104,7 @@ func resourceNetworkFloatingIPV2Create(d *schema.ResourceData, meta interface{})
 	createOpts := FloatingIPCreateOpts{
 		floatingips.CreateOpts{
 			FloatingNetworkID: poolID,
+			Description:       d.Get("description").(string),
 			FloatingIP:        d.Get("address").(string),
 			PortID:            d.Get("port_id").(string),
 			TenantID:          d.Get("tenant_id").(string),
@@ -157,6 +162,7 @@ func resourceNetworkFloatingIPV2Read(d *schema.ResourceData, meta interface{}) e
 		return CheckDeleted(d, err, "floating IP")
 	}
 
+	d.Set("description", floatingIP.Description)
 	d.Set("address", floatingIP.FloatingIP)
 	d.Set("port_id", floatingIP.PortID)
 	d.Set("fixed_ip", floatingIP.FixedIP)
@@ -180,12 +186,22 @@ func resourceNetworkFloatingIPV2Update(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error creating OpenStack network client: %s", err)
 	}
 
+	var hasChange bool
 	var updateOpts floatingips.UpdateOpts
 
+	if d.HasChange("description") {
+		hasChange = true
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
+	}
+
 	if d.HasChange("port_id") {
+		hasChange = true
 		portID := d.Get("port_id").(string)
 		updateOpts.PortID = &portID
+	}
 
+	if hasChange {
 		log.Printf("[DEBUG] Update Options: %#v", updateOpts)
 		_, err = floatingips.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {

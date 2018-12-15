@@ -23,6 +23,7 @@ func TestAccNetworkingV2FloatingIP_basic(t *testing.T) {
 				Config: testAccNetworkingV2FloatingIP_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
+					resource.TestCheckResourceAttr("openstack_networking_floatingip_v2.fip_1", "description", "test floating IP"),
 				),
 			},
 		},
@@ -42,6 +43,7 @@ func TestAccNetworkingV2FloatingIP_fixedip_bind(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
 					testAccCheckNetworkingV2FloatingIPBoundToCorrectIP(&fip, "192.168.199.20"),
+					resource.TestCheckResourceAttr("openstack_networking_floatingip_v2.fip_1", "description", ""),
 				),
 			},
 		},
@@ -153,6 +155,7 @@ func testAccCheckNetworkingV2InstanceFloatingIPAttach(
 
 const testAccNetworkingV2FloatingIP_basic = `
 resource "openstack_networking_floatingip_v2" "fip_1" {
+  description = "test floating IP"
 }
 `
 
