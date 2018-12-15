@@ -23,6 +23,8 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_network_v2.net", "name", "tf_test_network"),
 					resource.TestCheckResourceAttr(
+						"data.openstack_networking_network_v2.net", "description", "my network description"),
+					resource.TestCheckResourceAttr(
 						"data.openstack_networking_network_v2.net", "admin_state_up", "true"),
 				),
 			},
@@ -138,6 +140,7 @@ func testAccCheckNetworkingNetworkV2DataSourceID(n string) resource.TestCheckFun
 const testAccOpenStackNetworkingNetworkV2DataSource_network = `
 resource "openstack_networking_network_v2" "net" {
         name = "tf_test_network"
+        description = "my network description"
         admin_state_up = "true"
 }
 
@@ -154,6 +157,7 @@ var testAccOpenStackNetworkingNetworkV2DataSource_basic = fmt.Sprintf(`
 
 data "openstack_networking_network_v2" "net" {
 	name = "${openstack_networking_network_v2.net.name}"
+        description = "${openstack_networking_network_v2.net.description}"
 }
 `, testAccOpenStackNetworkingNetworkV2DataSource_network)
 

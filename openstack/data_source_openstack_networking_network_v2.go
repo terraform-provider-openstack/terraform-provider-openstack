@@ -32,6 +32,10 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"status": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -78,10 +82,11 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	}
 
 	listOpts = networks.ListOpts{
-		ID:       d.Get("network_id").(string),
-		Name:     d.Get("name").(string),
-		TenantID: d.Get("tenant_id").(string),
-		Status:   status,
+		ID:          d.Get("network_id").(string),
+		Name:        d.Get("name").(string),
+		Description: d.Get("description").(string),
+		TenantID:    d.Get("tenant_id").(string),
+		Status:      status,
 	}
 
 	if v, ok := d.GetOkExists("external"); ok {
@@ -159,6 +164,7 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	d.SetId(network.ID)
 
 	d.Set("name", network.Name)
+	d.Set("description", network.Description)
 	d.Set("admin_state_up", strconv.FormatBool(network.AdminStateUp))
 	d.Set("shared", strconv.FormatBool(network.Shared))
 	d.Set("external", network.External)
