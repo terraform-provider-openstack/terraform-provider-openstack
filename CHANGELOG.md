@@ -16,6 +16,7 @@ IMPROVEMENTS
 * Added `description` to `openstack_networking_router_v2` [GH-529]
 * Added `description` to `openstack_networking_port_v2` [GH-531]
 * Added `description` to `openstack_networking_subnet_v2` [GH-533]
+* Added `description` to `openstack_networking_floatingip_v2` [GH-534]
 
 BUG FIXES
 
