@@ -21,6 +21,7 @@ IMPROVEMENTS
 * Added `description` to `openstack_networking_network_v2` [GH-532]
 * Added `description` to `openstack_networking_subnet_v2` data source [GH-528]
 * Added `description` to `openstack_networking_router_v2` data source [GH-530]
+* Added `description` to `openstack_networking_network_v2` data source [GH-536]
 
 BUG FIXES
 
