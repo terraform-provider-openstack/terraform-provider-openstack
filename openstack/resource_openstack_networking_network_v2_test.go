@@ -27,6 +27,10 @@ func TestAccNetworkingV2Network_basic(t *testing.T) {
 				Config: testAccNetworkingV2Network_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "name", "network_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "description", "my network description"),
 				),
 			},
 			resource.TestStep{
@@ -34,6 +38,8 @@ func TestAccNetworkingV2Network_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_network_v2.network_1", "name", "network_2"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "description", ""),
 				),
 			},
 		},
@@ -237,6 +243,7 @@ func testAccCheckNetworkingV2NetworkExists(n string, network *networks.Network) 
 const testAccNetworkingV2Network_basic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
+  description = "my network description"
   admin_state_up = "true"
 }
 `

@@ -71,6 +71,9 @@ The following arguments are supported:
 * `name` - (Optional) The name of the network. Changing this updates the name of
     the existing network.
 
+* `description` - (Optional) Human-readable description of the network. Changing this
+    updates the name of the existing network.
+
 * `shared` - (Optional)  Specifies whether the network resource can be accessed
     by any tenant or not. Changing this updates the sharing capabalities of the
     existing network.
@@ -109,6 +112,7 @@ The following attributes are exported:
 
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
+* `description` - See Argument Reference above.
 * `shared` - See Argument Reference above.
 * `external` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
