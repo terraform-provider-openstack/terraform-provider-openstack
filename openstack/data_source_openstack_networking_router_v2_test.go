@@ -23,6 +23,8 @@ func TestAccOpenStackNetworkingRouterV2DataSource_name(t *testing.T) {
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_networking_router_v2.router", "name"),
 					resource.TestCheckResourceAttrSet(
+						"data.openstack_networking_router_v2.router", "description"),
+					resource.TestCheckResourceAttrSet(
 						"data.openstack_networking_router_v2.router", "admin_state_up"),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_networking_router_v2.router", "status"),
@@ -50,6 +52,7 @@ func testAccCheckNetworkingRouterV2DataSourceID(n string) resource.TestCheckFunc
 const testAccOpenStackNetworkingRouterV2DataSource_router = `
 resource "openstack_networking_router_v2" "router" {
   name           = "router_tf"
+  description    = "description"
   admin_state_up = "true"
 }
 `
@@ -59,6 +62,7 @@ var testAccOpenStackNetworkingRouterV2DataSource_name = fmt.Sprintf(`
 
 data "openstack_networking_router_v2" "router" {
    name           = "${openstack_networking_router_v2.router.name}"
+   description    = "description"
    admin_state_up = "true"
 }
 `, testAccOpenStackNetworkingRouterV2DataSource_router)

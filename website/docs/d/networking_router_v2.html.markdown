@@ -28,6 +28,8 @@ data "openstack_networking_router_v2" "router" {
 
 * `name` - (Optional) The name of the router.
 
+* `description` - (Optional) Human-readable description of the router.
+
 * `admin_state_up` - (Optional) Administrative up/down status for the router (must be "true" or "false" if provided).
 
 * `distributed` - (Optional) Indicates whether or not to get a distributed router.
