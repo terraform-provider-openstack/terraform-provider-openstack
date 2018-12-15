@@ -26,6 +26,8 @@ data "openstack_networking_subnet_v2" "subnet_1" {
 
 * `name` - (Optional) The name of the subnet.
 
+* `description` - (Optional) Human-readable description for the subnet.
+
 * `dhcp_enabled` - (Optional) If the subnet has DHCP enabled.
 
 * `dhcp_disabled` - (Optional) If the subnet has DHCP disabled.

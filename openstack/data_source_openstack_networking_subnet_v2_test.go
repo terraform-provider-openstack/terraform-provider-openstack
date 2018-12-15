@@ -41,6 +41,8 @@ func TestAccNetworkingV2SubnetDataSource_testQueries(t *testing.T) {
 				Config: testAccOpenStackNetworkingSubnetV2DataSource_cidr,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_subnet_v2.subnet_1", "description", "my subnet description"),
 				),
 			},
 			resource.TestStep{
@@ -163,6 +165,7 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
+  description = "my subnet description"
   cidr = "192.168.199.0/24"
   network_id = "${openstack_networking_network_v2.network_1.id}"
 }
