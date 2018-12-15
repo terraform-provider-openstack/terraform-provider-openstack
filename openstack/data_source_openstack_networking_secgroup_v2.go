@@ -28,6 +28,10 @@ func dataSourceNetworkingSecGroupV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"tenant_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -43,9 +47,10 @@ func dataSourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 
 	listOpts := groups.ListOpts{
-		ID:       d.Get("secgroup_id").(string),
-		Name:     d.Get("name").(string),
-		TenantID: d.Get("tenant_id").(string),
+		ID:          d.Get("secgroup_id").(string),
+		Name:        d.Get("name").(string),
+		Description: d.Get("description").(string),
+		TenantID:    d.Get("tenant_id").(string),
 	}
 
 	pages, err := groups.List(networkingClient, listOpts).AllPages()
