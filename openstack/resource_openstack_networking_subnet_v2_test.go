@@ -25,6 +25,8 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 					testAccCheckNetworkingV2SubnetDnsConsistency("openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "allocation_pools.0.start", "192.168.199.100"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "description", "my subnet description"),
 				),
 			},
 			resource.TestStep{
@@ -38,6 +40,8 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 						"openstack_networking_subnet_v2.subnet_1", "enable_dhcp", "true"),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "allocation_pools.0.start", "192.168.199.150"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "description", ""),
 				),
 			},
 		},
@@ -259,6 +263,7 @@ resource "openstack_networking_network_v2" "network_1" {
 }
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
+  description = "my subnet description"
   cidr = "192.168.199.0/24"
   network_id = "${openstack_networking_network_v2.network_1.id}"
 
