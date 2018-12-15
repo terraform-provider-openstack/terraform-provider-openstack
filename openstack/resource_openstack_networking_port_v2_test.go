@@ -99,6 +99,7 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_2", &vrrp_port_2),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.instance_port", &instance_port),
 					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instance_port, 2),
+					resource.TestCheckResourceAttr("openstack_networking_port_v2.vrrp_port_1", "description", "test vrrp port"),
 				),
 			},
 			resource.TestStep{
@@ -110,6 +111,7 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_2", &vrrp_port_2),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.instance_port", &instance_port),
 					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instance_port, 2),
+					resource.TestCheckResourceAttr("openstack_networking_port_v2.vrrp_port_1", "description", ""),
 				),
 			},
 			resource.TestStep{
@@ -722,6 +724,7 @@ resource "openstack_networking_router_interface_v2" "vrrp_interface" {
 
 resource "openstack_networking_port_v2" "vrrp_port_1" {
   name = "vrrp_port_1"
+  description = "test vrrp port"
   admin_state_up = "true"
   network_id = "${openstack_networking_network_v2.vrrp_network.id}"
 
