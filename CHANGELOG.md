@@ -15,6 +15,7 @@ IMPROVEMENTS
 * Allow `default_pool_id` to be updated in `openstack_lb_listener_v2` [GH-516]
 * Added `description` to `openstack_networking_router_v2` [GH-529]
 * Added `description` to `openstack_networking_port_v2` [GH-531]
+* Added `description` to `openstack_networking_subnet_v2` [GH-533]
 
 BUG FIXES
 
