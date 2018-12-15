@@ -13,6 +13,7 @@ IMPROVEMENTS
 * Added object versioning to `openstack_objectstorage_container_v1` [GH-465]
 * Added support for soft affinities in `openstack_compute_servergroup_v2` [GH-490]
 * Allow `default_pool_id` to be updated in `openstack_lb_listener_v2` [GH-516]
+* Added `description` to `openstack_networking_router_v2` [GH-529]
 
 BUG FIXES
 
