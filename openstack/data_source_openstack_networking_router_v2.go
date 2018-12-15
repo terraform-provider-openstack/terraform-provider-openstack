@@ -26,6 +26,10 @@ func dataSourceNetworkingRouterV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"admin_state_up": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -90,6 +94,10 @@ func dataSourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) 
 		listOpts.Name = v.(string)
 	}
 
+	if v, ok := d.GetOk("description"); ok {
+		listOpts.Description = v.(string)
+	}
+
 	if v, ok := d.GetOkExists("admin_state_up"); ok {
 		asu := v.(bool)
 		listOpts.AdminStateUp = &asu
@@ -132,6 +140,7 @@ func dataSourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) 
 	d.SetId(router.ID)
 
 	d.Set("name", router.Name)
+	d.Set("description", router.Description)
 	d.Set("admin_state_up", router.AdminStateUp)
 	d.Set("distributed", router.Distributed)
 	d.Set("status", router.Status)
