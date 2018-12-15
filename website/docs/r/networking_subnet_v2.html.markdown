@@ -52,6 +52,9 @@ The following arguments are supported:
 * `name` - (Optional) The name of the subnet. Changing this updates the name of
     the existing subnet.
 
+* `description` - (Optional) Human-readable description of the subnet. Changing this
+    updates the name of the existing subnet.
+
 * `tenant_id` - (Optional) The owner of the subnet. Required if admin wants to
     create a subnet for another tenant. Changing this creates a new subnet.
 
@@ -107,6 +110,7 @@ The following attributes are exported:
 * `cidr` - See Argument Reference above.
 * `ip_version` - See Argument Reference above.
 * `name` - See Argument Reference above.
+* `description` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
 * `allocation_pools` - See Argument Reference above.
 * `gateway_ip` - See Argument Reference above.
