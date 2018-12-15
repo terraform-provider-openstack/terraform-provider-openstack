@@ -18,6 +18,10 @@ func dataSourceNetworkingFloatingIPV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"address": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -51,6 +55,10 @@ func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 
 	listOpts := floatingips.ListOpts{}
+
+	if v, ok := d.GetOk("description"); ok {
+		listOpts.Description = v.(string)
+	}
 
 	if v, ok := d.GetOk("address"); ok {
 		listOpts.FloatingIP = v.(string)
@@ -95,6 +103,7 @@ func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface
 	log.Printf("[DEBUG] Retrieved Floating IP %s: %+v", fip.ID, fip)
 	d.SetId(fip.ID)
 
+	d.Set("description", fip.Description)
 	d.Set("address", fip.FloatingIP)
 	d.Set("pool", fip.FloatingNetworkID)
 	d.Set("port_id", fip.PortID)

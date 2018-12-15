@@ -24,6 +24,8 @@ data "openstack_networking_floatingip_v2" "floatingip_1" {
   A Neutron client is needed to retrieve floating IP ids. If omitted, the
   `region` argument of the provider is used.
 
+* `description` - (Optional) Human-readable description of the floating IP.
+
 * `address` - (Optional) The IP address of the floating IP.
 
 * `pool` - (Optional) The name of the pool from which the floating IP belongs to.
