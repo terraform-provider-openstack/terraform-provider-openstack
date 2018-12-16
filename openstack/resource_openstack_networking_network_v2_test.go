@@ -193,7 +193,6 @@ func TestAccNetworkingV2Network_transparent_vlan_Create(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckAdminOnly(t)
 			testAccPreCheckTransparentVLAN(t)
 		},
 		Providers:    testAccProviders,
@@ -217,7 +216,6 @@ func TestAccNetworkingV2Network_transparent_vlan_Update(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckAdminOnly(t)
 			testAccPreCheckTransparentVLAN(t)
 		},
 		Providers:    testAccProviders,
