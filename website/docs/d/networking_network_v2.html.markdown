@@ -40,6 +40,8 @@ data "openstack_networking_network_v2" "network" {
 
 * `availability_zone_hints` - (Optional) The availability zone candidates for the network.
 
+* `transparent_vlan` - (Optional) The VLAN transparent attribute for the
+  network.
 
 ## Attributes Reference
 
@@ -54,3 +56,4 @@ are exported:
 * `shared` - (Optional)  Specifies whether the network resource can be accessed
     by any tenant or not.
 * `availability_zone_hints` - (Optional) The availability zone candidates for the network.
+* `transparent_vlan` - See Argument Reference above.
