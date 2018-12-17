@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -82,11 +83,26 @@ func resourceComputeVolumeAttachV2Create(d *schema.ResourceData, meta interface{
 
 	log.Printf("[DEBUG] openstack_compute_volume_attach_v2 attach options %s: %#v", instanceId, attachOpts)
 
-	if v := d.Get("multiattach").(bool); v {
+	multiattach := d.Get("multiattach").(bool)
+	if multiattach {
 		computeClient.Microversion = "2.60"
 	}
 
-	attachment, err := volumeattach.Create(computeClient, instanceId, attachOpts).Extract()
+	var attachment *volumeattach.VolumeAttachment
+	timeout := d.Timeout(schema.TimeoutCreate)
+	err = resource.Retry(timeout, func() *resource.RetryError {
+		attachment, err = volumeattach.Create(computeClient, instanceId, attachOpts).Extract()
+		if err != nil {
+			if _, ok := err.(gophercloud.ErrDefault400); ok && multiattach {
+				return resource.RetryableError(err)
+			}
+
+			return resource.NonRetryableError(err)
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		return fmt.Errorf("Error creating openstack_compute_volume_attach_v2 %s: %s", instanceId, err)
 	}
