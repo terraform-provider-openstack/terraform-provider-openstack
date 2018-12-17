@@ -155,7 +155,6 @@ resource "openstack_lb_listener_v2" "listener_1" {
   protocol_port = 8080
   connection_limit = 100
   admin_state_up = "true"
-  default_pool_id = ""
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
 
 	timeouts {
