@@ -122,7 +122,7 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	timeout := d.Timeout(schema.TimeoutCreate)
 	poolID := createOpts.PoolID
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to create monitor: %s", err)
 	}
 
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -219,7 +219,7 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Updating monitor %s with options: %#v", d.Id(), updateOpts)
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	poolID := d.Get("pool_id").(string)
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -237,7 +237,7 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for LB to become active before continuing
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -255,7 +255,7 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Deleting monitor %s", d.Id())
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	poolID := d.Get("pool_id").(string)
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -272,7 +272,7 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to delete monitor %s: %s", d.Id(), err)
 	}
 
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}

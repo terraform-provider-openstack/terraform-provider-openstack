@@ -118,7 +118,7 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 	// Wait for LB to become active before continuing
 	poolID := d.Get("pool_id").(string)
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -138,7 +138,7 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for LB to become ACTIVE again
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -155,7 +155,9 @@ func resourceMemberV2Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	member, err := pools.GetMember(lbClient, d.Get("pool_id").(string), d.Id()).Extract()
+	poolID := d.Get("pool_id").(string)
+
+	member, err := pools.GetMember(lbClient, poolID, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "member")
 	}
@@ -198,7 +200,7 @@ func resourceMemberV2Update(d *schema.ResourceData, meta interface{}) error {
 	// Wait for LB to become active before continuing
 	poolID := d.Get("pool_id").(string)
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -216,7 +218,7 @@ func resourceMemberV2Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to update member %s: %s", d.Id(), err)
 	}
 
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -234,7 +236,7 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 	// Wait for Pool to become active before continuing
 	poolID := d.Get("pool_id").(string)
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -248,8 +250,12 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	})
 
+	if err != nil {
+		return fmt.Errorf("Unable to delete member %s: %s", d.Id(), err)
+	}
+
 	// Wait for LB to become ACTIVE
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}

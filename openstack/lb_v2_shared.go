@@ -15,6 +15,13 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 )
 
+// lbPendingStatuses are the valid statuses a LoadBalancer will be in while
+// it's updating.
+var lbPendingStatuses = []string{"PENDING_CREATE", "PENDING_UPDATE"}
+
+// lbPendingDeleteStatuses are the valid statuses a LoadBalancer will be before delete
+var lbPendingDeleteStatuses = []string{"PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"}
+
 // chooseLBV2Client will determine which load balacing client to use:
 // Either the Octavia/LBaaS client or the Neutron/Networking v2 client.
 func chooseLBV2Client(d *schema.ResourceData, config *Config) (*gophercloud.ServiceClient, error) {
@@ -70,8 +77,8 @@ func resourceLBV2ListenerRefreshFunc(lbClient *gophercloud.ServiceClient, id str
 			return nil, "", err
 		}
 
-		// The listener resource has no Status attribute, so a successful Get is the best we can do
-		return listener, "ACTIVE", nil
+		// The listener resource has no Status attribute in Neutron lbaasv2 API
+		return listener, lbV2StatusActiveIfEmpty(listener.ProvisioningStatus), nil
 	}
 }
 
@@ -149,8 +156,8 @@ func resourceLBV2MemberRefreshFunc(lbClient *gophercloud.ServiceClient, poolID, 
 			return nil, "", err
 		}
 
-		// The member resource has no Status attribute, so a successful Get is the best we can do
-		return member, "ACTIVE", nil
+		// The member resource has no Status attribute in Neutron lbaasv2 API
+		return member, lbV2StatusActiveIfEmpty(member.ProvisioningStatus), nil
 	}
 }
 
@@ -189,8 +196,8 @@ func resourceLBV2MonitorRefreshFunc(lbClient *gophercloud.ServiceClient, id stri
 			return nil, "", err
 		}
 
-		// The monitor resource has no Status attribute, so a successful Get is the best we can do
-		return monitor, "ACTIVE", nil
+		// The monitor resource has no Status attribute in Neutron lbaasv2 API
+		return monitor, lbV2StatusActiveIfEmpty(monitor.ProvisioningStatus), nil
 	}
 }
 
@@ -229,36 +236,58 @@ func resourceLBV2PoolRefreshFunc(lbClient *gophercloud.ServiceClient, poolID str
 			return nil, "", err
 		}
 
-		// The pool resource has no Status attribute, so a successful Get is the best we can do
-		return pool, "ACTIVE", nil
+		// The pool resource has no Status attribute in Neutron lbaasv2 API
+		return pool, lbV2StatusActiveIfEmpty(pool.ProvisioningStatus), nil
 	}
 }
 
-func waitForLBV2viaPool(lbClient *gophercloud.ServiceClient, id string, target string, timeout time.Duration) error {
+func waitForLBV2viaPool(lbClient *gophercloud.ServiceClient, id string, target string, pending []string, timeout time.Duration) error {
 	pool, err := pools.Get(lbClient, id).Extract()
 	if err != nil {
 		return err
 	}
 
-	if pool.Loadbalancers != nil {
+	if len(pool.Loadbalancers) > 0 {
 		// each pool has an LB in Octavia lbaasv2 API
-		lbID := pool.Loadbalancers[0].ID
-		return waitForLBV2LoadBalancer(lbClient, lbID, target, nil, timeout)
+		return waitForLBV2LoadBalancer(lbClient, pool.Loadbalancers[0].ID, target, pending, timeout)
 	}
 
-	if pool.Listeners != nil {
+	if len(pool.Listeners) > 0 {
 		// each pool has a listener in Neutron lbaasv2 API
-		listenerID := pool.Listeners[0].ID
-		listener, err := listeners.Get(lbClient, listenerID).Extract()
-		if err != nil {
-			return err
-		}
-		if listener.Loadbalancers != nil {
-			lbID := listener.Loadbalancers[0].ID
-			return waitForLBV2LoadBalancer(lbClient, lbID, target, nil, timeout)
-		}
+		return waitForLBV2viaListener(lbClient, pool.Listeners[0].ID, target, pending, timeout)
 	}
 
 	// got a pool but no LB - this is wrong
 	return fmt.Errorf("No Load Balancer on pool %s", id)
+}
+
+func waitForLBV2viaListener(lbClient *gophercloud.ServiceClient, id string, target string, pending []string, timeout time.Duration) error {
+	listener, err := listeners.Get(lbClient, id).Extract()
+	if err != nil {
+		return fmt.Errorf("Error: listener %s not found: %s ", id, err)
+	}
+
+	if len(listener.Loadbalancers) > 0 {
+		lbID := listener.Loadbalancers[0].ID
+		return waitForLBV2LoadBalancer(lbClient, lbID, target, pending, timeout)
+	}
+
+	return fmt.Errorf("No Load Balancer found associated with listener %s", id)
+}
+
+func waitForLBV2viaLBorListener(lbClient *gophercloud.ServiceClient, lbID string, listenerID string, target string, pending []string, timeout time.Duration) error {
+	if lbID != "" {
+		return waitForLBV2LoadBalancer(lbClient, lbID, target, pending, timeout)
+	}
+	if listenerID != "" {
+		return waitForLBV2viaListener(lbClient, listenerID, target, pending, timeout)
+	}
+	return fmt.Errorf("Neither Load Balancer ID nor Listener ID were provided")
+}
+
+func lbV2StatusActiveIfEmpty(provisioningStatus string) string {
+	if provisioningStatus == "" {
+		return "ACTIVE"
+	}
+	return provisioningStatus
 }
