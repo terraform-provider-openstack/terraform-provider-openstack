@@ -1,33 +1,33 @@
-## 1.13.0 (Unreleased)
+## 1.13.0 (December 18, 2018)
 
 FEATURES
 
-* __New Resource__: `openstack_sharedfilesystem_securityservice_v2` [GH-515]
-* __New Resource__: `openstack_sharedfilesystem_sharenetwork_v2` [GH-515]
-* __New Data Source__: `openstack_containerinfra_cluster_v1` [GH-488]
-* __New Data Source__: `openstack_blockstorage_snapshot_v2` [GH-448]
-* __New Data Source__: `openstack_blockstorage_snapshot_v3` [GH-448]
+* __New Resource__: `openstack_sharedfilesystem_securityservice_v2` ([#515](https://github.com/terraform-providers/terraform-provider-openstack/issues/515))
+* __New Resource__: `openstack_sharedfilesystem_sharenetwork_v2` ([#515](https://github.com/terraform-providers/terraform-provider-openstack/issues/515))
+* __New Data Source__: `openstack_containerinfra_cluster_v1` ([#488](https://github.com/terraform-providers/terraform-provider-openstack/issues/488))
+* __New Data Source__: `openstack_blockstorage_snapshot_v2` ([#448](https://github.com/terraform-providers/terraform-provider-openstack/issues/448))
+* __New Data Source__: `openstack_blockstorage_snapshot_v3` ([#448](https://github.com/terraform-providers/terraform-provider-openstack/issues/448))
 
 IMPROVEMENTS
 
-* Added object versioning to `openstack_objectstorage_container_v1` [GH-465]
-* Added support for soft affinities in `openstack_compute_servergroup_v2` [GH-490]
-* Allow `default_pool_id` to be updated in `openstack_lb_listener_v2` [GH-516]
-* Added `description` to `openstack_networking_router_v2` [GH-529]
-* Added `description` to `openstack_networking_port_v2` [GH-531]
-* Added `description` to `openstack_networking_subnet_v2` [GH-533]
-* Added `description` to `openstack_networking_floatingip_v2` [GH-534]
-* Added `description` to `openstack_networking_secgroup_v2` data source [GH-535]
-* Added `description` to `openstack_networking_network_v2` [GH-532]
-* Added `description` to `openstack_networking_subnet_v2` data source [GH-528]
-* Added `description` to `openstack_networking_router_v2` data source [GH-530]
-* Added `description` to `openstack_networking_network_v2` data source [GH-536]
-* Added `description` to `openstack_networking_floatingip_v2` data source [GH-523]
+* Added object versioning to `openstack_objectstorage_container_v1` ([#465](https://github.com/terraform-providers/terraform-provider-openstack/issues/465))
+* Added support for soft affinities in `openstack_compute_servergroup_v2` ([#490](https://github.com/terraform-providers/terraform-provider-openstack/issues/490))
+* Allow `default_pool_id` to be updated in `openstack_lb_listener_v2` ([#516](https://github.com/terraform-providers/terraform-provider-openstack/issues/516))
+* Added `description` to `openstack_networking_router_v2` ([#529](https://github.com/terraform-providers/terraform-provider-openstack/issues/529))
+* Added `description` to `openstack_networking_port_v2` ([#531](https://github.com/terraform-providers/terraform-provider-openstack/issues/531))
+* Added `description` to `openstack_networking_subnet_v2` ([#533](https://github.com/terraform-providers/terraform-provider-openstack/issues/533))
+* Added `description` to `openstack_networking_floatingip_v2` ([#534](https://github.com/terraform-providers/terraform-provider-openstack/issues/534))
+* Added `description` to `openstack_networking_secgroup_v2` data source ([#535](https://github.com/terraform-providers/terraform-provider-openstack/issues/535))
+* Added `description` to `openstack_networking_network_v2` ([#532](https://github.com/terraform-providers/terraform-provider-openstack/issues/532))
+* Added `description` to `openstack_networking_subnet_v2` data source ([#528](https://github.com/terraform-providers/terraform-provider-openstack/issues/528))
+* Added `description` to `openstack_networking_router_v2` data source ([#530](https://github.com/terraform-providers/terraform-provider-openstack/issues/530))
+* Added `description` to `openstack_networking_network_v2` data source ([#536](https://github.com/terraform-providers/terraform-provider-openstack/issues/536))
+* Added `description` to `openstack_networking_floatingip_v2` data source ([#523](https://github.com/terraform-providers/terraform-provider-openstack/issues/523))
 
 BUG FIXES
 
-* Allow instances to be in a state of `migrating` when performing a plan/refresh [GH-496]
-* Fix issue when `openstack_networking_floatingip_v2`, `openstack_networking_router_v2`, `openstack_networking_subnet_v2`, and `openstack_networking_subnetpool_v2` tag updates send empty updates for the resource. [GH-519]
+* Allow instances to be in a state of `migrating` when performing a plan/refresh ([#496](https://github.com/terraform-providers/terraform-provider-openstack/issues/496))
+* Fix issue when `openstack_networking_floatingip_v2`, `openstack_networking_router_v2`, `openstack_networking_subnet_v2`, and `openstack_networking_subnetpool_v2` tag updates send empty updates for the resource. ([#519](https://github.com/terraform-providers/terraform-provider-openstack/issues/519))
 
 ## 1.12.0 (November 13, 2018)
 
