@@ -18,86 +18,107 @@ func dataSourceContainerInfraCluster() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
+
 			"project_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"user_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"created_at": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"updated_at": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"api_address": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"coe_version": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"cluster_template_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"container_version": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"create_timeout": &schema.Schema{
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+
 			"discovery_url": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"docker_volume_size": &schema.Schema{
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+
 			"flavor": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"master_flavor": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"keypair": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"labels": &schema.Schema{
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
+
 			"master_count": &schema.Schema{
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+
 			"node_count": &schema.Schema{
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+
 			"master_addresses": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"node_addresses": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"stack_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
@@ -116,7 +137,7 @@ func dataSourceContainerInfraClusterRead(d *schema.ResourceData, meta interface{
 	name := d.Get("name").(string)
 	c, err := clusters.Get(containerInfraClient, name).Extract()
 	if err != nil {
-		return fmt.Errorf("Error getting OpenStack container infra cluster: %s", err)
+		return fmt.Errorf("Error getting openstack_containerinfra_cluster_v1 %s: %s", name, err)
 	}
 
 	d.SetId(c.UUID)
@@ -140,13 +161,13 @@ func dataSourceContainerInfraClusterRead(d *schema.ResourceData, meta interface{
 	d.Set("stack_id", c.StackID)
 
 	if err := d.Set("labels", c.Labels); err != nil {
-		log.Printf("[DEBUG] Unable to set labels for cluster %s: %s", c.UUID, err)
+		log.Printf("[DEBUG] Unable to set labels for openstack_containerinfra_cluster_v1 %s: %s", c.UUID, err)
 	}
 	if err := d.Set("created_at", c.CreatedAt.Format(time.RFC3339)); err != nil {
-		log.Printf("[DEBUG] Unable to set created_at for cluster %s: %s", c.UUID, err)
+		log.Printf("[DEBUG] Unable to set created_at for openstack_containerinfra_cluster_v1 %s: %s", c.UUID, err)
 	}
 	if err := d.Set("updated_at", c.UpdatedAt.Format(time.RFC3339)); err != nil {
-		log.Printf("[DEBUG] Unable to set updated_at for cluster %s: %s", c.UUID, err)
+		log.Printf("[DEBUG] Unable to set updated_at for openstack_containerinfra_cluster_v1 %s: %s", c.UUID, err)
 	}
 
 	d.Set("region", GetRegion(d, config))

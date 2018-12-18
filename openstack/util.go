@@ -163,35 +163,6 @@ func expandVendorOptions(vendOptsRaw []interface{}) map[string]interface{} {
 	return vendorOptions
 }
 
-func containerInfraLabelsMapV1(d *schema.ResourceData) (map[string]string, error) {
-	m := make(map[string]string)
-	for key, val := range d.Get("labels").(map[string]interface{}) {
-		labelValue, ok := val.(string)
-		if !ok {
-			return nil, fmt.Errorf("label %s value should be string", key)
-		}
-		m[key] = labelValue
-	}
-	return m, nil
-}
-
-func containerInfraLabelsStringV1(d *schema.ResourceData) (string, error) {
-	var formattedLabels string
-	for key, val := range d.Get("labels").(map[string]interface{}) {
-		labelValue, ok := val.(string)
-		if !ok {
-			return "", fmt.Errorf("label %s value should be string", key)
-		}
-		formattedLabels = strings.Join([]string{
-			formattedLabels,
-			fmt.Sprintf("%s=%s", key, labelValue),
-		}, ",")
-	}
-	formattedLabels = strings.Trim(formattedLabels, ",")
-
-	return formattedLabels, nil
-}
-
 func networkV2AttributesTags(d *schema.ResourceData) (tags []string) {
 	rawTags := d.Get("tags").(*schema.Set).List()
 	tags = make([]string, len(rawTags))
