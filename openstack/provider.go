@@ -131,7 +131,7 @@ func Provider() terraform.ResourceProvider {
 			"insecure": &schema.Schema{
 				Type:        schema.TypeBool,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_INSECURE", false),
+				DefaultFunc: schema.EnvDefaultFunc("OS_INSECURE", nil),
 				Description: descriptions["insecure"],
 			},
 
