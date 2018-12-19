@@ -181,7 +181,7 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	timeout := d.Timeout(schema.TimeoutCreate)
 
-	// Wait for LoadBalancer to become active before continuing
+	// Wait for Listener ot LoadBalancer to become active before continuing
 	err = waitForLBV2viaListenerOrLB(lbClient, listenerID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
@@ -201,9 +201,9 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating pool: %s", err)
 	}
 
-	// Pools was successfully created
-	// Wait for LoadBalancer to become active before continuing
-	err = waitForLBV2viaListenerOrLB(lbClient, listenerID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
+	// Pool was successfully created
+	// Wait for pool to become active before continuing
+	err = waitForLBV2Pool(lbClient, pool.ID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -247,7 +247,6 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	lbID := d.Get("loadbalancer_id").(string)
-	listenerID := d.Get("listener_id").(string)
 	var updateOpts pools.UpdateOpts
 	if d.HasChange("lb_method") {
 		updateOpts.LBMethod = pools.LBMethod(d.Get("lb_method").(string))
@@ -265,9 +264,10 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 		updateOpts.AdminStateUp = &asu
 	}
 
-	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2viaListenerOrLB(lbClient, listenerID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
+
+	// Wait for pool to become active before continuing
+	err = waitForLBV2Pool(lbClient, d.Id(), &lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -285,8 +285,8 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to update pool %s: %s", d.Id(), err)
 	}
 
-	// Wait for LoadBalancer to become active before continuing
-	err = waitForLBV2viaListenerOrLB(lbClient, listenerID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
+	// Wait for pool to become active before continuing
+	err = waitForLBV2Pool(lbClient, d.Id(), &lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -302,11 +302,10 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	lbID := d.Get("loadbalancer_id").(string)
-	listenerID := d.Get("listener_id").(string)
 	timeout := d.Timeout(schema.TimeoutDelete)
 
-	// Wait for LoadBalancer to become active before continuing
-	err = waitForLBV2viaListenerOrLB(lbClient, listenerID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
+	// Wait for pool to become active before continuing
+	err = waitForLBV2Pool(lbClient, d.Id(), &lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -325,7 +324,7 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for Pool to delete
-	err = waitForLBV2Pool(lbClient, d.Id(), &lbID, "DELETED", nil, timeout)
+	err = waitForLBV2Pool(lbClient, d.Id(), &lbID, "DELETED", lbPendingDeleteStatuses, timeout)
 	if err != nil {
 		return err
 	}

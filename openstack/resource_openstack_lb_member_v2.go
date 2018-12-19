@@ -265,7 +265,7 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for member to become DELETED
-	err = waitForLBV2Member(lbClient, poolID, d.Id(), &lbID, "DELETED", lbPendingStatuses, timeout)
+	err = waitForLBV2Member(lbClient, poolID, d.Id(), &lbID, "DELETED", lbPendingDeleteStatuses, timeout)
 	if err != nil {
 		return err
 	}

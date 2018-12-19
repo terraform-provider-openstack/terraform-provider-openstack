@@ -165,8 +165,8 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating listener: %s", err)
 	}
 
-	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", lbPendingStatuses, timeout)
+	// Wait for Listener to become active before continuing
+	err = waitForLBV2Listener(lbClient, listener.ID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}

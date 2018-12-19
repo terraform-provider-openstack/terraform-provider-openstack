@@ -71,17 +71,12 @@ func waitForLBV2Listener(lbClient *gophercloud.ServiceClient, id string, lbID *s
 }
 
 func resourceLBV2ListenerRefreshFunc(lbClient *gophercloud.ServiceClient, id string, lbID *string, target string) resource.StateRefreshFunc {
-	log.Printf("[DEBUG] resourceLBV2ListenerRefreshFunc: Passed %s Load Balancer ID, %v", *lbID, lbID)
 	return func() (interface{}, string, error) {
 		// Status func to get Listener's status
 		statusFunc := func(lbClient *gophercloud.ServiceClient, loadbalancerID *string) (interface{}, string, error) {
 			listener, err := listeners.Get(lbClient, id).Extract()
 			if err != nil {
 				return nil, "", err
-			}
-
-			if target == "DELETED" {
-				return listener, "", err
 			}
 
 			if listener.ProvisioningStatus != "" {
@@ -93,6 +88,8 @@ func resourceLBV2ListenerRefreshFunc(lbClient *gophercloud.ServiceClient, id str
 				// Avoid situations, when nil, but not empty string, has been passed
 				if loadbalancerID != nil {
 					*loadbalancerID = listener.Loadbalancers[0].ID
+					// Cache parent Load Balancer ID
+					log.Printf("[DEBUG] Cached %s Load Balancer ID", *loadbalancerID)
 				}
 			}
 
@@ -179,10 +176,6 @@ func resourceLBV2MemberRefreshFunc(lbClient *gophercloud.ServiceClient, poolID, 
 				return nil, "", err
 			}
 
-			if target == "DELETED" {
-				return member, "", err
-			}
-
 			if member.ProvisioningStatus != "" {
 				return member, member.ProvisioningStatus, nil
 			}
@@ -229,10 +222,6 @@ func resourceLBV2MonitorRefreshFunc(lbClient *gophercloud.ServiceClient, id stri
 			monitor, err := monitors.Get(lbClient, id).Extract()
 			if err != nil {
 				return nil, "", err
-			}
-
-			if target == "DELETED" {
-				return monitor, "", err
 			}
 
 			if monitor.ProvisioningStatus != "" {
@@ -283,10 +272,6 @@ func resourceLBV2PoolRefreshFunc(lbClient *gophercloud.ServiceClient, poolID str
 				return nil, "", err
 			}
 
-			if target == "DELETED" {
-				return pool, "", err
-			}
-
 			if pool.ProvisioningStatus != "" {
 				return pool, pool.ProvisioningStatus, nil
 			}
@@ -296,6 +281,8 @@ func resourceLBV2PoolRefreshFunc(lbClient *gophercloud.ServiceClient, poolID str
 				// Avoid situations, when nil, but not empty string, has been passed
 				if loadbalancerID != nil {
 					*loadbalancerID = pool.Loadbalancers[0].ID
+					// Cache parent Load Balancer ID
+					log.Printf("[DEBUG] Cached %s Load Balancer ID", *loadbalancerID)
 				}
 			}
 
@@ -313,7 +300,7 @@ func waitForLBV2viaListenerOrLB(lbClient *gophercloud.ServiceClient, listenerID 
 	if *lbID != "" {
 		return waitForLBV2LoadBalancer(lbClient, *lbID, target, pending, timeout)
 	}
-	return fmt.Errorf("Neither Load Balancer ID nor Listener ID were provided")
+	return fmt.Errorf("Neither Listener ID nor Load Balancer ID were provided")
 }
 
 // Function to detect the LB element provisioning status
@@ -322,27 +309,21 @@ func lbV2GetProvisioningStatus(lbClient *gophercloud.ServiceClient,
 	id string,
 	lbID *string,
 	target string) (interface{}, string, error) {
-	var loadbalancerID string
 
-	if lbID != nil && target != "DELETED" {
-		// Using cached lbID
-		// We can get here only in Neutron LBaaSv2 extension, when listener doesn't have a "ProvisioningStatus"
-		loadbalancerID = *lbID
-	} else {
-		res, status, err := statusFunc(lbClient, lbID)
-		if err == nil || target == "DELETED" {
-			return res, status, err
-		}
-		log.Printf("[DEBUG] %s", err)
+	log.Printf("[DEBUG] Detecting LBaaSv2 status for the %s using the %s client", id, lbClient.Type)
+
+	res, status, err := statusFunc(lbClient, lbID)
+	if status != "" {
+		return res, status, err
 	}
 
-	if loadbalancerID != "" {
-		res, status, err := lbV2GetProvisioningStatusViaLB(lbClient, id, loadbalancerID)
-		if err == nil {
-			return res, status, nil
-		}
-		log.Printf("[DEBUG] %s, falling back to resolve function", err)
+	log.Printf("[DEBUG] %s, falling back to resolve function", err)
+
+	if lbID != nil && *lbID != "" {
+		return lbV2GetProvisioningStatusViaLB(lbClient, id, *lbID)
 	}
+
+	log.Printf("[DEBUG] %s, falling back to heavy resolve function", err)
 
 	// Heavy API calls begin
 	lbsPages, err := loadbalancers.List(lbClient, loadbalancers.ListOpts{}).AllPages()
@@ -360,16 +341,23 @@ func lbV2GetProvisioningStatus(lbClient *gophercloud.ServiceClient,
 		res, status, err := lbV2GetProvisioningStatusViaLB(lbClient, id, lb.ID)
 		if err == nil {
 			if lbID != nil {
-				// Cache parent Load Balancer ID
-				log.Printf("[DEBUG] Caching %s Load Balancer ID", lb.ID)
 				*lbID = lb.ID
+				// Cache parent Load Balancer ID
+				log.Printf("[DEBUG] Cached %s Load Balancer ID", *lbID)
 			}
 			return res, status, nil
 		}
 		log.Printf("[DEBUG] %s", err)
 	}
 
-	return nil, "", fmt.Errorf("No %s resource found", id)
+	err404 := gophercloud.ErrDefault404{
+		gophercloud.ErrUnexpectedResponseCode{
+			BaseError: gophercloud.BaseError{
+				DefaultErrString: fmt.Sprintf("No %s resource found", id)},
+		},
+	}
+
+	return nil, "", err404
 }
 
 func lbV2GetProvisioningStatusViaLB(lbClient *gophercloud.ServiceClient, id string, lbID string) (interface{}, string, error) {
@@ -445,5 +433,12 @@ func lbV2GetProvisioningStatusViaLB(lbClient *gophercloud.ServiceClient, id stri
 		}
 	}
 
-	return nil, "", fmt.Errorf("Unable to to find the %s object from the Load Balancer %s statuses tree", id, lbID)
+	err404 := gophercloud.ErrDefault404{
+		gophercloud.ErrUnexpectedResponseCode{
+			BaseError: gophercloud.BaseError{
+				DefaultErrString: fmt.Sprintf("Unable to to find the %s object from the Load Balancer %s statuses tree", id, lbID)},
+		},
+	}
+
+	return nil, "", err404
 }

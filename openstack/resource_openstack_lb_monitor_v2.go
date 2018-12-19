@@ -286,7 +286,7 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for monitor to become DELETED
-	err = waitForLBV2Monitor(lbClient, d.Id(), &lbID, "DELETED", lbPendingStatuses, timeout)
+	err = waitForLBV2Monitor(lbClient, d.Id(), &lbID, "DELETED", lbPendingDeleteStatuses, timeout)
 	if err != nil {
 		return err
 	}
