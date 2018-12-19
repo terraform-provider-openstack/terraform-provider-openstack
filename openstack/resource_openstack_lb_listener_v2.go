@@ -142,9 +142,10 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	// Wait for LoadBalancer to become active before continuing
 	lbID := createOpts.LoadbalancerID
 	timeout := d.Timeout(schema.TimeoutCreate)
+
+	// Wait for LoadBalancer to become active before continuing
 	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
@@ -248,7 +249,7 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	// Wait for LoadBalancer to become active before continuing
 	lbID := d.Get("loadbalancer_id").(string)
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2Listener(lbClient, d.Id(), &lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -266,8 +267,8 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error updating listener %s: %s", d.Id(), err)
 	}
 
-	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", lbPendingStatuses, timeout)
+	// Wait for Listener to become active again before continuing
+	err = waitForLBV2Listener(lbClient, d.Id(), &lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -283,10 +284,10 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	// Wait for LoadBalancer to become active before continuing
+	// Wait for Listener to become active before continuing
 	lbID := d.Get("loadbalancer_id").(string)
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2Listener(lbClient, d.Id(), &lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -304,14 +305,8 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error deleting listener %s: %s", d.Id(), err)
 	}
 
-	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", lbPendingStatuses, timeout)
-	if err != nil {
-		return err
-	}
-
 	// Wait for Listener to delete
-	err = waitForLBV2Listener(lbClient, d.Id(), "DELETED", nil, timeout)
+	err = waitForLBV2Listener(lbClient, d.Id(), &lbID, "DELETED", lbPendingDeleteStatuses, timeout)
 	if err != nil {
 		return err
 	}

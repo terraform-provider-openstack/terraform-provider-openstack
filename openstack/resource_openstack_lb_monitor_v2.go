@@ -120,9 +120,13 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 		AdminStateUp:  &adminStateUp,
 	}
 
-	timeout := d.Timeout(schema.TimeoutCreate)
+	// cache for the parent Load Balancer ID
+	lbID := ""
 	poolID := createOpts.PoolID
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
+	timeout := d.Timeout(schema.TimeoutCreate)
+
+	// Wait for parent pool to become active before continuing
+	err = waitForLBV2Pool(lbClient, poolID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -142,7 +146,8 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to create monitor: %s", err)
 	}
 
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
+	// Wait for monitor to become active before continuing
+	err = waitForLBV2Monitor(lbClient, monitor.ID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -216,14 +221,18 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 		updateOpts.HTTPMethod = d.Get("http_method").(string)
 	}
 
-	log.Printf("[DEBUG] Updating monitor %s with options: %#v", d.Id(), updateOpts)
-	timeout := d.Timeout(schema.TimeoutUpdate)
+	// cache for the parent Load Balancer ID
+	lbID := ""
 	poolID := d.Get("pool_id").(string)
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
+	timeout := d.Timeout(schema.TimeoutUpdate)
+
+	// Wait for parent pool to become active before continuing
+	err = waitForLBV2Pool(lbClient, poolID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
 
+	log.Printf("[DEBUG] Updating monitor %s with options: %#v", d.Id(), updateOpts)
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		_, err = monitors.Update(lbClient, d.Id(), updateOpts).Extract()
 		if err != nil {
@@ -236,8 +245,8 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to update monitor %s: %s", d.Id(), err)
 	}
 
-	// Wait for LB to become active before continuing
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
+	// Wait for member to become active before continuing
+	err = waitForLBV2Monitor(lbClient, d.Id(), &lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -252,14 +261,18 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	log.Printf("[DEBUG] Deleting monitor %s", d.Id())
-	timeout := d.Timeout(schema.TimeoutUpdate)
+	// cache for the parent Load Balancer ID
+	lbID := ""
 	poolID := d.Get("pool_id").(string)
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
+	timeout := d.Timeout(schema.TimeoutUpdate)
+
+	// Wait for parent pool to become active before continuing
+	err = waitForLBV2Pool(lbClient, poolID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
 
+	log.Printf("[DEBUG] Deleting monitor %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		err = monitors.Delete(lbClient, d.Id()).ExtractErr()
 		if err != nil {
@@ -272,7 +285,8 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to delete monitor %s: %s", d.Id(), err)
 	}
 
-	err = waitForLBV2viaPool(lbClient, poolID, "ACTIVE", lbPendingStatuses, timeout)
+	// Wait for monitor to become DELETED
+	err = waitForLBV2Monitor(lbClient, d.Id(), &lbID, "DELETED", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
