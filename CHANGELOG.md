@@ -1,4 +1,9 @@
-## 1.13.1 (Unreleased)
+## 1.14.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Provider options `swauth` and `use_octavia` will correctly use a default value of `false` when they are not specified. This is to help with compatibility for v0.12 [GH-494]
+
 ## 1.13.0 (December 18, 2018)
 
 FEATURES
