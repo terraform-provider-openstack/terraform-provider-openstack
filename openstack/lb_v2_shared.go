@@ -137,7 +137,7 @@ func waitForLBV2Member(lbClient *gophercloud.ServiceClient, parentPool *pools.Po
 
 	var refreshFunc resource.StateRefreshFunc
 	if member.ProvisioningStatus != "" {
-		refreshFunc = resourceLBV2MemberRefreshFunc(lbClient, member.PoolID, member.ID)
+		refreshFunc = resourceLBV2MemberRefreshFunc(lbClient, parentPool.ID, member.ID)
 	} else {
 		lbID, err := lbV2FindLBIDviaPool(lbClient, parentPool)
 		if err != nil {
