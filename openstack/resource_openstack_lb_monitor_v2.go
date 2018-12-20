@@ -300,12 +300,6 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	// Wait for monitor to become active before continuing
-	err = waitForLBV2Monitor(lbClient, parentPool, monitor, "ACTIVE", lbPendingStatuses, timeout)
-	if err != nil {
-		return err
-	}
-
 	log.Printf("[DEBUG] Deleting monitor %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		err = monitors.Delete(lbClient, d.Id()).ExtractErr()

@@ -295,12 +295,7 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to retrieve listener %s: %s", d.Id(), err)
 	}
 
-	// Wait for the listener to become ACTIVE.
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = waitForLBV2Listener(lbClient, listener, "ACTIVE", lbPendingStatuses, timeout)
-	if err != nil {
-		return err
-	}
 
 	log.Printf("[DEBUG] Deleting listener %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
@@ -315,7 +310,7 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error deleting listener %s: %s", d.Id(), err)
 	}
 
-	// Wait for the listener to become ACTIVE.
+	// Wait for the listener to become DELETED.
 	err = waitForLBV2Listener(lbClient, listener, "DELETED", lbPendingDeleteStatuses, timeout)
 	if err != nil {
 		return err

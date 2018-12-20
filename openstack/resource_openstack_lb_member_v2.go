@@ -278,12 +278,6 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	// Wait for the member to become active before continuing.
-	err = waitForLBV2Member(lbClient, parentPool, member, "ACTIVE", lbPendingStatuses, timeout)
-	if err != nil {
-		return err
-	}
-
 	log.Printf("[DEBUG] Attempting to delete member %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		err = pools.DeleteMember(lbClient, poolID, d.Id()).ExtractErr()
@@ -297,7 +291,7 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to delete member %s: %s", d.Id(), err)
 	}
 
-	// Wait for the member to become active before continuing.
+	// Wait for the member to become DELETED.
 	err = waitForLBV2Member(lbClient, parentPool, member, "DELETED", lbPendingDeleteStatuses, timeout)
 	if err != nil {
 		return err

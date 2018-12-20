@@ -325,12 +325,6 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to retrieve pool %s: %s", d.Id(), err)
 	}
 
-	// Wait for pool to become active before continuing
-	err = waitForLBV2Pool(lbClient, pool, "ACTIVE", lbPendingStatuses, timeout)
-	if err != nil {
-		return err
-	}
-
 	log.Printf("[DEBUG] Attempting to delete pool %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		err = pools.Delete(lbClient, d.Id()).ExtractErr()
