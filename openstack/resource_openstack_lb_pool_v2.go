@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 )
 
@@ -181,8 +182,18 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	timeout := d.Timeout(schema.TimeoutCreate)
 
-	// Wait for Listener ot LoadBalancer to become active before continuing
-	err = waitForLBV2viaListenerOrLB(lbClient, listenerID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
+	// Wait for Listener or LoadBalancer to become active before continuing
+	if listenerID != "" {
+		listener, err := listeners.Get(lbClient, listenerID).Extract()
+		if err != nil {
+			return err
+		}
+
+		err = waitForLBV2Listener(lbClient, listener, "ACTIVE", lbPendingStatuses, timeout)
+	} else {
+		err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", lbPendingStatuses, timeout)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -203,7 +214,7 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	// Pool was successfully created
 	// Wait for pool to become active before continuing
-	err = waitForLBV2Pool(lbClient, pool.ID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2Pool(lbClient, pool, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -246,7 +257,6 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	lbID := d.Get("loadbalancer_id").(string)
 	var updateOpts pools.UpdateOpts
 	if d.HasChange("lb_method") {
 		updateOpts.LBMethod = pools.LBMethod(d.Get("lb_method").(string))
@@ -266,8 +276,14 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 
 	timeout := d.Timeout(schema.TimeoutUpdate)
 
+	// Get a clean copy of the pool.
+	pool, err := pools.Get(lbClient, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve pool %s: %s", d.Id(), err)
+	}
+
 	// Wait for pool to become active before continuing
-	err = waitForLBV2Pool(lbClient, d.Id(), &lbID, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2Pool(lbClient, pool, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -286,7 +302,7 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for pool to become active before continuing
-	err = waitForLBV2Pool(lbClient, d.Id(), &lbID, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2Pool(lbClient, pool, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -301,11 +317,16 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	lbID := d.Get("loadbalancer_id").(string)
 	timeout := d.Timeout(schema.TimeoutDelete)
 
+	// Get a clean copy of the pool.
+	pool, err := pools.Get(lbClient, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve pool %s: %s", d.Id(), err)
+	}
+
 	// Wait for pool to become active before continuing
-	err = waitForLBV2Pool(lbClient, d.Id(), &lbID, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2Pool(lbClient, pool, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -324,7 +345,7 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for Pool to delete
-	err = waitForLBV2Pool(lbClient, d.Id(), &lbID, "DELETED", lbPendingDeleteStatuses, timeout)
+	err = waitForLBV2Pool(lbClient, pool, "DELETED", lbPendingDeleteStatuses, timeout)
 	if err != nil {
 		return err
 	}

@@ -115,13 +115,16 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	// cache for the parent Load Balancer ID
-	lbID := ""
+	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
-	timeout := d.Timeout(schema.TimeoutCreate)
+	parentPool, err := pools.Get(lbClient, poolID).Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve parent pool %s: %s", poolID, err)
+	}
 
 	// Wait for parent pool to become active before continuing
-	err = waitForLBV2Pool(lbClient, poolID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
+	timeout := d.Timeout(schema.TimeoutCreate)
+	err = waitForLBV2Pool(lbClient, parentPool, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -141,7 +144,7 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for member to become active before continuing
-	err = waitForLBV2Member(lbClient, poolID, member.ID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2Member(lbClient, parentPool, member, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -200,13 +203,28 @@ func resourceMemberV2Update(d *schema.ResourceData, meta interface{}) error {
 		updateOpts.AdminStateUp = &asu
 	}
 
-	// cache for the parent Load Balancer ID
-	lbID := ""
+	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
-	timeout := d.Timeout(schema.TimeoutUpdate)
+	parentPool, err := pools.Get(lbClient, poolID).Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve parent pool %s: %s", poolID, err)
+	}
 
-	// Wait for parent pool to become active before continuing
-	err = waitForLBV2Pool(lbClient, poolID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
+	// Get a clean copy of the member.
+	member, err := pools.GetMember(lbClient, poolID, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve member: %s: %s", d.Id(), err)
+	}
+
+	// Wait for parent pool to become active before continuing.
+	timeout := d.Timeout(schema.TimeoutUpdate)
+	err = waitForLBV2Pool(lbClient, parentPool, "ACTIVE", lbPendingStatuses, timeout)
+	if err != nil {
+		return err
+	}
+
+	// Wait for the member to become active before continuing.
+	err = waitForLBV2Member(lbClient, parentPool, member, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -224,8 +242,8 @@ func resourceMemberV2Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to update member %s: %s", d.Id(), err)
 	}
 
-	// Wait for member to become active before continuing
-	err = waitForLBV2Member(lbClient, poolID, d.Id(), &lbID, "ACTIVE", lbPendingStatuses, timeout)
+	// Wait for the member to become active before continuing.
+	err = waitForLBV2Member(lbClient, parentPool, member, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -240,13 +258,28 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	// cache for the parent Load Balancer ID
-	lbID := ""
+	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
-	timeout := d.Timeout(schema.TimeoutDelete)
+	parentPool, err := pools.Get(lbClient, poolID).Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve parent pool %s: %s", poolID, err)
+	}
 
-	// Wait for parent pool to become active before continuing
-	err = waitForLBV2Pool(lbClient, poolID, &lbID, "ACTIVE", lbPendingStatuses, timeout)
+	// Get a clean copy of the member.
+	member, err := pools.GetMember(lbClient, poolID, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve member: %s: %s", d.Id(), err)
+	}
+
+	// Wait for parent pool to become active before continuing.
+	timeout := d.Timeout(schema.TimeoutDelete)
+	err = waitForLBV2Pool(lbClient, parentPool, "ACTIVE", lbPendingStatuses, timeout)
+	if err != nil {
+		return err
+	}
+
+	// Wait for the member to become active before continuing.
+	err = waitForLBV2Member(lbClient, parentPool, member, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -264,8 +297,8 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to delete member %s: %s", d.Id(), err)
 	}
 
-	// Wait for member to become DELETED
-	err = waitForLBV2Member(lbClient, poolID, d.Id(), &lbID, "DELETED", lbPendingDeleteStatuses, timeout)
+	// Wait for the member to become active before continuing.
+	err = waitForLBV2Member(lbClient, parentPool, member, "DELETED", lbPendingDeleteStatuses, timeout)
 	if err != nil {
 		return err
 	}
