@@ -18,7 +18,7 @@ func resourcePoolV2() *schema.Resource {
 		Update: resourcePoolV2Update,
 		Delete: resourcePoolV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			resourcePoolV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -230,14 +230,6 @@ func resourcePoolV2Read(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Retrieved pool %s: %#v", d.Id(), pool)
 
-	// Required by import
-	if len(pool.Listeners) > 0 && pool.Listeners[0].ID != "" {
-		d.Set("listener_id", pool.Listeners[0].ID)
-	}
-	if len(pool.Loadbalancers) > 0 && pool.Loadbalancers[0].ID != "" {
-		d.Set("loadbalancer_id", pool.Loadbalancers[0].ID)
-	}
-
 	d.Set("lb_method", pool.LBMethod)
 	d.Set("protocol", pool.Protocol)
 	d.Set("description", pool.Description)
@@ -347,4 +339,29 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	return nil
+}
+
+func resourcePoolV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*Config)
+	lbClient, err := chooseLBV2Client(d, config)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating OpenStack networking client: %s", err)
+	}
+
+	pool, err := pools.Get(lbClient, d.Id()).Extract()
+	if err != nil {
+		return nil, CheckDeleted(d, err, "pool")
+	}
+
+	log.Printf("[DEBUG] Retrieved pool %s during the import: %#v", d.Id(), pool)
+
+	if len(pool.Listeners) > 0 && pool.Listeners[0].ID != "" {
+		d.Set("listener_id", pool.Listeners[0].ID)
+	} else if len(pool.Loadbalancers) > 0 && pool.Loadbalancers[0].ID != "" {
+		d.Set("loadbalancer_id", pool.Loadbalancers[0].ID)
+	} else {
+		return nil, fmt.Errorf("Unable to detect pool's Listener ID or Load Balancer ID")
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
