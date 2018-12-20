@@ -20,7 +20,7 @@ import (
 var lbPendingStatuses = []string{"PENDING_CREATE", "PENDING_UPDATE"}
 
 // lbPendingDeleteStatuses are the valid statuses a LoadBalancer will be before delete
-var lbPendingDeleteStatuses = []string{"PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"}
+var lbPendingDeleteStatuses = []string{"ERROR", "PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"}
 
 // chooseLBV2Client will determine which load balacing client to use:
 // Either the Octavia/LBaaS client or the Neutron/Networking v2 client.
