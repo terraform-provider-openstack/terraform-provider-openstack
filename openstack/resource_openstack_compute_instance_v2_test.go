@@ -728,7 +728,7 @@ var testAccComputeV2Instance_basic = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
-  metadata {
+  metadata = {
     foo = "bar"
   }
   network {
@@ -1070,7 +1070,7 @@ var testAccComputeV2Instance_metadataRemove_1 = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
-  metadata {
+  metadata = {
     foo = "bar"
     abc = "def"
   }
@@ -1084,7 +1084,7 @@ var testAccComputeV2Instance_metadataRemove_2 = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
-  metadata {
+  metadata = {
     foo = "bar"
     ghi = "jkl"
   }
