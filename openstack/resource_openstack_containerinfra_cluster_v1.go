@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -100,18 +101,16 @@ func resourceContainerInfraClusterV1() *schema.Resource {
 				Computed: true,
 			},
 			"flavor": &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Computed:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_MAGNUM_FLAVOR", nil),
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
 			},
 			"master_flavor": &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Computed:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_MAGNUM_MASTER_FLAVOR", nil),
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
 			},
 			"keypair": &schema.Schema{
 				Type:     schema.TypeString,
@@ -169,13 +168,26 @@ func resourceContainerInfraClusterV1Create(d *schema.ResourceData, meta interfac
 		return err
 	}
 
+	// Determine the flavors to use.
+	// First check if it was set in the config.
+	// If not, try using the appropriate environment variable.
+	flavor, err := containerInfraClusterV1Flavor(d)
+	if err != nil {
+		return fmt.Errorf("Unable to determine openstack_containerinfra_cluster_v1 flavor")
+	}
+
+	masterFlavor, err := containerInfraClusterV1Flavor(d)
+	if err != nil {
+		return fmt.Errorf("Unable to determine openstack_containerinfra_cluster_v1 master_flavor")
+	}
+
 	createOpts := clusters.CreateOpts{
 		ClusterTemplateID: d.Get("cluster_template_id").(string),
 		DiscoveryURL:      d.Get("discovery_url").(string),
-		FlavorID:          d.Get("flavor").(string),
+		FlavorID:          flavor,
 		Keypair:           d.Get("keypair").(string),
 		Labels:            labels,
-		MasterFlavorID:    d.Get("master_flavor").(string),
+		MasterFlavorID:    masterFlavor,
 		Name:              d.Get("name").(string),
 	}
 
@@ -375,4 +387,29 @@ func ContainerInfraClusterV1StateRefreshFunc(client *gophercloud.ServiceClient, 
 
 		return c, c.Status, nil
 	}
+}
+
+func containerInfraClusterV1Flavor(d *schema.ResourceData) (string, error) {
+	if flavor := d.Get("flavor").(string); flavor != "" {
+		return flavor, nil
+	}
+	// Try the OS_MAGNUM_FLAVOR environment variable
+	if v := os.Getenv("OS_MAGNUM_FLAVOR"); v != "" {
+		return v, nil
+	}
+
+	return "", nil
+}
+
+func containerInfraClusterV1MasterFlavor(d *schema.ResourceData) (string, error) {
+	if flavor := d.Get("master_flavor").(string); flavor != "" {
+		return flavor, nil
+	}
+
+	// Try the OS_MAGNUM_FLAVOR environment variable
+	if v := os.Getenv("OS_MAGNUM_MASTER_FLAVOR"); v != "" {
+		return v, nil
+	}
+
+	return "", nil
 }

@@ -65,18 +65,16 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Computed: true,
 			},
 			"flavor_id": &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    false,
-				Computed:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_FLAVOR_ID", nil),
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+				Computed: true,
 			},
 			"flavor_name": &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    false,
-				Computed:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_FLAVOR_NAME", nil),
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+				Computed: true,
 			},
 			"floating_ip": &schema.Schema{
 				Type:     schema.TypeString,
@@ -394,6 +392,9 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
+	// Determines the Flavor ID using the following rules:
+	// If a flavor_id was specified, use it.
+	// If a flavor_name was specified, lookup the flavor ID, report if error.
 	flavorId, err := getFlavorID(computeClient, d)
 	if err != nil {
 		return err
@@ -1124,15 +1125,33 @@ func setImageInformation(computeClient *gophercloud.ServiceClient, server *serve
 	return nil
 }
 
-func getFlavorID(client *gophercloud.ServiceClient, d *schema.ResourceData) (string, error) {
-	flavorId := d.Get("flavor_id").(string)
-
-	if flavorId != "" {
+func getFlavorID(computeClient *gophercloud.ServiceClient, d *schema.ResourceData) (string, error) {
+	if flavorId := d.Get("flavor_id").(string); flavorId != "" {
 		return flavorId, nil
+	} else {
+		// Try the OS_FLAVOR_ID environment variable
+		if v := os.Getenv("OS_FLAVOR_ID"); v != "" {
+			return v, nil
+		}
 	}
 
 	flavorName := d.Get("flavor_name").(string)
-	return flavors.IDFromName(client, flavorName)
+	if flavorName == "" {
+		// Try the OS_FLAVOR_NAME environment variable
+		if v := os.Getenv("OS_FLAVOR_NAME"); v != "" {
+			flavorName = v
+		}
+	}
+
+	if flavorName != "" {
+		flavorId, err := flavors.IDFromName(computeClient, flavorName)
+		if err != nil {
+			return "", err
+		}
+		return flavorId, nil
+	}
+
+	return "", fmt.Errorf("Neither a flavor_id or flavor_name could be determined.")
 }
 
 func resourceComputeSchedulerHintsHash(v interface{}) int {
