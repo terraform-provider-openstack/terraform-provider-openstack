@@ -20,7 +20,7 @@ import (
 var lbPendingStatuses = []string{"PENDING_CREATE", "PENDING_UPDATE"}
 
 // lbPendingDeleteStatuses are the valid statuses a LoadBalancer will be before delete
-var lbPendingDeleteStatuses = []string{"PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"}
+var lbPendingDeleteStatuses = []string{"ERROR", "PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"}
 
 // chooseLBV2Client will determine which load balacing client to use:
 // Either the Octavia/LBaaS client or the Neutron/Networking v2 client.
@@ -42,13 +42,27 @@ func chooseLBV2AccTestClient(config *Config, region string) (*gophercloud.Servic
 	return config.networkingV2Client(region)
 }
 
-func waitForLBV2Listener(lbClient *gophercloud.ServiceClient, id string, target string, pending []string, timeout time.Duration) error {
-	log.Printf("[DEBUG] Waiting for listener %s to become %s.", id, target)
+func waitForLBV2Listener(lbClient *gophercloud.ServiceClient, listener *listeners.Listener, target string, pending []string, timeout time.Duration) error {
+	log.Printf("[DEBUG] Waiting for listener %s to become %s.", listener.ID, target)
+
+	var refreshFunc resource.StateRefreshFunc
+	if listener.ProvisioningStatus != "" {
+		refreshFunc = resourceLBV2ListenerRefreshFunc(lbClient, listener.ID)
+	} else {
+		if len(listener.Loadbalancers) > 0 {
+			lbID := listener.Loadbalancers[0].ID
+			refreshFunc = resourceLBV2LoadBalancerStatusRefreshFunc(lbClient, lbID, "listener", listener.ID)
+		}
+	}
+
+	if refreshFunc == nil {
+		return fmt.Errorf("Unable to determine how to check listener status")
+	}
 
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{target},
 		Pending:    pending,
-		Refresh:    resourceLBV2ListenerRefreshFunc(lbClient, id),
+		Refresh:    refreshFunc,
 		Timeout:    timeout,
 		Delay:      1 * time.Second,
 		MinTimeout: 1 * time.Second,
@@ -57,14 +71,12 @@ func waitForLBV2Listener(lbClient *gophercloud.ServiceClient, id string, target 
 	_, err := stateConf.WaitForState()
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
-			switch target {
-			case "DELETED":
+			if target == "DELETED" {
 				return nil
-			default:
-				return fmt.Errorf("Error: listener %s not found: %s", id, err)
 			}
 		}
-		return fmt.Errorf("Error waiting for listener %s to become %s: %s", id, target, err)
+
+		return fmt.Errorf("Error waiting for listener %s to become %s: %s", listener.ID, target, err)
 	}
 
 	return nil
@@ -72,13 +84,12 @@ func waitForLBV2Listener(lbClient *gophercloud.ServiceClient, id string, target 
 
 func resourceLBV2ListenerRefreshFunc(lbClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		listener, err := listeners.Get(lbClient, id).Extract()
+		lb, err := listeners.Get(lbClient, id).Extract()
 		if err != nil {
 			return nil, "", err
 		}
 
-		// The listener resource has no Status attribute in Neutron lbaasv2 API
-		return listener, lbV2StatusActiveIfEmpty(listener.ProvisioningStatus), nil
+		return lb, lb.ProvisioningStatus, nil
 	}
 }
 
@@ -121,13 +132,25 @@ func resourceLBV2LoadBalancerRefreshFunc(lbClient *gophercloud.ServiceClient, id
 	}
 }
 
-func waitForLBV2Member(lbClient *gophercloud.ServiceClient, poolID, memberID string, target string, pending []string, timeout time.Duration) error {
-	log.Printf("[DEBUG] Waiting for member %s to become %s.", memberID, target)
+func waitForLBV2Member(lbClient *gophercloud.ServiceClient, parentPool *pools.Pool, member *pools.Member, target string, pending []string, timeout time.Duration) error {
+	log.Printf("[DEBUG] Waiting for member %s to become %s.", member.ID, target)
+
+	var refreshFunc resource.StateRefreshFunc
+	if member.ProvisioningStatus != "" {
+		refreshFunc = resourceLBV2MemberRefreshFunc(lbClient, parentPool.ID, member.ID)
+	} else {
+		lbID, err := lbV2FindLBIDviaPool(lbClient, parentPool)
+		if err != nil {
+			return err
+		}
+
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFunc(lbClient, lbID, "member", member.ID)
+	}
 
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{target},
 		Pending:    pending,
-		Refresh:    resourceLBV2MemberRefreshFunc(lbClient, poolID, memberID),
+		Refresh:    refreshFunc,
 		Timeout:    timeout,
 		Delay:      1 * time.Second,
 		MinTimeout: 1 * time.Second,
@@ -136,14 +159,12 @@ func waitForLBV2Member(lbClient *gophercloud.ServiceClient, poolID, memberID str
 	_, err := stateConf.WaitForState()
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
-			switch target {
-			case "DELETED":
+			if target == "DELETED" {
 				return nil
-			default:
-				return fmt.Errorf("Error: member %s not found: %s", memberID, err)
 			}
 		}
-		return fmt.Errorf("Error waiting for member %s to become %s: %s", memberID, target, err)
+
+		return fmt.Errorf("Error waiting for member %s to become %s: %s", member.ID, target, err)
 	}
 
 	return nil
@@ -156,18 +177,29 @@ func resourceLBV2MemberRefreshFunc(lbClient *gophercloud.ServiceClient, poolID, 
 			return nil, "", err
 		}
 
-		// The member resource has no Status attribute in Neutron lbaasv2 API
-		return member, lbV2StatusActiveIfEmpty(member.ProvisioningStatus), nil
+		return member, member.ProvisioningStatus, nil
 	}
 }
 
-func waitForLBV2Monitor(lbClient *gophercloud.ServiceClient, id string, target string, pending []string, timeout time.Duration) error {
-	log.Printf("[DEBUG] Waiting for monitor %s to become %s.", id, target)
+func waitForLBV2Monitor(lbClient *gophercloud.ServiceClient, parentPool *pools.Pool, monitor *monitors.Monitor, target string, pending []string, timeout time.Duration) error {
+	log.Printf("[DEBUG] Waiting for monitor %s to become %s.", monitor.ID, target)
+
+	var refreshFunc resource.StateRefreshFunc
+	if monitor.ProvisioningStatus != "" {
+		refreshFunc = resourceLBV2MonitorRefreshFunc(lbClient, monitor.ID)
+	} else {
+		lbID, err := lbV2FindLBIDviaPool(lbClient, parentPool)
+		if err != nil {
+			return err
+		}
+
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFunc(lbClient, lbID, "monitor", monitor.ID)
+	}
 
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{target},
 		Pending:    pending,
-		Refresh:    resourceLBV2MonitorRefreshFunc(lbClient, id),
+		Refresh:    refreshFunc,
 		Timeout:    timeout,
 		Delay:      1 * time.Second,
 		MinTimeout: 1 * time.Second,
@@ -176,14 +208,11 @@ func waitForLBV2Monitor(lbClient *gophercloud.ServiceClient, id string, target s
 	_, err := stateConf.WaitForState()
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
-			switch target {
-			case "DELETED":
+			if target == "DELETED" {
 				return nil
-			default:
-				return fmt.Errorf("Error: monitor %s not found: %s", id, err)
 			}
 		}
-		return fmt.Errorf("Error waiting for monitor %s to become %s: %s", id, target, err)
+		return fmt.Errorf("Error waiting for monitor %s to become %s: %s", monitor.ID, target, err)
 	}
 
 	return nil
@@ -196,18 +225,29 @@ func resourceLBV2MonitorRefreshFunc(lbClient *gophercloud.ServiceClient, id stri
 			return nil, "", err
 		}
 
-		// The monitor resource has no Status attribute in Neutron lbaasv2 API
-		return monitor, lbV2StatusActiveIfEmpty(monitor.ProvisioningStatus), nil
+		return monitor, monitor.ProvisioningStatus, nil
 	}
 }
 
-func waitForLBV2Pool(lbClient *gophercloud.ServiceClient, id string, target string, pending []string, timeout time.Duration) error {
-	log.Printf("[DEBUG] Waiting for pool %s to become %s.", id, target)
+func waitForLBV2Pool(lbClient *gophercloud.ServiceClient, pool *pools.Pool, target string, pending []string, timeout time.Duration) error {
+	log.Printf("[DEBUG] Waiting for pool %s to become %s.", pool.ID, target)
+
+	var refreshFunc resource.StateRefreshFunc
+	if pool.ProvisioningStatus != "" {
+		refreshFunc = resourceLBV2PoolRefreshFunc(lbClient, pool.ID)
+	} else {
+		lbID, err := lbV2FindLBIDviaPool(lbClient, pool)
+		if err != nil {
+			return err
+		}
+
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFunc(lbClient, lbID, "pool", pool.ID)
+	}
 
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{target},
 		Pending:    pending,
-		Refresh:    resourceLBV2PoolRefreshFunc(lbClient, id),
+		Refresh:    refreshFunc,
 		Timeout:    timeout,
 		Delay:      1 * time.Second,
 		MinTimeout: 1 * time.Second,
@@ -216,78 +256,102 @@ func waitForLBV2Pool(lbClient *gophercloud.ServiceClient, id string, target stri
 	_, err := stateConf.WaitForState()
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
-			switch target {
-			case "DELETED":
+			if target == "DELETED" {
 				return nil
-			default:
-				return fmt.Errorf("Error: pool %s not found: %s", id, err)
 			}
 		}
-		return fmt.Errorf("Error waiting for pool %s to become %s: %s", id, target, err)
+
+		return fmt.Errorf("Error waiting for pool %s to become %s: %s", pool.ID, target, err)
 	}
 
 	return nil
 }
 
-func resourceLBV2PoolRefreshFunc(lbClient *gophercloud.ServiceClient, poolID string) resource.StateRefreshFunc {
+func resourceLBV2PoolRefreshFunc(lbClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		pool, err := pools.Get(lbClient, poolID).Extract()
+		pool, err := pools.Get(lbClient, id).Extract()
 		if err != nil {
 			return nil, "", err
 		}
 
-		// The pool resource has no Status attribute in Neutron lbaasv2 API
-		return pool, lbV2StatusActiveIfEmpty(pool.ProvisioningStatus), nil
+		return pool, pool.ProvisioningStatus, nil
 	}
 }
 
-func waitForLBV2viaPool(lbClient *gophercloud.ServiceClient, id string, target string, pending []string, timeout time.Duration) error {
-	pool, err := pools.Get(lbClient, id).Extract()
-	if err != nil {
-		return err
-	}
-
+func lbV2FindLBIDviaPool(lbClient *gophercloud.ServiceClient, pool *pools.Pool) (string, error) {
 	if len(pool.Loadbalancers) > 0 {
-		// each pool has an LB in Octavia lbaasv2 API
-		return waitForLBV2LoadBalancer(lbClient, pool.Loadbalancers[0].ID, target, pending, timeout)
+		return pool.Loadbalancers[0].ID, nil
 	}
 
 	if len(pool.Listeners) > 0 {
-		// each pool has a listener in Neutron lbaasv2 API
-		return waitForLBV2viaListener(lbClient, pool.Listeners[0].ID, target, pending, timeout)
+		listenerID := pool.Listeners[0].ID
+		listener, err := listeners.Get(lbClient, listenerID).Extract()
+		if err != nil {
+			return "", err
+		}
+
+		if len(listener.Loadbalancers) > 0 {
+			return listener.Loadbalancers[0].ID, nil
+		}
 	}
 
-	// got a pool but no LB - this is wrong
-	return fmt.Errorf("No Load Balancer on pool %s", id)
+	return "", fmt.Errorf("Unable to determine loadbalancer ID from pool %s", pool.ID)
 }
 
-func waitForLBV2viaListener(lbClient *gophercloud.ServiceClient, id string, target string, pending []string, timeout time.Duration) error {
-	listener, err := listeners.Get(lbClient, id).Extract()
-	if err != nil {
-		return fmt.Errorf("Error: listener %s not found: %s ", id, err)
-	}
+func resourceLBV2LoadBalancerStatusRefreshFunc(lbClient *gophercloud.ServiceClient, lbID, resourceType, resourceID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		statuses, err := loadbalancers.GetStatuses(lbClient, lbID).Extract()
+		if err != nil {
+			return nil, "", fmt.Errorf("Unable to get statuses from the Load Balancer %s statuses tree: %s", lbID, err)
+		}
 
-	if len(listener.Loadbalancers) > 0 {
-		lbID := listener.Loadbalancers[0].ID
-		return waitForLBV2LoadBalancer(lbClient, lbID, target, pending, timeout)
-	}
+		switch resourceType {
+		case "listener":
+			for _, listener := range statuses.Loadbalancer.Listeners {
+				if listener.ID == resourceID {
+					if listener.ProvisioningStatus != "" {
+						return listener, listener.ProvisioningStatus, nil
+					}
+				}
+			}
+			listener, err := listeners.Get(lbClient, resourceID).Extract()
+			return listener, "ACTIVE", err
 
-	return fmt.Errorf("No Load Balancer found associated with listener %s", id)
-}
+		case "pool":
+			for _, pool := range statuses.Loadbalancer.Pools {
+				if pool.ID == resourceID {
+					if pool.ProvisioningStatus != "" {
+						return pool, pool.ProvisioningStatus, nil
+					}
+				}
+			}
+			pool, err := pools.Get(lbClient, resourceID).Extract()
+			return pool, "ACTIVE", err
 
-func waitForLBV2viaLBorListener(lbClient *gophercloud.ServiceClient, lbID string, listenerID string, target string, pending []string, timeout time.Duration) error {
-	if lbID != "" {
-		return waitForLBV2LoadBalancer(lbClient, lbID, target, pending, timeout)
-	}
-	if listenerID != "" {
-		return waitForLBV2viaListener(lbClient, listenerID, target, pending, timeout)
-	}
-	return fmt.Errorf("Neither Load Balancer ID nor Listener ID were provided")
-}
+		case "monitor":
+			for _, pool := range statuses.Loadbalancer.Pools {
+				if pool.Monitor.ID == resourceID {
+					if pool.Monitor.ProvisioningStatus != "" {
+						return pool.Monitor, pool.Monitor.ProvisioningStatus, nil
+					}
+				}
+			}
+			monitor, err := monitors.Get(lbClient, resourceID).Extract()
+			return monitor, "ACTIVE", err
 
-func lbV2StatusActiveIfEmpty(provisioningStatus string) string {
-	if provisioningStatus == "" {
-		return "ACTIVE"
+		case "member":
+			for _, pool := range statuses.Loadbalancer.Pools {
+				for _, member := range pool.Members {
+					if member.ID == resourceID {
+						if member.ProvisioningStatus != "" {
+							return member, member.ProvisioningStatus, nil
+						}
+					}
+				}
+			}
+			return "", "DELETED", nil
+		}
+
+		return nil, "", fmt.Errorf("An unexpected error occurred querying the status of %s %s by loadbalancer %s", resourceType, resourceID, lbID)
 	}
-	return provisioningStatus
 }
