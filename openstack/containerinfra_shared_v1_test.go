@@ -30,11 +30,17 @@ func TestExpandContainerInfraV1LabelsString(t *testing.T) {
 		"bar": "baz",
 	}
 
-	expectedLabels := "foo=bar,bar=baz"
+	expectedLabels_1 := "foo=bar,bar=baz"
+	expectedLabels_2 := "bar=baz,foo=bar"
 
 	actualLabels, err := expandContainerInfraV1LabelsString(labels)
 	assert.Equal(t, err, nil)
-	assert.Equal(t, expectedLabels, actualLabels)
+
+	if actualLabels != expectedLabels_1 && actualLabels != expectedLabels_2 {
+		t.Fatalf("Unexpected labels. Got %s, expected %s or %s",
+			actualLabels, expectedLabels_1, expectedLabels_2)
+	}
+
 }
 
 func TestContainerInfraClusterTemplateV1AppendUpdateOpts(t *testing.T) {
