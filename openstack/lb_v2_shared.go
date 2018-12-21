@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/monitors"
@@ -350,8 +351,98 @@ func resourceLBV2LoadBalancerStatusRefreshFunc(lbClient *gophercloud.ServiceClie
 				}
 			}
 			return "", "DELETED", nil
+
+		case "l7policy":
+			for _, listener := range statuses.Loadbalancer.Listeners {
+				for _, l7policy := range listener.L7Policies {
+					if l7policy.ID == resourceID {
+						if l7policy.ProvisioningStatus != "" {
+							return l7policy, l7policy.ProvisioningStatus, nil
+						}
+					}
+				}
+			}
+			l7policy, err := l7policies.Get(lbClient, resourceID).Extract()
+			return l7policy, "ACTIVE", err
 		}
 
 		return nil, "", fmt.Errorf("An unexpected error occurred querying the status of %s %s by loadbalancer %s", resourceType, resourceID, lbID)
 	}
+}
+
+func resourceLBV2L7PolicyRefreshFunc(lbClient *gophercloud.ServiceClient, l7policyID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		l7policy, err := l7policies.Get(lbClient, l7policyID).Extract()
+		if err != nil {
+			return nil, "", err
+		}
+
+		return l7policy, l7policy.ProvisioningStatus, nil
+	}
+}
+
+func waitForLBV2L7Policy(lbClient *gophercloud.ServiceClient, parentListener *listeners.Listener, l7policy *l7policies.L7Policy, target string, pending []string, timeout time.Duration) error {
+	log.Printf("[DEBUG] Waiting for l7policy %s to become %s.", l7policy.ID, target)
+
+	var refreshFunc resource.StateRefreshFunc
+	if l7policy.ProvisioningStatus != "" {
+		refreshFunc = resourceLBV2L7PolicyRefreshFunc(lbClient, l7policy.ID)
+	} else {
+		if len(parentListener.Loadbalancers) == 0 {
+			return fmt.Errorf("Unable to determine loadbalancer ID from listener %s", parentListener.ID)
+		}
+
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFunc(lbClient, parentListener.Loadbalancers[0].ID, "l7policy", l7policy.ID)
+	}
+
+	stateConf := &resource.StateChangeConf{
+		Target:     []string{target},
+		Pending:    pending,
+		Refresh:    refreshFunc,
+		Timeout:    timeout,
+		Delay:      1 * time.Second,
+		MinTimeout: 1 * time.Second,
+	}
+
+	_, err := stateConf.WaitForState()
+	if err != nil {
+		if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if target == "DELETED" {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Error waiting for l7policy %s to become %s: %s", l7policy.ID, target, err)
+	}
+
+	return nil
+}
+
+func getListenerIDForL7Policy(lbClient *gophercloud.ServiceClient, id string) (string, error) {
+	log.Printf("[DEBUG] Trying to get Listener ID associated with the %s L7 Policy ID", id)
+	lbsPages, err := loadbalancers.List(lbClient, loadbalancers.ListOpts{}).AllPages()
+	if err != nil {
+		return "", fmt.Errorf("No Load Balancers were found: %s", err)
+	}
+
+	lbs, err := loadbalancers.ExtractLoadBalancers(lbsPages)
+	if err != nil {
+		return "", fmt.Errorf("Unable to extract Load Balancers list: %s", err)
+	}
+
+	for _, lb := range lbs {
+		statuses, err := loadbalancers.GetStatuses(lbClient, lb.ID).Extract()
+		if err != nil {
+			return "", fmt.Errorf("Failed to get Load Balancer statuses: %s", err)
+		}
+		for _, listener := range statuses.Loadbalancer.Listeners {
+			for _, l7policy := range listener.L7Policies {
+				if l7policy.ID == id {
+					return listener.ID, nil
+				}
+			}
+		}
+	}
+
+	return "", fmt.Errorf("Unable to find Listener ID associated with the %s L7 Policy ID", id)
 }
