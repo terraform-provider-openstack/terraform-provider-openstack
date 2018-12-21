@@ -1151,7 +1151,7 @@ func getFlavorID(computeClient *gophercloud.ServiceClient, d *schema.ResourceDat
 		return flavorId, nil
 	}
 
-	return "", fmt.Errorf("Neither a flavor_id or flavor_id could be determined.")
+	return "", fmt.Errorf("Neither a flavor_id or flavor_name could be determined.")
 }
 
 func resourceComputeSchedulerHintsHash(v interface{}) int {
