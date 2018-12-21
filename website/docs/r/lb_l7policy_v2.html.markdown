@@ -61,22 +61,22 @@ The following arguments are supported:
 * `region` - (Optional) The region in which to obtain the V2 Networking client.
     A Networking client is needed to create an . If omitted, the
     `region` argument of the provider is used. Changing this creates a new
-    L7policy.
+    L7 Policy.
 
 * `tenant_id` - (Optional) Required for admins. The UUID of the tenant who owns
-    the L7policy.  Only administrative users can specify a tenant UUID
-    other than their own. Changing this creates a new L7policy.
+    the L7 Policy.  Only administrative users can specify a tenant UUID
+    other than their own. Changing this creates a new L7 Policy.
 
-* `name` - (Optional) Human-readable name for the L7policy. Does not have
+* `name` - (Optional) Human-readable name for the L7 Policy. Does not have
     to be unique.
 
-* `description` - (Optional) Human-readable description for the L7policy.
+* `description` - (Optional) Human-readable description for the L7 Policy.
 
-* `action` - (Required) The L7policy action - can either be REDIRECT\_TO\_POOL,
+* `action` - (Required) The L7 Policy action - can either be REDIRECT\_TO\_POOL,
     REDIRECT\_TO\_URL or REJECT.
 
-* `listener_id` - (Required) The Listener on which the L7policy will be associated with.
-    Changing this creates a new L7policy.
+* `listener_id` - (Required) The Listener on which the L7 Policy will be associated with.
+    Changing this creates a new L7 Policy.
 
 * `position` - (Optional) The position of this policy on the listener. Positions start at 1.
 
@@ -86,14 +86,14 @@ The following arguments are supported:
 * `redirect_url` - (Optional) Requests matching this policy will be redirected to this URL.
     Only valid if action is REDIRECT\_TO\_URL.
 
-* `admin_state_up` - (Optional) The administrative state of the L7policy.
+* `admin_state_up` - (Optional) The administrative state of the L7 Policy.
     A valid value is true (UP) or false (DOWN).
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - The unique ID for the L7policy.
+* `id` - The unique ID for the L7 {olicy.
 * `region` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
 * `name` - See Argument Reference above.
@@ -107,7 +107,7 @@ The following attributes are exported:
 
 ## Import
 
-Load Balancer L7Policy can be imported using the L7 Policy ID, e.g.:
+Load Balancer L7 Policy can be imported using the L7 Policy ID, e.g.:
 
 ```
 $ terraform import openstack_lb_l7policy_v2.l7policy_1 8a7a79c2-cf17-4e65-b2ae-ddc8bfcf6c74
