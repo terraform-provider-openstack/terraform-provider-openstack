@@ -84,3 +84,11 @@ The following attributes are exported:
 * `lb_method` - See Argument Reference above.
 * `persistence` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
+
+## Import
+
+Load Balancer Pool can be imported using the Pool ID, e.g.:
+
+```
+$ terraform import openstack_lb_pool_v2.pool_1 60ad9ee4-249a-4d60-a45b-aa60e046c513
+```

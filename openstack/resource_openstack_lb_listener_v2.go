@@ -17,6 +17,9 @@ func resourceListenerV2() *schema.Resource {
 		Read:   resourceListenerV2Read,
 		Update: resourceListenerV2Update,
 		Delete: resourceListenerV2Delete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -188,6 +191,11 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)
+
+	// Required by import
+	if len(listener.Loadbalancers) > 0 {
+		d.Set("loadbalancer_id", listener.Loadbalancers[0].ID)
+	}
 
 	d.Set("name", listener.Name)
 	d.Set("protocol", listener.Protocol)

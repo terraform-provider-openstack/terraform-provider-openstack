@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -18,6 +19,9 @@ func resourceMemberV2() *schema.Resource {
 		Read:   resourceMemberV2Read,
 		Update: resourceMemberV2Update,
 		Delete: resourceMemberV2Delete,
+		Importer: &schema.ResourceImporter{
+			resourceMemberV2Import,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -261,4 +265,20 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	return nil
+}
+
+func resourceMemberV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.SplitN(d.Id(), "/", 2)
+	if len(parts) != 2 {
+		err := fmt.Errorf("Invalid format specified for Member. Format must be <pool id>/<member id>")
+		return nil, err
+	}
+
+	poolID := parts[0]
+	memberID := parts[1]
+
+	d.SetId(memberID)
+	d.Set("pool_id", poolID)
+
+	return []*schema.ResourceData{d}, nil
 }

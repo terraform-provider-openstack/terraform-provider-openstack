@@ -17,6 +17,9 @@ func resourceMonitorV2() *schema.Resource {
 		Read:   resourceMonitorV2Read,
 		Update: resourceMonitorV2Update,
 		Delete: resourceMonitorV2Delete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -165,6 +168,11 @@ func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] Retrieved monitor %s: %#v", d.Id(), monitor)
+
+	// Required by import
+	if len(monitor.Pools) > 0 {
+		d.Set("pool_id", monitor.Pools[0].ID)
+	}
 
 	d.Set("tenant_id", monitor.TenantID)
 	d.Set("type", monitor.Type)
