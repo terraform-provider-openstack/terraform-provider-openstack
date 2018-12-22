@@ -23,6 +23,8 @@ var lbPendingStatuses = []string{"PENDING_CREATE", "PENDING_UPDATE"}
 // lbPendingDeleteStatuses are the valid statuses a LoadBalancer will be before delete
 var lbPendingDeleteStatuses = []string{"ERROR", "PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"}
 
+var lbSkipLBStatuses = []string{"ERROR", "ACTIVE"}
+
 // chooseLBV2Client will determine which load balacing client to use:
 // Either the Octavia/LBaaS client or the Neutron/Networking v2 client.
 func chooseLBV2Client(d *schema.ResourceData, config *Config) (*gophercloud.ServiceClient, error) {
@@ -47,17 +49,17 @@ func waitForLBV2Listener(lbClient *gophercloud.ServiceClient, listener *listener
 	log.Printf("[DEBUG] Waiting for listener %s to become %s.", listener.ID, target)
 
 	var refreshFunc resource.StateRefreshFunc
-	if listener.ProvisioningStatus != "" {
-		refreshFunc = resourceLBV2ListenerRefreshFunc(lbClient, listener.ID)
-	} else {
-		if len(listener.Loadbalancers) > 0 {
-			lbID := listener.Loadbalancers[0].ID
-			refreshFunc = resourceLBV2LoadBalancerStatusRefreshFunc(lbClient, lbID, "listener", listener.ID)
-		}
+
+	if len(listener.Loadbalancers) == 0 {
+		return fmt.Errorf("Failed to detect a Load Balancer for the %s Listener", listener.ID)
 	}
 
-	if refreshFunc == nil {
-		return fmt.Errorf("Unable to determine how to check listener status")
+	lbID := listener.Loadbalancers[0].ID
+
+	if listener.ProvisioningStatus != "" {
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFuncOctavia(lbClient, lbID, resourceLBV2ListenerRefreshFunc(lbClient, listener.ID))
+	} else {
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFuncNeutron(lbClient, lbID, "listener", listener.ID)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -137,15 +139,16 @@ func waitForLBV2Member(lbClient *gophercloud.ServiceClient, parentPool *pools.Po
 	log.Printf("[DEBUG] Waiting for member %s to become %s.", member.ID, target)
 
 	var refreshFunc resource.StateRefreshFunc
-	if member.ProvisioningStatus != "" {
-		refreshFunc = resourceLBV2MemberRefreshFunc(lbClient, parentPool.ID, member.ID)
-	} else {
-		lbID, err := lbV2FindLBIDviaPool(lbClient, parentPool)
-		if err != nil {
-			return err
-		}
 
-		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFunc(lbClient, lbID, "member", member.ID)
+	lbID, err := lbV2FindLBIDviaPool(lbClient, parentPool)
+	if err != nil {
+		return err
+	}
+
+	if member.ProvisioningStatus != "" {
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFuncOctavia(lbClient, lbID, resourceLBV2MemberRefreshFunc(lbClient, parentPool.ID, member.ID))
+	} else {
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFuncNeutron(lbClient, lbID, "member", member.ID)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -157,7 +160,7 @@ func waitForLBV2Member(lbClient *gophercloud.ServiceClient, parentPool *pools.Po
 		MinTimeout: 1 * time.Second,
 	}
 
-	_, err := stateConf.WaitForState()
+	_, err = stateConf.WaitForState()
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
 			if target == "DELETED" {
@@ -186,15 +189,16 @@ func waitForLBV2Monitor(lbClient *gophercloud.ServiceClient, parentPool *pools.P
 	log.Printf("[DEBUG] Waiting for monitor %s to become %s.", monitor.ID, target)
 
 	var refreshFunc resource.StateRefreshFunc
-	if monitor.ProvisioningStatus != "" {
-		refreshFunc = resourceLBV2MonitorRefreshFunc(lbClient, monitor.ID)
-	} else {
-		lbID, err := lbV2FindLBIDviaPool(lbClient, parentPool)
-		if err != nil {
-			return err
-		}
 
-		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFunc(lbClient, lbID, "monitor", monitor.ID)
+	lbID, err := lbV2FindLBIDviaPool(lbClient, parentPool)
+	if err != nil {
+		return err
+	}
+
+	if monitor.ProvisioningStatus != "" {
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFuncOctavia(lbClient, lbID, resourceLBV2MonitorRefreshFunc(lbClient, monitor.ID))
+	} else {
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFuncNeutron(lbClient, lbID, "monitor", monitor.ID)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -206,7 +210,7 @@ func waitForLBV2Monitor(lbClient *gophercloud.ServiceClient, parentPool *pools.P
 		MinTimeout: 1 * time.Second,
 	}
 
-	_, err := stateConf.WaitForState()
+	_, err = stateConf.WaitForState()
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
 			if target == "DELETED" {
@@ -234,15 +238,16 @@ func waitForLBV2Pool(lbClient *gophercloud.ServiceClient, pool *pools.Pool, targ
 	log.Printf("[DEBUG] Waiting for pool %s to become %s.", pool.ID, target)
 
 	var refreshFunc resource.StateRefreshFunc
-	if pool.ProvisioningStatus != "" {
-		refreshFunc = resourceLBV2PoolRefreshFunc(lbClient, pool.ID)
-	} else {
-		lbID, err := lbV2FindLBIDviaPool(lbClient, pool)
-		if err != nil {
-			return err
-		}
 
-		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFunc(lbClient, lbID, "pool", pool.ID)
+	lbID, err := lbV2FindLBIDviaPool(lbClient, pool)
+	if err != nil {
+		return err
+	}
+
+	if pool.ProvisioningStatus != "" {
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFuncOctavia(lbClient, lbID, resourceLBV2PoolRefreshFunc(lbClient, pool.ID))
+	} else {
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFuncNeutron(lbClient, lbID, "pool", pool.ID)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -254,7 +259,7 @@ func waitForLBV2Pool(lbClient *gophercloud.ServiceClient, pool *pools.Pool, targ
 		MinTimeout: 1 * time.Second,
 	}
 
-	_, err := stateConf.WaitForState()
+	_, err = stateConf.WaitForState()
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
 			if target == "DELETED" {
@@ -299,11 +304,29 @@ func lbV2FindLBIDviaPool(lbClient *gophercloud.ServiceClient, pool *pools.Pool) 
 	return "", fmt.Errorf("Unable to determine loadbalancer ID from pool %s", pool.ID)
 }
 
-func resourceLBV2LoadBalancerStatusRefreshFunc(lbClient *gophercloud.ServiceClient, lbID, resourceType, resourceID string) resource.StateRefreshFunc {
+func resourceLBV2LoadBalancerStatusRefreshFuncOctavia(lbClient *gophercloud.ServiceClient, id string, resourceRefreshFunc func() (interface{}, string, error)) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		refreshFunc := resourceLBV2LoadBalancerRefreshFunc(lbClient, id)
+		lb, status, err := refreshFunc()
+		if err != nil {
+			return lb, status, err
+		}
+		if !strSliceContains(lbSkipLBStatuses, status) {
+			return lb, status, nil
+		}
+		return resourceRefreshFunc()
+	}
+}
+
+func resourceLBV2LoadBalancerStatusRefreshFuncNeutron(lbClient *gophercloud.ServiceClient, lbID, resourceType, resourceID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		statuses, err := loadbalancers.GetStatuses(lbClient, lbID).Extract()
 		if err != nil {
 			return nil, "", fmt.Errorf("Unable to get statuses from the Load Balancer %s statuses tree: %s", lbID, err)
+		}
+
+		if !strSliceContains(lbSkipLBStatuses, statuses.Loadbalancer.ProvisioningStatus) {
+			return statuses.Loadbalancer, statuses.Loadbalancer.ProvisioningStatus, nil
 		}
 
 		switch resourceType {
@@ -399,14 +422,17 @@ func waitForLBV2L7Policy(lbClient *gophercloud.ServiceClient, parentListener *li
 	log.Printf("[DEBUG] Waiting for l7policy %s to become %s.", l7policy.ID, target)
 
 	var refreshFunc resource.StateRefreshFunc
-	if l7policy.ProvisioningStatus != "" {
-		refreshFunc = resourceLBV2L7PolicyRefreshFunc(lbClient, l7policy.ID)
-	} else {
-		if len(parentListener.Loadbalancers) == 0 {
-			return fmt.Errorf("Unable to determine loadbalancer ID from listener %s", parentListener.ID)
-		}
 
-		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFunc(lbClient, parentListener.Loadbalancers[0].ID, "l7policy", l7policy.ID)
+	if len(parentListener.Loadbalancers) == 0 {
+		return fmt.Errorf("Unable to determine loadbalancer ID from listener %s", parentListener.ID)
+	}
+
+	lbID := parentListener.Loadbalancers[0].ID
+
+	if l7policy.ProvisioningStatus != "" {
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFuncOctavia(lbClient, lbID, resourceLBV2L7PolicyRefreshFunc(lbClient, l7policy.ID))
+	} else {
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFuncNeutron(lbClient, lbID, "l7policy", l7policy.ID)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -476,14 +502,17 @@ func waitForLBV2L7Rule(lbClient *gophercloud.ServiceClient, parentListener *list
 	log.Printf("[DEBUG] Waiting for l7rule %s to become %s.", l7rule.ID, target)
 
 	var refreshFunc resource.StateRefreshFunc
-	if l7rule.ProvisioningStatus != "" {
-		refreshFunc = resourceLBV2L7RuleRefreshFunc(lbClient, parentL7policy.ID, l7rule.ID)
-	} else {
-		if len(parentListener.Loadbalancers) == 0 {
-			return fmt.Errorf("Unable to determine loadbalancer ID from listener %s", parentListener.ID)
-		}
 
-		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFunc(lbClient, parentListener.Loadbalancers[0].ID, "l7rule", l7rule.ID)
+	if len(parentListener.Loadbalancers) == 0 {
+		return fmt.Errorf("Unable to determine loadbalancer ID from listener %s", parentListener.ID)
+	}
+
+	lbID := parentListener.Loadbalancers[0].ID
+
+	if l7rule.ProvisioningStatus != "" {
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFuncOctavia(lbClient, lbID, resourceLBV2L7RuleRefreshFunc(lbClient, parentL7policy.ID, l7rule.ID))
+	} else {
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFuncNeutron(lbClient, lbID, "l7rule", l7rule.ID)
 	}
 
 	stateConf := &resource.StateChangeConf{
