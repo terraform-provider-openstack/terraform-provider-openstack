@@ -4,6 +4,10 @@ NOTES
 
 * The Load Balancer v2 resources have been updated to provide more efficient status checks. If you encounter any problems due to this, please report them and we will make it a priority to resolve.
 
+FEATURES
+
+* __New Resource__: `openstack_lb_l7policy_v2` [GH-527]
+
 IMPROVEMENTS
 
 * Provider options `swauth` and `use_octavia` will correctly use a default value of `false` when they are not specified. This is to help with compatibility for v0.12 [GH-494]
