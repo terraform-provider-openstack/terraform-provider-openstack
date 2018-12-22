@@ -75,6 +75,12 @@ func resourceL7RuleV2() *schema.Resource {
 			"value": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					if len(v.(string)) == 0 {
+						errors = append(errors, fmt.Errorf("'value' field should not be empty"))
+					}
+					return
+				},
 			},
 
 			"key": &schema.Schema{
@@ -108,15 +114,22 @@ func resourceL7RuleV2Create(d *schema.ResourceData, meta interface{}) error {
 	l7policyID := d.Get("l7policy_id").(string)
 	listenerID := ""
 	ruleType := d.Get("type").(string)
+	key := d.Get("key").(string)
 	compareType := d.Get("compare_type").(string)
-
 	adminStateUp := d.Get("admin_state_up").(bool)
+
+	// Ensure the right combination of options have been specified.
+	err = checkL7RuleType(ruleType, key)
+	if err != nil {
+		return fmt.Errorf("Unable to create L7 Rule: %s", err)
+	}
+
 	createOpts := l7policies.CreateRuleOpts{
 		TenantID:     d.Get("tenant_id").(string),
 		RuleType:     l7policies.RuleType(ruleType),
 		CompareType:  l7policies.CompareType(compareType),
 		Value:        d.Get("value").(string),
-		Key:          d.Get("key").(string),
+		Key:          key,
 		Invert:       d.Get("invert").(bool),
 		AdminStateUp: &adminStateUp,
 	}
@@ -217,11 +230,16 @@ func resourceL7RuleV2Update(d *schema.ResourceData, meta interface{}) error {
 	// Assign some required variables for use in updating.
 	l7policyID := d.Get("l7policy_id").(string)
 	listenerID := d.Get("listener_id").(string)
+	ruleType := d.Get("type").(string)
+	key := d.Get("key").(string)
 
-	var updateOpts l7policies.UpdateRuleOpts
+	// Key should always be set
+	updateOpts := l7policies.UpdateRuleOpts{
+		Key: &key,
+	}
 
 	if d.HasChange("type") {
-		updateOpts.RuleType = l7policies.RuleType(d.Get("type").(string))
+		updateOpts.RuleType = l7policies.RuleType(ruleType)
 	}
 	if d.HasChange("compare_type") {
 		updateOpts.CompareType = l7policies.CompareType(d.Get("compare_type").(string))
@@ -229,13 +247,15 @@ func resourceL7RuleV2Update(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("value") {
 		updateOpts.Value = d.Get("value").(string)
 	}
-	if d.HasChange("key") {
-		key := d.Get("key").(string)
-		updateOpts.Key = &key
-	}
 	if d.HasChange("invert") {
 		invert := d.Get("invert").(bool)
 		updateOpts.Invert = &invert
+	}
+
+	// Ensure the right combination of options have been specified.
+	err = checkL7RuleType(ruleType, key)
+	if err != nil {
+		return err
 	}
 
 	timeout := d.Timeout(schema.TimeoutUpdate)
@@ -387,4 +407,14 @@ func resourceL7RuleV2Import(d *schema.ResourceData, meta interface{}) ([]*schema
 	d.Set("listener_id", listenerID)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func checkL7RuleType(ruleType, key string) error {
+	keyRequired := []string{"COOKIE", "HEADER"}
+	if strSliceContains(keyRequired, ruleType) && key == "" {
+		return fmt.Errorf("key attribute is required, when the L7 Rule type is %s", strings.Join(keyRequired, " or "))
+	} else if !strSliceContains(keyRequired, ruleType) && key != "" {
+		return fmt.Errorf("key attribute must not be used, when the L7 Rule type is not %s", strings.Join(keyRequired, " or "))
+	}
+	return nil
 }

@@ -508,3 +508,14 @@ func waitForLBV2L7Rule(lbClient *gophercloud.ServiceClient, parentListener *list
 
 	return nil
 }
+
+// strSliceContains checks if a given string is contained in a slice
+// When anybody asks why Go needs generics, here you go.
+func strSliceContains(haystack []string, needle string) bool {
+	for _, s := range haystack {
+		if s == needle {
+			return true
+		}
+	}
+	return false
+}
