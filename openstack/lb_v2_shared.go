@@ -364,6 +364,20 @@ func resourceLBV2LoadBalancerStatusRefreshFunc(lbClient *gophercloud.ServiceClie
 			}
 			l7policy, err := l7policies.Get(lbClient, resourceID).Extract()
 			return l7policy, "ACTIVE", err
+
+		case "l7rule":
+			for _, listener := range statuses.Loadbalancer.Listeners {
+				for _, l7policy := range listener.L7Policies {
+					for _, l7rule := range l7policy.Rules {
+						if l7rule.ID == resourceID {
+							if l7rule.ProvisioningStatus != "" {
+								return l7rule, l7rule.ProvisioningStatus, nil
+							}
+						}
+					}
+				}
+			}
+			return "", "DELETED", nil
 		}
 
 		return nil, "", fmt.Errorf("An unexpected error occurred querying the status of %s %s by loadbalancer %s", resourceType, resourceID, lbID)
@@ -445,4 +459,63 @@ func getListenerIDForL7Policy(lbClient *gophercloud.ServiceClient, id string) (s
 	}
 
 	return "", fmt.Errorf("Unable to find Listener ID associated with the %s L7 Policy ID", id)
+}
+
+func resourceLBV2L7RuleRefreshFunc(lbClient *gophercloud.ServiceClient, l7policyID string, l7ruleID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		l7rule, err := l7policies.GetRule(lbClient, l7policyID, l7ruleID).Extract()
+		if err != nil {
+			return nil, "", err
+		}
+
+		return l7rule, l7rule.ProvisioningStatus, nil
+	}
+}
+
+func waitForLBV2L7Rule(lbClient *gophercloud.ServiceClient, parentListener *listeners.Listener, parentL7policy *l7policies.L7Policy, l7rule *l7policies.Rule, target string, pending []string, timeout time.Duration) error {
+	log.Printf("[DEBUG] Waiting for l7rule %s to become %s.", l7rule.ID, target)
+
+	var refreshFunc resource.StateRefreshFunc
+	if l7rule.ProvisioningStatus != "" {
+		refreshFunc = resourceLBV2L7RuleRefreshFunc(lbClient, parentL7policy.ID, l7rule.ID)
+	} else {
+		if len(parentListener.Loadbalancers) == 0 {
+			return fmt.Errorf("Unable to determine loadbalancer ID from listener %s", parentListener.ID)
+		}
+
+		refreshFunc = resourceLBV2LoadBalancerStatusRefreshFunc(lbClient, parentListener.Loadbalancers[0].ID, "l7rule", l7rule.ID)
+	}
+
+	stateConf := &resource.StateChangeConf{
+		Target:     []string{target},
+		Pending:    pending,
+		Refresh:    refreshFunc,
+		Timeout:    timeout,
+		Delay:      1 * time.Second,
+		MinTimeout: 1 * time.Second,
+	}
+
+	_, err := stateConf.WaitForState()
+	if err != nil {
+		if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if target == "DELETED" {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Error waiting for l7rule %s to become %s: %s", l7rule.ID, target, err)
+	}
+
+	return nil
+}
+
+// strSliceContains checks if a given string is contained in a slice
+// When anybody asks why Go needs generics, here you go.
+func strSliceContains(haystack []string, needle string) bool {
+	for _, s := range haystack {
+		if s == needle {
+			return true
+		}
+	}
+	return false
 }
