@@ -7,6 +7,7 @@ NOTES
 FEATURES
 
 * __New Resource__: `openstack_lb_l7policy_v2` [GH-527]
+* __New Resource__: `openstack_lb_l7rule_v2` [GH-522]
 
 IMPROVEMENTS
 
