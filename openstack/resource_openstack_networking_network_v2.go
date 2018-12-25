@@ -171,7 +171,7 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 	// Add networking segments if specified.
 	if len(segments) > 0 {
 		finalCreateOpts = provider.CreateOptsExt{
-			CreateOptsBuilder: createOpts,
+			CreateOptsBuilder: finalCreateOpts,
 			Segments:          segments,
 		}
 	}
@@ -284,15 +284,6 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
-	}
-	if d.HasChange("tags") {
-		tags := networkV2AttributesTags(d)
-		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
-		tags, err := attributestags.ReplaceAll(networkingClient, "networks", d.Id(), tagOpts).Extract()
-		if err != nil {
-			return fmt.Errorf("Error updating Tags on Network: %s", err)
-		}
-		log.Printf("[DEBUG] Updated Tags = %+v on Network %+v", tags, d.Id())
 	}
 	if d.HasChange("admin_state_up") {
 		asuRaw := d.Get("admin_state_up").(string)
