@@ -723,8 +723,8 @@
 		{
 			"checksumSHA1": "TH4LSJLhZlq0fW36UVWltFlM3KA=",
 			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vlantransparent",
-			"revision": "26de66c23d78a75fc37e5dad5b6f16ffbfe9ee31",
-			"revisionTime": "2018-12-08T02:58:21Z"
+			"revision": "52046867450031e40bd4e94332fe5dbdf5cf51ca",
+			"revisionTime": "2018-12-20T15:44:12Z"
 		},
 		{
 			"checksumSHA1": "grviOYvybawC80v7Fmw0XOBwr0A=",
