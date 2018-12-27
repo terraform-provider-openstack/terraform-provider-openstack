@@ -148,6 +148,7 @@ func resourceComputeInterfaceAttachV2Read(d *schema.ResourceData, meta interface
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_interface_attach_v2 %s: %#v", d.Id(), attachment)
 
+	d.Set("instance_id", instanceId)
 	d.Set("port_id", attachment.PortID)
 	d.Set("network_id", attachment.NetID)
 	d.Set("region", GetRegion(d, config))
