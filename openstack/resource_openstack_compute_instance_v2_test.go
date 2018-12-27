@@ -260,6 +260,24 @@ func TestAccComputeV2Instance_blockDeviceNewVolume(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2Instance_blockDeviceNewVolumeTypeAndBus(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeV2Instance_blockDeviceNewVolumeTypeAndBus,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeV2Instance_blockDeviceExistingVolume(t *testing.T) {
 	var instance servers.Server
 	var volume volumes.Volume
@@ -916,6 +934,34 @@ resource "openstack_compute_instance_v2" "instance_1" {
     volume_size = 1
     boot_index = 1
     delete_on_termination = true
+  }
+  network {
+    uuid = "%s"
+  }
+}
+`, OS_IMAGE_ID, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_blockDeviceNewVolumeTypeAndBus = fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  block_device {
+    uuid = "%s"
+    source_type = "image"
+    destination_type = "local"
+    boot_index = 0
+		delete_on_termination = true
+		device_type = "disk"
+		disk_bus = "virtio"
+  }
+  block_device {
+    source_type = "blank"
+    destination_type = "volume"
+    volume_size = 1
+    boot_index = 1
+		delete_on_termination = true
+		device_type = "disk"
+		disk_bus = "virtio"
   }
   network {
     uuid = "%s"
