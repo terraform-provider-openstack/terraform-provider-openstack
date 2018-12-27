@@ -131,7 +131,7 @@ resource "openstack_images_image_v2" "image_1" {
   image_source_url = "https://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img"
   container_format = "bare"
   disk_format      = "raw"
-  properties {
+  properties = {
     os_distro = "fedora-atomic"
   }
 
@@ -156,7 +156,7 @@ resource "openstack_images_image_v2" "image_1" {
   image_source_url = "https://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img"
   container_format = "bare"
   disk_format = "raw"
-  properties {
+  properties = {
     os_distro = "fedora-atomic"
   }
 
@@ -182,7 +182,7 @@ resource "openstack_images_image_v2" "image_1" {
   image_source_url = "https://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img"
   container_format = "bare"
   disk_format      = "raw"
-  properties {
+  properties = {
     os_distro = "fedora-atomic"
   }
 
@@ -195,7 +195,7 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   name   = "%s"
   image  = "${openstack_images_image_v2.image_1.id}"
   coe    = "kubernetes"
-  labels {
+  labels = {
     kube_tag                         = "1.11.1"
     prometheus_monitoring            = "true"
     influx_grafana_dashboard_enabled = "true"

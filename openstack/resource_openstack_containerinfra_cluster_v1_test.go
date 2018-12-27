@@ -111,7 +111,7 @@ resource "openstack_images_image_v2" "image_1" {
   image_source_url = "https://dl.fedoraproject.org/pub/fedora/linux/releases/27/CloudImages/x86_64/images/Fedora-Atomic-27-1.6.x86_64.qcow2"
   container_format = "bare"
   disk_format      = "qcow2"
-  properties {
+  properties = {
     os_distro = "fedora-atomic"
   }
 }
@@ -131,7 +131,7 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   docker_storage_driver = "devicemapper"
   external_network_id   = "%s"
   network_driver        = "flannel"
-  labels {
+  labels = {
     kubescheduler_options = "log-flush-frequency=1m"
   }
 }
@@ -153,7 +153,7 @@ resource "openstack_images_image_v2" "image_1" {
   image_source_url = "https://dl.fedoraproject.org/pub/fedora/linux/releases/27/CloudImages/x86_64/images/Fedora-Atomic-27-1.6.x86_64.qcow2"
   container_format = "bare"
   disk_format      = "qcow2"
-  properties {
+  properties = {
     os_distro = "fedora-atomic"
   }
 }
@@ -171,7 +171,7 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   floating_ip_enabled   = false
   external_network_id   = "%s"
   network_driver        = "flannel"
-  labels {
+  labels = {
     kubescheduler_options = "log-flush-frequency=1m"
   }
 }

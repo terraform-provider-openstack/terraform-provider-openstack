@@ -19,7 +19,7 @@ resource "openstack_images_image_v2" "rancheros" {
   container_format = "bare"
   disk_format = "qcow2"
 
-  properties {
+  properties = {
     key = "value"
   }
 }

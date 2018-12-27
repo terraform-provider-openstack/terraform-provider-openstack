@@ -132,7 +132,7 @@ resource "openstack_lb_vip_v1" "vip_1" {
   pool_id = "${openstack_lb_pool_v1.pool_1.id}"
   subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
 
-  persistence {
+  persistence = {
     type = "SOURCE_IP"
   }
 }
@@ -165,7 +165,7 @@ resource "openstack_lb_vip_v1" "vip_1" {
   pool_id = "${openstack_lb_pool_v1.pool_1.id}"
   subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
 
-  persistence {
+  persistence = {
     type = "SOURCE_IP"
   }
 }
@@ -198,7 +198,7 @@ resource "openstack_lb_vip_v1" "vip_1" {
   pool_id = "${openstack_lb_pool_v1.pool_1.id}"
   subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
 
-  persistence {
+  persistence = {
     type = "SOURCE_IP"
   }
 

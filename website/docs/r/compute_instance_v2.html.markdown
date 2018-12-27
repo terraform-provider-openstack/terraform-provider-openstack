@@ -22,7 +22,7 @@ resource "openstack_compute_instance_v2" "basic" {
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
 
-  metadata {
+  metadata = {
     this = "that"
   }
 

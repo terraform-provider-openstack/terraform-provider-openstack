@@ -406,7 +406,7 @@ const testAccImagesImageV2_properties_1 = `
       container_format = "bare"
       disk_format = "qcow2"
 
-      properties {
+      properties = {
         foo = "bar"
         bar = "foo"
       }
@@ -419,7 +419,7 @@ const testAccImagesImageV2_properties_2 = `
       container_format = "bare"
       disk_format = "qcow2"
 
-      properties {
+      properties = {
         foo = "bar"
       }
   }`
@@ -431,7 +431,7 @@ const testAccImagesImageV2_properties_3 = `
       container_format = "bare"
       disk_format = "qcow2"
 
-      properties {
+      properties = {
         foo = "baz"
       }
   }`
@@ -443,7 +443,7 @@ const testAccImagesImageV2_properties_4 = `
       container_format = "bare"
       disk_format = "qcow2"
 
-      properties {
+      properties = {
         foo = "baz"
         bar = "foo"
       }

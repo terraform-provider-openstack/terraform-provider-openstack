@@ -29,7 +29,13 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   server_type           = "vm"
   master_lb_enabled     = true
   floating_ip_enabled   = false
-  labels                = "kube_tag=1.11.1,kube_dashboard_enabled=true,prometheus_monitoring=true,influx_grafana_dashboard_enabled=true"
+
+  labels = {
+    kube_tag                         = "1.11.1"
+    kube_dashboard_enabled           = "true"
+    prometheus_monitoring            = "true"
+    influx_grafana_dashboard_enabled = "true"
+  }
 }
 ```
 
