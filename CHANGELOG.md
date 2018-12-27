@@ -20,6 +20,10 @@ IMPROVEMENTS
 * Added the ability to import `openstack_lb_member_v2` [GH-524]
 * Added the ability to import `openstack_lb_monitor_v2` [GH-524]
 
+BUG FIXES
+
+* `openstack_compute_interface_attach_v2` now correctly sets the `instance_id` [GH-557] 
+
 ## 1.13.0 (December 18, 2018)
 
 FEATURES
