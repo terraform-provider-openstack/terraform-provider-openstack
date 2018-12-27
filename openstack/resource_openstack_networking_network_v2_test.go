@@ -210,35 +210,6 @@ func TestAccNetworkingV2Network_transparent_vlan_Create(t *testing.T) {
 	})
 }
 
-func TestAccNetworkingV2Network_transparent_vlan_Update(t *testing.T) {
-	var network networks.Network
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckTransparentVLAN(t)
-		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccNetworkingV2Network_basic,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
-				),
-			},
-			resource.TestStep{
-				Config: testAccNetworkingV2Network_transparent_vlan,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_network_v2.network_1", "transparent_vlan", "true"),
-				),
-			},
-		},
-	})
-}
-
 func testAccCheckNetworkingV2NetworkDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)

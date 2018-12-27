@@ -117,7 +117,7 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 			"transparent_vlan": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: false,
+				ForceNew: true,
 				Computed: true,
 			},
 		},
