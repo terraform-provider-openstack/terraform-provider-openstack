@@ -329,14 +329,6 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 			External:          &isExternal,
 		}
 	}
-	isVLANTransparent := false
-	if d.HasChange("transparent_vlan") {
-		isVLANTransparent = d.Get("transparent_vlan").(bool)
-		finalCreateOpts = vlantransparent.UpdateOptsExt{
-			UpdateOptsBuilder: finalCreateOpts,
-			VLANTransparent:   &isVLANTransparent,
-		}
-	}
 
 	log.Printf("[DEBUG] Updating Network %s with options: %+v", d.Id(), finalCreateOpts)
 	_, err = networks.Update(networkingClient, d.Id(), finalCreateOpts).Extract()
