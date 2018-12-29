@@ -26,7 +26,9 @@ func flattenBlockStorageVolumeV1Attachments(v []map[string]interface{}) []map[st
 func expandBlockStorageVolumeV1Metadata(v map[string]interface{}) map[string]string {
 	metadata := make(map[string]string)
 	for key, val := range v {
-		metadata[key] = val.(string)
+		if strVal, ok := val.(string); ok {
+			metadata[key] = strVal
+		}
 	}
 
 	return metadata
