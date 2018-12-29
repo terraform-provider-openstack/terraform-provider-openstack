@@ -100,6 +100,11 @@ The following arguments are supported:
 
 * `tags` - (Optional) A set of string tags for the network. 
 
+* `transparent_vlan` - (Optional) Specifies whether the network resource has the
+  VLAN transparent attribute set. Valid values are true and false. Defaults to
+  false. Changing this updates the `transparent_vlan` attribute of the existing
+  network.
+
 The `segments` block supports:
 
 * `physical_network` - The phisical network where this network is implemented.
@@ -119,6 +124,7 @@ The following attributes are exported:
 * `admin_state_up` - See Argument Reference above.
 * `availability_zone_hints` - See Argument Reference above.
 * `tags` - See Argument Reference above.
+* `transparent_vlan` - See Argument Reference above.
 
 ## Import
 

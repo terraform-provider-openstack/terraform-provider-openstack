@@ -13,27 +13,28 @@ import (
 )
 
 var (
-	OS_DB_ENVIRONMENT              = os.Getenv("OS_DB_ENVIRONMENT")
-	OS_DB_DATASTORE_VERSION        = os.Getenv("OS_DB_DATASTORE_VERSION")
-	OS_DB_DATASTORE_TYPE           = os.Getenv("OS_DB_DATASTORE_TYPE")
-	OS_DEPRECATED_ENVIRONMENT      = os.Getenv("OS_DEPRECATED_ENVIRONMENT")
-	OS_DNS_ENVIRONMENT             = os.Getenv("OS_DNS_ENVIRONMENT")
-	OS_EXTGW_ID                    = os.Getenv("OS_EXTGW_ID")
-	OS_FLAVOR_ID                   = os.Getenv("OS_FLAVOR_ID")
-	OS_FLAVOR_NAME                 = os.Getenv("OS_FLAVOR_NAME")
-	OS_IMAGE_ID                    = os.Getenv("OS_IMAGE_ID")
-	OS_IMAGE_NAME                  = os.Getenv("OS_IMAGE_NAME")
-	OS_MAGNUM_FLAVOR               = os.Getenv("OS_MAGNUM_FLAVOR")
-	OS_NETWORK_ID                  = os.Getenv("OS_NETWORK_ID")
-	OS_POOL_NAME                   = os.Getenv("OS_POOL_NAME")
-	OS_REGION_NAME                 = os.Getenv("OS_REGION_NAME")
-	OS_SWIFT_ENVIRONMENT           = os.Getenv("OS_SWIFT_ENVIRONMENT")
-	OS_LB_ENVIRONMENT              = os.Getenv("OS_LB_ENVIRONMENT")
-	OS_FW_ENVIRONMENT              = os.Getenv("OS_FW_ENVIRONMENT")
-	OS_VPN_ENVIRONMENT             = os.Getenv("OS_VPN_ENVIRONMENT")
-	OS_USE_OCTAVIA                 = os.Getenv("OS_USE_OCTAVIA")
-	OS_CONTAINER_INFRA_ENVIRONMENT = os.Getenv("OS_CONTAINER_INFRA_ENVIRONMENT")
-	OS_SFS_ENVIRONMENT             = os.Getenv("OS_SFS_ENVIRONMENT")
+	OS_DB_ENVIRONMENT               = os.Getenv("OS_DB_ENVIRONMENT")
+	OS_DB_DATASTORE_VERSION         = os.Getenv("OS_DB_DATASTORE_VERSION")
+	OS_DB_DATASTORE_TYPE            = os.Getenv("OS_DB_DATASTORE_TYPE")
+	OS_DEPRECATED_ENVIRONMENT       = os.Getenv("OS_DEPRECATED_ENVIRONMENT")
+	OS_DNS_ENVIRONMENT              = os.Getenv("OS_DNS_ENVIRONMENT")
+	OS_EXTGW_ID                     = os.Getenv("OS_EXTGW_ID")
+	OS_FLAVOR_ID                    = os.Getenv("OS_FLAVOR_ID")
+	OS_FLAVOR_NAME                  = os.Getenv("OS_FLAVOR_NAME")
+	OS_IMAGE_ID                     = os.Getenv("OS_IMAGE_ID")
+	OS_IMAGE_NAME                   = os.Getenv("OS_IMAGE_NAME")
+	OS_MAGNUM_FLAVOR                = os.Getenv("OS_MAGNUM_FLAVOR")
+	OS_NETWORK_ID                   = os.Getenv("OS_NETWORK_ID")
+	OS_POOL_NAME                    = os.Getenv("OS_POOL_NAME")
+	OS_REGION_NAME                  = os.Getenv("OS_REGION_NAME")
+	OS_SWIFT_ENVIRONMENT            = os.Getenv("OS_SWIFT_ENVIRONMENT")
+	OS_LB_ENVIRONMENT               = os.Getenv("OS_LB_ENVIRONMENT")
+	OS_FW_ENVIRONMENT               = os.Getenv("OS_FW_ENVIRONMENT")
+	OS_VPN_ENVIRONMENT              = os.Getenv("OS_VPN_ENVIRONMENT")
+	OS_USE_OCTAVIA                  = os.Getenv("OS_USE_OCTAVIA")
+	OS_CONTAINER_INFRA_ENVIRONMENT  = os.Getenv("OS_CONTAINER_INFRA_ENVIRONMENT")
+	OS_SFS_ENVIRONMENT              = os.Getenv("OS_SFS_ENVIRONMENT")
+	OS_TRANSPARENT_VLAN_ENVIRONMENT = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -167,6 +168,14 @@ func testAccPreOnlineResize(t *testing.T) {
 	v = os.Getenv("OS_FLAVOR_NAME")
 	if v == "" {
 		t.Skip("OS_FLAVOR_NAME required to support online blockstorage resize tests")
+	}
+}
+
+func testAccPreCheckTransparentVLAN(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_TRANSPARENT_VLAN_ENVIRONMENT == "" {
+		t.Skip("This environment does not support 'transparent-vlan' extension tests")
 	}
 }
 

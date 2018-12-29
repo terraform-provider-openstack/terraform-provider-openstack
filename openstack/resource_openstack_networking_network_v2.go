@@ -13,6 +13,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vlantransparent"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 )
 
@@ -113,6 +114,12 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"transparent_vlan": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -155,37 +162,38 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 	segments := resourceNetworkingNetworkV2Segments(d)
 
 	isExternal := d.Get("external").(bool)
-	n := &networks.Network{}
+	isVLANTransparent := d.Get("transparent_vlan").(bool)
+
+	// Declare a finalCreateOpts interface.
+	var finalCreateOpts networks.CreateOptsBuilder
+	finalCreateOpts = createOpts
+
+	// Add networking segments if specified.
 	if len(segments) > 0 {
-		providerCreateOpts := provider.CreateOptsExt{
-			CreateOptsBuilder: createOpts,
+		finalCreateOpts = provider.CreateOptsExt{
+			CreateOptsBuilder: finalCreateOpts,
 			Segments:          segments,
-		}
-		if isExternal {
-			createExternalOpts := external.CreateOptsExt{
-				CreateOptsBuilder: providerCreateOpts,
-				External:          &isExternal,
-			}
-			log.Printf("[DEBUG] Create Options: %#v", createExternalOpts)
-			n, err = networks.Create(networkingClient, createExternalOpts).Extract()
-		} else {
-			log.Printf("[DEBUG] Create Options: %#v", providerCreateOpts)
-			n, err = networks.Create(networkingClient, providerCreateOpts).Extract()
-		}
-	} else {
-		if isExternal {
-			createExternalOpts := external.CreateOptsExt{
-				CreateOptsBuilder: createOpts,
-				External:          &isExternal,
-			}
-			log.Printf("[DEBUG] Create Options: %#v", createExternalOpts)
-			n, err = networks.Create(networkingClient, createExternalOpts).Extract()
-		} else {
-			log.Printf("[DEBUG] Create Options: %#v", createOpts)
-			n, err = networks.Create(networkingClient, createOpts).Extract()
 		}
 	}
 
+	// Add the external attribute if specified.
+	if isExternal {
+		finalCreateOpts = external.CreateOptsExt{
+			CreateOptsBuilder: finalCreateOpts,
+			External:          &isExternal,
+		}
+	}
+
+	// Add the transparent VLAN attribute if specified.
+	if isVLANTransparent {
+		finalCreateOpts = vlantransparent.CreateOptsExt{
+			CreateOptsBuilder: finalCreateOpts,
+			VLANTransparent:   &isVLANTransparent,
+		}
+	}
+
+	log.Printf("[DEBUG] Create Options: %#v", finalCreateOpts)
+	n, err := networks.Create(networkingClient, finalCreateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack Neutron network: %s", err)
 	}
@@ -230,6 +238,7 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 	var n struct {
 		networks.Network
 		external.NetworkExternalExt
+		vlantransparent.TransparentExt
 	}
 	err = networks.Get(networkingClient, d.Id()).ExtractInto(&n)
 	if err != nil {
@@ -246,6 +255,7 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 	d.Set("tenant_id", n.TenantID)
 	d.Set("region", GetRegion(d, config))
 	d.Set("tags", n.Tags)
+	d.Set("transparent_vlan", n.VLANTransparent)
 
 	if err := d.Set("availability_zone_hints", n.AvailabilityZoneHints); err != nil {
 		log.Printf("[DEBUG] unable to set availability_zone_hints: %s", err)
@@ -261,22 +271,19 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	var updateOpts networks.UpdateOpts
+	// Declare finalUpdateOpts interface and basic updateOpts structure.
+	var (
+		finalCreateOpts networks.UpdateOptsBuilder
+		updateOpts      networks.UpdateOpts
+	)
+
+	// Populate basic updateOpts.
 	if d.HasChange("name") {
 		updateOpts.Name = d.Get("name").(string)
 	}
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
-	}
-	if d.HasChange("tags") {
-		tags := networkV2AttributesTags(d)
-		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
-		tags, err := attributestags.ReplaceAll(networkingClient, "networks", d.Id(), tagOpts).Extract()
-		if err != nil {
-			return fmt.Errorf("Error updating Tags on Network: %s", err)
-		}
-		log.Printf("[DEBUG] Updated Tags = %+v on Network %+v", tags, d.Id())
 	}
 	if d.HasChange("admin_state_up") {
 		asuRaw := d.Get("admin_state_up").(string)
@@ -298,23 +305,33 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 			updateOpts.Shared = &shared
 		}
 	}
+
+	// Change tags if needed.
+	if d.HasChange("tags") {
+		tags := networkV2AttributesTags(d)
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "networks", d.Id(), tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating Tags on Network: %s", err)
+		}
+		log.Printf("[DEBUG] Updated Tags = %+v on Network %+v", tags, d.Id())
+	}
+
+	// Save basic updateOpts into finalCreateOpts.
+	finalCreateOpts = updateOpts
+
+	// Populate extensions options.
 	isExternal := false
 	if d.HasChange("external") {
 		isExternal = d.Get("external").(bool)
-	}
-
-	if isExternal {
-		externalUpdateOpts := external.UpdateOptsExt{
-			UpdateOptsBuilder: updateOpts,
+		finalCreateOpts = external.UpdateOptsExt{
+			UpdateOptsBuilder: finalCreateOpts,
 			External:          &isExternal,
 		}
-		log.Printf("[DEBUG] Updating Network %s with options: %+v", d.Id(), externalUpdateOpts)
-		_, err = networks.Update(networkingClient, d.Id(), externalUpdateOpts).Extract()
-	} else {
-		log.Printf("[DEBUG] Updating Network %s with options: %+v", d.Id(), updateOpts)
-		_, err = networks.Update(networkingClient, d.Id(), updateOpts).Extract()
 	}
 
+	log.Printf("[DEBUG] Updating Network %s with options: %+v", d.Id(), finalCreateOpts)
+	_, err = networks.Update(networkingClient, d.Id(), finalCreateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error updating OpenStack Neutron Network: %s", err)
 	}
