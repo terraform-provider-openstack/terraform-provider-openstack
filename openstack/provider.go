@@ -274,6 +274,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_vpnaas_site_connection_v2":           resourceSiteConnectionV2(),
 			"openstack_sharedfilesystem_securityservice_v2": resourceSharedFilesystemSecurityServiceV2(),
 			"openstack_sharedfilesystem_sharenetwork_v2":    resourceSharedFilesystemShareNetworkV2(),
+			"openstack_sharedfilesystem_share_v2":           resourceSharedFilesystemShareV2(),
 		},
 
 		ConfigureFunc: configureProvider,
