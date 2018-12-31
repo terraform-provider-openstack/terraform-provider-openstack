@@ -275,6 +275,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_sharedfilesystem_securityservice_v2": resourceSharedFilesystemSecurityServiceV2(),
 			"openstack_sharedfilesystem_sharenetwork_v2":    resourceSharedFilesystemShareNetworkV2(),
 			"openstack_sharedfilesystem_share_v2":           resourceSharedFilesystemShareV2(),
+			"openstack_sharedfilesystem_share_access_v2":    resourceSharedFilesystemShareAccessV2(),
 		},
 
 		ConfigureFunc: configureProvider,
