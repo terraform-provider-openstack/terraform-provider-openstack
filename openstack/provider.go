@@ -337,7 +337,7 @@ func init() {
 
 		"cloud": "An entry in a `clouds.yaml` file to use.",
 
-		"max_retries": "How many times an http connection should be retried until giving up",
+		"max_retries": "How many times HTTP connection should be retried until giving up.",
 	}
 }
 
