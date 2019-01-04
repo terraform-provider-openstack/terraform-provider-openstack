@@ -206,6 +206,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_networking_subnetpool_v2":          dataSourceNetworkingSubnetPoolV2(),
 			"openstack_networking_floatingip_v2":          dataSourceNetworkingFloatingIPV2(),
 			"openstack_networking_router_v2":              dataSourceNetworkingRouterV2(),
+			"openstack_sharedfilesystem_share_v2":         dataSourceSharedFilesystemShareV2(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
