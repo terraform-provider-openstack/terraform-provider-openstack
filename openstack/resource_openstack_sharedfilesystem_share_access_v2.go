@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/errors"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
 )
 
@@ -95,7 +96,14 @@ func resourceSharedFilesystemShareAccessV2Create(d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error granting access: %s", err)
+		detailedErr := errors.ErrorDetails{}
+		e := errors.ExtractErrorInto(err, &detailedErr)
+		if e != nil {
+			return fmt.Errorf("Error granting access: %s: %s", err, e)
+		}
+		for k, msg := range detailedErr {
+			return fmt.Errorf("Error granting access: %s (%d): %s", k, msg.Code, msg.Message)
+		}
 	}
 
 	d.SetId(access.ID)
@@ -169,7 +177,14 @@ func resourceSharedFilesystemShareAccessV2Delete(d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error waiting for OpenStack share ACL on %s to be removed: %s", shareID, err)
+		detailedErr := errors.ErrorDetails{}
+		e := errors.ExtractErrorInto(err, &detailedErr)
+		if e != nil {
+			return fmt.Errorf("Error waiting for OpenStack share ACL on %s to be removed: %s: %s", shareID, err, e)
+		}
+		for k, msg := range detailedErr {
+			return fmt.Errorf("Error waiting for OpenStack share ACL on %s to be removed: %s (%d): %s", shareID, k, msg.Code, msg.Message)
+		}
 	}
 
 	// Wait for access to become deleted before continuing
