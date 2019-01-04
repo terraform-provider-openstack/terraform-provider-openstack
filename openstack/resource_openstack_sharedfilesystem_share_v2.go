@@ -160,10 +160,12 @@ func resourceSharedFilesystemShareV2Create(d *schema.ResourceData, meta interfac
 
 	isPublic := d.Get("is_public").(bool)
 
-	metadataraw := d.Get("metadata").(map[string]interface{})
-	metadata := make(map[string]string, len(metadataraw))
-	for k, v := range metadataraw {
-		metadata[k] = v.(string)
+	metadataRaw := d.Get("metadata").(map[string]interface{})
+	metadata := make(map[string]string, len(metadataRaw))
+	for k, v := range metadataRaw {
+		if stringVal, ok := v.(string); ok {
+			metadata[k] = stringVal
+		}
 	}
 
 	createOpts := shares.CreateOpts{
@@ -180,10 +182,6 @@ func resourceSharedFilesystemShareV2Create(d *schema.ResourceData, meta interfac
 
 	if v, ok := d.GetOkExists("share_type"); ok {
 		createOpts.ShareType = v.(string)
-	}
-
-	if v, ok := d.GetOkExists("volume_type"); ok {
-		createOpts.VolumeType = v.(string)
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -209,7 +207,7 @@ func resourceSharedFilesystemShareV2Create(d *schema.ResourceData, meta interfac
 	// Wait for share to become active before continuing
 	err = waitForSFV2Share(sfsClient, share.ID, "available", []string{"creating", "manage_starting"}, timeout)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error waiting for OpenStack share %s to become available: %s", share.ID, err)
 	}
 
 	return resourceSharedFilesystemShareV2Read(d, meta)
@@ -300,7 +298,7 @@ func resourceSharedFilesystemShareV2Update(d *schema.ResourceData, meta interfac
 		// Wait for share to become active before continuing
 		err = waitForSFV2Share(sfsClient, d.Id(), "available", []string{"creating", "manage_starting", "extending", "shrinking"}, timeout)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error waiting for OpenStack share %s to become available: %s", d.Id(), err)
 		}
 
 		log.Printf("[DEBUG] Attempting to update share")
@@ -319,48 +317,49 @@ func resourceSharedFilesystemShareV2Update(d *schema.ResourceData, meta interfac
 		// Wait for share to become active before continuing
 		err = waitForSFV2Share(sfsClient, d.Id(), "available", []string{"creating", "manage_starting", "extending", "shrinking"}, timeout)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error waiting for OpenStack share %s to become available: %s", d.Id(), err)
 		}
 	}
 
-	var pending []string
-	oldSize, newSize := d.GetChange("size")
-	if newSize.(int) > oldSize.(int) {
-		pending = append(pending, "extending")
-		resizeOpts := shares.ExtendOpts{NewSize: newSize.(int)}
-		log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
-		err = resource.Retry(timeout, func() *resource.RetryError {
-			err := shares.Extend(sfsClient, d.Id(), resizeOpts).Err
-			log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
-			if err != nil {
-				return checkForRetryableError(err)
-			}
-			return nil
-		})
-	} else if newSize.(int) < oldSize.(int) {
-		pending = append(pending, "shrinking")
-		resizeOpts := shares.ShrinkOpts{NewSize: newSize.(int)}
-		log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
-		err = resource.Retry(timeout, func() *resource.RetryError {
-			err := shares.Shrink(sfsClient, d.Id(), resizeOpts).Err
-			log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
-			if err != nil {
-				return checkForRetryableError(err)
-			}
-			return nil
-		})
-	} else {
-		return resourceSharedFilesystemShareV2Read(d, meta)
-	}
+	if d.HasChange("size") {
+		var pending []string
+		oldSize, newSize := d.GetChange("size")
 
-	if err != nil {
-		return fmt.Errorf("Unable to resize share %s: %s", d.Id(), err)
-	}
+		if newSize.(int) > oldSize.(int) {
+			pending = append(pending, "extending")
+			resizeOpts := shares.ExtendOpts{NewSize: newSize.(int)}
+			log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
+			err = resource.Retry(timeout, func() *resource.RetryError {
+				err := shares.Extend(sfsClient, d.Id(), resizeOpts).Err
+				log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
+				if err != nil {
+					return checkForRetryableError(err)
+				}
+				return nil
+			})
+		} else if newSize.(int) < oldSize.(int) {
+			pending = append(pending, "shrinking")
+			resizeOpts := shares.ShrinkOpts{NewSize: newSize.(int)}
+			log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
+			err = resource.Retry(timeout, func() *resource.RetryError {
+				err := shares.Shrink(sfsClient, d.Id(), resizeOpts).Err
+				log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
+				if err != nil {
+					return checkForRetryableError(err)
+				}
+				return nil
+			})
+		}
 
-	// Wait for share to become active before continuing
-	err = waitForSFV2Share(sfsClient, d.Id(), "available", pending, timeout)
-	if err != nil {
-		return err
+		if err != nil {
+			return fmt.Errorf("Unable to resize share %s: %s", d.Id(), err)
+		}
+
+		// Wait for share to become active before continuing
+		err = waitForSFV2Share(sfsClient, d.Id(), "available", pending, timeout)
+		if err != nil {
+			return fmt.Errorf("Error waiting for OpenStack share %s to become available: %s", d.Id(), err)
+		}
 	}
 
 	return resourceSharedFilesystemShareV2Read(d, meta)

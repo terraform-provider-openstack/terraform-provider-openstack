@@ -6,7 +6,7 @@ description: |-
   Configure a Shared File System share.
 ---
 
-# sharedfilesystem\_share\_v2
+# openstack\_sharedfilesystem\_share\_v2
 
 Use this resource to configure a share.
 
