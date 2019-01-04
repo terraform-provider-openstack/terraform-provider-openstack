@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/errors"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
 )
 
@@ -199,7 +200,14 @@ func resourceSharedFilesystemShareV2Create(d *schema.ResourceData, meta interfac
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error creating share: %s", err)
+		detailedErr := errors.ErrorDetails{}
+		e := errors.ExtractErrorInto(err, &detailedErr)
+		if e != nil {
+			return fmt.Errorf("Error creating share: %s: %s", err, e)
+		}
+		for k, msg := range detailedErr {
+			return fmt.Errorf("Error creating share: %s (%d): %s", k, msg.Code, msg.Message)
+		}
 	}
 
 	d.SetId(share.ID)
@@ -311,7 +319,14 @@ func resourceSharedFilesystemShareV2Update(d *schema.ResourceData, meta interfac
 		})
 
 		if err != nil {
-			return fmt.Errorf("Error updating %s share: %s", d.Id(), err)
+			detailedErr := errors.ErrorDetails{}
+			e := errors.ExtractErrorInto(err, &detailedErr)
+			if e != nil {
+				return fmt.Errorf("Error updating %s share: %s: %s", d.Id(), err, e)
+			}
+			for k, msg := range detailedErr {
+				return fmt.Errorf("Error updating %s share: %s (%d): %s", d.Id(), k, msg.Code, msg.Message)
+			}
 		}
 
 		// Wait for share to become active before continuing
@@ -352,7 +367,14 @@ func resourceSharedFilesystemShareV2Update(d *schema.ResourceData, meta interfac
 		}
 
 		if err != nil {
-			return fmt.Errorf("Unable to resize share %s: %s", d.Id(), err)
+			detailedErr := errors.ErrorDetails{}
+			e := errors.ExtractErrorInto(err, &detailedErr)
+			if e != nil {
+				return fmt.Errorf("Unable to resize %s share: %s: %s", d.Id(), err, e)
+			}
+			for k, msg := range detailedErr {
+				return fmt.Errorf("Unable to resize %s share: %s (%d): %s", d.Id(), k, msg.Code, msg.Message)
+			}
 		}
 
 		// Wait for share to become active before continuing
@@ -382,6 +404,17 @@ func resourceSharedFilesystemShareV2Delete(d *schema.ResourceData, meta interfac
 		}
 		return nil
 	})
+
+	if err != nil {
+		detailedErr := errors.ErrorDetails{}
+		e := errors.ExtractErrorInto(err, &detailedErr)
+		if e != nil {
+			return fmt.Errorf("Unable to delete %s share: %s: %s", d.Id(), err, e)
+		}
+		for k, msg := range detailedErr {
+			return fmt.Errorf("Unable to delete %s share: %s (%d): %s", d.Id(), k, msg.Code, msg.Message)
+		}
+	}
 
 	// Wait for share to become deleted before continuing
 	pending := []string{"deleting", "available"}
