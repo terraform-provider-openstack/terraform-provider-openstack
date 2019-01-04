@@ -6,7 +6,7 @@ description: |-
   Configure a Shared File System share access list.
 ---
 
-# sharedfilesystem\_share\_access\_v2
+# openstack\_sharedfilesystem\_share\_access\_v2
 
 Use this resource to control the share access lists.
 
@@ -18,9 +18,6 @@ Use this resource to control the share access lists.
 resource "openstack_networking_network_v2" "network_1" {
   name           = "network_1"
   admin_state_up = "true"
-  lifecycle {
-    ignore_changes = ["tags"]
-  }
 }
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
@@ -59,9 +56,6 @@ resource "openstack_sharedfilesystem_share_access_v2" "share_access_1" {
 resource "openstack_networking_network_v2" "network_1" {
   name           = "network_1"
   admin_state_up = "true"
-  lifecycle {
-    ignore_changes = ["tags"]
-  }
 }
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
@@ -139,3 +133,12 @@ The following arguments are supported:
 * `access_type` - See Argument Reference above.
 * `access_to` - See Argument Reference above.
 * `access_level` - See Argument Reference above.
+
+## Import
+
+This resource can be imported by specifying the ID of the share and the ID of the
+share access, separated by a slash, e.g.:
+
+```
+$ terraform import openstack_sharedfilesystem_share_access_v2.share_access_1 <share id>/<share access id>
+```

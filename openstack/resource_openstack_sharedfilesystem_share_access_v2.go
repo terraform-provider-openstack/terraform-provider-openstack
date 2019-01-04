@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -15,9 +16,12 @@ import (
 
 func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSharedFilesystemShareAccessV2Grant,
+		Create: resourceSharedFilesystemShareAccessV2Create,
 		Read:   resourceSharedFilesystemShareAccessV2Read,
-		Delete: resourceSharedFilesystemShareAccessV2Revoke,
+		Delete: resourceSharedFilesystemShareAccessV2Delete,
+		Importer: &schema.ResourceImporter{
+			resourceSharedFilesystemShareAccessV2Import,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -59,7 +63,7 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 	}
 }
 
-func resourceSharedFilesystemShareAccessV2Grant(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemShareAccessV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	sfsClient, err := config.sharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
@@ -68,7 +72,7 @@ func resourceSharedFilesystemShareAccessV2Grant(d *schema.ResourceData, meta int
 
 	sfsClient.Microversion = minManilaMicroversion
 
-	shareId := d.Get("share_id").(string)
+	shareID := d.Get("share_id").(string)
 
 	grantOpts := shares.GrantAccessOpts{
 		AccessType:  d.Get("access_type").(string),
@@ -83,7 +87,7 @@ func resourceSharedFilesystemShareAccessV2Grant(d *schema.ResourceData, meta int
 	log.Printf("[DEBUG] Attempting to grant access")
 	var access *shares.AccessRight
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		access, err = shares.GrantAccess(sfsClient, shareId, grantOpts).Extract()
+		access, err = shares.GrantAccess(sfsClient, shareID, grantOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -98,9 +102,9 @@ func resourceSharedFilesystemShareAccessV2Grant(d *schema.ResourceData, meta int
 
 	pending := []string{"new", "queued_to_apply", "applying"}
 	// Wait for access to become active before continuing
-	err = waitForSFV2Access(sfsClient, shareId, access.ID, "active", pending, timeout)
+	err = waitForSFV2Access(sfsClient, shareID, access.ID, "active", pending, timeout)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error waiting for OpenStack share ACL on %s to be applied: %s", shareID, err)
 	}
 
 	return resourceSharedFilesystemShareAccessV2Read(d, meta)
@@ -115,16 +119,16 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 
 	sfsClient.Microversion = minManilaMicroversion
 
-	shareId := d.Get("share_id").(string)
+	shareID := d.Get("share_id").(string)
 
-	access, err := shares.ListAccessRights(sfsClient, shareId).Extract()
+	access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "share")
 	}
 
 	for _, v := range access {
 		if v.ID == d.Id() {
-			log.Printf("[DEBUG] Retrieved access %s: %#v", d.Id(), access)
+			log.Printf("[DEBUG] Retrieved %s share ACL: %#v", d.Id(), v)
 
 			d.Set("access_type", v.AccessType)
 			d.Set("access_to", v.AccessTo)
@@ -134,14 +138,13 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 		}
 	}
 
-	d.Set("access_type", "")
-	d.Set("access_to", "")
-	d.Set("access_level", "")
+	log.Printf("[DEBUG] Unable to find %s share access", d.Id())
+	d.SetId("")
 
 	return nil
 }
 
-func resourceSharedFilesystemShareAccessV2Revoke(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemShareAccessV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	sfsClient, err := config.sharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
@@ -150,7 +153,7 @@ func resourceSharedFilesystemShareAccessV2Revoke(d *schema.ResourceData, meta in
 
 	sfsClient.Microversion = minManilaMicroversion
 
-	shareId := d.Get("share_id").(string)
+	shareID := d.Get("share_id").(string)
 
 	revokeOpts := shares.RevokeAccessOpts{AccessID: d.Id()}
 
@@ -158,7 +161,7 @@ func resourceSharedFilesystemShareAccessV2Revoke(d *schema.ResourceData, meta in
 
 	log.Printf("[DEBUG] Attempting to revoke access %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		err = shares.RevokeAccess(sfsClient, shareId, revokeOpts).ExtractErr()
+		err = shares.RevokeAccess(sfsClient, shareID, revokeOpts).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -166,27 +169,67 @@ func resourceSharedFilesystemShareAccessV2Revoke(d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		return err
+		return fmt.Errorf("Error waiting for OpenStack share ACL on %s to be removed: %s", shareID, err)
 	}
 
 	// Wait for access to become deleted before continuing
 	pending := []string{"new", "queued_to_deny", "denying"}
-	err = waitForSFV2Access(sfsClient, shareId, d.Id(), "denied", pending, timeout)
+	err = waitForSFV2Access(sfsClient, shareID, d.Id(), "denied", pending, timeout)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error waiting for OpenStack share ACL on %s to be removed: %s", shareID, err)
 	}
 
 	return nil
 }
 
+func resourceSharedFilesystemShareAccessV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.SplitN(d.Id(), "/", 2)
+	if len(parts) != 2 {
+		err := fmt.Errorf("Invalid format specified for Openstack share ACL. Format must be <share id>/<ACL id>")
+		return nil, err
+	}
+
+	config := meta.(*Config)
+	sfsClient, err := config.sharedfilesystemV2Client(GetRegion(d, config))
+	if err != nil {
+		return nil, fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+	}
+
+	sfsClient.Microversion = minManilaMicroversion
+
+	shareID := parts[0]
+	accessID := parts[1]
+
+	access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
+	if err != nil {
+		return nil, fmt.Errorf("Unable to get %s Openstack share and its ACL's: %s", shareID, err)
+	}
+
+	for _, v := range access {
+		if v.ID == accessID {
+			log.Printf("[DEBUG] Retrieved %s share ACL: %#v", accessID, v)
+
+			d.SetId(accessID)
+			d.Set("share_id", shareID)
+			d.Set("access_type", v.AccessType)
+			d.Set("access_to", v.AccessTo)
+			d.Set("access_level", v.AccessLevel)
+
+			return []*schema.ResourceData{d}, nil
+		}
+	}
+
+	return nil, fmt.Errorf("[DEBUG] Unable to find %s share access", accessID)
+}
+
 // Full list of the share access statuses: https://developer.openstack.org/api-ref/shared-file-system/?expanded=list-services-detail,list-access-rules-detail#list-access-rules
-func waitForSFV2Access(sfsClient *gophercloud.ServiceClient, shareId string, id string, target string, pending []string, timeout time.Duration) error {
+func waitForSFV2Access(sfsClient *gophercloud.ServiceClient, shareID string, id string, target string, pending []string, timeout time.Duration) error {
 	log.Printf("[DEBUG] Waiting for access %s to become %s.", id, target)
 
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{target},
 		Pending:    pending,
-		Refresh:    resourceSFV2AccessRefreshFunc(sfsClient, shareId, id),
+		Refresh:    resourceSFV2AccessRefreshFunc(sfsClient, shareID, id),
 		Timeout:    timeout,
 		Delay:      1 * time.Second,
 		MinTimeout: 1 * time.Second,
@@ -208,9 +251,9 @@ func waitForSFV2Access(sfsClient *gophercloud.ServiceClient, shareId string, id 
 	return nil
 }
 
-func resourceSFV2AccessRefreshFunc(sfsClient *gophercloud.ServiceClient, shareId string, id string) resource.StateRefreshFunc {
+func resourceSFV2AccessRefreshFunc(sfsClient *gophercloud.ServiceClient, shareID string, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		access, err := shares.ListAccessRights(sfsClient, shareId).Extract()
+		access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
 		if err != nil {
 			return nil, "", err
 		}
