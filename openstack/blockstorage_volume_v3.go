@@ -23,17 +23,6 @@ func flattenBlockStorageVolumeV3Attachments(v []volumes.Attachment) []map[string
 	return attachments
 }
 
-func expandBlockStorageVolumeV3Metadata(v map[string]interface{}) map[string]string {
-	metadata := make(map[string]string)
-	for key, val := range v {
-		if strVal, ok := val.(string); ok {
-			metadata[key] = strVal
-		}
-	}
-
-	return metadata
-}
-
 func blockStorageVolumeV3StateRefreshFunc(client *gophercloud.ServiceClient, volumeID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		v, err := volumes.Get(client, volumeID).Extract()

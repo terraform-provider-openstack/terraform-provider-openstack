@@ -134,7 +134,7 @@ func resourceBlockStorageVolumeV1Create(d *schema.ResourceData, meta interface{}
 		SourceVolID:      d.Get("source_vol_id").(string),
 		ImageID:          d.Get("image_id").(string),
 		VolumeType:       d.Get("volume_type").(string),
-		Metadata:         expandBlockStorageVolumeV1Metadata(metadata),
+		Metadata:         expandToMapStringString(metadata),
 	}
 
 	log.Printf("[DEBUG] openstack_blockstorage_volume_v1 create options: %#v", createOpts)
@@ -216,7 +216,7 @@ func resourceBlockStorageVolumeV1Update(d *schema.ResourceData, meta interface{}
 
 	if d.HasChange("metadata") {
 		metadata := d.Get("metadata").(map[string]interface{})
-		updateOpts.Metadata = expandBlockStorageVolumeV1Metadata(metadata)
+		updateOpts.Metadata = expandToMapStringString(metadata)
 	}
 
 	_, err = volumes.Update(blockStorageClient, d.Id(), updateOpts).Extract()

@@ -142,7 +142,7 @@ func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}
 		ConsistencyGroupID: d.Get("consistency_group_id").(string),
 		Description:        d.Get("description").(string),
 		ImageID:            d.Get("image_id").(string),
-		Metadata:           expandBlockStorageVolumeV2Metadata(metadata),
+		Metadata:           expandToMapStringString(metadata),
 		Name:               d.Get("name").(string),
 		Size:               d.Get("size").(int),
 		SnapshotID:         d.Get("snapshot_id").(string),
@@ -229,7 +229,7 @@ func resourceBlockStorageVolumeV2Update(d *schema.ResourceData, meta interface{}
 
 	if d.HasChange("metadata") {
 		metadata := d.Get("metadata").(map[string]interface{})
-		updateOpts.Metadata = expandBlockStorageVolumeV1Metadata(metadata)
+		updateOpts.Metadata = expandToMapStringString(metadata)
 	}
 
 	_, err = volumes.Update(blockStorageClient, d.Id(), updateOpts).Extract()

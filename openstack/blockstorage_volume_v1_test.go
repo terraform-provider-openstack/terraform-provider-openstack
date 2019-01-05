@@ -49,15 +49,6 @@ func TestFlattenBlockStorageVolumeV1Attachments(t *testing.T) {
 	assert.Equal(t, expectedAttachments, actualAttachments)
 }
 
-func TestExpandBlockStorageVolumeV1Metadata(t *testing.T) {
-	metadata := map[string]interface{}{
-		"contents": "junk",
-	}
-
-	actualMetadata := expandBlockStorageVolumeV1Metadata(metadata)
-	assert.Equal(t, blockStorageVolumeV1VolumeFixture.Metadata, actualMetadata)
-}
-
 func TestBlockStorageVolumeV1AttachmentHash(t *testing.T) {
 	attachments := flattenBlockStorageVolumeV1Attachments(blockStorageVolumeV1VolumeFixture.Attachments)
 
