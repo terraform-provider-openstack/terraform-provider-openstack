@@ -223,6 +223,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_networking_port_ids_v2":            dataSourceNetworkingPortIDsV2(),
 			"openstack_sharedfilesystem_sharenetwork_v2":  dataSourceSharedFilesystemShareNetworkV2(),
 			"openstack_sharedfilesystem_share_v2":         dataSourceSharedFilesystemShareV2(),
+			"openstack_sharedfilesystem_snapshot_v2":      dataSourceSharedFilesystemSnapshotV2(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
