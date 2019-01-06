@@ -34,8 +34,9 @@ import (
 // LogRoundTripper satisfies the http.RoundTripper interface and is used to
 // customize the default http client RoundTripper to allow for logging.
 type LogRoundTripper struct {
-	Rt      http.RoundTripper
-	OsDebug bool
+	Rt         http.RoundTripper
+	OsDebug    bool
+	MaxRetries int
 }
 
 // RoundTrip performs a round-trip HTTP request and logs relevant information about it.
@@ -64,8 +65,24 @@ func (lrt *LogRoundTripper) RoundTrip(request *http.Request) (*http.Response, er
 	}
 
 	response, err := lrt.Rt.RoundTrip(request)
-	if response == nil {
-		return nil, err
+
+	//Retrying connection
+	retry := 1
+	for response == nil {
+
+		if retry > lrt.MaxRetries {
+			if lrt.OsDebug {
+				log.Printf("[DEBUG] Openstack connection error, retries exhausted. Aborting")
+			}
+			err = fmt.Errorf("Openstack connection error, retries exhausted. Aborting. Last error was: %s", err)
+			return nil, err
+		}
+
+		if lrt.OsDebug {
+			log.Printf("[DEBUG] OpenStack connection error, retry number %d: %s", retry, err)
+		}
+		response, err = lrt.Rt.RoundTrip(request)
+		retry += 1
 	}
 
 	if lrt.OsDebug {
