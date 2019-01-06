@@ -233,7 +233,7 @@ func resourceBlockStorageVolumeAttachV2Create(d *schema.ResourceData, meta inter
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"available", "attaching"},
 		Target:     []string{"in-use"},
-		Refresh:    VolumeV2StateRefreshFunc(client, volumeId),
+		Refresh:    blockStorageVolumeV2StateRefreshFunc(client, volumeId),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -381,7 +381,7 @@ func resourceBlockStorageVolumeAttachV2Delete(d *schema.ResourceData, meta inter
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"in-use", "attaching", "detaching"},
 		Target:     []string{"available"},
-		Refresh:    VolumeV2StateRefreshFunc(client, volumeId),
+		Refresh:    blockStorageVolumeV2StateRefreshFunc(client, volumeId),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,

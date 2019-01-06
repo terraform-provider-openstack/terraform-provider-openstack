@@ -206,3 +206,14 @@ func testAccCheckNetworkingV2Tags(name string, tags []string) resource.TestCheck
 		return nil
 	}
 }
+
+func expandToMapStringString(v map[string]interface{}) map[string]string {
+	m := make(map[string]string)
+	for key, val := range v {
+		if strVal, ok := val.(string); ok {
+			m[key] = strVal
+		}
+	}
+
+	return m
+}
