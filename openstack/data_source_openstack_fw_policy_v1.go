@@ -19,32 +19,39 @@ func dataSourceFWPolicyV1() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+
 			"policy_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
+
 			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"audited": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+
 			"shared": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+
 			"rules": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -74,20 +81,20 @@ func dataSourceFWPolicyV1Read(d *schema.ResourceData, meta interface{}) error {
 
 	allFWPolicies, err := policies.ExtractPolicies(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve firewall policies: %s", err)
+		return fmt.Errorf("Unable to retrieve openstack_fw_policy_v1: %s", err)
 	}
 
 	if len(allFWPolicies) < 1 {
-		return fmt.Errorf("No firewall policies found with name: %s", d.Get("name"))
+		return fmt.Errorf("No openstack_fw_policy_v1 found with name: %s", d.Get("name"))
 	}
 
 	if len(allFWPolicies) > 1 {
-		return fmt.Errorf("More than one firewall policies found with name: %s", d.Get("name"))
+		return fmt.Errorf("More than one openstack_fw_policy_v1 found with name: %s", d.Get("name"))
 	}
 
 	policy := allFWPolicies[0]
 
-	log.Printf("[DEBUG] Retrieved firewall policies %s: %+v", policy.ID, policy)
+	log.Printf("[DEBUG] Retrieved openstack_fw_policy_v1 %s: %#v", policy.ID, policy)
 	d.SetId(policy.ID)
 
 	d.Set("name", policy.Name)
