@@ -23,6 +23,7 @@ IMPROVEMENTS
 * Added the ability to import `openstack_lb_monitor_v2` [GH-524]
 * Added `device_type` and `disk_bus` to `openstack_compute_instance_v2` block device [GH-558]
 * Added `transparent_vlan` to `openstack_networking_network_v2` [GH-513]
+* Added `max_retries` to the provider options [GH-413]
 
 BUG FIXES
 
