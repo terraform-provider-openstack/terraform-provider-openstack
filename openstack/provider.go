@@ -220,6 +220,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_networking_floatingip_v2":          dataSourceNetworkingFloatingIPV2(),
 			"openstack_networking_router_v2":              dataSourceNetworkingRouterV2(),
 			"openstack_networking_port_v2":                dataSourceNetworkingPortV2(),
+			"openstack_networking_port_ids_v2":            dataSourceNetworkingPortIDsV2(),
 			"openstack_sharedfilesystem_sharenetwork_v2":  dataSourceSharedFilesystemShareNetworkV2(),
 			"openstack_sharedfilesystem_share_v2":         dataSourceSharedFilesystemShareV2(),
 		},
