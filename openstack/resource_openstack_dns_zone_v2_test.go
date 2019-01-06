@@ -66,25 +66,6 @@ func TestAccDNSV2Zone_readTTL(t *testing.T) {
 	})
 }
 
-func TestAccDNSV2Zone_timeout(t *testing.T) {
-	var zone zones.Zone
-	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDNS(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDNSV2Zone_timeout(zoneName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2ZoneExists("openstack_dns_zone_v2.zone_1", &zone),
-				),
-			},
-		},
-	})
-}
-
 func testAccCheckDNSV2ZoneDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	dnsClient, err := config.dnsV2Client(OS_REGION_NAME)
@@ -167,22 +148,6 @@ func testAccDNSV2Zone_readTTL(zoneName string) string {
 		resource "openstack_dns_zone_v2" "zone_1" {
 			name = "%s"
 			email = "email1@example.com"
-		}
-	`, zoneName)
-}
-
-func testAccDNSV2Zone_timeout(zoneName string) string {
-	return fmt.Sprintf(`
-		resource "openstack_dns_zone_v2" "zone_1" {
-			name = "%s"
-			email = "email@example.com"
-			ttl = 3000
-
-			timeouts {
-				create = "5m"
-				update = "5m"
-				delete = "5m"
-			}
 		}
 	`, zoneName)
 }

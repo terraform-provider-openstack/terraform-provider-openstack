@@ -217,3 +217,14 @@ func expandToMapStringString(v map[string]interface{}) map[string]string {
 
 	return m
 }
+
+func expandToStringSlice(v []interface{}) []string {
+	s := make([]string, len(v))
+	for i, val := range v {
+		if strVal, ok := val.(string); ok {
+			s[i] = strVal
+		}
+	}
+
+	return s
+}
