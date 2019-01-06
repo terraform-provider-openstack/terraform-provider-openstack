@@ -131,18 +131,18 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan(t *testing.T
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccOpenStackNetworkingNetworkV2DataSource_network,
+				Config: testAccNetworkingV2Network_transparent_vlan,
 			},
 			resource.TestStep{
-				Config: testAccNetworkingV2Network_transparent_vlan,
+				Config: testAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.net"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_networking_network_v2.net", "name", OS_POOL_NAME),
+						"data.openstack_networking_network_v2.network_1", "name", "network_1"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_networking_network_v2.net", "admin_state_up", "true"),
+						"data.openstack_networking_network_v2.network_1", "admin_state_up", "true"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_networking_network_v2.net", "vlan_transparent", "true"),
+						"data.openstack_networking_network_v2.network_1", "transparent_vlan", "true"),
 				),
 			},
 		},
@@ -220,7 +220,7 @@ data "openstack_networking_network_v2" "net" {
 var testAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan = fmt.Sprintf(`
 %s
 
-data "openstack_networking_network_v2" "net" {
-    transparent_vlan = "true"
+data "openstack_networking_network_v2" "network_1" {
+    transparent_vlan = "${openstack_networking_network_v2.network_1.transparent_vlan}"
 }
 `, testAccNetworkingV2Network_transparent_vlan)
