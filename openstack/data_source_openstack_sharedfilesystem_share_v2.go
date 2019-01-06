@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	// iexport_location_path filter appeared in 2.35
+	// export_location_path filter appeared in 2.35
 	minManilaShareListExportLocationPath = "2.35"
 )
 
@@ -184,13 +184,9 @@ func dataSourceSharedFilesystemShareV2Read(d *schema.ResourceData, meta interfac
 		})
 	}
 
-	return dataSourceSharedFilesystemShareV2Attributes(d, &share, exportLocations, GetRegion(d, config))
-}
-
-func dataSourceSharedFilesystemShareV2Attributes(d *schema.ResourceData, share *shares.Share, exportLocations []map[string]string, region string) error {
 	d.SetId(share.ID)
 	d.Set("name", share.Name)
-	d.Set("region", region)
+	d.Set("region", GetRegion(d, config))
 	d.Set("project_id", share.ProjectID)
 	d.Set("snapshot_id", share.SnapshotID)
 	d.Set("share_network_id", share.ShareNetworkID)
