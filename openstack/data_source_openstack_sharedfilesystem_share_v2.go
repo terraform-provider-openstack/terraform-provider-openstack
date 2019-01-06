@@ -8,6 +8,11 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+const (
+	// iexport_location_path filter appeared in 2.35
+	minManilaShareListExportLocationPath = "2.35"
+)
+
 func dataSourceSharedFilesystemShareV2() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceSharedFilesystemShareV2Read,
@@ -36,6 +41,18 @@ func dataSourceSharedFilesystemShareV2() *schema.Resource {
 				Computed: true,
 			},
 
+			"snapshot_id": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
+			"share_network_id": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
 			"status": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -46,6 +63,17 @@ func dataSourceSharedFilesystemShareV2() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
+			},
+
+			"metadata": &schema.Schema{
+				Type:     schema.TypeMap,
+				Optional: true,
+				Computed: true,
+			},
+
+			"export_location_path": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 
 			"share_proto": &schema.Schema{
@@ -75,11 +103,6 @@ func dataSourceSharedFilesystemShareV2() *schema.Resource {
 				},
 			},
 
-			"metadata": &schema.Schema{
-				Type:     schema.TypeMap,
-				Computed: true,
-			},
-
 			"availability_zone": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
@@ -98,12 +121,28 @@ func dataSourceSharedFilesystemShareV2Read(d *schema.ResourceData, meta interfac
 	sfsClient.Microversion = minManilaShareMicroversion
 
 	isPublic := d.Get("is_public").(bool)
+	metadataRaw := d.Get("metadata").(map[string]interface{})
+	metadata := make(map[string]string, len(metadataRaw))
+	for k, v := range metadataRaw {
+		if stringVal, ok := v.(string); ok {
+			metadata[k] = stringVal
+		}
+	}
+
 	listOpts := shares.ListOpts{
 		Name:               d.Get("name").(string),
 		DisplayDescription: d.Get("description").(string),
 		ProjectID:          d.Get("project_id").(string),
+		SnapshotID:         d.Get("snapshot_id").(string),
+		ShareNetworkID:     d.Get("share_network_id").(string),
 		Status:             d.Get("status").(string),
+		Metadata:           metadata,
 		IsPublic:           &isPublic,
+	}
+
+	if v, ok := d.GetOkExists("export_location_path"); ok {
+		listOpts.ExportLocationPath = v.(string)
+		sfsClient.Microversion = minManilaShareListExportLocationPath
 	}
 
 	allPages, err := shares.ListDetail(sfsClient, listOpts).AllPages()
@@ -153,6 +192,8 @@ func dataSourceSharedFilesystemShareV2Attributes(d *schema.ResourceData, share *
 	d.Set("name", share.Name)
 	d.Set("region", region)
 	d.Set("project_id", share.ProjectID)
+	d.Set("snapshot_id", share.SnapshotID)
+	d.Set("share_network_id", share.ShareNetworkID)
 	d.Set("availability_zone", share.AvailabilityZone)
 	d.Set("description", share.Description)
 	d.Set("size", share.Size)
