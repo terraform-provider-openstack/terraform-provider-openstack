@@ -69,7 +69,7 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 			},
 			"transparent_vlan": &schema.Schema{
 				Type:     schema.TypeBool,
-				Computed: true,
+				Optional: true,
 			},
 		},
 	}

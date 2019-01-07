@@ -136,7 +136,7 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan(t *testing.T
 			resource.TestStep{
 				Config: testAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.net"),
+					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.network_1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_network_v2.network_1", "name", "network_1"),
 					resource.TestCheckResourceAttr(
