@@ -122,6 +122,33 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_externalImplicit(t *testing.T
 	})
 }
 
+func TestAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckTransparentVLAN(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccNetworkingV2Network_transparent_vlan,
+			},
+			resource.TestStep{
+				Config: testAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.network_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_network_v2.network_1", "name", "network_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_network_v2.network_1", "admin_state_up", "true"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_network_v2.network_1", "transparent_vlan", "true"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingNetworkV2DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -189,3 +216,11 @@ data "openstack_networking_network_v2" "net" {
 	name = "%s"
 }
 `, OS_POOL_NAME)
+
+var testAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan = fmt.Sprintf(`
+%s
+
+data "openstack_networking_network_v2" "network_1" {
+    transparent_vlan = "${openstack_networking_network_v2.network_1.transparent_vlan}"
+}
+`, testAccNetworkingV2Network_transparent_vlan)

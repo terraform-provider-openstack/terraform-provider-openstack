@@ -9,6 +9,7 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vlantransparent"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
@@ -66,6 +67,10 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"transparent_vlan": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -74,6 +79,7 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 
+	// Prepare basic listOpts.
 	var listOpts networks.ListOptsBuilder
 
 	var status string
@@ -89,11 +95,21 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 		Status:      status,
 	}
 
+	// Add the external attribute if specified.
 	if v, ok := d.GetOkExists("external"); ok {
 		isExternal := v.(bool)
 		listOpts = external.ListOptsExt{
 			ListOptsBuilder: listOpts,
 			External:        &isExternal,
+		}
+	}
+
+	// Add the transparent VLAN attribute if specified.
+	if v, ok := d.GetOkExists("transparent_vlan"); ok {
+		isVLANTransparent := v.(bool)
+		listOpts = vlantransparent.ListOptsExt{
+			ListOptsBuilder: listOpts,
+			VLANTransparent: &isVLANTransparent,
 		}
 	}
 
@@ -117,6 +133,7 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	type networkWithExternalExt struct {
 		networks.Network
 		external.NetworkExternalExt
+		vlantransparent.TransparentExt
 	}
 	var allNetworks []networkWithExternalExt
 	err = networks.ExtractNetworksInto(pages, &allNetworks)
@@ -170,6 +187,7 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	d.Set("external", network.External)
 	d.Set("tenant_id", network.TenantID)
 	d.Set("region", GetRegion(d, config))
+	d.Set("transparent_vlan", network.VLANTransparent)
 
 	return nil
 }
