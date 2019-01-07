@@ -32,31 +32,31 @@ func resourceL7PolicyV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"action": &schema.Schema{
+			"action": {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validation.StringInSlice([]string{
@@ -64,25 +64,25 @@ func resourceL7PolicyV2() *schema.Resource {
 				}, true),
 			},
 
-			"listener_id": &schema.Schema{
+			"listener_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"position": &schema.Schema{
+			"position": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 			},
 
-			"redirect_pool_id": &schema.Schema{
+			"redirect_pool_id": {
 				Type:          schema.TypeString,
 				ConflictsWith: []string{"redirect_url"},
 				Optional:      true,
 			},
 
-			"redirect_url": &schema.Schema{
+			"redirect_url": {
 				Type:          schema.TypeString,
 				ConflictsWith: []string{"redirect_pool_id"},
 				Optional:      true,
@@ -96,7 +96,7 @@ func resourceL7PolicyV2() *schema.Resource {
 				},
 			},
 
-			"admin_state_up": &schema.Schema{
+			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Default:  true,
 				Optional: true,

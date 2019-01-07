@@ -18,14 +18,14 @@ func TestAccNetworkingV2SubnetPoolBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetPoolDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SubnetPoolBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetPoolExists("openstack_networking_subnetpool_v2.subnetpool_1", &subnetPool),
 					testAccCheckNetworkingV2SubnetPoolPrefixesConsistency("openstack_networking_subnetpool_v2.subnetpool_1", &subnetPool),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SubnetPoolPrefixLengths,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -42,7 +42,7 @@ func TestAccNetworkingV2SubnetPoolBasic(t *testing.T) {
 						"openstack_networking_subnetpool_v2.subnetpool_1", "max_prefixlen", "30"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SubnetPoolUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(

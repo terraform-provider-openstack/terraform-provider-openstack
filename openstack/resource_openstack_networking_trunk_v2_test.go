@@ -23,7 +23,7 @@ func TestAccNetworkingV2Trunk_nosubports(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Trunk_noSubports,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.parent_port_1", &port_1),
@@ -45,7 +45,7 @@ func TestAccNetworkingV2Trunk_subports(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Trunk_subports,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.parent_port_1", &parent_port_1),
@@ -69,7 +69,7 @@ func TestAccNetworkingV2Trunk_tags(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Trunk_tags_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.parent_port_1", &parent_port_1),
@@ -77,7 +77,7 @@ func TestAccNetworkingV2Trunk_tags(t *testing.T) {
 					testAccCheckNetworkingV2Tags("openstack_networking_trunk_v2.trunk_1", []string{"a", "b", "c"}),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Trunk_tags_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.parent_port_1", &parent_port_1),
@@ -100,7 +100,7 @@ func TestAccNetworkingV2Trunk_trunkUpdateSubports(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Trunk_updateSubports_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.parent_port_1", &parent_port_1),
@@ -111,7 +111,7 @@ func TestAccNetworkingV2Trunk_trunkUpdateSubports(t *testing.T) {
 					testAccCheckNetworkingV2TrunkExists("openstack_networking_trunk_v2.trunk_1", []string{"openstack_networking_port_v2.subport_1", "openstack_networking_port_v2.subport_2"}, &trunk_1, &subport_1, &subport_2),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Trunk_updateSubports_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.parent_port_1", &parent_port_1),
@@ -122,7 +122,7 @@ func TestAccNetworkingV2Trunk_trunkUpdateSubports(t *testing.T) {
 					testAccCheckNetworkingV2TrunkExists("openstack_networking_trunk_v2.trunk_1", []string{"openstack_networking_port_v2.subport_1", "openstack_networking_port_v2.subport_3", "openstack_networking_port_v2.subport_4"}, &trunk_1, &subport_1, &subport_3, &subport_4),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Trunk_updateSubports_3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.parent_port_1", &parent_port_1),
@@ -133,7 +133,7 @@ func TestAccNetworkingV2Trunk_trunkUpdateSubports(t *testing.T) {
 					testAccCheckNetworkingV2TrunkExists("openstack_networking_trunk_v2.trunk_1", []string{"openstack_networking_port_v2.subport_1", "openstack_networking_port_v2.subport_3", "openstack_networking_port_v2.subport_4"}, &trunk_1, &subport_1, &subport_3, &subport_4),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Trunk_updateSubports_4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.parent_port_1", &parent_port_1),
@@ -160,7 +160,7 @@ func TestAccNetworkingV2Trunk_computeInstance(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Trunk_computeInstance,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance_1),

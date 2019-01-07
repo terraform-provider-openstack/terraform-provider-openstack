@@ -18,7 +18,7 @@ func TestAccComputeV2InterfaceAttach_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InterfaceAttachDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2InterfaceAttach_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InterfaceAttachExists("openstack_compute_interface_attach_v2.ai_1", &ai),
@@ -36,7 +36,7 @@ func TestAccComputeV2InterfaceAttach_IP(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InterfaceAttachDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2InterfaceAttach_IP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InterfaceAttachExists("openstack_compute_interface_attach_v2.ai_1", &ai),

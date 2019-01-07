@@ -16,10 +16,10 @@ func TestAccOpenStackDNSZoneV2DataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheckDNS(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackDNSZoneV2DataSource_zone,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackDNSZoneV2DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSZoneV2DataSourceID("data.openstack_dns_zone_v2.z1"),

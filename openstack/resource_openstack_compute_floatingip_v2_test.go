@@ -18,7 +18,7 @@ func TestAccComputeV2FloatingIP_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2FloatingIPDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2FloatingIP_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FloatingIPExists("openstack_compute_floatingip_v2.fip_1", &fip),

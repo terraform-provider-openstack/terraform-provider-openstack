@@ -18,13 +18,13 @@ func TestAccLBV1VIP_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1VIPDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccLBV1VIP_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1VIPExists("openstack_lb_vip_v1.vip_1", &vip),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccLBV1VIP_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_lb_vip_v1.vip_1", "name", "vip_1_updated"),
@@ -42,7 +42,7 @@ func TestAccLBV1VIP_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1VIPDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccLBV1VIP_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1VIPExists("openstack_lb_vip_v1.vip_1", &vip),

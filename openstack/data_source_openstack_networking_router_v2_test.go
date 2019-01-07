@@ -13,10 +13,10 @@ func TestAccOpenStackNetworkingRouterV2DataSource_name(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingRouterV2DataSource_router,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingRouterV2DataSource_name,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingRouterV2DataSourceID("data.openstack_networking_router_v2.router"),

@@ -36,7 +36,7 @@ func TestAccObjectStorageV1Object_basic(t *testing.T) {
 			return testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test/myfile.txt")
 		},
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccObjectStorageV1Object_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObjectStorageV1ObjectExists(
@@ -56,14 +56,14 @@ func TestAccObjectStorageV1Object_basic(t *testing.T) {
 						"openstack_objectstorage_object_v1.myfile", "etag", fooMD5),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccObjectStorageV1Object_updateContentType,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_object_v1.myfile", "content_type", "application/octet-stream"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccObjectStorageV1Object_updateContent,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -74,7 +74,7 @@ func TestAccObjectStorageV1Object_basic(t *testing.T) {
 						"openstack_objectstorage_object_v1.myfile", "content_length", "6"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccObjectStorageV1Object_updateDeleteAfter,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -106,7 +106,7 @@ func TestAccObjectStorageV1Object_fromSource(t *testing.T) {
 			return testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test/myfile")
 		},
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: fmt.Sprintf(testAccObjectStorageV1Object_fromSource, tmpfile.Name()),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -131,7 +131,7 @@ func TestAccObjectStorageV1Object_detectContentType(t *testing.T) {
 			return testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test/myfile.csv")
 		},
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccObjectStorageV1Object_detectContentType,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -157,7 +157,7 @@ func TestAccObjectStorageV1Object_copyFrom(t *testing.T) {
 			return testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test/myfilecopied.txt")
 		},
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccObjectStorageV1Object_copyFrom,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -188,7 +188,7 @@ func TestAccObjectStorageV1Object_objectManifest(t *testing.T) {
 			return nil
 		},
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccObjectStorageV1Object_objectManifest,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(

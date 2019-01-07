@@ -27,7 +27,7 @@ func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIdentityV3RoleAssignmentDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3RoleAssignment_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3RoleAssignmentExists("openstack_identity_role_assignment_v3.role_assignment_1", &role, &user, &project),

@@ -17,7 +17,7 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: TestAccLBV2ListenerConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
@@ -25,7 +25,7 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 						"openstack_lb_listener_v2.listener_1", "connection_limit", "-1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: TestAccLBV2ListenerConfig_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(

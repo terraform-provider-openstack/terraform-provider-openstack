@@ -26,7 +26,7 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIdentityV3UserDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3User_basic(projectName, userName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3UserExists("openstack_identity_user_v3.user_1", &user),
@@ -55,7 +55,7 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 						"openstack_identity_user_v3.user_1", "extra.email", "jdoe@example.com"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3User_update(projectName, userName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3UserExists("openstack_identity_user_v3.user_1", &user),

@@ -18,7 +18,7 @@ func TestAccSiteConnectionV2_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSiteConnectionV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccSiteConnectionV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSiteConnectionV2Exists(

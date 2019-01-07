@@ -17,11 +17,11 @@ func TestAccLBV2L7Rule_importBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2L7RuleDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCheckLBV2L7RuleConfig_basic,
 			},
 
-			resource.TestStep{
+			{
 				ResourceName:      l7ruleResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,

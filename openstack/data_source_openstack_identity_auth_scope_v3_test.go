@@ -17,7 +17,7 @@ func TestAccOpenStackIdentityAuthScopeV3DataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackIdentityAuthScopeV3DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityAuthScopeV3DataSourceID("data.openstack_identity_auth_scope_v3.token"),

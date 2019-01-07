@@ -21,7 +21,7 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDNSV2Zone_basic(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2ZoneExists("openstack_dns_zone_v2.zone_1", &zone),
@@ -29,7 +29,7 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 						"openstack_dns_zone_v2.zone_1", "description", "a zone"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccDNSV2Zone_update(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_dns_zone_v2.zone_1", "name", zoneName),
@@ -53,7 +53,7 @@ func TestAccDNSV2Zone_readTTL(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDNSV2Zone_readTTL(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2ZoneExists("openstack_dns_zone_v2.zone_1", &zone),
@@ -75,7 +75,7 @@ func TestAccDNSV2Zone_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDNSV2Zone_timeout(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2ZoneExists("openstack_dns_zone_v2.zone_1", &zone),

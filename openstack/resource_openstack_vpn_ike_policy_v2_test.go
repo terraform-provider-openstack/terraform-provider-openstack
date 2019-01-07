@@ -17,7 +17,7 @@ func TestAccIKEPolicyV2_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIKEPolicyV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists(
@@ -38,7 +38,7 @@ func TestAccIKEPolicyV2_withLifetime(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIKEPolicyV2_withLifetime,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists(
@@ -57,7 +57,7 @@ func TestAccIKEPolicyV2_Update(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIKEPolicyV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists(
@@ -65,7 +65,7 @@ func TestAccIKEPolicyV2_Update(t *testing.T) {
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_ike_policy_v2.policy_1", "name", &policy.Name),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccIKEPolicyV2_Update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists(
@@ -84,7 +84,7 @@ func TestAccIKEPolicyV2_withLifetimeUpdate(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIKEPolicyV2_withLifetime,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists(
@@ -94,7 +94,7 @@ func TestAccIKEPolicyV2_withLifetimeUpdate(t *testing.T) {
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_ike_policy_v2.policy_1", "pfs", &policy.PFS),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccIKEPolicyV2_withLifetimeUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists(

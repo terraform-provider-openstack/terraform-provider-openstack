@@ -19,7 +19,7 @@ func TestAccOpenStackObjectStorageTempurlV1_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackObjectstorageTempurlV1Resource_basic(containerName, objectName, "get", ttl),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObjectstorageTempurlV1ResourceID("openstack_objectstorage_tempurl_v1.tempurl_1"),
@@ -31,7 +31,7 @@ func TestAccOpenStackObjectStorageTempurlV1_basic(t *testing.T) {
 						"openstack_objectstorage_tempurl_v1.tempurl_1", "object", objectName),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackObjectstorageTempurlV1Resource_basic(containerName, objectName, "post", ttl),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObjectstorageTempurlV1ResourceID("openstack_objectstorage_tempurl_v1.tempurl_1"),

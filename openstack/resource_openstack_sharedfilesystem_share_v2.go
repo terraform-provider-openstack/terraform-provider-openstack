@@ -36,27 +36,27 @@ func resourceSharedFilesystemShareV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"project_id": &schema.Schema{
+			"project_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"share_proto": &schema.Schema{
+			"share_proto": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -65,61 +65,61 @@ func resourceSharedFilesystemShareV2() *schema.Resource {
 				}, true),
 			},
 
-			"size": &schema.Schema{
+			"size": {
 				Type:         schema.TypeInt,
 				Required:     true,
 				ValidateFunc: validation.IntAtLeast(1),
 			},
 
-			"share_type": &schema.Schema{
+			"share_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"snapshot_id": &schema.Schema{
+			"snapshot_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"is_public": &schema.Schema{
+			"is_public": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
 
-			"metadata": &schema.Schema{
+			"metadata": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"share_network_id": &schema.Schema{
+			"share_network_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"availability_zone": &schema.Schema{
+			"availability_zone": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"export_locations": &schema.Schema{
+			"export_locations": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"path": &schema.Schema{
+						"path": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"preferred": &schema.Schema{
+						"preferred": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -127,22 +127,22 @@ func resourceSharedFilesystemShareV2() *schema.Resource {
 				},
 			},
 
-			"has_replicas": &schema.Schema{
+			"has_replicas": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
 
-			"host": &schema.Schema{
+			"host": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"replication_type": &schema.Schema{
+			"replication_type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"share_server_id": &schema.Schema{
+			"share_server_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

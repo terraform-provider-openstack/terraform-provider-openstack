@@ -27,201 +27,201 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: false,
 			},
 
-			"project_id": &schema.Schema{
+			"project_id": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"user_id": &schema.Schema{
+			"user_id": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"created_at": &schema.Schema{
+			"created_at": {
 				Type:     schema.TypeString,
 				ForceNew: false,
 				Computed: true,
 			},
 
-			"updated_at": &schema.Schema{
+			"updated_at": {
 				Type:     schema.TypeString,
 				ForceNew: false,
 				Computed: true,
 			},
 
-			"apiserver_port": &schema.Schema{
+			"apiserver_port": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     false,
 				ValidateFunc: validation.IntBetween(1024, 65535),
 			},
 
-			"coe": &schema.Schema{
+			"coe": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: false,
 			},
 
-			"cluster_distro": &schema.Schema{
+			"cluster_distro": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
 
-			"dns_nameserver": &schema.Schema{
+			"dns_nameserver": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"docker_storage_driver": &schema.Schema{
+			"docker_storage_driver": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"docker_volume_size": &schema.Schema{
+			"docker_volume_size": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"external_network_id": &schema.Schema{
+			"external_network_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"fixed_network": &schema.Schema{
+			"fixed_network": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"fixed_subnet": &schema.Schema{
+			"fixed_subnet": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"flavor": &schema.Schema{
+			"flavor": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    false,
 				DefaultFunc: schema.EnvDefaultFunc("OS_MAGNUM_FLAVOR", nil),
 			},
 
-			"master_flavor": &schema.Schema{
+			"master_flavor": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    false,
 				DefaultFunc: schema.EnvDefaultFunc("OS_MAGNUM_MASTER_FLAVOR", nil),
 			},
 
-			"floating_ip_enabled": &schema.Schema{
+			"floating_ip_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"http_proxy": &schema.Schema{
+			"http_proxy": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"https_proxy": &schema.Schema{
+			"https_proxy": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"image": &schema.Schema{
+			"image": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    false,
 				DefaultFunc: schema.EnvDefaultFunc("OS_MAGNUM_IMAGE", nil),
 			},
 
-			"insecure_registry": &schema.Schema{
+			"insecure_registry": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"keypair_id": &schema.Schema{
+			"keypair_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"labels": &schema.Schema{
+			"labels": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"master_lb_enabled": &schema.Schema{
+			"master_lb_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"network_driver": &schema.Schema{
+			"network_driver": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
 
-			"no_proxy": &schema.Schema{
+			"no_proxy": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"public": &schema.Schema{
+			"public": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"registry_enabled": &schema.Schema{
+			"registry_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"server_type": &schema.Schema{
+			"server_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
 
-			"tls_disabled": &schema.Schema{
+			"tls_disabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
 			},
 
-			"volume_driver": &schema.Schema{
+			"volume_driver": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,

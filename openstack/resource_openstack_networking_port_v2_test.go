@@ -22,7 +22,7 @@ func TestAccNetworkingV2Port_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -44,7 +44,7 @@ func TestAccNetworkingV2Port_noip(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_noip,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -67,7 +67,7 @@ func TestAccNetworkingV2Port_multipleNoIP(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_multipleNoIP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -90,7 +90,7 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_allowedAddressPairs_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.vrrp_subnet", &subnet),
@@ -102,7 +102,7 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_networking_port_v2.vrrp_port_1", "description", "test vrrp port"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_allowedAddressPairs_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.vrrp_subnet", &subnet),
@@ -114,7 +114,7 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_networking_port_v2.vrrp_port_1", "description", ""),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_allowedAddressPairs_3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.vrrp_subnet", &subnet),
@@ -125,7 +125,7 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instance_port, 2),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_allowedAddressPairs_4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.vrrp_subnet", &subnet),
@@ -136,7 +136,7 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instance_port, 1),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_allowedAddressPairs_5,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.vrrp_subnet", &subnet),
@@ -161,7 +161,7 @@ func TestAccNetworkingV2Port_allowedAddressPairsNoMAC(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_allowedAddressPairsNoMAC,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.vrrp_subnet", &subnet),
@@ -186,7 +186,7 @@ func TestAccNetworkingV2Port_multipleFixedIPs(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_multipleFixedIPs,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -209,7 +209,7 @@ func TestAccNetworkingV2Port_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -227,7 +227,7 @@ func TestAccNetworkingV2Port_fixedIPs(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_fixedIPs,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -251,7 +251,7 @@ func TestAccNetworkingV2Port_updateSecurityGroups(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_updateSecurityGroups_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -264,7 +264,7 @@ func TestAccNetworkingV2Port_updateSecurityGroups(t *testing.T) {
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 1),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_updateSecurityGroups_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -277,7 +277,7 @@ func TestAccNetworkingV2Port_updateSecurityGroups(t *testing.T) {
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 1),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_updateSecurityGroups_3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -290,7 +290,7 @@ func TestAccNetworkingV2Port_updateSecurityGroups(t *testing.T) {
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 2),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_updateSecurityGroups_4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -303,7 +303,7 @@ func TestAccNetworkingV2Port_updateSecurityGroups(t *testing.T) {
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 1),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_updateSecurityGroups_5,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -331,7 +331,7 @@ func TestAccNetworkingV2Port_noSecurityGroups(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_noSecurityGroups_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -344,7 +344,7 @@ func TestAccNetworkingV2Port_noSecurityGroups(t *testing.T) {
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 0),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_noSecurityGroups_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -357,7 +357,7 @@ func TestAccNetworkingV2Port_noSecurityGroups(t *testing.T) {
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 1),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_noSecurityGroups_3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -370,7 +370,7 @@ func TestAccNetworkingV2Port_noSecurityGroups(t *testing.T) {
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 2),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_noSecurityGroups_4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -395,7 +395,7 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_noFixedIP_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
@@ -403,7 +403,7 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 						"openstack_networking_port_v2.port_1", "all_fixed_ips.#", "0"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_noFixedIP_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
@@ -411,7 +411,7 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 						"openstack_networking_port_v2.port_1", "all_fixed_ips.#", "1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_noFixedIP_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
@@ -419,7 +419,7 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 						"openstack_networking_port_v2.port_1", "all_fixed_ips.#", "0"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_noFixedIP_3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
@@ -427,7 +427,7 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 						"openstack_networking_port_v2.port_1", "all_fixed_ips.#", "2"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_noFixedIP_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
@@ -449,7 +449,7 @@ func TestAccNetworkingV2Port_createExtraDHCPOpts(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_createExtraDHCPOpts,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -473,7 +473,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -481,7 +481,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_updateExtraDHCPOpts_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -491,7 +491,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 						"openstack_networking_port_v2.port_1", "extra_dhcp_option.#", "1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_updateExtraDHCPOpts_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -501,7 +501,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 						"openstack_networking_port_v2.port_1", "extra_dhcp_option.#", "2"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_updateExtraDHCPOpts_3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -511,7 +511,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 						"openstack_networking_port_v2.port_1", "extra_dhcp_option.#", "2"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Port_updateExtraDHCPOpts_4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),

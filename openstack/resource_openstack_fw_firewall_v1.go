@@ -29,36 +29,36 @@ func resourceFWFirewallV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"policy_id": &schema.Schema{
+			"policy_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"admin_state_up": &schema.Schema{
+			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"associated_routers": &schema.Schema{
+			"associated_routers": {
 				Type:          schema.TypeSet,
 				Optional:      true,
 				Elem:          &schema.Schema{Type: schema.TypeString},
@@ -66,12 +66,12 @@ func resourceFWFirewallV1() *schema.Resource {
 				ConflictsWith: []string{"no_routers"},
 				Computed:      true,
 			},
-			"no_routers": &schema.Schema{
+			"no_routers": {
 				Type:          schema.TypeBool,
 				Optional:      true,
 				ConflictsWith: []string{"associated_routers"},
 			},
-			"value_specs": &schema.Schema{
+			"value_specs": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,

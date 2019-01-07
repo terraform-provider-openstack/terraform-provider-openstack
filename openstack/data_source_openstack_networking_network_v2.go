@@ -19,55 +19,55 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 		Read: dataSourceNetworkingNetworkV2Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"network_id": &schema.Schema{
+			"network_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"status": &schema.Schema{
+			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"matching_subnet_cidr": &schema.Schema{
+			"matching_subnet_cidr": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions["tenant_id"],
 			},
-			"admin_state_up": &schema.Schema{
+			"admin_state_up": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"shared": &schema.Schema{
+			"shared": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"external": &schema.Schema{
+			"external": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"availability_zone_hints": &schema.Schema{
+			"availability_zone_hints": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"transparent_vlan": &schema.Schema{
+			"transparent_vlan": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},

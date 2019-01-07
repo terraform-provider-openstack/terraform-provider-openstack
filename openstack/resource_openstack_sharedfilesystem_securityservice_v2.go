@@ -33,29 +33,29 @@ func resourceSharedFilesystemSecurityServiceV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"project_id": &schema.Schema{
+			"project_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"type": &schema.Schema{
+			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validation.StringInSlice([]string{
@@ -63,33 +63,33 @@ func resourceSharedFilesystemSecurityServiceV2() *schema.Resource {
 				}, true),
 			},
 
-			"dns_ip": &schema.Schema{
+			"dns_ip": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"ou": &schema.Schema{
+			"ou": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"user": &schema.Schema{
+			"user": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"password": &schema.Schema{
+			"password": {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
 			},
 
-			"domain": &schema.Schema{
+			"domain": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"server": &schema.Schema{
+			"server": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},

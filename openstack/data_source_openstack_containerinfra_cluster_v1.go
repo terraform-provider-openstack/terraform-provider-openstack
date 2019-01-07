@@ -13,113 +13,113 @@ func dataSourceContainerInfraCluster() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceContainerInfraClusterRead,
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 
-			"project_id": &schema.Schema{
+			"project_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"user_id": &schema.Schema{
+			"user_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"created_at": &schema.Schema{
+			"created_at": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"updated_at": &schema.Schema{
+			"updated_at": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"api_address": &schema.Schema{
+			"api_address": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"coe_version": &schema.Schema{
+			"coe_version": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"cluster_template_id": &schema.Schema{
+			"cluster_template_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"container_version": &schema.Schema{
+			"container_version": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"create_timeout": &schema.Schema{
+			"create_timeout": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
-			"discovery_url": &schema.Schema{
+			"discovery_url": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"docker_volume_size": &schema.Schema{
+			"docker_volume_size": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
-			"flavor": &schema.Schema{
+			"flavor": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"master_flavor": &schema.Schema{
+			"master_flavor": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"keypair": &schema.Schema{
+			"keypair": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"labels": &schema.Schema{
+			"labels": {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
 
-			"master_count": &schema.Schema{
+			"master_count": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
-			"node_count": &schema.Schema{
+			"node_count": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
-			"master_addresses": &schema.Schema{
+			"master_addresses": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"node_addresses": &schema.Schema{
+			"node_addresses": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"stack_id": &schema.Schema{
+			"stack_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

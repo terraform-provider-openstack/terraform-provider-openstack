@@ -13,18 +13,18 @@ func dataSourceIdentityRoleV3() *schema.Resource {
 		Read: dataSourceIdentityRoleV3Read,
 
 		Schema: map[string]*schema.Schema{
-			"domain_id": &schema.Schema{
+			"domain_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,

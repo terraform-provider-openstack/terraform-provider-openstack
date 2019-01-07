@@ -13,13 +13,13 @@ func dataSourceIdentityAuthScopeV3() *schema.Resource {
 		Read: dataSourceIdentityAuthScopeV3Read,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -27,52 +27,52 @@ func dataSourceIdentityAuthScopeV3() *schema.Resource {
 			},
 
 			// computed attributes
-			"user_id": &schema.Schema{
+			"user_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"user_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"user_domain_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"user_domain_name": &schema.Schema{
+			"user_name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"project_id": &schema.Schema{
+			"user_domain_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"project_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"project_domain_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"project_domain_name": &schema.Schema{
+			"user_domain_name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"roles": &schema.Schema{
+			"project_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"project_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"project_domain_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"project_domain_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"roles": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"role_id": &schema.Schema{
+						"role_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"role_name": &schema.Schema{
+						"role_name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},

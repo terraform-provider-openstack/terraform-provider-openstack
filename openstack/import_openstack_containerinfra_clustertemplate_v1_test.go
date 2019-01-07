@@ -18,10 +18,10 @@ func TestAccContainerInfraV1ClusterTemplateImportBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerInfraV1ClusterTemplateDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerInfraV1ClusterTemplateBasic(clusterTemplateName, imageName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,

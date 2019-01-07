@@ -29,145 +29,145 @@ func resourceContainerInfraClusterV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"project_id": &schema.Schema{
+			"project_id": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"user_id": &schema.Schema{
+			"user_id": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"created_at": &schema.Schema{
+			"created_at": {
 				Type:     schema.TypeString,
 				ForceNew: false,
 				Computed: true,
 			},
 
-			"updated_at": &schema.Schema{
+			"updated_at": {
 				Type:     schema.TypeString,
 				ForceNew: false,
 				Computed: true,
 			},
 
-			"api_address": &schema.Schema{
+			"api_address": {
 				Type:     schema.TypeString,
 				ForceNew: false,
 				Computed: true,
 			},
 
-			"coe_version": &schema.Schema{
+			"coe_version": {
 				Type:     schema.TypeString,
 				ForceNew: false,
 				Computed: true,
 			},
 
-			"cluster_template_id": &schema.Schema{
+			"cluster_template_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_MAGNUM_CLUSTER_TEMPLATE", nil),
 			},
 
-			"container_version": &schema.Schema{
+			"container_version": {
 				Type:     schema.TypeString,
 				ForceNew: false,
 				Computed: true,
 			},
 
-			"create_timeout": &schema.Schema{
+			"create_timeout": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"discovery_url": &schema.Schema{
+			"discovery_url": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"docker_volume_size": &schema.Schema{
+			"docker_volume_size": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"flavor": &schema.Schema{
+			"flavor": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"master_flavor": &schema.Schema{
+			"master_flavor": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"keypair": &schema.Schema{
+			"keypair": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"labels": &schema.Schema{
+			"labels": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"master_count": &schema.Schema{
+			"master_count": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"node_count": &schema.Schema{
+			"node_count": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
 
-			"master_addresses": &schema.Schema{
+			"master_addresses": {
 				Type:     schema.TypeString,
 				ForceNew: false,
 				Computed: true,
 			},
 
-			"node_addresses": &schema.Schema{
+			"node_addresses": {
 				Type:     schema.TypeString,
 				ForceNew: false,
 				Computed: true,
 			},
 
-			"stack_id": &schema.Schema{
+			"stack_id": {
 				Type:     schema.TypeString,
 				ForceNew: false,
 				Computed: true,

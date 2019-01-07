@@ -19,7 +19,7 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWRuleV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccFWRuleV1_basic_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
@@ -36,7 +36,7 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 				),
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccFWRuleV1_basic_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
@@ -63,7 +63,7 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 				),
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccFWRuleV1_basic_3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
@@ -90,7 +90,7 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 				),
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccFWRuleV1_basic_4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
@@ -117,7 +117,7 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 				),
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccFWRuleV1_basic_5,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
@@ -153,7 +153,7 @@ func TestAccFWRuleV1_anyProtocol(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWRuleV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccFWRuleV1_anyProtocol,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
@@ -185,7 +185,7 @@ func TestAccFWRuleV1_updateName(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWRuleV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccFWRuleV1_updateName_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
@@ -212,7 +212,7 @@ func TestAccFWRuleV1_updateName(t *testing.T) {
 				),
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccFWRuleV1_updateName_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),

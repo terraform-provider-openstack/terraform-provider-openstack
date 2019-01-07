@@ -15,19 +15,19 @@ func dataSourceIdentityEndpointV3() *schema.Resource {
 		Read: dataSourceIdentityEndpointV3Read,
 
 		Schema: map[string]*schema.Schema{
-			"service_name": &schema.Schema{
+			"service_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"service_id": &schema.Schema{
+			"service_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"interface": &schema.Schema{
+			"interface": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -41,12 +41,12 @@ func dataSourceIdentityEndpointV3() *schema.Resource {
 					return
 				},
 			},
-			"url": &schema.Schema{
+			"url": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,

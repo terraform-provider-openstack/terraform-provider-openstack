@@ -154,12 +154,12 @@ func TestFlattenNetworkingPort2DHCPOptionsV2(t *testing.T) {
 	}
 
 	expectedDHCPOptions := []map[string]interface{}{
-		map[string]interface{}{
+		{
 			"ip_version": 4,
 			"name":       "A",
 			"value":      "true",
 		},
-		map[string]interface{}{
+		{
 			"ip_version": 6,
 			"name":       "B",
 			"value":      "false",
@@ -216,11 +216,11 @@ func TestFlattenNetworkingPortAllowedAddressPairsV2(t *testing.T) {
 	mac := "mac3"
 
 	expectedAllowedAddressPairs := []map[string]interface{}{
-		map[string]interface{}{
+		{
 			"ip_address":  "192.0.2.1",
 			"mac_address": "mac1",
 		},
-		map[string]interface{}{
+		{
 			"ip_address":  "198.51.100.1",
 			"mac_address": "mac2",
 		},

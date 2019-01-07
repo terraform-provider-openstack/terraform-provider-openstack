@@ -13,7 +13,7 @@ func TestAccNetworkingV2_tags(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2_config_create,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2Tags(
@@ -39,7 +39,7 @@ func TestAccNetworkingV2_tags(t *testing.T) {
 						[]string{"a", "b", "c"}),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2_config_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2Tags(

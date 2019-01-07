@@ -20,7 +20,7 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSFSV2ShareAccessDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccSFSV2ShareAccessConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareAccessExists("openstack_sharedfilesystem_share_access_v2.share_access_1", &shareAccess1),
@@ -38,7 +38,7 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 					testAccCheckSFSV2ShareAccessDiffers(&shareAccess1, &shareAccess2),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccSFSV2ShareAccessConfig_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareAccessExists("openstack_sharedfilesystem_share_access_v2.share_access_1", &shareAccess1),

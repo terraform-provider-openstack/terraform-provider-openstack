@@ -13,72 +13,72 @@ func dataSourceNetworkingSubnetPoolV2() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceNetworkingSubnetPoolV2Read,
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
-			"default_quota": &schema.Schema{
+			"default_quota": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
-			"project_id": &schema.Schema{
+			"project_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"created_at": &schema.Schema{
+			"created_at": {
 				Type:     schema.TypeString,
 				Computed: true,
 				ForceNew: false,
 			},
-			"updated_at": &schema.Schema{
+			"updated_at": {
 				Type:     schema.TypeString,
 				Computed: true,
 				ForceNew: false,
 			},
-			"prefixes": &schema.Schema{
+			"prefixes": {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 				ForceNew: false,
 			},
-			"default_prefixlen": &schema.Schema{
+			"default_prefixlen": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
-			"min_prefixlen": &schema.Schema{
+			"min_prefixlen": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
-			"max_prefixlen": &schema.Schema{
+			"max_prefixlen": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
-			"address_scope_id": &schema.Schema{
+			"address_scope_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
-			"ip_version": &schema.Schema{
+			"ip_version": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
@@ -91,25 +91,25 @@ func dataSourceNetworkingSubnetPoolV2() *schema.Resource {
 					return
 				},
 			},
-			"shared": &schema.Schema{
+			"shared": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
-			"is_default": &schema.Schema{
+			"is_default": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
-			"revision_number": &schema.Schema{
+			"revision_number": {
 				Type:     schema.TypeInt,
 				Computed: true,
 				ForceNew: false,

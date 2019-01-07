@@ -21,7 +21,7 @@ func TestAccNetworkingV2RouterRoute_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2RouterRoute_create,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
@@ -41,7 +41,7 @@ func TestAccNetworkingV2RouterRoute_basic(t *testing.T) {
 						"openstack_networking_router_route_v2.router_route_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2RouterRoute_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterRouteExists(
@@ -50,7 +50,7 @@ func TestAccNetworkingV2RouterRoute_basic(t *testing.T) {
 						"openstack_networking_router_route_v2.router_route_2"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2RouterRoute_destroy,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterRouteEmpty("openstack_networking_router_v2.router_1"),

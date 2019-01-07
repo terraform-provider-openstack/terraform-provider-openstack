@@ -14,62 +14,62 @@ func dataSourceNetworkingRouterV2() *schema.Resource {
 		Read: dataSourceNetworkingRouterV2Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"router_id": &schema.Schema{
+			"router_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"admin_state_up": &schema.Schema{
+			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"distributed": &schema.Schema{
+			"distributed": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"status": &schema.Schema{
+			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"external_network_id": &schema.Schema{
+			"external_network_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"enable_snat": &schema.Schema{
+			"enable_snat": {
 				Type:     schema.TypeBool,
 				Computed: true,
 				Optional: true,
 			},
-			"availability_zone_hints": &schema.Schema{
+			"availability_zone_hints": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"external_fixed_ip": &schema.Schema{
+			"external_fixed_ip": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"subnet_id": &schema.Schema{
+						"subnet_id": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"ip_address": &schema.Schema{
+						"ip_address": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},

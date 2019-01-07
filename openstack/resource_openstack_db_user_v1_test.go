@@ -20,7 +20,7 @@ func TestAccDatabaseV1User_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDatabaseV1UserDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDatabaseV1UserBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatabaseV1InstanceExists(
