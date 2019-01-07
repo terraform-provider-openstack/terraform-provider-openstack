@@ -15,6 +15,7 @@ IMPROVEMENTS
 
 * Provider options `swauth` and `use_octavia` will correctly use a default value of `false` when they are not specified. This is to help with compatibility for v0.12 [GH-494]
 * Enhanced the pending status checks of the Load Balancer v2 resources [GH-550]
+* Prioritized the status of Load Balancer v2 resources to first use the Load Balancer's master status [GH-556]
 * Fix flavor detection in `openstack_compute_instance_v2` and `openstack_containerinfra_cluster_v1` for Terraform v0.12 [GH-551]
 * Added the ability to import `openstack_lb_loadbalancer_v2` [GH-524]
 * Added the ability to import `openstack_lb_listener_v2` [GH-524]
