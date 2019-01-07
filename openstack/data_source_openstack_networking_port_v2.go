@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 
@@ -73,6 +74,19 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 			"fixed_ip": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+
+			"security_group_ids": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
+
+			"tags": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
 			"allowed_address_pairs": &schema.Schema{
@@ -183,6 +197,11 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 		listOpts.DeviceID = v.(string)
 	}
 
+	tags := networkV2AttributesTags(d)
+	if len(tags) > 0 {
+		listOpts.Tags = strings.Join(tags, ",")
+	}
+
 	pages, err := p.List(networkingClient, listOpts).AllPages()
 	if err != nil {
 		return fmt.Errorf("Unable to list Ports: %s", err)
@@ -221,10 +240,27 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 			}
 		}
 		if len(ports) == 0 {
-			return fmt.Errorf("No Port found")
+			return fmt.Errorf("No Port found after the 'fixed_ip' filter")
 		}
 	} else {
 		ports = allPorts
+	}
+
+	v := d.Get("security_group_ids").(*schema.Set)
+	securityGroups := resourcePortSecurityGroupsV2(v)
+	if len(securityGroups) > 0 {
+		var sgPorts []p.Port
+		for _, p := range ports {
+			for _, sg := range p.SecurityGroups {
+				if strSliceContains(securityGroups, sg) {
+					sgPorts = append(sgPorts, p)
+				}
+			}
+		}
+		if len(sgPorts) == 0 {
+			return fmt.Errorf("No Port found after the 'security_group_ids' filter")
+		}
+		ports = sgPorts
 	}
 
 	if len(ports) > 1 {

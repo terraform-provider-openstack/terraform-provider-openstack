@@ -3,7 +3,7 @@ layout: "openstack"
 page_title: "OpenStack: openstack_networking_port_v2"
 sidebar_current: "docs-openstack-datasource-networking-port-v2"
 description: |-
-  Get information on an OpenStack Port.
+  Get information of an OpenStack Port.
 ---
 
 # openstack\_networking\_port\_v2
@@ -43,6 +43,10 @@ data "openstack_networking_port_v2" "port_1" {
 * `device_id` - (Optional) The ID of the device the port belongs to.
 
 * `fixed_ip` - (Optional) The port IP address filter.
+
+* `security_group_ids` - (Optional) The list of port security group IDs to filter.
+
+* `tags` - (Optional) The list of port tags to filter.
 
 ## Attributes Reference
 
