@@ -10,6 +10,7 @@ FEATURES
 * __New Resource__: `openstack_lb_l7rule_v2` [GH-522]
 * __New Resource__: `openstack_sharedfilesystem_share_v2` [GH-525]
 * __New Resource__: `openstack_sharedfilesystem_share_access_v2` [GH-526]
+* __New Data Source__: `openstack_sharedfilesystem_share_v1` [GH-564]
 
 IMPROVEMENTS
 
