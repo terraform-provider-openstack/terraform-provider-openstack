@@ -19,7 +19,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2L7PolicyDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCheckLBV2L7PolicyConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
@@ -36,7 +36,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 						regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccCheckLBV2L7PolicyConfig_update1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
@@ -55,7 +55,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 						regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccCheckLBV2L7PolicyConfig_update2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
@@ -75,7 +75,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 						regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccCheckLBV2L7PolicyConfig_update3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),

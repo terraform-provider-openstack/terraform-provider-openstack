@@ -18,7 +18,7 @@ func TestAccGroupV2_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckEndpointGroupV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccEndpointGroupV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEndpointGroupV2Exists(
@@ -39,7 +39,7 @@ func TestAccGroupV2_update(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckEndpointGroupV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccEndpointGroupV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEndpointGroupV2Exists(
@@ -49,7 +49,7 @@ func TestAccGroupV2_update(t *testing.T) {
 					testAccCheckEndpoints("openstack_vpnaas_endpoint_group_v2.group_1", &group.Endpoints),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccEndpointGroupV2_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEndpointGroupV2Exists(

@@ -19,7 +19,7 @@ func TestAccIPSecPolicyV2_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIPSecPolicyV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(
@@ -45,7 +45,7 @@ func TestAccIPSecPolicyV2_withLifetime(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIPSecPolicyV2_withLifetime,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(
@@ -64,7 +64,7 @@ func TestAccIPSecPolicyV2_Update(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIPSecPolicyV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(
@@ -72,7 +72,7 @@ func TestAccIPSecPolicyV2_Update(t *testing.T) {
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_ipsec_policy_v2.policy_1", "name", &policy.Name),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccIPSecPolicyV2_Update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(
@@ -91,7 +91,7 @@ func TestAccIPSecPolicyV2_withLifetimeUpdate(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIPSecPolicyV2_withLifetime,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(
@@ -101,7 +101,7 @@ func TestAccIPSecPolicyV2_withLifetimeUpdate(t *testing.T) {
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_ipsec_policy_v2.policy_1", "pfs", &policy.PFS),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccIPSecPolicyV2_withLifetimeUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(

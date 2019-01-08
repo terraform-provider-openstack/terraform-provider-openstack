@@ -20,10 +20,10 @@ func TestAccContainerInfraV1ClusterTemplateDataSource_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerInfraV1ClusterTemplateDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerInfraV1ClusterTemplateDataSource(clusterTemplateName, imageName),
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerInfraV1ClusterTemplateDataSource_basic(
 					testAccContainerInfraV1ClusterTemplateDataSource(clusterTemplateName, imageName),
 				),

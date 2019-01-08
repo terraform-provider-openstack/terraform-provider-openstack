@@ -15,7 +15,7 @@ func dataSourceImagesImageV2() *schema.Resource {
 		Read: dataSourceImagesImageV2Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,

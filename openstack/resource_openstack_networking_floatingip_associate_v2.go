@@ -20,20 +20,20 @@ func resourceNetworkingFloatingIPAssociateV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"floating_ip": &schema.Schema{
+			"floating_ip": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"port_id": &schema.Schema{
+			"port_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,

@@ -20,10 +20,10 @@ func TestAccOpenStackIdentityV3UserDataSource_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackIdentityUserV3DataSource_user(userName, userPassword),
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackIdentityUserV3DataSource_basic(userName, userPassword),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityUserV3DataSourceID("data.openstack_identity_user_v3.user_1"),

@@ -25,7 +25,7 @@ func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerInfraV1ClusterDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerInfraV1ClusterBasic(imageName, keypairName, clusterTemplateName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1ClusterExists(resourceName, &cluster),
@@ -36,7 +36,7 @@ func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "docker_volume_size", strconv.Itoa(5)),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerInfraV1ClusterUpdate(imageName, keypairName, clusterTemplateName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1ClusterExists(resourceName, &cluster),

@@ -18,7 +18,7 @@ func TestAccObjectStorageV1Container_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckObjectStorageV1ContainerDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccObjectStorageV1Container_basic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -27,7 +27,7 @@ func TestAccObjectStorageV1Container_basic(t *testing.T) {
 						"openstack_objectstorage_container_v1.container_1", "content_type", "application/json"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccObjectStorageV1Container_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(

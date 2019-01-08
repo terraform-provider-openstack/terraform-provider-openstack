@@ -18,7 +18,7 @@ func TestAccSFSV2Share_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSFSV2ShareDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccSFSV2ShareConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareExists("openstack_sharedfilesystem_share_v2.share_1", &share),
@@ -27,7 +27,7 @@ func TestAccSFSV2Share_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "share_proto", "NFS"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccSFSV2ShareConfig_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareExists("openstack_sharedfilesystem_share_v2.share_1", &share),
@@ -37,7 +37,7 @@ func TestAccSFSV2Share_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "share_proto", "NFS"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccSFSV2ShareConfig_extend,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareExists("openstack_sharedfilesystem_share_v2.share_1", &share),

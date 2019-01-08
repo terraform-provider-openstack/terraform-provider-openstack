@@ -18,14 +18,14 @@ func resourceComputeFloatingIPV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"pool": &schema.Schema{
+			"pool": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
@@ -33,17 +33,17 @@ func resourceComputeFloatingIPV2() *schema.Resource {
 			},
 
 			// computed-only
-			"address": &schema.Schema{
+			"address": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"fixed_ip": &schema.Schema{
+			"fixed_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"instance_id": &schema.Schema{
+			"instance_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

@@ -24,7 +24,7 @@ func TestAccSFSV2ShareNetwork_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSFSV2ShareNetworkDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccSFSV2ShareNetworkConfig + testAccSFSV2ShareNetworkConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork1),
@@ -40,7 +40,7 @@ func TestAccSFSV2ShareNetwork_basic(t *testing.T) {
 						regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccSFSV2ShareNetworkConfig + testAccSFSV2ShareNetworkConfig_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork2),
@@ -69,7 +69,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSFSV2ShareNetworkDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccSFSV2ShareNetworkConfig + testAccSFSV2ShareNetworkConfig_secservice_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
@@ -82,7 +82,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 					testAccCheckSFSV2ShareNetworkSecSvcExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccSFSV2ShareNetworkConfig + testAccSFSV2ShareNetworkConfig_secservice_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
@@ -95,7 +95,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 					testAccCheckSFSV2ShareNetworkSecSvcExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccSFSV2ShareNetworkConfig + testAccSFSV2ShareNetworkConfig_secservice_3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
@@ -108,7 +108,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 					testAccCheckSFSV2ShareNetworkSecSvcExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccSFSV2ShareNetworkConfig + testAccSFSV2ShareNetworkConfig_secservice_4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),

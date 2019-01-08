@@ -28,61 +28,61 @@ func resourceSharedFilesystemShareNetworkV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"project_id": &schema.Schema{
+			"project_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"neutron_net_id": &schema.Schema{
+			"neutron_net_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 
-			"neutron_subnet_id": &schema.Schema{
+			"neutron_subnet_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 
-			"security_service_ids": &schema.Schema{
+			"security_service_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
 
-			"network_type": &schema.Schema{
+			"network_type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"segmentation_id": &schema.Schema{
+			"segmentation_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"cidr": &schema.Schema{
+			"cidr": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"ip_version": &schema.Schema{
+			"ip_version": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

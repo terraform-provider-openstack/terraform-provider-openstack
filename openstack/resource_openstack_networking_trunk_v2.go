@@ -26,54 +26,54 @@ func resourceNetworkingTrunkV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
-			"port_id": &schema.Schema{
+			"port_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"admin_state_up": &schema.Schema{
+			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"sub_port": &schema.Schema{
+			"sub_port": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: false,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"port_id": &schema.Schema{
+						"port_id": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"segmentation_type": &schema.Schema{
+						"segmentation_type": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"segmentation_id": &schema.Schema{
+						"segmentation_id": {
 							Type:     schema.TypeInt,
 							Required: true,
 						},
 					},
 				},
 			},
-			"tags": &schema.Schema{
+			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: false,

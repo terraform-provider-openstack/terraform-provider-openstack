@@ -18,14 +18,14 @@ func TestAccLBV2Member_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2MemberDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: TestAccLBV2MemberConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MemberExists("openstack_lb_member_v2.member_1", &member_1),
 					testAccCheckLBV2MemberExists("openstack_lb_member_v2.member_2", &member_2),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: TestAccLBV2MemberConfig_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "weight", "10"),

@@ -13,35 +13,35 @@ var osMutexKV = mutexkv.NewMutexKV()
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"auth_url": &schema.Schema{
+			"auth_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_AUTH_URL", ""),
 				Description: descriptions["auth_url"],
 			},
 
-			"region": &schema.Schema{
+			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions["region"],
 				DefaultFunc: schema.EnvDefaultFunc("OS_REGION_NAME", ""),
 			},
 
-			"user_name": &schema.Schema{
+			"user_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_USERNAME", ""),
 				Description: descriptions["user_name"],
 			},
 
-			"user_id": &schema.Schema{
+			"user_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_USER_ID", ""),
 				Description: descriptions["user_name"],
 			},
 
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
@@ -51,7 +51,7 @@ func Provider() terraform.ResourceProvider {
 				Description: descriptions["tenant_id"],
 			},
 
-			"tenant_name": &schema.Schema{
+			"tenant_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
@@ -61,7 +61,7 @@ func Provider() terraform.ResourceProvider {
 				Description: descriptions["tenant_name"],
 			},
 
-			"password": &schema.Schema{
+			"password": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
@@ -69,7 +69,7 @@ func Provider() terraform.ResourceProvider {
 				Description: descriptions["password"],
 			},
 
-			"token": &schema.Schema{
+			"token": {
 				Type:     schema.TypeString,
 				Optional: true,
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
@@ -79,111 +79,111 @@ func Provider() terraform.ResourceProvider {
 				Description: descriptions["token"],
 			},
 
-			"user_domain_name": &schema.Schema{
+			"user_domain_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_USER_DOMAIN_NAME", ""),
 				Description: descriptions["user_domain_name"],
 			},
 
-			"user_domain_id": &schema.Schema{
+			"user_domain_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_USER_DOMAIN_ID", ""),
 				Description: descriptions["user_domain_id"],
 			},
 
-			"project_domain_name": &schema.Schema{
+			"project_domain_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_PROJECT_DOMAIN_NAME", ""),
 				Description: descriptions["project_domain_name"],
 			},
 
-			"project_domain_id": &schema.Schema{
+			"project_domain_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_PROJECT_DOMAIN_ID", ""),
 				Description: descriptions["project_domain_id"],
 			},
 
-			"domain_id": &schema.Schema{
+			"domain_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_DOMAIN_ID", ""),
 				Description: descriptions["domain_id"],
 			},
 
-			"domain_name": &schema.Schema{
+			"domain_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_DOMAIN_NAME", ""),
 				Description: descriptions["domain_name"],
 			},
 
-			"default_domain": &schema.Schema{
+			"default_domain": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_DEFAULT_DOMAIN", "default"),
 				Description: descriptions["default_domain"],
 			},
 
-			"insecure": &schema.Schema{
+			"insecure": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_INSECURE", nil),
 				Description: descriptions["insecure"],
 			},
 
-			"endpoint_type": &schema.Schema{
+			"endpoint_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_ENDPOINT_TYPE", ""),
 			},
 
-			"cacert_file": &schema.Schema{
+			"cacert_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_CACERT", ""),
 				Description: descriptions["cacert_file"],
 			},
 
-			"cert": &schema.Schema{
+			"cert": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_CERT", ""),
 				Description: descriptions["cert"],
 			},
 
-			"key": &schema.Schema{
+			"key": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_KEY", ""),
 				Description: descriptions["key"],
 			},
 
-			"swauth": &schema.Schema{
+			"swauth": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_SWAUTH", false),
 				Description: descriptions["swauth"],
 			},
 
-			"use_octavia": &schema.Schema{
+			"use_octavia": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_USE_OCTAVIA", false),
 				Description: descriptions["use_octavia"],
 			},
 
-			"cloud": &schema.Schema{
+			"cloud": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_CLOUD", ""),
 				Description: descriptions["cloud"],
 			},
 
-			"max_retries": &schema.Schema{
+			"max_retries": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Default:     0,

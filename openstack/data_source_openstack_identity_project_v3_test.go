@@ -20,10 +20,10 @@ func TestAccOpenStackIdentityV3ProjectDataSource_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackIdentityProjectV3DataSource_project(projectName, projectDescription),
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackIdentityProjectV3DataSource_basic(projectName, projectDescription),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectDataSourceID("data.openstack_identity_project_v3.project_1"),

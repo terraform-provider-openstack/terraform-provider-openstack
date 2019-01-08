@@ -19,7 +19,7 @@ func TestAccBlockStorageVolumeAttachV2_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageVolumeAttachV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageVolumeAttachV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageVolumeAttachV2Exists("openstack_blockstorage_volume_attach_v2.va_1", &va),
@@ -37,7 +37,7 @@ func TestAccBlockStorageVolumeAttachV2_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageVolumeAttachV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageVolumeAttachV2_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageVolumeAttachV2Exists("openstack_blockstorage_volume_attach_v2.va_1", &va),

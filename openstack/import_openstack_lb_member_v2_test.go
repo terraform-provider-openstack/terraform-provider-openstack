@@ -17,11 +17,11 @@ func TestAccLBV2Member_importBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2MemberDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: TestAccLBV2MemberConfig_basic,
 			},
 
-			resource.TestStep{
+			{
 				ResourceName:      memberResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,

@@ -15,51 +15,51 @@ func dataSourceIdentityUserV3() *schema.Resource {
 		Read: dataSourceIdentityUserV3Read,
 
 		Schema: map[string]*schema.Schema{
-			"default_project_id": &schema.Schema{
+			"default_project_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"domain_id": &schema.Schema{
+			"domain_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"enabled": &schema.Schema{
+			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
 
-			"idp_id": &schema.Schema{
+			"idp_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"password_expires_at": &schema.Schema{
+			"password_expires_at": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validatePasswordExpiresAtQuery,
 			},
 
-			"protocol_id": &schema.Schema{
+			"protocol_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"unique_id": &schema.Schema{
+			"unique_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},

@@ -20,7 +20,7 @@ func TestAccIdentityV3Role_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIdentityV3RoleDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3Role_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3RoleExists("openstack_identity_role_v3.role_1", &role),
@@ -28,7 +28,7 @@ func TestAccIdentityV3Role_basic(t *testing.T) {
 						"openstack_identity_role_v3.role_1", "name", &role.Name),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3Role_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3RoleExists("openstack_identity_role_v3.role_1", &role),

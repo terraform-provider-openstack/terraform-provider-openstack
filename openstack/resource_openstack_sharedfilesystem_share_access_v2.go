@@ -31,13 +31,13 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"share_id": &schema.Schema{
+			"share_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"access_type": &schema.Schema{
+			"access_type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -46,13 +46,13 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 				}, true),
 			},
 
-			"access_to": &schema.Schema{
+			"access_to": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"access_level": &schema.Schema{
+			"access_level": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,

@@ -16,7 +16,7 @@ func TestAccOpenStackIdentityV3RoleDataSource_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackIdentityV3RoleDataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3DataSourceID("data.openstack_identity_role_v3.role_1"),

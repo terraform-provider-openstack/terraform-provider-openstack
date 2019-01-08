@@ -33,7 +33,7 @@ func TestAccBlockStorageV3SnapshotDataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageV3SnapshotDataSource_basic(snapshotName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3SnapshotDataSourceID(resourceName),

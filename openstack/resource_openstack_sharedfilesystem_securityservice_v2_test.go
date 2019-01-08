@@ -18,7 +18,7 @@ func TestAccSFSV2SecurityService_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSFSV2SecurityServiceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccSFSV2SecurityServiceConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2SecurityServiceExists("openstack_sharedfilesystem_securityservice_v2.securityservice_1", &securityservice),
@@ -42,7 +42,7 @@ func TestAccSFSV2SecurityService_basic(t *testing.T) {
 						"openstack_sharedfilesystem_securityservice_v2.securityservice_1", "password", "s8cret"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccSFSV2SecurityServiceConfig_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2SecurityServiceExists("openstack_sharedfilesystem_securityservice_v2.securityservice_1", &securityservice),

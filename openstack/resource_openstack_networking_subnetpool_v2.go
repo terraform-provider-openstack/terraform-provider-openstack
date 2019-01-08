@@ -27,68 +27,68 @@ func resourceNetworkingSubnetPoolV2() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: false,
 			},
-			"default_quota": &schema.Schema{
+			"default_quota": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: false,
 			},
-			"project_id": &schema.Schema{
+			"project_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"created_at": &schema.Schema{
+			"created_at": {
 				Type:     schema.TypeString,
 				ForceNew: false,
 				Computed: true,
 			},
-			"updated_at": &schema.Schema{
+			"updated_at": {
 				Type:     schema.TypeString,
 				ForceNew: false,
 				Computed: true,
 			},
-			"prefixes": &schema.Schema{
+			"prefixes": {
 				Type:     schema.TypeList,
 				Required: true,
 				ForceNew: false,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"default_prefixlen": &schema.Schema{
+			"default_prefixlen": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
-			"min_prefixlen": &schema.Schema{
+			"min_prefixlen": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
-			"max_prefixlen": &schema.Schema{
+			"max_prefixlen": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
-			"address_scope_id": &schema.Schema{
+			"address_scope_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
-			"ip_version": &schema.Schema{
+			"ip_version": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
@@ -101,32 +101,32 @@ func resourceNetworkingSubnetPoolV2() *schema.Resource {
 					return
 				},
 			},
-			"shared": &schema.Schema{
+			"shared": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
-			"is_default": &schema.Schema{
+			"is_default": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
 			},
-			"revision_number": &schema.Schema{
+			"revision_number": {
 				Type:     schema.TypeInt,
 				ForceNew: false,
 				Computed: true,
 			},
-			"value_specs": &schema.Schema{
+			"value_specs": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
 			},
-			"tags": &schema.Schema{
+			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},

@@ -24,7 +24,7 @@ func TestAccContainerInfraV1ClusterTemplate_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerInfraV1ClusterTemplateDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerInfraV1ClusterTemplateBasic(clusterTemplateName, imageName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1ClusterTemplateExists(resourceName, &clusterTemplate),
@@ -33,7 +33,7 @@ func TestAccContainerInfraV1ClusterTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "http_proxy", "127.0.0.1:8801"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerInfraV1ClusterTemplateUpdate(clusterTemplateName, imageName, dockerVolumeSize),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", clusterTemplateName),
@@ -58,7 +58,7 @@ func TestAccContainerInfraV1ClusterTemplate_labels(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerInfraV1ClusterTemplateDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerInfraV1ClusterTemplateLabels(clusterTemplateName, imageName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "labels.kube_tag", "1.11.1"),

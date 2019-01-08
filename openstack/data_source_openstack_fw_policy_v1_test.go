@@ -13,10 +13,10 @@ func TestAccOpenStackNetworkingFWPolicyV1DataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingFWPolicyV1DataSource_group,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingFWPolicyV1DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingFWPolicyV1DataSourceID("data.openstack_fw_policy_v1.policy_1"),
@@ -32,10 +32,10 @@ func TestAccOpenStackNetworkingFWPolicyV1DataSource_FWPolicyID(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingFWPolicyV1DataSource_group,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingFWPolicyV1DataSource_policyID,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingFWPolicyV1DataSourceID("data.openstack_fw_policy_v1.policy_1"),

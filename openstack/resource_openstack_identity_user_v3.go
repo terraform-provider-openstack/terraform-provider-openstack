@@ -26,46 +26,46 @@ func resourceIdentityUserV3() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"default_project_id": &schema.Schema{
+			"default_project_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"domain_id": &schema.Schema{
+			"domain_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"enabled": &schema.Schema{
+			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
 
-			"extra": &schema.Schema{
+			"extra": {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"password": &schema.Schema{
+			"password": {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
 			},
 
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -74,32 +74,32 @@ func resourceIdentityUserV3() *schema.Resource {
 
 			// The following are all specific options that must
 			// be bundled into user.Options
-			"ignore_change_password_upon_first_use": &schema.Schema{
+			"ignore_change_password_upon_first_use": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
 
-			"ignore_password_expiry": &schema.Schema{
+			"ignore_password_expiry": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
 
-			"ignore_lockout_failure_attempts": &schema.Schema{
+			"ignore_lockout_failure_attempts": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
 
-			"multi_factor_auth_enabled": &schema.Schema{
+			"multi_factor_auth_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
 
-			"multi_factor_auth_rule": &schema.Schema{
+			"multi_factor_auth_rule": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"rule": &schema.Schema{
+						"rule": {
 							Type:     schema.TypeList,
 							MinItems: 1,
 							Required: true,

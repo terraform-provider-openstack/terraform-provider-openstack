@@ -14,7 +14,7 @@ func TestAccComputeV2KeypairDataSource_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2KeypairDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2KeypairDataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2KeypairDataSourceID("data.openstack_compute_keypair_v2.kp"),

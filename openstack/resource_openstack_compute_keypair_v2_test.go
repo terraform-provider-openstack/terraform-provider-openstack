@@ -19,7 +19,7 @@ func TestAccComputeV2Keypair_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2KeypairDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Keypair_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2KeypairExists("openstack_compute_keypair_v2.kp_1", &keypair),
@@ -40,7 +40,7 @@ func TestAccComputeV2Keypair_generatePrivate(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2KeypairDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Keypair_generatePrivate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2KeypairExists("openstack_compute_keypair_v2.kp_1", &keypair),

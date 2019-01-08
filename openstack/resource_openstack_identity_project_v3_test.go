@@ -23,7 +23,7 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIdentityV3ProjectDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3Project_basic(projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
@@ -39,7 +39,7 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 						"openstack_identity_project_v3.project_1", "is_domain", "false"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3Project_update(projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),

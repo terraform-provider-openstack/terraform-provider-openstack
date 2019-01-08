@@ -19,7 +19,7 @@ func TestAccBlockStorageV3Volume_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageV3Volume_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
@@ -30,7 +30,7 @@ func TestAccBlockStorageV3Volume_basic(t *testing.T) {
 						"openstack_blockstorage_volume_v3.volume_1", "size", "1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageV3Volume_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
@@ -51,14 +51,14 @@ func TestAccBlockStorageV3Volume_online_resize(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageV3Volume_online_resize,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "size", "1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageV3Volume_online_resize_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -77,7 +77,7 @@ func TestAccBlockStorageV3Volume_image(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageV3Volume_image,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
@@ -97,7 +97,7 @@ func TestAccBlockStorageV3Volume_image_multiattach(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageV3Volume_image_multiattach,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
@@ -119,7 +119,7 @@ func TestAccBlockStorageV3Volume_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageV3Volume_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),

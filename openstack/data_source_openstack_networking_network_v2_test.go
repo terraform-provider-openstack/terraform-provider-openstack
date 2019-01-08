@@ -13,10 +13,10 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingNetworkV2DataSource_network,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingNetworkV2DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.net"),
@@ -37,10 +37,10 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_subnet(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingNetworkV2DataSource_network,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingNetworkV2DataSource_subnet,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.net"),
@@ -59,10 +59,10 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_networkID(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingNetworkV2DataSource_network,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingNetworkV2DataSource_networkID,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.net"),
@@ -83,7 +83,7 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_externalExplicit(t *testing.T
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingNetworkV2DataSource_externalExplicit,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.net"),
@@ -106,7 +106,7 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_externalImplicit(t *testing.T
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingNetworkV2DataSource_externalImplicit,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.net"),
@@ -130,10 +130,10 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan(t *testing.T
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Network_transparent_vlan,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.network_1"),

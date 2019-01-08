@@ -19,7 +19,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2L7RuleDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCheckLBV2L7RuleConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
@@ -37,7 +37,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 						regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccCheckLBV2L7RuleConfig_update1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
@@ -57,7 +57,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 						regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccCheckLBV2L7RuleConfig_update2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
@@ -71,7 +71,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 						"openstack_lb_l7rule_v2.l7rule_1", "invert", "true"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccCheckLBV2L7RuleConfig_update3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
@@ -87,7 +87,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 						"openstack_lb_l7rule_v2.l7rule_1", "invert", "false"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccCheckLBV2L7RuleConfig_update4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
@@ -103,7 +103,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 						"openstack_lb_l7rule_v2.l7rule_1", "invert", "false"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccCheckLBV2L7RuleConfig_update5,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
@@ -119,7 +119,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 						"openstack_lb_l7rule_v2.l7rule_1", "invert", "false"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccCheckLBV2L7RuleConfig_update6,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),

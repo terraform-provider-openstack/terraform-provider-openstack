@@ -18,7 +18,7 @@ func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SecGroup_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists(
@@ -26,7 +26,7 @@ func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 					testAccCheckNetworkingV2SecGroupRuleCount(&security_group, 2),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SecGroup_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPtr(
@@ -47,7 +47,7 @@ func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SecGroup_noDefaultRules,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists(
@@ -67,7 +67,7 @@ func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SecGroup_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists(

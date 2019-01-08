@@ -25,39 +25,39 @@ func resourceBlockStorageVolumeAttachV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"volume_id": &schema.Schema{
+			"volume_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"instance_id": &schema.Schema{
+			"instance_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Removed:  "instance_id is no longer used in this resource",
 			},
 
-			"host_name": &schema.Schema{
+			"host_name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"device": &schema.Schema{
+			"device": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"attach_mode": &schema.Schema{
+			"attach_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -66,62 +66,62 @@ func resourceBlockStorageVolumeAttachV2() *schema.Resource {
 				}, false),
 			},
 
-			"initiator": &schema.Schema{
+			"initiator": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"ip_address": &schema.Schema{
+			"ip_address": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"multipath": &schema.Schema{
+			"multipath": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"os_type": &schema.Schema{
+			"os_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"platform": &schema.Schema{
+			"platform": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"wwpn": &schema.Schema{
+			"wwpn": {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
-			"wwnn": &schema.Schema{
+			"wwnn": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
 
 			// Volume attachment information
-			"data": &schema.Schema{
+			"data": {
 				Type:      schema.TypeMap,
 				Computed:  true,
 				Sensitive: true,
 			},
 
-			"driver_volume_type": &schema.Schema{
+			"driver_volume_type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"mount_point_base": &schema.Schema{
+			"mount_point_base": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

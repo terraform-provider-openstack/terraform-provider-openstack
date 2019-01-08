@@ -31,21 +31,21 @@ func resourceL7RuleV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"type": &schema.Schema{
+			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validation.StringInSlice([]string{
@@ -53,7 +53,7 @@ func resourceL7RuleV2() *schema.Resource {
 				}, true),
 			},
 
-			"compare_type": &schema.Schema{
+			"compare_type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validation.StringInSlice([]string{
@@ -61,18 +61,18 @@ func resourceL7RuleV2() *schema.Resource {
 				}, true),
 			},
 
-			"l7policy_id": &schema.Schema{
+			"l7policy_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"listener_id": &schema.Schema{
+			"listener_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"value": &schema.Schema{
+			"value": {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -83,18 +83,18 @@ func resourceL7RuleV2() *schema.Resource {
 				},
 			},
 
-			"key": &schema.Schema{
+			"key": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"invert": &schema.Schema{
+			"invert": {
 				Type:     schema.TypeBool,
 				Default:  false,
 				Optional: true,
 			},
 
-			"admin_state_up": &schema.Schema{
+			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Default:  true,
 				Optional: true,

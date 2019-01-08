@@ -18,7 +18,7 @@ func TestAccDatabaseV1Configuration_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDatabaseV1ConfigurationDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDatabaseV1ConfigurationBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatabaseV1ConfigurationExists(

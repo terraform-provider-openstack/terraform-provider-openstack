@@ -22,34 +22,34 @@ func resourceIdentityRoleAssignmentV3() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"domain_id": &schema.Schema{
+			"domain_id": {
 				Type:          schema.TypeString,
 				ConflictsWith: []string{"project_id"},
 				Optional:      true,
 				ForceNew:      true,
 			},
 
-			"group_id": &schema.Schema{
+			"group_id": {
 				Type:          schema.TypeString,
 				ConflictsWith: []string{"user_id"},
 				Optional:      true,
 				ForceNew:      true,
 			},
 
-			"project_id": &schema.Schema{
+			"project_id": {
 				Type:          schema.TypeString,
 				ConflictsWith: []string{"domain_id"},
 				Optional:      true,
 				ForceNew:      true,
 			},
 
-			"role_id": &schema.Schema{
+			"role_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"user_id": &schema.Schema{
+			"user_id": {
 				Type:          schema.TypeString,
 				ConflictsWith: []string{"group_id"},
 				Optional:      true,

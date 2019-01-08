@@ -17,11 +17,11 @@ func TestAccSFSV2ShareAccess_importBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSFSV2ShareAccessDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccSFSV2ShareAccessConfig_basic,
 			},
 
-			resource.TestStep{
+			{
 				ResourceName:      shareAccessName,
 				ImportState:       true,
 				ImportStateVerify: true,

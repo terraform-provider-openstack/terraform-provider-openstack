@@ -15,7 +15,7 @@ func dataSourceComputeFlavorV2() *schema.Resource {
 		Read: dataSourceComputeFlavorV2Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -71,7 +71,7 @@ func dataSourceComputeFlavorV2() *schema.Resource {
 			},
 
 			// Computed values
-			"extra_specs": &schema.Schema{
+			"extra_specs": {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},

@@ -18,7 +18,7 @@ func TestAccOpenStackIdentityV3EndpointDataSource_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackIdentityEndpointV3DataSource_basic(endpointName, "public"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityEndpointV3DataSourceID("data.openstack_identity_endpoint_v3.endpoint_1"),

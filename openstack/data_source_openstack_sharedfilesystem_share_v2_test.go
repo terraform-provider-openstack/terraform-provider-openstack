@@ -14,7 +14,7 @@ func TestAccSFSV2ShareDataSource_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSFSV2ShareDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccSFSV2ShareDataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareDataSourceID("data.openstack_sharedfilesystem_share_v2.share_1"),

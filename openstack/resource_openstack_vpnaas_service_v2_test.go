@@ -18,7 +18,7 @@ func TestAccServiceV2_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckServiceV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccServiceV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceV2Exists(

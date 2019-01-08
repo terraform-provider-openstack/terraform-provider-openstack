@@ -14,7 +14,7 @@ func TestAccComputeV2FlavorDataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2FlavorDataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
@@ -41,7 +41,7 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2FlavorDataSource_queryDisk,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
@@ -59,7 +59,7 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 						"data.openstack_compute_flavor_v2.flavor_1", "is_public", "true"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2FlavorDataSource_queryMinDisk,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
@@ -77,7 +77,7 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 						"data.openstack_compute_flavor_v2.flavor_1", "is_public", "true"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2FlavorDataSource_queryMinRAM,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
@@ -95,7 +95,7 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 						"data.openstack_compute_flavor_v2.flavor_1", "is_public", "true"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2FlavorDataSource_queryVCPUs,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
@@ -127,10 +127,10 @@ func TestAccComputeV2FlavorDataSource_extraSpecs(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Flavor_extraSpecs_1(flavorName),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2FlavorDataSource_extraSpecs(flavorName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),

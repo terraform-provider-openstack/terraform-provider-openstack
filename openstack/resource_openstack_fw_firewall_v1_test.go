@@ -19,13 +19,13 @@ func TestAccFWFirewallV1_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccFWFirewallV1_basic_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1("openstack_fw_firewall_v1.fw_1", "", "", policyID),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccFWFirewallV1_basic_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1(
@@ -44,7 +44,7 @@ func TestAccFWFirewallV1_router(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccFWFirewallV1_router,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1Exists("openstack_fw_firewall_v1.fw_1", &firewall),
@@ -63,7 +63,7 @@ func TestAccFWFirewallV1_no_router(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccFWFirewallV1_no_router,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1Exists("openstack_fw_firewall_v1.fw_1", &firewall),
@@ -83,14 +83,14 @@ func TestAccFWFirewallV1_router_update(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccFWFirewallV1_router,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1Exists("openstack_fw_firewall_v1.fw_1", &firewall),
 					testAccCheckFWFirewallRouterCount(&firewall, 1),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccFWFirewallV1_router_add,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1Exists("openstack_fw_firewall_v1.fw_1", &firewall),
@@ -109,14 +109,14 @@ func TestAccFWFirewallV1_router_remove(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccFWFirewallV1_router,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1Exists("openstack_fw_firewall_v1.fw_1", &firewall),
 					testAccCheckFWFirewallRouterCount(&firewall, 1),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccFWFirewallV1_router_remove,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1Exists("openstack_fw_firewall_v1.fw_1", &firewall),

@@ -13,10 +13,10 @@ func TestAccOpenStackNetworkingFloatingIPV2DataSource_address(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingFloatingIPV2DataSource_fip,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingFloatingIPV2DataSource_address,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingFloatingIPV2DataSourceID("data.openstack_networking_floatingip_v2.fip"),

@@ -26,7 +26,7 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -49,7 +49,7 @@ func TestAccComputeV2Instance_initialStateActive(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_stateActive,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -58,7 +58,7 @@ func TestAccComputeV2Instance_initialStateActive(t *testing.T) {
 					testAccCheckComputeV2InstanceState(&instance, "active"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_stateShutoff,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -67,7 +67,7 @@ func TestAccComputeV2Instance_initialStateActive(t *testing.T) {
 					testAccCheckComputeV2InstanceState(&instance, "shutoff"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_stateActive,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -88,7 +88,7 @@ func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_stateShutoff,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -97,7 +97,7 @@ func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
 					testAccCheckComputeV2InstanceState(&instance, "shutoff"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_stateActive,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -106,7 +106,7 @@ func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
 					testAccCheckComputeV2InstanceState(&instance, "active"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_stateShutoff,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -128,7 +128,7 @@ func TestAccComputeV2Instance_secgroupMulti(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_secgroupMulti,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists(
@@ -150,7 +150,7 @@ func TestAccComputeV2Instance_secgroupMultiUpdate(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_secgroupMultiUpdate_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists(
@@ -161,7 +161,7 @@ func TestAccComputeV2Instance_secgroupMultiUpdate(t *testing.T) {
 						"openstack_compute_instance_v2.instance_1", &instance_1),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_secgroupMultiUpdate_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists(
@@ -184,7 +184,7 @@ func TestAccComputeV2Instance_bootFromVolumeImage(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_bootFromVolumeImage,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -203,7 +203,7 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_bootFromVolumeVolume,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -223,14 +223,14 @@ func TestAccComputeV2Instance_bootFromVolumeForceNew(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_bootFromVolumeForceNew_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(
 						"openstack_compute_instance_v2.instance_1", &instance1_1),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_bootFromVolumeForceNew_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(
@@ -250,7 +250,7 @@ func TestAccComputeV2Instance_blockDeviceNewVolume(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_blockDeviceNewVolume,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -268,7 +268,7 @@ func TestAccComputeV2Instance_blockDeviceNewVolumeTypeAndBus(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_blockDeviceNewVolumeTypeAndBus,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -287,7 +287,7 @@ func TestAccComputeV2Instance_blockDeviceExistingVolume(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_blockDeviceExistingVolume,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -308,7 +308,7 @@ func TestAccComputeV2Instance_personality(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_personality,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -326,7 +326,7 @@ func TestAccComputeV2Instance_multiEphemeral(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_multiEphemeral,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(
@@ -345,7 +345,7 @@ func TestAccComputeV2Instance_accessIPv4(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_accessIPv4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -366,14 +366,14 @@ func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_changeFixedIP_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(
 						"openstack_compute_instance_v2.instance_1", &instance1_1),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_changeFixedIP_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(
@@ -392,7 +392,7 @@ func TestAccComputeV2Instance_stopBeforeDestroy(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_stopBeforeDestroy,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -410,7 +410,7 @@ func TestAccComputeV2Instance_metadataRemove(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_metadataRemove_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -422,7 +422,7 @@ func TestAccComputeV2Instance_metadataRemove(t *testing.T) {
 						"openstack_compute_instance_v2.instance_1", "all_metadata.abc", "def"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_metadataRemove_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -446,7 +446,7 @@ func TestAccComputeV2Instance_forceDelete(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_forceDelete,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -463,7 +463,7 @@ func TestAccComputeV2Instance_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -481,7 +481,7 @@ func TestAccComputeV2Instance_networkNameToID(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_networkNameToID,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -508,7 +508,7 @@ func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_crazyNICs,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -679,7 +679,7 @@ func testAccCheckComputeV2InstanceNoMetadataKey(
 			return nil
 		}
 
-		for key, _ := range instance.Metadata {
+		for key := range instance.Metadata {
 			if k == key {
 				return fmt.Errorf("Metadata found: %s", k)
 			}

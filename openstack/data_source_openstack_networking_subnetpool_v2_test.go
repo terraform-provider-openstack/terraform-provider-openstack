@@ -13,10 +13,10 @@ func TestAccNetworkingV2SubnetPoolDataSourceBasic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
@@ -33,22 +33,22 @@ func TestAccNetworkingV2SubnetPoolDataSourceTestQueries(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceDefaultQuota,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourcePrefixLenghts,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceDescription,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
