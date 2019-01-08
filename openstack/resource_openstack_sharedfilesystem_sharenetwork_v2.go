@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/securityservices"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/sharenetworks"
 )
@@ -73,7 +74,7 @@ func resourceSharedFilesystemShareNetworkV2() *schema.Resource {
 			},
 
 			"segmentation_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
@@ -83,7 +84,7 @@ func resourceSharedFilesystemShareNetworkV2() *schema.Resource {
 			},
 
 			"ip_version": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 		},
@@ -142,18 +143,12 @@ func resourceSharedFilesystemShareNetworkV2Read(d *schema.ResourceData, meta int
 
 	log.Printf("[DEBUG] Retrieved sharenetwork %s: %#v", d.Id(), sharenetwork)
 
-	securityServiceListOpts := securityservices.ListOpts{ShareNetworkID: d.Id()}
-	securityServicePages, err := securityservices.List(sfsClient, securityServiceListOpts).AllPages()
+	securityServiceIDs, err := resourceSharedFilesystemShareNetworkV2GetSvcByShareNetID(sfsClient, d.Id())
 	if err != nil {
-		return fmt.Errorf("Unable to list security services for sharenetwork %s: %s", d.Id(), err)
+		return err
 	}
-	securityServiceList, err := securityservices.ExtractSecurityServices(securityServicePages)
-	if err != nil {
-		return fmt.Errorf("Unable to extract security services for sharenetwork %s: %s", d.Id(), err)
-	}
-	log.Printf("[DEBUG] Retrieved security services for sharenetwork %s: %#v", d.Id(), securityServiceList)
 
-	d.Set("security_service_ids", resourceSharedFilesystemShareNetworkV2SecSvcToArray(&securityServiceList))
+	d.Set("security_service_ids", securityServiceIDs)
 
 	d.Set("name", sharenetwork.Name)
 	d.Set("description", sharenetwork.Description)
@@ -209,19 +204,21 @@ func resourceSharedFilesystemShareNetworkV2Update(d *schema.ResourceData, meta i
 		oldSecurityServiceIDs := oldList.Difference(newList)
 
 		for _, newSecurityServiceID := range newSecurityServiceIDs.List() {
-			log.Printf("[DEBUG] Adding new %s security service to sharenetwork %s", newSecurityServiceID, d.Id())
-			securityServiceOpts := sharenetworks.AddSecurityServiceOpts{SecurityServiceID: newSecurityServiceID.(string)}
+			id := newSecurityServiceID.(string)
+			log.Printf("[DEBUG] Adding new %s security service to sharenetwork %s", id, d.Id())
+			securityServiceOpts := sharenetworks.AddSecurityServiceOpts{SecurityServiceID: id}
 			_, err = sharenetworks.AddSecurityService(sfsClient, d.Id(), securityServiceOpts).Extract()
 			if err != nil {
-				return fmt.Errorf("Error adding new %s security service to sharenetwork: %s", newSecurityServiceID, err)
+				return fmt.Errorf("Error adding new %s security service to sharenetwork: %s", id, err)
 			}
 		}
 		for _, oldSecurityServiceID := range oldSecurityServiceIDs.List() {
-			log.Printf("[DEBUG] Removing old %s security service from sharenetwork %s", oldSecurityServiceID, d.Id())
-			securityServiceOpts := sharenetworks.RemoveSecurityServiceOpts{SecurityServiceID: oldSecurityServiceID.(string)}
+			id := oldSecurityServiceID.(string)
+			log.Printf("[DEBUG] Removing old %s security service from sharenetwork %s", id, d.Id())
+			securityServiceOpts := sharenetworks.RemoveSecurityServiceOpts{SecurityServiceID: id}
 			_, err = sharenetworks.RemoveSecurityService(sfsClient, d.Id(), securityServiceOpts).Extract()
 			if err != nil {
-				return fmt.Errorf("Error removing old %s security service from sharenetwork: %s", oldSecurityServiceID, err)
+				return fmt.Errorf("Error removing old %s security service from sharenetwork: %s", id, err)
 			}
 		}
 	}
@@ -243,6 +240,21 @@ func resourceSharedFilesystemShareNetworkV2Delete(d *schema.ResourceData, meta i
 	}
 
 	return nil
+}
+
+func resourceSharedFilesystemShareNetworkV2GetSvcByShareNetID(sfsClient *gophercloud.ServiceClient, shareNetworkID string) ([]string, error) {
+	securityServiceListOpts := securityservices.ListOpts{ShareNetworkID: shareNetworkID}
+	securityServicePages, err := securityservices.List(sfsClient, securityServiceListOpts).AllPages()
+	if err != nil {
+		return nil, fmt.Errorf("Unable to list security services for sharenetwork %s: %s", shareNetworkID, err)
+	}
+	securityServiceList, err := securityservices.ExtractSecurityServices(securityServicePages)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to extract security services for sharenetwork %s: %s", shareNetworkID, err)
+	}
+	log.Printf("[DEBUG] Retrieved security services for sharenetwork %s: %#v", shareNetworkID, securityServiceList)
+
+	return resourceSharedFilesystemShareNetworkV2SecSvcToArray(&securityServiceList), nil
 }
 
 func resourceSharedFilesystemShareNetworkV2SecSvcToArray(v interface{}) []string {

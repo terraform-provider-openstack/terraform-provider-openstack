@@ -25,7 +25,7 @@ func TestAccSFSV2ShareNetwork_basic(t *testing.T) {
 		CheckDestroy: testAccCheckSFSV2ShareNetworkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2ShareNetworkConfig + testAccSFSV2ShareNetworkConfig_basic,
+				Config: testAccSFSV2ShareNetworkConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork1),
 					resource.TestCheckResourceAttr(
@@ -41,7 +41,7 @@ func TestAccSFSV2ShareNetwork_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareNetworkConfig + testAccSFSV2ShareNetworkConfig_update,
+				Config: testAccSFSV2ShareNetworkConfig_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork2),
 					resource.TestCheckResourceAttr(
@@ -70,7 +70,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 		CheckDestroy: testAccCheckSFSV2ShareNetworkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2ShareNetworkConfig + testAccSFSV2ShareNetworkConfig_secservice_1,
+				Config: testAccSFSV2ShareNetworkConfig_secservice_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
@@ -83,7 +83,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareNetworkConfig + testAccSFSV2ShareNetworkConfig_secservice_2,
+				Config: testAccSFSV2ShareNetworkConfig_secservice_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
@@ -96,7 +96,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareNetworkConfig + testAccSFSV2ShareNetworkConfig_secservice_3,
+				Config: testAccSFSV2ShareNetworkConfig_secservice_3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
@@ -109,7 +109,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareNetworkConfig + testAccSFSV2ShareNetworkConfig_secservice_4,
+				Config: testAccSFSV2ShareNetworkConfig_secservice_4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
@@ -241,9 +241,6 @@ const testAccSFSV2ShareNetworkConfig = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
-  lifecycle {
-    ignore_changes = ["tags"]
-  }
 }
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
@@ -254,22 +251,23 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccSFSV2ShareNetworkConfig_basic = `
+var testAccSFSV2ShareNetworkConfig_basic = fmt.Sprintf(`
+%s
+
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   name                = "test_sharenetwork"
   description         = "share the love"
   neutron_net_id      = "${openstack_networking_network_v2.network_1.id}"
   neutron_subnet_id   = "${openstack_networking_subnet_v2.subnet_1.id}"
 }
-`
+`, testAccSFSV2ShareNetworkConfig)
 
-const testAccSFSV2ShareNetworkConfig_update = `
+var testAccSFSV2ShareNetworkConfig_update = fmt.Sprintf(`
+%s
+
 resource "openstack_networking_network_v2" "network_2" {
   name = "network_2"
   admin_state_up = "true"
-  lifecycle {
-    ignore_changes = ["tags"]
-  }
 }
 
 resource "openstack_networking_subnet_v2" "subnet_2" {
@@ -285,9 +283,9 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   neutron_net_id      = "${openstack_networking_network_v2.network_2.id}"
   neutron_subnet_id   = "${openstack_networking_subnet_v2.subnet_2.id}"
 }
-`
+`, testAccSFSV2ShareNetworkConfig)
 
-const testAccSFSV2ShareNetworkConfig_secservice_1 = `
+const testAccSFSV2ShareNetworkConfig_secservice = `
 resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
   name        = "security"
   description = "created by terraform"
@@ -307,6 +305,12 @@ resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_2" {
   server      = "192.168.199.11"
   dns_ip      = "192.168.199.11"
 }
+`
+
+var testAccSFSV2ShareNetworkConfig_secservice_1 = fmt.Sprintf(`
+%s
+
+%s
 
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   name                = "test_sharenetwork_secure"
@@ -317,28 +321,12 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
     "${openstack_sharedfilesystem_securityservice_v2.securityservice_1.id}",
   ]
 }
-`
+`, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfig_secservice)
 
-const testAccSFSV2ShareNetworkConfig_secservice_2 = `
-resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
-  name        = "security"
-  description = "created by terraform"
-  type        = "active_directory"
-  server      = "192.168.199.10"
-  dns_ip      = "192.168.199.10"
-  domain      = "example.com"
-  ou          = "CN=Computers,DC=example,DC=com"
-  user        = "joinDomainUser"
-  password    = "s8cret"
-}
+var testAccSFSV2ShareNetworkConfig_secservice_2 = fmt.Sprintf(`
+%s
 
-resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_2" {
-  name        = "security_through_obscurity"
-  description = ""
-  type        = "kerberos"
-  server      = "192.168.199.11"
-  dns_ip      = "192.168.199.11"
-}
+%s
 
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   name                = "test_sharenetwork_secure"
@@ -350,28 +338,12 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
     "${openstack_sharedfilesystem_securityservice_v2.securityservice_2.id}",
   ]
 }
-`
+`, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfig_secservice)
 
-const testAccSFSV2ShareNetworkConfig_secservice_3 = `
-resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
-  name        = "security"
-  description = "created by terraform"
-  type        = "active_directory"
-  server      = "192.168.199.10"
-  dns_ip      = "192.168.199.10"
-  domain      = "example.com"
-  ou          = "CN=Computers,DC=example,DC=com"
-  user        = "joinDomainUser"
-  password    = "s8cret"
-}
+var testAccSFSV2ShareNetworkConfig_secservice_3 = fmt.Sprintf(`
+%s
 
-resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_2" {
-  name        = "security_through_obscurity"
-  description = ""
-  type        = "kerberos"
-  server      = "192.168.199.11"
-  dns_ip      = "192.168.199.11"
-}
+%s
 
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   name                = "test_sharenetwork_secure"
@@ -382,27 +354,12 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
     "${openstack_sharedfilesystem_securityservice_v2.securityservice_2.id}",
   ]
 }
-`
+`, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfig_secservice)
 
-const testAccSFSV2ShareNetworkConfig_secservice_4 = `
-resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
-  name        = "security"
-  description = "created by terraform"
-  type        = "active_directory"
-  server      = "192.168.199.10"
-  dns_ip      = "192.168.199.10"
-  domain      = "example.com"
-  ou          = "CN=Computers,DC=example,DC=com"
-  user        = "joinDomainUser"
-  password    = "s8cret"
-}
+var testAccSFSV2ShareNetworkConfig_secservice_4 = fmt.Sprintf(`
+%s
 
-resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_2" {
-  name        = "security_through_obscurity"
-  type        = "kerberos"
-  server      = "192.168.199.11"
-  dns_ip      = "192.168.199.11"
-}
+%s
 
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   name                = "test_sharenetwork"
@@ -410,4 +367,4 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   neutron_net_id      = "${openstack_networking_network_v2.network_1.id}"
   neutron_subnet_id   = "${openstack_networking_subnet_v2.subnet_1.id}"
 }
-`
+`, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfig_secservice)
