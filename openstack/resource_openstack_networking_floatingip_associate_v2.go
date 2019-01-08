@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
@@ -52,24 +51,23 @@ func resourceNetworkingFloatingIPAssociateV2Create(d *schema.ResourceData, meta 
 	floatingIP := d.Get("floating_ip").(string)
 	portID := d.Get("port_id").(string)
 
-	floatingIPID, err := resourceNetworkingFloatingIPAssociateV2IP2ID(networkingClient, floatingIP)
+	fipID, err := networkingFloatingIPV2ID(networkingClient, floatingIP)
 	if err != nil {
-		return fmt.Errorf("Unable to get ID of floating IP: %s", err)
+		return fmt.Errorf("Unable to get ID of openstack_networking_floatingip_v2: %s", err)
 	}
 
 	updateOpts := floatingips.UpdateOpts{
 		PortID: &portID,
 	}
 
-	log.Printf("[DEBUG] Floating IP Associate Create Options: %#v", updateOpts)
-
-	_, err = floatingips.Update(networkingClient, floatingIPID, updateOpts).Extract()
+	log.Printf("[DEBUG] openstack_networking_floatingip_associate_v2 create options: %#v", updateOpts)
+	_, err = floatingips.Update(networkingClient, fipID, updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error associating floating IP %s to port %s: %s",
-			floatingIPID, portID, err)
+		return fmt.Errorf("Error associating openstack_networking_floatingip_v2 %s to openstack_networking_port_v2 %s: %s",
+			fipID, portID, err)
 	}
 
-	d.SetId(floatingIPID)
+	d.SetId(fipID)
 
 	return resourceNetworkFloatingIPV2Read(d, meta)
 }
@@ -81,13 +79,13 @@ func resourceNetworkingFloatingIPAssociateV2Read(d *schema.ResourceData, meta in
 		return fmt.Errorf("Error creating OpenStack network client: %s", err)
 	}
 
-	floatingIP, err := floatingips.Get(networkingClient, d.Id()).Extract()
+	fip, err := floatingips.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "floating IP")
+		return CheckDeleted(d, err, "Error getting openstack_networking_floatingip_v2")
 	}
 
-	d.Set("floating_ip", floatingIP.FloatingIP)
-	d.Set("port_id", floatingIP.PortID)
+	d.Set("floating_ip", fip.FloatingIP)
+	d.Set("port_id", fip.PortID)
 	d.Set("region", GetRegion(d, config))
 
 	return nil
@@ -105,35 +103,12 @@ func resourceNetworkingFloatingIPAssociateV2Delete(d *schema.ResourceData, meta 
 		PortID: nil,
 	}
 
-	log.Printf("[DEBUG] Floating IP Delete Options: %#v", updateOpts)
-
+	log.Printf("[DEBUG] openstack_networking_floatingip_v2 disassociating options: %#v", updateOpts)
 	_, err = floatingips.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error disassociating floating IP %s from port %s: %s",
+		return fmt.Errorf("Error disassociating openstack_networking_floatingip_v2 %s from openstack_networking_port_v2 %s: %s",
 			d.Id(), portID, err)
 	}
 
 	return nil
-}
-
-func resourceNetworkingFloatingIPAssociateV2IP2ID(client *gophercloud.ServiceClient, floatingIP string) (string, error) {
-	listOpts := floatingips.ListOpts{
-		FloatingIP: floatingIP,
-	}
-
-	allPages, err := floatingips.List(client, listOpts).AllPages()
-	if err != nil {
-		return "", err
-	}
-
-	allFloatingIPs, err := floatingips.ExtractFloatingIPs(allPages)
-	if err != nil {
-		return "", err
-	}
-
-	if len(allFloatingIPs) != 1 {
-		return "", fmt.Errorf("unable to determine the ID of %s", floatingIP)
-	}
-
-	return allFloatingIPs[0].ID, nil
 }

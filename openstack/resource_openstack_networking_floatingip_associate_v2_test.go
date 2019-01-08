@@ -38,7 +38,7 @@ func testAccCheckNetworkingV2FloatingIPAssociateDestroy(s *terraform.State) erro
 	config := testAccProvider.Meta().(*Config)
 	networkClient, err := config.networkingV2Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack floating IP: %s", err)
+		return fmt.Errorf("Error creating OpenStack network client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -52,11 +52,11 @@ func testAccCheckNetworkingV2FloatingIPAssociateDestroy(s *terraform.State) erro
 				return nil
 			}
 
-			return fmt.Errorf("Error retrieving floating IP: %s", err)
+			return fmt.Errorf("Error retrieving Floating IP: %s", err)
 		}
 
 		if fip.PortID != "" {
-			return fmt.Errorf("floating IP is still associated")
+			return fmt.Errorf("Floating IP is still associated")
 		}
 	}
 
@@ -86,7 +86,7 @@ func testAccCheckNetworkingV2FloatingIPAssociateExists(n string, fip *floatingip
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("FloatingIP not found")
+			return fmt.Errorf("Floating IP not found")
 		}
 
 		*fip = *found
