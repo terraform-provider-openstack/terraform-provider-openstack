@@ -18,3 +18,12 @@ func TestExpandToMapStringString(t *testing.T) {
 	actual := expandToMapStringString(metadata)
 	assert.Equal(t, expected, actual)
 }
+
+func TestExpandToStringSlice(t *testing.T) {
+	data := []interface{}{"foo", "bar"}
+
+	expected := []string{"foo", "bar"}
+
+	actual := expandToStringSlice(data)
+	assert.Equal(t, expected, actual)
+}
