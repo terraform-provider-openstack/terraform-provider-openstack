@@ -5,6 +5,7 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/hashicorp/terraform/helper/resource"
 )
 
 // networkingFloatingIPV2ID retrieves floating IP ID by the provided IP address.
@@ -31,4 +32,19 @@ func networkingFloatingIPV2ID(client *gophercloud.ServiceClient, floatingIP stri
 	}
 
 	return allFloatingIPs[0].ID, nil
+}
+
+func networkingFloatingIPV2StateRefreshFunc(client *gophercloud.ServiceClient, fipID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		fip, err := floatingips.Get(client, fipID).Extract()
+		if err != nil {
+			if _, ok := err.(gophercloud.ErrDefault404); ok {
+				return fip, "DELETED", nil
+			}
+
+			return nil, "", err
+		}
+
+		return fip, fip.Status, nil
+	}
 }
