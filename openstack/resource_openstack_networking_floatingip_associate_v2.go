@@ -69,7 +69,9 @@ func resourceNetworkingFloatingIPAssociateV2Create(d *schema.ResourceData, meta 
 
 	d.SetId(fipID)
 
-	return resourceNetworkFloatingIPV2Read(d, meta)
+	log.Printf("[DEBUG] Created association between openstack_networking_floatingip_v2 %s and openstack_networking_port_v2 %s",
+		fipID, portID)
+	return resourceNetworkingFloatingIPAssociateV2Read(d, meta)
 }
 
 func resourceNetworkingFloatingIPAssociateV2Read(d *schema.ResourceData, meta interface{}) error {
@@ -83,6 +85,8 @@ func resourceNetworkingFloatingIPAssociateV2Read(d *schema.ResourceData, meta in
 	if err != nil {
 		return CheckDeleted(d, err, "Error getting openstack_networking_floatingip_v2")
 	}
+
+	log.Printf("[DEBUG] Retrieved openstack_networking_floatingip_v2 %s: %#v", d.Id(), fip)
 
 	d.Set("floating_ip", fip.FloatingIP)
 	d.Set("port_id", fip.PortID)
