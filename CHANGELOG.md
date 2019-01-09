@@ -27,6 +27,7 @@ IMPROVEMENTS
 * Added `transparent_vlan` to `openstack_networking_network_v2` [GH-513]
 * Added `transparent_vlan` to `openstack_networking_network_v2` data source [GH-538]
 * Added `max_retries` to the provider options [GH-413]
+* Added the ability to override catalog endpoints [GH-501]
 
 BUG FIXES
 
