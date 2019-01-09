@@ -74,11 +74,11 @@ The following arguments are supported:
 * `description` - (Optional) Human-readable description of the network. Changing this
     updates the name of the existing network.
 
-* `shared` - (Optional)  Specifies whether the network resource can be accessed
-    by any tenant or not. Changing this updates the sharing capabalities of the
+* `shared` - (Optional) Specifies whether the network resource can be accessed
+    by any tenant or not. Changing this updates the sharing capabilities of the
     existing network.
 
-* `external` - (Optional)  Specifies whether the network resource has the
+* `external` - (Optional) Specifies whether the network resource has the
     external routing facility. Valid values are true and false. Defaults to
     false. Changing this updates the external attribute of the existing network.
 
@@ -107,7 +107,7 @@ The following arguments are supported:
 
 The `segments` block supports:
 
-* `physical_network` - The phisical network where this network is implemented.
+* `physical_network` - The physical network where this network is implemented.
 * `segmentation_id` - An isolated segment on the physical network.
 * `network_type` - The type of physical network.
 
