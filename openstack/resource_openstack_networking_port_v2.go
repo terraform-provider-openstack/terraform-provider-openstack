@@ -175,7 +175,7 @@ func resourceNetworkingPortV2() *schema.Resource {
 			},
 
 			"all_fixed_ips": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
