@@ -128,29 +128,30 @@ func dataSourceSharedFilesystemShareNetworkV2Read(d *schema.ResourceData, meta i
 			"Please change your search criteria and try again.")
 	}
 
-	securityServiceID := ""
-	securityServiceIDs := []string{}
+	var securityServiceID string
+	var securityServiceIDs []string
 	if v, ok := d.GetOkExists("security_service_id"); ok {
 		// filtering by "security_service_id"
 		securityServiceID = v.(string)
-		var filteredShareNetwork []sharenetworks.ShareNetwork
+		var filteredShareNetworks []sharenetworks.ShareNetwork
 
 		log.Printf("[DEBUG] Filtering share networks by a %s security service ID", securityServiceID)
 		for _, shareNetwork := range allShareNetworks {
-			securityServiceIDs, err = resourceSharedFilesystemShareNetworkV2GetSvcByShareNetID(sfsClient, shareNetwork.ID)
+			tmp, err := resourceSharedFilesystemShareNetworkV2GetSvcByShareNetID(sfsClient, shareNetwork.ID)
 			if err != nil {
 				return err
 			}
-			if strSliceContains(securityServiceIDs, securityServiceID) {
-				filteredShareNetwork = append(filteredShareNetwork, shareNetwork)
+			if strSliceContains(tmp, securityServiceID) {
+				filteredShareNetworks = append(filteredShareNetworks, shareNetwork)
+				securityServiceIDs = tmp
 			}
 		}
 
-		if len(filteredShareNetwork) == 0 {
+		if len(filteredShareNetworks) == 0 {
 			return fmt.Errorf("Your query returned no results after the security service ID filter. " +
 				"Please change your search criteria and try again.")
 		}
-		allShareNetworks = filteredShareNetwork
+		allShareNetworks = filteredShareNetworks
 	}
 
 	var shareNetwork sharenetworks.ShareNetwork
