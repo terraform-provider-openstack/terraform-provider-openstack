@@ -52,14 +52,14 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 			},
 
 			"admin_state_up": {
-				Type:     schema.TypeBool,
+				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
 
 			"shared": {
-				Type:     schema.TypeBool,
+				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
@@ -155,6 +155,24 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 			AvailabilityZoneHints: expandToStringSlice(azHints.List()),
 		},
 		MapValueSpecs(d),
+	}
+
+	asuRaw := d.Get("admin_state_up").(string)
+	if asuRaw != "" {
+		asu, err := strconv.ParseBool(asuRaw)
+		if err != nil {
+			return fmt.Errorf("admin_state_up, if provided, must be either 'true' or 'false'")
+		}
+		createOpts.AdminStateUp = &asu
+	}
+
+	sharedRaw := d.Get("shared").(string)
+	if sharedRaw != "" {
+		shared, err := strconv.ParseBool(sharedRaw)
+		if err != nil {
+			return fmt.Errorf("shared, if provided, must be either 'true' or 'false': %v", err)
+		}
+		createOpts.Shared = &shared
 	}
 
 	segments := expandNetworkingNetworkSegmentsV2(d.Get("segments").(*schema.Set))
@@ -284,12 +302,24 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 		updateOpts.Description = &description
 	}
 	if d.HasChange("admin_state_up") {
-		adminStateUp := d.Get("admin_state_up").(bool)
-		updateOpts.AdminStateUp = &adminStateUp
+		asuRaw := d.Get("admin_state_up").(string)
+		if asuRaw != "" {
+			asu, err := strconv.ParseBool(asuRaw)
+			if err != nil {
+				return fmt.Errorf("admin_state_up, if provided, must be either 'true' or 'false'")
+			}
+			updateOpts.AdminStateUp = &asu
+		}
 	}
 	if d.HasChange("shared") {
-		shared := d.Get("shared").(bool)
-		updateOpts.Shared = &shared
+		sharedRaw := d.Get("shared").(string)
+		if sharedRaw != "" {
+			shared, err := strconv.ParseBool(sharedRaw)
+			if err != nil {
+				return fmt.Errorf("shared, if provided, must be either 'true' or 'false': %v", err)
+			}
+			updateOpts.Shared = &shared
+		}
 	}
 
 	// Change tags if needed.
