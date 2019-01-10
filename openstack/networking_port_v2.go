@@ -4,8 +4,24 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
+
+func resourceNetworkingPortV2StateRefreshFunc(client *gophercloud.ServiceClient, portID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		n, err := ports.Get(client, portID).Extract()
+		if err != nil {
+			if _, ok := err.(gophercloud.ErrDefault404); ok {
+				return n, "DELETED", nil
+			}
+
+			return n, "", err
+		}
+
+		return n, n.Status, nil
+	}
+}
 
 func expandNetworkingPortDHCPOptsV2Create(dhcpOpts *schema.Set) []extradhcpopts.CreateExtraDHCPOpt {
 	rawDHCPOpts := dhcpOpts.List()
@@ -112,4 +128,32 @@ func flattenNetworkingPortAllowedAddressPairsV2(mac string, allowedAddressPairs 
 	}
 
 	return pairs
+}
+
+func expandNetworkingPortFixedIpsV2(d *schema.ResourceData) interface{} {
+	// If no_fixed_ip was specified, then just return an empty array.
+	// Since no_fixed_ip is mutually exclusive to fixed_ip,
+	// we can safely do this.
+	//
+	// Since we're only concerned about no_fixed_ip being set to "true",
+	// GetOk is used.
+	if _, ok := d.GetOk("no_fixed_ip"); ok {
+		return []interface{}{}
+	}
+
+	rawIP := d.Get("fixed_ip").(*schema.Set).List()
+
+	if len(rawIP) == 0 {
+		return nil
+	}
+
+	ip := make([]ports.IP, len(rawIP))
+	for i, raw := range rawIP {
+		rawMap := raw.(map[string]interface{})
+		ip[i] = ports.IP{
+			SubnetID:  rawMap["subnet_id"].(string),
+			IPAddress: rawMap["ip_address"].(string),
+		}
+	}
+	return ip
 }
