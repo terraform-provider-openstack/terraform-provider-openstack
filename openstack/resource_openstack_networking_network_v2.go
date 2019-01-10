@@ -217,7 +217,7 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"BUILD"},
-		Target:     []string{"ACTIVE"},
+		Target:     []string{"ACTIVE", "DOWN"},
 		Refresh:    resourceNetworkingNetworkV2StateRefreshFunc(networkingClient, n.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
