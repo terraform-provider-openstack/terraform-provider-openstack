@@ -12,6 +12,7 @@ FEATURES
 * __New Resource__: `openstack_sharedfilesystem_share_access_v2` [GH-526]
 * __New Data Source__: `openstack_sharedfilesystem_share_v2` [GH-564]
 * __New Data Source__: `openstack_networking_port_v2` [GH-567]
+* __New Data Source__: `openstack_sharedfilesystem_sharenetwork_v2` [GH-576]
 
 IMPROVEMENTS
 
