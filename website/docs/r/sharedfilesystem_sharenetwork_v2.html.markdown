@@ -85,7 +85,7 @@ The following arguments are supported:
     `region` argument of the provider is used. Changing this creates a new
     share network.
 
-* `name` - (Optional) The name of the share network. Changing this updates the name
+* `name` - (Optional) The name for the share network. Changing this updates the name
     of the existing share network.
 
 * `description` - (Optional) The human-readable description for the share network.
