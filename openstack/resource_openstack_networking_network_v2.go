@@ -241,6 +241,7 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_network_v2 %s", tags, n.ID)
 	}
 
+	log.Printf("[DEBUG] Created openstack_networking_network_v2 %s: %#v", n.ID, n)
 	return resourceNetworkingNetworkV2Read(d, meta)
 }
 
