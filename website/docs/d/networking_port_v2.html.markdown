@@ -26,9 +26,9 @@ data "openstack_networking_port_v2" "port_1" {
 
 * `project_id` - (Optional) The owner of the port.
 
-* `port_id` - (Options) The ID of the port.
+* `port_id` - (Optional) The ID of the port. Conflicts with the `name`.
 
-* `name` - (Optional) The name of the port.
+* `name` - (Optional) The name of the port. Conflicts with the `port_id`.
 
 * `description` - (Optional) Human-readable description of the port.
 
