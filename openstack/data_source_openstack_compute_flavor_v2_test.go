@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
+
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
@@ -148,6 +150,41 @@ func TestAccComputeV2FlavorDataSource_extraSpecs(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2FlavorDataSource_flavorID(t *testing.T) {
+	var flavor flavors.Flavor
+	var flavorName = acctest.RandomWithPrefix("tf-acc-flavor")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2Flavor_extraSpecs_1(flavorName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2FlavorExists("openstack_compute_flavor_v2.flavor_1", &flavor),
+				),
+			},
+			{
+				Config: testAccComputeV2FlavorDataSource_flavorID(flavorName, &flavor),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_compute_flavor_v2.flavor_1", "name", flavorName),
+					resource.TestCheckResourceAttr(
+						"data.openstack_compute_flavor_v2.flavor_1", "extra_specs.%", "2"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_compute_flavor_v2.flavor_1", "extra_specs.hw:cpu_policy", "CPU-POLICY"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_compute_flavor_v2.flavor_1", "extra_specs.hw:cpu_thread_policy", "CPU-THREAD-POLICY"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckComputeV2FlavorDataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -206,4 +243,16 @@ func testAccComputeV2FlavorDataSource_extraSpecs(flavorName string) string {
             name = "${openstack_compute_flavor_v2.flavor_1.name}"
           }
           `, flavorResource)
+}
+
+func testAccComputeV2FlavorDataSource_flavorID(flavorName string, flavor *flavors.Flavor) string {
+	flavorResource := testAccComputeV2Flavor_extraSpecs_1(flavorName)
+
+	return fmt.Sprintf(`
+          %s
+
+          data "openstack_compute_flavor_v2" "flavor_1" {
+            flavor_id = "%s"
+          }
+          `, flavorResource, flavor.ID)
 }

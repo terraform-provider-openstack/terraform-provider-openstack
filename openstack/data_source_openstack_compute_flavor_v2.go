@@ -22,10 +22,18 @@ func dataSourceComputeFlavorV2() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"flavor_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"name"},
+			},
+
 			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"flavor_id"},
 			},
 
 			"min_ram": {
@@ -92,6 +100,15 @@ func dataSourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
+	var flavor *flavors.Flavor
+	if v := d.Get("flavor_id").(string); v != "" {
+		flavor, err = flavors.Get(computeClient, v).Extract()
+		if err != nil {
+			msg := fmt.Sprintf("Error retrieving openstack_compute_flavor_v2 %s", v)
+			return CheckDeleted(d, err, msg)
+		}
+	}
+
 	listOpts := flavors.ListOpts{
 		MinDisk:    d.Get("min_disk").(int),
 		MinRAM:     d.Get("min_ram").(int),
@@ -100,78 +117,79 @@ func dataSourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) err
 
 	log.Printf("[DEBUG] openstack_compute_flavor_v2 ListOpts: %#v", listOpts)
 
-	var flavor flavors.Flavor
-	allPages, err := flavors.ListDetail(computeClient, listOpts).AllPages()
-	if err != nil {
-		return fmt.Errorf("Unable to query OpenStack flavors: %s", err)
-	}
-
-	allFlavors, err := flavors.ExtractFlavors(allPages)
-	if err != nil {
-		return fmt.Errorf("Unable to retrieve OpenStack flavors: %s", err)
-	}
-
-	// Loop through all flavors to find a more specific one.
-	if len(allFlavors) > 1 {
-		var filteredFlavors []flavors.Flavor
-		for _, flavor := range allFlavors {
-			if v := d.Get("name").(string); v != "" {
-				if flavor.Name != v {
-					continue
-				}
-			}
-
-			// d.GetOk is used because 0 might be a valid choice.
-			if v, ok := d.GetOk("ram"); ok {
-				if flavor.RAM != v.(int) {
-					continue
-				}
-			}
-
-			if v, ok := d.GetOk("vcpus"); ok {
-				if flavor.VCPUs != v.(int) {
-					continue
-				}
-			}
-
-			if v, ok := d.GetOk("disk"); ok {
-				if flavor.Disk != v.(int) {
-					continue
-				}
-			}
-
-			if v, ok := d.GetOk("swap"); ok {
-				if flavor.Swap != v.(int) {
-					continue
-				}
-			}
-
-			if v, ok := d.GetOk("rx_tx_factor"); ok {
-				if flavor.RxTxFactor != v.(float64) {
-					continue
-				}
-			}
-
-			filteredFlavors = append(filteredFlavors, flavor)
+	if flavor == nil {
+		allPages, err := flavors.ListDetail(computeClient, listOpts).AllPages()
+		if err != nil {
+			return fmt.Errorf("Unable to query OpenStack flavors: %s", err)
 		}
 
-		allFlavors = filteredFlavors
+		allFlavors, err := flavors.ExtractFlavors(allPages)
+		if err != nil {
+			return fmt.Errorf("Unable to retrieve OpenStack flavors: %s", err)
+		}
+
+		// Loop through all flavors to find a more specific one.
+		if len(allFlavors) > 1 {
+			var filteredFlavors []flavors.Flavor
+			for _, flavor := range allFlavors {
+				if v := d.Get("name").(string); v != "" {
+					if flavor.Name != v {
+						continue
+					}
+				}
+
+				// d.GetOk is used because 0 might be a valid choice.
+				if v, ok := d.GetOk("ram"); ok {
+					if flavor.RAM != v.(int) {
+						continue
+					}
+				}
+
+				if v, ok := d.GetOk("vcpus"); ok {
+					if flavor.VCPUs != v.(int) {
+						continue
+					}
+				}
+
+				if v, ok := d.GetOk("disk"); ok {
+					if flavor.Disk != v.(int) {
+						continue
+					}
+				}
+
+				if v, ok := d.GetOk("swap"); ok {
+					if flavor.Swap != v.(int) {
+						continue
+					}
+				}
+
+				if v, ok := d.GetOk("rx_tx_factor"); ok {
+					if flavor.RxTxFactor != v.(float64) {
+						continue
+					}
+				}
+
+				filteredFlavors = append(filteredFlavors, flavor)
+			}
+
+			allFlavors = filteredFlavors
+		}
+
+		if len(allFlavors) < 1 {
+			return fmt.Errorf("Your query returned no results. " +
+				"Please change your search criteria and try again.")
+		}
+
+		if len(allFlavors) > 1 {
+			log.Printf("[DEBUG] Multiple results found: %#v", allFlavors)
+			return fmt.Errorf("Your query returned more than one result. " +
+				"Please try a more specific search criteria")
+		}
+
+		flavor = &allFlavors[0]
 	}
 
-	if len(allFlavors) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
-			"Please change your search criteria and try again.")
-	}
-
-	if len(allFlavors) > 1 {
-		log.Printf("[DEBUG] Multiple results found: %#v", allFlavors)
-		return fmt.Errorf("Your query returned more than one result. " +
-			"Please try a more specific search criteria")
-	}
-
-	flavor = allFlavors[0]
-
-	return dataSourceComputeFlavorV2Attributes(d, computeClient, &flavor)
+	return dataSourceComputeFlavorV2Attributes(d, computeClient, flavor)
 }
 
 // dataSourceComputeFlavorV2Attributes populates the fields of a Flavor resource.
@@ -182,6 +200,7 @@ func dataSourceComputeFlavorV2Attributes(
 
 	d.SetId(flavor.ID)
 	d.Set("name", flavor.Name)
+	d.Set("flavor_id", flavor.ID)
 	d.Set("disk", flavor.Disk)
 	d.Set("ram", flavor.RAM)
 	d.Set("rx_tx_factor", flavor.RxTxFactor)
