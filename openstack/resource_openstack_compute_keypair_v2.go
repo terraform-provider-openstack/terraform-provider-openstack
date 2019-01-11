@@ -120,7 +120,7 @@ func resourceComputeKeypairV2Delete(d *schema.ResourceData, meta interface{}) er
 
 	err = keypairs.Delete(computeClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting openstack_compute_keypair_v2 %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Error deleting openstack_compute_keypair_v2")
 	}
 
 	return nil

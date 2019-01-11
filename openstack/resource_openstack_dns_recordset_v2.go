@@ -225,7 +225,7 @@ func resourceDNSRecordSetV2Delete(d *schema.ResourceData, meta interface{}) erro
 
 	err = recordsets.Delete(dnsClient, zoneID, recordsetID).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting openstack_dns_recordset_v2 %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Error deleting openstack_dns_recordset_v2")
 	}
 
 	stateConf := &resource.StateChangeConf{

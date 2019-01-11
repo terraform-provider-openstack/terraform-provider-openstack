@@ -218,7 +218,7 @@ func resourceDNSZoneV2Delete(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = zones.Delete(dnsClient, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Error deleting openstack_dns_zone_v2 %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Error deleting openstack_dns_zone_v2")
 	}
 
 	stateConf := &resource.StateChangeConf{
