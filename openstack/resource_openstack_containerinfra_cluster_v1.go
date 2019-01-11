@@ -269,7 +269,8 @@ func resourceContainerInfraClusterV1Read(d *schema.ResourceData, meta interface{
 
 	s, err := clusters.Get(containerInfraClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_containerinfra_cluster_v1")
+		msg := fmt.Sprintf("Error retrieving openstack_containerinfra_cluster_v1 %s", d.Id())
+		return CheckDeleted(d, err, msg)
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_containerinfra_cluster_v1 %s: %#v", d.Id(), s)
@@ -357,7 +358,8 @@ func resourceContainerInfraClusterV1Delete(d *schema.ResourceData, meta interfac
 	}
 
 	if err := clusters.Delete(containerInfraClient, d.Id()).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_containerinfra_cluster_v1")
+		msg := fmt.Sprintf("Error deleting openstack_containerinfra_cluster_v1 %s", d.Id())
+		return CheckDeleted(d, err, msg)
 	}
 
 	stateConf := &resource.StateChangeConf{

@@ -310,7 +310,8 @@ func resourceContainerInfraClusterTemplateV1Read(d *schema.ResourceData, meta in
 
 	s, err := clustertemplates.Get(containerInfraClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_containerinfra_clustertemplate_v1")
+		msg := fmt.Sprintf("Error retrieving openstack_containerinfra_clustertemplate_v1 %s", d.Id())
+		return CheckDeleted(d, err, msg)
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_containerinfra_clustertemplate_v1 %s: %#v", d.Id(), s)
@@ -538,7 +539,8 @@ func resourceContainerInfraClusterTemplateV1Delete(d *schema.ResourceData, meta 
 	}
 
 	if err := clustertemplates.Delete(containerInfraClient, d.Id()).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_containerinfra_clustertemplate_v1")
+		msg := fmt.Sprintf("Error deleting openstack_containerinfra_clustertemplate_v1 %s", d.Id())
+		return CheckDeleted(d, err, msg)
 	}
 
 	return nil

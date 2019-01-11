@@ -137,7 +137,8 @@ func resourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) error
 
 	fl, err := flavors.Get(computeClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_compute_flavor_v2")
+		msg := fmt.Sprintf("Error retrieving openstack_compute_flavor_v2 %s", d.Id())
+		return CheckDeleted(d, err, msg)
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_flavor_v2 %s: %#v", d.Id(), fl)
@@ -205,7 +206,8 @@ func resourceComputeFlavorV2Delete(d *schema.ResourceData, meta interface{}) err
 
 	err = flavors.Delete(computeClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting openstack_compute_flavor_v2 %s: %s", d.Id(), err)
+		msg := fmt.Sprintf("Error deleting openstack_compute_flavor_v2 %s", d.Id())
+		return CheckDeleted(d, err, msg)
 	}
 
 	return nil

@@ -199,7 +199,8 @@ func resourceBlockStorageVolumeV3Read(d *schema.ResourceData, meta interface{}) 
 
 	v, err := volumes.Get(blockStorageClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_blockstorage_volume_v3")
+		msg := fmt.Sprintf("Error retrieving openstack_blockstorage_volume_v3 %s", d.Id())
+		return CheckDeleted(d, err, msg)
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_blockstorage_volume_v3 %s: %#v", d.Id(), v)
@@ -304,7 +305,8 @@ func resourceBlockStorageVolumeV3Delete(d *schema.ResourceData, meta interface{}
 
 	v, err := volumes.Get(blockStorageClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_blockstorage_volume_v3")
+		msg := fmt.Sprintf("Error retrieving openstack_blockstorage_volume_v3 %s", d.Id())
+		return CheckDeleted(d, err, msg)
 	}
 
 	// make sure this volume is detached from all instances before deleting
@@ -346,7 +348,8 @@ func resourceBlockStorageVolumeV3Delete(d *schema.ResourceData, meta interface{}
 	// If this is true, just move on. It'll eventually delete.
 	if v.Status != "deleting" {
 		if err := volumes.Delete(blockStorageClient, d.Id(), nil).ExtractErr(); err != nil {
-			return CheckDeleted(d, err, "Error deleting openstack_blockstorage_volume_v3")
+			msg := fmt.Sprintf("Error deleting openstack_blockstorage_volume_v3 %s", d.Id())
+			return CheckDeleted(d, err, msg)
 		}
 	}
 

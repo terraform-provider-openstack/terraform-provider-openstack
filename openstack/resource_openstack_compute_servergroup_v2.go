@@ -94,7 +94,8 @@ func resourceComputeServerGroupV2Read(d *schema.ResourceData, meta interface{}) 
 
 	sg, err := servergroups.Get(computeClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_compute_servergroup_v2")
+		msg := fmt.Sprintf("Error retrieving openstack_compute_servergroup_v2 %s", d.Id())
+		return CheckDeleted(d, err, msg)
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_servergroup_v2 %s: %#v", d.Id(), sg)
@@ -116,7 +117,8 @@ func resourceComputeServerGroupV2Delete(d *schema.ResourceData, meta interface{}
 	}
 
 	if err := servergroups.Delete(computeClient, d.Id()).ExtractErr(); err != nil {
-		return fmt.Errorf("Error deleting openstack_compute_servergroup_v2: %s", err)
+		msg := fmt.Sprintf("Error deleting openstack_compute_servergroup_v2 %s", d.Id())
+		return CheckDeleted(d, err, msg)
 	}
 
 	return nil

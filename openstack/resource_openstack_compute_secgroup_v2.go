@@ -153,7 +153,8 @@ func resourceComputeSecGroupV2Read(d *schema.ResourceData, meta interface{}) err
 
 	sg, err := secgroups.Get(computeClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_compute_secgroup_v2")
+		msg := fmt.Sprintf("Error retrieving openstack_compute_secgroup_v2 %s", d.Id())
+		return CheckDeleted(d, err, msg)
 	}
 
 	d.Set("name", sg.Name)
@@ -222,7 +223,7 @@ func resourceComputeSecGroupV2Update(d *schema.ResourceData, meta interface{}) e
 					continue
 				}
 
-				return fmt.Errorf("Error removing rule %s from openstack_compute_secgroup_v2 %s", rule.ID, d.Id())
+				return fmt.Errorf("Error removing rule %s from openstack_compute_secgroup_v2 %s: %s", rule.ID, d.Id(), err)
 			}
 		}
 	}
@@ -248,7 +249,8 @@ func resourceComputeSecGroupV2Delete(d *schema.ResourceData, meta interface{}) e
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting openstack_compute_secgroup_v2: %s", err)
+		msg := fmt.Sprintf("Error deleting openstack_compute_secgroup_v2 %s", d.Id())
+		return CheckDeleted(d, err, msg)
 	}
 
 	return nil
