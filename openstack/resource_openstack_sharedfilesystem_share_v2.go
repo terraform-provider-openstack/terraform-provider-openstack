@@ -417,7 +417,7 @@ func resourceSharedFilesystemShareV2Delete(d *schema.ResourceData, meta interfac
 	}
 
 	// Wait for share to become deleted before continuing
-	pending := []string{"deleting", "available"}
+	pending := []string{"", "deleting", "available"}
 	err = waitForSFV2Share(sfsClient, d.Id(), "deleted", pending, timeout)
 	if err != nil {
 		return err
