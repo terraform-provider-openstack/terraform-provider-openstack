@@ -188,7 +188,7 @@ func resourceSharedFilesystemShareAccessV2Delete(d *schema.ResourceData, meta in
 	}
 
 	// Wait for access to become deleted before continuing
-	pending := []string{"new", "queued_to_deny", "denying"}
+	pending := []string{"active", "new", "queued_to_deny", "denying"}
 	err = waitForSFV2Access(sfsClient, shareID, d.Id(), "denied", pending, timeout)
 	if err != nil {
 		return fmt.Errorf("Error waiting for OpenStack share ACL on %s to be removed: %s", shareID, err)
