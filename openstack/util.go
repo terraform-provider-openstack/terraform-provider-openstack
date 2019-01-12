@@ -239,15 +239,3 @@ func strSliceContains(haystack []string, needle string) bool {
 	}
 	return false
 }
-
-// boolPtrArgument retrieves specified argument from the provided ResourceData
-// and returns pointer to boolean which contains "true" if argument is set.
-func boolPtrArgument(argument string, d *schema.ResourceData) *bool {
-	value := false
-
-	if raw, ok := d.GetOk(argument); ok && raw == true {
-		value = true
-	}
-
-	return &value
-}
