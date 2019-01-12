@@ -141,8 +141,6 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	adminStateUp := d.Get("admin_state_up").(bool)
-	shared := d.Get("shared").(bool)
 	azHints := d.Get("availability_zone_hints").(*schema.Set)
 
 	createOpts := NetworkCreateOpts{
@@ -150,8 +148,6 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 			Name:                  d.Get("name").(string),
 			Description:           d.Get("description").(string),
 			TenantID:              d.Get("tenant_id").(string),
-			AdminStateUp:          &adminStateUp,
-			Shared:                &shared,
 			AvailabilityZoneHints: expandToStringSlice(azHints.List()),
 		},
 		MapValueSpecs(d),

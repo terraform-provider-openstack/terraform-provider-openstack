@@ -25,48 +25,59 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+
 			"network_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"matching_subnet_cidr": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"tenant_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions["tenant_id"],
 			},
+
 			"admin_state_up": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"shared": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"external": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+
 			"availability_zone_hints": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+
 			"transparent_vlan": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -138,7 +149,7 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	var allNetworks []networkWithExternalExt
 	err = networks.ExtractNetworksInto(pages, &allNetworks)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve networks: %s", err)
+		return fmt.Errorf("Unable to retrieve openstack_networking_networks_v2: %s", err)
 	}
 
 	var refinedNetworks []networkWithExternalExt
@@ -150,7 +161,7 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 					if _, ok := err.(gophercloud.ErrDefault404); ok {
 						continue
 					}
-					return fmt.Errorf("Unable to retrieve network subnet: %s", err)
+					return fmt.Errorf("Unable to retrieve openstack_networking_network_v2 subnet: %s", err)
 				}
 				if cidr == subnet.CIDR {
 					refinedNetworks = append(refinedNetworks, n)
@@ -174,10 +185,10 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	network := refinedNetworks[0]
 
 	if err = d.Set("availability_zone_hints", network.AvailabilityZoneHints); err != nil {
-		log.Printf("[DEBUG] Unable to set availability_zone_hints: %s", err)
+		log.Printf("[DEBUG] Unable to set availability_zone_hints for openstack_networking_network_v2 %s: %s", network.ID, err)
 	}
 
-	log.Printf("[DEBUG] Retrieved Network %s: %+v", network.ID, network)
+	log.Printf("[DEBUG] Retrieved openstack_networking_network_v2 %s: %+v", network.ID, network)
 	d.SetId(network.ID)
 
 	d.Set("name", network.Name)
