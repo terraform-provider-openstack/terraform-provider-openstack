@@ -3,6 +3,7 @@
 NOTES
 
 * The Load Balancer v2 resources have been updated to provide more efficient status checks. If you encounter any problems due to this, please report them and we will make it a priority to resolve.
+* `openstack_networking_port_v2` will now set the `admin_state_up` to `true/UP` if it is left omitted from the resource configuration. This now correctly conforms to the OpenStack API. This should be a transparent change, but let us know if this causes you problems.
 
 FEATURES
 
