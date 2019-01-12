@@ -105,7 +105,7 @@ func resourceComputeFloatingIPV2Delete(d *schema.ResourceData, meta interface{})
 	}
 
 	if err := floatingips.Delete(computeClient, d.Id()).ExtractErr(); err != nil {
-		return fmt.Errorf("Error deleting openstack_compute_floatingip_v2: %s", err)
+		return CheckDeleted(d, err, "Error deleting openstack_compute_floatingip_v2")
 	}
 
 	return nil

@@ -38,7 +38,7 @@ func CheckDeleted(d *schema.ResourceData, err error, msg string) error {
 		return nil
 	}
 
-	return fmt.Errorf("%s: %s", msg, err)
+	return fmt.Errorf("%s %s: %s", msg, d.Id(), err)
 }
 
 // GetRegion returns the region that was specified in the resource. If a

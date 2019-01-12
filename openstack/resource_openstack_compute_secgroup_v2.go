@@ -222,7 +222,7 @@ func resourceComputeSecGroupV2Update(d *schema.ResourceData, meta interface{}) e
 					continue
 				}
 
-				return fmt.Errorf("Error removing rule %s from openstack_compute_secgroup_v2 %s", rule.ID, d.Id())
+				return fmt.Errorf("Error removing rule %s from openstack_compute_secgroup_v2 %s: %s", rule.ID, d.Id(), err)
 			}
 		}
 	}
@@ -248,7 +248,7 @@ func resourceComputeSecGroupV2Delete(d *schema.ResourceData, meta interface{}) e
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting openstack_compute_secgroup_v2: %s", err)
+		return CheckDeleted(d, err, "Error deleting openstack_compute_secgroup_v2")
 	}
 
 	return nil

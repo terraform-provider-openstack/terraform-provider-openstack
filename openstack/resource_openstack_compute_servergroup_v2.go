@@ -116,7 +116,7 @@ func resourceComputeServerGroupV2Delete(d *schema.ResourceData, meta interface{}
 	}
 
 	if err := servergroups.Delete(computeClient, d.Id()).ExtractErr(); err != nil {
-		return fmt.Errorf("Error deleting openstack_compute_servergroup_v2: %s", err)
+		return CheckDeleted(d, err, "Error deleting openstack_compute_servergroup_v2")
 	}
 
 	return nil
