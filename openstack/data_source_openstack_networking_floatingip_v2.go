@@ -18,30 +18,37 @@ func dataSourceNetworkingFloatingIPV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"address": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"pool": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"port_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"fixed_ip": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -82,25 +89,25 @@ func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface
 
 	pages, err := floatingips.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to list Floating IPs: %s", err)
+		return fmt.Errorf("Unable to list openstack_networking_floatingips_v2: %s", err)
 	}
 
 	allFloatingIPs, err := floatingips.ExtractFloatingIPs(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve Floating IPs: %s", err)
+		return fmt.Errorf("Unable to retrieve openstack_networking_floatingips_v2: %s", err)
 	}
 
 	if len(allFloatingIPs) < 1 {
-		return fmt.Errorf("No Floating IP found")
+		return fmt.Errorf("No openstack_networking_floatingip_v2 found")
 	}
 
 	if len(allFloatingIPs) > 1 {
-		return fmt.Errorf("More than one Floating IP found")
+		return fmt.Errorf("More than one openstack_networking_floatingip_v2 found")
 	}
 
 	fip := allFloatingIPs[0]
 
-	log.Printf("[DEBUG] Retrieved Floating IP %s: %+v", fip.ID, fip)
+	log.Printf("[DEBUG] Retrieved openstack_networking_floatingip_v2 %s: %+v", fip.ID, fip)
 	d.SetId(fip.ID)
 
 	d.Set("description", fip.Description)

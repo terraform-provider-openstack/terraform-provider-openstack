@@ -82,7 +82,7 @@ func testAccCheckNetworkingV2FloatingIPDestroy(s *terraform.State) error {
 
 		_, err := floatingips.Get(networkClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("FloatingIP still exists")
+			return fmt.Errorf("Floating IP still exists")
 		}
 	}
 
@@ -112,7 +112,7 @@ func testAccCheckNetworkingV2FloatingIPExists(n string, kp *floatingips.Floating
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("FloatingIP not found")
+			return fmt.Errorf("Floating IP not found")
 		}
 
 		*kp = *found
@@ -124,7 +124,7 @@ func testAccCheckNetworkingV2FloatingIPExists(n string, kp *floatingips.Floating
 func testAccCheckNetworkingV2FloatingIPBoundToCorrectIP(fip *floatingips.FloatingIP, fixed_ip string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if fip.FixedIP != fixed_ip {
-			return fmt.Errorf("Floating ip associated with wrong fixed ip")
+			return fmt.Errorf("Floating IP associated with wrong fixed ip")
 		}
 
 		return nil
