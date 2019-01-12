@@ -19,15 +19,15 @@ func TestAccOpenStackNetworkingFloatingIPV2DataSource_address(t *testing.T) {
 			{
 				Config: testAccOpenStackNetworkingFloatingIPV2DataSource_address,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingFloatingIPV2DataSourceID("data.openstack_networking_floatingip_v2.fip"),
+					testAccCheckNetworkingFloatingIPV2DataSourceID("data.openstack_networking_floatingip_v2.fip_1"),
 					resource.TestCheckResourceAttrSet(
-						"data.openstack_networking_floatingip_v2.fip", "address"),
+						"data.openstack_networking_floatingip_v2.fip_1", "address"),
 					resource.TestCheckResourceAttrSet(
-						"data.openstack_networking_floatingip_v2.fip", "pool"),
+						"data.openstack_networking_floatingip_v2.fip_1", "pool"),
 					resource.TestCheckResourceAttrSet(
-						"data.openstack_networking_floatingip_v2.fip", "status"),
+						"data.openstack_networking_floatingip_v2.fip_1", "status"),
 					resource.TestCheckResourceAttrSet(
-						"data.openstack_networking_floatingip_v2.fip", "description"),
+						"data.openstack_networking_floatingip_v2.fip_1", "description"),
 				),
 			},
 		},
@@ -50,7 +50,7 @@ func testAccCheckNetworkingFloatingIPV2DataSourceID(n string) resource.TestCheck
 }
 
 var testAccOpenStackNetworkingFloatingIPV2DataSource_fip = fmt.Sprintf(`
-resource "openstack_networking_floatingip_v2" "fip" {
+resource "openstack_networking_floatingip_v2" "fip_1" {
   pool = "%s"
   description = "test fip"
 }
@@ -59,8 +59,8 @@ resource "openstack_networking_floatingip_v2" "fip" {
 var testAccOpenStackNetworkingFloatingIPV2DataSource_address = fmt.Sprintf(`
 %s
 
-data "openstack_networking_floatingip_v2" "fip" {
-   address = "${openstack_networking_floatingip_v2.fip.address}"
-   description = "test fip"
+data "openstack_networking_floatingip_v2" "fip_1" {
+  address = "${openstack_networking_floatingip_v2.fip_1.address}"
+  description = "test fip"
 }
 `, testAccOpenStackNetworkingFloatingIPV2DataSource_fip)
