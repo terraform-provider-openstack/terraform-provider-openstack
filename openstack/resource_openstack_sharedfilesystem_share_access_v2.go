@@ -112,7 +112,7 @@ func resourceSharedFilesystemShareAccessV2Create(d *schema.ResourceData, meta in
 	// Wait for access to become active before continuing
 	err = waitForSFV2Access(sfsClient, shareID, access.ID, "active", pending, timeout)
 	if err != nil {
-		return fmt.Errorf("Error waiting for OpenStack share ACL on %s to be applied: %s", shareID, err)
+		return err
 	}
 
 	return resourceSharedFilesystemShareAccessV2Read(d, meta)
@@ -191,7 +191,7 @@ func resourceSharedFilesystemShareAccessV2Delete(d *schema.ResourceData, meta in
 	pending := []string{"active", "new", "queued_to_deny", "denying"}
 	err = waitForSFV2Access(sfsClient, shareID, d.Id(), "denied", pending, timeout)
 	if err != nil {
-		return fmt.Errorf("Error waiting for OpenStack share ACL on %s to be removed: %s", shareID, err)
+		return err
 	}
 
 	return nil
