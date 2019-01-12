@@ -35,6 +35,7 @@ IMPROVEMENTS
 BUG FIXES
 
 * `openstack_compute_interface_attach_v2` now correctly sets the `instance_id` [GH-557] 
+* `openstack_networking_port_v2` will now correctly set the `admin_state_up` to `true/UP` if left omitted [GH-594]
 
 ## 1.13.0 (December 18, 2018)
 
