@@ -525,6 +525,99 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Port_adminStateUp_omit(t *testing.T) {
+	var port ports.Port
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Port_adminStateUp_omit,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "admin_state_up", "true"),
+					testAccCheckNetworkingV2PortAdminStateUp(&port, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Port_adminStateUp_true(t *testing.T) {
+	var port ports.Port
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Port_adminStateUp_true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "admin_state_up", "true"),
+					testAccCheckNetworkingV2PortAdminStateUp(&port, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Port_adminStateUp_false(t *testing.T) {
+	var port ports.Port
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Port_adminStateUp_false,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "admin_state_up", "false"),
+					testAccCheckNetworkingV2PortAdminStateUp(&port, false),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Port_adminStateUp_update(t *testing.T) {
+	var port ports.Port
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Port_adminStateUp_omit,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "admin_state_up", "true"),
+					testAccCheckNetworkingV2PortAdminStateUp(&port, true),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Port_adminStateUp_false,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "admin_state_up", "false"),
+					testAccCheckNetworkingV2PortAdminStateUp(&port, false),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2PortDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
@@ -603,6 +696,16 @@ func testAccCheckNetworkingV2PortCountAllowedAddressPairs(
 	return func(s *terraform.State) error {
 		if len(port.AllowedAddressPairs) != expected {
 			return fmt.Errorf("Expected %d Allowed Address Pairs, got %d", expected, len(port.AllowedAddressPairs))
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckNetworkingV2PortAdminStateUp(port *ports.Port, expected bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if port.AdminStateUp != expected {
+			return fmt.Errorf("Port has wrong admin_state_up. Expected %t, got %t", expected, port.AdminStateUp)
 		}
 
 		return nil
@@ -1744,6 +1847,74 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  fixed_ip {
+    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.199.23"
+  }
+}
+`
+
+const testAccNetworkingV2Port_adminStateUp_omit = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  fixed_ip {
+    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.199.23"
+  }
+}
+`
+
+const testAccNetworkingV2Port_adminStateUp_true = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  admin_state_up = "true"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  fixed_ip {
+    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.199.23"
+  }
+}
+`
+
+const testAccNetworkingV2Port_adminStateUp_false = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  admin_state_up = "false"
   network_id = "${openstack_networking_network_v2.network_1.id}"
   fixed_ip {
     subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
