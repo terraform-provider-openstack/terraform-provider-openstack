@@ -112,7 +112,7 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 			},
 
 			"all_fixed_ips": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
