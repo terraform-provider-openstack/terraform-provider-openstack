@@ -204,7 +204,6 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		ports.CreateOpts{
 			Name:                d.Get("name").(string),
 			Description:         d.Get("description").(string),
-			AdminStateUp:        resourcePortAdminStateUpV2(d),
 			NetworkID:           d.Get("network_id").(string),
 			MACAddress:          d.Get("mac_address").(string),
 			TenantID:            d.Get("tenant_id").(string),
@@ -214,6 +213,11 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 			AllowedAddressPairs: expandNetworkingPortAllowedAddressPairsV2(allowedAddressPairs),
 		},
 		MapValueSpecs(d),
+	}
+
+	if v, ok := d.GetOkExists("admin_state_up"); ok {
+		asu := v.(bool)
+		createOpts.AdminStateUp = &asu
 	}
 
 	if noSecurityGroups {
@@ -387,7 +391,8 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("admin_state_up") {
 		hasChange = true
-		updateOpts.AdminStateUp = resourcePortAdminStateUpV2(d)
+		asu := d.Get("admin_state_up").(bool)
+		updateOpts.AdminStateUp = &asu
 	}
 
 	if d.HasChange("device_owner") {
@@ -526,16 +531,6 @@ func resourcePortFixedIpsV2(d *schema.ResourceData) interface{} {
 		}
 	}
 	return ip
-}
-
-func resourcePortAdminStateUpV2(d *schema.ResourceData) *bool {
-	value := false
-
-	if raw, ok := d.GetOk("admin_state_up"); ok && raw == true {
-		value = true
-	}
-
-	return &value
 }
 
 func allowedAddressPairsHash(v interface{}) int {
