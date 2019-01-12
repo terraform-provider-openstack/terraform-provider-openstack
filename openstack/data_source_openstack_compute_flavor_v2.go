@@ -104,9 +104,13 @@ func dataSourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) err
 	if v := d.Get("flavor_id").(string); v != "" {
 		flavor, err = flavors.Get(computeClient, v).Extract()
 		if err != nil {
-			msg := fmt.Sprintf("Error retrieving openstack_compute_flavor_v2 %s", v)
-			return CheckDeleted(d, err, msg)
+			if _, ok := err.(gophercloud.ErrDefault404); ok {
+				return fmt.Errorf("No Flavor found")
+			}
+			return fmt.Errorf("Unable to retrieve OpenStack %s flavor: %s", v, err)
 		}
+
+		return dataSourceComputeFlavorV2Attributes(d, computeClient, flavor)
 	}
 
 	listOpts := flavors.ListOpts{
@@ -117,77 +121,75 @@ func dataSourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) err
 
 	log.Printf("[DEBUG] openstack_compute_flavor_v2 ListOpts: %#v", listOpts)
 
-	if flavor == nil {
-		allPages, err := flavors.ListDetail(computeClient, listOpts).AllPages()
-		if err != nil {
-			return fmt.Errorf("Unable to query OpenStack flavors: %s", err)
-		}
+	allPages, err := flavors.ListDetail(computeClient, listOpts).AllPages()
+	if err != nil {
+		return fmt.Errorf("Unable to query OpenStack flavors: %s", err)
+	}
 
-		allFlavors, err := flavors.ExtractFlavors(allPages)
-		if err != nil {
-			return fmt.Errorf("Unable to retrieve OpenStack flavors: %s", err)
-		}
+	allFlavors, err := flavors.ExtractFlavors(allPages)
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve OpenStack flavors: %s", err)
+	}
 
-		// Loop through all flavors to find a more specific one.
-		if len(allFlavors) > 1 {
-			var filteredFlavors []flavors.Flavor
-			for _, flavor := range allFlavors {
-				if v := d.Get("name").(string); v != "" {
-					if flavor.Name != v {
-						continue
-					}
+	// Loop through all flavors to find a more specific one.
+	if len(allFlavors) > 1 {
+		var filteredFlavors []flavors.Flavor
+		for _, flavor := range allFlavors {
+			if v := d.Get("name").(string); v != "" {
+				if flavor.Name != v {
+					continue
 				}
-
-				// d.GetOk is used because 0 might be a valid choice.
-				if v, ok := d.GetOk("ram"); ok {
-					if flavor.RAM != v.(int) {
-						continue
-					}
-				}
-
-				if v, ok := d.GetOk("vcpus"); ok {
-					if flavor.VCPUs != v.(int) {
-						continue
-					}
-				}
-
-				if v, ok := d.GetOk("disk"); ok {
-					if flavor.Disk != v.(int) {
-						continue
-					}
-				}
-
-				if v, ok := d.GetOk("swap"); ok {
-					if flavor.Swap != v.(int) {
-						continue
-					}
-				}
-
-				if v, ok := d.GetOk("rx_tx_factor"); ok {
-					if flavor.RxTxFactor != v.(float64) {
-						continue
-					}
-				}
-
-				filteredFlavors = append(filteredFlavors, flavor)
 			}
 
-			allFlavors = filteredFlavors
+			// d.GetOk is used because 0 might be a valid choice.
+			if v, ok := d.GetOk("ram"); ok {
+				if flavor.RAM != v.(int) {
+					continue
+				}
+			}
+
+			if v, ok := d.GetOk("vcpus"); ok {
+				if flavor.VCPUs != v.(int) {
+					continue
+				}
+			}
+
+			if v, ok := d.GetOk("disk"); ok {
+				if flavor.Disk != v.(int) {
+					continue
+				}
+			}
+
+			if v, ok := d.GetOk("swap"); ok {
+				if flavor.Swap != v.(int) {
+					continue
+				}
+			}
+
+			if v, ok := d.GetOk("rx_tx_factor"); ok {
+				if flavor.RxTxFactor != v.(float64) {
+					continue
+				}
+			}
+
+			filteredFlavors = append(filteredFlavors, flavor)
 		}
 
-		if len(allFlavors) < 1 {
-			return fmt.Errorf("Your query returned no results. " +
-				"Please change your search criteria and try again.")
-		}
-
-		if len(allFlavors) > 1 {
-			log.Printf("[DEBUG] Multiple results found: %#v", allFlavors)
-			return fmt.Errorf("Your query returned more than one result. " +
-				"Please try a more specific search criteria")
-		}
-
-		flavor = &allFlavors[0]
+		allFlavors = filteredFlavors
 	}
+
+	if len(allFlavors) < 1 {
+		return fmt.Errorf("Your query returned no results. " +
+			"Please change your search criteria and try again.")
+	}
+
+	if len(allFlavors) > 1 {
+		log.Printf("[DEBUG] Multiple results found: %#v", allFlavors)
+		return fmt.Errorf("Your query returned more than one result. " +
+			"Please try a more specific search criteria")
+	}
+
+	flavor = &allFlavors[0]
 
 	return dataSourceComputeFlavorV2Attributes(d, computeClient, flavor)
 }
