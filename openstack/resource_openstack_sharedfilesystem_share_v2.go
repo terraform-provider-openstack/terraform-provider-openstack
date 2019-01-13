@@ -451,9 +451,9 @@ func waitForSFV2Share(sfsClient *gophercloud.ServiceClient, id string, target st
 			}
 		}
 		errorMessage := fmt.Sprintf("Error waiting for share %s to become %s", id, target)
-		msg, mErr := resourceSFSV2ShareManilaMessage(sfsClient, id)
-		if mErr != nil {
-			return fmt.Errorf("%s (%s) and error getting detailed manila message: %s", errorMessage, err, mErr)
+		msg := resourceSFSV2ShareManilaMessage(sfsClient, id)
+		if msg == nil {
+			return fmt.Errorf("%s: %s", errorMessage, err)
 		}
 		return fmt.Errorf("%s: %s: the latest manila message (%s): %s", errorMessage, err, msg.CreatedAt, msg.UserMessage)
 	}
@@ -471,7 +471,7 @@ func resourceSFV2ShareRefreshFunc(sfsClient *gophercloud.ServiceClient, id strin
 	}
 }
 
-func resourceSFSV2ShareManilaMessage(sfsClient *gophercloud.ServiceClient, id string) (*messages.Message, error) {
+func resourceSFSV2ShareManilaMessage(sfsClient *gophercloud.ServiceClient, id string) *messages.Message {
 	// we can simply set this, because this function is called after the error occurred
 	sfsClient.Microversion = "2.37"
 
@@ -483,17 +483,20 @@ func resourceSFSV2ShareManilaMessage(sfsClient *gophercloud.ServiceClient, id st
 	}
 	allPages, err := messages.List(sfsClient, listOpts).AllPages()
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve messages: %v", err)
+		log.Printf("[DEBUG] Unable to retrieve messages: %v", err)
+		return nil
 	}
 
 	allMessages, err := messages.ExtractMessages(allPages)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to extract messages: %v", err)
+		log.Printf("[DEBUG] Unable to extract messages: %v", err)
+		return nil
 	}
 
 	if len(allMessages) == 0 {
-		return nil, fmt.Errorf("No messages found")
+		log.Printf("[DEBUG] No messages found")
+		return nil
 	}
 
-	return &allMessages[0], nil
+	return &allMessages[0]
 }
