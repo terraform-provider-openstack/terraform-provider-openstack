@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider"
@@ -39,42 +38,49 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 			},
+
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
+
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
+
 			"admin_state_up": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
+
 			"shared": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
+
 			"external": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
+
 			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
+
 			"segments": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: true,
 				Elem: &schema.Resource{
@@ -97,23 +103,27 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 					},
 				},
 			},
+
 			"value_specs": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
 			},
+
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+
 			"availability_zone_hints": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Computed: true,
 				ForceNew: true,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+
 			"transparent_vlan": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -131,12 +141,14 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	azHints := d.Get("availability_zone_hints").(*schema.Set)
+
 	createOpts := NetworkCreateOpts{
 		networks.CreateOpts{
 			Name:                  d.Get("name").(string),
 			Description:           d.Get("description").(string),
 			TenantID:              d.Get("tenant_id").(string),
-			AvailabilityZoneHints: resourceNetworkingAvailabilityZoneHintsV2(d),
+			AvailabilityZoneHints: expandToStringSlice(azHints.List()),
 		},
 		MapValueSpecs(d),
 	}
@@ -159,8 +171,7 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 		createOpts.Shared = &shared
 	}
 
-	segments := resourceNetworkingNetworkV2Segments(d)
-
+	segments := expandNetworkingNetworkSegmentsV2(d.Get("segments").(*schema.Set))
 	isExternal := d.Get("external").(bool)
 	isVLANTransparent := d.Get("transparent_vlan").(bool)
 
@@ -192,39 +203,41 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	log.Printf("[DEBUG] Create Options: %#v", finalCreateOpts)
+	log.Printf("[DEBUG] openstack_networking_network_v2 create options: %#v", finalCreateOpts)
 	n, err := networks.Create(networkingClient, finalCreateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Neutron network: %s", err)
+		return fmt.Errorf("Error creating openstack_networking_network_v2: %s", err)
 	}
 
-	log.Printf("[INFO] Network ID: %s", n.ID)
-
-	tags := networkV2AttributesTags(d)
-	if len(tags) > 0 {
-		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
-		tags, err := attributestags.ReplaceAll(networkingClient, "networks", n.ID, tagOpts).Extract()
-		if err != nil {
-			return fmt.Errorf("Error creating Tags on Network: %s", err)
-		}
-		log.Printf("[DEBUG] Set Tags = %+v on Network %+v", tags, n.ID)
-	}
-
-	log.Printf("[DEBUG] Waiting for Network (%s) to become available", n.ID)
+	log.Printf("[DEBUG] Waiting for openstack_networking_network_v2 %s to become available.", n.ID)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"BUILD"},
-		Target:     []string{"ACTIVE"},
-		Refresh:    waitForNetworkActive(networkingClient, n.ID),
+		Target:     []string{"ACTIVE", "DOWN"},
+		Refresh:    resourceNetworkingNetworkV2StateRefreshFunc(networkingClient, n.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
 
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("Error waiting for openstack_networking_network_v2 %s to become available: %s", n.ID, err)
+	}
 
 	d.SetId(n.ID)
 
+	tags := networkV2AttributesTags(d)
+	if len(tags) > 0 {
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "networks", n.ID, tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error setting tags on openstack_networking_network_v2 %s: %s", n.ID, err)
+		}
+		log.Printf("[DEBUG] Set tags %s on openstack_networking_network_v2 %s", tags, n.ID)
+	}
+
+	log.Printf("[DEBUG] Created openstack_networking_network_v2 %s: %#v", n.ID, n)
 	return resourceNetworkingNetworkV2Read(d, meta)
 }
 
@@ -242,10 +255,10 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 	}
 	err = networks.Get(networkingClient, d.Id()).ExtractInto(&n)
 	if err != nil {
-		return CheckDeleted(d, err, "network")
+		return CheckDeleted(d, err, "Error getting openstack_networking_network_v2")
 	}
 
-	log.Printf("[DEBUG] Retrieved Network %s: %+v", d.Id(), n)
+	log.Printf("[DEBUG] Retrieved openstack_networking_network_v2 %s: %#v", d.Id(), n)
 
 	d.Set("name", n.Name)
 	d.Set("description", n.Description)
@@ -258,7 +271,7 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 	d.Set("transparent_vlan", n.VLANTransparent)
 
 	if err := d.Set("availability_zone_hints", n.AvailabilityZoneHints); err != nil {
-		log.Printf("[DEBUG] unable to set availability_zone_hints: %s", err)
+		log.Printf("[DEBUG] Unable to set openstack_networking_network_v2 %s availability_zone_hints: %s", d.Id(), err)
 	}
 
 	return nil
@@ -273,7 +286,7 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 
 	// Declare finalUpdateOpts interface and basic updateOpts structure.
 	var (
-		finalCreateOpts networks.UpdateOptsBuilder
+		finalUpdateOpts networks.UpdateOptsBuilder
 		updateOpts      networks.UpdateOpts
 	)
 
@@ -312,28 +325,28 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "networks", d.Id(), tagOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating Tags on Network: %s", err)
+			return fmt.Errorf("Error setting tags on openstack_networking_network_v2 %s: %s", d.Id(), err)
 		}
-		log.Printf("[DEBUG] Updated Tags = %+v on Network %+v", tags, d.Id())
+		log.Printf("[DEBUG] Set tags %s on openstack_networking_network_v2 %s", tags, d.Id())
 	}
 
-	// Save basic updateOpts into finalCreateOpts.
-	finalCreateOpts = updateOpts
+	// Save basic updateOpts into finalUpdateOpts.
+	finalUpdateOpts = updateOpts
 
 	// Populate extensions options.
 	isExternal := false
 	if d.HasChange("external") {
 		isExternal = d.Get("external").(bool)
-		finalCreateOpts = external.UpdateOptsExt{
-			UpdateOptsBuilder: finalCreateOpts,
+		finalUpdateOpts = external.UpdateOptsExt{
+			UpdateOptsBuilder: finalUpdateOpts,
 			External:          &isExternal,
 		}
 	}
 
-	log.Printf("[DEBUG] Updating Network %s with options: %+v", d.Id(), finalCreateOpts)
-	_, err = networks.Update(networkingClient, d.Id(), finalCreateOpts).Extract()
+	log.Printf("[DEBUG] openstack_networking_network_v2 %s update options: %#v", d.Id(), finalUpdateOpts)
+	_, err = networks.Update(networkingClient, d.Id(), finalUpdateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenStack Neutron Network: %s", err)
+		return fmt.Errorf("Error updating openstack_networking_network_v2 %s: %s", d.Id(), err)
 	}
 
 	return resourceNetworkingNetworkV2Read(d, meta)
@@ -346,10 +359,14 @@ func resourceNetworkingNetworkV2Delete(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	if err := networks.Delete(networkingClient, d.Id()).ExtractErr(); err != nil {
+		return CheckDeleted(d, err, "Error deleting openstack_networking_network_v2")
+	}
+
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForNetworkDelete(networkingClient, d.Id()),
+		Refresh:    resourceNetworkingNetworkV2StateRefreshFunc(networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -357,80 +374,9 @@ func resourceNetworkingNetworkV2Delete(d *schema.ResourceData, meta interface{})
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack Neutron Network: %s", err)
+		return fmt.Errorf("Error waiting for openstack_networking_network_v2 %s to delete: %s", d.Id(), err)
 	}
 
 	d.SetId("")
 	return nil
-}
-
-func resourceNetworkingNetworkV2Segments(d *schema.ResourceData) (providerSegments []provider.Segment) {
-	segments := d.Get("segments").([]interface{})
-	for _, v := range segments {
-		var segment provider.Segment
-		segmentMap := v.(map[string]interface{})
-
-		if v, ok := segmentMap["physical_network"].(string); ok {
-			segment.PhysicalNetwork = v
-		}
-
-		if v, ok := segmentMap["network_type"].(string); ok {
-			segment.NetworkType = v
-		}
-
-		if v, ok := segmentMap["segmentation_id"].(int); ok {
-			segment.SegmentationID = v
-		}
-
-		providerSegments = append(providerSegments, segment)
-	}
-	return
-}
-
-func waitForNetworkActive(networkingClient *gophercloud.ServiceClient, networkId string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		n, err := networks.Get(networkingClient, networkId).Extract()
-		if err != nil {
-			return nil, "", err
-		}
-
-		log.Printf("[DEBUG] OpenStack Neutron Network: %+v", n)
-		if n.Status == "DOWN" || n.Status == "ACTIVE" {
-			return n, "ACTIVE", nil
-		}
-
-		return n, n.Status, nil
-	}
-}
-
-func waitForNetworkDelete(networkingClient *gophercloud.ServiceClient, networkId string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		log.Printf("[DEBUG] Attempting to delete OpenStack Network %s.\n", networkId)
-
-		n, err := networks.Get(networkingClient, networkId).Extract()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenStack Network %s", networkId)
-				return n, "DELETED", nil
-			}
-			return n, "ACTIVE", err
-		}
-
-		err = networks.Delete(networkingClient, networkId).ExtractErr()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenStack Network %s", networkId)
-				return n, "DELETED", nil
-			}
-			if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 409 {
-					return n, "ACTIVE", nil
-				}
-			}
-			return n, "ACTIVE", err
-		}
-
-		log.Printf("[DEBUG] OpenStack Network %s still active.\n", networkId)
-		return n, "ACTIVE", nil
-	}
 }

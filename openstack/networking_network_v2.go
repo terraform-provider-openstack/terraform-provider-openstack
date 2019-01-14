@@ -3,8 +3,12 @@ package openstack
 import (
 	"fmt"
 
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/pagination"
+
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -68,4 +72,35 @@ func networkingNetworkV2Name(d *schema.ResourceData, meta interface{}, networkID
 	})
 
 	return networkName, err
+}
+
+func resourceNetworkingNetworkV2StateRefreshFunc(client *gophercloud.ServiceClient, networkID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		n, err := networks.Get(client, networkID).Extract()
+		if err != nil {
+			if _, ok := err.(gophercloud.ErrDefault404); ok {
+				return n, "DELETED", nil
+			}
+
+			return n, "", err
+		}
+
+		return n, n.Status, nil
+	}
+}
+
+func expandNetworkingNetworkSegmentsV2(segments *schema.Set) []provider.Segment {
+	rawSegments := segments.List()
+
+	providerSegments := make([]provider.Segment, len(rawSegments))
+	for i, raw := range rawSegments {
+		rawMap := raw.(map[string]interface{})
+		providerSegments[i] = provider.Segment{
+			PhysicalNetwork: rawMap["physical_network"].(string),
+			NetworkType:     rawMap["network_type"].(string),
+			SegmentationID:  rawMap["segmentation_id"].(int),
+		}
+	}
+
+	return providerSegments
 }
