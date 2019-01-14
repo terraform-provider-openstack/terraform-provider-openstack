@@ -343,13 +343,13 @@ func resourceL7PolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
 	// Get a clean copy of the listener.
 	listener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve listener %s: %s", listenerID, err)
+		return CheckDeleted(d, err, fmt.Sprintf("Unable to retrieve parent listener (%s) for the L7 Policy", listenerID))
 	}
 
 	// Get a clean copy of the L7 Policy.
 	l7Policy, err := l7policies.Get(lbClient, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve L7 Policy: %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Unable to retrieve L7 Policy")
 	}
 
 	// Wait for Listener to become active before continuing.
@@ -368,7 +368,7 @@ func resourceL7PolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error deleting L7 Policy %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Error deleting L7 Policy")
 	}
 
 	err = waitForLBV2L7Policy(lbClient, listener, l7Policy, "DELETED", lbPendingDeleteStatuses, timeout)

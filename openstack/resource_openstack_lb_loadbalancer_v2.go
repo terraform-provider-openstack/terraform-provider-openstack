@@ -279,7 +279,7 @@ func resourceLoadBalancerV2Delete(d *schema.ResourceData, meta interface{}) erro
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error deleting loadbalancer %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Error deleting loadbalancer")
 	}
 
 	// Wait for LoadBalancer to become delete

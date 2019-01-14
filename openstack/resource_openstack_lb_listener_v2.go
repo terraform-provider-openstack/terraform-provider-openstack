@@ -300,7 +300,7 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 	// Get a clean copy of the listener.
 	listener, err := listeners.Get(lbClient, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve listener %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Unable to retrieve listener")
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
@@ -315,7 +315,7 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error deleting listener %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Error deleting listener")
 	}
 
 	// Wait for the listener to become DELETED.
