@@ -130,7 +130,7 @@ func flattenNetworkingPortAllowedAddressPairsV2(mac string, allowedAddressPairs 
 	return pairs
 }
 
-func expandNetworkingPortFixedIpsV2(d *schema.ResourceData) interface{} {
+func expandNetworkingPortFixedIPV2(d *schema.ResourceData) interface{} {
 	// If no_fixed_ip was specified, then just return an empty array.
 	// Since no_fixed_ip is mutually exclusive to fixed_ip,
 	// we can safely do this.
@@ -141,7 +141,7 @@ func expandNetworkingPortFixedIpsV2(d *schema.ResourceData) interface{} {
 		return []interface{}{}
 	}
 
-	rawIP := d.Get("fixed_ip").(*schema.Set).List()
+	rawIP := d.Get("fixed_ip").([]interface{})
 
 	if len(rawIP) == 0 {
 		return nil

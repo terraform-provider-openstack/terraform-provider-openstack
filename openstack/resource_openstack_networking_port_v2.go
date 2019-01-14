@@ -102,7 +102,7 @@ func resourceNetworkingPortV2() *schema.Resource {
 			},
 
 			"fixed_ip": {
-				Type:          schema.TypeSet,
+				Type:          schema.TypeList,
 				Optional:      true,
 				ForceNew:      false,
 				ConflictsWith: []string{"no_fixed_ip"},
@@ -221,7 +221,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 			TenantID:            d.Get("tenant_id").(string),
 			DeviceOwner:         d.Get("device_owner").(string),
 			DeviceID:            d.Get("device_id").(string),
-			FixedIPs:            expandNetworkingPortFixedIpsV2(d),
+			FixedIPs:            expandNetworkingPortFixedIPV2(d),
 			AllowedAddressPairs: expandNetworkingPortAllowedAddressPairsV2(allowedAddressPairs),
 		},
 		MapValueSpecs(d),
@@ -420,7 +420,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("fixed_ip") || d.HasChange("no_fixed_ip") {
 		hasChange = true
-		updateOpts.FixedIPs = expandNetworkingPortFixedIpsV2(d)
+		updateOpts.FixedIPs = expandNetworkingPortFixedIPV2(d)
 	}
 
 	// At this point, perform the update for all "standard" port changes.
