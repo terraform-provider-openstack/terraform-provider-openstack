@@ -236,7 +236,7 @@ func resourceSharedFilesystemShareNetworkV2Delete(d *schema.ResourceData, meta i
 	log.Printf("[DEBUG] Attempting to delete sharenetwork %s", d.Id())
 	err = sharenetworks.Delete(sfsClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting sharenetwork: %s", err)
+		return CheckDeleted(d, err, "Error deleting sharenetwork")
 	}
 
 	return nil

@@ -131,7 +131,7 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 
 	access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "share")
+		return CheckDeleted(d, err, "share_access")
 	}
 
 	for _, v := range access {
@@ -177,8 +177,12 @@ func resourceSharedFilesystemShareAccessV2Delete(d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
+		e := CheckDeleted(d, err, "")
+		if e == nil {
+			return nil
+		}
 		detailedErr := errors.ErrorDetails{}
-		e := errors.ExtractErrorInto(err, &detailedErr)
+		e = errors.ExtractErrorInto(err, &detailedErr)
 		if e != nil {
 			return fmt.Errorf("Error waiting for OpenStack share ACL on %s to be removed: %s: %s", shareID, err, e)
 		}
