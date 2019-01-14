@@ -142,20 +142,10 @@ func resourceNetworkingRouterInterfaceV2Delete(d *schema.ResourceData, meta inte
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	removeOpts := routers.RemoveInterfaceOpts{
-		SubnetID: d.Get("subnet_id").(string),
-		PortID:   d.Get("port_id").(string),
-	}
-	routerID := d.Get("router_id").(string)
-	_, err = routers.RemoveInterface(networkingClient, routerID, removeOpts).Extract()
-	if err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_networking_router_interface_v2")
-	}
-
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    resourceNetworkingRouterInterfaceV2StateRefreshFunc(networkingClient, d.Id()),
+		Refresh:    resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(networkingClient, d),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
