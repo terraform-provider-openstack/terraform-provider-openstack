@@ -407,8 +407,12 @@ func resourceSharedFilesystemShareV2Delete(d *schema.ResourceData, meta interfac
 	})
 
 	if err != nil {
+		e := CheckDeleted(d, err, "")
+		if e == nil {
+			return nil
+		}
 		detailedErr := errors.ErrorDetails{}
-		e := errors.ExtractErrorInto(err, &detailedErr)
+		e = errors.ExtractErrorInto(err, &detailedErr)
 		if e != nil {
 			return fmt.Errorf("Unable to delete %s share: %s: %s", d.Id(), err, e)
 		}

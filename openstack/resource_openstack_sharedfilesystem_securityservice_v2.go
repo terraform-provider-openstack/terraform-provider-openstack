@@ -248,7 +248,7 @@ func resourceSharedFilesystemSecurityServiceV2Delete(d *schema.ResourceData, met
 	log.Printf("[DEBUG] Attempting to delete securityservice %s", d.Id())
 	err = securityservices.Delete(sfsClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting securityservice: %s", err)
+		return CheckDeleted(d, err, "Error deleting securityservice")
 	}
 
 	return nil
