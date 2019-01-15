@@ -29,6 +29,14 @@ func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 					testAccCheckComputeV2FloatingIPAssociateAssociated(&fip, &instance, 1),
 				),
 			},
+			{
+				Config: testAccComputeV2FloatingIPAssociate_update,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
+					testAccCheckComputeV2FloatingIPAssociateAssociated(&fip, &instance, 1),
+				),
+			},
 		},
 	})
 }
@@ -209,6 +217,25 @@ resource "openstack_compute_instance_v2" "instance_1" {
 }
 
 resource "openstack_networking_floatingip_v2" "fip_1" {
+}
+
+resource "openstack_compute_floatingip_associate_v2" "fip_1" {
+  floating_ip = "${openstack_networking_floatingip_v2.fip_1.address}"
+  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+}
+`, OS_NETWORK_ID)
+
+var testAccComputeV2FloatingIPAssociate_update = fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
+}
+
+resource "openstack_networking_floatingip_v2" "fip_1" {
+  description = "test"
 }
 
 resource "openstack_compute_floatingip_associate_v2" "fip_1" {
