@@ -343,7 +343,7 @@ func resourceL7PolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
 	// Get a clean copy of the listener.
 	listener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, fmt.Sprintf("Unable to retrieve parent listener (%s) for the L7 Policy", listenerID))
+		return fmt.Errorf("Unable to retrieve parent listener (%s) for the L7 Policy: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the L7 Policy.

@@ -327,13 +327,13 @@ func resourceL7RuleV2Delete(d *schema.ResourceData, meta interface{}) error {
 	// Get a clean copy of the parent listener.
 	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, fmt.Sprintf("Unable to retrieve parent listener (%s) for the L7 Rule", listenerID))
+		return fmt.Errorf("Unable to retrieve parent listener (%s) for the L7 Rule: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the parent L7 Policy.
 	parentL7Policy, err := l7policies.Get(lbClient, l7policyID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, fmt.Sprintf("Unable to retrieve parent L7 Policy (%s) for the L7 Rule", l7policyID))
+		return fmt.Errorf("Unable to retrieve parent L7 Policy (%s) for the L7 Rule: %s", l7policyID, err)
 	}
 
 	// Get a clean copy of the L7 Rule.

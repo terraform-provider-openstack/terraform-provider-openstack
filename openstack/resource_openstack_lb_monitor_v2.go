@@ -292,7 +292,7 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 	poolID := d.Get("pool_id").(string)
 	parentPool, err := pools.Get(lbClient, poolID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, fmt.Sprintf("Unable to retrieve parent pool (%s) for the monitor", poolID))
+		return fmt.Errorf("Unable to retrieve parent pool (%s) for the monitor: %s", poolID, err)
 	}
 
 	// Get a clean copy of the monitor.
