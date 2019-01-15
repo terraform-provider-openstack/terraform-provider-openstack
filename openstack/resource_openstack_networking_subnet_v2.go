@@ -266,7 +266,7 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("description", s.Description)
 	d.Set("tenant_id", s.TenantID)
 	d.Set("dns_nameservers", s.DNSNameservers)
-	d.Set("host_routes", s.HostRoutes)
+	d.Set("host_routes", resourceSubnetHostRoutesToMapV2(s.HostRoutes))
 	d.Set("enable_dhcp", s.EnableDHCP)
 	d.Set("network_id", s.NetworkID)
 	d.Set("ipv6_address_mode", s.IPv6AddressMode)
@@ -454,6 +454,17 @@ func resourceSubnetHostRoutesV2(d *schema.ResourceData) []subnets.HostRoute {
 		hr[i] = subnets.HostRoute{
 			DestinationCIDR: rawMap["destination_cidr"].(string),
 			NextHop:         rawMap["next_hop"].(string),
+		}
+	}
+	return hr
+}
+
+func resourceSubnetHostRoutesToMapV2(hostRoutes []subnets.HostRoute) []map[string]string {
+	hr := make([]map[string]string, len(hostRoutes))
+	for i, hostRoute := range hostRoutes {
+		hr[i] = map[string]string{
+			"destination_cidr": hostRoute.DestinationCIDR,
+			"next_hop":         hostRoute.NextHop,
 		}
 	}
 	return hr
