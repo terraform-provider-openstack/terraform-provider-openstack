@@ -1,4 +1,4 @@
-## 1.14.0 (Unreleased)
+## 1.14.0 (January 15, 2019)
 
 NOTES
 
@@ -7,39 +7,39 @@ NOTES
 
 FEATURES
 
-* __New Resource__: `openstack_lb_l7policy_v2` [GH-527]
-* __New Resource__: `openstack_lb_l7rule_v2` [GH-522]
-* __New Resource__: `openstack_sharedfilesystem_share_v2` [GH-525]
-* __New Resource__: `openstack_sharedfilesystem_share_access_v2` [GH-526]
-* __New Data Source__: `openstack_sharedfilesystem_share_v2` [GH-564]
-* __New Data Source__: `openstack_networking_port_v2` [GH-567]
-* __New Data Source__: `openstack_sharedfilesystem_sharenetwork_v2` [GH-576]
-* __New Data Source__: `openstack_networking_port_ids_v2` [GH-569]
-* __New Data Source__: `openstack_sharedfilesystem_snapshot_v2` [GH-577]
+* __New Resource__: `openstack_lb_l7policy_v2` ([#527](https://github.com/terraform-providers/terraform-provider-openstack/issues/527))
+* __New Resource__: `openstack_lb_l7rule_v2` ([#522](https://github.com/terraform-providers/terraform-provider-openstack/issues/522))
+* __New Resource__: `openstack_sharedfilesystem_share_v2` ([#525](https://github.com/terraform-providers/terraform-provider-openstack/issues/525))
+* __New Resource__: `openstack_sharedfilesystem_share_access_v2` ([#526](https://github.com/terraform-providers/terraform-provider-openstack/issues/526))
+* __New Data Source__: `openstack_sharedfilesystem_share_v2` ([#564](https://github.com/terraform-providers/terraform-provider-openstack/issues/564))
+* __New Data Source__: `openstack_networking_port_v2` ([#567](https://github.com/terraform-providers/terraform-provider-openstack/issues/567))
+* __New Data Source__: `openstack_sharedfilesystem_sharenetwork_v2` ([#576](https://github.com/terraform-providers/terraform-provider-openstack/issues/576))
+* __New Data Source__: `openstack_networking_port_ids_v2` ([#569](https://github.com/terraform-providers/terraform-provider-openstack/issues/569))
+* __New Data Source__: `openstack_sharedfilesystem_snapshot_v2` ([#577](https://github.com/terraform-providers/terraform-provider-openstack/issues/577))
 
 IMPROVEMENTS
 
-* Provider options `swauth` and `use_octavia` will correctly use a default value of `false` when they are not specified. This is to help with compatibility for v0.12 [GH-494]
-* Enhanced the pending status checks of the Load Balancer v2 resources [GH-550]
-* Prioritized the status of Load Balancer v2 resources to first use the Load Balancer's master status [GH-556]
-* Fix flavor detection in `openstack_compute_instance_v2` and `openstack_containerinfra_cluster_v1` for Terraform v0.12 [GH-551]
-* Added the ability to import `openstack_lb_loadbalancer_v2` [GH-524]
-* Added the ability to import `openstack_lb_listener_v2` [GH-524]
-* Added the ability to import `openstack_lb_pool_v2` [GH-524]
-* Added the ability to import `openstack_lb_member_v2` [GH-524]
-* Added the ability to import `openstack_lb_monitor_v2` [GH-524]
-* Added `device_type` and `disk_bus` to `openstack_compute_instance_v2` block device [GH-558]
-* Added `transparent_vlan` to `openstack_networking_network_v2` [GH-513]
-* Added `transparent_vlan` to `openstack_networking_network_v2` data source [GH-538]
-* Added `max_retries` to the provider options [GH-413]
-* Added the ability to override catalog endpoints [GH-501]
-* Changed the `segments` attribute of the `openstack_networking_network_v2` to `TypeSet` [GH-578] 
+* Provider options `swauth` and `use_octavia` will correctly use a default value of `false` when they are not specified. This is to help with compatibility for v0.12 ([#494](https://github.com/terraform-providers/terraform-provider-openstack/issues/494))
+* Enhanced the pending status checks of the Load Balancer v2 resources ([#550](https://github.com/terraform-providers/terraform-provider-openstack/issues/550))
+* Prioritized the status of Load Balancer v2 resources to first use the Load Balancer's master status ([#556](https://github.com/terraform-providers/terraform-provider-openstack/issues/556))
+* Fix flavor detection in `openstack_compute_instance_v2` and `openstack_containerinfra_cluster_v1` for Terraform v0.12 ([#551](https://github.com/terraform-providers/terraform-provider-openstack/issues/551))
+* Added the ability to import `openstack_lb_loadbalancer_v2` ([#524](https://github.com/terraform-providers/terraform-provider-openstack/issues/524))
+* Added the ability to import `openstack_lb_listener_v2` ([#524](https://github.com/terraform-providers/terraform-provider-openstack/issues/524))
+* Added the ability to import `openstack_lb_pool_v2` ([#524](https://github.com/terraform-providers/terraform-provider-openstack/issues/524))
+* Added the ability to import `openstack_lb_member_v2` ([#524](https://github.com/terraform-providers/terraform-provider-openstack/issues/524))
+* Added the ability to import `openstack_lb_monitor_v2` ([#524](https://github.com/terraform-providers/terraform-provider-openstack/issues/524))
+* Added `device_type` and `disk_bus` to `openstack_compute_instance_v2` block device ([#558](https://github.com/terraform-providers/terraform-provider-openstack/issues/558))
+* Added `transparent_vlan` to `openstack_networking_network_v2` ([#513](https://github.com/terraform-providers/terraform-provider-openstack/issues/513))
+* Added `transparent_vlan` to `openstack_networking_network_v2` data source ([#538](https://github.com/terraform-providers/terraform-provider-openstack/issues/538))
+* Added `max_retries` to the provider options ([#413](https://github.com/terraform-providers/terraform-provider-openstack/issues/413))
+* Added the ability to override catalog endpoints ([#501](https://github.com/terraform-providers/terraform-provider-openstack/issues/501))
+* Changed the `segments` attribute of the `openstack_networking_network_v2` to `TypeSet` [[#578](https://github.com/terraform-providers/terraform-provider-openstack/issues/578)] 
 
 BUG FIXES
 
-* `openstack_compute_interface_attach_v2` now correctly sets the `instance_id` [GH-557] 
-* `openstack_networking_port_v2` will now correctly set the `admin_state_up` to `true/UP` if left omitted [GH-594]
-* Fixed out of range panic in `openstack_compute_instance_v2` when no IP addresses were detected [GH-539]
+* `openstack_compute_interface_attach_v2` now correctly sets the `instance_id` [[#557](https://github.com/terraform-providers/terraform-provider-openstack/issues/557)] 
+* `openstack_networking_port_v2` will now correctly set the `admin_state_up` to `true/UP` if left omitted ([#594](https://github.com/terraform-providers/terraform-provider-openstack/issues/594))
+* Fixed out of range panic in `openstack_compute_instance_v2` when no IP addresses were detected ([#539](https://github.com/terraform-providers/terraform-provider-openstack/issues/539))
 
 ## 1.13.0 (December 18, 2018)
 
