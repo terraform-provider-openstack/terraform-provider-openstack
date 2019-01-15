@@ -77,5 +77,5 @@ location of the image or the path to retrieve it.
 * `schema` - The path to the JSON-schema that represent
    the image or image
 * `size_bytes` - The size of the image (in bytes).
-* `tags` - See Argument Reference above.
+* `tags` - The tags list of the image.
 * `updated_at` - The date the image was last updated.
