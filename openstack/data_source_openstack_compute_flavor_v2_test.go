@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
-
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
@@ -151,7 +149,6 @@ func TestAccComputeV2FlavorDataSource_extraSpecs(t *testing.T) {
 }
 
 func TestAccComputeV2FlavorDataSource_flavorID(t *testing.T) {
-	var flavor flavors.Flavor
 	var flavorName = acctest.RandomWithPrefix("tf-acc-flavor")
 
 	resource.Test(t, resource.TestCase{
@@ -163,12 +160,9 @@ func TestAccComputeV2FlavorDataSource_flavorID(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Flavor_extraSpecs_1(flavorName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2FlavorExists("openstack_compute_flavor_v2.flavor_1", &flavor),
-				),
 			},
 			{
-				Config: testAccComputeV2FlavorDataSource_flavorID(flavorName, &flavor),
+				Config: testAccComputeV2FlavorDataSource_flavorID(flavorName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
@@ -245,14 +239,14 @@ func testAccComputeV2FlavorDataSource_extraSpecs(flavorName string) string {
           `, flavorResource)
 }
 
-func testAccComputeV2FlavorDataSource_flavorID(flavorName string, flavor *flavors.Flavor) string {
+func testAccComputeV2FlavorDataSource_flavorID(flavorName string) string {
 	flavorResource := testAccComputeV2Flavor_extraSpecs_1(flavorName)
 
 	return fmt.Sprintf(`
           %s
 
           data "openstack_compute_flavor_v2" "flavor_1" {
-            flavor_id = "%s"
+            flavor_id = "${openstack_compute_flavor_v2.flavor_1.id}"
           }
-          `, flavorResource, flavor.ID)
+          `, flavorResource)
 }
