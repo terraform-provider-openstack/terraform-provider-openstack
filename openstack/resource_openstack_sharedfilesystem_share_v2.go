@@ -11,6 +11,7 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/errors"
+	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/messages"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
 )
 
@@ -215,7 +216,7 @@ func resourceSharedFilesystemShareV2Create(d *schema.ResourceData, meta interfac
 	// Wait for share to become active before continuing
 	err = waitForSFV2Share(sfsClient, share.ID, "available", []string{"creating", "manage_starting"}, timeout)
 	if err != nil {
-		return fmt.Errorf("Error waiting for OpenStack share %s to become available: %s", share.ID, err)
+		return err
 	}
 
 	return resourceSharedFilesystemShareV2Read(d, meta)
@@ -306,7 +307,7 @@ func resourceSharedFilesystemShareV2Update(d *schema.ResourceData, meta interfac
 		// Wait for share to become active before continuing
 		err = waitForSFV2Share(sfsClient, d.Id(), "available", []string{"creating", "manage_starting", "extending", "shrinking"}, timeout)
 		if err != nil {
-			return fmt.Errorf("Error waiting for OpenStack share %s to become available: %s", d.Id(), err)
+			return err
 		}
 
 		log.Printf("[DEBUG] Attempting to update share")
@@ -332,7 +333,7 @@ func resourceSharedFilesystemShareV2Update(d *schema.ResourceData, meta interfac
 		// Wait for share to become active before continuing
 		err = waitForSFV2Share(sfsClient, d.Id(), "available", []string{"creating", "manage_starting", "extending", "shrinking"}, timeout)
 		if err != nil {
-			return fmt.Errorf("Error waiting for OpenStack share %s to become available: %s", d.Id(), err)
+			return err
 		}
 	}
 
@@ -380,7 +381,7 @@ func resourceSharedFilesystemShareV2Update(d *schema.ResourceData, meta interfac
 		// Wait for share to become active before continuing
 		err = waitForSFV2Share(sfsClient, d.Id(), "available", pending, timeout)
 		if err != nil {
-			return fmt.Errorf("Error waiting for OpenStack share %s to become available: %s", d.Id(), err)
+			return err
 		}
 	}
 
@@ -449,7 +450,12 @@ func waitForSFV2Share(sfsClient *gophercloud.ServiceClient, id string, target st
 				return fmt.Errorf("Error: share %s not found: %s", id, err)
 			}
 		}
-		return fmt.Errorf("Error waiting for share %s to become %s: %s", id, target, err)
+		errorMessage := fmt.Sprintf("Error waiting for share %s to become %s", id, target)
+		msg := resourceSFSV2ShareManilaMessage(sfsClient, id)
+		if msg == nil {
+			return fmt.Errorf("%s: %s", errorMessage, err)
+		}
+		return fmt.Errorf("%s: %s: the latest manila message (%s): %s", errorMessage, err, msg.CreatedAt, msg.UserMessage)
 	}
 
 	return nil
@@ -463,4 +469,34 @@ func resourceSFV2ShareRefreshFunc(sfsClient *gophercloud.ServiceClient, id strin
 		}
 		return share, share.Status, nil
 	}
+}
+
+func resourceSFSV2ShareManilaMessage(sfsClient *gophercloud.ServiceClient, id string) *messages.Message {
+	// we can simply set this, because this function is called after the error occurred
+	sfsClient.Microversion = "2.37"
+
+	listOpts := messages.ListOpts{
+		ResourceID: id,
+		SortKey:    "created_at",
+		SortDir:    "desc",
+		Limit:      1,
+	}
+	allPages, err := messages.List(sfsClient, listOpts).AllPages()
+	if err != nil {
+		log.Printf("[DEBUG] Unable to retrieve messages: %v", err)
+		return nil
+	}
+
+	allMessages, err := messages.ExtractMessages(allPages)
+	if err != nil {
+		log.Printf("[DEBUG] Unable to extract messages: %v", err)
+		return nil
+	}
+
+	if len(allMessages) == 0 {
+		log.Printf("[DEBUG] No messages found")
+		return nil
+	}
+
+	return &allMessages[0]
 }
