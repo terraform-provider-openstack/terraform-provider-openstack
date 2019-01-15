@@ -336,7 +336,7 @@ The following arguments are supported:
     structure is documented below. Changing this creates a new server.
     You can specify multiple block devices which will create an instance with
     multiple disks. This configuration is very flexible, so please see the
-    following [reference](http://docs.openstack.org/developer/nova/block_device_mapping.html)
+    following [reference](https://docs.openstack.org/nova/latest/user/block-device-mapping.html)
     for more information.
 
 * `scheduler_hints` - (Optional) Provide the Nova scheduler with hints on how
