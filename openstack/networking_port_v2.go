@@ -1,9 +1,13 @@
 package openstack
 
 import (
+	"bytes"
+	"fmt"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -156,4 +160,12 @@ func expandNetworkingPortFixedIPV2(d *schema.ResourceData) interface{} {
 		}
 	}
 	return ip
+}
+
+func resourceNetworkingPortV2AllowedAddressPairsHash(v interface{}) int {
+	var buf bytes.Buffer
+	m := v.(map[string]interface{})
+	buf.WriteString(fmt.Sprintf("%s-%s", m["ip_address"].(string), m["mac_address"].(string)))
+
+	return hashcode.String(buf.String())
 }

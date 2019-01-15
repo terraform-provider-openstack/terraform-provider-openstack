@@ -131,6 +131,7 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: false,
+				Set:      resourceNetworkingPortV2AllowedAddressPairsHash,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip_address": {
