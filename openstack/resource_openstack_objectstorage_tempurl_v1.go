@@ -12,6 +12,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func resourceObjectstorageTempurlV1() *schema.Resource {
@@ -45,14 +46,9 @@ func resourceObjectstorageTempurlV1() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Default:  "get",
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if value != "get" && value != "post" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'get', and 'post' are supported values for 'method'"))
-					}
-					return
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"get", "post",
+				}, true),
 			},
 
 			"ttl": {

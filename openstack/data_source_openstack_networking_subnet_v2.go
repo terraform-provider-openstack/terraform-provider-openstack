@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
@@ -137,18 +138,22 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 				},
 			},
 			"ipv6_address_mode": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Computed:     true,
-				ValidateFunc: validateSubnetV2IPv6Mode,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"slaac", "dhcpv6-stateful", "dhcpv6-stateless",
+				}, true),
 			},
 			"ipv6_ra_mode": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Computed:     true,
-				ValidateFunc: validateSubnetV2IPv6Mode,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"slaac", "dhcpv6-stateful", "dhcpv6-stateless",
+				}, true),
 			},
 			"subnetpool_id": {
 				Type:     schema.TypeString,

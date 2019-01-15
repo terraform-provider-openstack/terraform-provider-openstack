@@ -8,6 +8,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/endpoints"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/services"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func dataSourceIdentityEndpointV3() *schema.Resource {
@@ -32,14 +33,9 @@ func dataSourceIdentityEndpointV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Default:  "public",
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if value != "public" && value != "internal" && value != "admin" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'public', 'internal', 'public'  are supported values for 'interface'"))
-					}
-					return
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"public", "internal", "admin",
+				}, true),
 			},
 			"url": {
 				Type:     schema.TypeString,

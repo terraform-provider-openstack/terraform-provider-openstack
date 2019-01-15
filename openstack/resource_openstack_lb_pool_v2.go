@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
@@ -57,14 +58,9 @@ func resourcePoolV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if value != "TCP" && value != "HTTP" && value != "HTTPS" && value != "PROXY" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'TCP', 'HTTP','HTTPS', and 'PROXY' are supported values for 'protocol'"))
-					}
-					return
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"TCP", "HTTP", "HTTPS", "PROXY",
+				}, false),
 			},
 
 			// One of loadbalancer_id or listener_id must be provided
@@ -84,14 +80,9 @@ func resourcePoolV2() *schema.Resource {
 			"lb_method": {
 				Type:     schema.TypeString,
 				Required: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if value != "ROUND_ROBIN" && value != "LEAST_CONNECTIONS" && value != "SOURCE_IP" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'ROUND_ROBIN', 'LEAST_CONNECTIONS', and 'SOURCE_IP' are supported values for 'lb_method'"))
-					}
-					return
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"ROUND_ROBIN", "LEAST_CONNECTIONS", "SOURCE_IP",
+				}, false),
 			},
 
 			"persistence": {
@@ -104,14 +95,9 @@ func resourcePoolV2() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 							ForceNew: true,
-							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-								value := v.(string)
-								if value != "SOURCE_IP" && value != "HTTP_COOKIE" && value != "APP_COOKIE" {
-									errors = append(errors, fmt.Errorf(
-										"Only 'SOURCE_IP', 'HTTP_COOKIE', and 'APP_COOKIE' are supported values for 'persistence'"))
-								}
-								return
-							},
+							ValidateFunc: validation.StringInSlice([]string{
+								"SOURCE_IP", "HTTP_COOKIE", "APP_COOKIE",
+							}, false),
 						},
 
 						"cookie_name": {

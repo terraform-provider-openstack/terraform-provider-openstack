@@ -8,6 +8,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func dataSourceImagesImageV2() *schema.Resource {
@@ -66,11 +67,13 @@ func dataSourceImagesImageV2() *schema.Resource {
 			},
 
 			"sort_direction": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Default:      "asc",
-				ValidateFunc: dataSourceImagesImageV2SortDirection,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "asc",
+				ValidateFunc: validation.StringInSlice([]string{
+					"asc", "desc",
+				}, true),
 			},
 
 			"tag": {
@@ -285,13 +288,4 @@ func mostRecentImage(images []images.Image) images.Image {
 	sortedImages := images
 	sort.Sort(imageSort(sortedImages))
 	return sortedImages[len(sortedImages)-1]
-}
-
-func dataSourceImagesImageV2SortDirection(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	if value != "asc" && value != "desc" {
-		err := fmt.Errorf("%s must be either asc or desc", k)
-		errors = append(errors, err)
-	}
-	return
 }

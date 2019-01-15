@@ -18,6 +18,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func resourceImagesImageV2() *schema.Resource {
@@ -45,17 +46,21 @@ func resourceImagesImageV2() *schema.Resource {
 			},
 
 			"container_format": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: resourceImagesImageV2ValidateContainerFormat,
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"ami", "ari", "aki", "bare", "ovf", "ova",
+				}, true),
 			},
 
 			"disk_format": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: resourceImagesImageV2ValidateDiskFormat,
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"ami", "ari", "aki", "vhd", "vmdk", "raw", "qcow2", "vdi", "iso",
+				}, true),
 			},
 
 			"file": {
@@ -87,7 +92,7 @@ func resourceImagesImageV2() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validatePositiveInt,
+				ValidateFunc: validation.IntAtLeast(0),
 				Default:      0,
 			},
 
@@ -95,7 +100,7 @@ func resourceImagesImageV2() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validatePositiveInt,
+				ValidateFunc: validation.IntAtLeast(0),
 				Default:      0,
 			},
 
@@ -456,41 +461,6 @@ func resourceImagesImageV2ValidateVisibility(v interface{}, k string) (ws []stri
 
 	err := fmt.Errorf("%s must be one of %s", k, validVisibilities)
 	errors = append(errors, err)
-	return
-}
-
-func validatePositiveInt(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(int)
-	if value >= 0 {
-		return
-	}
-	errors = append(errors, fmt.Errorf("%q must be a positive integer", k))
-	return
-}
-
-var DiskFormats = [9]string{"ami", "ari", "aki", "vhd", "vmdk", "raw", "qcow2", "vdi", "iso"}
-
-func resourceImagesImageV2ValidateDiskFormat(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	for i := range DiskFormats {
-		if value == DiskFormats[i] {
-			return
-		}
-	}
-	errors = append(errors, fmt.Errorf("%q must be one of %v", k, DiskFormats))
-	return
-}
-
-var ContainerFormats = [9]string{"ami", "ari", "aki", "bare", "ovf", "ova"}
-
-func resourceImagesImageV2ValidateContainerFormat(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	for i := range ContainerFormats {
-		if value == ContainerFormats[i] {
-			return
-		}
-	}
-	errors = append(errors, fmt.Errorf("%q must be one of %v", k, ContainerFormats))
 	return
 }
 
