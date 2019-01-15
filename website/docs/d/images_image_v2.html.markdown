@@ -78,4 +78,4 @@ location of the image or the path to retrieve it.
    the image or image
 * `size_bytes` - The size of the image (in bytes).
 * `tags` - See Argument Reference above.
-* `update_at` - The date the image was last updated.
+* `updated_at` - The date the image was last updated.
