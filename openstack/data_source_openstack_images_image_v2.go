@@ -134,6 +134,11 @@ func dataSourceImagesImageV2() *schema.Resource {
 				Computed: true,
 			},
 
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"updated_at": {
 				Type:     schema.TypeString,
 				Computed: true,
