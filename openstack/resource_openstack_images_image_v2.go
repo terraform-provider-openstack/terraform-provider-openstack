@@ -176,12 +176,6 @@ func resourceImagesImageV2() *schema.Resource {
 				Computed: true,
 			},
 
-			// Deprecated "use updated_at instead"
-			"update_at": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"updated_at": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -305,8 +299,6 @@ func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("metadata", img.Metadata)
 	d.Set("created_at", img.CreatedAt.Format(time.RFC3339))
 	d.Set("updated_at", img.UpdatedAt.Format(time.RFC3339))
-	// Deprecated
-	d.Set("update_at", img.UpdatedAt.Format(time.RFC3339))
 	d.Set("container_format", img.ContainerFormat)
 	d.Set("disk_format", img.DiskFormat)
 	d.Set("min_disk_gb", img.MinDiskGigabytes)
