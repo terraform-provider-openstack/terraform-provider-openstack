@@ -41,6 +41,11 @@ var testAccProviders map[string]terraform.ResourceProvider
 var testAccProvider *schema.Provider
 
 func init() {
+	// Openlab test environment sets only TF_ACC=1, forcing TF_SCHEMA_PANIC_ON_ERROR=1 as well
+	if os.Getenv("TF_ACC") != "" {
+		os.Setenv("TF_SCHEMA_PANIC_ON_ERROR", "1")
+	}
+
 	testAccProvider = Provider().(*schema.Provider)
 	testAccProviders = map[string]terraform.ResourceProvider{
 		"openstack": testAccProvider,
@@ -71,11 +76,6 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 
 	if OS_EXTGW_ID == "" {
 		t.Fatal("OS_EXTGW_ID must be set for acceptance tests")
-	}
-
-	// Openlab test environment sets only TF_ACC=1, forcing TF_SCHEMA_PANIC_ON_ERROR=1 as well
-	if os.Getenv("TF_ACC") != "" {
-		os.Setenv("TF_SCHEMA_PANIC_ON_ERROR", "1")
 	}
 }
 
