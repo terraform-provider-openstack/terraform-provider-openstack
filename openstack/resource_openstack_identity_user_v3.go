@@ -8,13 +8,6 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-var userOptions = map[users.Option]string{
-	users.IgnoreChangePasswordUponFirstUse: "ignore_change_password_upon_first_use",
-	users.IgnorePasswordExpiry:             "ignore_password_expiry",
-	users.IgnoreLockoutFailureAttempts:     "ignore_lockout_failure_attempts",
-	users.MultiFactorAuthEnabled:           "multi_factor_auth_enabled",
-}
-
 func resourceIdentityUserV3() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceIdentityUserV3Create,
@@ -26,6 +19,13 @@ func resourceIdentityUserV3() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+
 			"default_project_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -63,13 +63,6 @@ func resourceIdentityUserV3() *schema.Resource {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
-			},
-
-			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
 			},
 
 			// The following are all specific options that must
@@ -138,21 +131,21 @@ func resourceIdentityUserV3Create(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	// Build the MFA rules
-	mfaRules := resourceIdentityUserV3BuildMFARules(d.Get("multi_factor_auth_rule").([]interface{}))
+	mfaRules := expandIdentityUserV3MFARules(d.Get("multi_factor_auth_rule").([]interface{}))
 	if len(mfaRules) > 0 {
 		options[users.MultiFactorAuthRules] = mfaRules
 	}
 
 	createOpts.Options = options
 
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
+	log.Printf("[DEBUG] openstack_identity_user_v3 create options: %#v", createOpts)
 
 	// Add password here so it wouldn't go in the above log entry
 	createOpts.Password = d.Get("password").(string)
 
 	user, err := users.Create(identityClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack user: %s", err)
+		return fmt.Errorf("Error creating openstack_identity_user_v3: %s", err)
 	}
 
 	d.SetId(user.ID)
@@ -169,10 +162,10 @@ func resourceIdentityUserV3Read(d *schema.ResourceData, meta interface{}) error 
 
 	user, err := users.Get(identityClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "user")
+		return CheckDeleted(d, err, "Error retrieving openstack_identity_user_v3")
 	}
 
-	log.Printf("[DEBUG] Retrieved OpenStack user: %#v", user)
+	log.Printf("[DEBUG] Retrieved openstack_identity_user_v3 %s: %#v", d.Id(), user)
 
 	d.Set("default_project_id", user.DefaultProjectID)
 	d.Set("description", user.Description)
@@ -182,6 +175,7 @@ func resourceIdentityUserV3Read(d *schema.ResourceData, meta interface{}) error 
 	d.Set("name", user.Name)
 	d.Set("region", GetRegion(d, config))
 
+	// Check and see if any options match those defined in the schema.
 	options := user.Options
 	for _, option := range userOptions {
 		if v, ok := options[option]; ok {
@@ -189,15 +183,8 @@ func resourceIdentityUserV3Read(d *schema.ResourceData, meta interface{}) error 
 		}
 	}
 
-	mfaRules := []map[string]interface{}{}
 	if v, ok := options["multi_factor_auth_rules"].([]interface{}); ok {
-		for _, v := range v {
-			mfaRule := map[string]interface{}{
-				"rule": v,
-			}
-			mfaRules = append(mfaRules, mfaRule)
-		}
-
+		mfaRules := flattenIdentityUserV3MFARules(v)
 		d.Set("multi_factor_auth_rule", mfaRules)
 	}
 
@@ -257,7 +244,7 @@ func resourceIdentityUserV3Update(d *schema.ResourceData, meta interface{}) erro
 
 	// Build the MFA rules
 	if d.HasChange("multi_factor_auth_rule") {
-		mfaRules := resourceIdentityUserV3BuildMFARules(d.Get("multi_factor_auth_rule").([]interface{}))
+		mfaRules := expandIdentityUserV3MFARules(d.Get("multi_factor_auth_rule").([]interface{}))
 		if len(mfaRules) > 0 {
 			options[users.MultiFactorAuthRules] = mfaRules
 		}
@@ -266,7 +253,7 @@ func resourceIdentityUserV3Update(d *schema.ResourceData, meta interface{}) erro
 	updateOpts.Options = options
 
 	if hasChange {
-		log.Printf("[DEBUG] Update Options: %#v", updateOpts)
+		log.Printf("[DEBUG] openstack_identity_user_v3 %s update options: %#v", d.Id(), updateOpts)
 	}
 
 	if d.HasChange("password") {
@@ -277,7 +264,7 @@ func resourceIdentityUserV3Update(d *schema.ResourceData, meta interface{}) erro
 	if hasChange {
 		_, err := users.Update(identityClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenStack user: %s", err)
+			return fmt.Errorf("Error updating openstack_identity_user_v3 %s: %s", d.Id(), err)
 		}
 	}
 
@@ -293,20 +280,8 @@ func resourceIdentityUserV3Delete(d *schema.ResourceData, meta interface{}) erro
 
 	err = users.Delete(identityClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack user: %s", err)
+		return CheckDeleted(d, err, "Error deleting openstack_identity_user_v3")
 	}
 
 	return nil
-}
-
-func resourceIdentityUserV3BuildMFARules(rules []interface{}) []interface{} {
-	var mfaRules []interface{}
-
-	for _, rule := range rules {
-		ruleMap := rule.(map[string]interface{})
-		ruleList := ruleMap["rule"].([]interface{})
-		mfaRules = append(mfaRules, ruleList)
-	}
-
-	return mfaRules
 }
