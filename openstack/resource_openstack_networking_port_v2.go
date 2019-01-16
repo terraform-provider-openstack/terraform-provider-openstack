@@ -1,16 +1,13 @@
 package openstack
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
-	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -37,44 +34,52 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
+
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"network_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
+
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
+
 			"mac_address": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
+
 			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
+
 			"device_owner": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
+
 			"security_group_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -82,17 +87,20 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
+
 			"no_security_groups": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
 			},
+
 			"device_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
+
 			"fixed_ip": {
 				Type:          schema.TypeList,
 				Optional:      true,
@@ -111,17 +119,19 @@ func resourceNetworkingPortV2() *schema.Resource {
 					},
 				},
 			},
+
 			"no_fixed_ip": {
 				Type:          schema.TypeBool,
 				Optional:      true,
 				ForceNew:      false,
 				ConflictsWith: []string{"fixed_ip"},
 			},
+
 			"allowed_address_pairs": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: false,
-				Set:      allowedAddressPairsHash,
+				Set:      resourceNetworkingPortV2AllowedAddressPairsHash,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip_address": {
@@ -135,6 +145,7 @@ func resourceNetworkingPortV2() *schema.Resource {
 					},
 				},
 			},
+
 			"extra_dhcp_option": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -157,22 +168,26 @@ func resourceNetworkingPortV2() *schema.Resource {
 					},
 				},
 			},
+
 			"value_specs": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
 			},
+
 			"all_fixed_ips": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+
 			"all_security_group_ids": {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
+
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -189,14 +204,12 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	var securityGroups []string
-	v := d.Get("security_group_ids")
-	securityGroups = resourcePortSecurityGroupsV2(v.(*schema.Set))
+	securityGroups := expandToStringSlice(d.Get("security_group_ids").(*schema.Set).List())
 	noSecurityGroups := d.Get("no_security_groups").(bool)
 
 	// Check and make sure an invalid security group configuration wasn't given.
 	if noSecurityGroups && len(securityGroups) > 0 {
-		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set")
+		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set for openstack_networking_port_v2")
 	}
 
 	allowedAddressPairs := d.Get("allowed_address_pairs").(*schema.Set)
@@ -209,7 +222,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 			TenantID:            d.Get("tenant_id").(string),
 			DeviceOwner:         d.Get("device_owner").(string),
 			DeviceID:            d.Get("device_id").(string),
-			FixedIPs:            resourcePortFixedIpsV2(d),
+			FixedIPs:            expandNetworkingPortFixedIPV2(d),
 			AllowedAddressPairs: expandNetworkingPortAllowedAddressPairsV2(allowedAddressPairs),
 		},
 		MapValueSpecs(d),
@@ -232,7 +245,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 	}
 
 	// Declare a finalCreateOpts interface to hold either the
-	// base create options or the extended dhcp options.
+	// base create options or the extended DHCP options.
 	var finalCreateOpts ports.CreateOptsBuilder
 	finalCreateOpts = createOpts
 
@@ -244,7 +257,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
-	log.Printf("[DEBUG] Create Options: %#v", finalCreateOpts)
+	log.Printf("[DEBUG] openstack_networking_port_v2 create options: %#v", finalCreateOpts)
 
 	// Create a Neutron port and set extra DHCP options if they're specified.
 	var p struct {
@@ -254,22 +267,23 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 
 	err = ports.Create(networkingClient, finalCreateOpts).ExtractInto(&p)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Neutron port: %s", err)
+		return fmt.Errorf("Error creating openstack_networking_port_v2: %s", err)
 	}
 
-	log.Printf("[INFO] Network ID: %s", p.ID)
-
-	log.Printf("[DEBUG] Waiting for OpenStack Neutron Port (%s) to become available.", p.ID)
+	log.Printf("[DEBUG] Waiting for openstack_networking_port_v2 %s to become available.", p.ID)
 
 	stateConf := &resource.StateChangeConf{
-		Target:     []string{"ACTIVE"},
-		Refresh:    waitForNetworkPortActive(networkingClient, p.ID),
+		Target:     []string{"ACTIVE", "DOWN"},
+		Refresh:    resourceNetworkingPortV2StateRefreshFunc(networkingClient, p.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
 
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("Error waiting for openstack_networking_port_v2 %s to become available: %s", p.ID, err)
+	}
 
 	d.SetId(p.ID)
 
@@ -278,11 +292,12 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "ports", p.ID, tagOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error creating Tags on Port: %s", err)
+			return fmt.Errorf("Error setting tags on openstack_networking_port_v2 %s: %s", p.ID, err)
 		}
-		log.Printf("[DEBUG] Set Tags = %+v on Port %+v", tags, p.ID)
+		log.Printf("[DEBUG] Set tags %s on openstack_networking_port_v2 %s", tags, p.ID)
 	}
 
+	log.Printf("[DEBUG] Created openstack_networking_port_v2 %s: %#v", p.ID, p)
 	return resourceNetworkingPortV2Read(d, meta)
 }
 
@@ -299,10 +314,10 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	}
 	err = ports.Get(networkingClient, d.Id()).ExtractInto(&p)
 	if err != nil {
-		return CheckDeleted(d, err, "port")
+		return CheckDeleted(d, err, "Error getting openstack_networking_port_v2")
 	}
 
-	log.Printf("[DEBUG] Retrieved Port %s: %+v", d.Id(), p)
+	log.Printf("[DEBUG] Retrieved openstack_networking_port_v2 %s: %#v", d.Id(), p)
 
 	d.Set("name", p.Name)
 	d.Set("description", p.Description)
@@ -343,13 +358,12 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	v := d.Get("security_group_ids").(*schema.Set)
-	securityGroups := resourcePortSecurityGroupsV2(v)
+	securityGroups := expandToStringSlice(d.Get("security_group_ids").(*schema.Set).List())
 	noSecurityGroups := d.Get("no_security_groups").(bool)
 
 	// Check and make sure an invalid security group configuration wasn't given.
 	if noSecurityGroups && len(securityGroups) > 0 {
-		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set")
+		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set for openstack_networking_port_v2")
 	}
 
 	var hasChange bool
@@ -372,8 +386,6 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("security_group_ids") {
 		hasChange = true
-		sgs := d.Get("security_group_ids").(*schema.Set)
-		securityGroups := resourcePortSecurityGroupsV2(sgs)
 		updateOpts.SecurityGroups = &securityGroups
 	}
 
@@ -409,11 +421,12 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("fixed_ip") || d.HasChange("no_fixed_ip") {
 		hasChange = true
-		updateOpts.FixedIPs = resourcePortFixedIpsV2(d)
+		updateOpts.FixedIPs = expandNetworkingPortFixedIPV2(d)
 	}
 
 	// At this point, perform the update for all "standard" port changes.
 	if hasChange {
+		log.Printf("[DEBUG] openstack_networking_port_v2 %s update options: %#v", d.Id(), updateOpts)
 		_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
@@ -435,7 +448,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 				ExtraDHCPOpts:     deleteExtraDHCPOpts,
 			}
 
-			log.Printf("[DEBUG] Deleting old DHCP opts for Port %s", d.Id())
+			log.Printf("[DEBUG] Deleting old DHCP opts for openstack_networking_port_v2 %s", d.Id())
 			_, err = ports.Update(networkingClient, d.Id(), dhcpUpdateOpts).Extract()
 			if err != nil {
 				return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
@@ -450,10 +463,10 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 				ExtraDHCPOpts:     updateExtraDHCPOpts,
 			}
 
-			log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), dhcpUpdateOpts)
+			log.Printf("[DEBUG] Updating openstack_networking_port_v2 %s with options: %#v", d.Id(), dhcpUpdateOpts)
 			_, err = ports.Update(networkingClient, d.Id(), dhcpUpdateOpts).Extract()
 			if err != nil {
-				return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
+				return fmt.Errorf("Error updating openstack_networking_port_v2 %s: %s", d.Id(), err)
 			}
 		}
 	}
@@ -464,9 +477,9 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "ports", d.Id(), tagOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating Tags on Port: %s", err)
+			return fmt.Errorf("Error setting tags on openstack_networking_port_v2 %s: %s", d.Id(), err)
 		}
-		log.Printf("[DEBUG] Updated Tags = %+v on Port %+v", tags, d.Id())
+		log.Printf("[DEBUG] Set tags %s on openstack_networking_port_v2 %s", tags, d.Id())
 	}
 
 	return resourceNetworkingPortV2Read(d, meta)
@@ -479,10 +492,14 @@ func resourceNetworkingPortV2Delete(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	if err := ports.Delete(networkingClient, d.Id()).ExtractErr(); err != nil {
+		return CheckDeleted(d, err, "Error deleting openstack_networking_port_v2")
+	}
+
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForNetworkPortDelete(networkingClient, d.Id()),
+		Refresh:    resourceNetworkingPortV2StateRefreshFunc(networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -490,96 +507,9 @@ func resourceNetworkingPortV2Delete(d *schema.ResourceData, meta interface{}) er
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack Neutron Network: %s", err)
+		return fmt.Errorf("Error waiting for openstack_networking_port_v2 %s to delete: %s", d.Id(), err)
 	}
 
 	d.SetId("")
 	return nil
-}
-
-func resourcePortSecurityGroupsV2(v *schema.Set) []string {
-	var securityGroups []string
-	for _, v := range v.List() {
-		securityGroups = append(securityGroups, v.(string))
-	}
-	return securityGroups
-}
-
-func resourcePortFixedIpsV2(d *schema.ResourceData) interface{} {
-	// if no_fixed_ip was specified, then just return
-	// an empty array. Since no_fixed_ip is mutually
-	// exclusive to fixed_ip, we can safely do this.
-	//
-	// Since we're only concerned about no_fixed_ip
-	// being set to "true", GetOk is used.
-	if _, ok := d.GetOk("no_fixed_ip"); ok {
-		return []interface{}{}
-	}
-
-	rawIP := d.Get("fixed_ip").([]interface{})
-
-	if len(rawIP) == 0 {
-		return nil
-	}
-
-	ip := make([]ports.IP, len(rawIP))
-	for i, raw := range rawIP {
-		rawMap := raw.(map[string]interface{})
-		ip[i] = ports.IP{
-			SubnetID:  rawMap["subnet_id"].(string),
-			IPAddress: rawMap["ip_address"].(string),
-		}
-	}
-	return ip
-}
-
-func allowedAddressPairsHash(v interface{}) int {
-	var buf bytes.Buffer
-	m := v.(map[string]interface{})
-	buf.WriteString(fmt.Sprintf("%s-%s", m["ip_address"].(string), m["mac_address"].(string)))
-
-	return hashcode.String(buf.String())
-}
-
-func waitForNetworkPortActive(networkingClient *gophercloud.ServiceClient, portId string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		p, err := ports.Get(networkingClient, portId).Extract()
-		if err != nil {
-			return nil, "", err
-		}
-
-		log.Printf("[DEBUG] OpenStack Neutron Port: %+v", p)
-		if p.Status == "DOWN" || p.Status == "ACTIVE" {
-			return p, "ACTIVE", nil
-		}
-
-		return p, p.Status, nil
-	}
-}
-
-func waitForNetworkPortDelete(networkingClient *gophercloud.ServiceClient, portId string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		log.Printf("[DEBUG] Attempting to delete OpenStack Neutron Port %s", portId)
-
-		p, err := ports.Get(networkingClient, portId).Extract()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenStack Port %s", portId)
-				return p, "DELETED", nil
-			}
-			return p, "ACTIVE", err
-		}
-
-		err = ports.Delete(networkingClient, portId).ExtractErr()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenStack Port %s", portId)
-				return p, "DELETED", nil
-			}
-			return p, "ACTIVE", err
-		}
-
-		log.Printf("[DEBUG] OpenStack Port %s still active.\n", portId)
-		return p, "ACTIVE", nil
-	}
 }

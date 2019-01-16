@@ -97,7 +97,6 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 			"allowed_address_pairs": {
 				Type:     schema.TypeSet,
 				Computed: true,
-				Set:      allowedAddressPairsHash,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip_address": {
@@ -209,18 +208,18 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 
 	allPages, err := ports.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to list Ports: %s", err)
+		return fmt.Errorf("Unable to list openstack_networking_ports_v2: %s", err)
 	}
 
 	var allPorts []extraPort
 
 	err = ports.ExtractPortsInto(allPages, &allPorts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve Ports: %s", err)
+		return fmt.Errorf("Unable to retrieve openstack_networking_ports_v2: %s", err)
 	}
 
 	if len(allPorts) == 0 {
-		return fmt.Errorf("No Port found")
+		return fmt.Errorf("No openstack_networking_port_v2 found")
 	}
 
 	var portsList []extraPort
@@ -243,15 +242,14 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 			}
 		}
 		if len(portsList) == 0 {
-			log.Printf("No Port found after the 'fixed_ip' filter")
-			return fmt.Errorf("No Port found")
+			log.Printf("No openstack_networking_port_v2 found after the 'fixed_ip' filter")
+			return fmt.Errorf("No openstack_networking_port_v2 found")
 		}
 	} else {
 		portsList = allPorts
 	}
 
-	v := d.Get("security_group_ids").(*schema.Set)
-	securityGroups := resourcePortSecurityGroupsV2(v)
+	securityGroups := expandToStringSlice(d.Get("security_group_ids").(*schema.Set).List())
 	if len(securityGroups) > 0 {
 		var sgPorts []extraPort
 		for _, p := range portsList {
@@ -262,19 +260,19 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 			}
 		}
 		if len(sgPorts) == 0 {
-			log.Printf("[DEBUG] No Port found after the 'security_group_ids' filter")
-			return fmt.Errorf("No Port found")
+			log.Printf("[DEBUG] No openstack_networking_port_v2 found after the 'security_group_ids' filter")
+			return fmt.Errorf("No openstack_networking_port_v2 found")
 		}
 		portsList = sgPorts
 	}
 
 	if len(portsList) > 1 {
-		return fmt.Errorf("More than one Port found (%d)", len(portsList))
+		return fmt.Errorf("More than one openstack_networking_port_v2 found (%d)", len(portsList))
 	}
 
 	port := portsList[0]
 
-	log.Printf("[DEBUG] Retrieved Port %s: %+v", port.ID, port)
+	log.Printf("[DEBUG] Retrieved openstack_networking_port_v2 %s: %+v", port.ID, port)
 	d.SetId(port.ID)
 
 	d.Set("port_id", port.ID)

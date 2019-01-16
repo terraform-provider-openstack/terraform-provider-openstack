@@ -180,16 +180,16 @@ func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{})
 
 	allPages, err := ports.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to list Ports: %s", err)
+		return fmt.Errorf("Unable to list openstack_networking_ports_v2: %s", err)
 	}
 
 	allPorts, err := ports.ExtractPorts(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve Ports: %s", err)
+		return fmt.Errorf("Unable to retrieve openstack_networking_ports_v2: %s", err)
 	}
 
 	if len(allPorts) == 0 {
-		return fmt.Errorf("No Port found")
+		return fmt.Errorf("No openstack_networking_port_v2 found")
 	}
 
 	var portsList []ports.Port
@@ -209,15 +209,14 @@ func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{})
 			}
 		}
 		if len(portsList) == 0 {
-			log.Printf("No Port found after the 'fixed_ip' filter")
-			return fmt.Errorf("No Port found")
+			log.Printf("No openstack_networking_port_v2 found after the 'fixed_ip' filter")
+			return fmt.Errorf("No openstack_networking_port_v2 found")
 		}
 	} else {
 		portsList = allPorts
 	}
 
-	v := d.Get("security_group_ids").(*schema.Set)
-	securityGroups := resourcePortSecurityGroupsV2(v)
+	securityGroups := expandToStringSlice(d.Get("security_group_ids").(*schema.Set).List())
 	if len(securityGroups) > 0 {
 		var sgPorts []ports.Port
 		for _, p := range portsList {
@@ -228,8 +227,8 @@ func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{})
 			}
 		}
 		if len(sgPorts) == 0 {
-			log.Printf("No Port found after the 'security_group_ids' filter")
-			return fmt.Errorf("No Port found")
+			log.Printf("No openstack_networking_port_v2 found after the 'security_group_ids' filter")
+			return fmt.Errorf("No openstack_networking_port_v2 found")
 		}
 		portsList = sgPorts
 	}
@@ -238,7 +237,7 @@ func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{})
 		portIDs = append(portIDs, p.ID)
 	}
 
-	log.Printf("[DEBUG] Retrieved %d Ports: %+v", len(portsList), portsList)
+	log.Printf("[DEBUG] Retrieved %d openstack_networking_port_v2: %+v", len(portsList), portsList)
 
 	d.SetId(fmt.Sprintf("%d", hashcode.String(strings.Join(portIDs, ""))))
 	d.Set("ids", portIDs)

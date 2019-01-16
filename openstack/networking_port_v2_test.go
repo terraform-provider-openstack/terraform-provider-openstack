@@ -230,3 +230,45 @@ func TestFlattenNetworkingPortAllowedAddressPairsV2(t *testing.T) {
 
 	assert.ElementsMatch(t, expectedAllowedAddressPairs, actualAllowedAddressPairs)
 }
+
+func TestExpandNetworkingPortFixedIPV2NoFixedIPs(t *testing.T) {
+	r := resourceNetworkingPortV2()
+	d := r.TestResourceData()
+	d.SetId("1")
+	d.Set("no_fixed_ip", true)
+
+	actualFixedIP := expandNetworkingPortFixedIPV2(d)
+
+	assert.Empty(t, actualFixedIP)
+}
+
+func TestExpandNetworkingPortFixedIPV2SomeFixedIPs(t *testing.T) {
+	r := resourceNetworkingPortV2()
+	d := r.TestResourceData()
+	d.SetId("1")
+	fixedIP1 := map[string]interface{}{
+		"subnet_id":  "aaa",
+		"ip_address": "192.0.201.101",
+	}
+	fixedIP2 := map[string]interface{}{
+		"subnet_id":  "bbb",
+		"ip_address": "192.0.202.102",
+	}
+	fixedIP := []map[string]interface{}{fixedIP1, fixedIP2}
+	d.Set("fixed_ip", fixedIP)
+
+	expectedFixedIP := []ports.IP{
+		{
+			SubnetID:  "aaa",
+			IPAddress: "192.0.201.101",
+		},
+		{
+			SubnetID:  "bbb",
+			IPAddress: "192.0.202.102",
+		},
+	}
+
+	actualFixedIP := expandNetworkingPortFixedIPV2(d)
+
+	assert.ElementsMatch(t, expectedFixedIP, actualFixedIP)
+}
