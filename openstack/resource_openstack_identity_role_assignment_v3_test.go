@@ -81,7 +81,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
 
-		domainID, projectID, groupID, userID, roleID := extractRoleAssignmentID(rs.Primary.ID)
+		domainID, projectID, groupID, userID, roleID := identityRoleAssignmentV3ParseID(rs.Primary.ID)
 
 		var opts roles.ListAssignmentsOpts
 		opts = roles.ListAssignmentsOpts{
