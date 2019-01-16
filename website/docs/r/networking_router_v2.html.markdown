@@ -42,7 +42,7 @@ The following arguments are supported:
     distributed router. The default policy setting in Neutron restricts
     usage of this property to administrative users only.
 
-* `external_gateway` - (Deprecated - use `external_network_id` instead) The
+* `external_gateway` - (**Deprecated** - use `external_network_id` instead) The
     network UUID of an external gateway for the router. A router with an
     external gateway is required if any compute instances or load balancers
     will be using floating IPs. Changing this updates the external gateway

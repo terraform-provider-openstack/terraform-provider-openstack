@@ -106,7 +106,8 @@ The following attributes are exported:
 * `status` - The status of the image. It can be "queued", "active"
    or "saving".
 * `tags` - See Argument Reference above.
-* `update_at` - The date the image was last updated.
+* `updated_at` - The date the image was last updated.
+* `update_at` - (**Deprecated** - use `updated_at` instead)
 * `visibility` - See Argument Reference above.
 
 ## Notes
