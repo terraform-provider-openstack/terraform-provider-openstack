@@ -203,13 +203,9 @@ func resourceNetworkFloatingIPV2Update(d *schema.ResourceData, meta interface{})
 		hasChange = true
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
-
-		// PortID is a pointer and not omitted, should always be set
-		portID := d.Get("port_id").(string)
-		updateOpts.PortID = &portID
 	}
 
-	if d.HasChange("port_id") && !hasChange {
+	if d.HasChange("port_id") {
 		hasChange = true
 		portID := d.Get("port_id").(string)
 		updateOpts.PortID = &portID
