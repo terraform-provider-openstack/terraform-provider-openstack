@@ -414,7 +414,7 @@ and create a Pull Request.
 ### OpenLab Testing
 
 Once you have created a Pull Request, it will automatically be tested by
-[OpenLab](http://openlabtesting.org/). OpenLab will run most of the Acceptance
+[OpenLab](https://openlabtesting.org/). OpenLab will run most of the Acceptance
 Tests in a clean OpenStack cloud (see below for the resources which you must
 tell OpenLab to run). Testing will take between 90-120 minutes and you will
 receive a notification with a test report when testing has finished.
