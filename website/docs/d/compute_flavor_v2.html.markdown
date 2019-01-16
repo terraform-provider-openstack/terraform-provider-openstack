@@ -24,13 +24,18 @@ data "openstack_compute_flavor_v2" "small" {
 * `region` - (Optional) The region in which to obtain the V2 Compute client.
     If omitted, the `region` argument of the provider is used.
 
-* `name` - (Optional) The name of the flavor.
+* `flavor_id` - (Optional) The ID of the flavor. Conflicts with the `name`,
+    `min_ram` and `min_disk`
 
-* `min_ram` - (Optional) The minimum amount of RAM (in megabytes).
+* `name` - (Optional) The name of the flavor. Conflicts with the `flavor_id`.
+
+* `min_ram` - (Optional) The minimum amount of RAM (in megabytes). Conflicts
+   with the `flavor_id`.
 
 * `ram` - (Optional) The exact amount of RAM (in megabytes).
 
-* `min_disk` - (Optional) The minimum amount of disk (in gigabytes).
+* `min_disk` - (Optional) The minimum amount of disk (in gigabytes). Conflicts
+   with the `flavor_id`.
 
 * `disk` - (Optional) The exact amount of disk (in gigabytes).
 
