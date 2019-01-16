@@ -327,19 +327,19 @@ func resourceL7RuleV2Delete(d *schema.ResourceData, meta interface{}) error {
 	// Get a clean copy of the parent listener.
 	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve listener %s: %s", listenerID, err)
+		return fmt.Errorf("Unable to retrieve parent listener (%s) for the L7 Rule: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the parent L7 Policy.
 	parentL7Policy, err := l7policies.Get(lbClient, l7policyID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to get parent L7 Policy: %s", err)
+		return fmt.Errorf("Unable to retrieve parent L7 Policy (%s) for the L7 Rule: %s", l7policyID, err)
 	}
 
 	// Get a clean copy of the L7 Rule.
 	l7Rule, err := l7policies.GetRule(lbClient, l7policyID, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to get L7 Rule: %s", err)
+		return CheckDeleted(d, err, "Unable to retrieve L7 Rule")
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
@@ -358,7 +358,7 @@ func resourceL7RuleV2Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error deleting L7 Rule %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Error deleting L7 Rule")
 	}
 
 	err = waitForLBV2L7Rule(lbClient, parentListener, parentL7Policy, l7Rule, "DELETED", lbPendingDeleteStatuses, timeout)

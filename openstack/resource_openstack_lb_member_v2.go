@@ -266,13 +266,13 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 	poolID := d.Get("pool_id").(string)
 	parentPool, err := pools.Get(lbClient, poolID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve parent pool %s: %s", poolID, err)
+		return fmt.Errorf("Unable to retrieve parent pool (%s) for the member: %s", poolID, err)
 	}
 
 	// Get a clean copy of the member.
 	member, err := pools.GetMember(lbClient, poolID, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve member: %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Unable to retrieve member")
 	}
 
 	// Wait for parent pool to become active before continuing.
@@ -292,7 +292,7 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Unable to delete member %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Error deleting member")
 	}
 
 	// Wait for the member to become DELETED.

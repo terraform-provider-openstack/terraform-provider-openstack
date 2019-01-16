@@ -325,7 +325,7 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	// Get a clean copy of the pool.
 	pool, err := pools.Get(lbClient, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve pool %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Unable to retrieve pool")
 	}
 
 	log.Printf("[DEBUG] Attempting to delete pool %s", d.Id())
@@ -338,7 +338,7 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Unale to delete pool %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Error deleting pool")
 	}
 
 	// Wait for Pool to delete
