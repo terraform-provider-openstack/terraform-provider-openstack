@@ -31,6 +31,7 @@ func dataSourceIdentityAuthScopeV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"user_name": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -40,6 +41,7 @@ func dataSourceIdentityAuthScopeV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"user_domain_name": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -49,6 +51,7 @@ func dataSourceIdentityAuthScopeV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"project_name": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -58,6 +61,7 @@ func dataSourceIdentityAuthScopeV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"project_domain_name": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -120,16 +124,9 @@ func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	var allRoles []map[string]string
-	for _, r := range roles {
-		allRoles = append(allRoles, map[string]string{
-			"role_name": r.Name,
-			"role_id":   r.ID,
-		})
-	}
-
+	allRoles := flattenIdentityAuthScopeV3Roles(roles)
 	if err := d.Set("roles", allRoles); err != nil {
-		log.Printf("[DEBUG] Unable to set roles: %s", err)
+		log.Printf("[DEBUG] Unable to set openstack_identity_auth_scope_v3 roles: %s", err)
 	}
 
 	d.Set("region", GetRegion(d, config))
