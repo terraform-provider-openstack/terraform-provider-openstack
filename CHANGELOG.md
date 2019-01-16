@@ -1,4 +1,9 @@
-## 1.14.1 (Unreleased)
+## 1.15.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Added `flavor_id` to the `openstack_compute_flavor_v2` data source so flavors can be queried by ID [GH-587]
+
 ## 1.14.0 (January 15, 2019)
 
 NOTES
