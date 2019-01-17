@@ -10,6 +10,8 @@ BUG FIXES
 * Fixed `created_at` and `updated_at` fields in the `openstack_networking_subnetpool_v2` resource [GH-619]
 * Fixed `created_at` and `updated_at` fields in the `openstack_networking_subnetpool_v2` data source [GH-616]
 * Fixed issue where updating the description of a floating IP would cause the port to disassociate [GH-606]
+* `admin_state_up` and `shared` fields of `openstack_networking_network_v2` are now correct boolean fields [GH-593]
+* `external` field of `openstack_networking_network_v2` field will now show an actual value [GH-593]
 
 ## 1.14.0 (January 15, 2019)
 
