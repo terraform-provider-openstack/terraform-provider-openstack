@@ -52,6 +52,8 @@ data "openstack_networking_subnetpool_v2" "subnetpool_1" {
 
 * `is_default` - (Optional) Whether the subnetpool is default subnetpool or not.
 
+* `tags` - (Optional) The list of subnetpool tags to filter.
+
 ## Attributes Reference
 
 `id` is set to the ID of the found subnetpool. In addition, the following attributes
@@ -73,3 +75,4 @@ are exported:
 * `description` - See Argument Reference above.
 * `is_default` - See Argument Reference above.
 * `revision_number` - The revision number of the subnetpool.
+* `all_tags` - The set of string tags applied on the subnetpool.
