@@ -28,6 +28,10 @@ func TestAccNetworkingV2Trunk_nosubports(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.parent_port_1", &port_1),
 					testAccCheckNetworkingV2TrunkExists("openstack_networking_trunk_v2.trunk_1", []string{}, &trunk_1),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_trunk_v2.trunk_1", "name", "trunk_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_trunk_v2.trunk_1", "description", "trunk_1 description"),
 				),
 			},
 		},
@@ -109,6 +113,8 @@ func TestAccNetworkingV2Trunk_trunkUpdateSubports(t *testing.T) {
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.subport_3", &subport_3),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.subport_4", &subport_4),
 					testAccCheckNetworkingV2TrunkExists("openstack_networking_trunk_v2.trunk_1", []string{"openstack_networking_port_v2.subport_1", "openstack_networking_port_v2.subport_2"}, &trunk_1, &subport_1, &subport_2),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_trunk_v2.trunk_1", "description", "trunk_1 description"),
 				),
 			},
 			{
@@ -120,6 +126,8 @@ func TestAccNetworkingV2Trunk_trunkUpdateSubports(t *testing.T) {
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.subport_3", &subport_3),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.subport_4", &subport_4),
 					testAccCheckNetworkingV2TrunkExists("openstack_networking_trunk_v2.trunk_1", []string{"openstack_networking_port_v2.subport_1", "openstack_networking_port_v2.subport_3", "openstack_networking_port_v2.subport_4"}, &trunk_1, &subport_1, &subport_3, &subport_4),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_trunk_v2.trunk_1", "description", ""),
 				),
 			},
 			{
@@ -131,6 +139,8 @@ func TestAccNetworkingV2Trunk_trunkUpdateSubports(t *testing.T) {
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.subport_3", &subport_3),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.subport_4", &subport_4),
 					testAccCheckNetworkingV2TrunkExists("openstack_networking_trunk_v2.trunk_1", []string{"openstack_networking_port_v2.subport_1", "openstack_networking_port_v2.subport_3", "openstack_networking_port_v2.subport_4"}, &trunk_1, &subport_1, &subport_3, &subport_4),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_trunk_v2.trunk_1", "description", ""),
 				),
 			},
 			{
@@ -142,6 +152,8 @@ func TestAccNetworkingV2Trunk_trunkUpdateSubports(t *testing.T) {
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.subport_3", &subport_3),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.subport_4", &subport_4),
 					testAccCheckNetworkingV2TrunkExists("openstack_networking_trunk_v2.trunk_1", []string{}, &trunk_1),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_trunk_v2.trunk_1", "description", "trunk_1 updated description"),
 				),
 			},
 		},
@@ -283,6 +295,7 @@ resource "openstack_networking_port_v2" "parent_port_1" {
 
 resource "openstack_networking_trunk_v2" "trunk_1" {
   name = "trunk_1"
+  description = "trunk_1 description"
   port_id = "${openstack_networking_port_v2.parent_port_1.id}"
   admin_state_up = "true"
 }
@@ -321,6 +334,7 @@ resource "openstack_networking_port_v2" "subport_2" {
 
 resource "openstack_networking_trunk_v2" "trunk_1" {
   name = "trunk_1"
+  description = "trunk_1 description"
   port_id = "${openstack_networking_port_v2.parent_port_1.id}"
   admin_state_up = "true"
 
@@ -383,6 +397,7 @@ resource "openstack_networking_port_v2" "subport_4" {
 
 resource "openstack_networking_trunk_v2" "trunk_1" {
   name = "trunk_1"
+  description = "trunk_1 description"
   admin_state_up = "true"
   port_id = "${openstack_networking_port_v2.parent_port_1.id}"
 
@@ -513,6 +528,7 @@ resource "openstack_networking_port_v2" "subport_4" {
 
 resource "openstack_networking_trunk_v2" "trunk_1" {
   name = "trunk_1"
+  description = ""
   admin_state_up = "true"
   port_id = "${openstack_networking_port_v2.parent_port_1.id}"
 
@@ -581,6 +597,7 @@ resource "openstack_networking_port_v2" "subport_4" {
 
 resource "openstack_networking_trunk_v2" "trunk_1" {
   name = "trunk_1"
+  description = "trunk_1 updated description"
   port_id = "${openstack_networking_port_v2.parent_port_1.id}"
   admin_state_up = "true"
 }

@@ -53,9 +53,9 @@ resource "openstack_networking_trunk_v2" "trunk_1" {
   port_id = "${openstack_networking_port_v2.parent_port_1.id}"
 
   sub_port {
-	  port_id = "${openstack_networking_port_v2.subport_1.id}"
-	  segmentation_id = 1
-	  segmentation_type = "vlan"
+    port_id = "${openstack_networking_port_v2.subport_1.id}"
+    segmentation_id = 1
+    segmentation_type = "vlan"
   }
 }
 
@@ -81,6 +81,9 @@ The following arguments are supported:
 * `name` - (Optional) A unique name for the port. Changing this
     updates the `name` of an existing port.
 
+* `description` - (Optional) Human-readable description of the port. Changing this
+    updates the name of the existing port.
+
 * `port_id` - (Required) The ID of the port to be used as the parent port of the
     trunk. This is the port that should be used as the compute instance network
     port. Changing this creates a new trunk.
@@ -94,6 +97,8 @@ The following arguments are supported:
 
 * `sub_port` - (Optional) The set of ports that will be made subports of the trunk.
     The structure of each subport is described below.
+
+* `tags` - (Optional) A set of string tags for the port.
 
 The `sub_port` block supports:
 
@@ -109,7 +114,9 @@ The following attributes are exported:
 
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
+* `description` - See Argument Reference above.
 * `port_id` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
-* `sub_port` - See Argument Reference above
+* `sub_port` - See Argument Reference above.
+* `tags` - See Argument Reference above.
