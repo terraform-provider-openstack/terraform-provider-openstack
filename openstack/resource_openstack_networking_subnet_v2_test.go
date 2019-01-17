@@ -182,6 +182,34 @@ func TestAccNetworkingV2Subnet_subnetPoolNoCIDR(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Subnet_subnetHostRoutes(t *testing.T) {
+	var subnet subnets.Subnet
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Subnet_subnetHostRoutes1,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "host_routes.#", "1"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Subnet_subnetHostRoutes2,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "host_routes.#", "2"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2SubnetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
@@ -389,8 +417,8 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "10.11.12.0/25"
   no_gateway = true
-	network_id = "${openstack_networking_network_v2.network_1.id}"
-	subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
 }
 `
 
@@ -408,7 +436,49 @@ resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
-	network_id = "${openstack_networking_network_v2.network_1.id}"
-	subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+}
+`
+
+const testAccNetworkingV2Subnet_subnetHostRoutes1 = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  cidr = "192.168.199.0/24"
+
+  host_routes = {
+    destination_cidr = "10.0.1.0/24",
+    next_hop = "192.168.199.254",
+  }
+}
+`
+
+const testAccNetworkingV2Subnet_subnetHostRoutes2 = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  cidr = "192.168.199.0/24"
+
+  host_routes = [
+    {
+      destination_cidr = "10.0.1.0/24",
+      next_hop = "192.168.199.254",
+    },
+    {
+      destination_cidr = "10.0.2.0/24",
+      next_hop = "192.168.199.254",
+    },
+  ]
 }
 `
