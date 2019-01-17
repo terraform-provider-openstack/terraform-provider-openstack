@@ -5,13 +5,13 @@ import (
 )
 
 func flattenIdentityAuthScopeV3Roles(roles []tokens.Role) []map[string]string {
-	var allRoles []map[string]string
+	allRoles := make([]map[string]string, len(roles))
 
-	for _, r := range roles {
-		allRoles = append(allRoles, map[string]string{
+	for i, r := range roles {
+		allRoles[i] = map[string]string{
 			"role_name": r.Name,
 			"role_id":   r.ID,
-		})
+		}
 
 	}
 
