@@ -104,7 +104,7 @@ func resourceNetworkingFloatingIPAssociateV2Delete(d *schema.ResourceData, meta 
 
 	portID := d.Get("port_id").(string)
 	updateOpts := floatingips.UpdateOpts{
-		PortID: nil,
+		PortID: new(string),
 	}
 
 	log.Printf("[DEBUG] openstack_networking_floatingip_v2 disassociating options: %#v", updateOpts)
