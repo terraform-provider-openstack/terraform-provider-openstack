@@ -83,6 +83,12 @@ func dataSourceNetworkingPortIDsV2() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			"security_group_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -150,6 +156,10 @@ func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{})
 	}
 
 	if v, ok := d.GetOk("network_id"); ok {
+		listOpts.NetworkID = v.(string)
+	}
+
+	if v, ok := d.GetOk("status"); ok {
 		listOpts.Status = v.(string)
 	}
 

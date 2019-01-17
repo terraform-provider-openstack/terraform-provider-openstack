@@ -21,6 +21,8 @@ func TestAccNetworkingV2PortDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_networking_port_v2.port_2", "id",
 						"openstack_networking_port_v2.port_2", "id"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_port_v2.port_2", "allowed_address_pairs.#", "2"),
 				),
 			},
 		},
@@ -59,6 +61,16 @@ resource "openstack_networking_port_v2" "port_2" {
     "foo",
     "bar",
   ]
+
+  allowed_address_pairs {
+    ip_address = "10.0.0.201"
+    mac_address = "fa:16:3e:f8:ab:da"
+  }
+
+  allowed_address_pairs {
+    ip_address = "10.0.0.202"
+    mac_address = "fa:16:3e:ab:4b:58"
+  }
 }
 
 data "openstack_networking_port_v2" "port_1" {

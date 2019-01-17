@@ -43,6 +43,8 @@ data "openstack_networking_port_ids_v2" "ports" {
 
 * `fixed_ip` - (Optional) The port IP address filter.
 
+* `status` - (Optional) The status of the port.
+
 * `security_group_ids` - (Optional) The list of port security group IDs to filter.
 
 * `tags` - (Optional) The list of port tags to filter.
