@@ -93,7 +93,7 @@ func TestAccNetworkingV2TrunkDataSource_tags(t *testing.T) {
 
 const testAccNetworkingV2TrunkDataSource = `
 resource "openstack_networking_network_v2" "network_1" {
-  name = "network_1"
+  name = "trunk_network_1"
   admin_state_up = "true"
 }
 

@@ -167,7 +167,7 @@ func dataSourceNetworkingTrunkV2Read(d *schema.ResourceData, meta interface{}) e
 	d.Set("port_id", trunk.PortID)
 	d.Set("admin_state_up", trunk.AdminStateUp)
 	d.Set("status", trunk.Status)
-	d.Set("tenant_id", trunk.TenantID)
+	d.Set("project_id", trunk.ProjectID)
 	d.Set("all_tags", trunk.Tags)
 
 	subports := make([]map[string]interface{}, len(trunk.Subports))
