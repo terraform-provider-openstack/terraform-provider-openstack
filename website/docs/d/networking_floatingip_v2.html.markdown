@@ -32,7 +32,11 @@ data "openstack_networking_floatingip_v2" "floatingip_1" {
 
 * `port_id` - (Optional) The ID of the port the floating IP is attached.
 
+* `status` - status of the floating IP (ACTIVE/DOWN).
+
 * `fixed_ip` - (Optional) The specific IP address of the internal port which should be associated with the floating IP.
+
+* `tags` - (Optional) The list of floating IP tags to filter.
 
 * `tenant_id` - (Optional) The owner of the floating IP.
 
@@ -41,4 +45,4 @@ data "openstack_networking_floatingip_v2" "floatingip_1" {
 `id` is set to the ID of the found floating IP. In addition, the following attributes
 are exported:
 
-* `status` - status of the floating IP (ACTIVE/DOWN).
+* `all_tags` - A set of string tags applied on the floating IP.
