@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/hashicorp/terraform/helper/schema"
 
@@ -198,8 +199,8 @@ func dataSourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface
 	d.Set("name", subnetPool.Name)
 	d.Set("default_quota", subnetPool.DefaultQuota)
 	d.Set("project_id", subnetPool.ProjectID)
-	d.Set("created_at", subnetPool.CreatedAt)
-	d.Set("updated_at", subnetPool.UpdatedAt)
+	d.Set("created_at", subnetPool.CreatedAt.Format(time.RFC3339))
+	d.Set("updated_at", subnetPool.UpdatedAt.Format(time.RFC3339))
 	d.Set("default_prefixlen", subnetPool.DefaultPrefixLen)
 	d.Set("min_prefixlen", subnetPool.MinPrefixLen)
 	d.Set("max_prefixlen", subnetPool.MaxPrefixLen)
