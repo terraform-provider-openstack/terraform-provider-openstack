@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 
@@ -76,6 +77,16 @@ func dataSourceNetworkingRouterV2() *schema.Resource {
 					},
 				},
 			},
+			"tags": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"all_tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -116,6 +127,11 @@ func dataSourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) 
 		listOpts.TenantID = v.(string)
 	}
 
+	tags := networkV2AttributesTags(d)
+	if len(tags) > 0 {
+		listOpts.Tags = strings.Join(tags, ",")
+	}
+
 	pages, err := routers.List(networkingClient, listOpts).AllPages()
 	if err != nil {
 		return fmt.Errorf("Unable to list Routers: %s", err)
@@ -147,6 +163,7 @@ func dataSourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) 
 	d.Set("tenant_id", router.TenantID)
 	d.Set("external_network_id", router.GatewayInfo.NetworkID)
 	d.Set("enable_snat", router.GatewayInfo.EnableSNAT)
+	d.Set("all_tags", router.Tags)
 	d.Set("region", GetRegion(d, config))
 
 	if err := d.Set("availability_zone_hints", router.AvailabilityZoneHints); err != nil {

@@ -36,6 +36,8 @@ data "openstack_networking_router_v2" "router" {
 
 * `status` - (Optional) The status of the router (ACTIVE/DOWN).
 
+* `tags` - (Optional) The list of router tags to filter.
+
 * `tenant_id` - (Optional) The owner of the router.
 
 ## Attributes Reference
@@ -56,3 +58,5 @@ The `external_fixed_ip` block supports:
 * `subnet_id`- Subnet in which the fixed IP belongs to.
 
 * `ip_address` - The IP address to set on the router.
+
+* `all_tags` - The set of string tags applied on the router.
