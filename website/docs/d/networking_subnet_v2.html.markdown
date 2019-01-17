@@ -52,6 +52,8 @@ data "openstack_networking_subnet_v2" "subnet_1" {
 
 * `tenant_id` - (Optional) The owner of the subnet.
 
+* `tags` - (Optional) The list of subnet tags to filter.
+
 ## Attributes Reference
 
 `id` is set to the ID of the found subnet. In addition, the following attributes
@@ -62,3 +64,4 @@ are exported:
 * `dns_nameservers` - DNS Nameservers of the subnet.
 * `host_routes` - Host Routes of the subnet.
 * `region` - See Argument Reference above.
+* `all_tags` - A set of string tags applied on the subnet.

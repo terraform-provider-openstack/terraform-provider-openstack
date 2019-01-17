@@ -23,6 +23,8 @@ func TestAccNetworkingV2SubnetDataSource_basic(t *testing.T) {
 					testAccCheckNetworkingSubnetV2DataSourceGoodNetwork("data.openstack_networking_subnet_v2.subnet_1", "openstack_networking_network_v2.network_1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_subnet_v2.subnet_1", "name", "subnet_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_subnet_v2.subnet_1", "all_tags.#", "2"),
 				),
 			},
 		},
@@ -43,24 +45,34 @@ func TestAccNetworkingV2SubnetDataSource_testQueries(t *testing.T) {
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_subnet_v2.subnet_1", "description", "my subnet description"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_subnet_v2.subnet_1", "all_tags.#", "2"),
 				),
 			},
 			{
 				Config: testAccOpenStackNetworkingSubnetV2DataSource_dhcpEnabled,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_subnet_v2.subnet_1", "tags.#", "1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_subnet_v2.subnet_1", "all_tags.#", "2"),
 				),
 			},
 			{
 				Config: testAccOpenStackNetworkingSubnetV2DataSource_ipVersion,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_subnet_v2.subnet_1", "all_tags.#", "2"),
 				),
 			},
 			{
 				Config: testAccOpenStackNetworkingSubnetV2DataSource_gatewayIP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_subnet_v2.subnet_1", "all_tags.#", "2"),
 				),
 			},
 		},
@@ -77,6 +89,10 @@ func TestAccNetworkingV2SubnetDataSource_networkIdAttribute(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					testAccCheckNetworkingSubnetV2DataSourceGoodNetwork("data.openstack_networking_subnet_v2.subnet_1", "openstack_networking_network_v2.network_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_subnet_v2.subnet_1", "tags.#", "1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_subnet_v2.subnet_1", "all_tags.#", "2"),
 					testAccCheckNetworkingPortV2ID("openstack_networking_port_v2.port_1"),
 				),
 			},
@@ -93,6 +109,10 @@ func TestAccNetworkingV2SubnetDataSource_subnetPoolIdAttribute(t *testing.T) {
 				Config: testAccOpenStackNetworkingSubnetV2DataSource_subnetPoolIdAttribute,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_subnet_v2.subnet_1", "tags.#", "2"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_subnet_v2.subnet_1", "all_tags.#", "2"),
 				),
 			},
 		},
@@ -168,6 +188,10 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   description = "my subnet description"
   cidr = "192.168.199.0/24"
   network_id = "${openstack_networking_network_v2.network_1.id}"
+  tags = [
+    "foo",
+    "bar",
+  ]
 }
 `
 
@@ -185,8 +209,12 @@ resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "10.11.12.0/25"
-	network_id = "${openstack_networking_network_v2.network_1.id}"
-	subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+  tags = [
+    "foo",
+    "bar",
+  ]
 }
 `
 
@@ -194,7 +222,7 @@ var testAccOpenStackNetworkingSubnetV2DataSource_basic = fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
-	name = "${openstack_networking_subnet_v2.subnet_1.name}"
+  name = "${openstack_networking_subnet_v2.subnet_1.name}"
 }
 `, testAccOpenStackNetworkingSubnetV2DataSource_subnet)
 
@@ -202,7 +230,8 @@ var testAccOpenStackNetworkingSubnetV2DataSource_cidr = fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
-	cidr = "192.168.199.0/24"
+  cidr = "192.168.199.0/24"
+  tags = []
 }
 `, testAccOpenStackNetworkingSubnetV2DataSource_subnet)
 
@@ -211,7 +240,10 @@ var testAccOpenStackNetworkingSubnetV2DataSource_dhcpEnabled = fmt.Sprintf(`
 
 data "openstack_networking_subnet_v2" "subnet_1" {
   network_id = "${openstack_networking_network_v2.network_1.id}"
-	dhcp_enabled = true
+  dhcp_enabled = true
+  tags = [
+    "bar",
+  ]
 }
 `, testAccOpenStackNetworkingSubnetV2DataSource_subnet)
 
@@ -237,11 +269,14 @@ var testAccOpenStackNetworkingSubnetV2DataSource_networkIdAttribute = fmt.Sprint
 
 data "openstack_networking_subnet_v2" "subnet_1" {
   subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  tags = [
+    "foo",
+  ]
 }
 
 resource "openstack_networking_port_v2" "port_1" {
-  name               = "test_port"
-  network_id         = "${data.openstack_networking_subnet_v2.subnet_1.network_id}"
+  name            = "test_port"
+  network_id      = "${data.openstack_networking_subnet_v2.subnet_1.network_id}"
   admin_state_up  = "true"
 }
 
@@ -251,6 +286,10 @@ var testAccOpenStackNetworkingSubnetV2DataSource_subnetPoolIdAttribute = fmt.Spr
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
-	subnetpool_id = "${openstack_networking_subnet_v2.subnet_1.subnetpool_id}"
+  subnetpool_id = "${openstack_networking_subnet_v2.subnet_1.subnetpool_id}"
+  tags = [
+    "foo",
+    "bar",
+  ]
 }
 `, testAccOpenStackNetworkingSubnetV2DataSource_subnetWithSubnetPool)

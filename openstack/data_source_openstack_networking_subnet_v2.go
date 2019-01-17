@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 
@@ -155,6 +156,16 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 				Computed: true,
 				Optional: true,
 			},
+			"tags": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"all_tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -219,6 +230,11 @@ func dataSourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) 
 		listOpts.SubnetPoolID = v.(string)
 	}
 
+	tags := networkV2AttributesTags(d)
+	if len(tags) > 0 {
+		listOpts.Tags = strings.Join(tags, ",")
+	}
+
 	pages, err := subnets.List(networkingClient, listOpts).AllPages()
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve subnets: %s", err)
@@ -255,6 +271,7 @@ func dataSourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) 
 	d.Set("gateway_ip", subnet.GatewayIP)
 	d.Set("enable_dhcp", subnet.EnableDHCP)
 	d.Set("subnetpool_id", subnet.SubnetPoolID)
+	d.Set("all_tags", subnet.Tags)
 	d.Set("region", GetRegion(d, config))
 
 	err = d.Set("dns_nameservers", subnet.DNSNameservers)
