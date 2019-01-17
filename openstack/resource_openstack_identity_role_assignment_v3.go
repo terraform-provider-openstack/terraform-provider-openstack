@@ -123,7 +123,10 @@ func resourceIdentityRoleAssignmentV3Delete(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
-	domainID, projectID, groupID, userID, roleID := identityRoleAssignmentV3ParseID(d.Id())
+	domainID, projectID, groupID, userID, roleID, err := identityRoleAssignmentV3ParseID(d.Id())
+	if err != nil {
+		return fmt.Errorf("Error determining openstack_identity_role_assignment_v3 ID: %s", err)
+	}
 
 	opts := roles.UnassignOpts{
 		DomainID:  domainID,

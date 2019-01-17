@@ -15,13 +15,23 @@ func identityRoleAssignmentV3ID(domainID, projectID, groupID, userID, roleID str
 	return fmt.Sprintf("%s/%s/%s/%s/%s", domainID, projectID, groupID, userID, roleID)
 }
 
-func identityRoleAssignmentV3ParseID(roleAssignmentID string) (string, string, string, string, string) {
+func identityRoleAssignmentV3ParseID(roleAssignmentID string) (string, string, string, string, string, error) {
 	split := strings.Split(roleAssignmentID, "/")
-	return split[0], split[1], split[2], split[3], split[4]
+
+	if len(split) != 5 {
+		return "", "", "", "", "", fmt.Errorf("Malformed ID: %s", roleAssignmentID)
+	}
+
+	return split[0], split[1], split[2], split[3], split[4], nil
 }
 
 func identityRoleAssignmentV3FindAssignment(identityClient *gophercloud.ServiceClient, id string) (roles.RoleAssignment, error) {
-	domainID, projectID, groupID, userID, roleID := identityRoleAssignmentV3ParseID(id)
+	var assignment roles.RoleAssignment
+
+	domainID, projectID, groupID, userID, roleID, err := identityRoleAssignmentV3ParseID(id)
+	if err != nil {
+		return assignment, err
+	}
 
 	var opts roles.ListAssignmentsOpts
 	opts = roles.ListAssignmentsOpts{
@@ -32,9 +42,8 @@ func identityRoleAssignmentV3FindAssignment(identityClient *gophercloud.ServiceC
 	}
 
 	pager := roles.ListAssignments(identityClient, opts)
-	var assignment roles.RoleAssignment
 
-	err := pager.EachPage(func(page pagination.Page) (bool, error) {
+	err = pager.EachPage(func(page pagination.Page) (bool, error) {
 		assignmentList, err := roles.ExtractRoleAssignments(page)
 		if err != nil {
 			return false, err

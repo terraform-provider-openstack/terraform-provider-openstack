@@ -27,7 +27,8 @@ func TestIdentityRoleAssignmentV3ParseID(t *testing.T) {
 	expectedUserID := "user"
 	expectedRoleID := "role"
 
-	actualDomainID, actualProjectID, actualGroupID, actualUserID, actualRoleID := identityRoleAssignmentV3ParseID(id)
+	actualDomainID, actualProjectID, actualGroupID, actualUserID, actualRoleID, err := identityRoleAssignmentV3ParseID(id)
+	assert.Equal(t, err, nil)
 	assert.Equal(t, expectedDomainID, actualDomainID)
 	assert.Equal(t, expectedProjectID, actualProjectID)
 	assert.Equal(t, expectedGroupID, actualGroupID)
