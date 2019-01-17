@@ -210,6 +210,107 @@ func TestAccNetworkingV2Network_transparent_vlan_Create(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Network_adminStateUp_omit(t *testing.T) {
+	var network networks.Network
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_adminStateUp_omit,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "admin_state_up", "true"),
+					testAccCheckNetworkingV2NetworkAdminStateUp(&network, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_adminStateUp_true(t *testing.T) {
+	var network networks.Network
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_adminStateUp_true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "admin_state_up", "true"),
+					testAccCheckNetworkingV2NetworkAdminStateUp(&network, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_adminStateUp_false(t *testing.T) {
+	var network networks.Network
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_adminStateUp_false,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "admin_state_up", "false"),
+					testAccCheckNetworkingV2NetworkAdminStateUp(&network, false),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_adminStateUp_update(t *testing.T) {
+	var network networks.Network
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_adminStateUp_omit,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "admin_state_up", "true"),
+					testAccCheckNetworkingV2NetworkAdminStateUp(&network, true),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Network_adminStateUp_false,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "admin_state_up", "false"),
+					testAccCheckNetworkingV2NetworkAdminStateUp(&network, false),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2NetworkDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
@@ -258,6 +359,18 @@ func testAccCheckNetworkingV2NetworkExists(n string, network *networks.Network) 
 		}
 
 		*network = *found
+
+		return nil
+	}
+}
+
+func testAccCheckNetworkingV2NetworkAdminStateUp(
+	network *networks.Network, expected bool) resource.TestCheckFunc {
+
+	return func(s *terraform.State) error {
+		if network.AdminStateUp != expected {
+			return fmt.Errorf("Network has wrong admin_state_up. Expected %t, got %t", expected, network.AdminStateUp)
+		}
 
 		return nil
 	}
@@ -385,5 +498,25 @@ resource "openstack_networking_network_v2" "network_1" {
   name             = "network_1"
 	admin_state_up   = "true"
 	transparent_vlan = "true"
+}
+`
+
+const testAccNetworkingV2Network_adminStateUp_omit = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+`
+
+const testAccNetworkingV2Network_adminStateUp_true = `
+resource "openstack_networking_network_v2" "network_1" {
+  name           = "network_1"
+  admin_state_up = "true"
+}
+`
+
+const testAccNetworkingV2Network_adminStateUp_false = `
+resource "openstack_networking_network_v2" "network_1" {
+  name           = "network_1"
+  admin_state_up = "false"
 }
 `
