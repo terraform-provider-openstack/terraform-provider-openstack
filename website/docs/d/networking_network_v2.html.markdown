@@ -43,6 +43,8 @@ data "openstack_networking_network_v2" "network" {
 * `transparent_vlan` - (Optional) The VLAN transparent attribute for the
   network.
 
+* `tags` - (Optional) The list of network tags to filter.
+
 ## Attributes Reference
 
 `id` is set to the ID of the found network. In addition, the following attributes
@@ -57,3 +59,4 @@ are exported:
     by any tenant or not.
 * `availability_zone_hints` - (Optional) The availability zone candidates for the network.
 * `transparent_vlan` - See Argument Reference above.
+* `all_tags` - The set of string tags applied on the network.
