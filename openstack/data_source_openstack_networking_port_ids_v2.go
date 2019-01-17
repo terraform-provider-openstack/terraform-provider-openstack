@@ -210,10 +210,8 @@ func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{})
 	// which is usually alpha-numeric.
 	if v, ok := d.GetOk("fixed_ip"); ok {
 		for _, p := range allPorts {
-			var ips = []string{}
 			for _, ipObject := range p.FixedIPs {
-				ips = append(ips, ipObject.IPAddress)
-				if v == ipObject.IPAddress {
+				if v.(string) == ipObject.IPAddress {
 					portsList = append(portsList, p)
 				}
 			}

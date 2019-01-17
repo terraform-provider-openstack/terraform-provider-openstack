@@ -243,7 +243,7 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 			var ips = []string{}
 			for _, ipObject := range p.FixedIPs {
 				ips = append(ips, ipObject.IPAddress)
-				if v == ipObject.IPAddress {
+				if v.(string) == ipObject.IPAddress {
 					portsList = append(portsList, p)
 				}
 			}
