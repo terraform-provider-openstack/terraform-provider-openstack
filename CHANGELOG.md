@@ -4,6 +4,10 @@ IMPROVEMENTS
 
 * Added `flavor_id` to the `openstack_compute_flavor_v2` data source so flavors can be queried by ID [GH-587]
 
+BUG FIXES
+
+* Fixed `created_at`, `updated_at`, and `tag` fields in the `openstack_images_image_v2` data source [GH-615]
+
 ## 1.14.0 (January 15, 2019)
 
 NOTES
