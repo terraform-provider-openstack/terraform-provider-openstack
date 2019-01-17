@@ -56,6 +56,9 @@ func dataSourceNetworkingSecGroupV2() *schema.Resource {
 func dataSourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+	}
 
 	listOpts := groups.ListOpts{
 		ID:          d.Get("secgroup_id").(string),
