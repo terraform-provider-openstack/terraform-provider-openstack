@@ -190,16 +190,16 @@ func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{})
 
 	allPages, err := ports.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to list openstack_networking_ports_v2: %s", err)
+		return fmt.Errorf("Unable to list openstack_networking_port_ids_v2: %s", err)
 	}
 
 	allPorts, err := ports.ExtractPorts(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_networking_ports_v2: %s", err)
+		return fmt.Errorf("Unable to retrieve openstack_networking_port_ids_v2: %s", err)
 	}
 
 	if len(allPorts) == 0 {
-		return fmt.Errorf("No openstack_networking_port_v2 found")
+		log.Printf("[DEBUG] No ports in openstack_networking_port_ids_v2 found")
 	}
 
 	var portsList []ports.Port
@@ -217,8 +217,7 @@ func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{})
 			}
 		}
 		if len(portsList) == 0 {
-			log.Printf("No openstack_networking_port_v2 found after the 'fixed_ip' filter")
-			return fmt.Errorf("No openstack_networking_port_v2 found")
+			log.Printf("[DEBUG] No ports in openstack_networking_port_ids_v2 found after the 'fixed_ip' filter")
 		}
 	} else {
 		portsList = allPorts
@@ -235,8 +234,7 @@ func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{})
 			}
 		}
 		if len(sgPorts) == 0 {
-			log.Printf("No openstack_networking_port_v2 found after the 'security_group_ids' filter")
-			return fmt.Errorf("No openstack_networking_port_v2 found")
+			log.Printf("[DEBUG] No ports in openstack_networking_port_ids_v2 found after the 'security_group_ids' filter")
 		}
 		portsList = sgPorts
 	}
@@ -245,7 +243,7 @@ func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{})
 		portIDs = append(portIDs, p.ID)
 	}
 
-	log.Printf("[DEBUG] Retrieved %d openstack_networking_port_v2: %+v", len(portsList), portsList)
+	log.Printf("[DEBUG] Retrieved %d ports in openstack_networking_port_ids_v2: %+v", len(portsList), portsList)
 
 	d.SetId(fmt.Sprintf("%d", hashcode.String(strings.Join(portIDs, ""))))
 	d.Set("ids", portIDs)
