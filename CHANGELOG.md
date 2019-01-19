@@ -4,6 +4,7 @@ IMPROVEMENTS
 
 * Added `flavor_id` to the `openstack_compute_flavor_v2` data source so flavors can be queried by ID [GH-587]
 * `openstack_networking_port_ids_v2` data source can now return an empty set of results [GH-631]
+* Added `description` to `openstack_networking_trunk_v2` resource [GH-625]
 
 BUG FIXES
 
