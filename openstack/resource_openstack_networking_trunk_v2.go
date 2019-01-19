@@ -37,6 +37,11 @@ func resourceNetworkingTrunkV2() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+			},
 			"port_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -92,6 +97,7 @@ func resourceNetworkingTrunkV2Create(d *schema.ResourceData, meta interface{}) e
 
 	createOpts := trunks.CreateOpts{
 		Name:         d.Get("name").(string),
+		Description:  d.Get("description").(string),
 		AdminStateUp: resourceNetworkingTrunkV2AdminStateUp(d),
 		PortID:       d.Get("port_id").(string),
 		TenantID:     d.Get("tenant_id").(string),
@@ -148,6 +154,7 @@ func resourceNetworkingTrunkV2Read(d *schema.ResourceData, meta interface{}) err
 
 	d.Set("region", GetRegion(d, config))
 	d.Set("name", trunk.Name)
+	d.Set("description", trunk.Description)
 	d.Set("port_id", trunk.PortID)
 	d.Set("admin_state_up", trunk.AdminStateUp)
 	d.Set("tenant_id", trunk.TenantID)
@@ -181,6 +188,11 @@ func resourceNetworkingTrunkV2Update(d *schema.ResourceData, meta interface{}) e
 		updateTrunk = true
 		name := d.Get("name").(string)
 		updateOpts.Name = &name
+	}
+	if d.HasChange("description") {
+		updateTrunk = true
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
 	}
 	if d.HasChange("admin_state_up") {
 		updateTrunk = true
