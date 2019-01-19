@@ -1,5 +1,9 @@
 ## 1.15.0 (Unreleased)
 
+NOTES
+
+* The `openstack_images_image_v2.update_at` attribute has been deprecated in favor of `updated_at` [GH-617]
+
 IMPROVEMENTS
 
 * Added `flavor_id` to the `openstack_compute_flavor_v2` data source so flavors can be queried by ID [GH-587]
@@ -16,6 +20,7 @@ BUG FIXES
 * `external` field of `openstack_networking_network_v2` field will now show an actual value [GH-593]
 * Fixed issue where `status` was being used as the query value for `network_id` in `openstack_networking_port_v2` data source [GH-631]
 * Fixed issue where `status` was being used as the query value for `network_id` in `openstack_networking_port_ids_v2` data source [GH-631]
+* The `openstack_images_image_v2` fields `update_at`, `updated_at`, and `created_at` all now set correctly [GH-617]
 
 
 ## 1.14.0 (January 15, 2019)
