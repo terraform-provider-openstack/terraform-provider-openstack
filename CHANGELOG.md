@@ -3,6 +3,7 @@
 IMPROVEMENTS
 
 * Added `flavor_id` to the `openstack_compute_flavor_v2` data source so flavors can be queried by ID [GH-587]
+* `openstack_networking_port_ids_v2` data source can now return an empty set of results [GH-631]
 
 BUG FIXES
 
@@ -12,6 +13,9 @@ BUG FIXES
 * Fixed issue where updating the description of a floating IP would cause the port to disassociate [GH-606]
 * `admin_state_up` and `shared` fields of `openstack_networking_network_v2` are now correct boolean fields [GH-593]
 * `external` field of `openstack_networking_network_v2` field will now show an actual value [GH-593]
+* Fixed issue where `status` was being used as the query value for `network_id` in `openstack_networking_port_v2` data source [GH-631]
+* Fixed issue where `status` was being used as the query value for `network_id` in `openstack_networking_port_ids_v2` data source [GH-631]
+
 
 ## 1.14.0 (January 15, 2019)
 
