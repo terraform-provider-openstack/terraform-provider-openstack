@@ -81,6 +81,12 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 				Optional: true,
 			},
 
+			"status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			"security_group_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -97,6 +103,7 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 			"allowed_address_pairs": {
 				Type:     schema.TypeSet,
 				Computed: true,
+				Set:      resourceNetworkingPortV2AllowedAddressPairsHash,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip_address": {
@@ -178,6 +185,10 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if v, ok := d.GetOk("network_id"); ok {
+		listOpts.NetworkID = v.(string)
+	}
+
+	if v, ok := d.GetOk("status"); ok {
 		listOpts.Status = v.(string)
 	}
 
@@ -232,7 +243,7 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 			var ips = []string{}
 			for _, ipObject := range p.FixedIPs {
 				ips = append(ips, ipObject.IPAddress)
-				if v == ipObject.IPAddress {
+				if v.(string) == ipObject.IPAddress {
 					portsList = append(portsList, p)
 				}
 			}

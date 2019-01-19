@@ -44,6 +44,8 @@ data "openstack_networking_port_v2" "port_1" {
 
 * `fixed_ip` - (Optional) The port IP address filter.
 
+* `status` - (Optional) The status of the port.
+
 * `security_group_ids` - (Optional) The list of port security group IDs to filter.
 
 * `tags` - (Optional) The list of port tags to filter.
@@ -54,31 +56,49 @@ data "openstack_networking_port_v2" "port_1" {
 are exported:
 
 * `region` - See Argument Reference above.
+
 * `project_id` - See Argument Reference above.
+
 * `port_id` - See Argument Reference above.
+
 * `name` - See Argument Reference above.
+
 * `description` - See Argument Reference above.
+
 * `admin_state_up` - See Argument Reference above.
+
 * `network_id` - See Argument Reference above.
+
 * `device_owner` - See Argument Reference above.
+
 * `mac_address` - See Argument Reference above.
+
 * `device_id` - See Argument Reference above.
+
 * `allowed_address_pairs` - An IP/MAC Address pair of additional IP
     addresses that can be active on this port. The structure is described
     below.
+
 * `all_fixed_ips` - The collection of Fixed IP addresses on the port in the
   order returned by the Network v2 API.
-* `all_security_group_ids` - A list of security group IDs applied on the port.
-* `all_tags` - A set of string tags applied on the port.
+
+* `all_security_group_ids` - The set of security group IDs applied on the port.
+
+* `all_tags` - The set of string tags applied on the port.
+
 * `extra_dhcp_option` - An extra DHCP option configured on the port.
     The structure is described below.
 
 The `allowed_address_pairs` attribute has fields below:
+
 * `ip_address` - The additional IP address.
+
 * `mac_address` - The additional MAC address.
-* `tags` - A set of string tags for the port.
 
 The `extra_dhcp_option` attribute has fields below:
+
 * `name` - Name of the DHCP option.
+
 * `value` - Value of the DHCP option.
+
 * `ip_version` - IP protocol version
