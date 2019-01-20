@@ -78,11 +78,11 @@ The following arguments are supported:
     `region` argument of the provider is used. Changing this creates a new
     trunk.
 
-* `name` - (Optional) A unique name for the port. Changing this
-    updates the `name` of an existing port.
+* `name` - (Optional) A unique name for the trunk. Changing this
+    updates the `name` of an existing trunk.
 
-* `description` - (Optional) Human-readable description of the port. Changing this
-    updates the name of the existing port.
+* `description` - (Optional) Human-readable description of the trunk. Changing this
+    updates the name of the existing trunk.
 
 * `port_id` - (Required) The ID of the port to be used as the parent port of the
     trunk. This is the port that should be used as the compute instance network
@@ -104,7 +104,7 @@ The `sub_port` block supports:
 
 * `port_id` - (Required) The ID of the port to be made a subport of the trunk.
 
-* `segmentation_type` - (Required) The segmenation tecnology to use, e.g., "vlan".
+* `segmentation_type` - (Required) The segmentation technology to use, e.g., "vlan".
 
 * `segmentation_id` - (Required) The numeric id of the subport segment.
 
