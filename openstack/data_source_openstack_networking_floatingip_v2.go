@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 
@@ -53,6 +54,18 @@ func dataSourceNetworkingFloatingIPV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
+			"tags": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"all_tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -60,6 +73,9 @@ func dataSourceNetworkingFloatingIPV2() *schema.Resource {
 func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+	}
 
 	listOpts := floatingips.ListOpts{}
 
@@ -85,6 +101,15 @@ func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface
 
 	if v, ok := d.GetOk("fixed_ip"); ok {
 		listOpts.FixedIP = v.(string)
+	}
+
+	if v, ok := d.GetOk("status"); ok {
+		listOpts.Status = v.(string)
+	}
+
+	tags := networkV2AttributesTags(d)
+	if len(tags) > 0 {
+		listOpts.Tags = strings.Join(tags, ",")
 	}
 
 	pages, err := floatingips.List(networkingClient, listOpts).AllPages()
@@ -117,6 +142,7 @@ func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface
 	d.Set("fixed_ip", fip.FixedIP)
 	d.Set("tenant_id", fip.TenantID)
 	d.Set("status", fip.Status)
+	d.Set("all_tags", fip.Tags)
 	d.Set("region", GetRegion(d, config))
 
 	return nil

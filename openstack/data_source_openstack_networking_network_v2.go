@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 
@@ -82,6 +83,18 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+
+			"tags": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"all_tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -89,6 +102,9 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+	}
 
 	// Prepare basic listOpts.
 	var listOpts networks.ListOptsBuilder
@@ -122,6 +138,11 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 			ListOptsBuilder: listOpts,
 			VLANTransparent: &isVLANTransparent,
 		}
+	}
+
+	tags := networkV2AttributesTags(d)
+	if len(tags) > 0 {
+		listOpts = networks.ListOpts{Tags: strings.Join(tags, ",")}
 	}
 
 	pages, err := networks.List(networkingClient, listOpts).AllPages()
@@ -197,8 +218,9 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	d.Set("shared", strconv.FormatBool(network.Shared))
 	d.Set("external", network.External)
 	d.Set("tenant_id", network.TenantID)
-	d.Set("region", GetRegion(d, config))
 	d.Set("transparent_vlan", network.VLANTransparent)
+	d.Set("all_tags", network.Tags)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

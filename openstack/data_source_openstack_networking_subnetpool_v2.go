@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -115,6 +116,16 @@ func dataSourceNetworkingSubnetPoolV2() *schema.Resource {
 				Computed: true,
 				ForceNew: false,
 			},
+			"tags": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"all_tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -122,6 +133,9 @@ func dataSourceNetworkingSubnetPoolV2() *schema.Resource {
 func dataSourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+	}
 
 	listOpts := subnetpools.ListOpts{}
 
@@ -171,6 +185,11 @@ func dataSourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface
 		listOpts.IsDefault = &isDefault
 	}
 
+	tags := networkV2AttributesTags(d)
+	if len(tags) > 0 {
+		listOpts.Tags = strings.Join(tags, ",")
+	}
+
 	pages, err := subnetpools.List(networkingClient, listOpts).AllPages()
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve subnetpools: %s", err)
@@ -210,6 +229,7 @@ func dataSourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface
 	d.Set("is_default", subnetPool.IsDefault)
 	d.Set("description", subnetPool.Description)
 	d.Set("revision_number", subnetPool.RevisionNumber)
+	d.Set("all_tags", subnetPool.Tags)
 	d.Set("region", GetRegion(d, config))
 
 	if err := d.Set("prefixes", subnetPool.Prefixes); err != nil {

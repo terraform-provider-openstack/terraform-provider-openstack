@@ -26,6 +26,8 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_basic(t *testing.T) {
 						"data.openstack_networking_network_v2.network_1", "description", "my network description"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_network_v2.network_1", "admin_state_up", "true"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_network_v2.network_1", "all_tags.#", "2"),
 				),
 			},
 		},
@@ -48,6 +50,10 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_subnet(t *testing.T) {
 						"data.openstack_networking_network_v2.network_1", "name", "tf_test_network"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_network_v2.network_1", "admin_state_up", "true"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_network_v2.network_1", "tags.#", "2"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_network_v2.network_1", "all_tags.#", "2"),
 				),
 			},
 		},
@@ -70,6 +76,8 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_networkID(t *testing.T) {
 						"data.openstack_networking_network_v2.network_1", "name", "tf_test_network"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_network_v2.network_1", "admin_state_up", "true"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_network_v2.network_1", "all_tags.#", "2"),
 				),
 			},
 		},
@@ -93,6 +101,8 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_externalExplicit(t *testing.T
 						"data.openstack_networking_network_v2.network_1", "admin_state_up", "true"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_network_v2.network_1", "external", "true"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_network_v2.network_1", "all_tags.#", "0"),
 				),
 			},
 		},
@@ -116,6 +126,8 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_externalImplicit(t *testing.T
 						"data.openstack_networking_network_v2.network_1", "admin_state_up", "true"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_network_v2.network_1", "external", "true"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_network_v2.network_1", "all_tags.#", "0"),
 				),
 			},
 		},
@@ -143,6 +155,10 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan(t *testing.T
 						"data.openstack_networking_network_v2.network_1", "admin_state_up", "true"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_network_v2.network_1", "transparent_vlan", "true"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_network_v2.network_1", "tags.#", "1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_network_v2.network_1", "all_tags.#", "2"),
 				),
 			},
 		},
@@ -169,6 +185,10 @@ resource "openstack_networking_network_v2" "network_1" {
   name = "tf_test_network"
   description = "my network description"
   admin_state_up = "true"
+  tags = [
+    "foo",
+    "bar",
+  ]
 }
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
@@ -193,6 +213,10 @@ var testAccOpenStackNetworkingNetworkV2DataSource_subnet = fmt.Sprintf(`
 
 data "openstack_networking_network_v2" "network_1" {
   matching_subnet_cidr = "${openstack_networking_subnet_v2.subnet_1.cidr}"
+  tags = [
+    "foo",
+    "bar",
+  ]
 }
 `, testAccOpenStackNetworkingNetworkV2DataSource_network)
 
@@ -222,5 +246,8 @@ var testAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan = fmt.Sprintf
 
 data "openstack_networking_network_v2" "network_1" {
   transparent_vlan = "${openstack_networking_network_v2.network_1.transparent_vlan}"
+  tags = [
+    "bar",
+  ]
 }
 `, testAccNetworkingV2Network_transparent_vlan)
