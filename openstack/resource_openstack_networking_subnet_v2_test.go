@@ -472,11 +472,11 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 
   host_routes = [
     {
-      destination_cidr = "10.0.1.0/24",
+      destination_cidr = "10.0.2.0/24",
       next_hop = "192.168.199.254",
     },
     {
-      destination_cidr = "10.0.2.0/24",
+      destination_cidr = "10.0.1.0/24",
       next_hop = "192.168.199.254",
     },
   ]

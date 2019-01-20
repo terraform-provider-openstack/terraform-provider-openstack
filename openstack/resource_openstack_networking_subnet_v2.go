@@ -112,10 +112,9 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"host_routes": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"destination_cidr": {
@@ -183,7 +182,7 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 			IPv6RAMode:      d.Get("ipv6_ra_mode").(string),
 			AllocationPools: resourceSubnetAllocationPoolsV2(d),
 			DNSNameservers:  resourceSubnetDNSNameserversV2(d),
-			HostRoutes:      resourceSubnetHostRoutesV2(d),
+			HostRoutes:      expandNetworkingSubnetV2HostRoutes(d),
 			SubnetPoolID:    d.Get("subnetpool_id").(string),
 			EnableDHCP:      nil,
 		},
@@ -267,7 +266,6 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("description", s.Description)
 	d.Set("tenant_id", s.TenantID)
 	d.Set("dns_nameservers", s.DNSNameservers)
-	d.Set("host_routes", resourceSubnetHostRoutesToMapV2(s.HostRoutes))
 	d.Set("enable_dhcp", s.EnableDHCP)
 	d.Set("network_id", s.NetworkID)
 	d.Set("ipv6_address_mode", s.IPv6AddressMode)
@@ -295,6 +293,11 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 		d.Set("no_gateway", true)
 	} else {
 		d.Set("no_gateway", false)
+	}
+
+	hostRoutes := flattenNetworkingSubnetV2HostRoutes(s.HostRoutes)
+	if err := d.Set("host_routes", hostRoutes); err != nil {
+		return fmt.Errorf("Unable to set openstack_networking_subnet_v2 %s host_routes: %s", d.Id(), err)
 	}
 
 	d.Set("region", GetRegion(d, config))
@@ -350,7 +353,7 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 
 	if d.HasChange("host_routes") {
 		hasChange = true
-		newHostRoutes := resourceSubnetHostRoutesV2(d)
+		newHostRoutes := expandNetworkingSubnetV2HostRoutes(d)
 		updateOpts.HostRoutes = &newHostRoutes
 	}
 
@@ -411,6 +414,20 @@ func resourceNetworkingSubnetV2Delete(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
+func flattenNetworkingSubnetV2HostRoutes(v []subnets.HostRoute) []map[string]string {
+	hostRoutes := make([]map[string]string, len(v))
+
+	for i, hostRoute := range v {
+		m := map[string]string{}
+		m["destination_cidr"] = hostRoute.DestinationCIDR
+		m["next_hop"] = hostRoute.NextHop
+
+		hostRoutes[i] = m
+	}
+
+	return hostRoutes
+}
+
 func resourceSubnetAllocationPoolsV2(d *schema.ResourceData) []subnets.AllocationPool {
 	rawAPs := d.Get("allocation_pools").([]interface{})
 	aps := make([]subnets.AllocationPool, len(rawAPs))
@@ -447,28 +464,17 @@ func resourceSubnetDNSNameserversV2CheckIsSet(d *schema.ResourceData) error {
 	return nil
 }
 
-func resourceSubnetHostRoutesV2(d *schema.ResourceData) []subnets.HostRoute {
-	rawHR := d.Get("host_routes").([]interface{})
-	hr := make([]subnets.HostRoute, len(rawHR))
-	for i, raw := range rawHR {
-		rawMap := raw.(map[string]interface{})
-		hr[i] = subnets.HostRoute{
-			DestinationCIDR: rawMap["destination_cidr"].(string),
-			NextHop:         rawMap["next_hop"].(string),
+func expandNetworkingSubnetV2HostRoutes(d *schema.ResourceData) []subnets.HostRoute {
+	v := d.Get("host_routes").(*schema.Set).List()
+	hostRoutes := make([]subnets.HostRoute, len(v))
+	for i, hr := range v {
+		hostRoute := hr.(map[string]interface{})
+		hostRoutes[i] = subnets.HostRoute{
+			DestinationCIDR: hostRoute["destination_cidr"].(string),
+			NextHop:         hostRoute["next_hop"].(string),
 		}
 	}
-	return hr
-}
-
-func resourceSubnetHostRoutesToMapV2(hostRoutes []subnets.HostRoute) []map[string]string {
-	hr := make([]map[string]string, len(hostRoutes))
-	for i, hostRoute := range hostRoutes {
-		hr[i] = map[string]string{
-			"destination_cidr": hostRoute.DestinationCIDR,
-			"next_hop":         hostRoute.NextHop,
-		}
-	}
-	return hr
+	return hostRoutes
 }
 
 func resourceNetworkingSubnetV2DetermineIPVersion(v int) gophercloud.IPVersion {
