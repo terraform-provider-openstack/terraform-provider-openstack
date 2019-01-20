@@ -21,34 +21,40 @@ func dataSourceNetworkingSubnetPoolV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
+
 			"default_quota": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
+
 			"project_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
+
 			"created_at": {
 				Type:     schema.TypeString,
 				Computed: true,
 				ForceNew: false,
 			},
+
 			"updated_at": {
 				Type:     schema.TypeString,
 				Computed: true,
 				ForceNew: false,
 			},
+
 			"prefixes": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -56,30 +62,35 @@ func dataSourceNetworkingSubnetPoolV2() *schema.Resource {
 				Set:      schema.HashString,
 				ForceNew: false,
 			},
+
 			"default_prefixlen": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
+
 			"min_prefixlen": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
+
 			"max_prefixlen": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
+
 			"address_scope_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
+
 			"ip_version": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -93,34 +104,40 @@ func dataSourceNetworkingSubnetPoolV2() *schema.Resource {
 					return
 				},
 			},
+
 			"shared": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
+
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
+
 			"is_default": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
 				ForceNew: false,
 			},
+
 			"revision_number": {
 				Type:     schema.TypeInt,
 				Computed: true,
 				ForceNew: false,
 			},
+
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+
 			"all_tags": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -192,34 +209,32 @@ func dataSourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface
 
 	pages, err := subnetpools.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve subnetpools: %s", err)
+		return fmt.Errorf("Unable to retrieve openstack_networking_subnetpool_v2: %s", err)
 	}
 
 	allSubnetPools, err := subnetpools.ExtractSubnetPools(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to extract subnetpools: %s", err)
+		return fmt.Errorf("Unable to extract openstack_networking_subnetpool_v2: %s", err)
 	}
 
 	if len(allSubnetPools) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return fmt.Errorf("Your query returned no openstack_networking_subnetpool_v2. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allSubnetPools) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return fmt.Errorf("Your query returned more than one openstack_networking_subnetpool_v2." +
 			" Please try a more specific search criteria")
 	}
 
 	subnetPool := allSubnetPools[0]
 
-	log.Printf("[DEBUG] Retrieved Subnetpool %s: %+v", subnetPool.ID, subnetPool)
+	log.Printf("[DEBUG] Retrieved openstack_networking_subnetpool_v2 %s: %+v", subnetPool.ID, subnetPool)
 	d.SetId(subnetPool.ID)
 
 	d.Set("name", subnetPool.Name)
 	d.Set("default_quota", subnetPool.DefaultQuota)
 	d.Set("project_id", subnetPool.ProjectID)
-	d.Set("created_at", subnetPool.CreatedAt.Format(time.RFC3339))
-	d.Set("updated_at", subnetPool.UpdatedAt.Format(time.RFC3339))
 	d.Set("default_prefixlen", subnetPool.DefaultPrefixLen)
 	d.Set("min_prefixlen", subnetPool.MinPrefixLen)
 	d.Set("max_prefixlen", subnetPool.MaxPrefixLen)
@@ -232,6 +247,12 @@ func dataSourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface
 	d.Set("all_tags", subnetPool.Tags)
 	d.Set("region", GetRegion(d, config))
 
+	if err := d.Set("created_at", subnetPool.CreatedAt.Format(time.RFC3339)); err != nil {
+		log.Printf("[DEBUG] Unable to set openstack_networking_subnetpool_v2 created_at: %s", err)
+	}
+	if err := d.Set("updated_at", subnetPool.UpdatedAt.Format(time.RFC3339)); err != nil {
+		log.Printf("[DEBUG] Unable to set openstack_networking_subnetpool_v2 updated_at: %s", err)
+	}
 	if err := d.Set("prefixes", subnetPool.Prefixes); err != nil {
 		log.Printf("[WARN] unable to set prefixes: %s", err)
 	}
