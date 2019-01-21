@@ -71,14 +71,11 @@ func resourceNetworkingAddressScopeV2Create(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	createOpts := AddressScopeCreateOpts{
-		addressscopes.CreateOpts{
-			Name:      d.Get("name").(string),
-			ProjectID: d.Get("project_id").(string),
-			IPVersion: d.Get("ip_version").(int),
-			Shared:    d.Get("shared").(bool),
-		},
-		MapValueSpecs(d),
+	createOpts := addressscopes.CreateOpts{
+		Name:      d.Get("name").(string),
+		ProjectID: d.Get("project_id").(string),
+		IPVersion: d.Get("ip_version").(int),
+		Shared:    d.Get("shared").(bool),
 	}
 
 	log.Printf("[DEBUG] openstack_networking_addressscope_v2 create options: %#v", createOpts)
