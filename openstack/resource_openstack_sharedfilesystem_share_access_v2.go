@@ -21,7 +21,7 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 		Read:   resourceSharedFilesystemShareAccessV2Read,
 		Delete: resourceSharedFilesystemShareAccessV2Delete,
 		Importer: &schema.ResourceImporter{
-			resourceSharedFilesystemShareAccessV2Import,
+			State: resourceSharedFilesystemShareAccessV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

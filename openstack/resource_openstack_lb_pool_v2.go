@@ -19,7 +19,7 @@ func resourcePoolV2() *schema.Resource {
 		Update: resourcePoolV2Update,
 		Delete: resourcePoolV2Delete,
 		Importer: &schema.ResourceImporter{
-			resourcePoolV2Import,
+			State: resourcePoolV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

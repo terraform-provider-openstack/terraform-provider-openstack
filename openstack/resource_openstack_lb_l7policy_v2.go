@@ -22,7 +22,7 @@ func resourceL7PolicyV2() *schema.Resource {
 		Update: resourceL7PolicyV2Update,
 		Delete: resourceL7PolicyV2Delete,
 		Importer: &schema.ResourceImporter{
-			resourceL7PolicyV2Import,
+			State: resourceL7PolicyV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

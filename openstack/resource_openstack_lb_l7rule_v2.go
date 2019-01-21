@@ -21,7 +21,7 @@ func resourceL7RuleV2() *schema.Resource {
 		Update: resourceL7RuleV2Update,
 		Delete: resourceL7RuleV2Delete,
 		Importer: &schema.ResourceImporter{
-			resourceL7RuleV2Import,
+			State: resourceL7RuleV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
