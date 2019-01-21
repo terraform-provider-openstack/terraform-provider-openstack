@@ -106,7 +106,7 @@ func resourceNetworkingTrunkV2Create(d *schema.ResourceData, meta interface{}) e
 		Description: d.Get("description").(string),
 		PortID:      d.Get("port_id").(string),
 		TenantID:    d.Get("tenant_id").(string),
-		Subports:    expandNetworkingTrunkSubportsV2(d.Get("sub_port").(*schema.Set)),
+		Subports:    expandNetworkingTrunkV2Subports(d.Get("sub_port").(*schema.Set)),
 	}
 
 	if v, ok := d.GetOkExists("admin_state_up"); ok {
@@ -173,7 +173,7 @@ func resourceNetworkingTrunkV2Read(d *schema.ResourceData, meta interface{}) err
 	d.Set("tenant_id", trunk.TenantID)
 	d.Set("tags", trunk.Tags)
 
-	err = d.Set("sub_port", flattenNetworkingTrunkSubportsV2(trunk.Subports))
+	err = d.Set("sub_port", flattenNetworkingTrunkV2Subports(trunk.Subports))
 	if err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_networking_trunk_v2 %s sub_port: %s", d.Id(), err)
 	}
@@ -229,7 +229,7 @@ func resourceNetworkingTrunkV2Update(d *schema.ResourceData, meta interface{}) e
 		// Delete all old subports, regardless of if they still exist.
 		// If they do still exist, they will be re-added below.
 		if oldSubport.Len() != 0 {
-			removeSubports := expandNetworkingTrunkSubportsRemoveV2(oldSubport)
+			removeSubports := expandNetworkingTrunkV2SubportsRemove(oldSubport)
 			removeSubportsOpts := trunks.RemoveSubportsOpts{
 				Subports: removeSubports,
 			}
@@ -243,7 +243,7 @@ func resourceNetworkingTrunkV2Update(d *schema.ResourceData, meta interface{}) e
 
 		// Add any new sub_port and re-add previously set subports.
 		if newSubport.Len() != 0 {
-			addSubports := expandNetworkingTrunkSubportsV2(oldSubport)
+			addSubports := expandNetworkingTrunkV2Subports(newSubport)
 			addSubportsOpts := trunks.AddSubportsOpts{
 				Subports: addSubports,
 			}

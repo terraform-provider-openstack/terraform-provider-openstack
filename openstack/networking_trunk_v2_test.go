@@ -36,7 +36,7 @@ func TestFlattenNetworkingTrunkSubportsV2(t *testing.T) {
 		},
 	}
 
-	actualSubports := flattenNetworkingTrunkSubportsV2(subports)
+	actualSubports := flattenNetworkingTrunkV2Subports(subports)
 
 	assert.ElementsMatch(t, expectedSubports, actualSubports)
 }
@@ -71,7 +71,7 @@ func TestExpandNetworkingTrunkSubportsV2(t *testing.T) {
 		},
 	}
 
-	actualSubports := expandNetworkingTrunkSubportsV2(d.Get("sub_port").(*schema.Set))
+	actualSubports := expandNetworkingTrunkV2Subports(d.Get("sub_port").(*schema.Set))
 
 	assert.ElementsMatch(t, expectedSubports, actualSubports)
 }
@@ -102,7 +102,7 @@ func TestExpandNetworkingTrunkSubportsRemoveV2(t *testing.T) {
 		},
 	}
 
-	actualRemoveSubports := expandNetworkingTrunkSubportsRemoveV2(d.Get("sub_port").(*schema.Set))
+	actualRemoveSubports := expandNetworkingTrunkV2SubportsRemove(d.Get("sub_port").(*schema.Set))
 
 	assert.ElementsMatch(t, expectedRemoveSubports, actualRemoveSubports)
 }

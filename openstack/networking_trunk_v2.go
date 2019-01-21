@@ -22,7 +22,7 @@ func networkingTrunkV2StateRefreshFunc(client *gophercloud.ServiceClient, trunkI
 	}
 }
 
-func flattenNetworkingTrunkSubportsV2(subports []trunks.Subport) []map[string]interface{} {
+func flattenNetworkingTrunkV2Subports(subports []trunks.Subport) []map[string]interface{} {
 	trunkSubports := make([]map[string]interface{}, len(subports))
 
 	for i, subport := range subports {
@@ -36,7 +36,7 @@ func flattenNetworkingTrunkSubportsV2(subports []trunks.Subport) []map[string]in
 	return trunkSubports
 }
 
-func expandNetworkingTrunkSubportsV2(subports *schema.Set) []trunks.Subport {
+func expandNetworkingTrunkV2Subports(subports *schema.Set) []trunks.Subport {
 	rawSubports := subports.List()
 
 	trunkSubports := make([]trunks.Subport, len(rawSubports))
@@ -53,7 +53,7 @@ func expandNetworkingTrunkSubportsV2(subports *schema.Set) []trunks.Subport {
 	return trunkSubports
 }
 
-func expandNetworkingTrunkSubportsRemoveV2(subports *schema.Set) []trunks.RemoveSubport {
+func expandNetworkingTrunkV2SubportsRemove(subports *schema.Set) []trunks.RemoveSubport {
 	rawSubports := subports.List()
 
 	subportsToRemove := make([]trunks.RemoveSubport, len(rawSubports))
