@@ -13,6 +13,11 @@ func networkingSubnetpoolV2StateRefreshFunc(client *gophercloud.ServiceClient, i
 			if _, ok := err.(gophercloud.ErrDefault404); ok {
 				return subnetpool, "DELETED", nil
 			}
+			if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
+				if errCode.Actual == 409 {
+					return subnetpool, "ACTIVE", nil
+				}
+			}
 
 			return nil, "", err
 		}
