@@ -20,7 +20,7 @@ func resourceMemberV2() *schema.Resource {
 		Update: resourceMemberV2Update,
 		Delete: resourceMemberV2Delete,
 		Importer: &schema.ResourceImporter{
-			resourceMemberV2Import,
+			State: resourceMemberV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
