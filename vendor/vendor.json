@@ -625,10 +625,6 @@
 			"revisionTime": "2019-01-19T03:36:13Z"
 		},
 		{
-			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/addressscopes...",
-			"revision": ""
-		},
-		{
 			"checksumSHA1": "pwDShGMmrzSuRFXg2JPhCjOB3zc=",
 			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips",
 			"revision": "e102249148e2e09eb5efab07b7c3ea74c161e935",
