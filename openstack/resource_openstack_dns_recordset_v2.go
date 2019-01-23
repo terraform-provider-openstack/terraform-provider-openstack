@@ -18,7 +18,7 @@ func resourceDNSRecordSetV2() *schema.Resource {
 		Update: resourceDNSRecordSetV2Update,
 		Delete: resourceDNSRecordSetV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceDNSRecordSetV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -54,11 +54,13 @@ func resourceDNSRecordSetV2() *schema.Resource {
 			},
 
 			"records": {
-				Type:             schema.TypeList,
-				Optional:         true,
-				ForceNew:         false,
-				Elem:             &schema.Schema{Type: schema.TypeString},
-				DiffSuppressFunc: dnsRecordSetV2SuppressRecordDiffs,
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: false,
+				Elem: &schema.Schema{
+					Type:      schema.TypeString,
+					StateFunc: dnsRecordSetV2RecordsStateFunc,
+				},
 			},
 
 			"ttl": {
@@ -126,6 +128,12 @@ func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) erro
 	id := fmt.Sprintf("%s/%s", zoneID, n.ID)
 	d.SetId(id)
 
+	// This is a workaround to store the modified IP addresses in the state
+	// because we don't want to make records computed or change it to TypeSet
+	// in order to retain backwards compatibility.
+	// Because of the StateFunc, this will not cause issues.
+	d.Set("records", records)
+
 	log.Printf("[DEBUG] Created openstack_dns_recordset_v2 %s: %#v", n.ID, n)
 	return resourceDNSRecordSetV2Read(d, meta)
 }
@@ -154,7 +162,6 @@ func resourceDNSRecordSetV2Read(d *schema.ResourceData, meta interface{}) error 
 	d.Set("description", n.Description)
 	d.Set("ttl", n.TTL)
 	d.Set("type", n.Type)
-	d.Set("records", n.Records)
 	d.Set("zone_id", zoneID)
 	d.Set("region", GetRegion(d, config))
 
@@ -240,4 +247,25 @@ func resourceDNSRecordSetV2Delete(d *schema.ResourceData, meta interface{}) erro
 	_, err = stateConf.WaitForState()
 
 	return nil
+}
+
+func resourceDNSRecordSetV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*Config)
+	dnsClient, err := config.dnsV2Client(GetRegion(d, config))
+	if err != nil {
+		return nil, fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+	}
+
+	zoneID, recordsetID, err := dnsRecordSetV2ParseID(d.Id())
+	if err != nil {
+		return nil, err
+	}
+
+	n, err := recordsets.Get(dnsClient, zoneID, recordsetID).Extract()
+	if err != nil {
+		return nil, fmt.Errorf("Error retrieving openstack_dns_recordset_v2 %s: %s", d.Id(), err)
+	}
+
+	d.Set("records", n.Records)
+	return []*schema.ResourceData{d}, nil
 }

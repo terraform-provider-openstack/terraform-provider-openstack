@@ -54,7 +54,9 @@ The following arguments are supported:
 
 * `description` - (Optional) A description of the  record set.
 
-* `records` - (Optional) An array of DNS records.
+* `records` - (Optional) An array of DNS records. _Note:_ if an IPv6 address
+  contains brackets (`[ ]`), the brackets will be stripped and the modified
+  address will be recorded in the state.
 
 * `value_specs` - (Optional) Map of additional options. Changing this creates a
   new record set.
