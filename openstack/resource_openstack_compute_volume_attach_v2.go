@@ -162,7 +162,7 @@ func resourceComputeVolumeAttachV2Delete(d *schema.ResourceData, meta interface{
 	}
 
 	if _, err = stateConf.WaitForState(); err != nil {
-		return fmt.Errorf("Error detaching openstack_compute_volume_attach_v2 %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Error detaching openstack_compute_volume_attach_v2")
 	}
 
 	return nil
