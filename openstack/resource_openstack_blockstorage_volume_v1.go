@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v1/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 
@@ -252,6 +253,13 @@ func resourceBlockStorageVolumeV1Delete(d *schema.ResourceData, meta interface{}
 			serverID := volumeAttachment["server_id"].(string)
 			attachmentID := volumeAttachment["id"].(string)
 			if err := volumeattach.Delete(computeClient, serverID, attachmentID).ExtractErr(); err != nil {
+				// It's possible the volume was already detached by
+				// openstack_compute_volume_attach_v2, so consider
+				// a 404 acceptable and continue.
+				if _, ok := err.(gophercloud.ErrDefault404); ok {
+					continue
+				}
+
 				return fmt.Errorf(
 					"Error detaching openstack_blockstorage_volume_v1 %s from %s: %s", d.Id(), serverID, err)
 			}
