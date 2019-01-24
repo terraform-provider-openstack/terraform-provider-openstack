@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets"
@@ -79,17 +78,14 @@ func expandDNSRecordSetV2Records(v []interface{}) []string {
 	return records
 }
 
-// dnsRecordSetV2SuppressRecordDiffs will suppress diffs when the format
-// of a record is different yet still a valid DNS record. For example, if a
-// user specifies an IPv6 address using [bracket] notation, but the record is
-// returned without brackets, it is still a valid record.
-func dnsRecordSetV2SuppressRecordDiffs(k, old, new string, d *schema.ResourceData) bool {
-	re := regexp.MustCompile("[][]")
-	new = re.ReplaceAllString(new, "")
+// dnsRecordSetV2RecordsStateFunc will strip brackets from IPv6 addresses.
+func dnsRecordSetV2RecordsStateFunc(v interface{}) string {
+	if addr, ok := v.(string); ok {
+		re := regexp.MustCompile("[][]")
+		addr = re.ReplaceAllString(addr, "")
 
-	if old == new {
-		return true
+		return addr
 	}
 
-	return false
+	return ""
 }
