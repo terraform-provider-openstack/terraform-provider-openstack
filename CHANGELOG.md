@@ -4,6 +4,10 @@ NOTES
 
 * The `openstack_images_image_v2.update_at` attribute has been deprecated in favor of `updated_at` [GH-617]
 
+FEATURES
+
+* __New Resource__: `openstack_networking_addressscope_v2` [GH-634]
+
 IMPROVEMENTS
 
 * Added `flavor_id` to the `openstack_compute_flavor_v2` data source so flavors can be queried by ID [GH-587]
