@@ -265,8 +265,7 @@ func resourceBlockStorageVolumeV2Delete(d *schema.ResourceData, meta interface{}
 			serverID := volumeAttachment.ServerID
 			attachmentID := volumeAttachment.ID
 			if err := volumeattach.Delete(computeClient, serverID, attachmentID).ExtractErr(); err != nil {
-				return fmt.Errorf(
-					"Error detaching openstack_blockstorage_volume_v2 %s from %s: %s", d.Id(), serverID, err)
+				return CheckDeleted(d, err, "Error detaching openstack_blockstorage_volume_v2")
 			}
 		}
 
