@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-func TestAccNetworkingV2AddressScopeImportBasic(t *testing.T) {
+func TestAccNetworkingV2AddressScopeImport_basic(t *testing.T) {
 	resourceName := "openstack_networking_addressscope_v2.addressscope_1"
 	name := acctest.RandomWithPrefix("tf-acc-addrscope")
 

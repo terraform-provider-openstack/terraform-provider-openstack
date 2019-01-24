@@ -102,7 +102,7 @@ func resourceNetworkingAddressScopeV2Create(d *schema.ResourceData, meta interfa
 	d.SetId(a.ID)
 
 	log.Printf("[DEBUG] Created openstack_networking_addressscope_v2 %s: %#v", a.ID, a)
-	return resourceNetworkingSubnetPoolV2Read(d, meta)
+	return resourceNetworkingAddressScopeV2Read(d, meta)
 }
 
 func resourceNetworkingAddressScopeV2Read(d *schema.ResourceData, meta interface{}) error {
@@ -188,6 +188,5 @@ func resourceNetworkingAddressScopeV2Delete(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("Error waiting for openstack_networking_addressscope_v2 %s to delete: %s", d.Id(), err)
 	}
 
-	d.SetId("")
 	return nil
 }
