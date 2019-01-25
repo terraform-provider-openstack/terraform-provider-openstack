@@ -150,6 +150,9 @@ func (lrt *LogRoundTripper) formatJSON(raw []byte) string {
 					v["password"] = "***"
 				}
 			}
+			if v, ok := v["application_credential"].(map[string]interface{}); ok {
+				v["secret"] = "***"
+			}
 		}
 	}
 

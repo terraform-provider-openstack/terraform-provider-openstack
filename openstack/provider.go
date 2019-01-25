@@ -41,6 +41,27 @@ func Provider() terraform.ResourceProvider {
 				Description: descriptions["user_name"],
 			},
 
+			"application_credential_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_APPLICATION_CREDENTIAL_ID", ""),
+				Description: descriptions["application_credential_id"],
+			},
+
+			"application_credential_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_APPLICATION_CREDENTIAL_NAME", ""),
+				Description: descriptions["application_credential_name"],
+			},
+
+			"application_credential_secret": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_APPLICATION_CREDENTIAL_SECRET", ""),
+				Description: descriptions["application_credential_secret"],
+			},
+
 			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -313,6 +334,12 @@ func init() {
 
 		"user_id": "User ID to login with.",
 
+		"application_credential_id": "Application Credential ID to login with.",
+
+		"application_credential_name": "Application Credential name to login with.",
+
+		"application_credential_secret": "Application Credential secret to login with.",
+
 		"tenant_id": "The ID of the Tenant (Identity v2) or Project (Identity v3)\n" +
 			"to login with.",
 
@@ -364,30 +391,33 @@ func init() {
 
 func configureProvider(d *schema.ResourceData) (interface{}, error) {
 	config := Config{
-		CACertFile:        d.Get("cacert_file").(string),
-		ClientCertFile:    d.Get("cert").(string),
-		ClientKeyFile:     d.Get("key").(string),
-		Cloud:             d.Get("cloud").(string),
-		DefaultDomain:     d.Get("default_domain").(string),
-		DomainID:          d.Get("domain_id").(string),
-		DomainName:        d.Get("domain_name").(string),
-		EndpointOverrides: d.Get("endpoint_overrides").(map[string]interface{}),
-		EndpointType:      d.Get("endpoint_type").(string),
-		IdentityEndpoint:  d.Get("auth_url").(string),
-		Password:          d.Get("password").(string),
-		ProjectDomainID:   d.Get("project_domain_id").(string),
-		ProjectDomainName: d.Get("project_domain_name").(string),
-		Region:            d.Get("region").(string),
-		Swauth:            d.Get("swauth").(bool),
-		Token:             d.Get("token").(string),
-		TenantID:          d.Get("tenant_id").(string),
-		TenantName:        d.Get("tenant_name").(string),
-		UserDomainID:      d.Get("user_domain_id").(string),
-		UserDomainName:    d.Get("user_domain_name").(string),
-		Username:          d.Get("user_name").(string),
-		UserID:            d.Get("user_id").(string),
-		useOctavia:        d.Get("use_octavia").(bool),
-		MaxRetries:        d.Get("max_retries").(int),
+		CACertFile:                  d.Get("cacert_file").(string),
+		ClientCertFile:              d.Get("cert").(string),
+		ClientKeyFile:               d.Get("key").(string),
+		Cloud:                       d.Get("cloud").(string),
+		DefaultDomain:               d.Get("default_domain").(string),
+		DomainID:                    d.Get("domain_id").(string),
+		DomainName:                  d.Get("domain_name").(string),
+		EndpointOverrides:           d.Get("endpoint_overrides").(map[string]interface{}),
+		EndpointType:                d.Get("endpoint_type").(string),
+		IdentityEndpoint:            d.Get("auth_url").(string),
+		Password:                    d.Get("password").(string),
+		ProjectDomainID:             d.Get("project_domain_id").(string),
+		ProjectDomainName:           d.Get("project_domain_name").(string),
+		Region:                      d.Get("region").(string),
+		Swauth:                      d.Get("swauth").(bool),
+		Token:                       d.Get("token").(string),
+		TenantID:                    d.Get("tenant_id").(string),
+		TenantName:                  d.Get("tenant_name").(string),
+		UserDomainID:                d.Get("user_domain_id").(string),
+		UserDomainName:              d.Get("user_domain_name").(string),
+		Username:                    d.Get("user_name").(string),
+		UserID:                      d.Get("user_id").(string),
+		ApplicationCredentialID:     d.Get("application_credential_id").(string),
+		ApplicationCredentialName:   d.Get("application_credential_name").(string),
+		ApplicationCredentialSecret: d.Get("application_credential_secret").(string),
+		useOctavia:                  d.Get("use_octavia").(bool),
+		MaxRetries:                  d.Get("max_retries").(int),
 	}
 
 	v, ok := d.GetOkExists("insecure")

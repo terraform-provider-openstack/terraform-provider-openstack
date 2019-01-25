@@ -877,10 +877,10 @@
 			"revisionTime": "2019-01-25T12:42:42Z"
 		},
 		{
-			"checksumSHA1": "MSG3N7e3iPW4bkP/E8dzmoLeuqE=",
+			"checksumSHA1": "Qa9/UEYex1czC5qP32wPsW7vLLA=",
 			"path": "github.com/gophercloud/utils/openstack/clientconfig",
-			"revision": "3b35bcb43167f6d8080fa824c480f04b60311b51",
-			"revisionTime": "2019-01-24T23:21:39Z"
+			"revision": "fbb6ab446f0167dfa4d25b8eb0c0d2f873924516",
+			"revisionTime": "2019-01-28T07:29:30Z"
 		},
 		{
 			"checksumSHA1": "cdOCt0Yb+hdErz8NAQqayxPmRsY=",

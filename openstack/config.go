@@ -17,31 +17,34 @@ import (
 )
 
 type Config struct {
-	CACertFile        string
-	ClientCertFile    string
-	ClientKeyFile     string
-	Cloud             string
-	DefaultDomain     string
-	DomainID          string
-	DomainName        string
-	EndpointOverrides map[string]interface{}
-	EndpointType      string
-	IdentityEndpoint  string
-	Insecure          *bool
-	Password          string
-	ProjectDomainName string
-	ProjectDomainID   string
-	Region            string
-	Swauth            bool
-	TenantID          string
-	TenantName        string
-	Token             string
-	UserDomainName    string
-	UserDomainID      string
-	Username          string
-	UserID            string
-	useOctavia        bool
-	MaxRetries        int
+	CACertFile                  string
+	ClientCertFile              string
+	ClientKeyFile               string
+	Cloud                       string
+	DefaultDomain               string
+	DomainID                    string
+	DomainName                  string
+	EndpointOverrides           map[string]interface{}
+	EndpointType                string
+	IdentityEndpoint            string
+	Insecure                    *bool
+	Password                    string
+	ProjectDomainName           string
+	ProjectDomainID             string
+	Region                      string
+	Swauth                      bool
+	TenantID                    string
+	TenantName                  string
+	Token                       string
+	UserDomainName              string
+	UserDomainID                string
+	Username                    string
+	UserID                      string
+	ApplicationCredentialID     string
+	ApplicationCredentialName   string
+	ApplicationCredentialSecret string
+	useOctavia                  bool
+	MaxRetries                  int
 
 	OsClient *gophercloud.ProviderClient
 }
@@ -108,20 +111,23 @@ func (c *Config) LoadAndValidate() error {
 		}
 	} else {
 		authInfo := &clientconfig.AuthInfo{
-			AuthURL:           c.IdentityEndpoint,
-			DefaultDomain:     c.DefaultDomain,
-			DomainID:          c.DomainID,
-			DomainName:        c.DomainName,
-			Password:          c.Password,
-			ProjectDomainID:   c.ProjectDomainID,
-			ProjectDomainName: c.ProjectDomainName,
-			ProjectID:         c.TenantID,
-			ProjectName:       c.TenantName,
-			Token:             c.Token,
-			UserDomainID:      c.UserDomainID,
-			UserDomainName:    c.UserDomainName,
-			Username:          c.Username,
-			UserID:            c.UserID,
+			AuthURL:                     c.IdentityEndpoint,
+			DefaultDomain:               c.DefaultDomain,
+			DomainID:                    c.DomainID,
+			DomainName:                  c.DomainName,
+			Password:                    c.Password,
+			ProjectDomainID:             c.ProjectDomainID,
+			ProjectDomainName:           c.ProjectDomainName,
+			ProjectID:                   c.TenantID,
+			ProjectName:                 c.TenantName,
+			Token:                       c.Token,
+			UserDomainID:                c.UserDomainID,
+			UserDomainName:              c.UserDomainName,
+			Username:                    c.Username,
+			UserID:                      c.UserID,
+			ApplicationCredentialID:     c.ApplicationCredentialID,
+			ApplicationCredentialName:   c.ApplicationCredentialName,
+			ApplicationCredentialSecret: c.ApplicationCredentialSecret,
 		}
 		clientOpts.AuthInfo = authInfo
 	}
