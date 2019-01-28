@@ -114,11 +114,19 @@ func resourceNetworkingPortSecGroupAssociateV2Read(d *schema.ResourceData, meta 
 		enforce = v.(bool)
 	}
 
+	d.Set("all_security_group_ids", port.SecurityGroups)
+
 	if enforce {
 		d.Set("security_group_ids", port.SecurityGroups)
+	} else {
+		allSet := d.Get("all_security_group_ids").(*schema.Set)
+		desiredSet := d.Get("security_group_ids").(*schema.Set)
+		actualSet := allSet.Intersection(desiredSet)
+		if !actualSet.Equal(desiredSet) {
+			d.Set("security_group_ids", expandToStringSlice(actualSet.List()))
+		}
 	}
 
-	d.Set("all_security_group_ids", port.SecurityGroups)
 	d.Set("region", GetRegion(d, config))
 
 	return nil
