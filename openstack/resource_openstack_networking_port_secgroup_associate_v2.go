@@ -41,7 +41,7 @@ func resourceNetworkingPortSecGroupAssociateV2() *schema.Resource {
 			"enforce": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				Default:  false,
 			},
 
 			"all_security_group_ids": {
@@ -72,15 +72,20 @@ func resourceNetworkingPortSecGroupAssociateV2Create(d *schema.ResourceData, met
 	log.Printf("[DEBUG] Retrieved Port %s: %+v", portID, port)
 
 	var updateOpts ports.UpdateOpts
-	if v, ok := d.GetOk("enforce"); ok && v.(bool) == true {
-		updateOpts = ports.UpdateOpts{SecurityGroups: &securityGroups}
+	var enforce bool
+	if v, ok := d.GetOkExists("enforce"); ok {
+		enforce = v.(bool)
+	}
+
+	if enforce {
+		updateOpts.SecurityGroups = &securityGroups
 	} else {
 		// append security groups
 		sg := sliceUnion(port.SecurityGroups, securityGroups)
-		updateOpts = ports.UpdateOpts{SecurityGroups: &sg}
+		updateOpts.SecurityGroups = &sg
 	}
 
-	log.Printf("[DEBUG] Port Security Group Associate Options: %#v", updateOpts)
+	log.Printf("[DEBUG] Port Security Group Associate Options: %#v", updateOpts.SecurityGroups)
 
 	_, err = ports.Update(networkingClient, portID, updateOpts).Extract()
 	if err != nil {
@@ -88,9 +93,6 @@ func resourceNetworkingPortSecGroupAssociateV2Create(d *schema.ResourceData, met
 	}
 
 	d.SetId(portID)
-
-	log.Printf("[DEBUG] Storing old security group IDs into the 'old_security_group_ids' attribute: %#v", port.SecurityGroups)
-	d.Set("old_security_group_ids", port.SecurityGroups)
 
 	return resourceNetworkingPortSecGroupAssociateV2Read(d, meta)
 }
@@ -104,14 +106,19 @@ func resourceNetworkingPortSecGroupAssociateV2Read(d *schema.ResourceData, meta 
 
 	port, err := ports.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "port")
+		return CheckDeleted(d, err, "Error fetching port security groups")
 	}
 
-	if v, ok := d.GetOk("enforce"); ok && v.(bool) == true {
+	var enforce bool
+	if v, ok := d.GetOkExists("enforce"); ok {
+		enforce = v.(bool)
+	}
+
+	if enforce {
 		d.Set("security_group_ids", port.SecurityGroups)
 	}
-	d.Set("all_security_group_ids", port.SecurityGroups)
 
+	d.Set("all_security_group_ids", port.SecurityGroups)
 	d.Set("region", GetRegion(d, config))
 
 	return nil
@@ -125,10 +132,14 @@ func resourceNetworkingPortSecGroupAssociateV2Update(d *schema.ResourceData, met
 	}
 
 	var updateOpts ports.UpdateOpts
+	var enforce bool
+	if v, ok := d.GetOkExists("enforce"); ok {
+		enforce = v.(bool)
+	}
 
-	if d.Get("enforce").(bool) {
+	if enforce {
 		securityGroups := expandToStringSlice(d.Get("security_group_ids").(*schema.Set).List())
-		updateOpts = ports.UpdateOpts{SecurityGroups: &securityGroups}
+		updateOpts.SecurityGroups = &securityGroups
 	} else {
 		allSet := d.Get("all_security_group_ids").(*schema.Set)
 		oldIDs, newIDs := d.GetChange("security_group_ids")
@@ -138,11 +149,11 @@ func resourceNetworkingPortSecGroupAssociateV2Update(d *schema.ResourceData, met
 
 		newSecurityGroups := expandToStringSlice(allWithoutOld.Union(newSet).List())
 
-		updateOpts = ports.UpdateOpts{SecurityGroups: &newSecurityGroups}
+		updateOpts.SecurityGroups = &newSecurityGroups
 	}
 
 	if d.HasChange("security_group_ids") || d.HasChange("enforce") {
-		log.Printf("[DEBUG] Port Security Group Update Options: %#v", updateOpts)
+		log.Printf("[DEBUG] Port Security Group Update Options: %#v", updateOpts.SecurityGroups)
 		_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
@@ -153,19 +164,32 @@ func resourceNetworkingPortSecGroupAssociateV2Update(d *schema.ResourceData, met
 }
 
 func resourceNetworkingPortSecGroupAssociateV2Delete(d *schema.ResourceData, meta interface{}) error {
-	if d.Get("enforce").(bool) == false {
-		return nil
-	}
-
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	updateOpts := ports.UpdateOpts{SecurityGroups: &[]string{}}
+	var updateOpts ports.UpdateOpts
+	var enforce bool
+	if v, ok := d.GetOkExists("enforce"); ok {
+		enforce = v.(bool)
+	}
 
-	log.Printf("[DEBUG] Port security groups disassociation options: %#v", updateOpts)
+	if enforce {
+		updateOpts.SecurityGroups = &[]string{}
+	} else {
+		allSet := d.Get("all_security_group_ids").(*schema.Set)
+		oldSet := d.Get("security_group_ids").(*schema.Set)
+
+		allWithoutOld := allSet.Difference(oldSet)
+
+		newSecurityGroups := expandToStringSlice(allWithoutOld.List())
+
+		updateOpts.SecurityGroups = &newSecurityGroups
+	}
+
+	log.Printf("[DEBUG] Port security groups disassociation options: %#v", updateOpts.SecurityGroups)
 
 	_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {

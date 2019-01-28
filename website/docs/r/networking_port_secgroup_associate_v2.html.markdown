@@ -10,17 +10,16 @@ description: |-
 
 Manages a V2 port's security groups within OpenStack. Useful, when the port was
 created not by Terraform (e.g. Manila or LBaaS). It should not be used, when the
-port was created within Terraform.
+port was created directly within Terraform.
 
-When the resource is deleted, Terraform doesn't delete the port, but sets the
-list of security group IDs to an empty list.
-
-However, if `enforce` is set to `false` and the resource is deleted, Terraform
-will just remove the resource without any change to the actual port.
+When the resource is deleted, Terraform doesn't delete the port, but unsets the
+list of user defined security group IDs.  However, if `enforce` is set to `true`
+and the resource is deleted, Terraform will remove all assigned security group
+IDs.
 
 ## Example Usage
 
-### Enforce a security group to an existing port
+### Append a security group to an existing port
 
 ```hcl
 data "openstack_networking_port_v2" "system_port" {
@@ -39,7 +38,7 @@ resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
 }
 ```
 
-### Append a security group to an existing port
+### Enforce a security group to an existing port
 
 ```hcl
 data "openstack_networking_port_v2" "system_port" {
@@ -52,7 +51,7 @@ data "openstack_networking_secgroup_v2" "secgroup" {
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
   port_id = "${data.openstack_networking_port_v2.system_port.id}"
-  enforce = "false"
+  enforce = "true"
   security_group_ids = [
     "${data.openstack_networking_secgroup_v2.secgroup.id}",
   ]
@@ -68,6 +67,7 @@ data "openstack_networking_port_v2" "system_port" {
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
   port_id = "${data.openstack_networking_port_v2.system_port.id}"
+  enforce = "true"
   security_group_ids = []
 }
 ```
@@ -88,7 +88,7 @@ The following arguments are supported:
     opposed to how they are configured with the Compute Instance).
 
 * `enforce` - (Optional) Whether to replace or append the list of security
-    groups, specified in the `security_group_ids`. Defaults to `true`.
+    groups, specified in the `security_group_ids`. Defaults to `false`.
 
 ## Attributes Reference
 
