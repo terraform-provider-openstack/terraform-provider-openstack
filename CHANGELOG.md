@@ -7,6 +7,7 @@ NOTES
 FEATURES
 
 * __New Resource__: `openstack_networking_addressscope_v2` [GH-634]
+* __New Resource__: `openstack_networking_port_secgroup_associate_v2` [GH-574]
 
 IMPROVEMENTS
 
