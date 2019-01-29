@@ -29,6 +29,7 @@ BUG FIXES
 * The `openstack_images_image_v2` fields `update_at`, `updated_at`, and `created_at` all now set correctly [GH-617]
 * Fixed issue with `openstack_dns_recordset_v2` where `records` would be returned out of order [GH-636]
 * Fixed issue where `openstack_compute_volume_attach_v2` and `openstack_blockstorage_volume_v2` were trying to detach volumes at the same time [GH-640]
+* Fixed a regression bug where destroying networks was failing on a 409 code [GH-644]
 
 
 ## 1.14.0 (January 15, 2019)
