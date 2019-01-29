@@ -21,6 +21,9 @@ func TestAccComputeV2InterfaceAttachImport_basic(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"admin_pass",
+				},
 			},
 		},
 	})

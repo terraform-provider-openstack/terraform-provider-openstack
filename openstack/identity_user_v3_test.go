@@ -32,10 +32,10 @@ func TestFlattenIdentityUserV3MFARules(t *testing.T) {
 	mfaRules := []interface{}{mfaRule_1, mfaRule_2}
 
 	expected := []map[string]interface{}{
-		map[string]interface{}{
+		{
 			"rule": mfaRule_1,
 		},
-		map[string]interface{}{
+		{
 			"rule": mfaRule_2,
 		},
 	}
