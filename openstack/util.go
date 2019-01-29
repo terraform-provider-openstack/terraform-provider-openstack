@@ -239,3 +239,18 @@ func strSliceContains(haystack []string, needle string) bool {
 	}
 	return false
 }
+
+func sliceUnion(a, b []string) []string {
+	var res []string
+	for _, i := range a {
+		if !strSliceContains(res, i) {
+			res = append(res, i)
+		}
+	}
+	for _, k := range b {
+		if !strSliceContains(res, k) {
+			res = append(res, k)
+		}
+	}
+	return res
+}
