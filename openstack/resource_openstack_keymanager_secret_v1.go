@@ -19,6 +19,10 @@ func resourceKeymanagerSecretV1() *schema.Resource {
 		Update: resourceKeymanagerSecretV1Update,
 		Delete: resourceKeymanagerSecretV1Delete,
 
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
@@ -41,19 +45,16 @@ func resourceKeymanagerSecretV1() *schema.Resource {
 			"bit_length": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				ForceNew: true,
 				Computed: true,
 			},
 			"algorithm": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 				Computed: true,
 			},
 			"creator_id": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: false,
+				ForceNew: true,
 				Computed: true,
 			},
 			"mode": {
@@ -69,15 +70,6 @@ func resourceKeymanagerSecretV1() *schema.Resource {
 			"secret_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
-			},
-			"security_groups": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				ForceNew: false,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 			"status": {
 				Type:     schema.TypeString,
@@ -87,7 +79,7 @@ func resourceKeymanagerSecretV1() *schema.Resource {
 			},
 			"payload": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"payload_content_type": {
 				Type:     schema.TypeString,
