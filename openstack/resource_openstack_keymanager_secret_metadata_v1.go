@@ -2,7 +2,6 @@ package openstack
 
 import (
 	"fmt"
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -57,7 +56,7 @@ func resourceKeymanagerSecretMetadataV1Create(d *schema.ResourceData, meta inter
 	log.Printf("[DEBUG] Create Options for resource_keymanager_secret_metadata_v1: %#v", createOpts)
 
 	secret_ref := d.Get("secret_ref").(string)
-	uuid := getUUIDfromSecretRef(secret_ref)
+	uuid := keymanagerSecretV1GetUUIDfromSecretRef(secret_ref)
 	_, err = secrets.CreateMetadata(kmClient, uuid, createOpts).Extract()
 
 	if err != nil {
@@ -67,7 +66,7 @@ func resourceKeymanagerSecretMetadataV1Create(d *schema.ResourceData, meta inter
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"NOT_CREATED"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    waitForSecretMetadataCreation(kmClient, uuid),
+		Refresh:    keymanagerSecretMetadataV1WaitForSecretMetadataCreation(kmClient, uuid),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
@@ -124,15 +123,4 @@ func resourceKeymanagerSecretMetadataV1Delete(d *schema.ResourceData, meta inter
 	d.Set("metadata", "")
 
 	return resourceKeymanagerSecretMetadataV1Create(d, meta)
-}
-
-func waitForSecretMetadataCreation(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		fmt.Println("ID is %v", id)
-		metadata, err := secrets.GetMetadata(kmClient, id).Extract()
-		if err != nil {
-			return "", "NOT_CREATED", nil
-		}
-		return metadata, "ACTIVE", nil
-	}
 }

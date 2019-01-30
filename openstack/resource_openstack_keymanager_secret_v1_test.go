@@ -96,7 +96,7 @@ func testAccCheckSecretV1Exists(n string, secret *secrets.Secret) resource.TestC
 		config := testAccProvider.Meta().(*Config)
 		kmClient, err := config.keymanagerV1Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack keymanager client: %s", err)
 		}
 
 		var found *secrets.Secret
@@ -116,14 +116,14 @@ func testAccCheckPayloadEquals(payload string, secret *secrets.Secret) resource.
 		config := testAccProvider.Meta().(*Config)
 		kmClient, err := config.keymanagerV1Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack keymanager client: %s", err)
 		}
 
 		opts := secrets.GetPayloadOpts{
 			PayloadContentType: "text/plain",
 		}
 
-		uuid := getUUIDfromSecretRef(secret.SecretRef)
+		uuid := keymanagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
 		secretPayload, _ := secrets.GetPayload(kmClient, uuid, opts).Extract()
 		if string(secretPayload) != payload {
 			return fmt.Errorf("Payloads do not match. Expected %v but got %v", payload, secretPayload)

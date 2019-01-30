@@ -4,7 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
+	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"strings"
+
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools"
@@ -16,11 +21,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
-	"io"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"strings"
 )
 
 // LogRoundTripper satisfies the http.RoundTripper interface and is used to
@@ -304,17 +304,5 @@ type EndpointGroupCreateOpts struct {
 // SiteConnectionCreateOpts represents the attributes used when creating a new IPSec site connection.
 type SiteConnectionCreateOpts struct {
 	siteconnections.CreateOpts
-	ValueSpecs map[string]string `json:"value_specs,omitempty"`
-}
-
-// SecretCreateOpts represents the attributes used when creating a new Barbican secret.
-type SecretCreateOpts struct {
-	secrets.CreateOpts
-	ValueSpecs map[string]string `json:"value_specs,omitempty"`
-}
-
-// SecretMetadataCreateOpts represents the attributes used when creating a new Barbican secret.
-type SecretMetadataCreateOpts struct {
-	secrets.MetadataOpts
 	ValueSpecs map[string]string `json:"value_specs,omitempty"`
 }

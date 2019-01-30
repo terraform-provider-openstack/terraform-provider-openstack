@@ -129,7 +129,7 @@ func testAccCheckMetadataEquals(key string, value string, secret *secrets.Secret
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		uuid := getUUIDfromSecretRef(secret.SecretRef)
+		uuid := keymanagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
 		metadatum, _ := secrets.GetMetadatum(kmClient, uuid, key).Extract()
 		if err != nil {
 			return err

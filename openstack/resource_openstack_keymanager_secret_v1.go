@@ -3,10 +3,8 @@ package openstack
 import (
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -102,7 +100,7 @@ func resourceKeymanagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 
 	var createOpts secrets.CreateOptsBuilder
 
-	secretType := resourceKeymanagerSecretV1SecretType(d.Get("secret_type").(string))
+	secretType := keymanagerSecretV1SecretType(d.Get("secret_type").(string))
 
 	createOpts = &secrets.CreateOpts{
 		Name:                   d.Get("name").(string),
@@ -120,12 +118,12 @@ func resourceKeymanagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 	var secret *secrets.Secret
 	secret, err = secrets.Create(kmClient, createOpts).Extract()
 
-	uuid := getUUIDfromSecretRef(secret.SecretRef)
+	uuid := keymanagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"NOT_CREATED"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    waitForSecretCreation(kmClient, uuid),
+		Refresh:    keymanagerSecretV1WaitForSecretCreation(kmClient, uuid),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
@@ -155,7 +153,7 @@ func resourceKeymanagerSecretV1Read(d *schema.ResourceData, meta interface{}) er
 		return CheckDeleted(d, err, "secret")
 	}
 
-	log.Printf("[DEBUG] Retrieved secret %s: %+v", d.Id(), secret)
+	log.Printf("[DEBUG] Retrieved openstack_keymanager_secret_v1 with id %s: %+v", d.Id(), secret)
 
 	d.Set("name", secret.Name)
 
@@ -220,7 +218,7 @@ func resourceKeymanagerSecretV1Delete(d *schema.ResourceData, meta interface{}) 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForSecretDeletion(kmClient, d.Id()),
+		Refresh:    keymanagerSecretV1WaitForSecretDeletion(kmClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
@@ -231,54 +229,4 @@ func resourceKeymanagerSecretV1Delete(d *schema.ResourceData, meta interface{}) 
 	}
 
 	return nil
-}
-
-func waitForSecretDeletion(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		err := secrets.Delete(kmClient, id).Err
-		if err == nil {
-			return "", "DELETED", nil
-		}
-
-		return nil, "ACTIVE", err
-	}
-}
-
-func resourceKeymanagerSecretV1SecretType(v string) secrets.SecretType {
-	var stype secrets.SecretType
-	switch v {
-	case "symmetric":
-		stype = secrets.SymmetricSecret
-	case "public":
-		stype = secrets.PublicSecret
-	case "private":
-		stype = secrets.PrivateSecret
-	case "passphrase":
-		stype = secrets.PassphraseSecret
-	case "certificate":
-		stype = secrets.CertificateSecret
-	case "opaque":
-		stype = secrets.OpaqueSecret
-	}
-
-	return stype
-}
-
-func waitForSecretCreation(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		fmt.Println("ID is %v", id)
-		secret, err := secrets.Get(kmClient, id).Extract()
-		if err != nil {
-			return "", "NOT_CREATED", nil
-		}
-		return secret, "ACTIVE", nil
-	}
-}
-
-func getUUIDfromSecretRef(ref string) string {
-	// secret ref has form https://{barbican_host}/v1/secrets/{secret_uuid}
-	// so we are only interested in the last part
-	ref_split := strings.Split(ref, "/")
-	uuid := ref_split[len(ref_split)-1]
-	return uuid
 }
