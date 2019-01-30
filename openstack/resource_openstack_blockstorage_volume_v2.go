@@ -273,6 +273,14 @@ func resourceBlockStorageVolumeV2Delete(d *schema.ResourceData, meta interface{}
 					continue
 				}
 
+				// A 409 is also acceptable because there's another
+				// concurrent action happening.
+				if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
+					if errCode.Actual == 409 {
+						continue
+					}
+				}
+
 				return fmt.Errorf(
 					"Error detaching openstack_blockstorage_volume_v2 %s from %s: %s", d.Id(), serverID, err)
 			}
@@ -280,7 +288,7 @@ func resourceBlockStorageVolumeV2Delete(d *schema.ResourceData, meta interface{}
 
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"in-use", "attaching", "detaching"},
-			Target:     []string{"available"},
+			Target:     []string{"available", "deleted"},
 			Refresh:    blockStorageVolumeV2StateRefreshFunc(blockStorageClient, d.Id()),
 			Timeout:    10 * time.Minute,
 			Delay:      10 * time.Second,
