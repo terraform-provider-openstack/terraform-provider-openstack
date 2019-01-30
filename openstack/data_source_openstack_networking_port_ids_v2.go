@@ -78,9 +78,10 @@ func dataSourceNetworkingPortIDsV2() *schema.Resource {
 			},
 
 			"fixed_ip": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.SingleIP(),
 			},
 
 			"status": {
@@ -208,9 +209,7 @@ func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{})
 	var portsList []ports.Port
 	var portIDs []string
 
-	// Create a slice of all returned Fixed IPs.
-	// This will be in the order returned by the API,
-	// which is usually alpha-numeric.
+	// Filter returned Fixed IPs by a "fixed_ip".
 	if v, ok := d.GetOk("fixed_ip"); ok {
 		for _, p := range allPorts {
 			for _, ipObject := range p.FixedIPs {
