@@ -10,6 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func resourceNetworkingPortV2() *schema.Resource {
@@ -113,8 +114,9 @@ func resourceNetworkingPortV2() *schema.Resource {
 							Required: true,
 						},
 						"ip_address": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.SingleIP(),
 						},
 					},
 				},
@@ -135,8 +137,9 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip_address": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.SingleIP(),
 						},
 						"mac_address": {
 							Type:     schema.TypeString,
@@ -329,14 +332,10 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	d.Set("device_id", p.DeviceID)
 	d.Set("tags", p.Tags)
 
-	// Create a slice of all returned Fixed IPs.
+	// Set a slice of all returned Fixed IPs.
 	// This will be in the order returned by the API,
 	// which is usually alpha-numeric.
-	var ips []string
-	for _, ipObject := range p.FixedIPs {
-		ips = append(ips, ipObject.IPAddress)
-	}
-	d.Set("all_fixed_ips", ips)
+	d.Set("all_fixed_ips", expandNetworkingPortFixedIPToStringSlice(p.FixedIPs))
 
 	// Set all security groups.
 	// This can be different from what the user specified since
@@ -420,8 +419,11 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if d.HasChange("fixed_ip") || d.HasChange("no_fixed_ip") {
-		hasChange = true
-		updateOpts.FixedIPs = expandNetworkingPortFixedIPV2(d)
+		fixedIPs := expandNetworkingPortFixedIPV2(d)
+		if fixedIPs != nil {
+			hasChange = true
+			updateOpts.FixedIPs = fixedIPs
+		}
 	}
 
 	// At this point, perform the update for all "standard" port changes.
