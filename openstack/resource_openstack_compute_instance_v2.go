@@ -178,9 +178,10 @@ func resourceComputeInstanceV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"admin_pass": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: false,
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+				ForceNew:  false,
 			},
 			"access_ip_v4": {
 				Type:     schema.TypeString,
@@ -890,7 +891,7 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 	if d.Get("stop_before_destroy").(bool) {
 		err = startstop.Stop(computeClient, d.Id()).ExtractErr()
 		if err != nil {
-			log.Printf("[WARN] Error stopping OpenStack instance: %s", err)
+			log.Printf("[WARN] Error stopping openstack_compute_instance_v2: %s", err)
 		} else {
 			stopStateConf := &resource.StateChangeConf{
 				Pending:    []string{"ACTIVE"},
@@ -912,13 +913,13 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 		log.Printf("[DEBUG] Force deleting OpenStack Instance %s", d.Id())
 		err = servers.ForceDelete(computeClient, d.Id()).ExtractErr()
 		if err != nil {
-			return fmt.Errorf("Error deleting OpenStack server: %s", err)
+			return CheckDeleted(d, err, "Error force deleting openstack_compute_instance_v2")
 		}
 	} else {
 		log.Printf("[DEBUG] Deleting OpenStack Instance %s", d.Id())
 		err = servers.Delete(computeClient, d.Id()).ExtractErr()
 		if err != nil {
-			return fmt.Errorf("Error deleting OpenStack server: %s", err)
+			return CheckDeleted(d, err, "Error deleting openstack_compute_instance_v2")
 		}
 	}
 
@@ -941,7 +942,6 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 			d.Id(), err)
 	}
 
-	d.SetId("")
 	return nil
 }
 
