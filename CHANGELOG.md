@@ -15,6 +15,7 @@ IMPROVEMENTS
 * `openstack_networking_port_ids_v2` data source can now return an empty set of results [GH-631]
 * Added `description` to `openstack_networking_trunk_v2` resource [GH-625]
 * Added `tags` to the networking data source to query by tags and `all_tags` to see a full list of tags [GH-624]
+* `openstack_compute_instance_v2.admin_pass` is now a "sensitive" attribute [GH-647]
 
 BUG FIXES
 
@@ -30,6 +31,7 @@ BUG FIXES
 * Fixed issue with `openstack_dns_recordset_v2` where `records` would be returned out of order [GH-636]
 * Fixed issue where `openstack_compute_volume_attach_v2` and `openstack_blockstorage_volume_v2` were trying to detach volumes at the same time [GH-640]
 * Fixed a regression bug where destroying networks was failing on a 409 code [GH-644]
+* Fixed an issue with `openstack_compute_instance_v2` where a 404 was triggering an error [GH-647]
 
 
 ## 1.14.0 (January 15, 2019)
