@@ -39,7 +39,9 @@ func resourceSharedFilesystemShareV2() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 
 			"project_id": {

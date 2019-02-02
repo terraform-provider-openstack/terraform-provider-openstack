@@ -45,6 +45,10 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
 
 The following arguments are supported:
 
+* `region` - The region in which to obtain the V2 Shared File System client.
+    A Shared File System client is needed to create a share. Changing this
+    creates a new share.
+
 * `name` - (Optional) The name of the share. Changing this updates the name
     of the existing share.
 
@@ -80,8 +84,7 @@ The following arguments are supported:
 ## Attributes Reference
 
 * `id` - The unique ID for the Share.
-* `region` - The region in which to obtain the V2 Shared File System client.
-    A Shared File System client is needed to create a share network.
+* `region` - See Argument Reference above.
 * `project_id` - The owner of the Share.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
