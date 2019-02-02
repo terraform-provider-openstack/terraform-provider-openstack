@@ -31,6 +31,13 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+
 			"share_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -141,6 +148,7 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 			d.Set("access_type", v.AccessType)
 			d.Set("access_to", v.AccessTo)
 			d.Set("access_level", v.AccessLevel)
+			d.Set("region", GetRegion(d, config))
 
 			return nil
 		}
@@ -233,6 +241,7 @@ func resourceSharedFilesystemShareAccessV2Import(d *schema.ResourceData, meta in
 			d.Set("access_type", v.AccessType)
 			d.Set("access_to", v.AccessTo)
 			d.Set("access_level", v.AccessLevel)
+			d.Set("region", GetRegion(d, config))
 
 			return []*schema.ResourceData{d}, nil
 		}
