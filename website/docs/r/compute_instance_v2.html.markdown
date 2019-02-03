@@ -438,7 +438,7 @@ The `personality` block supports:
 
 * `file` - (Required) The absolute path of the destination file.
 
-* `contents` - (Required) The contents of the file. Limited to 255 bytes.
+* `content` - (Required) The contents of the file. Limited to 255 bytes.
 
 The `vendor_options` block supports:
 
