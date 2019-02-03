@@ -19,7 +19,7 @@ resource "openstack_compute_flavor_v2" "test-flavor" {
   vcpus = "2"
   disk  = "20"
 
-  extra_specs {
+  extra_specs = {
     "hw:cpu_policy" = "CPU-POLICY",
     "hw:cpu_thread_policy" = "CPU-THREAD-POLICY"
   }

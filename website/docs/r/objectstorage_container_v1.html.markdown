@@ -17,7 +17,7 @@ resource "openstack_objectstorage_container_v1" "container_1" {
   region = "RegionOne"
   name   = "tf-test-container-1"
 
-  metadata {
+  metadata = {
     test = "true"
   }
 

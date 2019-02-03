@@ -62,7 +62,7 @@ func testAccCheckObjectStorageV1ContainerDestroy(s *terraform.State) error {
 const testAccObjectStorageV1Container_basic = `
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "container_1"
-  metadata {
+  metadata = {
     test = "true"
   }
   content_type = "application/json"
@@ -72,7 +72,7 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 const testAccObjectStorageV1Container_update = `
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "container_1"
-  metadata {
+  metadata = {
     test = "true"
   }
   content_type = "text/plain"

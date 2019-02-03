@@ -229,7 +229,7 @@ const testAccBlockStorageV3Volume_basic = `
 resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   description = "first test volume"
-  metadata {
+  metadata = {
     foo = "bar"
   }
   size = 1
@@ -249,7 +249,7 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   size = 1
   enable_online_resize = true
 }
- 
+
 resource "openstack_compute_volume_attach_v2" "va_1" {
   instance_id = "${openstack_compute_instance_v2.basic.id}"
   volume_id   = "${openstack_blockstorage_volume_v3.volume_1.id}"
@@ -269,7 +269,7 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   size = 2
   enable_online_resize = true
 }
- 
+
 resource "openstack_compute_volume_attach_v2" "va_1" {
   instance_id = "${openstack_compute_instance_v2.basic.id}"
   volume_id   = "${openstack_blockstorage_volume_v3.volume_1.id}"
@@ -280,7 +280,7 @@ const testAccBlockStorageV3Volume_update = `
 resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1-updated"
   description = "first test volume"
-  metadata {
+  metadata = {
     foo = "bar"
   }
   size = 2

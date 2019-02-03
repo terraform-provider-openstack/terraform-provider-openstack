@@ -153,7 +153,7 @@ func testAccComputeV2Flavor_extraSpecs_1(flavorName string) string {
 
       is_public = true
 
-      extra_specs {
+      extra_specs = {
         "hw:cpu_policy" = "CPU-POLICY",
         "hw:cpu_thread_policy" = "CPU-THREAD-POLICY"
       }
@@ -171,7 +171,7 @@ func testAccComputeV2Flavor_extraSpecs_2(flavorName string) string {
 
       is_public = true
 
-      extra_specs {
+      extra_specs = {
         "hw:cpu_policy" = "CPU-POLICY-2"
       }
     }

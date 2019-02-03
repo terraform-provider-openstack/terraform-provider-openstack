@@ -102,7 +102,7 @@ resource "openstack_images_image_v2" "image_1" {
   disk_format = "qcow2"
   image_source_url = "http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
   tags = ["cirros-tf_1"]
-  properties {
+  properties = {
     foo = "bar"
     bar = "foo"
   }
@@ -114,7 +114,7 @@ resource "openstack_images_image_v2" "image_2" {
   disk_format = "qcow2"
   image_source_url = "http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
   tags = ["cirros-tf_2"]
-  properties {
+  properties = {
     foo = "bar"
   }
 }
@@ -163,7 +163,7 @@ var testAccOpenStackImagesV2ImageDataSource_property = fmt.Sprintf(`
 %s
 
 data "openstack_images_image_v2" "image_1" {
-  properties {
+  properties = {
     foo = "bar"
     bar = "foo"
   }
