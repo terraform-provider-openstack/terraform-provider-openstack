@@ -17,6 +17,9 @@ IMPROVEMENTS
 * Added `tags` to the networking data source to query by tags and `all_tags` to see a full list of tags [GH-624]
 * `openstack_compute_instance_v2.admin_pass` is now a "sensitive" attribute [GH-647]
 * Added support to authenticate with Application Credentials [GH-642]
+* Added ability to specify region in `openstack_sharedfilesystem_share_access_v2` [GH-654]
+* Added ability to specify region in `openstack_sharedfilesystem_share_v2` [GH-654]
+
 
 BUG FIXES
 
