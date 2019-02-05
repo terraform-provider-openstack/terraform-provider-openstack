@@ -36,6 +36,8 @@ BUG FIXES
 * Fixed issue where `openstack_compute_volume_attach_v2` and `openstack_blockstorage_volume_v2` were trying to detach volumes at the same time [GH-640]
 * Fixed a regression bug where destroying networks was failing on a 409 code [GH-644]
 * Fixed an issue with `openstack_compute_instance_v2` where a 404 was triggering an error [GH-647]
+* Fixed an issue where `all_fixed_ips` was not being set in `openstack_networking_port_v2` data source [GH-649]
+* Fixed an issue where `openstack_networking_port_v2` would cause an API error [GH-649]
 
 
 ## 1.14.0 (January 15, 2019)
