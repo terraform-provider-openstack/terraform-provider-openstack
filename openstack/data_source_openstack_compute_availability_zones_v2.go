@@ -43,11 +43,11 @@ func dataSourceComputeAvailabilityZonesV2Read(d *schema.ResourceData, meta inter
 	}
 	allPages, err := availabilityzones.List(computeClient).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to fetch availability zones: %s", err.Error())
+		return fmt.Errorf("Error retrieving openstack_compute_availability_zones_v2: %s", err.Error())
 	}
 	zoneInfo, err := availabilityzones.ExtractAvailabilityZones(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to extract availability zones: %s", err.Error())
+		return fmt.Errorf("Error extracting openstack_compute_availability_zones_v2 from response: %s", err.Error())
 	}
 	state := d.Get("state").(string)
 	if state == "" {
