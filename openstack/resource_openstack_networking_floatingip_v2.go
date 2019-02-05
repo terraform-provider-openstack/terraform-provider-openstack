@@ -89,6 +89,12 @@ func resourceNetworkingFloatingIPV2() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+
+			"all_tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -178,7 +184,8 @@ func resourceNetworkFloatingIPV2Read(d *schema.ResourceData, meta interface{}) e
 	d.Set("fixed_ip", fip.FixedIP)
 	d.Set("tenant_id", fip.TenantID)
 	d.Set("region", GetRegion(d, config))
-	d.Set("tags", fip.Tags)
+
+	networkV2ReadAttributesTags(d, fip.Tags)
 
 	poolName, err := networkingNetworkV2Name(d, meta, fip.FloatingNetworkID)
 	if err != nil {
@@ -220,7 +227,7 @@ func resourceNetworkFloatingIPV2Update(d *schema.ResourceData, meta interface{})
 	}
 
 	if d.HasChange("tags") {
-		tags := networkV2AttributesTags(d)
+		tags := networkV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "floatingips", d.Id(), tagOpts).Extract()
 		if err != nil {

@@ -163,6 +163,27 @@ func expandVendorOptions(vendOptsRaw []interface{}) map[string]interface{} {
 	return vendorOptions
 }
 
+func networkV2ReadAttributesTags(d *schema.ResourceData, tags []string) {
+	d.Set("all_tags", tags)
+
+	allTags := d.Get("all_tags").(*schema.Set)
+	desiredTags := d.Get("tags").(*schema.Set)
+	actualTags := allTags.Intersection(desiredTags)
+	if !actualTags.Equal(desiredTags) {
+		d.Set("tags", expandToStringSlice(actualTags.List()))
+	}
+}
+
+func networkV2UpdateAttributesTags(d *schema.ResourceData) (tags []string) {
+	allTags := d.Get("all_tags").(*schema.Set)
+	oldTagsRaw, newTagsRaw := d.GetChange("tags")
+	oldTags, newTags := oldTagsRaw.(*schema.Set), newTagsRaw.(*schema.Set)
+
+	allWithoutOld := allTags.Difference(oldTags)
+
+	return expandToStringSlice(allWithoutOld.Union(newTags).List())
+}
+
 func networkV2AttributesTags(d *schema.ResourceData) (tags []string) {
 	rawTags := d.Get("tags").(*schema.Set).List()
 	tags = make([]string, len(rawTags))

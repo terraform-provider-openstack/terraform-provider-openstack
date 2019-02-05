@@ -53,6 +53,8 @@ The following attributes are exported:
 * `description` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
 * `tags` - See Argument Reference above.
+* `all_tags` - The collection of tags assigned on the security group, which have
+  been explicitly and implicitly added.
 
 ## Default Security Group Rules
 

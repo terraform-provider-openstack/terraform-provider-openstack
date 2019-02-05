@@ -124,6 +124,8 @@ The following attributes are exported:
 * `admin_state_up` - See Argument Reference above.
 * `availability_zone_hints` - See Argument Reference above.
 * `tags` - See Argument Reference above.
+* `all_tags` - The collection of tags assigned on the network, which have been
+  explicitly and implicitly added.
 * `transparent_vlan` - See Argument Reference above.
 
 ## Import

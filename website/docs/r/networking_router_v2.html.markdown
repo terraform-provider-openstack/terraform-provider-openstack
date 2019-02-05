@@ -104,6 +104,8 @@ The following attributes are exported:
 * `value_specs` - See Argument Reference above.
 * `availability_zone_hints` - See Argument Reference above.
 * `tags` - See Argument Reference above.
+* `all_tags` - The collection of tags assigned on the router, which have been
+  explicitly and implicitly added.
 
 ## Import
 

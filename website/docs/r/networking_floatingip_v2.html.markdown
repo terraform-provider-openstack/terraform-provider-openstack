@@ -71,6 +71,8 @@ The following attributes are exported:
 * `tenant_id` - the ID of the tenant in which to create the floating IP.
 * `fixed_ip` - The fixed IP which the floating IP maps to.
 * `tags` - See Argument Reference above.
+* `all_tags` - The collection of tags assigned on the floating IP, which have
+  been explicitly and implicitly added.
 
 ## Import
 

@@ -119,6 +119,8 @@ The following attributes are exported:
 * `host_routes` - See Argument Reference above.
 * `subnetpool_id` - See Argument Reference above.
 * `tags` - See Argument Reference above.
+* `all_tags` - The collection of ags assigned on the subnet, which have been
+  explicitly and implicitly added.
 
 ## Import
 
