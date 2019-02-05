@@ -18,6 +18,10 @@ func dataSourceComputeAvailabilityZonesV2() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"state": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -29,7 +33,11 @@ func dataSourceComputeAvailabilityZonesV2() *schema.Resource {
 
 func dataSourceComputeAvailabilityZonesV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2Client(GetRegion(d, config))
+	region := d.Get("region").(string)
+	if region == "" {
+		region = GetRegion(d, config)
+	}
+	computeClient, err := config.computeV2Client(region)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err.Error())
 	}
