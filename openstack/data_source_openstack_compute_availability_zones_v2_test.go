@@ -1,12 +1,10 @@
 package openstack
 
 import (
-	"fmt"
-	"strconv"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
 )
 
 func TestAccOpenStackAvailabilityZonesV2_basic(t *testing.T) {
@@ -17,36 +15,11 @@ func TestAccOpenStackAvailabilityZonesV2_basic(t *testing.T) {
 			{
 				Config: testAccOpenStackAvailabilityZonesConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2AvailabilityZones("data.openstack_compute_availability_zones_v2.zones"),
+					resource.TestMatchResourceAttr("data.openstack_compute_availability_zones_v2.zones", "names.#", regexp.MustCompile("[1-9]\\d*")),
 				),
 			},
 		},
 	})
-}
-
-func testAccCheckComputeV2AvailabilityZones(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Can't find AZ resource: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("AZ resource ID not set")
-		}
-		v, ok := rs.Primary.Attributes["names.#"]
-		if !ok {
-			return fmt.Errorf("AZ name list missing")
-		}
-		qty, err := strconv.Atoi(v)
-		if err != nil {
-			return err
-		}
-		if qty < 1 {
-			return fmt.Errorf("No AZs found, something is broken")
-		}
-		return nil
-	}
 }
 
 const testAccOpenStackAvailabilityZonesConfig = `
