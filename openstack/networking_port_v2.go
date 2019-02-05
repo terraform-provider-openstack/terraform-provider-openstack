@@ -169,3 +169,12 @@ func resourceNetworkingPortV2AllowedAddressPairsHash(v interface{}) int {
 
 	return hashcode.String(buf.String())
 }
+
+func expandNetworkingPortFixedIPToStringSlice(fixedIPs []ports.IP) []string {
+	s := make([]string, len(fixedIPs))
+	for i, fixedIP := range fixedIPs {
+		s[i] = fixedIP.IPAddress
+	}
+
+	return s
+}

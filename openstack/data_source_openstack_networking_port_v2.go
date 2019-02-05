@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
@@ -77,8 +78,9 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 			},
 
 			"fixed_ip": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.SingleIP(),
 			},
 
 			"status": {
@@ -238,21 +240,13 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 
 	var portsList []extraPort
 
-	// Create a slice of all returned Fixed IPs.
-	// This will be in the order returned by the API,
-	// which is usually alpha-numeric.
+	// Filter returned Fixed IPs by a "fixed_ip".
 	if v, ok := d.GetOk("fixed_ip"); ok {
 		for _, p := range allPorts {
-			var ips = []string{}
 			for _, ipObject := range p.FixedIPs {
-				ips = append(ips, ipObject.IPAddress)
 				if v.(string) == ipObject.IPAddress {
 					portsList = append(portsList, p)
 				}
-			}
-			if len(portsList) > 0 && len(ips) > 0 {
-				d.Set("all_fixed_ips", ips)
-				break
 			}
 		}
 		if len(portsList) == 0 {
@@ -302,6 +296,7 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("region", GetRegion(d, config))
 	d.Set("all_tags", port.Tags)
 	d.Set("all_security_group_ids", port.SecurityGroups)
+	d.Set("all_fixed_ips", expandNetworkingPortFixedIPToStringSlice(port.FixedIPs))
 	d.Set("allowed_address_pairs", flattenNetworkingPortAllowedAddressPairsV2(port.MACAddress, port.AllowedAddressPairs))
 	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDHCPOptsExt))
 
