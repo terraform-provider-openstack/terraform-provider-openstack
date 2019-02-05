@@ -46,9 +46,6 @@ const testAccSFSV2ShareNetworkDataSource_basic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
-  lifecycle {
-    ignore_changes = ["tags"]
-  }
 }
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
