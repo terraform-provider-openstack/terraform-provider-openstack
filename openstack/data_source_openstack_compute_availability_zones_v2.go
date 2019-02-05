@@ -41,6 +41,7 @@ func dataSourceComputeAvailabilityZonesV2Read(d *schema.ResourceData, meta inter
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err.Error())
 	}
+
 	allPages, err := availabilityzones.List(computeClient).AllPages()
 	if err != nil {
 		return fmt.Errorf("Error retrieving openstack_compute_availability_zones_v2: %s", err.Error())
@@ -49,6 +50,7 @@ func dataSourceComputeAvailabilityZonesV2Read(d *schema.ResourceData, meta inter
 	if err != nil {
 		return fmt.Errorf("Error extracting openstack_compute_availability_zones_v2 from response: %s", err.Error())
 	}
+
 	state := d.Get("state").(string)
 	if state == "" {
 		state = "available"
@@ -60,7 +62,9 @@ func dataSourceComputeAvailabilityZonesV2Read(d *schema.ResourceData, meta inter
 			zones = append(zones, z.ZoneName)
 		}
 	}
+
 	d.SetId(time.Now().UTC().String())
 	d.Set("names", zones)
+
 	return nil
 }
