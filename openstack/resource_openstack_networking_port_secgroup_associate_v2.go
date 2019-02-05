@@ -168,7 +168,7 @@ func resourceNetworkingPortSecGroupAssociateV2Update(d *schema.ResourceData, met
 		}
 	}
 
-	return resourceNetworkingPortV2Read(d, meta)
+	return resourceNetworkingPortSecGroupAssociateV2Read(d, meta)
 }
 
 func resourceNetworkingPortSecGroupAssociateV2Delete(d *schema.ResourceData, meta interface{}) error {
