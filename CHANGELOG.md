@@ -1,44 +1,44 @@
-## 1.15.0 (Unreleased)
+## 1.15.0 (February 06, 2019)
 
 NOTES
 
-* The `openstack_images_image_v2.update_at` attribute has been deprecated in favor of `updated_at` [GH-617]
+* The `openstack_images_image_v2.update_at` attribute has been deprecated in favor of `updated_at` ([#617](https://github.com/terraform-providers/terraform-provider-openstack/issues/617))
 
 FEATURES
 
-* __New Resource__: `openstack_networking_addressscope_v2` [GH-634]
-* __New Resource__: `openstack_networking_port_secgroup_associate_v2` [GH-574]
+* __New Resource__: `openstack_networking_addressscope_v2` ([#634](https://github.com/terraform-providers/terraform-provider-openstack/issues/634))
+* __New Resource__: `openstack_networking_port_secgroup_associate_v2` ([#574](https://github.com/terraform-providers/terraform-provider-openstack/issues/574))
 
 IMPROVEMENTS
 
-* Added `flavor_id` to the `openstack_compute_flavor_v2` data source so flavors can be queried by ID [GH-587]
-* `openstack_networking_port_ids_v2` data source can now return an empty set of results [GH-631]
-* Added `description` to `openstack_networking_trunk_v2` resource [GH-625]
-* Added `tags` to the networking data source to query by tags and `all_tags` to see a full list of tags [GH-624]
-* `openstack_compute_instance_v2.admin_pass` is now a "sensitive" attribute [GH-647]
-* Added support to authenticate with Application Credentials [GH-642]
-* Added ability to specify region in `openstack_sharedfilesystem_share_access_v2` [GH-654]
-* Added ability to specify region in `openstack_sharedfilesystem_share_v2` [GH-654]
-* Added `all_tags` attribute to Networking resources to set tags provided by the OpenStack backend automatically [GH-623]
+* Added `flavor_id` to the `openstack_compute_flavor_v2` data source so flavors can be queried by ID ([#587](https://github.com/terraform-providers/terraform-provider-openstack/issues/587))
+* `openstack_networking_port_ids_v2` data source can now return an empty set of results ([#631](https://github.com/terraform-providers/terraform-provider-openstack/issues/631))
+* Added `description` to `openstack_networking_trunk_v2` resource ([#625](https://github.com/terraform-providers/terraform-provider-openstack/issues/625))
+* Added `tags` to the networking data source to query by tags and `all_tags` to see a full list of tags ([#624](https://github.com/terraform-providers/terraform-provider-openstack/issues/624))
+* `openstack_compute_instance_v2.admin_pass` is now a "sensitive" attribute ([#647](https://github.com/terraform-providers/terraform-provider-openstack/issues/647))
+* Added support to authenticate with Application Credentials ([#642](https://github.com/terraform-providers/terraform-provider-openstack/issues/642))
+* Added ability to specify region in `openstack_sharedfilesystem_share_access_v2` ([#654](https://github.com/terraform-providers/terraform-provider-openstack/issues/654))
+* Added ability to specify region in `openstack_sharedfilesystem_share_v2` ([#654](https://github.com/terraform-providers/terraform-provider-openstack/issues/654))
+* Added `all_tags` attribute to Networking resources to set tags provided by the OpenStack backend automatically ([#623](https://github.com/terraform-providers/terraform-provider-openstack/issues/623))
 
 BUG FIXES
 
-* Fixed `created_at`, `updated_at`, and `tag` fields in the `openstack_images_image_v2` data source [GH-615]
-* Fixed `created_at` and `updated_at` fields in the `openstack_networking_subnetpool_v2` resource [GH-619]
-* Fixed `created_at` and `updated_at` fields in the `openstack_networking_subnetpool_v2` data source [GH-616]
-* Fixed issue where updating the description of a floating IP would cause the port to disassociate [GH-606]
-* `admin_state_up` and `shared` fields of `openstack_networking_network_v2` are now correct boolean fields [GH-593]
-* `external` field of `openstack_networking_network_v2` field will now show an actual value [GH-593]
-* Fixed issue where `status` was being used as the query value for `network_id` in `openstack_networking_port_v2` data source [GH-631]
-* Fixed issue where `status` was being used as the query value for `network_id` in `openstack_networking_port_ids_v2` data source [GH-631]
-* The `openstack_images_image_v2` fields `update_at`, `updated_at`, and `created_at` all now set correctly [GH-617]
-* Fixed issue with `openstack_dns_recordset_v2` where `records` would be returned out of order [GH-636]
-* Fixed issue where `openstack_compute_volume_attach_v2` and `openstack_blockstorage_volume_v2` were trying to detach volumes at the same time [GH-640]
-* Fixed a regression bug where destroying networks was failing on a 409 code [GH-644]
-* Fixed an issue with `openstack_compute_instance_v2` where a 404 was triggering an error [GH-647]
-* Fixed an issue where `all_fixed_ips` was not being set in `openstack_networking_port_v2` data source [GH-649]
-* Fixed an issue where `openstack_networking_port_v2` would cause an API error [GH-649]
-* Fixed an issue where Blockstorage volume resources couldn't be detached because they had been removed [GH-641]
+* Fixed `created_at`, `updated_at`, and `tag` fields in the `openstack_images_image_v2` data source ([#615](https://github.com/terraform-providers/terraform-provider-openstack/issues/615))
+* Fixed `created_at` and `updated_at` fields in the `openstack_networking_subnetpool_v2` resource ([#619](https://github.com/terraform-providers/terraform-provider-openstack/issues/619))
+* Fixed `created_at` and `updated_at` fields in the `openstack_networking_subnetpool_v2` data source ([#616](https://github.com/terraform-providers/terraform-provider-openstack/issues/616))
+* Fixed issue where updating the description of a floating IP would cause the port to disassociate ([#606](https://github.com/terraform-providers/terraform-provider-openstack/issues/606))
+* `admin_state_up` and `shared` fields of `openstack_networking_network_v2` are now correct boolean fields ([#593](https://github.com/terraform-providers/terraform-provider-openstack/issues/593))
+* `external` field of `openstack_networking_network_v2` field will now show an actual value ([#593](https://github.com/terraform-providers/terraform-provider-openstack/issues/593))
+* Fixed issue where `status` was being used as the query value for `network_id` in `openstack_networking_port_v2` data source ([#631](https://github.com/terraform-providers/terraform-provider-openstack/issues/631))
+* Fixed issue where `status` was being used as the query value for `network_id` in `openstack_networking_port_ids_v2` data source ([#631](https://github.com/terraform-providers/terraform-provider-openstack/issues/631))
+* The `openstack_images_image_v2` fields `update_at`, `updated_at`, and `created_at` all now set correctly ([#617](https://github.com/terraform-providers/terraform-provider-openstack/issues/617))
+* Fixed issue with `openstack_dns_recordset_v2` where `records` would be returned out of order ([#636](https://github.com/terraform-providers/terraform-provider-openstack/issues/636))
+* Fixed issue where `openstack_compute_volume_attach_v2` and `openstack_blockstorage_volume_v2` were trying to detach volumes at the same time ([#640](https://github.com/terraform-providers/terraform-provider-openstack/issues/640))
+* Fixed a regression bug where destroying networks was failing on a 409 code ([#644](https://github.com/terraform-providers/terraform-provider-openstack/issues/644))
+* Fixed an issue with `openstack_compute_instance_v2` where a 404 was triggering an error ([#647](https://github.com/terraform-providers/terraform-provider-openstack/issues/647))
+* Fixed an issue where `all_fixed_ips` was not being set in `openstack_networking_port_v2` data source ([#649](https://github.com/terraform-providers/terraform-provider-openstack/issues/649))
+* Fixed an issue where `openstack_networking_port_v2` would cause an API error ([#649](https://github.com/terraform-providers/terraform-provider-openstack/issues/649))
+* Fixed an issue where Blockstorage volume resources couldn't be detached because they had been removed ([#641](https://github.com/terraform-providers/terraform-provider-openstack/issues/641))
 
 ## 1.14.0 (January 15, 2019)
 
