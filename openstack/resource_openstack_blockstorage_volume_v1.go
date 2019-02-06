@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v1/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 
@@ -252,6 +253,21 @@ func resourceBlockStorageVolumeV1Delete(d *schema.ResourceData, meta interface{}
 			serverID := volumeAttachment["server_id"].(string)
 			attachmentID := volumeAttachment["id"].(string)
 			if err := volumeattach.Delete(computeClient, serverID, attachmentID).ExtractErr(); err != nil {
+				// It's possible the volume was already detached by
+				// openstack_compute_volume_attach_v2, so consider
+				// a 404 acceptable and continue.
+				if _, ok := err.(gophercloud.ErrDefault404); ok {
+					continue
+				}
+
+				// A 409 is also acceptable because there's another
+				// concurrent action happening.
+				if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
+					if errCode.Actual == 409 {
+						continue
+					}
+				}
+
 				return fmt.Errorf(
 					"Error detaching openstack_blockstorage_volume_v1 %s from %s: %s", d.Id(), serverID, err)
 			}
@@ -259,7 +275,7 @@ func resourceBlockStorageVolumeV1Delete(d *schema.ResourceData, meta interface{}
 
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"in-use", "attaching", "detaching"},
-			Target:     []string{"available"},
+			Target:     []string{"available", "deleted"},
 			Refresh:    blockStorageVolumeV1StateRefreshFunc(blockStorageClient, d.Id()),
 			Timeout:    10 * time.Minute,
 			Delay:      10 * time.Second,
