@@ -123,6 +123,8 @@ The following attributes are exported:
 * `revision_number` - The revision number of the subnetpool.
 * `value_specs` - See Argument Reference above.
 * `tags` - See Argument Reference above.
+* `all_tags` - The collection of tags assigned on the subnetpool, which have been
+  explicitly and implicitly added.
 
 ## Import
 

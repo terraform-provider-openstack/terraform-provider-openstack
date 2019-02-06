@@ -120,3 +120,5 @@ The following attributes are exported:
 * `tenant_id` - See Argument Reference above.
 * `sub_port` - See Argument Reference above.
 * `tags` - See Argument Reference above.
+* `all_tags` - The collection of tags assigned on the trunk, which have been
+  explicitly and implicitly added.

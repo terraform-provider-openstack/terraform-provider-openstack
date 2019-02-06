@@ -115,6 +115,12 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
+			"all_tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
 			"availability_zone_hints": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -258,8 +264,9 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 	d.Set("external", n.External)
 	d.Set("tenant_id", n.TenantID)
 	d.Set("region", GetRegion(d, config))
-	d.Set("tags", n.Tags)
 	d.Set("transparent_vlan", n.VLANTransparent)
+
+	networkV2ReadAttributesTags(d, n.Tags)
 
 	if err := d.Set("availability_zone_hints", n.AvailabilityZoneHints); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_networking_network_v2 %s availability_zone_hints: %s", d.Id(), err)
@@ -300,7 +307,7 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 
 	// Change tags if needed.
 	if d.HasChange("tags") {
-		tags := networkV2AttributesTags(d)
+		tags := networkV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "networks", d.Id(), tagOpts).Extract()
 		if err != nil {

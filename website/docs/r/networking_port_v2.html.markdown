@@ -133,6 +133,8 @@ The following attributes are exported:
   which have been explicitly and implicitly added.
 * `extra_dhcp_option` - See Argument Reference above.
 * `tags` - See Argument Reference above.
+* `all_tags` - The collection of tags assigned on the port, which have been
+  explicitly and implicitly added.
 
 ## Import
 

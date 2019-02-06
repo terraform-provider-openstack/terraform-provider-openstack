@@ -90,6 +90,12 @@ func resourceNetworkingTrunkV2() *schema.Resource {
 				ForceNew: false,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+
+			"all_tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -171,7 +177,8 @@ func resourceNetworkingTrunkV2Read(d *schema.ResourceData, meta interface{}) err
 	d.Set("port_id", trunk.PortID)
 	d.Set("admin_state_up", trunk.AdminStateUp)
 	d.Set("tenant_id", trunk.TenantID)
-	d.Set("tags", trunk.Tags)
+
+	networkV2ReadAttributesTags(d, trunk.Tags)
 
 	err = d.Set("sub_port", flattenNetworkingTrunkV2Subports(trunk.Subports))
 	if err != nil {
@@ -257,7 +264,7 @@ func resourceNetworkingTrunkV2Update(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if d.HasChange("tags") {
-		tags := networkV2AttributesTags(d)
+		tags := networkV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(client, "trunks", d.Id(), tagOpts).Extract()
 		if err != nil {

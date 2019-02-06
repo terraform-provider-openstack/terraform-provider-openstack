@@ -60,6 +60,11 @@ func resourceNetworkingSecGroupV2() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"all_tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -136,7 +141,8 @@ func resourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}) 
 	d.Set("tenant_id", security_group.TenantID)
 	d.Set("name", security_group.Name)
 	d.Set("region", GetRegion(d, config))
-	d.Set("tags", security_group.Tags)
+
+	networkV2ReadAttributesTags(d, security_group.Tags)
 
 	return nil
 }
@@ -171,7 +177,7 @@ func resourceNetworkingSecGroupV2Update(d *schema.ResourceData, meta interface{}
 	}
 
 	if d.HasChange("tags") {
-		tags := networkV2AttributesTags(d)
+		tags := networkV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "security-groups", d.Id(), tagOpts).Extract()
 		if err != nil {
