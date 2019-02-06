@@ -19,7 +19,7 @@ IMPROVEMENTS
 * Added support to authenticate with Application Credentials [GH-642]
 * Added ability to specify region in `openstack_sharedfilesystem_share_access_v2` [GH-654]
 * Added ability to specify region in `openstack_sharedfilesystem_share_v2` [GH-654]
-
+* Added `all_tags` attribute to Networking resources to set tags provided by the OpenStack backend automatically [GH-623]
 
 BUG FIXES
 
@@ -38,7 +38,7 @@ BUG FIXES
 * Fixed an issue with `openstack_compute_instance_v2` where a 404 was triggering an error [GH-647]
 * Fixed an issue where `all_fixed_ips` was not being set in `openstack_networking_port_v2` data source [GH-649]
 * Fixed an issue where `openstack_networking_port_v2` would cause an API error [GH-649]
-
+* Fixed an issue where Blockstorage volume resources couldn't be detached because they had been removed [GH-641]
 
 ## 1.14.0 (January 15, 2019)
 
