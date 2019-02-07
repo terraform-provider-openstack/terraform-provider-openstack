@@ -16,7 +16,9 @@ func dataSourceComputeAvailabilityZonesV2() *schema.Resource {
 			"names": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"region": {
 				Type:     schema.TypeString,
@@ -33,22 +35,18 @@ func dataSourceComputeAvailabilityZonesV2() *schema.Resource {
 
 func dataSourceComputeAvailabilityZonesV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	region := d.Get("region").(string)
-	if region == "" {
-		region = GetRegion(d, config)
-	}
-	computeClient, err := config.computeV2Client(region)
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err.Error())
+		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	allPages, err := availabilityzones.List(computeClient).AllPages()
 	if err != nil {
-		return fmt.Errorf("Error retrieving openstack_compute_availability_zones_v2: %s", err.Error())
+		return fmt.Errorf("Error retrieving openstack_compute_availability_zones_v2: %s", err)
 	}
 	zoneInfo, err := availabilityzones.ExtractAvailabilityZones(allPages)
 	if err != nil {
-		return fmt.Errorf("Error extracting openstack_compute_availability_zones_v2 from response: %s", err.Error())
+		return fmt.Errorf("Error extracting openstack_compute_availability_zones_v2 from response: %s", err)
 	}
 
 	state := d.Get("state").(string)
