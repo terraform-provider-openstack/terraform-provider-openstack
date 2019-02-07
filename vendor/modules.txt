@@ -58,7 +58,7 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
-# github.com/gophercloud/gophercloud v0.0.0-20190212181753-892256c46858
+# github.com/gophercloud/gophercloud v0.0.0-20190215023200-9e57e2f8ff0c
 github.com/gophercloud/gophercloud
 github.com/gophercloud/gophercloud/openstack
 github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions
@@ -89,6 +89,7 @@ github.com/gophercloud/gophercloud/openstack/db/v1/instances
 github.com/gophercloud/gophercloud/openstack/db/v1/users
 github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets
 github.com/gophercloud/gophercloud/openstack/dns/v2/zones
+github.com/gophercloud/gophercloud/openstack/identity/v3/applicationcredentials
 github.com/gophercloud/gophercloud/openstack/identity/v3/endpoints
 github.com/gophercloud/gophercloud/openstack/identity/v3/groups
 github.com/gophercloud/gophercloud/openstack/identity/v3/projects
