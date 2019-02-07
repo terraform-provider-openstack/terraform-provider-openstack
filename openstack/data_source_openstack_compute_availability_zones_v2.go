@@ -20,10 +20,12 @@ func dataSourceComputeAvailabilityZonesV2() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+
 			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
 			"state": {
 				Type:         schema.TypeString,
 				Optional:     true,
