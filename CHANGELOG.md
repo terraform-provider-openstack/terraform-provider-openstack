@@ -1,9 +1,9 @@
-## 1.15.1 (Unreleased)
+## 1.15.1 (February 08, 2019)
 
 BUG FIXES
 
-* Fixed issue where volume multiattachments would not be retried [GH-540]
-* Reverted an incorrect schema validation for `openstack_networking_port_v2.allowed_address_pairs` [GH-661]
+* Fixed issue where volume multiattachments would not be retried ([#540](https://github.com/terraform-providers/terraform-provider-openstack/issues/540))
+* Reverted an incorrect schema validation for `openstack_networking_port_v2.allowed_address_pairs` ([#661](https://github.com/terraform-providers/terraform-provider-openstack/issues/661))
 
 ## 1.15.0 (February 06, 2019)
 
