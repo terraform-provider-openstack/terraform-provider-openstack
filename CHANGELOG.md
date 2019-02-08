@@ -1,4 +1,9 @@
-## 1.16.0 (Unreleased)
+## 1.15.1 (Unreleased)
+
+BUG FIXES
+
+* Fixed issue where volume multiattachments would not be retried [GH-540]
+
 ## 1.15.0 (February 06, 2019)
 
 NOTES
