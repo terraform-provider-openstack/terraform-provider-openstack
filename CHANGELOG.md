@@ -3,6 +3,7 @@
 BUG FIXES
 
 * Fixed issue where volume multiattachments would not be retried [GH-540]
+* Reverted an incorrect schema validation for `openstack_networking_port_v2.allowed_address_pairs` [GH-661]
 
 ## 1.15.0 (February 06, 2019)
 
