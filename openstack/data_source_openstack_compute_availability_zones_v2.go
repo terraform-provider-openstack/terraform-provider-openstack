@@ -28,6 +28,7 @@ func dataSourceComputeAvailabilityZonesV2() *schema.Resource {
 
 			"state": {
 				Type:         schema.TypeString,
+				Default:      "available",
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"available", "unavailable"}, true),
 			},
@@ -51,11 +52,7 @@ func dataSourceComputeAvailabilityZonesV2Read(d *schema.ResourceData, meta inter
 		return fmt.Errorf("Error extracting openstack_compute_availability_zones_v2 from response: %s", err)
 	}
 
-	state := d.Get("state").(string)
-	if state == "" {
-		state = "available"
-	}
-	stateBool := state == "available"
+	stateBool := d.Get("state").(string) == "available"
 	zones := make([]string, 0, len(zoneInfo))
 	for _, z := range zoneInfo {
 		if z.ZoneState.Available == stateBool {
