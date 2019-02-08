@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/gophercloud/gophercloud"
@@ -271,4 +272,34 @@ func TestExpandNetworkingPortFixedIPV2SomeFixedIPs(t *testing.T) {
 	actualFixedIP := expandNetworkingPortFixedIPV2(d)
 
 	assert.ElementsMatch(t, expectedFixedIP, actualFixedIP)
+}
+
+func TestValidateCIDRorIP(t *testing.T) {
+	cases := []struct {
+		CIDR              string
+		ExpectedErrSubstr string
+	}{
+		{"notacidr", ` invalid CIDR address: notacidr`},
+		{"10.0.1.0/24", ``},
+		{"10.0.1.100", ``},
+	}
+
+	for i, tc := range cases {
+		_, errs := validateCIDRorIP()(tc.CIDR, "foo")
+		if tc.ExpectedErrSubstr == "" {
+			if len(errs) != 0 {
+				t.Fatalf("%d/%d: Expected no error, got errs: %#v",
+					i+1, len(cases), errs)
+			}
+		} else {
+			if len(errs) != 1 {
+				t.Fatalf("%d/%d: Expected 1 err containing %q, got %d errs",
+					i+1, len(cases), tc.ExpectedErrSubstr, len(errs))
+			}
+			if !strings.Contains(errs[0].Error(), tc.ExpectedErrSubstr) {
+				t.Fatalf("%d/%d: Expected err: %q, to include %q",
+					i+1, len(cases), errs[0], tc.ExpectedErrSubstr)
+			}
+		}
+	}
 }

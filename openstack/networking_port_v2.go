@@ -10,7 +10,18 @@ import (
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 )
+
+func validateCIDRorIP() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		_, err := validation.SingleIP()(i, k)
+		if err != nil {
+			return validation.CIDRNetwork(0, 32)(i, k)
+		}
+		return nil, nil
+	}
+}
 
 func resourceNetworkingPortV2StateRefreshFunc(client *gophercloud.ServiceClient, portID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {

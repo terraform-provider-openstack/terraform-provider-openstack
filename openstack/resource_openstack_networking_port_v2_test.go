@@ -1027,7 +1027,7 @@ resource "openstack_networking_port_v2" "instance_port" {
   security_group_ids = ["${openstack_networking_secgroup_v2.secgroup_1.id}"]
 
   allowed_address_pairs {
-    ip_address = "${openstack_networking_port_v2.vrrp_port_1.fixed_ip.0.ip_address}"
+    ip_address = "${openstack_networking_port_v2.vrrp_port_1.fixed_ip.0.ip_address}/31"
     mac_address = "${openstack_networking_port_v2.vrrp_port_1.mac_address}"
   }
 

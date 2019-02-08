@@ -137,8 +137,9 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip_address": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validateCIDRorIP(),
 						},
 						"mac_address": {
 							Type:     schema.TypeString,
