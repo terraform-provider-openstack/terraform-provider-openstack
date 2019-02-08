@@ -339,6 +339,15 @@ func suppressAvailabilityZoneDetailDiffs(k, old, new string, d *schema.ResourceD
 	}
 
 	if len(oldParts) > 1 && oldAZ == "" {
+		counter := 0
+		for _, part := range oldParts {
+			if part == "" {
+				counter = counter + 1
+			}
+		}
+		if counter == len(oldParts) {
+			return false
+		}
 		return true
 	}
 
