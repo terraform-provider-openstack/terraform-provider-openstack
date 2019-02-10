@@ -591,3 +591,27 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 ```
+
+### Instances and Networks
+
+Instances almost always require a network. Here are some notes to be aware of
+with how Instances and Networks relate:
+
+* In scenarios where you only have one network available, you can create an
+instance without specifying a `network` block. OpenStack will automatically
+launch the instance on this network.
+
+* If you have access to more than one network, you will need to specify a network
+with a `network` block. Not specifying a network will result in the following
+error:
+
+```
+* openstack_compute_instance_v2.instance: Error creating OpenStack server:
+Expected HTTP response code [201 202] when accessing [POST https://example.com:8774/v2.1/servers], but got 409 instead
+{"conflictingRequest": {"message": "Multiple possible networks found, use a Network ID to be more specific.", "code": 409}}
+```
+
+* If you intend to use the `openstack_compute_interface_attach_v2` resource,
+you still need to make sure one of the above points is satisfied. An instance
+cannot be created without a valid network configuration even if you intend to
+use `openstack_compute_interface_attach_v2` after the instance has been created.
