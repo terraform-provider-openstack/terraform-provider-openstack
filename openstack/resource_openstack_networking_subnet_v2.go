@@ -418,11 +418,10 @@ func flattenNetworkingSubnetV2HostRoutes(v []subnets.HostRoute) []map[string]str
 	hostRoutes := make([]map[string]string, len(v))
 
 	for i, hostRoute := range v {
-		m := map[string]string{}
-		m["destination_cidr"] = hostRoute.DestinationCIDR
-		m["next_hop"] = hostRoute.NextHop
-
-		hostRoutes[i] = m
+		hostRoutes[i] = map[string]string{
+			"destination_cidr": hostRoute.DestinationCIDR,
+			"next_hop":         hostRoute.NextHop,
+		}
 	}
 
 	return hostRoutes
