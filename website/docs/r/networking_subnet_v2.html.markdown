@@ -78,7 +78,8 @@ The following arguments are supported:
     in this subnet. Changing this updates the DNS name servers for the existing
     subnet.
 
-* `host_routes` - (Optional) An array of routes that should be used by devices
+* `host_routes` - (**Deprecated** - use `openstack_networking_subnet_route_v2`
+    instead) An array of routes that should be used by devices
     with IPs from this subnet (not including local subnet route). The host_route
     object structure is documented below. Changing this updates the host routes
     for the existing subnet.
