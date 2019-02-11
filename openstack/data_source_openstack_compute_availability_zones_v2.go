@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
@@ -61,6 +62,9 @@ func dataSourceComputeAvailabilityZonesV2Read(d *schema.ResourceData, meta inter
 			zones = append(zones, z.ZoneName)
 		}
 	}
+
+	// sort.Strings sorts in place, returns nothing
+	sort.Strings(zones)
 
 	d.SetId(time.Now().UTC().String())
 	d.Set("names", zones)
