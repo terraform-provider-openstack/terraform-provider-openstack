@@ -1,4 +1,13 @@
-## 1.15.2 (Unreleased)
+## 1.16.0 (Unreleased)
+
+NOTES
+
+* The `openstack_networking_subnet_v2.host_routes` argument has been marked as deprecated. Please use the dedicated `openstack_networking_subnet_route_v2` resource instead.
+
+BUG FIXES
+
+* The `openstack_networking_subnet_v2.host_routes` argument has been deprecated due to schema issues and conflicts with `openstack_networking_subnet_route_v2` [GH-668]
+
 ## 1.15.1 (February 08, 2019)
 
 BUG FIXES
