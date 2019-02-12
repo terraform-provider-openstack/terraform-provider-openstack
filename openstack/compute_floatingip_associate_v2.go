@@ -40,7 +40,7 @@ func computeFloatingIPAssociateV2NetworkExists(networkClient *gophercloud.Servic
 	}
 
 	if len(allFips) > 1 {
-		return false, fmt.Errorf("There was a problem retrieving the floating IP")
+		return false, fmt.Errorf("more than one floating IP with %s address found", floatingIP)
 	}
 
 	if len(allFips) == 0 {
