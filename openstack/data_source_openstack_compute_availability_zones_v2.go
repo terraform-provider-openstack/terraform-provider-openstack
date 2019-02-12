@@ -3,9 +3,9 @@ package openstack
 import (
 	"fmt"
 	"sort"
-	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
+	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 )
@@ -66,7 +66,7 @@ func dataSourceComputeAvailabilityZonesV2Read(d *schema.ResourceData, meta inter
 	// sort.Strings sorts in place, returns nothing
 	sort.Strings(zones)
 
-	d.SetId(time.Now().UTC().String())
+	d.SetId(hashcode.Strings(zones))
 	d.Set("names", zones)
 	d.Set("region", region)
 
