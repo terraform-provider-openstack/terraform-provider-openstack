@@ -143,7 +143,7 @@ github.com/gophercloud/gophercloud/openstack/objectstorage/v1/accounts
 github.com/gophercloud/gophercloud/testhelper
 github.com/gophercloud/gophercloud/testhelper/client
 github.com/gophercloud/gophercloud/openstack/identity/v2/tenants
-# github.com/gophercloud/utils v0.0.0-20190128072930-fbb6ab446f01
+# github.com/gophercloud/utils v0.0.0-20190212203534-6f24f46ce3c9
 github.com/gophercloud/utils/openstack/clientconfig
 # github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce
 github.com/hashicorp/errwrap
@@ -160,7 +160,7 @@ github.com/hashicorp/go-multierror
 github.com/hashicorp/go-plugin
 # github.com/hashicorp/go-safetemp v0.0.0-20180326211150-b1a1dbde6fdc
 github.com/hashicorp/go-safetemp
-# github.com/hashicorp/go-uuid v0.0.0-20160120003506-36289988d83c
+# github.com/hashicorp/go-uuid v1.0.1
 github.com/hashicorp/go-uuid
 # github.com/hashicorp/go-version v0.0.0-20161031182605-e96d38404026
 github.com/hashicorp/go-version
