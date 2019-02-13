@@ -2,13 +2,13 @@
 github.com/Unknwon/com
 # github.com/agext/levenshtein v1.2.1
 github.com/agext/levenshtein
-# github.com/apparentlymart/go-cidr v0.0.0-20170418151526-7e4b007599d4
+# github.com/apparentlymart/go-cidr v0.0.0-20170616213631-2bd8b58cf427
 github.com/apparentlymart/go-cidr/cidr
 # github.com/apparentlymart/go-textseg v0.0.0-20170531203952-b836f5c4d331
 github.com/apparentlymart/go-textseg/textseg
 # github.com/armon/go-radix v0.0.0-20170727155443-1fca145dffbc
 github.com/armon/go-radix
-# github.com/aws/aws-sdk-go v1.8.34
+# github.com/aws/aws-sdk-go v1.14.31
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/credentials
 github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds
@@ -17,20 +17,26 @@ github.com/aws/aws-sdk-go/aws/session
 github.com/aws/aws-sdk-go/service/s3
 github.com/aws/aws-sdk-go/aws/awserr
 github.com/aws/aws-sdk-go/aws/endpoints
+github.com/aws/aws-sdk-go/internal/sdkio
 github.com/aws/aws-sdk-go/internal/shareddefaults
 github.com/aws/aws-sdk-go/aws/client
+github.com/aws/aws-sdk-go/internal/sdkuri
 github.com/aws/aws-sdk-go/aws/client/metadata
-github.com/aws/aws-sdk-go/aws/request
 github.com/aws/aws-sdk-go/aws/corehandlers
+github.com/aws/aws-sdk-go/aws/request
 github.com/aws/aws-sdk-go/aws/credentials/stscreds
+github.com/aws/aws-sdk-go/aws/csm
 github.com/aws/aws-sdk-go/aws/defaults
 github.com/aws/aws-sdk-go/aws/awsutil
 github.com/aws/aws-sdk-go/aws/signer/v4
 github.com/aws/aws-sdk-go/private/protocol
+github.com/aws/aws-sdk-go/private/protocol/eventstream
+github.com/aws/aws-sdk-go/private/protocol/eventstream/eventstreamapi
+github.com/aws/aws-sdk-go/private/protocol/rest
 github.com/aws/aws-sdk-go/private/protocol/restxml
+github.com/aws/aws-sdk-go/internal/sdkrand
 github.com/aws/aws-sdk-go/service/sts
 github.com/aws/aws-sdk-go/aws/credentials/endpointcreds
-github.com/aws/aws-sdk-go/private/protocol/rest
 github.com/aws/aws-sdk-go/private/protocol/query
 github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/private/protocol/query/queryutil
@@ -40,13 +46,13 @@ github.com/bgentry/go-netrc/netrc
 github.com/bgentry/speakeasy
 # github.com/blang/semver v3.5.1+incompatible
 github.com/blang/semver
-# github.com/davecgh/go-spew v1.1.0
+# github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/fatih/color v1.6.0
 github.com/fatih/color
-# github.com/go-ini/ini v1.23.1
+# github.com/go-ini/ini v1.25.4
 github.com/go-ini/ini
-# github.com/golang/protobuf v0.0.0-20180328163153-e09c5db29600
+# github.com/golang/protobuf v1.2.0
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
@@ -147,7 +153,7 @@ github.com/gophercloud/gophercloud/openstack/identity/v2/tenants
 github.com/gophercloud/utils/openstack/clientconfig
 # github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce
 github.com/hashicorp/errwrap
-# github.com/hashicorp/go-cleanhttp v0.0.0-20170211013415-3573b8b52aa7
+# github.com/hashicorp/go-cleanhttp v0.5.0
 github.com/hashicorp/go-cleanhttp
 # github.com/hashicorp/go-getter v0.0.0-20180425224130-3f60ec5cfbb2
 github.com/hashicorp/go-getter
@@ -162,7 +168,7 @@ github.com/hashicorp/go-plugin
 github.com/hashicorp/go-safetemp
 # github.com/hashicorp/go-uuid v1.0.1
 github.com/hashicorp/go-uuid
-# github.com/hashicorp/go-version v0.0.0-20161031182605-e96d38404026
+# github.com/hashicorp/go-version v1.0.0
 github.com/hashicorp/go-version
 # github.com/hashicorp/hcl v0.0.0-20170504190234-a4b07c25de5f
 github.com/hashicorp/hcl
@@ -181,14 +187,14 @@ github.com/hashicorp/hcl2/hclparse
 github.com/hashicorp/hcl2/hcldec
 github.com/hashicorp/hcl2/hcl/hclsyntax
 github.com/hashicorp/hcl2/hcl/json
-# github.com/hashicorp/hil v0.0.0-20170512213305-fac2259da677
+# github.com/hashicorp/hil v0.0.0-20170627220502-fa9f258a9250
 github.com/hashicorp/hil
 github.com/hashicorp/hil/ast
 github.com/hashicorp/hil/parser
 github.com/hashicorp/hil/scanner
 # github.com/hashicorp/logutils v0.0.0-20150609070431-0dc08b1671f3
 github.com/hashicorp/logutils
-# github.com/hashicorp/terraform v0.11.7
+# github.com/hashicorp/terraform v0.11.12-beta1.0.20190212191339-ee1f8f9362f3
 github.com/hashicorp/terraform/plugin
 github.com/hashicorp/terraform/flatmap
 github.com/hashicorp/terraform/helper/hashcode
@@ -215,10 +221,10 @@ github.com/hashicorp/terraform/helper/acctest
 github.com/hashicorp/terraform/registry
 github.com/hashicorp/terraform/registry/regsrc
 github.com/hashicorp/terraform/registry/response
-github.com/hashicorp/terraform/svchost/auth
 github.com/hashicorp/terraform/svchost/disco
 github.com/hashicorp/terraform/config/hcl2shim
 github.com/hashicorp/terraform/svchost
+github.com/hashicorp/terraform/svchost/auth
 # github.com/hashicorp/yamux v0.0.0-20160720233140-d1caa6c97c9f
 github.com/hashicorp/yamux
 # github.com/jmespath/go-jmespath v0.0.0-20160803190731-bd40a432e4c7
@@ -243,7 +249,7 @@ github.com/mitchellh/hashstructure
 github.com/mitchellh/mapstructure
 # github.com/mitchellh/reflectwalk v0.0.0-20170726202117-63d60e9d0dbc
 github.com/mitchellh/reflectwalk
-# github.com/oklog/run v0.0.0-20180308005104-6934b124db28
+# github.com/oklog/run v1.0.0
 github.com/oklog/run
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
@@ -252,7 +258,7 @@ github.com/posener/complete
 github.com/posener/complete/cmd/install
 github.com/posener/complete/cmd
 github.com/posener/complete/match
-# github.com/stretchr/testify v0.0.0-20181115233458-8019298d9fa5
+# github.com/stretchr/testify v1.3.0
 github.com/stretchr/testify/assert
 # github.com/ulikunitz/xz v0.5.4
 github.com/ulikunitz/xz
