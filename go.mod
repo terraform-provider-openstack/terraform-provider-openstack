@@ -16,8 +16,8 @@ require (
 	github.com/go-test/deep v1.0.1 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/golang/protobuf v0.0.0-20180328163153-e09c5db29600 // indirect
-	github.com/gophercloud/gophercloud v0.0.0-20190125124242-bb1ef8ce758c
-	github.com/gophercloud/utils v0.0.0-20190128072930-fbb6ab446f01
+	github.com/gophercloud/gophercloud v0.0.0-20190212181753-892256c46858
+	github.com/gophercloud/utils v0.0.0-20190212203534-6f24f46ce3c9
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce // indirect
 	github.com/hashicorp/go-cleanhttp v0.0.0-20170211013415-3573b8b52aa7 // indirect
@@ -26,7 +26,6 @@ require (
 	github.com/hashicorp/go-multierror v0.0.0-20150916205742-d30f09973e19 // indirect
 	github.com/hashicorp/go-plugin v0.0.0-20180331002553-e8d22c780116 // indirect
 	github.com/hashicorp/go-safetemp v0.0.0-20180326211150-b1a1dbde6fdc // indirect
-	github.com/hashicorp/go-uuid v0.0.0-20160120003506-36289988d83c // indirect
 	github.com/hashicorp/go-version v0.0.0-20161031182605-e96d38404026 // indirect
 	github.com/hashicorp/hcl v0.0.0-20170504190234-a4b07c25de5f // indirect
 	github.com/hashicorp/hcl2 v0.0.0-20180308163058-5f8ed954abd8 // indirect
@@ -56,13 +55,10 @@ require (
 	github.com/stretchr/testify v0.0.0-20181115233458-8019298d9fa5
 	github.com/ulikunitz/xz v0.5.4 // indirect
 	github.com/zclconf/go-cty v0.0.0-20180328152515-d006e4534bc4 // indirect
-	golang.org/x/crypto v0.0.0-20170808112155-b176d7def5d7 // indirect
 	golang.org/x/net v0.0.0-20180420171651-5f9ae10d9af5 // indirect
 	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
-	golang.org/x/sys v0.0.0-20180425194835-bb9c189858d9 // indirect
 	golang.org/x/text v0.0.0-20180410181320-7922cc490dd5 // indirect
 	google.golang.org/genproto v0.0.0-20180413175816-7fd901a49ba6 // indirect
 	google.golang.org/grpc v0.0.0-20180425170133-7263089022e5 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	gopkg.in/yaml.v2 v2.0.0-20170812160011-eb3733d160e7 // indirect
 )
