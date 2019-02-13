@@ -324,7 +324,7 @@ a Gophercloud but, please ask.
 ### Vendoring
 
 If you require pulling in changes from an external package, such as Gophercloud,
-this provider uses [govendor](https://github.com/kardianos/govendor).
+this provider uses [Go Modules](https://github.com/golang/go/wiki/Modules).
 
 ### Acceptance Tests
 
