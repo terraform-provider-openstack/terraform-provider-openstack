@@ -4,6 +4,10 @@ NOTES
 
 * The `openstack_networking_subnet_v2.host_routes` argument has been marked as deprecated. Please use the dedicated `openstack_networking_subnet_route_v2` resource instead.
 
+FEATURES
+
+* __New Data Source__: `openstack_compute_availability_zones_v2` [GH-655]
+
 BUG FIXES
 
 * The `openstack_networking_subnet_v2.host_routes` argument has been deprecated due to schema issues and conflicts with `openstack_networking_subnet_route_v2` [GH-668]
