@@ -2,8 +2,6 @@
     name: h00130372/terraform-provider-openstack
     check:
       jobs:
-        //- terraform-provider-openstack-unittest
-        //- terraform-provider-openstack-acceptance-test
         - test-create-k8s-cluster
     recheck-trove:
       jobs:
@@ -17,9 +15,3 @@
     recheck-fwaas:
       jobs:
         - terraform-provider-openstack-acceptance-test-fwaas
-    //check-generic-cloud:
-      //jobs:
-        //- terraform-provider-openstack-acceptance-test-telefonica
-        //- terraform-provider-openstack-acceptance-test-huaweicloud
-        //- terraform-provider-openstack-acceptance-test-orange
-        //- terraform-provider-openstack-acceptance-test-opentelekomcloud
