@@ -11,6 +11,7 @@ FEATURES
 BUG FIXES
 
 * The `openstack_networking_subnet_v2.host_routes` argument has been deprecated due to schema issues and conflicts with `openstack_networking_subnet_route_v2` [GH-668]
+* A previously added validation to `openstack_networking_port_v2.fixed_ip.ip_address` was removed as it was causing problems for prior behavior of using an empty string [GH-678]
 
 ## 1.15.1 (February 08, 2019)
 
