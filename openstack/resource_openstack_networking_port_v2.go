@@ -10,7 +10,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func resourceNetworkingPortV2() *schema.Resource {
@@ -114,9 +113,8 @@ func resourceNetworkingPortV2() *schema.Resource {
 							Required: true,
 						},
 						"ip_address": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.SingleIP(),
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 					},
 				},
