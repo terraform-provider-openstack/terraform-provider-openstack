@@ -120,7 +120,7 @@ func testAccCheckNetworkingV2RouterRouteExists(n string) resource.TestCheckFunc 
 			return fmt.Errorf("Router for route not found")
 		}
 
-		var found bool = false
+		found := false
 		for _, r := range router.Routes {
 			if r.DestinationCIDR == rs.Primary.Attributes["destination_cidr"] && r.NextHop == rs.Primary.Attributes["next_hop"] {
 				found = true
