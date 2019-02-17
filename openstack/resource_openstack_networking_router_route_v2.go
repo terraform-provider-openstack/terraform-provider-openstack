@@ -59,10 +59,9 @@ func resourceNetworkingRouterRouteV2Create(d *schema.ResourceData, meta interfac
 	osMutexKV.Lock(routerID)
 	defer osMutexKV.Unlock(routerID)
 
-	r, err := routers.Get(networkingClient, d.Get("router_id").(string)).Extract()
+	r, err := routers.Get(networkingClient, routerID).Extract()
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
-			d.SetId("")
 			return nil
 		}
 
@@ -79,6 +78,7 @@ func resourceNetworkingRouterRouteV2Create(d *schema.ResourceData, meta interfac
 	for _, route := range routes {
 		if route.DestinationCIDR == dstCIDR && route.NextHop == nextHop {
 			exists = true
+			break
 		}
 	}
 
@@ -153,7 +153,7 @@ func resourceNetworkingRouterRouteV2Delete(d *schema.ResourceData, meta interfac
 	osMutexKV.Lock(routerID)
 	defer osMutexKV.Unlock(routerID)
 
-	r, err := routers.Get(networkingClient, d.Get("router_id").(string)).Extract()
+	r, err := routers.Get(networkingClient, routerID).Extract()
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
 			d.SetId("")
