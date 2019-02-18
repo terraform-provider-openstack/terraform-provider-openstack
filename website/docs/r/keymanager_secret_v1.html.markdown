@@ -21,6 +21,9 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
 		payload = "foobar"
 		payload_content_type = "text/plain"
 		secret_type = "passphrase"
+		metadata = {
+		  key = "foo"
+		}
 	}
 ```
 
@@ -50,6 +53,8 @@ The following arguments are supported:
 * `payload_content_type` - (Optional) (required if **payload** is included) The media type for the content of the payload.
 
 * `payload_content_encoding` - (Optional) (required if payload is encoded) The encoding used for the payload to be able to include it in the JSON request. Currently only base64 is supported.
+
+* `metadata` - (Optional) Additional Metadata for the secret.
 			
 ## Attributes Reference
 

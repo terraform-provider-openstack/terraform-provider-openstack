@@ -5,6 +5,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/helper/schema"
 	"strings"
 )
 
@@ -12,6 +13,10 @@ func keymanagerSecretV1WaitForSecretDeletion(kmClient *gophercloud.ServiceClient
 	return func() (interface{}, string, error) {
 		err := secrets.Delete(kmClient, id).Err
 		if err == nil {
+			return "", "DELETED", nil
+		}
+
+		if _, ok := err.(gophercloud.ErrDefault404); ok {
 			return "", "DELETED", nil
 		}
 
@@ -41,7 +46,7 @@ func keymanagerSecretV1SecretType(v string) secrets.SecretType {
 
 func keymanagerSecretV1WaitForSecretCreation(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		fmt.Println("ID is %v", id)
+		fmt.Println("[DEBUG] Waiting for openstack_keymanager_secret_v1 with ID %v to be created", id)
 		secret, err := secrets.Get(kmClient, id).Extract()
 		if err != nil {
 			return "", "NOT_CREATED", nil
@@ -58,8 +63,20 @@ func keymanagerSecretV1GetUUIDfromSecretRef(ref string) string {
 	return uuid
 }
 
-// SecretCreateOpts represents the attributes used when creating a new Barbican secret.
-type SecretCreateOpts struct {
-	secrets.CreateOpts
-	ValueSpecs map[string]string `json:"value_specs,omitempty"`
+func keymanagerSecretMetadataV1(d *schema.ResourceData) map[string]string {
+	m := make(map[string]string)
+	for key, val := range d.Get("metadata").(map[string]interface{}) {
+		m[key] = val.(string)
+	}
+	return m
+}
+
+func keymanagerSecretMetadataV1WaitForSecretMetadataCreation(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		metadata, err := secrets.GetMetadata(kmClient, id).Extract()
+		if err != nil {
+			return "", "NOT_CREATED", nil
+		}
+		return metadata, "ACTIVE", nil
+	}
 }
