@@ -95,15 +95,21 @@ The following arguments are supported:
 
 * `availability_zone_hints` -  (Optional) An availability zone is used to make
     network resources highly available. Used for resources with high availability
-    so that they are scheduled on different availability zones. Changing this 
+    so that they are scheduled on different availability zones. Changing this
     creates a new network.
 
-* `tags` - (Optional) A set of string tags for the network. 
+* `tags` - (Optional) A set of string tags for the network.
 
 * `transparent_vlan` - (Optional) Specifies whether the network resource has the
   VLAN transparent attribute set. Valid values are true and false. Defaults to
   false. Changing this updates the `transparent_vlan` attribute of the existing
   network.
+
+* `port_security_enabled` - (Optional) Whether to explicitly enable or disable
+  port security on the network. Port Security is usually enabled by default, so
+  omitting this argument will usually result in a value of "true". Setting this
+  explicitly to `false` will disable port security. Valid values are `true` and
+  `false`.
 
 The `segments` block supports:
 
@@ -127,6 +133,7 @@ The following attributes are exported:
 * `all_tags` - The collection of tags assigned on the network, which have been
   explicitly and implicitly added.
 * `transparent_vlan` - See Argument Reference above.
+* `port_security_enabled` - See Argument Reference above.
 
 ## Import
 
