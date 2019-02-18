@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
@@ -11,6 +12,11 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
+
+type testPortWithExtensions struct {
+	ports.Port
+	portsecurity.PortSecurityExt
+}
 
 func TestAccNetworkingV2Port_basic(t *testing.T) {
 	var network networks.Network
@@ -647,6 +653,105 @@ func TestAccNetworkingV2Port_adminStateUp_update(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Port_portSecurity_omit(t *testing.T) {
+	var port testPortWithExtensions
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Port_portSecurity_omit,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortWithExtensionsExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "port_security_enabled", "true"),
+					testAccCheckNetworkingV2PortPortSecurityEnabled(&port, true),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Port_portSecurity_disabled,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortWithExtensionsExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "port_security_enabled", "false"),
+					testAccCheckNetworkingV2PortPortSecurityEnabled(&port, false),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Port_portSecurity_enabled,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortWithExtensionsExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "port_security_enabled", "true"),
+					testAccCheckNetworkingV2PortPortSecurityEnabled(&port, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Port_portSecurity_disabled(t *testing.T) {
+	var port testPortWithExtensions
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Port_portSecurity_disabled,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortWithExtensionsExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "port_security_enabled", "false"),
+					testAccCheckNetworkingV2PortPortSecurityEnabled(&port, false),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Port_portSecurity_enabled,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortWithExtensionsExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "port_security_enabled", "true"),
+					testAccCheckNetworkingV2PortPortSecurityEnabled(&port, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Port_portSecurity_enabled(t *testing.T) {
+	var port testPortWithExtensions
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Port_portSecurity_enabled,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortWithExtensionsExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "port_security_enabled", "true"),
+					testAccCheckNetworkingV2PortPortSecurityEnabled(&port, true),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Port_portSecurity_disabled,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortWithExtensionsExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "port_security_enabled", "false"),
+					testAccCheckNetworkingV2PortPortSecurityEnabled(&port, false),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2PortDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
@@ -700,6 +805,40 @@ func testAccCheckNetworkingV2PortExists(n string, port *ports.Port) resource.Tes
 	}
 }
 
+func testAccCheckNetworkingV2PortWithExtensionsExists(
+	n string, port *testPortWithExtensions) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := testAccProvider.Meta().(*Config)
+		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		}
+
+		var p testPortWithExtensions
+		err = ports.Get(networkingClient, rs.Primary.ID).ExtractInto(&p)
+		if err != nil {
+			return err
+		}
+
+		if p.ID != rs.Primary.ID {
+			return fmt.Errorf("Port not found")
+		}
+
+		*port = p
+
+		return nil
+	}
+}
+
 func testAccCheckNetworkingV2PortCountFixedIPs(port *ports.Port, expected int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if len(port.FixedIPs) != expected {
@@ -735,6 +874,17 @@ func testAccCheckNetworkingV2PortAdminStateUp(port *ports.Port, expected bool) r
 	return func(s *terraform.State) error {
 		if port.AdminStateUp != expected {
 			return fmt.Errorf("Port has wrong admin_state_up. Expected %t, got %t", expected, port.AdminStateUp)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckNetworkingV2PortPortSecurityEnabled(
+	port *testPortWithExtensions, expected bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if port.PortSecurityEnabled != expected {
+			return fmt.Errorf("Port has wrong port_security_enabled. Expected %t, got %t", expected, port.PortSecurityEnabled)
 		}
 
 		return nil
@@ -2029,6 +2179,77 @@ resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "false"
   network_id = "${openstack_networking_network_v2.network_1.id}"
+  fixed_ip {
+    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.199.23"
+  }
+}
+`
+
+const testAccNetworkingV2Port_portSecurity_omit = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  no_security_groups = true
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  fixed_ip {
+    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.199.23"
+  }
+}
+`
+
+const testAccNetworkingV2Port_portSecurity_disabled = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  no_security_groups = true
+  port_security_enabled = false
+  fixed_ip {
+    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.199.23"
+  }
+}
+`
+
+const testAccNetworkingV2Port_portSecurity_enabled = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  no_security_groups = true
+  port_security_enabled = true
   fixed_ip {
     subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
     ip_address = "192.168.199.23"
