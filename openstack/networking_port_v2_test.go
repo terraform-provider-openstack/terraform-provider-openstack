@@ -89,7 +89,7 @@ func TestExpandNetworkingPortDHCPOptsV2Update(t *testing.T) {
 		},
 	}
 
-	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Update(d.Get("extra_dhcp_option").(*schema.Set))
+	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Update(nil, d.Get("extra_dhcp_option").(*schema.Set))
 
 	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
@@ -99,9 +99,9 @@ func TestExpandNetworkingPortDHCPOptsEmptyV2Update(t *testing.T) {
 	d := r.TestResourceData()
 	d.SetId("1")
 
-	expectedDHCPOptions := []extradhcpopts.UpdateExtraDHCPOpt{}
+	var expectedDHCPOptions []extradhcpopts.UpdateExtraDHCPOpt
 
-	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Update(d.Get("extra_dhcp_option").(*schema.Set))
+	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Update(nil, d.Get("extra_dhcp_option").(*schema.Set))
 
 	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
@@ -132,7 +132,7 @@ func TestExpandNetworkingPortDHCPOptsV2Delete(t *testing.T) {
 		},
 	}
 
-	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Delete(d.Get("extra_dhcp_option").(*schema.Set))
+	actualDHCPOptions := expandNetworkingPortDHCPOptsV2Update(d.Get("extra_dhcp_option").(*schema.Set), nil)
 
 	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
