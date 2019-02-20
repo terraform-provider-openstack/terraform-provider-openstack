@@ -4,6 +4,10 @@ FEATURES
 
 * __New Resource__: `openstack_identity_application_credential_v3` [GH-660]
 
+BUG FIXES
+
+* Fixed bug in `openstack_identity_auth_scope_v3` data source where the `user_id` attribute was being set to the user's Name and not ID [GH-660]
+
 ## 1.16.0 (February 14, 2019)
 
 NOTES
