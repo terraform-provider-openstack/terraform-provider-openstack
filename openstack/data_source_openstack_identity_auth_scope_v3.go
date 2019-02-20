@@ -105,7 +105,7 @@ func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{})
 	}
 
 	d.Set("user_name", user.Name)
-	d.Set("user_id", user.Name)
+	d.Set("user_id", user.ID)
 	d.Set("user_domain_name", user.Domain.Name)
 	d.Set("user_domain_id", user.Domain.ID)
 

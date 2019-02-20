@@ -279,6 +279,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_identity_role_v3":                      resourceIdentityRoleV3(),
 			"openstack_identity_role_assignment_v3":           resourceIdentityRoleAssignmentV3(),
 			"openstack_identity_user_v3":                      resourceIdentityUserV3(),
+			"openstack_identity_application_credential_v3":    resourceIdentityApplicationCredentialV3(),
 			"openstack_images_image_v2":                       resourceImagesImageV2(),
 			"openstack_lb_member_v1":                          resourceLBMemberV1(),
 			"openstack_lb_monitor_v1":                         resourceLBMonitorV1(),
