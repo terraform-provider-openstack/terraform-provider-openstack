@@ -3,6 +3,8 @@
 FEATURES
 
 * __New Resource__: `openstack_identity_application_credential_v3` [GH-660]
+* __New Data Source__: `openstack_blockstorage_availability_zones_v3` [GH-652]
+* __New Data Source__: `openstack_sharedfilesystem_availability_zones_v2` [GH-652]
 
 BUG FIXES
 
