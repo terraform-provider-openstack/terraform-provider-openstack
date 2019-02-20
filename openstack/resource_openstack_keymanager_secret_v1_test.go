@@ -207,60 +207,60 @@ func testAccCheckMetadataEquals(key string, value string, secret *secrets.Secret
 
 var testAccSecretV1_basic = fmt.Sprintf(`
 resource "openstack_keymanager_secret_v1" "secret_1" {
-		algorithm = "aes"
-		bit_length = 256
-		mode = "cbc"
-		name = "mysecret"
-		payload = "foobar"
-		payload_content_type = "text/plain"
-		secret_type = "passphrase"
-	}`)
+  algorithm = "aes"
+  bit_length = 256
+  mode = "cbc"
+  name = "mysecret"
+  payload = "foobar"
+  payload_content_type = "text/plain"
+  secret_type = "passphrase"
+}`)
 
 var testAccSecretV1_basicWithMetadata = fmt.Sprintf(`
 resource "openstack_keymanager_secret_v1" "secret_1" {
-		algorithm = "aes"
-		bit_length = 256
-		mode = "cbc"
-		name = "mysecret"
-		payload = "foobar"
-		payload_content_type = "text/plain"
-		secret_type = "passphrase"
-		metadata = {
-			foo = "bar"
-		}
-	}`)
+  algorithm = "aes"
+  bit_length = 256
+  mode = "cbc"
+  name = "mysecret"
+  payload = "foobar"
+  payload_content_type = "text/plain"
+  secret_type = "passphrase"
+  metadata = {
+    foo = "bar"
+  }
+}`)
 
 var testAccSecretV1_updateMetadata = fmt.Sprintf(`
 resource "openstack_keymanager_secret_v1" "secret_1" {
-		algorithm = "aes"
-		bit_length = 256
-		mode = "cbc"
-		name = "mysecret"
-		payload = "foobar"
-		payload_content_type = "text/plain"
-		secret_type = "passphrase"
-		metadata = {
-			foo = "update"
-		}
-	}`)
+  algorithm = "aes"
+  bit_length = 256
+  mode = "cbc"
+  name = "mysecret"
+  payload = "foobar"
+  payload_content_type = "text/plain"
+  secret_type = "passphrase"
+  metadata = {
+    foo = "update"
+  }
+}`)
 
 var testAccSecretV1_noPayload = fmt.Sprintf(`
 resource "openstack_keymanager_secret_v1" "secret_1" {
-		algorithm = "aes"
-		bit_length = 256
-		mode = "cbc"
-		name = "mysecret"
-		secret_type = "passphrase"
-		payload = ""
-	}`)
+  algorithm = "aes"
+  bit_length = 256
+  mode = "cbc"
+  name = "mysecret"
+  secret_type = "passphrase"
+  payload = ""
+}`)
 
 var testAccSecretV1_update = fmt.Sprintf(`
 resource "openstack_keymanager_secret_v1" "secret_1" {
-		algorithm = "aes"
-		bit_length = 256
-		mode = "cbc"
-		name = "mysecret"
-		payload = "updatedfoobar"
-		payload_content_type = "text/plain"
-		secret_type = "passphrase"
-	}`)
+  algorithm = "aes"
+  bit_length = 256
+  mode = "cbc"
+  name = "mysecret"
+  payload = "updatedfoobar"
+  payload_content_type = "text/plain"
+  secret_type = "passphrase"
+}`)
