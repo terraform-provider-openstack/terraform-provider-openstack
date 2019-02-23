@@ -1,5 +1,3 @@
-# github.com/Unknwon/com v0.0.0-20151008135407-28b053d5a292
-github.com/Unknwon/com
 # github.com/agext/levenshtein v1.2.1
 github.com/agext/levenshtein
 # github.com/apparentlymart/go-cidr v0.0.0-20170616213631-2bd8b58cf427

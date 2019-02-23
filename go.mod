@@ -1,7 +1,6 @@
 module github.com/terraform-providers/terraform-provider-openstack
 
 require (
-	github.com/Unknwon/com v0.0.0-20151008135407-28b053d5a292
 	github.com/armon/go-radix v0.0.0-20170727155443-1fca145dffbc // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
