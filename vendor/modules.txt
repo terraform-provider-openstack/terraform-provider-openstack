@@ -60,7 +60,6 @@ github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
 # github.com/gophercloud/gophercloud v0.0.0-20190215023200-9e57e2f8ff0c
 github.com/gophercloud/gophercloud
-github.com/gophercloud/gophercloud/openstack
 github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions
 github.com/gophercloud/gophercloud/openstack/blockstorage/v1/volumes
 github.com/gophercloud/gophercloud/openstack/blockstorage/v2/snapshots
@@ -134,7 +133,6 @@ github.com/gophercloud/gophercloud/openstack/networking/v2/ports
 github.com/gophercloud/gophercloud/openstack/networking/v2/subnets
 github.com/gophercloud/gophercloud/openstack/objectstorage/v1/containers
 github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects
-github.com/gophercloud/gophercloud/openstack/objectstorage/v1/swauth
 github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/availabilityzones
 github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/errors
 github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/messages
@@ -143,15 +141,18 @@ github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/sharenetworks
 github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares
 github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/snapshots
 github.com/gophercloud/gophercloud/pagination
-github.com/gophercloud/gophercloud/openstack/identity/v2/tokens
-github.com/gophercloud/gophercloud/openstack/utils
 github.com/gophercloud/gophercloud/openstack/db/v1/datastores
 github.com/gophercloud/gophercloud/internal
+github.com/gophercloud/gophercloud/openstack/utils
 github.com/gophercloud/gophercloud/openstack/objectstorage/v1/accounts
+github.com/gophercloud/gophercloud/openstack
+github.com/gophercloud/gophercloud/openstack/objectstorage/v1/swauth
 github.com/gophercloud/gophercloud/testhelper
 github.com/gophercloud/gophercloud/testhelper/client
+github.com/gophercloud/gophercloud/openstack/identity/v2/tokens
 github.com/gophercloud/gophercloud/openstack/identity/v2/tenants
-# github.com/gophercloud/utils v0.0.0-20190212203534-6f24f46ce3c9
+# github.com/gophercloud/utils v0.0.0-20190223031740-003f6f5724a5
+github.com/gophercloud/utils/terraform/auth
 github.com/gophercloud/utils/openstack/clientconfig
 # github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce
 github.com/hashicorp/errwrap
@@ -201,7 +202,6 @@ github.com/hashicorp/terraform/plugin
 github.com/hashicorp/terraform/flatmap
 github.com/hashicorp/terraform/helper/hashcode
 github.com/hashicorp/terraform/helper/mutexkv
-github.com/hashicorp/terraform/helper/pathorcontents
 github.com/hashicorp/terraform/helper/resource
 github.com/hashicorp/terraform/helper/schema
 github.com/hashicorp/terraform/helper/validation
@@ -220,6 +220,7 @@ github.com/hashicorp/terraform/moduledeps
 github.com/hashicorp/terraform/tfdiags
 github.com/hashicorp/terraform/version
 github.com/hashicorp/terraform/helper/acctest
+github.com/hashicorp/terraform/helper/pathorcontents
 github.com/hashicorp/terraform/registry
 github.com/hashicorp/terraform/registry/regsrc
 github.com/hashicorp/terraform/registry/response
@@ -239,7 +240,7 @@ github.com/mattn/go-isatty
 github.com/mitchellh/cli
 # github.com/mitchellh/copystructure v0.0.0-20170525013902-d23ffcb85de3
 github.com/mitchellh/copystructure
-# github.com/mitchellh/go-homedir v0.0.0-20161203194507-b8bc1bf76747
+# github.com/mitchellh/go-homedir v1.1.0
 github.com/mitchellh/go-homedir
 # github.com/mitchellh/go-testing-interface v0.0.0-20171004221916-a61a99592b77
 github.com/mitchellh/go-testing-interface
@@ -275,7 +276,7 @@ github.com/zclconf/go-cty/cty/function/stdlib
 github.com/zclconf/go-cty/cty/set
 github.com/zclconf/go-cty/cty/gocty
 github.com/zclconf/go-cty/cty/json
-# golang.org/x/crypto v0.0.0-20190211182817-74369b46fc67
+# golang.org/x/crypto v0.0.0-20190222235706-ffb98f73852f
 golang.org/x/crypto/openpgp
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/ssh
@@ -303,7 +304,7 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/lex/httplex
 golang.org/x/net/internal/timeseries
-# golang.org/x/sys v0.0.0-20190209173611-3b5209105503
+# golang.org/x/sys v0.0.0-20190222171317-cd391775e71e
 golang.org/x/sys/unix
 # golang.org/x/text v0.0.0-20180410181320-7922cc490dd5
 golang.org/x/text/unicode/norm
