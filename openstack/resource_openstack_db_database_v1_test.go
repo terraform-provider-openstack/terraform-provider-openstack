@@ -55,12 +55,12 @@ func testAccCheckDatabaseV1DatabaseExists(
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		databaseV1Client, err := config.databaseV1Client(OS_REGION_NAME)
+		DatabaseV1Client, err := config.DatabaseV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		pages, err := databases.List(databaseV1Client, instance.ID).AllPages()
+		pages, err := databases.List(DatabaseV1Client, instance.ID).AllPages()
 		if err != nil {
 			return fmt.Errorf("Unable to retrieve databases: %s", err)
 		}
@@ -84,7 +84,7 @@ func testAccCheckDatabaseV1DatabaseExists(
 func testAccCheckDatabaseV1DatabaseDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
-	databaseV1Client, err := config.databaseV1Client(OS_REGION_NAME)
+	DatabaseV1Client, err := config.DatabaseV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -99,7 +99,7 @@ func testAccCheckDatabaseV1DatabaseDestroy(s *terraform.State) error {
 			return fmt.Errorf("Malformed database name: %s", rs.Primary.ID)
 		}
 
-		pages, err := databases.List(databaseV1Client, parts[0]).AllPages()
+		pages, err := databases.List(DatabaseV1Client, parts[0]).AllPages()
 		if err != nil {
 			return nil
 		}

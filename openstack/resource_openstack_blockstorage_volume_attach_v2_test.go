@@ -49,7 +49,7 @@ func TestAccBlockStorageVolumeAttachV2_timeout(t *testing.T) {
 
 func testAccCheckBlockStorageVolumeAttachV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	client, err := config.blockStorageV2Client(OS_REGION_NAME)
+	client, err := config.BlockStorageV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
@@ -94,7 +94,7 @@ func testAccCheckBlockStorageVolumeAttachV2Exists(n string, va *volumes.Attachme
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		client, err := config.blockStorageV2Client(OS_REGION_NAME)
+		client, err := config.BlockStorageV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}

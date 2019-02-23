@@ -65,7 +65,7 @@ func resourceDatabaseUserV1() *schema.Resource {
 
 func resourceDatabaseUserV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
+	DatabaseV1Client, err := config.DatabaseV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
@@ -89,12 +89,12 @@ func resourceDatabaseUserV1Create(d *schema.ResourceData, meta interface{}) erro
 		Databases: dbs,
 	})
 
-	users.Create(databaseV1Client, instanceID, usersList)
+	users.Create(DatabaseV1Client, instanceID, usersList)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"BUILD"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    DatabaseUserV1StateRefreshFunc(databaseV1Client, instanceID, userName),
+		Refresh:    DatabaseUserV1StateRefreshFunc(DatabaseV1Client, instanceID, userName),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -114,7 +114,7 @@ func resourceDatabaseUserV1Create(d *schema.ResourceData, meta interface{}) erro
 
 func resourceDatabaseUserV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
+	DatabaseV1Client, err := config.DatabaseV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
@@ -127,7 +127,7 @@ func resourceDatabaseUserV1Read(d *schema.ResourceData, meta interface{}) error 
 	instanceID := userID[0]
 	userName := userID[1]
 
-	exists, userObj, err := DatabaseUserV1State(databaseV1Client, instanceID, userName)
+	exists, userObj, err := DatabaseUserV1State(DatabaseV1Client, instanceID, userName)
 	if err != nil {
 		return fmt.Errorf("Error checking user status: %s", err)
 	}
@@ -154,7 +154,7 @@ func resourceDatabaseUserV1Read(d *schema.ResourceData, meta interface{}) error 
 
 func resourceDatabaseUserV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
+	DatabaseV1Client, err := config.DatabaseV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
@@ -167,7 +167,7 @@ func resourceDatabaseUserV1Delete(d *schema.ResourceData, meta interface{}) erro
 	instanceID := userID[0]
 	userName := userID[1]
 
-	exists, _, err := DatabaseUserV1State(databaseV1Client, instanceID, userName)
+	exists, _, err := DatabaseUserV1State(DatabaseV1Client, instanceID, userName)
 	if err != nil {
 		return fmt.Errorf("Error checking user status: %s", err)
 	}
@@ -179,7 +179,7 @@ func resourceDatabaseUserV1Delete(d *schema.ResourceData, meta interface{}) erro
 
 	log.Printf("[DEBUG] Retrieved user %s", userName)
 
-	users.Delete(databaseV1Client, instanceID, userName)
+	users.Delete(DatabaseV1Client, instanceID, userName)
 
 	d.SetId("")
 	return nil

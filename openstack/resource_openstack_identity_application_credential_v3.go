@@ -82,7 +82,7 @@ func resourceIdentityApplicationCredentialV3() *schema.Resource {
 
 func resourceIdentityApplicationCredentialV3Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	identityClient, err := config.identityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -127,7 +127,7 @@ func resourceIdentityApplicationCredentialV3Create(d *schema.ResourceData, meta 
 
 func resourceIdentityApplicationCredentialV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	identityClient, err := config.identityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -167,7 +167,7 @@ func resourceIdentityApplicationCredentialV3Read(d *schema.ResourceData, meta in
 
 func resourceIdentityApplicationCredentialV3Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	identityClient, err := config.identityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}

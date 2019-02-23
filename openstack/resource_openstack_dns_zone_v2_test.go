@@ -68,7 +68,7 @@ func TestAccDNSV2Zone_readTTL(t *testing.T) {
 
 func testAccCheckDNSV2ZoneDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	dnsClient, err := config.dnsV2Client(OS_REGION_NAME)
+	dnsClient, err := config.DNSV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
@@ -99,7 +99,7 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		dnsClient, err := config.dnsV2Client(OS_REGION_NAME)
+		dnsClient, err := config.DNSV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 		}

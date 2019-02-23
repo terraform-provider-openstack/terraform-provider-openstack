@@ -191,7 +191,7 @@ func TestAccNetworkingV2Trunk_computeInstance(t *testing.T) {
 
 func testAccCheckNetworkingV2TrunkDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	client, err := config.networkingV2Client(OS_REGION_NAME)
+	client, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -238,7 +238,7 @@ func testAccCheckNetworkingV2TrunkExists(n string, subportResourceNames []string
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		client, err := config.networkingV2Client(OS_REGION_NAME)
+		client, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}

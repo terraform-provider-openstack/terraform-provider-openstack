@@ -99,7 +99,7 @@ func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 
 func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	dnsClient, err := config.dnsV2Client(OS_REGION_NAME)
+	dnsClient, err := config.DNSV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
@@ -135,7 +135,7 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		dnsClient, err := config.dnsV2Client(OS_REGION_NAME)
+		dnsClient, err := config.DNSV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 		}

@@ -89,7 +89,7 @@ func dataSourceIdentityAuthScopeV3() *schema.Resource {
 
 func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	identityClient, err := config.identityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	tokenID := config.OsClient.TokenID
 
 	d.SetId(d.Get("name").(string))

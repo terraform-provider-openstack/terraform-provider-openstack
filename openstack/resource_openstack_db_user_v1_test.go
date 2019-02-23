@@ -53,12 +53,12 @@ func testAccCheckDatabaseV1UserExists(n string, instance *instances.Instance, us
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		databaseV1Client, err := config.databaseV1Client(OS_REGION_NAME)
+		DatabaseV1Client, err := config.DatabaseV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating cloud database client: %s", err)
 		}
 
-		pages, err := users.List(databaseV1Client, instance.ID).AllPages()
+		pages, err := users.List(DatabaseV1Client, instance.ID).AllPages()
 		if err != nil {
 			return fmt.Errorf("Unable to retrieve users: %s", err)
 		}
@@ -82,7 +82,7 @@ func testAccCheckDatabaseV1UserExists(n string, instance *instances.Instance, us
 func testAccCheckDatabaseV1UserDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
-	databaseV1Client, err := config.databaseV1Client(OS_REGION_NAME)
+	DatabaseV1Client, err := config.DatabaseV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
@@ -97,7 +97,7 @@ func testAccCheckDatabaseV1UserDestroy(s *terraform.State) error {
 			return fmt.Errorf("Malformed username: %s", rs.Primary.ID)
 		}
 
-		pages, err := users.List(databaseV1Client, parts[0]).AllPages()
+		pages, err := users.List(DatabaseV1Client, parts[0]).AllPages()
 		if err != nil {
 			return nil
 		}

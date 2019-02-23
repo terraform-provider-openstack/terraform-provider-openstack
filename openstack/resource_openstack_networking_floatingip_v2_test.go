@@ -70,7 +70,7 @@ func TestAccNetworkingV2FloatingIP_timeout(t *testing.T) {
 
 func testAccCheckNetworkingV2FloatingIPDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack floating IP: %s", err)
 	}
@@ -101,7 +101,7 @@ func testAccCheckNetworkingV2FloatingIPExists(n string, kp *floatingips.Floating
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}

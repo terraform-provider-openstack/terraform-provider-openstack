@@ -59,7 +59,7 @@ func dataSourceIdentityProjectV3() *schema.Resource {
 // dataSourceIdentityProjectV3Read performs the project lookup.
 func dataSourceIdentityProjectV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	identityClient, err := config.identityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}

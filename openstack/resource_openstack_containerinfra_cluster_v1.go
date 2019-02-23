@@ -178,7 +178,7 @@ func resourceContainerInfraClusterV1() *schema.Resource {
 
 func resourceContainerInfraClusterV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	containerInfraClient, err := config.containerInfraV1Client(GetRegion(d, config))
+	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
@@ -262,7 +262,7 @@ func resourceContainerInfraClusterV1Create(d *schema.ResourceData, meta interfac
 
 func resourceContainerInfraClusterV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	containerInfraClient, err := config.containerInfraV1Client(GetRegion(d, config))
+	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
@@ -307,7 +307,7 @@ func resourceContainerInfraClusterV1Read(d *schema.ResourceData, meta interface{
 
 func resourceContainerInfraClusterV1Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	containerInfraClient, err := config.containerInfraV1Client(GetRegion(d, config))
+	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
@@ -351,7 +351,7 @@ func resourceContainerInfraClusterV1Update(d *schema.ResourceData, meta interfac
 
 func resourceContainerInfraClusterV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	containerInfraClient, err := config.containerInfraV1Client(GetRegion(d, config))
+	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
 	}

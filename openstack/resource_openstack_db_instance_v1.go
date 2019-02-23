@@ -165,7 +165,7 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 
 func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
+	DatabaseV1Client, err := config.DatabaseV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating database client: %s", err)
 	}
@@ -245,7 +245,7 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 	createOpts.Users = UserList
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	instance, err := instances.Create(databaseV1Client, createOpts).Extract()
+	instance, err := instances.Create(DatabaseV1Client, createOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error creating database instance: %s", err)
 	}
@@ -259,7 +259,7 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"BUILD"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    DatabaseInstanceV1StateRefreshFunc(databaseV1Client, instance.ID),
+		Refresh:    DatabaseInstanceV1StateRefreshFunc(DatabaseV1Client, instance.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -273,7 +273,7 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if configuration, ok := d.GetOk("configuration_id"); ok {
-		err := instances.AttachConfigurationGroup(databaseV1Client, instance.ID, configuration.(string)).ExtractErr()
+		err := instances.AttachConfigurationGroup(DatabaseV1Client, instance.ID, configuration.(string)).ExtractErr()
 		if err != nil {
 			return err
 		}
@@ -288,12 +288,12 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 
 func resourceDatabaseInstanceV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
+	DatabaseV1Client, err := config.DatabaseV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating database client: %s", err)
 	}
 
-	instance, err := instances.Get(databaseV1Client, d.Id()).Extract()
+	instance, err := instances.Get(DatabaseV1Client, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "instance")
 	}
@@ -310,7 +310,7 @@ func resourceDatabaseInstanceV1Read(d *schema.ResourceData, meta interface{}) er
 
 func resourceDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
+	DatabaseV1Client, err := config.DatabaseV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating database client: %s", err)
 	}
@@ -318,14 +318,14 @@ func resourceDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("configuration_id") {
 		old, new := d.GetChange("configuration_id")
 
-		err := instances.DetachConfigurationGroup(databaseV1Client, d.Id()).ExtractErr()
+		err := instances.DetachConfigurationGroup(DatabaseV1Client, d.Id()).ExtractErr()
 		if err != nil {
 			return err
 		}
 		log.Printf("Detaching configuration %v from the instance %v", old, d.Id())
 
 		if new != "" {
-			err := instances.AttachConfigurationGroup(databaseV1Client, d.Id(), new.(string)).ExtractErr()
+			err := instances.AttachConfigurationGroup(DatabaseV1Client, d.Id(), new.(string)).ExtractErr()
 			if err != nil {
 				return err
 			}
@@ -338,13 +338,13 @@ func resourceDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceDatabaseInstanceV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
+	DatabaseV1Client, err := config.DatabaseV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating database client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting database instance %s", d.Id())
-	err = instances.Delete(databaseV1Client, d.Id()).ExtractErr()
+	err = instances.Delete(DatabaseV1Client, d.Id()).ExtractErr()
 	if err != nil {
 		return fmt.Errorf("Error deleting database instance: %s", err)
 	}
@@ -355,7 +355,7 @@ func resourceDatabaseInstanceV1Delete(d *schema.ResourceData, meta interface{}) 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE", "SHUTDOWN"},
 		Target:     []string{"DELETED"},
-		Refresh:    DatabaseInstanceV1StateRefreshFunc(databaseV1Client, d.Id()),
+		Refresh:    DatabaseInstanceV1StateRefreshFunc(DatabaseV1Client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,

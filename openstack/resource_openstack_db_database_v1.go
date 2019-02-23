@@ -49,7 +49,7 @@ func resourceDatabaseDatabaseV1() *schema.Resource {
 
 func resourceDatabaseDatabaseV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
+	DatabaseV1Client, err := config.DatabaseV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
@@ -62,7 +62,7 @@ func resourceDatabaseDatabaseV1Create(d *schema.ResourceData, meta interface{}) 
 		Name: dbName,
 	})
 
-	exists, err := DatabaseDatabaseV1State(databaseV1Client, instanceID, dbName)
+	exists, err := DatabaseDatabaseV1State(DatabaseV1Client, instanceID, dbName)
 	if err != nil {
 		return fmt.Errorf("Error checking database status: %s", err)
 	}
@@ -71,7 +71,7 @@ func resourceDatabaseDatabaseV1Create(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Database %s exists on instance %s", dbName, instanceID)
 	}
 
-	err = databases.Create(databaseV1Client, instanceID, dbs).ExtractErr()
+	err = databases.Create(DatabaseV1Client, instanceID, dbs).ExtractErr()
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func resourceDatabaseDatabaseV1Create(d *schema.ResourceData, meta interface{}) 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"BUILD"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    DatabaseDatabaseV1StateRefreshFunc(databaseV1Client, instanceID, dbName),
+		Refresh:    DatabaseDatabaseV1StateRefreshFunc(DatabaseV1Client, instanceID, dbName),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -99,7 +99,7 @@ func resourceDatabaseDatabaseV1Create(d *schema.ResourceData, meta interface{}) 
 
 func resourceDatabaseDatabaseV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
+	DatabaseV1Client, err := config.DatabaseV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating database client: %s", err)
 	}
@@ -112,7 +112,7 @@ func resourceDatabaseDatabaseV1Read(d *schema.ResourceData, meta interface{}) er
 	instanceID := dbID[0]
 	dbName := dbID[1]
 
-	exists, err := DatabaseDatabaseV1State(databaseV1Client, instanceID, dbName)
+	exists, err := DatabaseDatabaseV1State(DatabaseV1Client, instanceID, dbName)
 	if err != nil {
 		return fmt.Errorf("Error checking database status: %s", err)
 	}
@@ -131,7 +131,7 @@ func resourceDatabaseDatabaseV1Read(d *schema.ResourceData, meta interface{}) er
 
 func resourceDatabaseDatabaseV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	databaseV1Client, err := config.databaseV1Client(GetRegion(d, config))
+	DatabaseV1Client, err := config.DatabaseV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
@@ -144,7 +144,7 @@ func resourceDatabaseDatabaseV1Delete(d *schema.ResourceData, meta interface{}) 
 	instanceID := dbID[0]
 	dbName := dbID[1]
 
-	exists, err := DatabaseDatabaseV1State(databaseV1Client, instanceID, dbName)
+	exists, err := DatabaseDatabaseV1State(DatabaseV1Client, instanceID, dbName)
 	if err != nil {
 		return fmt.Errorf("Error checking database status: %s", err)
 	}
@@ -153,7 +153,7 @@ func resourceDatabaseDatabaseV1Delete(d *schema.ResourceData, meta interface{}) 
 		return nil
 	}
 
-	err = databases.Delete(databaseV1Client, instanceID, dbName).ExtractErr()
+	err = databases.Delete(DatabaseV1Client, instanceID, dbName).ExtractErr()
 	if err != nil {
 		return fmt.Errorf("Error deleting database %s: %s", dbName, err)
 	}

@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform/helper/pathorcontents"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
+
+	"github.com/gophercloud/utils/terraform/auth"
 )
 
 var (
@@ -367,26 +369,28 @@ func testAccAuthFromEnv() (*Config, error) {
 	}
 
 	config := Config{
-		CACertFile:        os.Getenv("OS_CACERT"),
-		ClientCertFile:    os.Getenv("OS_CERT"),
-		ClientKeyFile:     os.Getenv("OS_KEY"),
-		Cloud:             os.Getenv("OS_CLOUD"),
-		DefaultDomain:     os.Getenv("OS_DEFAULT_DOMAIN"),
-		DomainID:          os.Getenv("OS_DOMAIN_ID"),
-		DomainName:        os.Getenv("OS_DOMAIN_NAME"),
-		EndpointType:      os.Getenv("OS_ENDPOINT_TYPE"),
-		IdentityEndpoint:  os.Getenv("OS_AUTH_URL"),
-		Password:          os.Getenv("OS_PASSWORD"),
-		ProjectDomainID:   os.Getenv("OS_PROJECT_DOMAIN_ID"),
-		ProjectDomainName: os.Getenv("OS_PROJECT_DOMAIN_NAME"),
-		Region:            os.Getenv("OS_REGION"),
-		Token:             os.Getenv("OS_TOKEN"),
-		TenantID:          tenantID,
-		TenantName:        tenantName,
-		UserDomainID:      os.Getenv("OS_USER_DOMAIN_ID"),
-		UserDomainName:    os.Getenv("OS_USER_DOMAIN_NAME"),
-		Username:          os.Getenv("OS_USERNAME"),
-		UserID:            os.Getenv("OS_USER_ID"),
+		auth.Config{
+			CACertFile:        os.Getenv("OS_CACERT"),
+			ClientCertFile:    os.Getenv("OS_CERT"),
+			ClientKeyFile:     os.Getenv("OS_KEY"),
+			Cloud:             os.Getenv("OS_CLOUD"),
+			DefaultDomain:     os.Getenv("OS_DEFAULT_DOMAIN"),
+			DomainID:          os.Getenv("OS_DOMAIN_ID"),
+			DomainName:        os.Getenv("OS_DOMAIN_NAME"),
+			EndpointType:      os.Getenv("OS_ENDPOINT_TYPE"),
+			IdentityEndpoint:  os.Getenv("OS_AUTH_URL"),
+			Password:          os.Getenv("OS_PASSWORD"),
+			ProjectDomainID:   os.Getenv("OS_PROJECT_DOMAIN_ID"),
+			ProjectDomainName: os.Getenv("OS_PROJECT_DOMAIN_NAME"),
+			Region:            os.Getenv("OS_REGION"),
+			Token:             os.Getenv("OS_TOKEN"),
+			TenantID:          tenantID,
+			TenantName:        tenantName,
+			UserDomainID:      os.Getenv("OS_USER_DOMAIN_ID"),
+			UserDomainName:    os.Getenv("OS_USER_DOMAIN_NAME"),
+			Username:          os.Getenv("OS_USERNAME"),
+			UserID:            os.Getenv("OS_USER_ID"),
+		},
 	}
 
 	if err := config.LoadAndValidate(); err != nil {

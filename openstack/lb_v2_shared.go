@@ -28,10 +28,10 @@ var lbSkipLBStatuses = []string{"ERROR", "ACTIVE"}
 // chooseLBV2Client will determine which load balacing client to use:
 // Either the Octavia/LBaaS client or the Neutron/Networking v2 client.
 func chooseLBV2Client(d *schema.ResourceData, config *Config) (*gophercloud.ServiceClient, error) {
-	if config.useOctavia {
-		return config.loadBalancerV2Client(GetRegion(d, config))
+	if config.UseOctavia {
+		return config.LoadBalancerV2Client(GetRegion(d, config))
 	}
-	return config.networkingV2Client(GetRegion(d, config))
+	return config.NetworkingV2Client(GetRegion(d, config))
 }
 
 // chooseLBV2AccTestClient will determine which load balacing client to use:
@@ -39,10 +39,10 @@ func chooseLBV2Client(d *schema.ResourceData, config *Config) (*gophercloud.Serv
 // This is similar to the chooseLBV2Client function but specific for acceptance
 // tests.
 func chooseLBV2AccTestClient(config *Config, region string) (*gophercloud.ServiceClient, error) {
-	if config.useOctavia {
-		return config.loadBalancerV2Client(region)
+	if config.UseOctavia {
+		return config.LoadBalancerV2Client(region)
 	}
-	return config.networkingV2Client(region)
+	return config.NetworkingV2Client(region)
 }
 
 func waitForLBV2Listener(lbClient *gophercloud.ServiceClient, listener *listeners.Listener, target string, pending []string, timeout time.Duration) error {
