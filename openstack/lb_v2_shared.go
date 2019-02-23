@@ -327,7 +327,11 @@ func resourceLBV2LoadBalancerStatusRefreshFuncNeutron(lbClient *gophercloud.Serv
 			return nil, "", fmt.Errorf("Unable to get statuses from the Load Balancer %s statuses tree: %s", lbID, err)
 		}
 
-		if !strSliceContains(lbSkipLBStatuses, statuses.Loadbalancer.ProvisioningStatus) {
+		// Don't fail, when statuses returns "null"
+		if statuses == nil || statuses.Loadbalancer == nil {
+			statuses = new(loadbalancers.StatusTree)
+			statuses.Loadbalancer = new(loadbalancers.LoadBalancer)
+		} else if !strSliceContains(lbSkipLBStatuses, statuses.Loadbalancer.ProvisioningStatus) {
 			return statuses.Loadbalancer, statuses.Loadbalancer.ProvisioningStatus, nil
 		}
 
