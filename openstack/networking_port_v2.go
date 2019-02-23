@@ -12,6 +12,11 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+type portExtended struct {
+	ports.Port
+	extradhcpopts.ExtraDHCPOptsExt
+}
+
 func resourceNetworkingPortV2StateRefreshFunc(client *gophercloud.ServiceClient, portID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		n, err := ports.Get(client, portID).Extract()

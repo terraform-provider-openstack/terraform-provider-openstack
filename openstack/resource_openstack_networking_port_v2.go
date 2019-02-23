@@ -282,17 +282,14 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 	log.Printf("[DEBUG] openstack_networking_port_v2 create options: %#v", finalCreateOpts)
 
 	// Create a Neutron port and set extra DHCP options if they're specified.
-	var p struct {
-		ports.Port
-		extradhcpopts.ExtraDHCPOptsExt
-	}
+	var port portExtended
 
-	err = ports.Create(networkingClient, finalCreateOpts).ExtractInto(&p)
+	err = ports.Create(networkingClient, finalCreateOpts).ExtractInto(&port)
 	if err != nil {
 		return fmt.Errorf("Error creating openstack_networking_port_v2: %s", err)
 	}
 
-	log.Printf("[DEBUG] Waiting for openstack_networking_port_v2 %s to become available.", p.ID)
+	log.Printf("[DEBUG] Waiting for openstack_networking_port_v2 %s to become available.", port.ID)
 
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{"ACTIVE", "DOWN"},
@@ -304,22 +301,22 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_port_v2 %s to become available: %s", p.ID, err)
+		return fmt.Errorf("Error waiting for openstack_networking_port_v2 %s to become available: %s", port.ID, err)
 	}
 
-	d.SetId(p.ID)
+	d.SetId(port.ID)
 
 	tags := networkV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
-		tags, err := attributestags.ReplaceAll(networkingClient, "ports", p.ID, tagOpts).Extract()
+		tags, err := attributestags.ReplaceAll(networkingClient, "ports", port.ID, tagOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error setting tags on openstack_networking_port_v2 %s: %s", p.ID, err)
+			return fmt.Errorf("Error setting tags on openstack_networking_port_v2 %s: %s", port.ID, err)
 		}
-		log.Printf("[DEBUG] Set tags %s on openstack_networking_port_v2 %s", tags, p.ID)
+		log.Printf("[DEBUG] Set tags %s on openstack_networking_port_v2 %s", tags, port.ID)
 	}
 
-	log.Printf("[DEBUG] Created openstack_networking_port_v2 %s: %#v", p.ID, p)
+	log.Printf("[DEBUG] Created openstack_networking_port_v2 %s: %#v", port.ID, port)
 	return resourceNetworkingPortV2Read(d, meta)
 }
 
@@ -330,41 +327,37 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	var p struct {
-		ports.Port
-		extradhcpopts.ExtraDHCPOptsExt
-		portsecurity.PortSecurityExt
-	}
-	err = ports.Get(networkingClient, d.Id()).ExtractInto(&p)
+	var port portExtended
+	err = ports.Get(networkingClient, d.Id()).ExtractInto(&port)
 	if err != nil {
 		return CheckDeleted(d, err, "Error getting openstack_networking_port_v2")
 	}
 
-	log.Printf("[DEBUG] Retrieved openstack_networking_port_v2 %s: %#v", d.Id(), p)
+	log.Printf("[DEBUG] Retrieved openstack_networking_port_v2 %s: %#v", d.Id(), port)
 
-	d.Set("name", p.Name)
-	d.Set("description", p.Description)
-	d.Set("admin_state_up", p.AdminStateUp)
-	d.Set("network_id", p.NetworkID)
-	d.Set("mac_address", p.MACAddress)
-	d.Set("tenant_id", p.TenantID)
-	d.Set("device_owner", p.DeviceOwner)
-	d.Set("device_id", p.DeviceID)
+	d.Set("name", port.Name)
+	d.Set("description", port.Description)
+	d.Set("admin_state_up", port.AdminStateUp)
+	d.Set("network_id", port.NetworkID)
+	d.Set("mac_address", port.MACAddress)
+	d.Set("tenant_id", port.TenantID)
+	d.Set("device_owner", port.DeviceOwner)
+	d.Set("device_id", port.DeviceID)
 
-	networkV2ReadAttributesTags(d, p.Tags)
+	networkV2ReadAttributesTags(d, port.Tags)
 
 	// Set a slice of all returned Fixed IPs.
 	// This will be in the order returned by the API,
 	// which is usually alpha-numeric.
-	d.Set("all_fixed_ips", expandNetworkingPortFixedIPToStringSlice(p.FixedIPs))
+	d.Set("all_fixed_ips", expandNetworkingPortFixedIPToStringSlice(port.FixedIPs))
 
 	// Set all security groups.
 	// This can be different from what the user specified since
 	// the port can have the "default" group automatically applied.
-	d.Set("all_security_group_ids", p.SecurityGroups)
+	d.Set("all_security_group_ids", port.SecurityGroups)
 
-	d.Set("allowed_address_pairs", flattenNetworkingPortAllowedAddressPairsV2(p.MACAddress, p.AllowedAddressPairs))
-	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(p.ExtraDHCPOptsExt))
+	d.Set("allowed_address_pairs", flattenNetworkingPortAllowedAddressPairsV2(port.MACAddress, port.AllowedAddressPairs))
+	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDHCPOptsExt))
 	d.Set("port_security_enabled", p.PortSecurityEnabled)
 
 	d.Set("region", GetRegion(d, config))
