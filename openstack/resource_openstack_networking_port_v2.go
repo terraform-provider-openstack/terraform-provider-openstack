@@ -441,8 +441,8 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		oldDHCPOpts := o.(*schema.Set)
 		newDHCPOpts := n.(*schema.Set)
 
-		addDHCPOpts := newDHCPOpts.Difference(oldDHCPOpts)
 		deleteDHCPOpts := oldDHCPOpts.Difference(newDHCPOpts)
+		addDHCPOpts := newDHCPOpts.Difference(oldDHCPOpts)
 
 		updateExtraDHCPOpts := expandNetworkingPortDHCPOptsV2Update(deleteDHCPOpts, addDHCPOpts)
 		finalUpdateOpts = extradhcpopts.UpdateOptsExt{

@@ -51,6 +51,7 @@ func expandNetworkingPortDHCPOptsV2Create(dhcpOpts *schema.Set) []extradhcpopts.
 
 func expandNetworkingPortDHCPOptsV2Update(oldDHCPopts, newDHCPopts *schema.Set) []extradhcpopts.UpdateExtraDHCPOpt {
 	var extraDHCPOpts []extradhcpopts.UpdateExtraDHCPOpt
+	var newOptNames []string
 
 	if newDHCPopts != nil {
 		for _, raw := range newDHCPopts.List() {
@@ -59,6 +60,8 @@ func expandNetworkingPortDHCPOptsV2Update(oldDHCPopts, newDHCPopts *schema.Set) 
 			ipVersion := rawMap["ip_version"].(int)
 			optName := rawMap["name"].(string)
 			optValue := rawMap["value"].(string)
+			// DHCP option name is the primary key, we will check this key below
+			newOptNames = append(newOptNames, optName)
 
 			extraDHCPOpts = append(extraDHCPOpts, extradhcpopts.UpdateExtraDHCPOpt{
 				OptName:   optName,
@@ -71,10 +74,16 @@ func expandNetworkingPortDHCPOptsV2Update(oldDHCPopts, newDHCPopts *schema.Set) 
 	if oldDHCPopts != nil {
 		for _, raw := range oldDHCPopts.List() {
 			rawMap := raw.(map[string]interface{})
-			extraDHCPOpts = append(extraDHCPOpts, extradhcpopts.UpdateExtraDHCPOpt{
-				OptName:  rawMap["name"].(string),
-				OptValue: nil,
-			})
+
+			optName := rawMap["name"].(string)
+
+			// if we already add a new option with the same name, it means that we update it, no need to delete
+			if !strSliceContains(newOptNames, optName) {
+				extraDHCPOpts = append(extraDHCPOpts, extradhcpopts.UpdateExtraDHCPOpt{
+					OptName:  optName,
+					OptValue: nil,
+				})
+			}
 		}
 	}
 
