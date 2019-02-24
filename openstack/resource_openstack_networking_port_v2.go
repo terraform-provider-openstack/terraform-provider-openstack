@@ -11,6 +11,8 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/structure"
+	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func resourceNetworkingPortV2() *schema.Resource {
@@ -201,6 +203,47 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
+			"binding": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"host_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"profile": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateFunc:     validation.ValidateJsonString,
+							DiffSuppressFunc: suppressDiffPortBindingProfileV2,
+							StateFunc: func(v interface{}) string {
+								json, _ := structure.NormalizeJsonString(v)
+								return json
+							},
+						},
+						"vif_details": {
+							Type:     schema.TypeMap,
+							Computed: true,
+						},
+						"vif_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"vnic_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "normal",
+							ValidateFunc: validation.StringInSlice([]string{
+								"direct", "direct-physical", "macvtap", "normal", "baremetal", "virtio-forwarder",
+							}, true),
+						},
+					},
+				},
+			},
+
 			"port_security_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -279,9 +322,15 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
+	binding := d.Get("binding").([]interface{})
+	err = expandNetworkingPortBindingProfileCreateV2(binding, &finalCreateOpts)
+	if err != nil {
+		return err
+	}
+
 	log.Printf("[DEBUG] openstack_networking_port_v2 create options: %#v", finalCreateOpts)
 
-	// Create a Neutron port and set extra DHCP options if they're specified.
+	// Create a Neutron port and set extra options if they're specified.
 	var port portExtended
 
 	err = ports.Create(networkingClient, finalCreateOpts).ExtractInto(&port)
@@ -293,7 +342,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{"ACTIVE", "DOWN"},
-		Refresh:    resourceNetworkingPortV2StateRefreshFunc(networkingClient, p.ID),
+		Refresh:    resourceNetworkingPortV2StateRefreshFunc(networkingClient, port.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -359,6 +408,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	d.Set("allowed_address_pairs", flattenNetworkingPortAllowedAddressPairsV2(port.MACAddress, port.AllowedAddressPairs))
 	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDHCPOptsExt))
 	d.Set("port_security_enabled", p.PortSecurityEnabled)
+	d.Set("binding", flattenNetworkingPortBindingV2(port))
 
 	d.Set("region", GetRegion(d, config))
 
@@ -468,6 +518,17 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		finalUpdateOpts = extradhcpopts.UpdateOptsExt{
 			UpdateOptsBuilder: updateOpts,
 			ExtraDHCPOpts:     updateExtraDHCPOpts,
+		}
+	}
+
+	// Next, perform port binding option changes.
+	if d.HasChange("binding") {
+		hasChange = true
+
+		binding := d.Get("binding").([]interface{})
+		err = expandNetworkingPortBindingProfileUpdateV2(binding, &finalUpdateOpts)
+		if err != nil {
+			return err
 		}
 	}
 

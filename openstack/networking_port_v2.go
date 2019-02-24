@@ -2,10 +2,13 @@ package openstack
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsbinding"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
@@ -15,6 +18,7 @@ import (
 type portExtended struct {
 	ports.Port
 	extradhcpopts.ExtraDHCPOptsExt
+	portsbinding.PortsBindingExt
 }
 
 func resourceNetworkingPortV2StateRefreshFunc(client *gophercloud.ServiceClient, portID string) resource.StateRefreshFunc {
@@ -184,4 +188,106 @@ func expandNetworkingPortFixedIPToStringSlice(fixedIPs []ports.IP) []string {
 	}
 
 	return s
+}
+
+func flattenNetworkingPortBindingV2(port portExtended) []map[string]interface{} {
+	var portBinding []map[string]interface{}
+
+	profile, err := json.Marshal(port.Profile)
+	if err != nil {
+		log.Printf("[DEBUG] flattenNetworkingPortBindingV2: Cannot marshal port.Profile: %s", err)
+	}
+
+	vifDetails := make(map[string]string)
+	for k, v := range port.VIFDetails {
+		p, err := json.Marshal(v)
+		if err != nil {
+			log.Printf("[DEBUG] flattenNetworkingPortBindingV2: Cannot marshal %s key value: %s", k, err)
+		}
+		vifDetails[k] = string(p)
+	}
+
+	portBinding = append(portBinding, map[string]interface{}{
+		"profile":     string(profile),
+		"vif_type":    port.VIFType,
+		"vif_details": vifDetails,
+		"vnic_type":   port.VNICType,
+		"host_id":     port.HostID,
+	})
+
+	return portBinding
+}
+
+func expandNetworkingPortBindingProfileCreateV2(portBinding []interface{}, opts *ports.CreateOptsBuilder) error {
+	for _, raw := range portBinding {
+		binding := raw.(map[string]interface{})
+		profile := map[string]interface{}{}
+
+		// Convert raw string into the map
+		rawProfile := binding["profile"].(string)
+		if len(rawProfile) > 0 {
+			err := json.Unmarshal([]byte(rawProfile), &profile)
+			if err != nil {
+				return fmt.Errorf("Failed to unmarshal the JSON: %s", err)
+			}
+		}
+
+		*opts = portsbinding.CreateOptsExt{
+			CreateOptsBuilder: *opts,
+			HostID:            binding["host_id"].(string),
+			Profile:           profile,
+			VNICType:          binding["vnic_type"].(string),
+		}
+	}
+
+	return nil
+}
+
+func expandNetworkingPortBindingProfileUpdateV2(portBinding []interface{}, opts *ports.UpdateOptsBuilder) error {
+	profile := map[string]interface{}{}
+
+	// default options, when unsetting the port bindings
+	newOpts := portsbinding.UpdateOptsExt{
+		UpdateOptsBuilder: *opts,
+		HostID:            new(string),
+		Profile:           profile,
+		VNICType:          "normal",
+	}
+
+	for _, raw := range portBinding {
+		binding := raw.(map[string]interface{})
+
+		// Convert raw string into the map
+		rawProfile := binding["profile"].(string)
+		if len(rawProfile) > 0 {
+			err := json.Unmarshal([]byte(rawProfile), &profile)
+			if err != nil {
+				return fmt.Errorf("Failed to unmarshal the JSON: %s", err)
+			}
+		}
+
+		hostID := binding["host_id"].(string)
+		newOpts = portsbinding.UpdateOptsExt{
+			UpdateOptsBuilder: *opts,
+			HostID:            &hostID,
+			Profile:           profile,
+			VNICType:          binding["vnic_type"].(string),
+		}
+	}
+
+	*opts = newOpts
+
+	return nil
+}
+
+func suppressDiffPortBindingProfileV2(k, old, new string, d *schema.ResourceData) bool {
+	if old == "{}" && new == "" {
+		return true
+	}
+
+	if old == "" && new == "{}" {
+		return true
+	}
+
+	return false
 }
