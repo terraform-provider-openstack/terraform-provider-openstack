@@ -140,7 +140,7 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 			},
 
 			"extra_dhcp_option": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
