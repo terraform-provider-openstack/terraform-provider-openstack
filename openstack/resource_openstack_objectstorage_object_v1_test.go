@@ -407,7 +407,7 @@ resource "openstack_objectstorage_object_v1" "myfile" {
   container_name = "${openstack_objectstorage_container_v1.container_1.name}"
   object_manifest = "${format("%s/terraform/test.csv/part",openstack_objectstorage_container_v1.container_1.name)}"
 
-  metadata {
+  metadata = {
     race = "${openstack_objectstorage_object_v1.myfile_part1.id}"
     condition = "${openstack_objectstorage_object_v1.myfile_part2.id}"
   }
