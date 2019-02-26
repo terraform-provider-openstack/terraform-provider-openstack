@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsbinding"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
@@ -251,6 +252,17 @@ func resourceNetworkingPortV2() *schema.Resource {
 					},
 				},
 			},
+
+			"dns_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"dns_assignment": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeMap},
+			},
 		},
 	}
 }
@@ -348,6 +360,14 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
+	dnsName := d.Get("dns_name").(string)
+	if len(dnsName) > 0 {
+		finalCreateOpts = dns.PortCreateOptsExt{
+			CreateOptsBuilder: finalCreateOpts,
+			DNSName:           dnsName,
+		}
+	}
+
 	log.Printf("[DEBUG] openstack_networking_port_v2 create options: %#v", finalCreateOpts)
 
 	// Create a Neutron port and set extra options if they're specified.
@@ -429,6 +449,8 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDHCPOptsExt))
 	d.Set("port_security_enabled", port.PortSecurityEnabled)
 	d.Set("binding", flattenNetworkingPortBindingV2(port))
+	d.Set("dns_name", port.DNSName)
+	d.Set("dns_assignment", port.DNSAssignment)
 
 	d.Set("region", GetRegion(d, config))
 
@@ -577,6 +599,16 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		}
 
 		finalUpdateOpts = newOpts
+	}
+
+	if d.HasChange("dns_name") {
+		hasChange = true
+
+		dnsName := d.Get("dns_name").(string)
+		finalUpdateOpts = dns.PortUpdateOptsExt{
+			UpdateOptsBuilder: finalUpdateOpts,
+			DNSName:           &dnsName,
+		}
 	}
 
 	// At this point, perform the update for all "standard" port changes.

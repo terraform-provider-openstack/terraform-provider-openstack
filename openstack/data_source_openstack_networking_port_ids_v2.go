@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 )
 
@@ -105,6 +106,12 @@ func dataSourceNetworkingPortIDsV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
+			"dns_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			"sort_key": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -137,6 +144,7 @@ func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{})
 	}
 
 	listOpts := ports.ListOpts{}
+	var listOptsBuilder ports.ListOptsBuilder
 
 	if v, ok := d.GetOk("sort_key"); ok {
 		listOpts.SortKey = v.(string)
@@ -192,7 +200,16 @@ func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{})
 		listOpts.Tags = strings.Join(tags, ",")
 	}
 
-	allPages, err := ports.List(networkingClient, listOpts).AllPages()
+	listOptsBuilder = listOpts
+
+	if v, ok := d.GetOk("dns_name"); ok {
+		listOptsBuilder = dns.PortListOptsExt{
+			ListOptsBuilder: listOptsBuilder,
+			DNSName:         v.(string),
+		}
+	}
+
+	allPages, err := ports.List(networkingClient, listOptsBuilder).AllPages()
 	if err != nil {
 		return fmt.Errorf("Unable to list openstack_networking_port_ids_v2: %s", err)
 	}

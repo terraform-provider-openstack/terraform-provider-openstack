@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/structure"
 	"github.com/hashicorp/terraform/helper/validation"
 
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 )
 
@@ -187,6 +188,18 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 					},
 				},
 			},
+
+			"dns_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
+			"dns_assignment": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeMap},
+			},
 		},
 	}
 }
@@ -199,6 +212,7 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 	}
 
 	listOpts := ports.ListOpts{}
+	var listOptsBuilder ports.ListOptsBuilder
 
 	if v, ok := d.GetOk("port_id"); ok {
 		listOpts.ID = v.(string)
@@ -250,7 +264,16 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 		listOpts.Tags = strings.Join(tags, ",")
 	}
 
-	allPages, err := ports.List(networkingClient, listOpts).AllPages()
+	listOptsBuilder = listOpts
+
+	if v, ok := d.GetOk("dns_name"); ok {
+		listOptsBuilder = dns.PortListOptsExt{
+			ListOptsBuilder: listOptsBuilder,
+			DNSName:         v.(string),
+		}
+	}
+
+	allPages, err := ports.List(networkingClient, listOptsBuilder).AllPages()
 	if err != nil {
 		return fmt.Errorf("Unable to list openstack_networking_ports_v2: %s", err)
 	}
@@ -328,6 +351,8 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("allowed_address_pairs", flattenNetworkingPortAllowedAddressPairsV2(port.MACAddress, port.AllowedAddressPairs))
 	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDHCPOptsExt))
 	d.Set("binding", flattenNetworkingPortBindingV2(port))
+	d.Set("dns_name", port.DNSName)
+	d.Set("dns_assignment", port.DNSAssignment)
 
 	return nil
 }
