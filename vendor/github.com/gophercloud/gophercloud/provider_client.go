@@ -77,9 +77,12 @@ type ProviderClient struct {
 	// with the token and reauth func zeroed. Such client can be used to perform reauthorization.
 	Throwaway bool
 
+<<<<<<< HEAD
 	// Context is the context passed to the HTTP request.
 	Context context.Context
 
+=======
+>>>>>>> Bump gophercloud vendor dependency
 	// mut is a mutex for the client. It protects read and write access to client attributes such as getting
 	// and setting the TokenID.
 	mut *sync.RWMutex

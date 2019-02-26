@@ -58,7 +58,11 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
+<<<<<<< HEAD
 # github.com/gophercloud/gophercloud v0.0.0-20190318015731-ff9851476e98
+=======
+# github.com/gophercloud/gophercloud v0.0.0-20190227173556-cfa8434422e7
+>>>>>>> Bump gophercloud vendor dependency
 github.com/gophercloud/gophercloud
 github.com/gophercloud/gophercloud/openstack
 github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions
@@ -206,6 +210,7 @@ github.com/hashicorp/terraform/helper/mutexkv
 github.com/hashicorp/terraform/helper/pathorcontents
 github.com/hashicorp/terraform/helper/resource
 github.com/hashicorp/terraform/helper/schema
+github.com/hashicorp/terraform/helper/structure
 github.com/hashicorp/terraform/helper/validation
 github.com/hashicorp/terraform/terraform
 github.com/hashicorp/terraform/plugin/discovery
@@ -214,7 +219,6 @@ github.com/hashicorp/terraform/helper/config
 github.com/hashicorp/terraform/helper/logging
 github.com/hashicorp/terraform/config
 github.com/hashicorp/terraform/config/configschema
-github.com/hashicorp/terraform/helper/structure
 github.com/hashicorp/terraform/dag
 github.com/hashicorp/terraform/helper/hilmapstructure
 github.com/hashicorp/terraform/httpclient
