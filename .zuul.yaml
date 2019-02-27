@@ -2,7 +2,8 @@
     name: h00130372/terraform-provider-openstack
     check:
       jobs:
-        - test-create-k8s-cluster
+        - terraform-provider-openstack-acceptance-test
+        - terraform-provider-openstack-unittest
     recheck-trove:
       jobs:
         - terraform-provider-openstack-acceptance-test-trove
