@@ -430,50 +430,33 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
-	// At this point, perform the update for all "standard" port changes.
-	if hasChange {
-		log.Printf("[DEBUG] openstack_networking_port_v2 %s update options: %#v", d.Id(), updateOpts)
-		_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
-		if err != nil {
-			return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
-		}
-	}
+	var finalUpdateOpts ports.UpdateOptsBuilder
+	finalUpdateOpts = updateOpts
 
 	// Next, perform any dhcp option changes.
 	if d.HasChange("extra_dhcp_option") {
+		hasChange = true
+
 		o, n := d.GetChange("extra_dhcp_option")
 		oldDHCPOpts := o.(*schema.Set)
 		newDHCPOpts := n.(*schema.Set)
 
-		// Delete all old DHCP options, regardless of if they still exist.
-		// If they do still exist, they will be re-added below.
-		if oldDHCPOpts.Len() != 0 {
-			deleteExtraDHCPOpts := expandNetworkingPortDHCPOptsV2Delete(oldDHCPOpts)
-			dhcpUpdateOpts := extradhcpopts.UpdateOptsExt{
-				UpdateOptsBuilder: &ports.UpdateOpts{},
-				ExtraDHCPOpts:     deleteExtraDHCPOpts,
-			}
+		deleteDHCPOpts := oldDHCPOpts.Difference(newDHCPOpts)
+		addDHCPOpts := newDHCPOpts.Difference(oldDHCPOpts)
 
-			log.Printf("[DEBUG] Deleting old DHCP opts for openstack_networking_port_v2 %s", d.Id())
-			_, err = ports.Update(networkingClient, d.Id(), dhcpUpdateOpts).Extract()
-			if err != nil {
-				return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
-			}
+		updateExtraDHCPOpts := expandNetworkingPortDHCPOptsV2Update(deleteDHCPOpts, addDHCPOpts)
+		finalUpdateOpts = extradhcpopts.UpdateOptsExt{
+			UpdateOptsBuilder: updateOpts,
+			ExtraDHCPOpts:     updateExtraDHCPOpts,
 		}
+	}
 
-		// Add any new DHCP options and re-add previously set DHCP options.
-		if newDHCPOpts.Len() != 0 {
-			updateExtraDHCPOpts := expandNetworkingPortDHCPOptsV2Update(newDHCPOpts)
-			dhcpUpdateOpts := extradhcpopts.UpdateOptsExt{
-				UpdateOptsBuilder: &ports.UpdateOpts{},
-				ExtraDHCPOpts:     updateExtraDHCPOpts,
-			}
-
-			log.Printf("[DEBUG] Updating openstack_networking_port_v2 %s with options: %#v", d.Id(), dhcpUpdateOpts)
-			_, err = ports.Update(networkingClient, d.Id(), dhcpUpdateOpts).Extract()
-			if err != nil {
-				return fmt.Errorf("Error updating openstack_networking_port_v2 %s: %s", d.Id(), err)
-			}
+	// At this point, perform the update for all "standard" port changes.
+	if hasChange {
+		log.Printf("[DEBUG] openstack_networking_port_v2 %s update options: %#v", d.Id(), updateOpts)
+		_, err = ports.Update(networkingClient, d.Id(), finalUpdateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
 		}
 	}
 

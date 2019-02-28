@@ -28,60 +28,62 @@ func resourceNetworkingPortV2StateRefreshFunc(client *gophercloud.ServiceClient,
 }
 
 func expandNetworkingPortDHCPOptsV2Create(dhcpOpts *schema.Set) []extradhcpopts.CreateExtraDHCPOpt {
-	rawDHCPOpts := dhcpOpts.List()
+	var extraDHCPOpts []extradhcpopts.CreateExtraDHCPOpt
 
-	extraDHCPOpts := make([]extradhcpopts.CreateExtraDHCPOpt, len(rawDHCPOpts))
-	for i, raw := range rawDHCPOpts {
-		rawMap := raw.(map[string]interface{})
+	if dhcpOpts != nil {
+		for _, raw := range dhcpOpts.List() {
+			rawMap := raw.(map[string]interface{})
 
-		ipVersion := rawMap["ip_version"].(int)
-		optName := rawMap["name"].(string)
-		optValue := rawMap["value"].(string)
+			ipVersion := rawMap["ip_version"].(int)
+			optName := rawMap["name"].(string)
+			optValue := rawMap["value"].(string)
 
-		extraDHCPOpts[i] = extradhcpopts.CreateExtraDHCPOpt{
-			OptName:   optName,
-			OptValue:  optValue,
-			IPVersion: gophercloud.IPVersion(ipVersion),
+			extraDHCPOpts = append(extraDHCPOpts, extradhcpopts.CreateExtraDHCPOpt{
+				OptName:   optName,
+				OptValue:  optValue,
+				IPVersion: gophercloud.IPVersion(ipVersion),
+			})
 		}
 	}
 
 	return extraDHCPOpts
 }
 
-func expandNetworkingPortDHCPOptsV2Update(dhcpOpts *schema.Set) []extradhcpopts.UpdateExtraDHCPOpt {
-	rawDHCPOpts := dhcpOpts.List()
+func expandNetworkingPortDHCPOptsV2Update(oldDHCPopts, newDHCPopts *schema.Set) []extradhcpopts.UpdateExtraDHCPOpt {
+	var extraDHCPOpts []extradhcpopts.UpdateExtraDHCPOpt
+	var newOptNames []string
 
-	extraDHCPOpts := make([]extradhcpopts.UpdateExtraDHCPOpt, len(rawDHCPOpts))
-	for i, raw := range rawDHCPOpts {
-		rawMap := raw.(map[string]interface{})
+	if newDHCPopts != nil {
+		for _, raw := range newDHCPopts.List() {
+			rawMap := raw.(map[string]interface{})
 
-		ipVersion := rawMap["ip_version"].(int)
-		optName := rawMap["name"].(string)
-		optValue := rawMap["value"].(string)
+			ipVersion := rawMap["ip_version"].(int)
+			optName := rawMap["name"].(string)
+			optValue := rawMap["value"].(string)
+			// DHCP option name is the primary key, we will check this key below
+			newOptNames = append(newOptNames, optName)
 
-		extraDHCPOpts[i] = extradhcpopts.UpdateExtraDHCPOpt{
-			OptName:   optName,
-			OptValue:  &optValue,
-			IPVersion: gophercloud.IPVersion(ipVersion),
+			extraDHCPOpts = append(extraDHCPOpts, extradhcpopts.UpdateExtraDHCPOpt{
+				OptName:   optName,
+				OptValue:  &optValue,
+				IPVersion: gophercloud.IPVersion(ipVersion),
+			})
 		}
 	}
 
-	return extraDHCPOpts
-}
+	if oldDHCPopts != nil {
+		for _, raw := range oldDHCPopts.List() {
+			rawMap := raw.(map[string]interface{})
 
-func expandNetworkingPortDHCPOptsV2Delete(dhcpOpts *schema.Set) []extradhcpopts.UpdateExtraDHCPOpt {
-	if dhcpOpts == nil {
-		return []extradhcpopts.UpdateExtraDHCPOpt{}
-	}
+			optName := rawMap["name"].(string)
 
-	rawDHCPOpts := dhcpOpts.List()
-
-	extraDHCPOpts := make([]extradhcpopts.UpdateExtraDHCPOpt, len(rawDHCPOpts))
-	for i, raw := range rawDHCPOpts {
-		rawMap := raw.(map[string]interface{})
-		extraDHCPOpts[i] = extradhcpopts.UpdateExtraDHCPOpt{
-			OptName:  rawMap["name"].(string),
-			OptValue: nil,
+			// if we already add a new option with the same name, it means that we update it, no need to delete
+			if !strSliceContains(newOptNames, optName) {
+				extraDHCPOpts = append(extraDHCPOpts, extradhcpopts.UpdateExtraDHCPOpt{
+					OptName:  optName,
+					OptValue: nil,
+				})
+			}
 		}
 	}
 
