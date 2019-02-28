@@ -38,6 +38,8 @@ resource "openstack_networking_network_v2" "network_1" {
 resource "openstack_networking_port_v2" "port_1" {
   name           = "port_1"
   network_id     = "${openstack_networking_network_v2.network_1.id}"
+  device_id      = "cdf70fcf-c161-4f24-9c70-96b3f5a54b71"
+  device_owner   = "baremetal:none"
   admin_state_up = "true"
 
   binding = {
