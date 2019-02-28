@@ -6,6 +6,10 @@ FEATURES
 * __New Data Source__: `openstack_blockstorage_availability_zones_v3` [GH-652]
 * __New Data Source__: `openstack_sharedfilesystem_availability_zones_v2` [GH-652]
 
+IMPROVEMENTS
+
+* Reduced API calls when updating `extra_dhcp_option` in `openstack_networking_port_v2` [GH-689]
+
 BUG FIXES
 
 * Fixed bug in `openstack_identity_auth_scope_v3` data source where the `user_id` attribute was being set to the user's Name and not ID [GH-660]
