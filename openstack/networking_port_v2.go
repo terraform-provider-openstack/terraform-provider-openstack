@@ -190,12 +190,34 @@ func expandNetworkingPortFixedIPToStringSlice(fixedIPs []ports.IP) []string {
 	return s
 }
 
-func flattenNetworkingPortBindingV2(port portExtended) []map[string]interface{} {
+func flattenNetworkingPortBindingV2(port portExtended, dataSource bool) interface{} {
 	var portBinding []map[string]interface{}
+	var profile interface{}
 
-	profile, err := json.Marshal(port.Profile)
-	if err != nil {
-		log.Printf("[DEBUG] flattenNetworkingPortBindingV2: Cannot marshal port.Profile: %s", err)
+	if dataSource {
+		// Due to a lack of the "jsondecode" interpolation function in Terraform there
+		// is no sense to store raw JSON string for the data source, because it could
+		// not be reused. Therefore the code below builds a map for the port data source.
+		// Unfortunately it is impossible to store the map[string]interface{} into the
+		// TypeMap, the "map[string]string" is the best we can do.
+		tmp := make(map[string]string)
+		for k, v := range port.Profile {
+			p, err := json.Marshal(v)
+			if err != nil {
+				log.Printf("[DEBUG] flattenNetworkingPortBindingV2: Cannot marshal port.Profile %s key value: %s", k, err)
+			}
+			tmp[k] = string(p)
+		}
+		profile = tmp
+	} else {
+		// "TypeMap" with "ValidateFunc", "DiffSuppressFunc" and "StateFunc" combination
+		// is not supported by Terraform. Therefore a regular JSON string is used for the
+		// port resource.
+		tmp, err := json.Marshal(port.Profile)
+		if err != nil {
+			log.Printf("[DEBUG] flattenNetworkingPortBindingV2: Cannot marshal port.Profile: %s", err)
+		}
+		profile = string(tmp)
 	}
 
 	vifDetails := make(map[string]string)
@@ -208,7 +230,7 @@ func flattenNetworkingPortBindingV2(port portExtended) []map[string]interface{} 
 	}
 
 	portBinding = append(portBinding, map[string]interface{}{
-		"profile":     string(profile),
+		"profile":     profile,
 		"vif_type":    port.VIFType,
 		"vif_details": vifDetails,
 		"vnic_type":   port.VNICType,

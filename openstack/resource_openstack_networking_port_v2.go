@@ -408,7 +408,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	d.Set("allowed_address_pairs", flattenNetworkingPortAllowedAddressPairsV2(port.MACAddress, port.AllowedAddressPairs))
 	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDHCPOptsExt))
 	d.Set("port_security_enabled", p.PortSecurityEnabled)
-	d.Set("binding", flattenNetworkingPortBindingV2(port))
+	d.Set("binding", flattenNetworkingPortBindingV2(port, false))
 
 	d.Set("region", GetRegion(d, config))
 

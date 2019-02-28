@@ -164,7 +164,7 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 							Computed: true,
 						},
 						"profile": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeMap,
 							Computed: true,
 						},
 						"vif_details": {
@@ -322,7 +322,7 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("all_fixed_ips", expandNetworkingPortFixedIPToStringSlice(port.FixedIPs))
 	d.Set("allowed_address_pairs", flattenNetworkingPortAllowedAddressPairsV2(port.MACAddress, port.AllowedAddressPairs))
 	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDHCPOptsExt))
-	d.Set("binding", flattenNetworkingPortBindingV2(port))
+	d.Set("binding", flattenNetworkingPortBindingV2(port, true))
 
 	return nil
 }
