@@ -202,6 +202,12 @@ func flattenNetworkingPortBindingV2(port portExtended, dataSource bool) interfac
 		// TypeMap, the "map[string]string" is the best we can do.
 		tmp := make(map[string]string)
 		for k, v := range port.Profile {
+			// don't marshal, if it is a regular string
+			if s, ok := v.(string); ok {
+				tmp[k] = s
+				continue
+			}
+
 			p, err := json.Marshal(v)
 			if err != nil {
 				log.Printf("[DEBUG] flattenNetworkingPortBindingV2: Cannot marshal port.Profile %s key value: %s", k, err)
@@ -222,6 +228,12 @@ func flattenNetworkingPortBindingV2(port portExtended, dataSource bool) interfac
 
 	vifDetails := make(map[string]string)
 	for k, v := range port.VIFDetails {
+		// don't marshal, if it is a regular string
+		if s, ok := v.(string); ok {
+			vifDetails[k] = s
+			continue
+		}
+
 		p, err := json.Marshal(v)
 		if err != nil {
 			log.Printf("[DEBUG] flattenNetworkingPortBindingV2: Cannot marshal %s key value: %s", k, err)
