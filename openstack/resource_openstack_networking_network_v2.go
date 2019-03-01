@@ -3,12 +3,15 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
 	mtuext "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/mtu"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
@@ -149,6 +152,12 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+
+			"dns_domain": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^$|\.$`), "fully-qualified (unambiguous) DNS domain names must have a dot at the end"),
+			},
 		},
 	}
 }
@@ -231,6 +240,15 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+	dnsDomain := d.Get("dns_domain").(string)
+	// Add the DNS Domain attribute if specified.
+	if len(dnsDomain) > 0 {
+		finalCreateOpts = dns.NetworkCreateOptsExt{
+			CreateOptsBuilder: finalCreateOpts,
+			DNSDomain:         dnsDomain,
+		}
+	}
+
 	log.Printf("[DEBUG] openstack_networking_network_v2 create options: %#v", finalCreateOpts)
 	n, err := networks.Create(networkingClient, finalCreateOpts).Extract()
 	if err != nil {
@@ -294,6 +312,7 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 	d.Set("transparent_vlan", network.VLANTransparent)
 	d.Set("port_security_enabled", network.PortSecurityEnabled)
 	d.Set("mtu", network.MTU)
+	d.Set("dns_domain", network.DNSDomain)
 	d.Set("region", GetRegion(d, config))
 
 	networkV2ReadAttributesTags(d, network.Tags)
@@ -372,6 +391,14 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 		finalUpdateOpts = mtuext.UpdateOptsExt{
 			UpdateOptsBuilder: finalUpdateOpts,
 			MTU:               mtu,
+		}
+	}
+
+	if d.HasChange("dns_domain") {
+		dnsDomain := d.Get("dns_domain").(string)
+		finalUpdateOpts = dns.NetworkUpdateOptsExt{
+			UpdateOptsBuilder: finalUpdateOpts,
+			DNSDomain:         &dnsDomain,
 		}
 	}
 

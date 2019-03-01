@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
 	mtuext "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/mtu"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vlantransparent"
@@ -96,6 +97,11 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 				Optional: true,
 			},
 
+			"dns_domain": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"all_tags": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -151,6 +157,14 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 		listOpts = mtuext.ListOptsExt{
 			ListOptsBuilder: listOpts,
 			MTU:             v.(int),
+		}
+	}
+
+	// Add the DNS Domain attribute if specified.
+	if v, ok := d.GetOkExists("dns_domain"); ok {
+		listOpts = dns.NetworkListOptsExt{
+			ListOptsBuilder: listOpts,
+			DNSDomain:       v.(string),
 		}
 	}
 
@@ -230,6 +244,7 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	d.Set("transparent_vlan", network.VLANTransparent)
 	d.Set("all_tags", network.Tags)
 	d.Set("mtu", network.MTU)
+	d.Set("dns_domain", network.DNSDomain)
 	d.Set("region", GetRegion(d, config))
 
 	return nil

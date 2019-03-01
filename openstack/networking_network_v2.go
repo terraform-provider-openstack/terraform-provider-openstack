@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/mtu"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
@@ -23,6 +24,7 @@ type networkExtended struct {
 	provider.NetworkProviderExt
 	portsecurity.PortSecurityExt
 	mtu.NetworkMTUExt
+	dns.NetworkDNSExt
 }
 
 // networkingNetworkV2ID retrieves network ID by the provided name.
