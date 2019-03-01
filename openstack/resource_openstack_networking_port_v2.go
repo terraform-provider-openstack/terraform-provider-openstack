@@ -534,7 +534,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	// At this point, perform the update for all "standard" port changes.
 	if hasChange {
-		log.Printf("[DEBUG] openstack_networking_port_v2 %s update options: %#v", d.Id(), updateOpts)
+		log.Printf("[DEBUG] openstack_networking_port_v2 %s update options: %#v", d.Id(), finalUpdateOpts)
 		_, err = ports.Update(networkingClient, d.Id(), finalUpdateOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
