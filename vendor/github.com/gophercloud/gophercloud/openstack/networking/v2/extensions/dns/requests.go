@@ -9,15 +9,14 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 )
 
-// ListOptsExt adds the external network options to the base ListOpts.
+// PortListOptsExt adds the DNS options to the base port ListOpts.
 type PortListOptsExt struct {
 	ports.ListOptsBuilder
 
 	DNSName string `q:"dns_name"`
 }
 
-// ToNetworkListQuery adds the router:external option to the base network
-// list options.
+// ToPortListQuery adds the DNS options to the base port list options.
 func (opts PortListOptsExt) ToPortListQuery() (string, error) {
 	q, err := gophercloud.BuildQueryString(opts.ListOptsBuilder)
 	if err != nil {
@@ -34,7 +33,7 @@ func (opts PortListOptsExt) ToPortListQuery() (string, error) {
 	return q.String(), err
 }
 
-// CreateOptsExt adds port binding options to the base ports.CreateOpts.
+// PortCreateOptsExt adds port DNS options to the base ports.CreateOpts.
 type PortCreateOptsExt struct {
 	// CreateOptsBuilder is the interface options structs have to satisfy in order
 	// to be used in the main Create operation in this package.

@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -61,6 +62,16 @@ func dataSourceNetworkingFloatingIPV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
+			"dns_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"dns_domain": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"all_tags": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -78,6 +89,7 @@ func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface
 	}
 
 	listOpts := floatingips.ListOpts{}
+	var listOptsBuilder floatingips.ListOptsBuilder
 
 	if v, ok := d.GetOk("description"); ok {
 		listOpts.Description = v.(string)
@@ -112,12 +124,30 @@ func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface
 		listOpts.Tags = strings.Join(tags, ",")
 	}
 
-	pages, err := floatingips.List(networkingClient, listOpts).AllPages()
+	listOptsBuilder = listOpts
+
+	if v, ok := d.GetOk("dns_name"); ok {
+		listOptsBuilder = dns.FloatingIPListOptsExt{
+			ListOptsBuilder: listOptsBuilder,
+			DNSName:         v.(string),
+		}
+	}
+
+	if v, ok := d.GetOk("dns_domain"); ok {
+		listOptsBuilder = dns.FloatingIPListOptsExt{
+			ListOptsBuilder: listOptsBuilder,
+			DNSDomain:       v.(string),
+		}
+	}
+
+	pages, err := floatingips.List(networkingClient, listOptsBuilder).AllPages()
 	if err != nil {
 		return fmt.Errorf("Unable to list openstack_networking_floatingips_v2: %s", err)
 	}
 
-	allFloatingIPs, err := floatingips.ExtractFloatingIPs(pages)
+	var allFloatingIPs []floatingIPExtended
+
+	err = floatingips.ExtractFloatingIPsInto(pages, &allFloatingIPs)
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve openstack_networking_floatingips_v2: %s", err)
 	}
@@ -136,13 +166,15 @@ func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface
 	d.SetId(fip.ID)
 
 	d.Set("description", fip.Description)
-	d.Set("address", fip.FloatingIP)
+	d.Set("address", fip.FloatingIP.FloatingIP)
 	d.Set("pool", fip.FloatingNetworkID)
 	d.Set("port_id", fip.PortID)
 	d.Set("fixed_ip", fip.FixedIP)
 	d.Set("tenant_id", fip.TenantID)
 	d.Set("status", fip.Status)
 	d.Set("all_tags", fip.Tags)
+	d.Set("dns_name", fip.DNSName)
+	d.Set("dns_domain", fip.DNSDomain)
 	d.Set("region", GetRegion(d, config))
 
 	return nil

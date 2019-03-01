@@ -4,9 +4,15 @@ import (
 	"fmt"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/hashicorp/terraform/helper/resource"
 )
+
+type floatingIPExtended struct {
+	floatingips.FloatingIP
+	dns.FloatingIPDNSExt
+}
 
 // networkingFloatingIPV2ID retrieves floating IP ID by the provided IP address.
 func networkingFloatingIPV2ID(client *gophercloud.ServiceClient, floatingIP string) (string, error) {

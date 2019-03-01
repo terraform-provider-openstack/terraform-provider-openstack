@@ -192,7 +192,6 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 			"dns_name": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 			},
 
 			"dns_assignment": {
