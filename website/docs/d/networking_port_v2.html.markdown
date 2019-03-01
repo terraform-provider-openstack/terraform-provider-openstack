@@ -50,6 +50,9 @@ data "openstack_networking_port_v2" "port_1" {
 
 * `tags` - (Optional) The list of port tags to filter.
 
+* `dns_name` - (Optional) The port DNS name to filter. Available, when Neutron
+    DNS extension is enabled.
+
 ## Attributes Reference
 
 `id` is set to the ID of the found port. In addition, the following attributes
@@ -90,6 +93,10 @@ are exported:
     The structure is described below.
 
 * `binding` - The port binding information. The structure is described below.
+
+* `dns_name` - See Argument Reference above.
+
+* `dns_assignment` - The list of maps representing port DNS assignments.
 
 The `allowed_address_pairs` attribute has fields below:
 

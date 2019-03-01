@@ -48,6 +48,9 @@ data "openstack_networking_network_v2" "network" {
 * `mtu` - (Optional) The network MTU to filter. Available, when Neutron `net-mtu`
     extension is enabled.
 
+* `dns_domain` - (Optional) The network DNS domain to filter. Available, when Neutron
+    DNS extension is enabled.
+
 ## Attributes Reference
 
 `id` is set to the ID of the found network. In addition, the following attributes
@@ -64,3 +67,4 @@ are exported:
 * `transparent_vlan` - See Argument Reference above.
 * `all_tags` - The set of string tags applied on the network.
 * `mtu` - See Argument Reference above.
+* `dns_domain` - See Argument Reference above.

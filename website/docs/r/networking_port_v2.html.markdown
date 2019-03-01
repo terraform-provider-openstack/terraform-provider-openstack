@@ -140,6 +140,9 @@ The following arguments are supported:
 * `binding` - (Optional) The port binding allows to specify binding information
     for the port. The structure is described below.
 
+* `dns_name` - (Optional) The port DNS name. Available, when Neutron DNS extension
+    is enabled.
+
 The `fixed_ip` block supports:
 
 * `subnet_id` - (Required) Subnet in which to allocate IP address for
@@ -203,6 +206,8 @@ The following attributes are exported:
 * `all_tags` - The collection of tags assigned on the port, which have been
   explicitly and implicitly added.
 * `binding` - See Argument Reference above.
+* `dns_name` - See Argument Reference above.
+* `dns_assignment` - The list of maps representing port DNS assignments.
 
 ## Import
 
