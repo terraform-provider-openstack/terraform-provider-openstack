@@ -4,13 +4,26 @@ import (
 	"fmt"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/mtu"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vlantransparent"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/pagination"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
+
+type networkExtended struct {
+	networks.Network
+	external.NetworkExternalExt
+	vlantransparent.TransparentExt
+	provider.NetworkProviderExt
+	portsecurity.PortSecurityExt
+	mtu.NetworkMTUExt
+}
 
 // networkingNetworkV2ID retrieves network ID by the provided name.
 func networkingNetworkV2ID(d *schema.ResourceData, meta interface{}, networkName string) (string, error) {
