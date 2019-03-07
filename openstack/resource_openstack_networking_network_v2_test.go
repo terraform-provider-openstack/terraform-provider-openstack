@@ -475,13 +475,12 @@ resource "openstack_networking_network_v2" "network_1" {
 const testAccNetworkingV2Network_multipleSegmentMappings = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
-  segments =[
-    {
-      segmentation_id = 2,
-      network_type = "vxlan"
-    }
-  ],
   admin_state_up = "true"
+
+  segments {
+    segmentation_id = 2
+    network_type = "vxlan"
+  }
 }
 `
 

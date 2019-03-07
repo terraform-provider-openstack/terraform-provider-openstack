@@ -61,11 +61,11 @@ resource "openstack_networking_port_v2" "port_1" {
     "${data.openstack_networking_secgroup_v2.default.id}",
   ]
 
-  fixed_ip = {
+  fixed_ip {
     subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
   }
 
-  fixed_ip = {
+  fixed_ip {
     subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
   }
 }
@@ -82,12 +82,12 @@ resource "openstack_networking_port_v2" "port_2" {
     "bar",
   ]
 
-  allowed_address_pairs = {
+  allowed_address_pairs {
     ip_address  = "10.0.0.201"
     mac_address = "fa:16:3e:f8:ab:da"
   }
 
-  allowed_address_pairs = {
+  allowed_address_pairs {
     ip_address  = "10.0.0.202"
     mac_address = "fa:16:3e:ab:4b:58"
   }

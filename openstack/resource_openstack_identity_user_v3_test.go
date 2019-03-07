@@ -156,7 +156,7 @@ func testAccIdentityV3User_basic(projectName, userName string) string {
         rule = ["password", "custom-auth-method"]
       }
 
-      extra {
+      extra = {
         email = "jdoe@example.com"
       }
     }
@@ -182,7 +182,7 @@ func testAccIdentityV3User_update(projectName, userName string) string {
         rule = ["password", "totp"]
       }
 
-      extra {
+      extra = {
         email = "jdoe@foobar.com"
       }
     }
