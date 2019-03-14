@@ -453,8 +453,7 @@ The following attributes are exported:
 
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
-* `access_ip_v4` - The first detected Fixed IPv4 address _or_ the
-    Floating IP.
+* `access_ip_v4` - The first detected Fixed IPv4 address.
 * `access_ip_v6` - The first detected Fixed IPv6 address.
 * `metadata` - See Argument Reference above.
 * `security_groups` - See Argument Reference above.
