@@ -46,6 +46,11 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"prefix_length": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -198,6 +203,11 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 	if v, ok := d.GetOk("cidr"); ok {
 		cidr := v.(string)
 		createOpts.CIDR = cidr
+	}
+
+	if v, ok := d.GetOk("prefix_length"); ok {
+		prefixLength := v.(int)
+		createOpts.Prefixlen = prefixLength
 	}
 
 	if v, ok := d.GetOk("gateway_ip"); ok {
