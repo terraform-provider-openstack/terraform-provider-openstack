@@ -10,6 +10,7 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vlantransparent"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
@@ -135,6 +136,12 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 			},
+
+			"port_security_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -168,15 +175,12 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 		createOpts.Shared = &shared
 	}
 
-	segments := expandNetworkingNetworkSegmentsV2(d.Get("segments").(*schema.Set))
-	isExternal := d.Get("external").(bool)
-	isVLANTransparent := d.Get("transparent_vlan").(bool)
-
 	// Declare a finalCreateOpts interface.
 	var finalCreateOpts networks.CreateOptsBuilder
 	finalCreateOpts = createOpts
 
 	// Add networking segments if specified.
+	segments := expandNetworkingNetworkSegmentsV2(d.Get("segments").(*schema.Set))
 	if len(segments) > 0 {
 		finalCreateOpts = provider.CreateOptsExt{
 			CreateOptsBuilder: finalCreateOpts,
@@ -185,6 +189,7 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 	}
 
 	// Add the external attribute if specified.
+	isExternal := d.Get("external").(bool)
 	if isExternal {
 		finalCreateOpts = external.CreateOptsExt{
 			CreateOptsBuilder: finalCreateOpts,
@@ -193,10 +198,20 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 	}
 
 	// Add the transparent VLAN attribute if specified.
+	isVLANTransparent := d.Get("transparent_vlan").(bool)
 	if isVLANTransparent {
 		finalCreateOpts = vlantransparent.CreateOptsExt{
 			CreateOptsBuilder: finalCreateOpts,
 			VLANTransparent:   &isVLANTransparent,
+		}
+	}
+
+	// Add the port security attribute if specified.
+	if v, ok := d.GetOkExists("port_security_enabled"); ok {
+		portSecurityEnabled := v.(bool)
+		finalCreateOpts = portsecurity.NetworkCreateOptsExt{
+			CreateOptsBuilder:   finalCreateOpts,
+			PortSecurityEnabled: &portSecurityEnabled,
 		}
 	}
 
@@ -248,6 +263,7 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 	var n struct {
 		networks.Network
 		external.NetworkExternalExt
+		portsecurity.PortSecurityExt
 		vlantransparent.TransparentExt
 	}
 	err = networks.Get(networkingClient, d.Id()).ExtractInto(&n)
@@ -265,6 +281,7 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 	d.Set("tenant_id", n.TenantID)
 	d.Set("region", GetRegion(d, config))
 	d.Set("transparent_vlan", n.VLANTransparent)
+	d.Set("port_security_enabled", n.PortSecurityEnabled)
 
 	networkV2ReadAttributesTags(d, n.Tags)
 
@@ -326,6 +343,15 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 		finalUpdateOpts = external.UpdateOptsExt{
 			UpdateOptsBuilder: finalUpdateOpts,
 			External:          &isExternal,
+		}
+	}
+
+	// Populate port security options.
+	if d.HasChange("port_security_enabled") {
+		portSecurityEnabled := d.Get("port_security_enabled").(bool)
+		finalUpdateOpts = portsecurity.NetworkUpdateOptsExt{
+			UpdateOptsBuilder:   finalUpdateOpts,
+			PortSecurityEnabled: &portSecurityEnabled,
 		}
 	}
 
