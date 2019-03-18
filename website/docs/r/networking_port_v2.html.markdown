@@ -85,6 +85,13 @@ The following arguments are supported:
     on the port. The structure is described below. Can be specified multiple
     times.
 
+* `port_security_enabled` - (Optional) Whether to explicitly enable or disable
+  port security on the port. Port Security is usually enabled by default, so
+  omitting argument will usually result in a value of "true". Setting this
+  explicitly to `false` will disable port security. In order to disable port
+  security, the port must not have any security groups. Valid values are `true`
+  and `false`.
+
 * `value_specs` - (Optional) Map of additional options.
 
 The `fixed_ip` block supports:

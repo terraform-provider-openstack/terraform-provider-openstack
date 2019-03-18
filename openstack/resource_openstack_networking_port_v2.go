@@ -7,6 +7,7 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -199,6 +200,12 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+
+			"port_security_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -263,6 +270,15 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
+	// Add the port security attribute if specified.
+	if v, ok := d.GetOkExists("port_security_enabled"); ok {
+		portSecurityEnabled := v.(bool)
+		finalCreateOpts = portsecurity.PortCreateOptsExt{
+			CreateOptsBuilder:   finalCreateOpts,
+			PortSecurityEnabled: &portSecurityEnabled,
+		}
+	}
+
 	log.Printf("[DEBUG] openstack_networking_port_v2 create options: %#v", finalCreateOpts)
 
 	// Create a Neutron port and set extra DHCP options if they're specified.
@@ -317,6 +333,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	var p struct {
 		ports.Port
 		extradhcpopts.ExtraDHCPOptsExt
+		portsecurity.PortSecurityExt
 	}
 	err = ports.Get(networkingClient, d.Id()).ExtractInto(&p)
 	if err != nil {
@@ -348,6 +365,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 
 	d.Set("allowed_address_pairs", flattenNetworkingPortAllowedAddressPairsV2(p.MACAddress, p.AllowedAddressPairs))
 	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(p.ExtraDHCPOptsExt))
+	d.Set("port_security_enabled", p.PortSecurityEnabled)
 
 	d.Set("region", GetRegion(d, config))
 
@@ -432,6 +450,15 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	var finalUpdateOpts ports.UpdateOptsBuilder
 	finalUpdateOpts = updateOpts
+
+	if d.HasChange("port_security_enabled") {
+		hasChange = true
+		portSecurityEnabled := d.Get("port_security_enabled").(bool)
+		finalUpdateOpts = portsecurity.PortUpdateOptsExt{
+			UpdateOptsBuilder:   finalUpdateOpts,
+			PortSecurityEnabled: &portSecurityEnabled,
+		}
+	}
 
 	// Next, perform any dhcp option changes.
 	if d.HasChange("extra_dhcp_option") {
