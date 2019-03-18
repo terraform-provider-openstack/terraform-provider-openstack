@@ -491,7 +491,7 @@ func (c *Config) keymanagerV1Client(region string) (*gophercloud.ServiceClient, 
 	}
 
 	// Check if an endpoint override was specified for the keymanager service.
-	client = c.determineEndpoint(client, "barbican")
+	client = c.determineEndpoint(client, "key-manager")
 
 	return client, nil
 }

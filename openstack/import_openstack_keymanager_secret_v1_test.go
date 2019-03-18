@@ -15,7 +15,7 @@ func TestAccSecretV1_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecretV1_basic,
+				Config: testAccKeymanagerSecretV1_basic,
 			},
 			{
 				ResourceName:      resourceName,

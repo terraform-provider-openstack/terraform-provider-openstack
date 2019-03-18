@@ -1,12 +1,12 @@
 package openstack
 
 import (
-	"fmt"
+	"strings"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
-	"strings"
 )
 
 func keymanagerSecretV1WaitForSecretDeletion(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
@@ -46,10 +46,13 @@ func keymanagerSecretV1SecretType(v string) secrets.SecretType {
 
 func keymanagerSecretV1WaitForSecretCreation(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		fmt.Println("[DEBUG] Waiting for openstack_keymanager_secret_v1 with ID %v to be created", id)
 		secret, err := secrets.Get(kmClient, id).Extract()
 		if err != nil {
-			return "", "NOT_CREATED", nil
+			if _, ok := err.(gophercloud.ErrDefault404); ok {
+				return "", "NOT_CREATED", nil
+			}
+
+			return "", "NOT_CREATED", err
 		}
 		return secret, "ACTIVE", nil
 	}
@@ -63,7 +66,7 @@ func keymanagerSecretV1GetUUIDfromSecretRef(ref string) string {
 	return uuid
 }
 
-func keymanagerSecretMetadataV1(d *schema.ResourceData) map[string]string {
+func flattenKeyManagerSecretMetadataV1(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
 	for key, val := range d.Get("metadata").(map[string]interface{}) {
 		m[key] = val.(string)
@@ -75,7 +78,11 @@ func keymanagerSecretMetadataV1WaitForSecretMetadataCreation(kmClient *gopherclo
 	return func() (interface{}, string, error) {
 		metadata, err := secrets.GetMetadata(kmClient, id).Extract()
 		if err != nil {
-			return "", "NOT_CREATED", nil
+			if _, ok := err.(gophercloud.ErrDefault404); ok {
+				return "", "NOT_CREATED", nil
+			}
+
+			return "", "NOT_CREATED", err
 		}
 		return metadata, "ACTIVE", nil
 	}

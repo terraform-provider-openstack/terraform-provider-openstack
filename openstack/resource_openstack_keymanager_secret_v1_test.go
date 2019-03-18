@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestAccSecretV1_basic(t *testing.T) {
+func TestAccKeymanagerSecretV1_basic(t *testing.T) {
 	var secret secrets.Secret
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckKeyManager(t) },
@@ -18,7 +18,7 @@ func TestAccSecretV1_basic(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecretV1_basic,
+				Config: testAccKeymanagerSecretV1_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSecretV1Exists(
 						"openstack_keymanager_secret_v1.secret_1", &secret),
@@ -30,7 +30,7 @@ func TestAccSecretV1_basic(t *testing.T) {
 	})
 }
 
-func TestAccSecretV1_basicWithMetadata(t *testing.T) {
+func TestAccKeymanagerSecretV1_basicWithMetadata(t *testing.T) {
 	var secret secrets.Secret
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckKeyManager(t) },
@@ -38,7 +38,7 @@ func TestAccSecretV1_basicWithMetadata(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecretV1_basicWithMetadata,
+				Config: testAccKeymanagerSecretV1_basicWithMetadata,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSecretV1Exists(
 						"openstack_keymanager_secret_v1.secret_1", &secret),
@@ -50,7 +50,7 @@ func TestAccSecretV1_basicWithMetadata(t *testing.T) {
 	})
 }
 
-func TestAccSecretV1_updateMetadata(t *testing.T) {
+func TestAccKeymanagerSecretV1_updateMetadata(t *testing.T) {
 	var secret secrets.Secret
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckKeyManager(t) },
@@ -58,7 +58,7 @@ func TestAccSecretV1_updateMetadata(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecretV1_basicWithMetadata,
+				Config: testAccKeymanagerSecretV1_basicWithMetadata,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSecretV1Exists(
 						"openstack_keymanager_secret_v1.secret_1", &secret),
@@ -68,7 +68,7 @@ func TestAccSecretV1_updateMetadata(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSecretV1_updateMetadata,
+				Config: testAccKeymanagerSecretV1_updateMetadata,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSecretV1Exists(
 						"openstack_keymanager_secret_v1.secret_1", &secret),
@@ -89,7 +89,7 @@ func TestAccUpdateSecretV1_payload(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecretV1_noPayload,
+				Config: testAccKeymanagerSecretV1_noPayload,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSecretV1Exists(
 						"openstack_keymanager_secret_v1.secret_1", &secret),
@@ -99,7 +99,7 @@ func TestAccUpdateSecretV1_payload(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSecretV1_update,
+				Config: testAccKeymanagerSecretV1_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSecretV1Exists(
 						"openstack_keymanager_secret_v1.secret_1", &secret),
@@ -192,7 +192,6 @@ func testAccCheckMetadataEquals(key string, value string, secret *secrets.Secret
 		}
 
 		uuid := keymanagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
-		fmt.Printf("UUID = %v", uuid)
 		metadatum, err := secrets.GetMetadatum(kmClient, uuid, key).Extract()
 		if err != nil {
 			return err
@@ -205,7 +204,7 @@ func testAccCheckMetadataEquals(key string, value string, secret *secrets.Secret
 	}
 }
 
-var testAccSecretV1_basic = fmt.Sprintf(`
+var testAccKeymanagerSecretV1_basic = fmt.Sprintf(`
 resource "openstack_keymanager_secret_v1" "secret_1" {
   algorithm = "aes"
   bit_length = 256
@@ -216,7 +215,7 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   secret_type = "passphrase"
 }`)
 
-var testAccSecretV1_basicWithMetadata = fmt.Sprintf(`
+var testAccKeymanagerSecretV1_basicWithMetadata = fmt.Sprintf(`
 resource "openstack_keymanager_secret_v1" "secret_1" {
   algorithm = "aes"
   bit_length = 256
@@ -230,7 +229,7 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   }
 }`)
 
-var testAccSecretV1_updateMetadata = fmt.Sprintf(`
+var testAccKeymanagerSecretV1_updateMetadata = fmt.Sprintf(`
 resource "openstack_keymanager_secret_v1" "secret_1" {
   algorithm = "aes"
   bit_length = 256
@@ -244,7 +243,7 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   }
 }`)
 
-var testAccSecretV1_noPayload = fmt.Sprintf(`
+var testAccKeymanagerSecretV1_noPayload = fmt.Sprintf(`
 resource "openstack_keymanager_secret_v1" "secret_1" {
   algorithm = "aes"
   bit_length = 256
@@ -254,7 +253,7 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   payload = ""
 }`)
 
-var testAccSecretV1_update = fmt.Sprintf(`
+var testAccKeymanagerSecretV1_update = fmt.Sprintf(`
 resource "openstack_keymanager_secret_v1" "secret_1" {
   algorithm = "aes"
   bit_length = 256
