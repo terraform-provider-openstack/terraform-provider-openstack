@@ -58,11 +58,7 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
-<<<<<<< HEAD
 # github.com/gophercloud/gophercloud v0.0.0-20190318015731-ff9851476e98
-=======
-# github.com/gophercloud/gophercloud v0.0.0-20190227173556-cfa8434422e7
->>>>>>> Bump gophercloud vendor dependency
 github.com/gophercloud/gophercloud
 github.com/gophercloud/gophercloud/openstack
 github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions
