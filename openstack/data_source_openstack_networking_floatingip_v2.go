@@ -5,7 +5,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -64,12 +63,12 @@ func dataSourceNetworkingFloatingIPV2() *schema.Resource {
 
 			"dns_name": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 
 			"dns_domain": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 
 			"all_tags": {
@@ -89,7 +88,6 @@ func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface
 	}
 
 	listOpts := floatingips.ListOpts{}
-	var listOptsBuilder floatingips.ListOptsBuilder
 
 	if v, ok := d.GetOk("description"); ok {
 		listOpts.Description = v.(string)
@@ -124,23 +122,7 @@ func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface
 		listOpts.Tags = strings.Join(tags, ",")
 	}
 
-	listOptsBuilder = listOpts
-
-	if v, ok := d.GetOk("dns_name"); ok {
-		listOptsBuilder = dns.FloatingIPListOptsExt{
-			ListOptsBuilder: listOptsBuilder,
-			DNSName:         v.(string),
-		}
-	}
-
-	if v, ok := d.GetOk("dns_domain"); ok {
-		listOptsBuilder = dns.FloatingIPListOptsExt{
-			ListOptsBuilder: listOptsBuilder,
-			DNSDomain:       v.(string),
-		}
-	}
-
-	pages, err := floatingips.List(networkingClient, listOptsBuilder).AllPages()
+	pages, err := floatingips.List(networkingClient, listOpts).AllPages()
 	if err != nil {
 		return fmt.Errorf("Unable to list openstack_networking_floatingips_v2: %s", err)
 	}

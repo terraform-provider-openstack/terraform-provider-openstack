@@ -40,15 +40,13 @@ data "openstack_networking_floatingip_v2" "floatingip_1" {
 
 * `tenant_id` - (Optional) The owner of the floating IP.
 
-* `dns_name` - (Optional) The floating IP DNS name to filter. Available, when Neutron
-    DNS extension is enabled.
-
-* `dns_domain` - (Optional) The floating IP DNS domain to filter. Available, when
-    Neutron DNS extension is enabled.
-
 ## Attributes Reference
 
 `id` is set to the ID of the found floating IP. In addition, the following attributes
 are exported:
 
 * `all_tags` - A set of string tags applied on the floating IP.
+* `dns_name` - (Optional) The floating IP DNS name. Available, when Neutron DNS
+    extension is enabled.
+* `dns_domain` - (Optional) The floating IP DNS domain. Available, when Neutron
+    DNS extension is enabled.
