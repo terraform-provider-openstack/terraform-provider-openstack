@@ -1,12 +1,14 @@
 package openstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsbinding"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/resource"
@@ -203,6 +205,12 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
+			"port_security_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+
 			"binding": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -242,12 +250,6 @@ func resourceNetworkingPortV2() *schema.Resource {
 						},
 					},
 				},
-			},
-
-			"port_security_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
 			},
 		},
 	}
@@ -322,10 +324,28 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
-	binding := d.Get("binding").([]interface{})
-	err = expandNetworkingPortBindingProfileCreateV2(binding, &finalCreateOpts)
-	if err != nil {
-		return err
+	// Add the port binding parameters if specified.
+	if v, ok := d.GetOkExists("binding"); ok {
+		for _, raw := range v.([]interface{}) {
+			binding := raw.(map[string]interface{})
+			profile := map[string]interface{}{}
+
+			// Convert raw string into the map
+			rawProfile := binding["profile"].(string)
+			if len(rawProfile) > 0 {
+				err := json.Unmarshal([]byte(rawProfile), &profile)
+				if err != nil {
+					return fmt.Errorf("Failed to unmarshal the JSON: %s", err)
+				}
+			}
+
+			finalCreateOpts = portsbinding.CreateOptsExt{
+				CreateOptsBuilder: finalCreateOpts,
+				HostID:            binding["host_id"].(string),
+				Profile:           profile,
+				VNICType:          binding["vnic_type"].(string),
+			}
+		}
 	}
 
 	log.Printf("[DEBUG] openstack_networking_port_v2 create options: %#v", finalCreateOpts)
@@ -408,7 +428,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	d.Set("allowed_address_pairs", flattenNetworkingPortAllowedAddressPairsV2(port.MACAddress, port.AllowedAddressPairs))
 	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDHCPOptsExt))
 	d.Set("port_security_enabled", port.PortSecurityEnabled)
-	d.Set("binding", flattenNetworkingPortBindingV2(port, false))
+	d.Set("binding", flattenNetworkingPortBindingV2(port))
 
 	d.Set("region", GetRegion(d, config))
 
@@ -516,7 +536,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 		updateExtraDHCPOpts := expandNetworkingPortDHCPOptsV2Update(deleteDHCPOpts, addDHCPOpts)
 		finalUpdateOpts = extradhcpopts.UpdateOptsExt{
-			UpdateOptsBuilder: updateOpts,
+			UpdateOptsBuilder: finalUpdateOpts,
 			ExtraDHCPOpts:     updateExtraDHCPOpts,
 		}
 	}
@@ -525,11 +545,38 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("binding") {
 		hasChange = true
 
-		binding := d.Get("binding").([]interface{})
-		err = expandNetworkingPortBindingProfileUpdateV2(binding, &finalUpdateOpts)
-		if err != nil {
-			return err
+		profile := map[string]interface{}{}
+
+		// default options, when unsetting the port bindings
+		newOpts := portsbinding.UpdateOptsExt{
+			UpdateOptsBuilder: finalUpdateOpts,
+			HostID:            new(string),
+			Profile:           profile,
+			VNICType:          "normal",
 		}
+
+		for _, raw := range d.Get("binding").([]interface{}) {
+			binding := raw.(map[string]interface{})
+
+			// Convert raw string into the map
+			rawProfile := binding["profile"].(string)
+			if len(rawProfile) > 0 {
+				err := json.Unmarshal([]byte(rawProfile), &profile)
+				if err != nil {
+					return fmt.Errorf("Failed to unmarshal the JSON: %s", err)
+				}
+			}
+
+			hostID := binding["host_id"].(string)
+			newOpts = portsbinding.UpdateOptsExt{
+				UpdateOptsBuilder: finalUpdateOpts,
+				HostID:            &hostID,
+				Profile:           profile,
+				VNICType:          binding["vnic_type"].(string),
+			}
+		}
+
+		finalUpdateOpts = newOpts
 	}
 
 	// At this point, perform the update for all "standard" port changes.

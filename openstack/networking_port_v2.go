@@ -8,8 +8,8 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsbinding"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
@@ -192,41 +192,18 @@ func expandNetworkingPortFixedIPToStringSlice(fixedIPs []ports.IP) []string {
 	return s
 }
 
-func flattenNetworkingPortBindingV2(port portExtended, dataSource bool) interface{} {
+func flattenNetworkingPortBindingV2(port portExtended) interface{} {
 	var portBinding []map[string]interface{}
 	var profile interface{}
 
-	if dataSource {
-		// Due to a lack of the "jsondecode" interpolation function in Terraform there
-		// is no sense to store raw JSON string for the data source, because it could
-		// not be reused. Therefore the code below builds a map for the port data source.
-		// Unfortunately it is impossible to store the map[string]interface{} into the
-		// TypeMap, the "map[string]string" is the best we can do.
-		tmp := make(map[string]string)
-		for k, v := range port.Profile {
-			// don't marshal, if it is a regular string
-			if s, ok := v.(string); ok {
-				tmp[k] = s
-				continue
-			}
-
-			p, err := json.Marshal(v)
-			if err != nil {
-				log.Printf("[DEBUG] flattenNetworkingPortBindingV2: Cannot marshal port.Profile %s key value: %s", k, err)
-			}
-			tmp[k] = string(p)
-		}
-		profile = tmp
-	} else {
-		// "TypeMap" with "ValidateFunc", "DiffSuppressFunc" and "StateFunc" combination
-		// is not supported by Terraform. Therefore a regular JSON string is used for the
-		// port resource.
-		tmp, err := json.Marshal(port.Profile)
-		if err != nil {
-			log.Printf("[DEBUG] flattenNetworkingPortBindingV2: Cannot marshal port.Profile: %s", err)
-		}
-		profile = string(tmp)
+	// "TypeMap" with "ValidateFunc", "DiffSuppressFunc" and "StateFunc" combination
+	// is not supported by Terraform. Therefore a regular JSON string is used for the
+	// port resource.
+	tmp, err := json.Marshal(port.Profile)
+	if err != nil {
+		log.Printf("[DEBUG] flattenNetworkingPortBindingV2: Cannot marshal port.Profile: %s", err)
 	}
+	profile = string(tmp)
 
 	vifDetails := make(map[string]string)
 	for k, v := range port.VIFDetails {
@@ -252,68 +229,6 @@ func flattenNetworkingPortBindingV2(port portExtended, dataSource bool) interfac
 	})
 
 	return portBinding
-}
-
-func expandNetworkingPortBindingProfileCreateV2(portBinding []interface{}, opts *ports.CreateOptsBuilder) error {
-	for _, raw := range portBinding {
-		binding := raw.(map[string]interface{})
-		profile := map[string]interface{}{}
-
-		// Convert raw string into the map
-		rawProfile := binding["profile"].(string)
-		if len(rawProfile) > 0 {
-			err := json.Unmarshal([]byte(rawProfile), &profile)
-			if err != nil {
-				return fmt.Errorf("Failed to unmarshal the JSON: %s", err)
-			}
-		}
-
-		*opts = portsbinding.CreateOptsExt{
-			CreateOptsBuilder: *opts,
-			HostID:            binding["host_id"].(string),
-			Profile:           profile,
-			VNICType:          binding["vnic_type"].(string),
-		}
-	}
-
-	return nil
-}
-
-func expandNetworkingPortBindingProfileUpdateV2(portBinding []interface{}, opts *ports.UpdateOptsBuilder) error {
-	profile := map[string]interface{}{}
-
-	// default options, when unsetting the port bindings
-	newOpts := portsbinding.UpdateOptsExt{
-		UpdateOptsBuilder: *opts,
-		HostID:            new(string),
-		Profile:           profile,
-		VNICType:          "normal",
-	}
-
-	for _, raw := range portBinding {
-		binding := raw.(map[string]interface{})
-
-		// Convert raw string into the map
-		rawProfile := binding["profile"].(string)
-		if len(rawProfile) > 0 {
-			err := json.Unmarshal([]byte(rawProfile), &profile)
-			if err != nil {
-				return fmt.Errorf("Failed to unmarshal the JSON: %s", err)
-			}
-		}
-
-		hostID := binding["host_id"].(string)
-		newOpts = portsbinding.UpdateOptsExt{
-			UpdateOptsBuilder: *opts,
-			HostID:            &hostID,
-			Profile:           profile,
-			VNICType:          binding["vnic_type"].(string),
-		}
-	}
-
-	*opts = newOpts
-
-	return nil
 }
 
 func suppressDiffPortBindingProfileV2(k, old, new string, d *schema.ResourceData) bool {

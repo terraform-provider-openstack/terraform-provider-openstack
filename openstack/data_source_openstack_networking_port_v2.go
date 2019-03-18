@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/structure"
 	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
@@ -164,8 +165,12 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 							Computed: true,
 						},
 						"profile": {
-							Type:     schema.TypeMap,
+							Type:     schema.TypeString,
 							Computed: true,
+							StateFunc: func(v interface{}) string {
+								json, _ := structure.NormalizeJsonString(v)
+								return json
+							},
 						},
 						"vif_details": {
 							Type:     schema.TypeMap,
@@ -322,7 +327,7 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("all_fixed_ips", expandNetworkingPortFixedIPToStringSlice(port.FixedIPs))
 	d.Set("allowed_address_pairs", flattenNetworkingPortAllowedAddressPairsV2(port.MACAddress, port.AllowedAddressPairs))
 	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDHCPOptsExt))
-	d.Set("binding", flattenNetworkingPortBindingV2(port, true))
+	d.Set("binding", flattenNetworkingPortBindingV2(port))
 
 	return nil
 }
