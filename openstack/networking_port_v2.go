@@ -8,6 +8,7 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsbinding"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/hashcode"
@@ -18,6 +19,7 @@ import (
 type portExtended struct {
 	ports.Port
 	extradhcpopts.ExtraDHCPOptsExt
+	portsecurity.PortSecurityExt
 	portsbinding.PortsBindingExt
 }
 
