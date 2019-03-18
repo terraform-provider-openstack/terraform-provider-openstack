@@ -182,7 +182,7 @@ func TestAccNetworkingV2Subnet_subnetPoolNoCIDR(t *testing.T) {
 	})
 }
 
-func TestAccNetworkingV2Subnet_subnetPoolPrefixLength(t *testing.T) {
+func TestAccNetworkingV2Subnet_subnetPrefixLength(t *testing.T) {
 	var subnet [2]subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -191,7 +191,7 @@ func TestAccNetworkingV2Subnet_subnetPoolPrefixLength(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_subnetPoolPrefixLength,
+				Config: testAccNetworkingV2Subnet_subnetPrefixLength,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet[0]),
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_2", &subnet[1]),
@@ -436,7 +436,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_subnetPoolPrefixLength = `
+const testAccNetworkingV2Subnet_subnetPrefixLength = `
 resource "openstack_networking_network_v2" "network_1" {
   name           = "network_1"
   admin_state_up = "true"
