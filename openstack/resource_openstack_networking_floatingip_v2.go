@@ -71,9 +71,10 @@ func resourceNetworkingFloatingIPV2() *schema.Resource {
 			},
 
 			"fixed_ip": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.SingleIP(),
 			},
 
 			"subnet_id": {
@@ -247,10 +248,17 @@ func resourceNetworkFloatingIPV2Update(d *schema.ResourceData, meta interface{})
 		updateOpts.Description = &description
 	}
 
-	if d.HasChange("port_id") {
+	// fixed_ip_address cannot be specified without a port_id
+	if d.HasChange("port_id") || d.HasChange("fixed_ip") {
 		hasChange = true
 		portID := d.Get("port_id").(string)
 		updateOpts.PortID = &portID
+	}
+
+	if d.HasChange("fixed_ip") {
+		hasChange = true
+		fixedIP := d.Get("fixed_ip").(string)
+		updateOpts.FixedIP = fixedIP
 	}
 
 	if hasChange {
