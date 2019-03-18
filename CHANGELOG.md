@@ -10,6 +10,7 @@ IMPROVEMENTS
 
 * Reduced API calls when updating `extra_dhcp_option` in `openstack_networking_port_v2` [GH-689]
 * Added `port_security_enabled` to `openstack_networking_network_v2` [GH-681]
+* Added `port_security_enabled` to `openstack_networking_port_v2` [GH-682]
 
 BUG FIXES
 
