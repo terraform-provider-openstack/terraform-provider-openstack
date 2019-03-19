@@ -1,23 +1,18 @@
-# Openstack deploy with Terraform
+# Multiple Instances with Floating IPs
 
-## Prerequists
+## Prerequisites
 
-Install Terraform
-
-```
-LATEST_VERSION=$(curl -sL https://releases.hashicorp.com/terraform/ | grep href | grep -v "\(alpha\|beta\|rc\)" | head -n2 | tail -n1 | sed -e 's#.*">.*_\(.*\)<.*#\1#g')
-wget https://releases.hashicorp.com/terraform/${LATEST_VERSION}/terraform_${LATEST_VERSION}_linux_amd64.zip
-sudo unzip terraform_${LATEST_VERSION}_linux_amd64.zip -d /usr/local/bin/
-```
+We assume you already installed terraform using the following instructions: https://www.terraform.io/downloads.html
 
 ## Getting started
 
-Source openstack configuration
+First, download an openrc file from the OpenStack dashboard. If your cloud provider does not support downloading the openrc file from a dashboard, then you can use the openrc.sample file in this directory. Rename it to openrc and modify it using a text editor of your choice.
+
+After you have modified it, source it into your shell environment:
 
 ```
-source ./my-project-openrc.sh
+source ./openrc
 ```
-Note: edit `openrc.sample` file
 
 Init providers
 
@@ -25,7 +20,10 @@ Init providers
 terraform init
 ```
 
-Plan for `n` instances
+
+## Deploy the Configuration
+
+plan the deployment
 
 ```
 terraform plan
@@ -53,7 +51,7 @@ terraform apply -auto-approve \
 
 ## Tear down
 
-cleanup
+cleanup, watch the `-force` will not ask for any confirmation.
 
 ```
 terraform destroy -force
