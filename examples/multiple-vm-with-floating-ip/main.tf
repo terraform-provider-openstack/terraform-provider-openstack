@@ -21,7 +21,7 @@ resource "openstack_networking_floatingip_v2" "fip" {
 }
 
 resource "openstack_compute_floatingip_associate_v2" "fip" {
-  count = "${var.count}"
-  floating_ip = "${element(openstack_networking_floatingip_v2.fip.*.address, count.index)}"
-  instance_id = "${element(openstack_compute_instance_v2.multi.*.id, count.index)}"
+  count       = "${var.count}"
+  instance_id = "${openstack_compute_instance_v2.multi.*.id[count.index]}"
+  floating_ip = "${openstack_networking_floatingip_v2.fip.*.address[count.index]}"
 }
