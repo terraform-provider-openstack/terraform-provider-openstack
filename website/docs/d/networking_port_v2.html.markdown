@@ -109,7 +109,7 @@ The `binding` attribute has fields below:
 
 * `host_id` - The ID of the host, which has the allocatee port.
 
-* `profile` - A map of JSON strings containing the binding profile information.
+* `profile` - A JSON string containing the binding profile information.
 
 * `vnic_type` - VNIC type for the port.
 
