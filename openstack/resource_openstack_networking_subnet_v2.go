@@ -41,15 +41,17 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"cidr": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				ConflictsWith: []string{"prefix_length"},
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
 			},
 			"prefix_length": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeInt,
+				ConflictsWith: []string{"cidr"},
+				Optional:      true,
+				ForceNew:      true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -206,6 +208,9 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if v, ok := d.GetOk("prefix_length"); ok {
+		if d.Get("subnetpool_id").(string) == "" {
+			return fmt.Errorf("'prefix_length' is only valid if 'subnetpool_id' is set")
+		}
 		prefixLength := v.(int)
 		createOpts.Prefixlen = prefixLength
 	}
