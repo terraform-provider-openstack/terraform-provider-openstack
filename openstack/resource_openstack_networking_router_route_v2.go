@@ -112,12 +112,17 @@ func resourceNetworkingRouterRouteV2Read(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	routerID, dstCIDR, nextHop, err := resourceNetworkingRouterRouteV2ParseID(d.Id())
+	idFromResource, dstCIDR, nextHop, err := resourceNetworkingRouterRouteV2ParseID(d.Id())
 	if err != nil {
 		return fmt.Errorf("Error reading openstack_networking_router_route_v2 ID %s: %s", d.Id(), err)
 	}
 
-	r, err := routers.Get(networkingClient, d.Get("router_id").(string)).Extract()
+	routerID := d.Get("router_id").(string)
+	if routerID == "" {
+		routerID = idFromResource
+	}
+
+	r, err := routers.Get(networkingClient, routerID).Extract()
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
 			d.SetId("")
@@ -172,7 +177,7 @@ func resourceNetworkingRouterRouteV2Delete(d *schema.ResourceData, meta interfac
 	newRoute := []routers.Route{}
 
 	for _, route := range oldRoutes {
-		if route.DestinationCIDR != dstCIDR && route.NextHop != nextHop {
+		if route.DestinationCIDR != dstCIDR || route.NextHop != nextHop {
 			newRoute = append(newRoute, route)
 		}
 	}
