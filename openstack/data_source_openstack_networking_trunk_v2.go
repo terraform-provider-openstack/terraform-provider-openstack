@@ -58,9 +58,8 @@ func dataSourceNetworkingTrunkV2() *schema.Resource {
 			},
 
 			"sub_port": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
-				Set:      resourceAttributesHash(dataSourceNetworkingTrunkV2, "sub_port"),
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"port_id": {

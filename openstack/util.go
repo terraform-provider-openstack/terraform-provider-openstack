@@ -1,7 +1,6 @@
 package openstack
 
 import (
-	"bytes"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -13,7 +12,6 @@ import (
 	"github.com/Unknwon/com"
 	"github.com/gophercloud/gophercloud"
 	"github.com/hashicorp/terraform/flatmap"
-	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
@@ -276,41 +274,4 @@ func sliceUnion(a, b []string) []string {
 		}
 	}
 	return res
-}
-
-// serializeValueForHash appends a serialization of the given resource config
-// to the given buffer, guaranteeing deterministic results given the same value
-// and schema.
-//
-// It is copied from the schema.SerializeResourceForHash, but with a minor changes
-// to perform a proper serialization of the computed attributes
-func serializeResourceForHash(buf *bytes.Buffer, val interface{}, resource *schema.Resource) {
-	if val == nil {
-		return
-	}
-	sm := resource.Schema
-	m := val.(map[string]interface{})
-	var keys []string
-	for k := range sm {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	for _, k := range keys {
-		innerSchema := sm[k]
-		buf.WriteString(k)
-		buf.WriteRune(':')
-		innerVal := m[k]
-		schema.SerializeValueForHash(buf, innerVal, innerSchema)
-	}
-}
-
-func resourceAttributesHash(parentSchema func() *schema.Resource, key string) func(interface{}) int {
-	return func(v interface{}) int {
-		m := v.(map[string]interface{})
-		resource := parentSchema().Schema[key].Elem.(*schema.Resource)
-
-		var buf bytes.Buffer
-		serializeResourceForHash(&buf, m, resource)
-		return hashcode.String(buf.String())
-	}
 }
