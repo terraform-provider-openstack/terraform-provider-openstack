@@ -1,5 +1,10 @@
 ## 1.17.0 (Unreleased)
 
+NOTES
+
+* `extra_dhcp_option` in the `openstack_networking_port_v2` data source has been changed to a List. This is to resolve a bug where multiple DHCP options were not being rendered.
+
+
 FEATURES
 
 * __New Resource__: `openstack_identity_application_credential_v3` [GH-660]
@@ -16,6 +21,7 @@ BUG FIXES
 
 * Fixed bug in `openstack_identity_auth_scope_v3` data source where the `user_id` attribute was being set to the user's Name and not ID [GH-660]
 * Fixed bug in Load Balancer resources for Contrail-based load balancers [GH-691]
+* `extra_dhcp_option` in the `openstack_networking_port_v2` data source has been changed to a List. This is to resolve a bug where multiple DHCP options were not being rendered [GH-695]
 
 ## 1.16.0 (February 14, 2019)
 
