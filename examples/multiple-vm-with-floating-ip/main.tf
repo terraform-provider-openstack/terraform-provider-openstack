@@ -5,7 +5,7 @@ resource "openstack_compute_keypair_v2" "terraform" {
 
 resource "openstack_compute_instance_v2" "multi" {
   count = "${var.count}"
-  name = "${format("multi-%02d", count.index+1)}"
+  name = "${format("${var.instance_prefix}-%02d", count.index+1)}"
   image_name = "${var.image}"
   flavor_name = "${var.flavor}"
   key_pair = "${openstack_compute_keypair_v2.terraform.name}"

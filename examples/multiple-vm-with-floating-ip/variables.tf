@@ -25,3 +25,7 @@ variable "count" {
 variable "network_name" {
   default = "my-network"
 }
+
+variable "instance_prefix" {
+  default = "multi"
+}
