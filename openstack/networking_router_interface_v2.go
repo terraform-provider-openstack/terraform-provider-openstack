@@ -52,11 +52,9 @@ func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(networkingClient *goph
 				log.Printf("[DEBUG] Successfully deleted openstack_networking_router_interface_v2 %s", routerInterfaceID)
 				return r, "DELETED", nil
 			}
-			if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 409 {
-					log.Printf("[DEBUG] openstack_networking_router_interface_v2 %s is still in use", routerInterfaceID)
-					return r, "ACTIVE", nil
-				}
+			if _, ok := err.(gophercloud.ErrDefault409); ok {
+				log.Printf("[DEBUG] openstack_networking_router_interface_v2 %s is still in use", routerInterfaceID)
+				return r, "ACTIVE", nil
 			}
 
 			return r, "ACTIVE", err
