@@ -211,8 +211,8 @@ func resourceObjectStorageContainerV1Delete(d *schema.ResourceData, meta interfa
 
 	_, err = containers.Delete(objectStorageClient, d.Id()).Extract()
 	if err != nil {
-		gopherErr, ok := err.(gophercloud.ErrUnexpectedResponseCode)
-		if ok && gopherErr.Actual == 409 && d.Get("force_destroy").(bool) {
+		_, ok := err.(gophercloud.ErrDefault409)
+		if ok && d.Get("force_destroy").(bool) {
 			// Container may have things. Delete them.
 			log.Printf("[DEBUG] Attempting to forceDestroy Openstack container %+v", err)
 

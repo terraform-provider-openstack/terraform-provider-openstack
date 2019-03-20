@@ -81,10 +81,8 @@ func resourceNetworkingNetworkV2StateRefreshFunc(client *gophercloud.ServiceClie
 			if _, ok := err.(gophercloud.ErrDefault404); ok {
 				return n, "DELETED", nil
 			}
-			if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 409 {
-					return n, "ACTIVE", nil
-				}
+			if _, ok := err.(gophercloud.ErrDefault409); ok {
+				return n, "ACTIVE", nil
 			}
 
 			return n, "", err

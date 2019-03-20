@@ -26,13 +26,11 @@ func fwPolicyV1DeleteFunc(networkingClient *gophercloud.ServiceClient, id string
 			return "", "DELETED", nil
 		}
 
-		if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
-			if errCode.Actual == 409 {
-				// This error usually means that the policy is attached
-				// to a firewall. At this point, the firewall is probably
-				// being delete. So, we retry a few times.
-				return nil, "ACTIVE", nil
-			}
+		if _, ok := err.(gophercloud.ErrDefault409); ok {
+			// This error usually means that the policy is attached
+			// to a firewall. At this point, the firewall is probably
+			// being delete. So, we retry a few times.
+			return nil, "ACTIVE", nil
 		}
 
 		return nil, "ACTIVE", err

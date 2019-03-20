@@ -103,16 +103,13 @@ func FormatHeaders(headers http.Header, seperator string) string {
 }
 
 func checkForRetryableError(err error) *resource.RetryError {
-	switch errCode := err.(type) {
+	switch err.(type) {
 	case gophercloud.ErrDefault500:
 		return resource.RetryableError(err)
-	case gophercloud.ErrUnexpectedResponseCode:
-		switch errCode.Actual {
-		case 409, 503:
-			return resource.RetryableError(err)
-		default:
-			return resource.NonRetryableError(err)
-		}
+	case gophercloud.ErrDefault409:
+		return resource.RetryableError(err)
+	case gophercloud.ErrDefault503:
+		return resource.RetryableError(err)
 	default:
 		return resource.NonRetryableError(err)
 	}

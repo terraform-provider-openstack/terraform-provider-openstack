@@ -508,10 +508,8 @@ func waitForSubnetDelete(networkingClient *gophercloud.ServiceClient, subnetId s
 				log.Printf("[DEBUG] Successfully deleted OpenStack Subnet %s", subnetId)
 				return s, "DELETED", nil
 			}
-			if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 409 {
-					return s, "ACTIVE", nil
-				}
+			if _, ok := err.(gophercloud.ErrDefault409); ok {
+				return s, "ACTIVE", nil
 			}
 			return s, "ACTIVE", err
 		}
