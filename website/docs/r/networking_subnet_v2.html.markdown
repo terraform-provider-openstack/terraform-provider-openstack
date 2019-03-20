@@ -40,6 +40,11 @@ The following arguments are supported:
     version. You can omit this option if you are creating a subnet from a
     subnet pool.
 
+* `prefix_length` - (Optional) The prefix length to use when creating a subnet
+    from a subnet pool. The default subnet pool prefix length that was defined
+    when creating the subnet pool will be used if not provided. Changing this 
+    creates a new subnet.
+
 * `ip_version` - (Optional) IP version, either 4 (default) or 6. Changing this creates a
     new subnet.
 

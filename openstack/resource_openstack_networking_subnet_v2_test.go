@@ -182,6 +182,29 @@ func TestAccNetworkingV2Subnet_subnetPoolNoCIDR(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Subnet_subnetPrefixLength(t *testing.T) {
+	var subnet [2]subnets.Subnet
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Subnet_subnetPrefixLength,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet[0]),
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_2", &subnet[1]),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "prefix_length", "27"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_2", "prefix_length", "32"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2SubnetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
@@ -410,5 +433,33 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
 	network_id = "${openstack_networking_network_v2.network_1.id}"
 	subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+}
+`
+
+const testAccNetworkingV2Subnet_subnetPrefixLength = `
+resource "openstack_networking_network_v2" "network_1" {
+  name           = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
+  name     = "my_ipv4_pool"
+  prefixes = ["10.11.12.0/24"]
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name          = "subnet_1"
+  prefix_length = 27
+  enable_dhcp   = false
+  network_id    = "${openstack_networking_network_v2.network_1.id}"
+  subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_2" {
+  name          = "subnet_2"
+  prefix_length = 32
+  enable_dhcp   = false
+  network_id    = "${openstack_networking_network_v2.network_1.id}"
+  subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
 }
 `
