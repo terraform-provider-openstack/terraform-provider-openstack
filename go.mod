@@ -7,7 +7,7 @@ require (
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/fatih/color v1.6.0 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
-	github.com/gophercloud/gophercloud v0.0.0-20190215023200-9e57e2f8ff0c
+	github.com/gophercloud/gophercloud v0.0.0-20190318015731-ff9851476e98
 	github.com/gophercloud/utils v0.0.0-20190212203534-6f24f46ce3c9
 	github.com/hashicorp/go-getter v0.0.0-20180425224130-3f60ec5cfbb2 // indirect
 	github.com/hashicorp/go-hclog v0.0.0-20180402200405-69ff559dc25f // indirect
