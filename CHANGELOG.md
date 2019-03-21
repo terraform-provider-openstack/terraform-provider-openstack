@@ -18,6 +18,8 @@ IMPROVEMENTS
 * Added `port_security_enabled` to `openstack_networking_network_v2` [GH-681]
 * Added `port_security_enabled` to `openstack_networking_port_v2` [GH-682]
 * Added `prefix_length` to `openstack_networking_subnet_v2` [GH-705]
+* Added `binding` to `openstack_networking_port_v2` [GH-693]
+* Added `binding` to `openstack_networking_port_v2` data source [GH-693]
 
 BUG FIXES
 
