@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+export OS_AUTH_URL=http://KEYSTONE.ENDPOINT.URL:5000/v3
+export OS_PROJECT_ID="42..."
+export OS_PROJECT_NAME="multivm-project"
+export OS_USER_DOMAIN_NAME="mycloud"
+export OS_PROJECT_DOMAIN_ID="23..."
+export OS_USERNAME="$USER"
+export OS_PASSWORD=$OS_PASSWORD_INPUT
+export OS_REGION_NAME="MyRegion"
+export OS_INTERFACE=public
+export OS_IDENTITY_API_VERSION=3
