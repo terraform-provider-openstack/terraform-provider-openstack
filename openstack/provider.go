@@ -244,6 +244,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_networking_router_v2":                   dataSourceNetworkingRouterV2(),
 			"openstack_networking_port_v2":                     dataSourceNetworkingPortV2(),
 			"openstack_networking_port_ids_v2":                 dataSourceNetworkingPortIDsV2(),
+			"openstack_networking_trunk_v2":                    dataSourceNetworkingTrunkV2(),
 			"openstack_sharedfilesystem_availability_zones_v2": dataSourceSharedFilesystemAvailabilityZonesV2(),
 			"openstack_sharedfilesystem_sharenetwork_v2":       dataSourceSharedFilesystemShareNetworkV2(),
 			"openstack_sharedfilesystem_share_v2":              dataSourceSharedFilesystemShareV2(),
