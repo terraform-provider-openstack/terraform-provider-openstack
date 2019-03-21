@@ -89,6 +89,8 @@ are exported:
 * `extra_dhcp_option` - An extra DHCP option configured on the port.
     The structure is described below.
 
+* `binding` - The port binding information. The structure is described below.
+
 The `allowed_address_pairs` attribute has fields below:
 
 * `ip_address` - The additional IP address.
@@ -102,3 +104,16 @@ The `extra_dhcp_option` attribute has fields below:
 * `value` - Value of the DHCP option.
 
 * `ip_version` - IP protocol version
+
+The `binding` attribute has fields below:
+
+* `host_id` - The ID of the host, which has the allocatee port.
+
+* `profile` - A JSON string containing the binding profile information.
+
+* `vnic_type` - VNIC type for the port.
+
+* `vif_details` - A map of JSON strings containing additional details for this
+    specific binding.
+
+* `vif_type` - The VNIC type of the port binding.

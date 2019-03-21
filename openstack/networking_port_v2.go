@@ -2,15 +2,26 @@ package openstack
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsbinding"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
+
+type portExtended struct {
+	ports.Port
+	extradhcpopts.ExtraDHCPOptsExt
+	portsecurity.PortSecurityExt
+	portsbinding.PortsBindingExt
+}
 
 func resourceNetworkingPortV2StateRefreshFunc(client *gophercloud.ServiceClient, portID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
@@ -179,4 +190,55 @@ func expandNetworkingPortFixedIPToStringSlice(fixedIPs []ports.IP) []string {
 	}
 
 	return s
+}
+
+func flattenNetworkingPortBindingV2(port portExtended) interface{} {
+	var portBinding []map[string]interface{}
+	var profile interface{}
+
+	// "TypeMap" with "ValidateFunc", "DiffSuppressFunc" and "StateFunc" combination
+	// is not supported by Terraform. Therefore a regular JSON string is used for the
+	// port resource.
+	tmp, err := json.Marshal(port.Profile)
+	if err != nil {
+		log.Printf("[DEBUG] flattenNetworkingPortBindingV2: Cannot marshal port.Profile: %s", err)
+	}
+	profile = string(tmp)
+
+	vifDetails := make(map[string]string)
+	for k, v := range port.VIFDetails {
+		// don't marshal, if it is a regular string
+		if s, ok := v.(string); ok {
+			vifDetails[k] = s
+			continue
+		}
+
+		p, err := json.Marshal(v)
+		if err != nil {
+			log.Printf("[DEBUG] flattenNetworkingPortBindingV2: Cannot marshal %s key value: %s", k, err)
+		}
+		vifDetails[k] = string(p)
+	}
+
+	portBinding = append(portBinding, map[string]interface{}{
+		"profile":     profile,
+		"vif_type":    port.VIFType,
+		"vif_details": vifDetails,
+		"vnic_type":   port.VNICType,
+		"host_id":     port.HostID,
+	})
+
+	return portBinding
+}
+
+func suppressDiffPortBindingProfileV2(k, old, new string, d *schema.ResourceData) bool {
+	if old == "{}" && new == "" {
+		return true
+	}
+
+	if old == "" && new == "{}" {
+		return true
+	}
+
+	return false
 }

@@ -118,6 +118,7 @@ github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/l
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/monitors
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools
+github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsbinding
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups
@@ -205,6 +206,7 @@ github.com/hashicorp/terraform/helper/mutexkv
 github.com/hashicorp/terraform/helper/pathorcontents
 github.com/hashicorp/terraform/helper/resource
 github.com/hashicorp/terraform/helper/schema
+github.com/hashicorp/terraform/helper/structure
 github.com/hashicorp/terraform/helper/validation
 github.com/hashicorp/terraform/terraform
 github.com/hashicorp/terraform/plugin/discovery
@@ -213,7 +215,6 @@ github.com/hashicorp/terraform/helper/config
 github.com/hashicorp/terraform/helper/logging
 github.com/hashicorp/terraform/config
 github.com/hashicorp/terraform/config/configschema
-github.com/hashicorp/terraform/helper/structure
 github.com/hashicorp/terraform/dag
 github.com/hashicorp/terraform/helper/hilmapstructure
 github.com/hashicorp/terraform/httpclient
