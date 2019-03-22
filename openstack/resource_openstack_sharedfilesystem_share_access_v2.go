@@ -85,11 +85,15 @@ func resourceSharedFilesystemShareAccessV2Create(d *schema.ResourceData, meta in
 	}
 
 	sfsClient.Microversion = minManilaMicroversion
+	accessType := d.Get("access_type").(string)
+	if accessType == "cephx" {
+		sfsClient.Microversion = "2.13"
+	}
 
 	shareID := d.Get("share_id").(string)
 
 	grantOpts := shares.GrantAccessOpts{
-		AccessType:  d.Get("access_type").(string),
+		AccessType:  accessType,
 		AccessTo:    d.Get("access_to").(string),
 		AccessLevel: d.Get("access_level").(string),
 	}

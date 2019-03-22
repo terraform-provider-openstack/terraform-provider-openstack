@@ -60,6 +60,25 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 	})
 }
 
+func TestAccSFSV2ShareAccess_cephx(t *testing.T) {
+	var shareAccess1 shares.AccessRight
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckSFS(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckSFSV2ShareAccessDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSFSV2ShareAccessConfig_cephx,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSFSV2ShareAccessExists("openstack_sharedfilesystem_share_access_v2.share_access_1", &shareAccess1),
+					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_type", "cephx"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckSFSV2ShareAccessDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	sfsClient, err := config.sharedfilesystemV2Client(OS_REGION_NAME)
@@ -196,5 +215,16 @@ resource "openstack_sharedfilesystem_share_access_v2" "share_access_2" {
   access_type  = "ip"
   access_to    = "192.168.199.11"
   access_level = "ro"
+}
+`, testAccSFSV2ShareAccessConfig)
+
+var testAccSFSV2ShareAccessConfig_cephx = fmt.Sprintf(`
+%s
+
+resource "openstack_sharedfilesystem_share_access_v2" "share_access_1" {
+  share_id     = "${openstack_sharedfilesystem_share_v2.share_1.id}"
+  access_type  = "cephx"
+  access_to    = "192.168.199.10"
+  access_level = "rw"
 }
 `, testAccSFSV2ShareAccessConfig)
