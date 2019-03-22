@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
 	mtuext "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/mtu"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vlantransparent"
@@ -99,7 +98,7 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 
 			"dns_domain": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 
 			"all_tags": {
@@ -157,14 +156,6 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 		listOpts = mtuext.ListOptsExt{
 			ListOptsBuilder: listOpts,
 			MTU:             v.(int),
-		}
-	}
-
-	// Add the DNS Domain attribute if specified.
-	if v, ok := d.GetOkExists("dns_domain"); ok {
-		listOpts = dns.NetworkListOptsExt{
-			ListOptsBuilder: listOpts,
-			DNSDomain:       v.(string),
 		}
 	}
 
