@@ -240,9 +240,8 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	dnsDomain := d.Get("dns_domain").(string)
 	// Add the DNS Domain attribute if specified.
-	if len(dnsDomain) > 0 {
+	if dnsDomain := d.Get("dns_domain").(string); dnsDomain != "" {
 		finalCreateOpts = dns.NetworkCreateOptsExt{
 			CreateOptsBuilder: finalCreateOpts,
 			DNSDomain:         dnsDomain,

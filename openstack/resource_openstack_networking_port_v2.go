@@ -360,8 +360,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
-	dnsName := d.Get("dns_name").(string)
-	if len(dnsName) > 0 {
+	if dnsName := d.Get("dns_name").(string); dnsName != "" {
 		finalCreateOpts = dns.PortCreateOptsExt{
 			CreateOptsBuilder: finalCreateOpts,
 			DNSName:           dnsName,

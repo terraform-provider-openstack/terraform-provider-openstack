@@ -147,17 +147,11 @@ func resourceNetworkFloatingIPV2Create(d *schema.ResourceData, meta interface{})
 	finalCreateOpts = createOpts
 
 	dnsName := d.Get("dns_name").(string)
-	if len(dnsName) > 0 {
+	dnsDomain := d.Get("dns_domain").(string)
+	if dnsName != "" || dnsDomain != "" {
 		finalCreateOpts = dns.FloatingIPCreateOptsExt{
 			CreateOptsBuilder: finalCreateOpts,
 			DNSName:           dnsName,
-		}
-	}
-
-	dnsDomain := d.Get("dns_domain").(string)
-	if len(dnsDomain) > 0 {
-		finalCreateOpts = dns.FloatingIPCreateOptsExt{
-			CreateOptsBuilder: finalCreateOpts,
 			DNSDomain:         dnsDomain,
 		}
 	}
