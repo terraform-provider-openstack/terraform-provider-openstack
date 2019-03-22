@@ -49,7 +49,7 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"ip", "user", "cert",
+					"ip", "user", "cert", "cephx",
 				}, true),
 			},
 
@@ -66,6 +66,12 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"rw", "ro",
 				}, true),
+			},
+
+			"access_key": {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 		},
 	}
@@ -148,6 +154,7 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 			d.Set("access_type", v.AccessType)
 			d.Set("access_to", v.AccessTo)
 			d.Set("access_level", v.AccessLevel)
+			d.Set("access_key", v.AccessKey)
 			d.Set("region", GetRegion(d, config))
 
 			return nil
@@ -241,6 +248,7 @@ func resourceSharedFilesystemShareAccessV2Import(d *schema.ResourceData, meta in
 			d.Set("access_type", v.AccessType)
 			d.Set("access_to", v.AccessTo)
 			d.Set("access_level", v.AccessLevel)
+			d.Set("access_key", v.AccessKey)
 			d.Set("region", GetRegion(d, config))
 
 			return []*schema.ResourceData{d}, nil

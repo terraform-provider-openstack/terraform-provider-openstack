@@ -10,6 +10,10 @@ description: |-
 
 Use this resource to control the share access lists.
 
+~> **Important Security Notice** The access key retrieved by this resource will
+be stored *unencrypted* in your Terraform state file. If you use this resource
+in production, please make sure your state file is sufficiently protected.
+
 ## Example Usage
 
 ### NFS
@@ -138,6 +142,7 @@ The following arguments are supported:
 * `access_type` - See Argument Reference above.
 * `access_to` - See Argument Reference above.
 * `access_level` - See Argument Reference above.
+* `access_key` - The access credential of the entity granted access.
 
 ## Import
 
