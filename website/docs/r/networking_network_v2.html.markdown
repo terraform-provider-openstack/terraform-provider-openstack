@@ -111,6 +111,10 @@ The following arguments are supported:
   explicitly to `false` will disable port security. Valid values are `true` and
   `false`.
 
+* `mtu` - (Optional) The network MTU. Available for read-only, when Neutron
+   `net-mtu` extension is enabled. Available for the modification, when
+   Neutron `net-mtu-writable` extension is enabled.
+
 The `segments` block supports:
 
 * `physical_network` - The physical network where this network is implemented.
@@ -134,6 +138,7 @@ The following attributes are exported:
   explicitly and implicitly added.
 * `transparent_vlan` - See Argument Reference above.
 * `port_security_enabled` - See Argument Reference above.
+* `mtu` - See Argument Reference above.
 
 ## Import
 

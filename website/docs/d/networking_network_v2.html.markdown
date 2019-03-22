@@ -45,18 +45,22 @@ data "openstack_networking_network_v2" "network" {
 
 * `tags` - (Optional) The list of network tags to filter.
 
+* `mtu` - (Optional) The network MTU to filter. Available, when Neutron `net-mtu`
+    extension is enabled.
+
 ## Attributes Reference
 
 `id` is set to the ID of the found network. In addition, the following attributes
 are exported:
 
-* `admin_state_up` - (Optional) The administrative state of the network.
+* `admin_state_up` - The administrative state of the network.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `region` - See Argument Reference above.
 * `external` - See Argument Reference above.
-* `shared` - (Optional)  Specifies whether the network resource can be accessed
+* `shared` - Specifies whether the network resource can be accessed
     by any tenant or not.
-* `availability_zone_hints` - (Optional) The availability zone candidates for the network.
+* `availability_zone_hints` - The availability zone candidates for the network.
 * `transparent_vlan` - See Argument Reference above.
 * `all_tags` - The set of string tags applied on the network.
+* `mtu` - See Argument Reference above.

@@ -10,6 +10,7 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
+	mtuext "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/mtu"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vlantransparent"
@@ -142,6 +143,12 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+
+			"mtu": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -215,6 +222,15 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+	mtu := d.Get("mtu").(int)
+	// Add the MTU attribute if specified.
+	if mtu > 0 {
+		finalCreateOpts = mtuext.CreateOptsExt{
+			CreateOptsBuilder: finalCreateOpts,
+			MTU:               mtu,
+		}
+	}
+
 	log.Printf("[DEBUG] openstack_networking_network_v2 create options: %#v", finalCreateOpts)
 	n, err := networks.Create(networkingClient, finalCreateOpts).Extract()
 	if err != nil {
@@ -260,32 +276,29 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	var n struct {
-		networks.Network
-		external.NetworkExternalExt
-		portsecurity.PortSecurityExt
-		vlantransparent.TransparentExt
-	}
-	err = networks.Get(networkingClient, d.Id()).ExtractInto(&n)
+	var network networkExtended
+
+	err = networks.Get(networkingClient, d.Id()).ExtractInto(&network)
 	if err != nil {
 		return CheckDeleted(d, err, "Error getting openstack_networking_network_v2")
 	}
 
-	log.Printf("[DEBUG] Retrieved openstack_networking_network_v2 %s: %#v", d.Id(), n)
+	log.Printf("[DEBUG] Retrieved openstack_networking_network_v2 %s: %#v", d.Id(), network)
 
-	d.Set("name", n.Name)
-	d.Set("description", n.Description)
-	d.Set("admin_state_up", n.AdminStateUp)
-	d.Set("shared", n.Shared)
-	d.Set("external", n.External)
-	d.Set("tenant_id", n.TenantID)
+	d.Set("name", network.Name)
+	d.Set("description", network.Description)
+	d.Set("admin_state_up", network.AdminStateUp)
+	d.Set("shared", network.Shared)
+	d.Set("external", network.External)
+	d.Set("tenant_id", network.TenantID)
+	d.Set("transparent_vlan", network.VLANTransparent)
+	d.Set("port_security_enabled", network.PortSecurityEnabled)
+	d.Set("mtu", network.MTU)
 	d.Set("region", GetRegion(d, config))
-	d.Set("transparent_vlan", n.VLANTransparent)
-	d.Set("port_security_enabled", n.PortSecurityEnabled)
 
-	networkV2ReadAttributesTags(d, n.Tags)
+	networkV2ReadAttributesTags(d, network.Tags)
 
-	if err := d.Set("availability_zone_hints", n.AvailabilityZoneHints); err != nil {
+	if err := d.Set("availability_zone_hints", network.AvailabilityZoneHints); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_networking_network_v2 %s availability_zone_hints: %s", d.Id(), err)
 	}
 
@@ -337,9 +350,8 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 	finalUpdateOpts = updateOpts
 
 	// Populate extensions options.
-	isExternal := false
 	if d.HasChange("external") {
-		isExternal = d.Get("external").(bool)
+		isExternal := d.Get("external").(bool)
 		finalUpdateOpts = external.UpdateOptsExt{
 			UpdateOptsBuilder: finalUpdateOpts,
 			External:          &isExternal,
@@ -352,6 +364,14 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 		finalUpdateOpts = portsecurity.NetworkUpdateOptsExt{
 			UpdateOptsBuilder:   finalUpdateOpts,
 			PortSecurityEnabled: &portSecurityEnabled,
+		}
+	}
+
+	if d.HasChange("mtu") {
+		mtu := d.Get("mtu").(int)
+		finalUpdateOpts = mtuext.UpdateOptsExt{
+			UpdateOptsBuilder: finalUpdateOpts,
+			MTU:               mtu,
 		}
 	}
 
