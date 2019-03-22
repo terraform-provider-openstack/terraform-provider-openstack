@@ -20,6 +20,8 @@ IMPROVEMENTS
 * Added `prefix_length` to `openstack_networking_subnet_v2` [GH-705]
 * Added `binding` to `openstack_networking_port_v2` [GH-693]
 * Added `binding` to `openstack_networking_port_v2` data source [GH-693]
+* Added `mtu` to `openstack_networking_network_v2` [GH-708]
+* Added `mtu` to `openstack_networking_network_v2` data source [GH-708]
 
 BUG FIXES
 
