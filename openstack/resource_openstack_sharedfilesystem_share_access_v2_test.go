@@ -224,7 +224,7 @@ var testAccSFSV2ShareAccessConfig_cephx = fmt.Sprintf(`
 resource "openstack_sharedfilesystem_share_access_v2" "share_access_1" {
   share_id     = "${openstack_sharedfilesystem_share_v2.share_1.id}"
   access_type  = "cephx"
-  access_to    = "192.168.199.10"
+  access_to    = "myuser"
   access_level = "rw"
 }
 `, testAccSFSV2ShareAccessConfig)
