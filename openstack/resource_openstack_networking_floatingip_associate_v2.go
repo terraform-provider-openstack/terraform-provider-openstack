@@ -13,6 +13,7 @@ func resourceNetworkingFloatingIPAssociateV2() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNetworkingFloatingIPAssociateV2Create,
 		Read:   resourceNetworkingFloatingIPAssociateV2Read,
+		Update: resourceNetworkingFloatingIPAssociateV2Update,
 		Delete: resourceNetworkingFloatingIPAssociateV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
