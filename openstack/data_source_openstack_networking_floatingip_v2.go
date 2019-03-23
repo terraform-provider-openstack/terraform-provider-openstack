@@ -61,6 +61,16 @@ func dataSourceNetworkingFloatingIPV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
+			"dns_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"dns_domain": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"all_tags": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -117,7 +127,9 @@ func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Unable to list openstack_networking_floatingips_v2: %s", err)
 	}
 
-	allFloatingIPs, err := floatingips.ExtractFloatingIPs(pages)
+	var allFloatingIPs []floatingIPExtended
+
+	err = floatingips.ExtractFloatingIPsInto(pages, &allFloatingIPs)
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve openstack_networking_floatingips_v2: %s", err)
 	}
@@ -136,13 +148,15 @@ func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface
 	d.SetId(fip.ID)
 
 	d.Set("description", fip.Description)
-	d.Set("address", fip.FloatingIP)
+	d.Set("address", fip.FloatingIP.FloatingIP)
 	d.Set("pool", fip.FloatingNetworkID)
 	d.Set("port_id", fip.PortID)
 	d.Set("fixed_ip", fip.FixedIP)
 	d.Set("tenant_id", fip.TenantID)
 	d.Set("status", fip.Status)
 	d.Set("all_tags", fip.Tags)
+	d.Set("dns_name", fip.DNSName)
+	d.Set("dns_domain", fip.DNSDomain)
 	d.Set("region", GetRegion(d, config))
 
 	return nil

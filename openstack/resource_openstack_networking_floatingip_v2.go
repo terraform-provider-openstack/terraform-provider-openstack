@@ -3,12 +3,15 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
@@ -95,6 +98,19 @@ func resourceNetworkingFloatingIPV2() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+
+			"dns_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"dns_domain": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^$|\.$`), "fully-qualified (unambiguous) DNS domain names must have a dot at the end"),
+			},
 		},
 	}
 }
@@ -127,8 +143,23 @@ func resourceNetworkFloatingIPV2Create(d *schema.ResourceData, meta interface{})
 		MapValueSpecs(d),
 	}
 
-	log.Printf("[DEBUG] openstack_networking_floatingip_v2 create options: %#v", createOpts)
-	fip, err := floatingips.Create(networkingClient, createOpts).Extract()
+	var finalCreateOpts floatingips.CreateOptsBuilder
+	finalCreateOpts = createOpts
+
+	dnsName := d.Get("dns_name").(string)
+	dnsDomain := d.Get("dns_domain").(string)
+	if dnsName != "" || dnsDomain != "" {
+		finalCreateOpts = dns.FloatingIPCreateOptsExt{
+			CreateOptsBuilder: finalCreateOpts,
+			DNSName:           dnsName,
+			DNSDomain:         dnsDomain,
+		}
+	}
+
+	var fip floatingIPExtended
+
+	log.Printf("[DEBUG] openstack_networking_floatingip_v2 create options: %#v", finalCreateOpts)
+	err = floatingips.Create(networkingClient, finalCreateOpts).ExtractInto(&fip)
 	if err != nil {
 		return fmt.Errorf("Error creating openstack_networking_floatingip_v2: %s", err)
 	}
@@ -171,7 +202,9 @@ func resourceNetworkFloatingIPV2Read(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error creating OpenStack network client: %s", err)
 	}
 
-	fip, err := floatingips.Get(networkingClient, d.Id()).Extract()
+	var fip floatingIPExtended
+
+	err = floatingips.Get(networkingClient, d.Id()).ExtractInto(&fip)
 	if err != nil {
 		return CheckDeleted(d, err, "Error getting openstack_networking_floatingip_v2")
 	}
@@ -179,10 +212,12 @@ func resourceNetworkFloatingIPV2Read(d *schema.ResourceData, meta interface{}) e
 	log.Printf("[DEBUG] Retrieved openstack_networking_floatingip_v2 %s: %#v", d.Id(), fip)
 
 	d.Set("description", fip.Description)
-	d.Set("address", fip.FloatingIP)
+	d.Set("address", fip.FloatingIP.FloatingIP)
 	d.Set("port_id", fip.PortID)
 	d.Set("fixed_ip", fip.FixedIP)
 	d.Set("tenant_id", fip.TenantID)
+	d.Set("dns_name", fip.DNSName)
+	d.Set("dns_domain", fip.DNSDomain)
 	d.Set("region", GetRegion(d, config))
 
 	networkV2ReadAttributesTags(d, fip.Tags)

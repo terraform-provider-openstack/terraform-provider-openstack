@@ -96,6 +96,11 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 				Optional: true,
 			},
 
+			"dns_domain": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"all_tags": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -230,6 +235,7 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	d.Set("transparent_vlan", network.VLANTransparent)
 	d.Set("all_tags", network.Tags)
 	d.Set("mtu", network.MTU)
+	d.Set("dns_domain", network.DNSDomain)
 	d.Set("region", GetRegion(d, config))
 
 	return nil

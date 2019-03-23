@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsbinding"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
@@ -21,6 +22,7 @@ type portExtended struct {
 	extradhcpopts.ExtraDHCPOptsExt
 	portsecurity.PortSecurityExt
 	portsbinding.PortsBindingExt
+	dns.PortDNSExt
 }
 
 func resourceNetworkingPortV2StateRefreshFunc(client *gophercloud.ServiceClient, portID string) resource.StateRefreshFunc {

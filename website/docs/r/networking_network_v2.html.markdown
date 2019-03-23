@@ -115,6 +115,11 @@ The following arguments are supported:
    `net-mtu` extension is enabled. Available for the modification, when
    Neutron `net-mtu-writable` extension is enabled.
 
+* `dns_domain` - (Optional) The network DNS domain. Available, when Neutron DNS
+    extension is enabled. The `dns_domain` of a network in conjunction with the
+    `dns_name` attribute of its ports will be published in an external DNS
+    service when Neutron is configured to integrate with such a service.
+
 The `segments` block supports:
 
 * `physical_network` - The physical network where this network is implemented.
@@ -139,6 +144,7 @@ The following attributes are exported:
 * `transparent_vlan` - See Argument Reference above.
 * `port_security_enabled` - See Argument Reference above.
 * `mtu` - See Argument Reference above.
+* `dns_domain` - See Argument Reference above.
 
 ## Import
 
