@@ -22,6 +22,12 @@ IMPROVEMENTS
 * Added `binding` to `openstack_networking_port_v2` data source [GH-693]
 * Added `mtu` to `openstack_networking_network_v2` [GH-708]
 * Added `mtu` to `openstack_networking_network_v2` data source [GH-708]
+* Added `dns_name` and `dns_domain` to `openstack_networking_floatingip_v2` [GH-706]
+* Added `dns_name` and `dns_domain` to `openstack_networking_floatingip_v2` data source [GH-706]
+* Added `dns_domain` to `openstack_networking_network_v2` [GH-706]
+* Added `dns_domain` to `openstack_networking_network_v2` data source [GH-706]
+* Added `dns_name` and `dns_assignment` to `openstack_networking_port_v2` [GH-706]
+* Added `dns_name` and `dns_assignment` to `openstack_networking_port_v2` data source [GH-706]
 
 BUG FIXES
 
