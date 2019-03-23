@@ -41,6 +41,7 @@ func resourceNetworkingFloatingIPAssociateV2() *schema.Resource {
 			"fixed_ip": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 		},
 	}
