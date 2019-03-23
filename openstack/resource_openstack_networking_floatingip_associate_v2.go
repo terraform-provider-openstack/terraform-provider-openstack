@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 )
@@ -40,10 +39,9 @@ func resourceNetworkingFloatingIPAssociateV2() *schema.Resource {
 			},
 
 			"fixed_ip": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.SingleIP(),
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 		},
 	}

@@ -8,7 +8,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func dataSourceNetworkingFloatingIPV2() *schema.Resource {
@@ -47,9 +46,8 @@ func dataSourceNetworkingFloatingIPV2() *schema.Resource {
 			},
 
 			"fixed_ip": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.SingleIP(),
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 
 			"status": {

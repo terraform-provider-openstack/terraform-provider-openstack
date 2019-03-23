@@ -71,10 +71,9 @@ func resourceNetworkingFloatingIPV2() *schema.Resource {
 			},
 
 			"fixed_ip": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.SingleIP(),
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
 			},
 
 			"subnet_id": {
