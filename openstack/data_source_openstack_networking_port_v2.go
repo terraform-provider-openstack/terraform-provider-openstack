@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/structure"
 	"github.com/hashicorp/terraform/helper/validation"
 
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 )
@@ -69,8 +70,15 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 			},
 
 			"device_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"server"},
+			},
+
+			"server": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"device_id"},
 			},
 
 			"fixed_ip": {
@@ -256,6 +264,18 @@ func dataSourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) er
 
 	if v, ok := d.GetOk("device_id"); ok {
 		listOpts.DeviceID = v.(string)
+	}
+
+	if v, ok := d.GetOk("server"); ok {
+		computeClient, err := config.computeV2Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		}
+		deviceID, err := servers.IDFromName(computeClient, v.(string))
+		if err != nil {
+			return fmt.Errorf("Failed to resolve device_id from %s server name: %s", v.(string), err)
+		}
+		listOpts.DeviceID = deviceID
 	}
 
 	tags := networkV2AttributesTags(d)

@@ -40,7 +40,11 @@ data "openstack_networking_port_v2" "port_1" {
 
 * `mac_address` - (Optional) The MAC address of the port.
 
-* `device_id` - (Optional) The ID of the device the port belongs to.
+* `device_id` - (Optional) The ID of the device the port belongs to. Conflicts
+    with `server`.
+
+* `server` - (Optional) The name of the compute instance the port belongs to.
+    Conflicts with `device_id`.
 
 * `fixed_ip` - (Optional) The port IP address filter.
 
@@ -59,25 +63,16 @@ data "openstack_networking_port_v2" "port_1" {
 are exported:
 
 * `region` - See Argument Reference above.
-
 * `project_id` - See Argument Reference above.
-
 * `port_id` - See Argument Reference above.
-
 * `name` - See Argument Reference above.
-
 * `description` - See Argument Reference above.
-
 * `admin_state_up` - See Argument Reference above.
-
 * `network_id` - See Argument Reference above.
-
 * `device_owner` - See Argument Reference above.
-
 * `mac_address` - See Argument Reference above.
-
 * `device_id` - See Argument Reference above.
-
+* `server` - See Argument Reference above.
 * `allowed_address_pairs` - An IP/MAC Address pair of additional IP
     addresses that can be active on this port. The structure is described
     below.

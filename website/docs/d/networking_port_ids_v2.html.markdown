@@ -39,7 +39,11 @@ data "openstack_networking_port_ids_v2" "ports" {
 
 * `mac_address` - (Optional) The MAC address of the port.
 
-* `device_id` - (Optional) The ID of the device the port belongs to.
+* `device_id` - (Optional) The ID of the device the port belongs to. Conflicts
+    with `server`.
+
+* `server` - (Optional) The name of the compute instance the port belongs to.
+    Conflicts with `device_id`.
 
 * `fixed_ip` - (Optional) The port IP address filter.
 
