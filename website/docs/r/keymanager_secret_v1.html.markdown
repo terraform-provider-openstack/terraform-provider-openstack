@@ -10,6 +10,10 @@ description: |-
 
 Manages a V1 Barbican secret resource within OpenStack.
 
+~> **Important Security Notice** The payload of this resource will be stored
+*unencrypted* in your Terraform state file. **Use of this resource for production
+deployments is *not* recommended**.
+
 ## Example Usage
 
 ```hcl
@@ -31,8 +35,8 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V1 Keymanager client.
-    A Keymanager client is needed to create a secret. If omitted, the
+* `region` - (Optional) The region in which to obtain the V1 KeyManager client.
+    A KeyManager client is needed to create a secret. If omitted, the
     `region` argument of the provider is used. Changing this creates a new
     V1 secret.
 

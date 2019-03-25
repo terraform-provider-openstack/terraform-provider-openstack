@@ -480,7 +480,7 @@ func (c *Config) sharedfilesystemV2Client(region string) (*gophercloud.ServiceCl
 	return client, nil
 }
 
-func (c *Config) keymanagerV1Client(region string) (*gophercloud.ServiceClient, error) {
+func (c *Config) keyManagerV1Client(region string) (*gophercloud.ServiceClient, error) {
 	client, err := openstack.NewKeyManagerV1(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType(),

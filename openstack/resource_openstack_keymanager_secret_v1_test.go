@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestAccKeymanagerSecretV1_basic(t *testing.T) {
+func TestAccKeyManagerSecretV1_basic(t *testing.T) {
 	var secret secrets.Secret
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckKeyManager(t) },
@@ -18,7 +18,7 @@ func TestAccKeymanagerSecretV1_basic(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeymanagerSecretV1_basic,
+				Config: testAccKeyManagerSecretV1_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSecretV1Exists(
 						"openstack_keymanager_secret_v1.secret_1", &secret),
@@ -30,7 +30,7 @@ func TestAccKeymanagerSecretV1_basic(t *testing.T) {
 	})
 }
 
-func TestAccKeymanagerSecretV1_basicWithMetadata(t *testing.T) {
+func TestAccKeyManagerSecretV1_basicWithMetadata(t *testing.T) {
 	var secret secrets.Secret
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckKeyManager(t) },
@@ -38,7 +38,7 @@ func TestAccKeymanagerSecretV1_basicWithMetadata(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeymanagerSecretV1_basicWithMetadata,
+				Config: testAccKeyManagerSecretV1_basicWithMetadata,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSecretV1Exists(
 						"openstack_keymanager_secret_v1.secret_1", &secret),
@@ -50,7 +50,7 @@ func TestAccKeymanagerSecretV1_basicWithMetadata(t *testing.T) {
 	})
 }
 
-func TestAccKeymanagerSecretV1_updateMetadata(t *testing.T) {
+func TestAccKeyManagerSecretV1_updateMetadata(t *testing.T) {
 	var secret secrets.Secret
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckKeyManager(t) },
@@ -58,7 +58,7 @@ func TestAccKeymanagerSecretV1_updateMetadata(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeymanagerSecretV1_basicWithMetadata,
+				Config: testAccKeyManagerSecretV1_basicWithMetadata,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSecretV1Exists(
 						"openstack_keymanager_secret_v1.secret_1", &secret),
@@ -68,7 +68,7 @@ func TestAccKeymanagerSecretV1_updateMetadata(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccKeymanagerSecretV1_updateMetadata,
+				Config: testAccKeyManagerSecretV1_updateMetadata,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSecretV1Exists(
 						"openstack_keymanager_secret_v1.secret_1", &secret),
@@ -89,7 +89,7 @@ func TestAccUpdateSecretV1_payload(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeymanagerSecretV1_noPayload,
+				Config: testAccKeyManagerSecretV1_noPayload,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSecretV1Exists(
 						"openstack_keymanager_secret_v1.secret_1", &secret),
@@ -99,7 +99,7 @@ func TestAccUpdateSecretV1_payload(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccKeymanagerSecretV1_update,
+				Config: testAccKeyManagerSecretV1_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSecretV1Exists(
 						"openstack_keymanager_secret_v1.secret_1", &secret),
@@ -114,9 +114,9 @@ func TestAccUpdateSecretV1_payload(t *testing.T) {
 
 func testAccCheckSecretV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	kmClient, err := config.keymanagerV1Client(OS_REGION_NAME)
+	kmClient, err := config.keyManagerV1Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Keymanager client: %s", err)
+		return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 	}
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "openstack_keymanager_secret" {
@@ -145,9 +145,9 @@ func testAccCheckSecretV1Exists(n string, secret *secrets.Secret) resource.TestC
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		kmClient, err := config.keymanagerV1Client(OS_REGION_NAME)
+		kmClient, err := config.keyManagerV1Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack keymanager client: %s", err)
+			return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 		}
 
 		var found *secrets.Secret
@@ -165,16 +165,16 @@ func testAccCheckSecretV1Exists(n string, secret *secrets.Secret) resource.TestC
 func testAccCheckPayloadEquals(payload string, secret *secrets.Secret) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		kmClient, err := config.keymanagerV1Client(OS_REGION_NAME)
+		kmClient, err := config.keyManagerV1Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack keymanager client: %s", err)
+			return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 		}
 
 		opts := secrets.GetPayloadOpts{
 			PayloadContentType: "text/plain",
 		}
 
-		uuid := keymanagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
+		uuid := keyManagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
 		secretPayload, _ := secrets.GetPayload(kmClient, uuid, opts).Extract()
 		if string(secretPayload) != payload {
 			return fmt.Errorf("Payloads do not match. Expected %v but got %v", payload, secretPayload)
@@ -186,12 +186,12 @@ func testAccCheckPayloadEquals(payload string, secret *secrets.Secret) resource.
 func testAccCheckMetadataEquals(key string, value string, secret *secrets.Secret) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		kmClient, err := config.keymanagerV1Client(OS_REGION_NAME)
+		kmClient, err := config.keyManagerV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		uuid := keymanagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
+		uuid := keyManagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
 		metadatum, err := secrets.GetMetadatum(kmClient, uuid, key).Extract()
 		if err != nil {
 			return err
@@ -204,7 +204,7 @@ func testAccCheckMetadataEquals(key string, value string, secret *secrets.Secret
 	}
 }
 
-var testAccKeymanagerSecretV1_basic = fmt.Sprintf(`
+const testAccKeyManagerSecretV1_basic = `
 resource "openstack_keymanager_secret_v1" "secret_1" {
   algorithm = "aes"
   bit_length = 256
@@ -213,9 +213,9 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   payload = "foobar"
   payload_content_type = "text/plain"
   secret_type = "passphrase"
-}`)
+}`
 
-var testAccKeymanagerSecretV1_basicWithMetadata = fmt.Sprintf(`
+const testAccKeyManagerSecretV1_basicWithMetadata = `
 resource "openstack_keymanager_secret_v1" "secret_1" {
   algorithm = "aes"
   bit_length = 256
@@ -227,9 +227,9 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   metadata = {
     foo = "bar"
   }
-}`)
+}`
 
-var testAccKeymanagerSecretV1_updateMetadata = fmt.Sprintf(`
+const testAccKeyManagerSecretV1_updateMetadata = `
 resource "openstack_keymanager_secret_v1" "secret_1" {
   algorithm = "aes"
   bit_length = 256
@@ -241,9 +241,9 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   metadata = {
     foo = "update"
   }
-}`)
+}`
 
-var testAccKeymanagerSecretV1_noPayload = fmt.Sprintf(`
+const testAccKeyManagerSecretV1_noPayload = `
 resource "openstack_keymanager_secret_v1" "secret_1" {
   algorithm = "aes"
   bit_length = 256
@@ -251,9 +251,9 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   name = "mysecret"
   secret_type = "passphrase"
   payload = ""
-}`)
+}`
 
-var testAccKeymanagerSecretV1_update = fmt.Sprintf(`
+const testAccKeyManagerSecretV1_update = `
 resource "openstack_keymanager_secret_v1" "secret_1" {
   algorithm = "aes"
   bit_length = 256
@@ -262,4 +262,4 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   payload = "updatedfoobar"
   payload_content_type = "text/plain"
   secret_type = "passphrase"
-}`)
+}`

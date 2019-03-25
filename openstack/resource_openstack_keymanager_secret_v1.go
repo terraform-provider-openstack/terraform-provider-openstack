@@ -11,12 +11,12 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 )
 
-func resourceKeymanagerSecretV1() *schema.Resource {
+func resourceKeyManagerSecretV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKeymanagerSecretV1Create,
-		Read:   resourceKeymanagerSecretV1Read,
-		Update: resourceKeymanagerSecretV1Update,
-		Delete: resourceKeymanagerSecretV1Delete,
+		Create: resourceKeyManagerSecretV1Create,
+		Read:   resourceKeyManagerSecretV1Read,
+		Update: resourceKeyManagerSecretV1Update,
+		Delete: resourceKeyManagerSecretV1Delete,
 
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -140,14 +140,14 @@ func resourceKeymanagerSecretV1() *schema.Resource {
 	}
 }
 
-func resourceKeymanagerSecretV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	kmClient, err := config.keymanagerV1Client(GetRegion(d, config))
+	kmClient, err := config.keyManagerV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack keymanager client: %s", err)
+		return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 	}
 
-	secretType := keymanagerSecretV1SecretType(d.Get("secret_type").(string))
+	secretType := keyManagerSecretV1SecretType(d.Get("secret_type").(string))
 
 	createOpts := secrets.CreateOpts{
 		Name:                   d.Get("name").(string),
@@ -171,12 +171,12 @@ func resourceKeymanagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error creating openstack_keymanager_secret_v1: %s", err)
 	}
 
-	uuid := keymanagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
+	uuid := keyManagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"NOT_CREATED"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    keymanagerSecretV1WaitForSecretCreation(kmClient, uuid),
+		Refresh:    keyManagerSecretV1WaitForSecretCreation(kmClient, uuid),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
@@ -192,7 +192,7 @@ func resourceKeymanagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 	d.Partial(true)
 
 	var metadataCreateOpts secrets.MetadataOpts
-	metadataCreateOpts = flattenKeyManagerSecretMetadataV1(d)
+	metadataCreateOpts = flattenKeyManagerSecretV1Metadata(d)
 
 	log.Printf("[DEBUG] Metadata Create Options for resource_keymanager_secret_metadata_v1 %s: %#v", uuid, metadataCreateOpts)
 
@@ -206,7 +206,7 @@ func resourceKeymanagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 		stateConf = &resource.StateChangeConf{
 			Pending:    []string{"NOT_CREATED"},
 			Target:     []string{"ACTIVE"},
-			Refresh:    keymanagerSecretMetadataV1WaitForSecretMetadataCreation(kmClient, uuid),
+			Refresh:    keyManagerSecretMetadataV1WaitForSecretMetadataCreation(kmClient, uuid),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			Delay:      0,
 			MinTimeout: 2 * time.Second,
@@ -221,12 +221,12 @@ func resourceKeymanagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 
 	d.Partial(false)
 
-	return resourceKeymanagerSecretV1Read(d, meta)
+	return resourceKeyManagerSecretV1Read(d, meta)
 }
 
-func resourceKeymanagerSecretV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceKeyManagerSecretV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	kmClient, err := config.keymanagerV1Client(GetRegion(d, config))
+	kmClient, err := config.keyManagerV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack barbican client: %s", err)
 	}
@@ -264,9 +264,9 @@ func resourceKeymanagerSecretV1Read(d *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-func resourceKeymanagerSecretV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceKeyManagerSecretV1Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	kmClient, err := config.keymanagerV1Client(GetRegion(d, config))
+	kmClient, err := config.keyManagerV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack barbican client: %s", err)
 	}
@@ -362,12 +362,12 @@ func resourceKeymanagerSecretV1Update(d *schema.ResourceData, meta interface{}) 
 		}
 	}
 
-	return resourceKeymanagerSecretV1Read(d, meta)
+	return resourceKeyManagerSecretV1Read(d, meta)
 }
 
-func resourceKeymanagerSecretV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceKeyManagerSecretV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	kmClient, err := config.keymanagerV1Client(GetRegion(d, config))
+	kmClient, err := config.keyManagerV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack barbican client: %s", err)
 	}
@@ -375,7 +375,7 @@ func resourceKeymanagerSecretV1Delete(d *schema.ResourceData, meta interface{}) 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    keymanagerSecretV1WaitForSecretDeletion(kmClient, d.Id()),
+		Refresh:    keyManagerSecretV1WaitForSecretDeletion(kmClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      0,
 		MinTimeout: 2 * time.Second,

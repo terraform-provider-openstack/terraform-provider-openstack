@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func keymanagerSecretV1WaitForSecretDeletion(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func keyManagerSecretV1WaitForSecretDeletion(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		err := secrets.Delete(kmClient, id).Err
 		if err == nil {
@@ -24,7 +24,7 @@ func keymanagerSecretV1WaitForSecretDeletion(kmClient *gophercloud.ServiceClient
 	}
 }
 
-func keymanagerSecretV1SecretType(v string) secrets.SecretType {
+func keyManagerSecretV1SecretType(v string) secrets.SecretType {
 	var stype secrets.SecretType
 	switch v {
 	case "symmetric":
@@ -44,7 +44,7 @@ func keymanagerSecretV1SecretType(v string) secrets.SecretType {
 	return stype
 }
 
-func keymanagerSecretV1WaitForSecretCreation(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func keyManagerSecretV1WaitForSecretCreation(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		secret, err := secrets.Get(kmClient, id).Extract()
 		if err != nil {
@@ -58,7 +58,7 @@ func keymanagerSecretV1WaitForSecretCreation(kmClient *gophercloud.ServiceClient
 	}
 }
 
-func keymanagerSecretV1GetUUIDfromSecretRef(ref string) string {
+func keyManagerSecretV1GetUUIDfromSecretRef(ref string) string {
 	// secret ref has form https://{barbican_host}/v1/secrets/{secret_uuid}
 	// so we are only interested in the last part
 	ref_split := strings.Split(ref, "/")
@@ -66,7 +66,7 @@ func keymanagerSecretV1GetUUIDfromSecretRef(ref string) string {
 	return uuid
 }
 
-func flattenKeyManagerSecretMetadataV1(d *schema.ResourceData) map[string]string {
+func flattenKeyManagerSecretV1Metadata(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
 	for key, val := range d.Get("metadata").(map[string]interface{}) {
 		m[key] = val.(string)
@@ -74,7 +74,7 @@ func flattenKeyManagerSecretMetadataV1(d *schema.ResourceData) map[string]string
 	return m
 }
 
-func keymanagerSecretMetadataV1WaitForSecretMetadataCreation(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func keyManagerSecretMetadataV1WaitForSecretMetadataCreation(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		metadata, err := secrets.GetMetadata(kmClient, id).Extract()
 		if err != nil {

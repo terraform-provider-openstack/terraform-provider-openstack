@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-func TestAccSecretV1_importBasic(t *testing.T) {
+func TestAccKeyManagerSecretV1_importBasic(t *testing.T) {
 	resourceName := "openstack_keymanager_secret_v1.secret_1"
 
 	resource.Test(t, resource.TestCase{
@@ -15,7 +15,7 @@ func TestAccSecretV1_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeymanagerSecretV1_basic,
+				Config: testAccKeyManagerSecretV1_basic,
 			},
 			{
 				ResourceName:      resourceName,
