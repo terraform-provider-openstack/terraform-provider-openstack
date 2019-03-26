@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/apiversions"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/errors"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
 )
@@ -144,18 +145,20 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 
 	shareID := d.Get("share_id").(string)
 
-	// Attempt to query with 2.21 for environments that support it.
-	// This is so we can retrieve the access_key.
-	sfsClient.Microversion = "2.21"
+	apiInfo, err := apiversions.Get(sfsClient, "v2").Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to query Shared Filesystem API endpoint: %s", err)
+	}
+
+	sfsClient.Microversion = minManilaMicroversion
+	if apiInfo.Version != "" {
+		log.Printf("[DEBUG] Setting OpenStack sharedfilesystem client to microversion %s", apiInfo.Version)
+		sfsClient.Microversion = apiInfo.Version
+	}
+
 	access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
 	if err != nil {
-		log.Printf("[DEBUG] Unable to query openstack_sharedfilesystem_share_access_v2 %s with microversion 2.21", d.Id())
-
-		sfsClient.Microversion = minManilaMicroversion
-		access, err = shares.ListAccessRights(sfsClient, shareID).Extract()
-		if err != nil {
-			return CheckDeleted(d, err, "Error retrieving openstack_sharedfilesystem_share_access_v2")
-		}
+		return CheckDeleted(d, err, "Error retrieving openstack_sharedfilesystem_share_access_v2")
 	}
 
 	for _, v := range access {
@@ -167,9 +170,9 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 			d.Set("access_level", v.AccessLevel)
 			d.Set("region", GetRegion(d, config))
 
-			if sfsClient.Microversion == "2.21" {
-				d.Set("access_key", v.AccessKey)
-			}
+			// This will only be set if the Shared Filesystem environment supports
+			// microversion 2.21 or later.
+			d.Set("access_key", v.AccessKey)
 
 			return nil
 		}
