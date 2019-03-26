@@ -142,13 +142,20 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	sfsClient.Microversion = minManilaMicroversion
-
 	shareID := d.Get("share_id").(string)
 
+	// Attempt to query with 2.21 for environments that support it.
+	// This is so we can retrieve the access_key.
+	sfsClient.Microversion = "2.21"
 	access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "share_access")
+		log.Printf("[DEBUG] Unable to query openstack_sharedfilesystem_share_access_v2 %s with microversion 2.21", d.Id())
+
+		sfsClient.Microversion = minManilaMicroversion
+		access, err = shares.ListAccessRights(sfsClient, shareID).Extract()
+		if err != nil {
+			return CheckDeleted(d, err, "Error retrieving openstack_sharedfilesystem_share_access_v2")
+		}
 	}
 
 	for _, v := range access {
@@ -158,8 +165,11 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 			d.Set("access_type", v.AccessType)
 			d.Set("access_to", v.AccessTo)
 			d.Set("access_level", v.AccessLevel)
-			d.Set("access_key", v.AccessKey)
 			d.Set("region", GetRegion(d, config))
+
+			if sfsClient.Microversion == "2.21" {
+				d.Set("access_key", v.AccessKey)
+			}
 
 			return nil
 		}
