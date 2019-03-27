@@ -60,7 +60,7 @@ func resourceNetworkingFloatingIPAssociateV2Create(d *schema.ResourceData, meta 
 
 	fipID, err := networkingFloatingIPV2ID(networkingClient, floatingIP)
 	if err != nil {
-		return fmt.Errorf("Unable to get ID of floatingip: %s", err)
+		return fmt.Errorf("Unable to get ID of openstack_networking_floatingip_associate_v2 floating_ip %s: %s", floatingIP, err)
 	}
 
 	updateOpts := floatingips.UpdateOpts{
@@ -71,12 +71,11 @@ func resourceNetworkingFloatingIPAssociateV2Create(d *schema.ResourceData, meta 
 	log.Printf("[DEBUG] openstack_networking_floatingip_associate_v2 create options: %#v", updateOpts)
 	_, err = floatingips.Update(networkingClient, fipID, updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error associating floatingip %s with port %s: %s", fipID, portID, err)
+		return fmt.Errorf("Error associating openstack_networking_floatingip_associate_v2 floating_ip %s with port %s: %s", fipID, portID, err)
 	}
 
 	d.SetId(fipID)
 
-	log.Printf("[DEBUG] Created association between floatingip %s and port %s", fipID, portID)
 	return resourceNetworkingFloatingIPAssociateV2Read(d, meta)
 }
 
@@ -143,7 +142,7 @@ func resourceNetworkingFloatingIPAssociateV2Delete(d *schema.ResourceData, meta 
 	log.Printf("[DEBUG] openstack_networking_floatingip_associate_v2 disassociating options: %#v", updateOpts)
 	_, err = floatingips.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error disassociating floatingip %s from port %s: %s", d.Id(), portID, err)
+		return fmt.Errorf("Error disassociating openstack_networking_floatingip_associate_v2 floating_ip %s with port %s: %s", d.Id(), portID, err)
 	}
 
 	return nil

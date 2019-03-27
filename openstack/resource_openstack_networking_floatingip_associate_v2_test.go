@@ -203,12 +203,12 @@ resource "openstack_networking_port_v2" "port_1" {
   admin_state_up = "true"
   network_id = "${openstack_networking_subnet_v2.subnet_1.network_id}"
 
-  fixed_ip = {
+  fixed_ip {
     subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
     ip_address = "192.168.199.20"
   }
 
-  fixed_ip = {
+  fixed_ip {
     subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
     ip_address = "192.168.199.21"
   }
@@ -252,12 +252,12 @@ resource "openstack_networking_port_v2" "port_1" {
   admin_state_up = "true"
   network_id = "${openstack_networking_subnet_v2.subnet_1.network_id}"
 
-  fixed_ip = {
+  fixed_ip {
     subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
     ip_address = "192.168.199.20"
   }
 
-  fixed_ip = {
+  fixed_ip {
     subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
     ip_address = "192.168.199.21"
   }
