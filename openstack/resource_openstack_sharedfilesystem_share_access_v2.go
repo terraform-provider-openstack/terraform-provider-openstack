@@ -143,19 +143,26 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	shareID := d.Get("share_id").(string)
+	// Set the client to the minimum supported microversion.
+	sfsClient.Microversion = minManilaMicroversion
 
+	// Now check and see if the OpenStack environment supports microversion 2.21.
+	// If so, use that for the API request for access_key support.
 	apiInfo, err := apiversions.Get(sfsClient, "v2").Extract()
 	if err != nil {
 		return fmt.Errorf("Unable to query Shared Filesystem API endpoint: %s", err)
 	}
 
-	sfsClient.Microversion = minManilaMicroversion
-	if apiInfo.Version != "" {
-		log.Printf("[DEBUG] Setting OpenStack sharedfilesystem client to microversion %s", apiInfo.Version)
-		sfsClient.Microversion = apiInfo.Version
+	compatible, err := compatibleMicroversion("min", "2.21", apiInfo.Version)
+	if err != nil {
+		return fmt.Errorf("Error comparing microversions for openstack_sharedfilesystem_share_access_v2 %s: %s", d.Id(), err)
 	}
 
+	if compatible {
+		sfsClient.Microversion = "2.21"
+	}
+
+	shareID := d.Get("share_id").(string)
 	access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "Error retrieving openstack_sharedfilesystem_share_access_v2")
@@ -261,13 +268,6 @@ func resourceSharedFilesystemShareAccessV2Import(d *schema.ResourceData, meta in
 			log.Printf("[DEBUG] Retrieved %s share ACL: %#v", accessID, v)
 
 			d.SetId(accessID)
-			d.Set("share_id", shareID)
-			d.Set("access_type", v.AccessType)
-			d.Set("access_to", v.AccessTo)
-			d.Set("access_level", v.AccessLevel)
-			d.Set("access_key", v.AccessKey)
-			d.Set("region", GetRegion(d, config))
-
 			return []*schema.ResourceData{d}, nil
 		}
 	}
