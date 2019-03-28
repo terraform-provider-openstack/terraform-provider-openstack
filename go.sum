@@ -66,8 +66,8 @@ github.com/google/go-querystring v1.0.0/go.mod h1:odCYkC5MyYFN7vkCjXpyrEuKhc/BUO
 github.com/googleapis/gax-go v0.0.0-20161107002406-da06d194a00e/go.mod h1:SFVmujtThgffbyetf+mdk2eWhX2bMyUtNHzFKcPA9HY=
 github.com/gophercloud/gophercloud v0.0.0-20190208042652-bc37892e1968/go.mod h1:3WdhXV3rUYy9p6AUW8d94kr+HS62Y4VL9mBnFxsD8q4=
 github.com/gophercloud/gophercloud v0.0.0-20190212181753-892256c46858/go.mod h1:vxM41WHh5uqHVBMZHzuwNOHh8XEoIEcSTewFxm1c5g8=
-github.com/gophercloud/gophercloud v0.0.0-20190325182007-873f28e270b0 h1:/BbxyJU/X6my3EEP6plSh1Fr9vp3h+e89RZFQWUaEPw=
-github.com/gophercloud/gophercloud v0.0.0-20190325182007-873f28e270b0/go.mod h1:vxM41WHh5uqHVBMZHzuwNOHh8XEoIEcSTewFxm1c5g8=
+github.com/gophercloud/gophercloud v0.0.0-20190328150603-33e54f40ffcf h1:Cadz8DdkvBq1XLIk6aDDLsYHfXFr9sjlHE0RmaZpY9Q=
+github.com/gophercloud/gophercloud v0.0.0-20190328150603-33e54f40ffcf/go.mod h1:vxM41WHh5uqHVBMZHzuwNOHh8XEoIEcSTewFxm1c5g8=
 github.com/gophercloud/utils v0.0.0-20190128072930-fbb6ab446f01/go.mod h1:wjDF8z83zTeg5eMLml5EBSlAhbF7G8DobyI1YsMuyzw=
 github.com/gophercloud/utils v0.0.0-20190212203534-6f24f46ce3c9 h1:frK+RgSyzotPwHzxlbGO9aeM+zoQ4LgUfQbbynAAavw=
 github.com/gophercloud/utils v0.0.0-20190212203534-6f24f46ce3c9/go.mod h1:95GkZLE4Nob0I9L4qW5dWmyiekLwK3HsVAOV13XY9CY=
