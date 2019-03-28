@@ -268,6 +268,7 @@ func resourceSharedFilesystemShareAccessV2Import(d *schema.ResourceData, meta in
 			log.Printf("[DEBUG] Retrieved %s share ACL: %#v", accessID, v)
 
 			d.SetId(accessID)
+			d.Set("share_id", shareID)
 			return []*schema.ResourceData{d}, nil
 		}
 	}
