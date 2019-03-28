@@ -272,3 +272,65 @@ func sliceUnion(a, b []string) []string {
 	}
 	return res
 }
+
+// compatibleMicroversion will determine if an obtained microversion is
+// compatible with a given microversion.
+func compatibleMicroversion(direction, required, given string) (bool, error) {
+	if direction != "min" && direction != "max" {
+		return false, fmt.Errorf("Invalid microversion direction %s. Must be min or max", direction)
+	}
+
+	if required == "" || given == "" {
+		return false, nil
+	}
+
+	requiredParts := strings.Split(required, ".")
+	if len(requiredParts) != 2 {
+		return false, fmt.Errorf("Not a valid microversion: %s", required)
+	}
+
+	givenParts := strings.Split(given, ".")
+	if len(givenParts) != 2 {
+		return false, fmt.Errorf("Not a valid microversion: %s", given)
+	}
+
+	requiredMajor, requiredMinor := requiredParts[0], requiredParts[1]
+	givenMajor, givenMinor := givenParts[0], givenParts[1]
+
+	requiredMajorInt, err := strconv.Atoi(requiredMajor)
+	if err != nil {
+		return false, fmt.Errorf("Unable to parse microversion: %s", required)
+	}
+
+	requiredMinorInt, err := strconv.Atoi(requiredMinor)
+	if err != nil {
+		return false, fmt.Errorf("Unable to parse microversion: %s", required)
+	}
+
+	givenMajorInt, err := strconv.Atoi(givenMajor)
+	if err != nil {
+		return false, fmt.Errorf("Unable to parse microversion: %s", given)
+	}
+
+	givenMinorInt, err := strconv.Atoi(givenMinor)
+	if err != nil {
+		return false, fmt.Errorf("Unable to parse microversion: %s", given)
+	}
+
+	switch direction {
+	case "min":
+		if requiredMajorInt == givenMajorInt {
+			if requiredMinorInt <= givenMinorInt {
+				return true, nil
+			}
+		}
+	case "max":
+		if requiredMajorInt == givenMajorInt {
+			if requiredMinorInt >= givenMinorInt {
+				return true, nil
+			}
+		}
+	}
+
+	return false, nil
+}
