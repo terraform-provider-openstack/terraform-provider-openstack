@@ -39,11 +39,21 @@ func TestAccNetworkingV2FloatingIP_fixedip_bind(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2FloatingIPDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2FloatingIP_fixedip_bind,
+				Config: testAccNetworkingV2FloatingIP_fixedip_bind1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
 					testAccCheckNetworkingV2FloatingIPBoundToCorrectIP(&fip, "192.168.199.20"),
+					resource.TestCheckResourceAttr("openstack_networking_floatingip_v2.fip_1", "description", "test"),
+					resource.TestCheckResourceAttr("openstack_networking_floatingip_v2.fip_1", "fixed_ip", "192.168.199.20"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2FloatingIP_fixedip_bind2,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
+					testAccCheckNetworkingV2FloatingIPBoundToCorrectIP(&fip, "192.168.199.10"),
 					resource.TestCheckResourceAttr("openstack_networking_floatingip_v2.fip_1", "description", ""),
+					resource.TestCheckResourceAttr("openstack_networking_floatingip_v2.fip_1", "fixed_ip", "192.168.199.10"),
 				),
 			},
 		},
@@ -159,7 +169,53 @@ resource "openstack_networking_floatingip_v2" "fip_1" {
 }
 `
 
-var testAccNetworkingV2FloatingIP_fixedip_bind = fmt.Sprintf(`
+var testAccNetworkingV2FloatingIP_fixedip_bind1 = fmt.Sprintf(`
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_networking_router_interface_v2" "router_interface_1" {
+  router_id = "${openstack_networking_router_v2.router_1.id}"
+  subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+}
+
+resource "openstack_networking_router_v2" "router_1" {
+  name = "router_1"
+  external_gateway = "%s"
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  admin_state_up = "true"
+  network_id = "${openstack_networking_subnet_v2.subnet_1.network_id}"
+
+  fixed_ip {
+    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.199.10"
+  }
+
+  fixed_ip {
+    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.199.20"
+  }
+}
+
+resource "openstack_networking_floatingip_v2" "fip_1" {
+  pool = "%s"
+  description = "test"
+  port_id = "${openstack_networking_port_v2.port_1.id}"
+  fixed_ip = "${openstack_networking_port_v2.port_1.fixed_ip.1.ip_address}"
+}
+`, OS_EXTGW_ID, OS_POOL_NAME)
+
+var testAccNetworkingV2FloatingIP_fixedip_bind2 = fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -200,7 +256,7 @@ resource "openstack_networking_port_v2" "port_1" {
 resource "openstack_networking_floatingip_v2" "fip_1" {
   pool = "%s"
   port_id = "${openstack_networking_port_v2.port_1.id}"
-  fixed_ip = "${openstack_networking_port_v2.port_1.fixed_ip.1.ip_address}"
+  fixed_ip = "${openstack_networking_port_v2.port_1.fixed_ip.0.ip_address}"
 }
 `, OS_EXTGW_ID, OS_POOL_NAME)
 
