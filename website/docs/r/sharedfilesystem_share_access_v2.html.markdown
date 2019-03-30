@@ -128,7 +128,8 @@ The following arguments are supported:
 * `share_id` - (Required) The UUID of the share to which you are granted access.
 
 * `access_type` - (Required) The access rule type. Can either be an ip, user,
-  cert, or cephx.
+  cert, or cephx. cephx support requires an OpenStack environment that supports
+  Shared Filesystem microversion 2.13 (Mitaka) or later.
 
 * `access_to` - (Required) The value that defines the access. Can either be an IP
     address or a username verified by configured Security Service of the Share Network.
