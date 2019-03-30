@@ -127,7 +127,8 @@ The following arguments are supported:
 
 * `share_id` - (Required) The UUID of the share to which you are granted access.
 
-* `access_type` - (Required) The access rule type. Can either be an ip, user or cert.
+* `access_type` - (Required) The access rule type. Can either be an ip, user,
+  cert, or cephx.
 
 * `access_to` - (Required) The value that defines the access. Can either be an IP
     address or a username verified by configured Security Service of the Share Network.

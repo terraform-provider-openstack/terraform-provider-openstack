@@ -178,7 +178,7 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 			d.Set("region", GetRegion(d, config))
 
 			// This will only be set if the Shared Filesystem environment supports
-			// microversion 2.21 or later.
+			// microversion 2.21.
 			d.Set("access_key", v.AccessKey)
 
 			return nil
