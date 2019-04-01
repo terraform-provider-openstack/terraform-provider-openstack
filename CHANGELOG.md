@@ -1,4 +1,4 @@
-## 1.17.0 (Unreleased)
+## 1.17.0 (April 01, 2019)
 
 NOTES
 
@@ -7,36 +7,36 @@ NOTES
 
 FEATURES
 
-* __New Resource__: `openstack_identity_application_credential_v3` [GH-660]
-* __New Data Source__: `openstack_blockstorage_availability_zones_v3` [GH-652]
-* __New Data Source__: `openstack_sharedfilesystem_availability_zones_v2` [GH-652]
-* __New Data Source__: `openstack_networking_trunk_v2` [GH-626]
+* __New Resource__: `openstack_identity_application_credential_v3` ([#660](https://github.com/terraform-providers/terraform-provider-openstack/issues/660))
+* __New Data Source__: `openstack_blockstorage_availability_zones_v3` ([#652](https://github.com/terraform-providers/terraform-provider-openstack/issues/652))
+* __New Data Source__: `openstack_sharedfilesystem_availability_zones_v2` ([#652](https://github.com/terraform-providers/terraform-provider-openstack/issues/652))
+* __New Data Source__: `openstack_networking_trunk_v2` ([#626](https://github.com/terraform-providers/terraform-provider-openstack/issues/626))
 
 IMPROVEMENTS
 
-* Reduced API calls when updating `extra_dhcp_option` in `openstack_networking_port_v2` [GH-689]
-* Added `port_security_enabled` to `openstack_networking_network_v2` [GH-681]
-* Added `port_security_enabled` to `openstack_networking_port_v2` [GH-682]
-* Added `prefix_length` to `openstack_networking_subnet_v2` [GH-705]
-* Added `binding` to `openstack_networking_port_v2` [GH-693]
-* Added `binding` to `openstack_networking_port_v2` data source [GH-693]
-* Added `mtu` to `openstack_networking_network_v2` [GH-708]
-* Added `mtu` to `openstack_networking_network_v2` data source [GH-708]
-* Added `dns_name` and `dns_domain` to `openstack_networking_floatingip_v2` [GH-706]
-* Added `dns_name` and `dns_domain` to `openstack_networking_floatingip_v2` data source [GH-706]
-* Added `dns_domain` to `openstack_networking_network_v2` [GH-706]
-* Added `dns_domain` to `openstack_networking_network_v2` data source [GH-706]
-* Added `dns_name` and `dns_assignment` to `openstack_networking_port_v2` [GH-706]
-* Added `dns_name` and `dns_assignment` to `openstack_networking_port_v2` data source [GH-706]
-* Added `fixed_ip` to `openstack_networking_floatingip_associate_v2` [GH-709]
-* Enable `fixed_ip` to be updated in `openstack_networking_floatingip_v2` [GH-709]
-* Added ability to specify `cephx` as `access_type` and to retrieve the `access_key` in `openstack_sharedfilesystem_share_access_v2` [GH-715]
+* Reduced API calls when updating `extra_dhcp_option` in `openstack_networking_port_v2` ([#689](https://github.com/terraform-providers/terraform-provider-openstack/issues/689))
+* Added `port_security_enabled` to `openstack_networking_network_v2` ([#681](https://github.com/terraform-providers/terraform-provider-openstack/issues/681))
+* Added `port_security_enabled` to `openstack_networking_port_v2` ([#682](https://github.com/terraform-providers/terraform-provider-openstack/issues/682))
+* Added `prefix_length` to `openstack_networking_subnet_v2` ([#705](https://github.com/terraform-providers/terraform-provider-openstack/issues/705))
+* Added `binding` to `openstack_networking_port_v2` ([#693](https://github.com/terraform-providers/terraform-provider-openstack/issues/693))
+* Added `binding` to `openstack_networking_port_v2` data source ([#693](https://github.com/terraform-providers/terraform-provider-openstack/issues/693))
+* Added `mtu` to `openstack_networking_network_v2` ([#708](https://github.com/terraform-providers/terraform-provider-openstack/issues/708))
+* Added `mtu` to `openstack_networking_network_v2` data source ([#708](https://github.com/terraform-providers/terraform-provider-openstack/issues/708))
+* Added `dns_name` and `dns_domain` to `openstack_networking_floatingip_v2` ([#706](https://github.com/terraform-providers/terraform-provider-openstack/issues/706))
+* Added `dns_name` and `dns_domain` to `openstack_networking_floatingip_v2` data source ([#706](https://github.com/terraform-providers/terraform-provider-openstack/issues/706))
+* Added `dns_domain` to `openstack_networking_network_v2` ([#706](https://github.com/terraform-providers/terraform-provider-openstack/issues/706))
+* Added `dns_domain` to `openstack_networking_network_v2` data source ([#706](https://github.com/terraform-providers/terraform-provider-openstack/issues/706))
+* Added `dns_name` and `dns_assignment` to `openstack_networking_port_v2` ([#706](https://github.com/terraform-providers/terraform-provider-openstack/issues/706))
+* Added `dns_name` and `dns_assignment` to `openstack_networking_port_v2` data source ([#706](https://github.com/terraform-providers/terraform-provider-openstack/issues/706))
+* Added `fixed_ip` to `openstack_networking_floatingip_associate_v2` ([#709](https://github.com/terraform-providers/terraform-provider-openstack/issues/709))
+* Enable `fixed_ip` to be updated in `openstack_networking_floatingip_v2` ([#709](https://github.com/terraform-providers/terraform-provider-openstack/issues/709))
+* Added ability to specify `cephx` as `access_type` and to retrieve the `access_key` in `openstack_sharedfilesystem_share_access_v2` ([#715](https://github.com/terraform-providers/terraform-provider-openstack/issues/715))
 
 BUG FIXES
 
-* Fixed bug in `openstack_identity_auth_scope_v3` data source where the `user_id` attribute was being set to the user's Name and not ID [GH-660]
-* Fixed bug in Load Balancer resources for Contrail-based load balancers [GH-691]
-* `extra_dhcp_option` in the `openstack_networking_port_v2` data source has been changed to a List. This is to resolve a bug where multiple DHCP options were not being rendered [GH-695]
+* Fixed bug in `openstack_identity_auth_scope_v3` data source where the `user_id` attribute was being set to the user's Name and not ID ([#660](https://github.com/terraform-providers/terraform-provider-openstack/issues/660))
+* Fixed bug in Load Balancer resources for Contrail-based load balancers ([#691](https://github.com/terraform-providers/terraform-provider-openstack/issues/691))
+* `extra_dhcp_option` in the `openstack_networking_port_v2` data source has been changed to a List. This is to resolve a bug where multiple DHCP options were not being rendered ([#695](https://github.com/terraform-providers/terraform-provider-openstack/issues/695))
 
 ## 1.16.0 (February 14, 2019)
 
