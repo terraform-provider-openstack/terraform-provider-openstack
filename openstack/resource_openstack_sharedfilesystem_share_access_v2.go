@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/apiversions"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/errors"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
 )
@@ -49,7 +50,7 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"ip", "user", "cert",
+					"ip", "user", "cert", "cephx",
 				}, true),
 			},
 
@@ -67,6 +68,12 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 					"rw", "ro",
 				}, true),
 			},
+
+			"access_key": {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
 		},
 	}
 }
@@ -79,11 +86,15 @@ func resourceSharedFilesystemShareAccessV2Create(d *schema.ResourceData, meta in
 	}
 
 	sfsClient.Microversion = minManilaMicroversion
+	accessType := d.Get("access_type").(string)
+	if accessType == "cephx" {
+		sfsClient.Microversion = "2.13"
+	}
 
 	shareID := d.Get("share_id").(string)
 
 	grantOpts := shares.GrantAccessOpts{
-		AccessType:  d.Get("access_type").(string),
+		AccessType:  accessType,
 		AccessTo:    d.Get("access_to").(string),
 		AccessLevel: d.Get("access_level").(string),
 	}
@@ -132,13 +143,29 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
+	// Set the client to the minimum supported microversion.
 	sfsClient.Microversion = minManilaMicroversion
 
-	shareID := d.Get("share_id").(string)
+	// Now check and see if the OpenStack environment supports microversion 2.21.
+	// If so, use that for the API request for access_key support.
+	apiInfo, err := apiversions.Get(sfsClient, "v2").Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to query Shared Filesystem API endpoint: %s", err)
+	}
 
+	compatible, err := compatibleMicroversion("min", "2.21", apiInfo.Version)
+	if err != nil {
+		return fmt.Errorf("Error comparing microversions for openstack_sharedfilesystem_share_access_v2 %s: %s", d.Id(), err)
+	}
+
+	if compatible {
+		sfsClient.Microversion = "2.21"
+	}
+
+	shareID := d.Get("share_id").(string)
 	access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "share_access")
+		return CheckDeleted(d, err, "Error retrieving openstack_sharedfilesystem_share_access_v2")
 	}
 
 	for _, v := range access {
@@ -149,6 +176,10 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 			d.Set("access_to", v.AccessTo)
 			d.Set("access_level", v.AccessLevel)
 			d.Set("region", GetRegion(d, config))
+
+			// This will only be set if the Shared Filesystem environment supports
+			// microversion 2.21.
+			d.Set("access_key", v.AccessKey)
 
 			return nil
 		}
@@ -238,11 +269,6 @@ func resourceSharedFilesystemShareAccessV2Import(d *schema.ResourceData, meta in
 
 			d.SetId(accessID)
 			d.Set("share_id", shareID)
-			d.Set("access_type", v.AccessType)
-			d.Set("access_to", v.AccessTo)
-			d.Set("access_level", v.AccessLevel)
-			d.Set("region", GetRegion(d, config))
-
 			return []*schema.ResourceData{d}, nil
 		}
 	}
