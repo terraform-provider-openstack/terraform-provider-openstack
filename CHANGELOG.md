@@ -30,6 +30,7 @@ IMPROVEMENTS
 * Added `dns_name` and `dns_assignment` to `openstack_networking_port_v2` data source [GH-706]
 * Added `fixed_ip` to `openstack_networking_floatingip_associate_v2` [GH-709]
 * Enable `fixed_ip` to be updated in `openstack_networking_floatingip_v2` [GH-709]
+* Added ability to specify `cephx` as `access_type` and to retrieve the `access_key` in `openstack_sharedfilesystem_share_access_v2` [GH-715]
 
 BUG FIXES
 
