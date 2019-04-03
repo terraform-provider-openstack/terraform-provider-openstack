@@ -457,11 +457,12 @@ func resourceSubnetDNSNameserversV2CheckIsSet(d *schema.ResourceData) error {
 	rawDNSN := d.Get("dns_nameservers").([]interface{})
 	set := make(map[string]*string)
 	for _, raw := range rawDNSN {
-		dns := raw.(string)
-		if set[dns] != nil {
-			return fmt.Errorf("DNS nameservers must appear exactly once: %q", dns)
-		} else {
-			set[dns] = &dns
+		if dns, ok := raw.(string); ok {
+			if set[dns] != nil {
+				return fmt.Errorf("DNS nameservers must appear exactly once: %q", dns)
+			} else {
+				set[dns] = &dns
+			}
 		}
 	}
 	return nil
