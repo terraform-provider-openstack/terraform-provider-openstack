@@ -1,4 +1,9 @@
 ## 1.18.0 (Unreleased)
+
+BUG FIXES
+
+* Fixed bug where `master_flavor` was being ignored in `openstack_containerinfra_cluster_v1` [GH-730]
+
 ## 1.17.0 (April 01, 2019)
 
 NOTES
