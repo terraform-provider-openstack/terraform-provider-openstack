@@ -198,7 +198,7 @@ func resourceContainerInfraClusterV1Create(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Unable to determine openstack_containerinfra_cluster_v1 flavor")
 	}
 
-	masterFlavor, err := containerInfraClusterV1Flavor(d)
+	masterFlavor, err := containerInfraClusterV1MasterFlavor(d)
 	if err != nil {
 		return fmt.Errorf("Unable to determine openstack_containerinfra_cluster_v1 master_flavor")
 	}
