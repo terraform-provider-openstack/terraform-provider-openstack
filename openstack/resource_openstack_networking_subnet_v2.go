@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform/helper/customdiff"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 
@@ -70,7 +71,25 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				Computed: true,
 			},
 			"allocation_pools": {
-				Type:     schema.TypeList,
+				Type:       schema.TypeList,
+				Optional:   true,
+				Computed:   true,
+				Deprecated: "use allocation_pool instead",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"start": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"end": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+			"allocation_pool": {
+				Type:     schema.TypeSet,
 				Optional: true,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -171,6 +190,13 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
+
+		CustomizeDiff: customdiff.Sequence(
+			// Clear the diff if the old and new allocation_pools are the same.
+			func(diff *schema.ResourceDiff, v interface{}) error {
+				return resourceSubnetV2AllocationPoolsCustomizeDiff(diff)
+			},
+		),
 	}
 }
 
@@ -193,7 +219,7 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 			TenantID:        d.Get("tenant_id").(string),
 			IPv6AddressMode: d.Get("ipv6_address_mode").(string),
 			IPv6RAMode:      d.Get("ipv6_ra_mode").(string),
-			AllocationPools: resourceSubnetAllocationPoolsV2(d),
+			AllocationPools: resourceSubnetAllocationPoolsCreateV2(d),
 			DNSNameservers:  resourceSubnetDNSNameserversV2(d),
 			HostRoutes:      resourceSubnetHostRoutesV2(d),
 			SubnetPoolID:    d.Get("subnetpool_id").(string),
@@ -305,6 +331,7 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 		allocationPools = append(allocationPools, pool)
 	}
 	d.Set("allocation_pools", allocationPools)
+	d.Set("allocation_pool", allocationPools)
 
 	// Set the subnet's Gateway IP.
 	gatewayIP := s.GatewayIP
@@ -380,9 +407,12 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 		updateOpts.EnableDHCP = &v
 	}
 
-	if d.HasChange("allocation_pools") {
+	if d.HasChange("allocation_pool") {
 		hasChange = true
-		updateOpts.AllocationPools = resourceSubnetAllocationPoolsV2(d)
+		updateOpts.AllocationPools = resourceSubnetAllocationPoolUpdateV2(d)
+	} else if d.HasChange("allocation_pools") {
+		hasChange = true
+		updateOpts.AllocationPools = resourceSubnetAllocationPoolsUpdateV2(d)
 	}
 
 	if hasChange {
@@ -431,8 +461,53 @@ func resourceNetworkingSubnetV2Delete(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func resourceSubnetAllocationPoolsV2(d *schema.ResourceData) []subnets.AllocationPool {
+// resourceSubnetAllocationPoolsCreateV2 returns a slice of allocation pools
+// when creating a subnet. It takes into account both the old allocation_pools
+// argument as well as the new allocation_pool argument.
+//
+// This can be modified to only account for allocation_pool when
+// allocation_pools is removed.
+func resourceSubnetAllocationPoolsCreateV2(d *schema.ResourceData) []subnets.AllocationPool {
+	// First check allocation_pools since that is the original,
+	// but deprecated, argument.
 	rawAPs := d.Get("allocation_pools").([]interface{})
+	if len(rawAPs) == 0 {
+		// Then check allocation_pool which is the new argument.
+		rawAPs = d.Get("allocation_pool").(*schema.Set).List()
+	}
+
+	aps := make([]subnets.AllocationPool, len(rawAPs))
+	for i, raw := range rawAPs {
+		rawMap := raw.(map[string]interface{})
+		aps[i] = subnets.AllocationPool{
+			Start: rawMap["start"].(string),
+			End:   rawMap["end"].(string),
+		}
+	}
+	return aps
+}
+
+// resourceSubnetAllocationPoolsUpdateV2 returns a slice of allocation pools
+// when modifying a subnet using the old allocation_pools argument.
+//
+// This can be removed when allocation_pools is removed.
+func resourceSubnetAllocationPoolsUpdateV2(d *schema.ResourceData) []subnets.AllocationPool {
+	rawAPs := d.Get("allocation_pools").([]interface{})
+	aps := make([]subnets.AllocationPool, len(rawAPs))
+	for i, raw := range rawAPs {
+		rawMap := raw.(map[string]interface{})
+		aps[i] = subnets.AllocationPool{
+			Start: rawMap["start"].(string),
+			End:   rawMap["end"].(string),
+		}
+	}
+	return aps
+}
+
+// resourceSubnetAllocationPoolUpdateV2 returns a slice of allocation pools
+// when modifying a subnet using the new allocation_pool argument.
+func resourceSubnetAllocationPoolUpdateV2(d *schema.ResourceData) []subnets.AllocationPool {
+	rawAPs := d.Get("allocation_pool").(*schema.Set).List()
 	aps := make([]subnets.AllocationPool, len(rawAPs))
 	for i, raw := range rawAPs {
 		rawMap := raw.(map[string]interface{})
@@ -532,4 +607,44 @@ func waitForSubnetDelete(networkingClient *gophercloud.ServiceClient, subnetId s
 		log.Printf("[DEBUG] OpenStack Subnet %s still active.\n", subnetId)
 		return s, "ACTIVE", nil
 	}
+}
+
+func resourceSubnetV2AllocationPoolsCustomizeDiff(diff *schema.ResourceDiff) error {
+	if diff.Id() != "" && diff.HasChange("allocation_pools") {
+		o, n := diff.GetChange("allocation_pools")
+		oRaw := o.([]interface{})
+		nRaw := n.([]interface{})
+
+		samePools := true
+
+		for _, newRaw := range nRaw {
+			var found bool
+
+			newRawPool := newRaw.(map[string]interface{})
+			newStart := newRawPool["start"].(string)
+			newEnd := newRawPool["end"].(string)
+
+			for _, oldRaw := range oRaw {
+				oldRawPool := oldRaw.(map[string]interface{})
+				oldStart := oldRawPool["start"].(string)
+				oldEnd := oldRawPool["end"].(string)
+
+				if oldStart == newStart && oldEnd == newEnd {
+					found = true
+				}
+			}
+
+			if !found {
+				samePools = false
+			}
+		}
+
+		if samePools {
+			log.Printf("[DEBUG] allocation_pools have not changed. clearing diff")
+			return diff.Clear("allocation_pools")
+		}
+
+	}
+
+	return nil
 }

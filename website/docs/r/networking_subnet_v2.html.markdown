@@ -42,7 +42,7 @@ The following arguments are supported:
 
 * `prefix_length` - (Optional) The prefix length to use when creating a subnet
     from a subnet pool. The default subnet pool prefix length that was defined
-    when creating the subnet pool will be used if not provided. Changing this 
+    when creating the subnet pool will be used if not provided. Changing this
     creates a new subnet.
 
 * `ip_version` - (Optional) IP version, either 4 (default) or 6. Changing this creates a
@@ -63,9 +63,13 @@ The following arguments are supported:
 * `tenant_id` - (Optional) The owner of the subnet. Required if admin wants to
     create a subnet for another tenant. Changing this creates a new subnet.
 
-* `allocation_pools` - (Optional) An array of sub-ranges of CIDR available for
+* `allocation_pools` - (**Deprecated** - use `allocation_pool` instead)
+    An array of sub-ranges of CIDR available for dynamic allocation to ports.
+    The allocation_pools object structure is documented below.
+
+* `allocation_pool` - (Optional) An array of sub-ranges of CIDR available for
     dynamic allocation to ports. The allocation_pool object structure is
-    documented below. Changing this creates a new subnet.
+    documented below.
 
 * `gateway_ip` - (Optional)  Default gateway used by devices in this subnet.
     Leaving this blank and not setting `no_gateway` will cause a default
@@ -95,7 +99,13 @@ The following arguments are supported:
 
 * `tags` - (Optional) A set of string tags for the subnet.
 
-The `allocation_pools` block supports:
+The deprecated `allocation_pools` block supports:
+
+* `start` - (Required) The starting address.
+
+* `end` - (Required) The ending address.
+
+The `allocation_pool` block supports:
 
 * `start` - (Required) The starting address.
 
