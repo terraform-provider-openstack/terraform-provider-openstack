@@ -376,9 +376,6 @@ The `network` block supports:
 * `fixed_ip_v4` - (Optional) Specifies a fixed IPv4 address to be used on this
     network. Changing this creates a new server.
 
-* `fixed_ip_v6` - (Optional) Specifies a fixed IPv6 address to be used on this
-    network. Changing this creates a new server.
-
 * `access_network` - (Optional) Specifies if this network should be used for
     provisioning access. Accepts true or false. Defaults to false.
 
