@@ -22,6 +22,9 @@
     recheck-rocky:
       jobs:
         - terraform-provider-openstack-acceptance-test-rocky
+    recheck-stein:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-stein
     recheck-trove:
       jobs:
         - terraform-provider-openstack-acceptance-test-trove
