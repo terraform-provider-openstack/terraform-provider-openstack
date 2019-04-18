@@ -51,7 +51,7 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"ip", "user", "cert", "cephx",
-				}, true),
+				}, false),
 			},
 
 			"access_to": {
@@ -66,7 +66,7 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"rw", "ro",
-				}, true),
+				}, false),
 			},
 
 			"access_key": {
