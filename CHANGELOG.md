@@ -3,6 +3,8 @@
 BUG FIXES
 
 * Fixed bug where `master_flavor` was being ignored in `openstack_containerinfra_cluster_v1` [GH-730]
+* Fixed case-sensitivity for validation on `access_type` and `access_level` in `openstack_sharedfilesystem_share_access_v2` [GH-730]
+
 
 ## 1.17.0 (April 01, 2019)
 
