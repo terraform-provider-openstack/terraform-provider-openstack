@@ -468,12 +468,13 @@ func resourceNetworkingSubnetV2Delete(d *schema.ResourceData, meta interface{}) 
 // This can be modified to only account for allocation_pool when
 // allocation_pools is removed.
 func resourceSubnetAllocationPoolsCreateV2(d *schema.ResourceData) []subnets.AllocationPool {
-	// First check allocation_pools since that is the original,
-	// but deprecated, argument.
-	rawAPs := d.Get("allocation_pools").([]interface{})
+	// First check allocation_pool since that is the new argument.
+	rawAPs := d.Get("allocation_pool").(*schema.Set).List()
+
 	if len(rawAPs) == 0 {
-		// Then check allocation_pool which is the new argument.
-		rawAPs = d.Get("allocation_pool").(*schema.Set).List()
+		// If no allocation_pool was specified, check allocation_pools
+		// which is the older legacy argument.
+		rawAPs = d.Get("allocation_pools").([]interface{})
 	}
 
 	aps := make([]subnets.AllocationPool, len(rawAPs))
