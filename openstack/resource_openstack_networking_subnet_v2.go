@@ -71,10 +71,11 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				Computed: true,
 			},
 			"allocation_pools": {
-				Type:       schema.TypeList,
-				Optional:   true,
-				Computed:   true,
-				Deprecated: "use allocation_pool instead",
+				Type:          schema.TypeList,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"allocation_pool"},
+				Deprecated:    "use allocation_pool instead",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"start": {
@@ -89,9 +90,10 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				},
 			},
 			"allocation_pool": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Computed: true,
+				Type:          schema.TypeSet,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"allocation_pools"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"start": {
