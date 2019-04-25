@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 )
 
@@ -61,11 +60,7 @@ func resourceNetworkingRouterRouteV2Create(d *schema.ResourceData, meta interfac
 
 	r, err := routers.Get(networkingClient, routerID).Extract()
 	if err != nil {
-		if _, ok := err.(gophercloud.ErrDefault404); ok {
-			return nil
-		}
-
-		return fmt.Errorf("Error retrieving openstack_networking_router_v2: %s", err)
+		return CheckDeleted(d, err, "Error getting openstack_networking_router_v2")
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_router_v2 %s: %#v", routerID, r)
@@ -124,12 +119,7 @@ func resourceNetworkingRouterRouteV2Read(d *schema.ResourceData, meta interface{
 
 	r, err := routers.Get(networkingClient, routerID).Extract()
 	if err != nil {
-		if _, ok := err.(gophercloud.ErrDefault404); ok {
-			d.SetId("")
-			return nil
-		}
-
-		return fmt.Errorf("Error retrieving openstack_networking_router_v2: %s", err)
+		return CheckDeleted(d, err, "Error getting openstack_networking_router_v2")
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_router_v2 %s: %#v", routerID, r)
@@ -160,12 +150,7 @@ func resourceNetworkingRouterRouteV2Delete(d *schema.ResourceData, meta interfac
 
 	r, err := routers.Get(networkingClient, routerID).Extract()
 	if err != nil {
-		if _, ok := err.(gophercloud.ErrDefault404); ok {
-			d.SetId("")
-			return nil
-		}
-
-		return fmt.Errorf("Error retrieving openstack_networking_router_v2: %s", err)
+		return CheckDeleted(d, err, "Error getting openstack_networking_router_v2")
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_router_v2 %s: %#v", routerID, r)
