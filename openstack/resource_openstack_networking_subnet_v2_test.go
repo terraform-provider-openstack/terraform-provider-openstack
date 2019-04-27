@@ -205,6 +205,73 @@ func TestAccNetworkingV2Subnet_subnetPrefixLength(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Subnet_multipleAllocationPools(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Subnet_multipleAllocationPools_1,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pools.#", "2"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Subnet_multipleAllocationPools_2,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pools.#", "2"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Subnet_multipleAllocationPools_3,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pools.#", "2"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Subnet_allocationPool(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Subnet_allocationPool_1,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.1804036869.start", "10.3.0.2"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.1804036869.end", "10.3.0.255"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.1586215448.start", "10.3.255.0"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.1586215448.end", "10.3.255.254"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Subnet_allocationPool_2,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.1804036869.start", "10.3.0.2"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.1804036869.end", "10.3.0.255"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.2876574713.start", "10.3.255.10"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.2876574713.end", "10.3.255.154"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2SubnetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
@@ -461,5 +528,120 @@ resource "openstack_networking_subnet_v2" "subnet_2" {
   enable_dhcp   = false
   network_id    = "${openstack_networking_network_v2.network_1.id}"
   subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+}
+`
+
+const testAccNetworkingV2Subnet_multipleAllocationPools_1 = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "10.3.0.0/16"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  allocation_pools {
+    start = "10.3.0.2"
+    end = "10.3.0.255"
+  }
+
+  allocation_pools {
+    start = "10.3.255.0"
+    end = "10.3.255.254"
+  }
+}
+`
+
+const testAccNetworkingV2Subnet_multipleAllocationPools_2 = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "10.3.0.0/16"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  allocation_pools {
+    start = "10.3.255.0"
+    end = "10.3.255.254"
+  }
+
+  allocation_pools {
+    start = "10.3.0.2"
+    end = "10.3.0.255"
+  }
+}
+`
+
+const testAccNetworkingV2Subnet_multipleAllocationPools_3 = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "10.3.0.0/16"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  allocation_pools {
+    start = "10.3.255.10"
+    end = "10.3.255.154"
+  }
+
+  allocation_pools {
+    start = "10.3.0.2"
+    end = "10.3.0.255"
+  }
+}
+`
+
+const testAccNetworkingV2Subnet_allocationPool_1 = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "10.3.0.0/16"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  allocation_pool {
+    start = "10.3.0.2"
+    end = "10.3.0.255"
+  }
+
+  allocation_pool {
+    start = "10.3.255.0"
+    end = "10.3.255.254"
+  }
+}
+`
+
+const testAccNetworkingV2Subnet_allocationPool_2 = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "10.3.0.0/16"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  allocation_pools {
+    start = "10.3.255.10"
+    end = "10.3.255.154"
+  }
+
+  allocation_pools {
+    start = "10.3.0.2"
+    end = "10.3.0.255"
+  }
 }
 `

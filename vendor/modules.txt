@@ -204,6 +204,7 @@ github.com/hashicorp/logutils
 # github.com/hashicorp/terraform v0.11.12-beta1.0.20190212191339-ee1f8f9362f3
 github.com/hashicorp/terraform/plugin
 github.com/hashicorp/terraform/flatmap
+github.com/hashicorp/terraform/helper/customdiff
 github.com/hashicorp/terraform/helper/hashcode
 github.com/hashicorp/terraform/helper/mutexkv
 github.com/hashicorp/terraform/helper/pathorcontents
