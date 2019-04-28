@@ -90,7 +90,7 @@ func resourceNetworkingRouterRouteV2Create(d *schema.ResourceData, meta interfac
 		Routes: routes,
 	}
 	log.Printf("[DEBUG] openstack_networking_router_v2 %s update options: %#v", routerID, updateOpts)
-	_, err = routers.Update(networkingClient, d.Id(), updateOpts).Extract()
+	_, err = routers.Update(networkingClient, routerID, updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error updating openstack_networking_router_v2: %s", err)
 	}
