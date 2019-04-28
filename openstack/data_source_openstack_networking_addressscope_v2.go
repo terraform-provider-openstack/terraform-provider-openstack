@@ -59,7 +59,7 @@ func dataSourceNetworkingAddressScopeV2Read(d *schema.ResourceData, meta interfa
 		listOpts.IPVersion = v.(int)
 	}
 
-	if v, ok := d.GetOk("shared"); ok {
+	if v, ok := d.GetOkExists("shared"); ok {
 		shared := v.(bool)
 		listOpts.Shared = &shared
 	}
