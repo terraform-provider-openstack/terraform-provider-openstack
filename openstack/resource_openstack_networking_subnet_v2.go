@@ -363,7 +363,8 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 
 	if d.HasChange("name") {
 		hasChange = true
-		updateOpts.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
 	}
 
 	if d.HasChange("description") {
@@ -394,7 +395,8 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 			return err
 		}
 		hasChange = true
-		updateOpts.DNSNameservers = resourceSubnetDNSNameserversV2(d)
+		nameservers := resourceSubnetDNSNameserversV2(d)
+		updateOpts.DNSNameservers = &nameservers
 	}
 
 	if d.HasChange("host_routes") {

@@ -338,7 +338,8 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 
 	// Populate basic updateOpts.
 	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
 	}
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
