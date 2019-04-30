@@ -272,6 +272,34 @@ func TestAccNetworkingV2Subnet_allocationPool(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Subnet_clearDNSNameservers(t *testing.T) {
+	var subnet subnets.Subnet
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Subnet_clearDNSNameservers_1,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2SubnetDnsConsistency("openstack_networking_subnet_v2.subnet_1", &subnet),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "dns_nameservers.#", "2"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Subnet_clearDNSNameservers_2,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "dns_nameservers.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2SubnetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
@@ -642,6 +670,43 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   allocation_pools {
     start = "10.3.0.2"
     end = "10.3.0.255"
+  }
+}
+`
+
+const testAccNetworkingV2Subnet_clearDNSNameservers_1 = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  cidr = "192.168.199.0/24"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  dns_nameservers = ["10.0.16.4", "213.186.33.99"]
+
+  allocation_pools {
+    start = "192.168.199.100"
+    end = "192.168.199.200"
+  }
+}
+`
+
+const testAccNetworkingV2Subnet_clearDNSNameservers_2 = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  allocation_pools {
+    start = "192.168.199.100"
+    end = "192.168.199.200"
   }
 }
 `
