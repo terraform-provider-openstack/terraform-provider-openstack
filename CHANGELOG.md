@@ -4,6 +4,10 @@ NOTES
 
 * The `openstack_networking_subnet_v2` argument `allocation_pools` has been deprecated in favor of `allocation_pool`.
 
+FEATURES
+
+* __New Data Source__: `openstack_networking_addressscope_v2` [GH-741]
+
 BUG FIXES
 
 * Fixed bug where `master_flavor` was being ignored in `openstack_containerinfra_cluster_v1` [GH-730]
