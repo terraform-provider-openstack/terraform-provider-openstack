@@ -7,8 +7,8 @@ require (
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/fatih/color v1.6.0 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
-	github.com/gophercloud/gophercloud v0.0.0-20190328150603-33e54f40ffcf
-	github.com/gophercloud/utils v0.0.0-20190212203534-6f24f46ce3c9
+	github.com/gophercloud/gophercloud v0.0.0-20190427020117-60507118a582
+	github.com/gophercloud/utils v0.0.0-20190313033024-0bcc8e728cb5
 	github.com/hashicorp/go-getter v0.0.0-20180425224130-3f60ec5cfbb2 // indirect
 	github.com/hashicorp/go-hclog v0.0.0-20180402200405-69ff559dc25f // indirect
 	github.com/hashicorp/go-plugin v0.0.0-20180331002553-e8d22c780116 // indirect
@@ -17,7 +17,7 @@ require (
 	github.com/mattn/go-colorable v0.1.0 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/mitchellh/cli v0.0.0-20180414170447-c48282d14eba // indirect
-	github.com/mitchellh/go-homedir v0.0.0-20161203194507-b8bc1bf76747
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-testing-interface v0.0.0-20171004221916-a61a99592b77 // indirect
 	github.com/posener/complete v0.0.0-20180413091813-e037c22b2fcf // indirect
 	github.com/stretchr/testify v1.3.0
