@@ -116,6 +116,7 @@ func resourceNetworkingRouterRouteV2Read(d *schema.ResourceData, meta interface{
 	if routerID == "" {
 		routerID = idFromResource
 	}
+	d.Set("router_id", routerID)
 
 	r, err := routers.Get(networkingClient, routerID).Extract()
 	if err != nil {
