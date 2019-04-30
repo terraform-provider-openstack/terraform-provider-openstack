@@ -9,6 +9,7 @@ BUG FIXES
 * Fixed bug where `master_flavor` was being ignored in `openstack_containerinfra_cluster_v1` [GH-730]
 * Fixed case-sensitivity for validation on `access_type` and `access_level` in `openstack_sharedfilesystem_share_access_v2` [GH-730]
 * The `openstack_networking_subnet_v2` argument `allocation_pools` has been deprecated in favor of `allocation_pool`. This deprecation helps resolve an issue where multiple allocation pools in a single subnet were being returned out of order [GH-739]
+* Fixed a bug where `dns_nameservers` could not be cleared in `openstack_networking_subnet_v2` [GH-728]
 
 
 ## 1.17.0 (April 01, 2019)
