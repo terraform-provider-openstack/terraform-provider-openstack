@@ -24,6 +24,7 @@ func TestAccKeyManagerSecretV1_basic(t *testing.T) {
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "payload", "foobar"),
 				),
 			},
 		},

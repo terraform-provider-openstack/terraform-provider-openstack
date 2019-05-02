@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gophercloud/gophercloud"
@@ -54,7 +55,12 @@ func keyManagerSecretV1WaitForSecretCreation(kmClient *gophercloud.ServiceClient
 
 			return "", "NOT_CREATED", err
 		}
-		return secret, "ACTIVE", nil
+
+		if secret.Status == "ERROR" {
+			return "", secret.Status, fmt.Errorf("Error creating secret")
+		}
+
+		return secret, secret.Status, nil
 	}
 }
 
@@ -86,4 +92,12 @@ func keyManagerSecretMetadataV1WaitForSecretMetadataCreation(kmClient *gopherclo
 		}
 		return metadata, "ACTIVE", nil
 	}
+}
+
+func keyManagerSecretV1GetPayload(kmClient *gophercloud.ServiceClient, id string) string {
+	payload, err := secrets.GetPayload(kmClient, id, nil).Extract()
+	if err != nil {
+		fmt.Errorf("Could not retrieve payload for secret with id %v", id)
+	}
+	return string(payload)
 }

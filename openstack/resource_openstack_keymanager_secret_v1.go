@@ -78,8 +78,9 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 				Optional: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"symmetric", "public", "private", "passphrase", "certificate", "opaque",
-				}, true),
+				}, false),
 				ForceNew: true,
+				Computed: true,
 			},
 
 			"status": {
@@ -91,19 +92,22 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
-				ForceNew:  false,
+				ForceNew:  true,
 			},
 
 			"payload_content_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: false,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"text/plain", "text/plain;charset=utf-8", "text/plain; charset=utf-8", "application/octet-stream", "application/pkcs8",
+				}, true),
 			},
 
 			"payload_content_encoding": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: false,
+				ForceNew: true,
 			},
 
 			"created_at": {
@@ -122,7 +126,7 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 			},
 
 			"content_types": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeMap,
 				Computed: true,
 			},
 
@@ -174,7 +178,7 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 	uuid := keyManagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"NOT_CREATED"},
+		Pending:    []string{"PENDING"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    keyManagerSecretV1WaitForSecretCreation(kmClient, uuid),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
@@ -204,7 +208,7 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 		}
 
 		stateConf = &resource.StateChangeConf{
-			Pending:    []string{"NOT_CREATED"},
+			Pending:    []string{"PENDING"},
 			Target:     []string{"ACTIVE"},
 			Refresh:    keyManagerSecretMetadataV1WaitForSecretMetadataCreation(kmClient, uuid),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
@@ -251,10 +255,10 @@ func resourceKeyManagerSecretV1Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("updated_at", secret.Updated.Format(time.RFC3339))
 	d.Set("expiration", secret.Expiration.Format(time.RFC3339))
 	d.Set("content_types", secret.ContentTypes)
-
+	d.Set("payload", keyManagerSecretV1GetPayload(kmClient, d.Id()))
 	metadataMap, err := secrets.GetMetadata(kmClient, d.Id()).Extract()
 	if err != nil {
-		log.Printf("[DEBUG] Unable to set metadata: %s", err)
+		log.Printf("[DEBUG] Unable to get metadata: %s", err)
 	}
 	d.Set("all_metadata", metadataMap)
 
@@ -269,34 +273,6 @@ func resourceKeyManagerSecretV1Update(d *schema.ResourceData, meta interface{}) 
 	kmClient, err := config.keyManagerV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack barbican client: %s", err)
-	}
-
-	var hasChange = false
-	var updateOpts secrets.UpdateOpts
-	if d.HasChange("payload_content_type") {
-		hasChange = true
-	}
-	// This is not optional so we have to set it regardless
-	updateOpts.ContentType = d.Get("payload_content_type").(string)
-
-	if d.HasChange("payload_content_encoding") {
-		hasChange = true
-		updateOpts.ContentEncoding = d.Get("content_encoding").(string)
-	}
-
-	// Print the update options before we set the payload
-	log.Printf("[DEBUG] Update Options for resource_keymanager_secret_v1: %#v", updateOpts)
-
-	if d.HasChange("payload") {
-		hasChange = true
-		updateOpts.Payload = d.Get("payload").(string)
-	}
-
-	if hasChange {
-		err := secrets.Update(kmClient, d.Id(), updateOpts).Err
-		if err != nil {
-			return err
-		}
 	}
 
 	if d.HasChange("metadata") {
@@ -373,7 +349,7 @@ func resourceKeyManagerSecretV1Delete(d *schema.ResourceData, meta interface{}) 
 	}
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"ACTIVE"},
+		Pending:    []string{"PENDING"},
 		Target:     []string{"DELETED"},
 		Refresh:    keyManagerSecretV1WaitForSecretDeletion(kmClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),

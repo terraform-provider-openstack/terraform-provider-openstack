@@ -23,7 +23,6 @@ func TestAccKeyManagerSecretV1_importBasic(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"payload",
-					"payload_content_type",
 				},
 			},
 		},

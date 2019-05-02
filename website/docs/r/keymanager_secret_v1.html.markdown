@@ -54,9 +54,9 @@ The following arguments are supported:
  
 * `payload` - (Optional) The secret’s data to be stored. **payload_content_type** must also be supplied if **payload** is included.
 
-* `payload_content_type` - (Optional) (required if **payload** is included) The media type for the content of the payload.
+* `payload_content_type` - (Optional) (required if **payload** is included) The media type for the content of the payload. Must be one of `'text/plain', 'text/plain;charset=utf-8', 'text/plain; charset=utf-8', 'application/octet-stream', 'application/pkcs8'`.
 
-* `payload_content_encoding` - (Optional) (required if payload is encoded) The encoding used for the payload to be able to include it in the JSON request. Currently only base64 is supported.
+* `payload_content_encoding` - (Optional) (required if payload is encoded) The encoding used for the payload to be able to include it in the JSON request. Currently only `'base64'` is supported.
 
 * `metadata` - (Optional) Additional Metadata for the secret.
 			
