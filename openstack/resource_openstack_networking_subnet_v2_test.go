@@ -662,12 +662,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   cidr = "10.3.0.0/16"
   network_id = "${openstack_networking_network_v2.network_1.id}"
 
-  allocation_pools {
+  allocation_pool {
     start = "10.3.255.10"
     end = "10.3.255.154"
   }
 
-  allocation_pools {
+  allocation_pool {
     start = "10.3.0.2"
     end = "10.3.0.255"
   }
