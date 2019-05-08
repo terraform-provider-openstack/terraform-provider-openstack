@@ -1,4 +1,9 @@
 ## 1.19.0 (Unreleased)
+
+IMPROVEMENTS
+
+* `openstack_compute_instance_v2.stop_before_destroy` is now configurable by the `delete` timeout [GH-750]
+
 ## 1.18.0 (May 08, 2019)
 
 NOTES
