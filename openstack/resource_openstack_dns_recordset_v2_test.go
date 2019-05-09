@@ -97,6 +97,38 @@ func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 	})
 }
 
+func TestAccDNSV2RecordSet_ensureSameTTL(t *testing.T) {
+	var recordset recordsets.RecordSet
+	zoneName := randomZoneName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckDNS(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDNSV2RecordSet_ensureSameTTL_1(zoneName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
+					resource.TestCheckResourceAttr(
+						"openstack_dns_recordset_v2.recordset_1", "records.0", "10.1.0.1"),
+					resource.TestCheckResourceAttr(
+						"openstack_dns_recordset_v2.recordset_1", "ttl", "3000"),
+				),
+			},
+			{
+				Config: testAccDNSV2RecordSet_ensureSameTTL_2(zoneName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_dns_recordset_v2.recordset_1", "records.0", "10.1.0.2"),
+					resource.TestCheckResourceAttr(
+						"openstack_dns_recordset_v2.recordset_1", "ttl", "3000"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	dnsClient, err := config.dnsV2Client(OS_REGION_NAME)
@@ -241,6 +273,44 @@ func testAccDNSV2RecordSet_ipv6(zoneName string) string {
 				"[fd2b:db7f:6ae:dd8d::1]",
 				"fd2b:db7f:6ae:dd8d::2"
 			]
+		}
+	`, zoneName, zoneName)
+}
+
+func testAccDNSV2RecordSet_ensureSameTTL_1(zoneName string) string {
+	return fmt.Sprintf(`
+		resource "openstack_dns_zone_v2" "zone_1" {
+			name = "%s"
+			email = "email2@example.com"
+			ttl = 6000
+			type = "PRIMARY"
+		}
+
+		resource "openstack_dns_recordset_v2" "recordset_1" {
+			zone_id = "${openstack_dns_zone_v2.zone_1.id}"
+			name = "%s"
+			type = "A"
+			ttl = 3000
+			records = ["10.1.0.1"]
+		}
+	`, zoneName, zoneName)
+}
+
+func testAccDNSV2RecordSet_ensureSameTTL_2(zoneName string) string {
+	return fmt.Sprintf(`
+		resource "openstack_dns_zone_v2" "zone_1" {
+			name = "%s"
+			email = "email2@example.com"
+			ttl = 6000
+			type = "PRIMARY"
+		}
+
+		resource "openstack_dns_recordset_v2" "recordset_1" {
+			zone_id = "${openstack_dns_zone_v2.zone_1.id}"
+			name = "%s"
+			type = "A"
+			ttl = 3000
+			records = ["10.1.0.2"]
 		}
 	`, zoneName, zoneName)
 }
