@@ -177,7 +177,8 @@ func resourceDNSRecordSetV2Update(d *schema.ResourceData, meta interface{}) erro
 
 	var updateOpts recordsets.UpdateOpts
 	if d.HasChange("ttl") {
-		updateOpts.TTL = d.Get("ttl").(int)
+		ttl := d.Get("ttl").(int)
+		updateOpts.TTL = &ttl
 	}
 
 	if d.HasChange("records") {
