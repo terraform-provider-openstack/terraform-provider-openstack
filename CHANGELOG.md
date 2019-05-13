@@ -4,6 +4,10 @@ IMPROVEMENTS
 
 * `openstack_compute_instance_v2.stop_before_destroy` is now configurable by the `delete` timeout [GH-750]
 
+BUG FIXES
+
+* Fixed bug where `openstack_dns_recordset_v2.ttl` was being cleared [GH-752]
+
 ## 1.18.0 (May 08, 2019)
 
 NOTES
