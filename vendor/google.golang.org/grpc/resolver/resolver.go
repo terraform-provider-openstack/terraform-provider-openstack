@@ -49,8 +49,12 @@ func Get(scheme string) Builder {
 	return nil
 }
 
-// SetDefaultScheme sets the default scheme that will be used.
-// The default default scheme is "passthrough".
+// SetDefaultScheme sets the default scheme that will be used. The default
+// default scheme is "passthrough".
+//
+// NOTE: this function must only be called during initialization time (i.e. in
+// an init() function), and is not thread-safe. The scheme set last overrides
+// previously set values.
 func SetDefaultScheme(scheme string) {
 	defaultScheme = scheme
 }
@@ -90,6 +94,8 @@ type Address struct {
 // BuildOption includes additional information for the builder to create
 // the resolver.
 type BuildOption struct {
+	// DisableServiceConfig indicates whether resolver should fetch service config data.
+	DisableServiceConfig bool
 }
 
 // ClientConn contains the callbacks for resolver to notify any updates
