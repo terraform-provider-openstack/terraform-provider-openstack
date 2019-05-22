@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"sort"
@@ -296,4 +297,28 @@ func compatibleMicroversion(direction, required, given string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func validateJsonObject(v interface{}, k string) ([]string, []error) {
+	if v == nil || v.(string) == "" {
+		return nil, []error{fmt.Errorf("%q value must not be empty", k)}
+	}
+
+	var j map[string]interface{}
+	s := v.(string)
+
+	err := json.Unmarshal([]byte(s), &j)
+	if err != nil {
+		return nil, []error{fmt.Errorf("%q must be a JSON object: %s", k, err)}
+	}
+
+	return nil, nil
+}
+
+func diffSuppressJsonObject(k, old, new string, d *schema.ResourceData) bool {
+	if strSliceContains([]string{"{}", "null", ""}, old) &&
+		strSliceContains([]string{"{}", "null", ""}, new) {
+		return true
+	}
+	return false
 }

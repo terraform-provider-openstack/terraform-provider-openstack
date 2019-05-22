@@ -234,15 +234,3 @@ func flattenNetworkingPortBindingV2(port portExtended) interface{} {
 
 	return portBinding
 }
-
-func suppressDiffPortBindingProfileV2(k, old, new string, d *schema.ResourceData) bool {
-	if old == "{}" && new == "" {
-		return true
-	}
-
-	if old == "" && new == "{}" {
-		return true
-	}
-
-	return false
-}
