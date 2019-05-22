@@ -1,15 +1,15 @@
-## 1.19.0 (Unreleased)
+## 1.19.0 (May 22, 2019)
 
 IMPROVEMENTS
 
 * The provider is now compatible with Terraform v0.12, while retaining compatibility with prior versions.
-* `openstack_compute_instance_v2.stop_before_destroy` is now configurable by the `delete` timeout [GH-750]
+* `openstack_compute_instance_v2.stop_before_destroy` is now configurable by the `delete` timeout ([#750](https://github.com/terraform-providers/terraform-provider-openstack/issues/750))
 
 BUG FIXES
 
-* Fixed bug where `openstack_dns_recordset_v2.ttl` was being cleared [GH-752]
-* Fixed an out of memory issue when running in debug mode [GH-755]
-* Fixed printing of clear text password in case of `v2` auth [GH-757]
+* Fixed bug where `openstack_dns_recordset_v2.ttl` was being cleared ([#752](https://github.com/terraform-providers/terraform-provider-openstack/issues/752))
+* Fixed an out of memory issue when running in debug mode ([#755](https://github.com/terraform-providers/terraform-provider-openstack/issues/755))
+* Fixed printing of clear text password in case of `v2` auth ([#757](https://github.com/terraform-providers/terraform-provider-openstack/issues/757))
 
 ## 1.18.0 (May 08, 2019)
 
