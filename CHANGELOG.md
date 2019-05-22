@@ -2,6 +2,7 @@
 
 IMPROVEMENTS
 
+* The provider is now compatible with Terraform v0.12, while retaining compatibility with prior versions.
 * `openstack_compute_instance_v2.stop_before_destroy` is now configurable by the `delete` timeout [GH-750]
 
 BUG FIXES
