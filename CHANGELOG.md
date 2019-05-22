@@ -7,6 +7,7 @@ IMPROVEMENTS
 BUG FIXES
 
 * Fixed bug where `openstack_dns_recordset_v2.ttl` was being cleared [GH-752]
+* Fixed an out of memory issue when running in debug mode [GH-755]
 
 ## 1.18.0 (May 08, 2019)
 
