@@ -157,6 +157,14 @@ func (lrt *LogRoundTripper) formatJSON(raw []byte) string {
 
 	// Mask known password fields
 	if v, ok := data["auth"].(map[string]interface{}); ok {
+		// v2 auth methods
+		if v, ok := v["passwordCredentials"].(map[string]interface{}); ok {
+			v["password"] = "***"
+		}
+		if v, ok := v["token"].(map[string]interface{}); ok {
+			v["id"] = "***"
+		}
+		// v3 auth methods
 		if v, ok := v["identity"].(map[string]interface{}); ok {
 			if v, ok := v["password"].(map[string]interface{}); ok {
 				if v, ok := v["user"].(map[string]interface{}); ok {
