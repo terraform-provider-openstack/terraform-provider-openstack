@@ -1,4 +1,9 @@
 ## 1.20.0 (Unreleased)
+
+BUG FIXES
+
+* Fixed bug preventing a floating IP from being re-associated with an instance when using `create_before_destroy` [GH-761]
+
 ## 1.19.0 (May 22, 2019)
 
 IMPROVEMENTS
