@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 )
@@ -203,7 +204,12 @@ func resourceComputeFloatingIPAssociateV2Delete(d *schema.ResourceData, meta int
 
 	err = floatingips.DisassociateInstance(computeClient, instanceId, disassociateOpts).ExtractErr()
 	if err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_compute_floatingip_associate_v2")
+		if _, ok := err.(gophercloud.ErrDefault409); ok {
+			// 409 is returned when floating ip address is not associated with an instance.
+			log.Printf("[DEBUG] openstack_compute_floatingip_associate_v2 %s is not associated with instance %s", d.Id(), instanceId)
+		} else {
+			return CheckDeleted(d, err, "Error deleting openstack_compute_floatingip_associate_v2")
+		}
 	}
 
 	return nil
