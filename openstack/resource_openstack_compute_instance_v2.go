@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
@@ -20,7 +21,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -29,51 +29,12 @@ import (
 
 func resourceOpenStackComputeInstanceV2ImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	results := make([]*schema.ResourceData, 1)
-	ordered_networks := []interface{}{}
-	config := meta.(*Config)
 	err := resourceComputeInstanceV2Read(d, meta)
+
 	if err != nil {
 		return nil, err
 	}
-	networkClient, err := config.networkingV2Client(GetRegion(d, config))
-	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenStack networking client: %s", err)
-	}
 
-	for _, mac := range strings.Split(os.Getenv("TF_MAC_IMPORT_ORDER"), "_") {
-		pSpec := false
-		networks := []interface{}{}
-		networks = d.Get("network").([]interface{})
-		for _, n := range networks {
-			v := n.(map[string]interface{})
-			if strings.HasSuffix(mac, "P") {
-				mac = strings.TrimSuffix(mac, "P")
-				pSpec = true
-			}
-
-			if mac == v["mac"] {
-				if pSpec {
-					listOpts := ports.ListOpts{
-						MACAddress: mac,
-					}
-					allPages, err := ports.List(networkClient, listOpts).AllPages()
-					if err != nil {
-						return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
-					}
-
-					mPorts, err := ports.ExtractPorts(allPages)
-					if err != nil {
-						return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
-					}
-					v["port"] = mPorts[0].ID
-
-				}
-				ordered_networks = append(ordered_networks, v)
-			}
-		}
-
-	}
-	d.Set("network", ordered_networks)
 	results[0] = d
 
 	return results, nil
@@ -592,7 +553,6 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	}
 
 	return resourceComputeInstanceV2Read(d, meta)
-
 }
 
 func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) error {
@@ -687,6 +647,49 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	err = servers.Get(computeClient, d.Id()).ExtractInto(&serverWithAZ)
 	if err != nil {
 		return CheckDeleted(d, err, "server")
+	}
+	computeClient.Microversion = "2.3" // Required for returning delete_on_termination
+	raw := servers.Get(computeClient, d.Id())
+	server, err1 := raw.Extract()
+	if err1 != nil {
+		return CheckDeleted(d, err1, "server")
+	}
+	var serverWithAttachments struct {
+		VolumesAttached []map[string]interface{} `json:"os-extended-volumes:volumes_attached"`
+	}
+	raw.ExtractInto(&serverWithAttachments)
+
+	log.Printf("[DEBUG] Retrieved ServerAttachments %+v", serverWithAttachments)
+
+	bds := []map[string]interface{}{}
+	if len(serverWithAttachments.VolumesAttached) > 0 {
+		blockStorageClient, err := config.blockStorageV2Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack volume client: %s", err)
+		}
+		idx := 0
+		for _, b := range serverWithAttachments.VolumesAttached {
+
+			vol, err := volumes.Get(blockStorageClient, b["id"].(string)).Extract()
+			if err != nil {
+				log.Printf("[ERR] %s", err)
+			}
+			v := map[string]interface{}{
+				"delete_on_termination": b["delete_on_termination"],
+				"uuid":                  vol.VolumeImageMetadata["image_id"],
+				"boot_index":            idx,
+				"destination_type":      "volume",
+				"source_type":           "image",
+				"volume_size":           vol.Size,
+				"disk_bus":              "",
+				"device_type":           "",
+			}
+			if vol.Bootable == "true" {
+				bds = append(bds, v)
+				idx++
+			}
+		}
+		d.Set("block_device", bds)
 	}
 
 	// Set the availability zone
@@ -1174,21 +1177,22 @@ func setImageInformation(computeClient *gophercloud.ServiceClient, server *serve
 			return nil
 		}
 	}
-
-	imageId := server.Image["id"].(string)
-	if imageId != "" {
-		d.Set("image_id", imageId)
-		if image, err := images.Get(computeClient, imageId).Extract(); err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				// If the image name can't be found, set the value to "Image not found".
-				// The most likely scenario is that the image no longer exists in the Image Service
-				// but the instance still has a record from when it existed.
-				d.Set("image_name", "Image not found")
-				return nil
+	if server.Image["id"] != nil {
+		imageId := server.Image["id"].(string)
+		if imageId != "" {
+			d.Set("image_id", imageId)
+			if image, err := images.Get(computeClient, imageId).Extract(); err != nil {
+				if _, ok := err.(gophercloud.ErrDefault404); ok {
+					// If the image name can't be found, set the value to "Image not found".
+					// The most likely scenario is that the image no longer exists in the Image Service
+					// but the instance still has a record from when it existed.
+					d.Set("image_name", "Image not found")
+					return nil
+				}
+				return err
+			} else {
+				d.Set("image_name", image.Name)
 			}
-			return err
-		} else {
-			d.Set("image_name", image.Name)
 		}
 	}
 

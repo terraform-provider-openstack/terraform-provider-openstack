@@ -10,11 +10,9 @@
 package openstack
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tenantnetworks"
@@ -463,8 +461,6 @@ func flattenInstanceNetworks(
 	}
 
 	// Loop through all networks and addresses, merge relevant address details.
-	var buffer bytes.Buffer
-
 	for _, instanceNetwork := range allInstanceNetworks {
 		for _, instanceAddresses := range allInstanceAddresses {
 			// Skip if instanceAddresses has no NICs
@@ -486,17 +482,10 @@ func flattenInstanceNetworks(
 					"port":           instanceNetwork.Port,
 					"access_network": instanceNetwork.AccessNetwork,
 				}
-				buffer.WriteString(v["mac"].(string))
-				if v["port"].(string) != "" {
-					buffer.WriteString("P")
-				}
-				buffer.WriteString("_")
 				networks = append(networks, v)
 			}
 		}
-
 	}
-	os.Setenv("TF_MAC_IMPORT_ORDER", strings.TrimSuffix(buffer.String(), "_")) //For test pass, in other cases must be calcuated and set manually
 
 	log.Printf("[DEBUG] flattenInstanceNetworks: %#v", networks)
 	return networks, nil

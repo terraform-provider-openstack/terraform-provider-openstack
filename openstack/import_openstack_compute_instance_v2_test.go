@@ -31,7 +31,7 @@ func TestAccComputeV2Instance_importBasic(t *testing.T) {
 		},
 	})
 }
-func TestAccComputeV2Instance_importCrazyNICs(t *testing.T) {
+func TestAccComputeV2Instance_importbootFromVolumeForceNew_1(t *testing.T) {
 	resourceName := "openstack_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
@@ -40,7 +40,7 @@ func TestAccComputeV2Instance_importCrazyNICs(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccComputeV2Instance_crazyNICs,
+				Config: testAccComputeV2Instance_bootFromVolumeForceNew_1,
 			},
 			resource.TestStep{
 				ResourceName:      resourceName,
