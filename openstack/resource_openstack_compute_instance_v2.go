@@ -20,12 +20,65 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 )
 
+func resourceOpenStackComputeInstanceV2ImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	results := make([]*schema.ResourceData, 1)
+	ordered_networks := []interface{}{}
+	config := meta.(*Config)
+	err := resourceComputeInstanceV2Read(d, meta)
+	if err != nil {
+		return nil, err
+	}
+	networkClient, err := config.networkingV2Client(GetRegion(d, config))
+	if err != nil {
+		return nil, fmt.Errorf("Error creating OpenStack networking client: %s", err)
+	}
+
+	for _, mac := range strings.Split(os.Getenv("TF_MAC_IMPORT_ORDER"), "_") {
+		pSpec := false
+		networks := []interface{}{}
+		networks = d.Get("network").([]interface{})
+		for _, n := range networks {
+			v := n.(map[string]interface{})
+			if strings.HasSuffix(mac, "P") {
+				mac = strings.TrimSuffix(mac, "P")
+				pSpec = true
+			}
+
+			if mac == v["mac"] {
+				if pSpec {
+					listOpts := ports.ListOpts{
+						MACAddress: mac,
+					}
+					allPages, err := ports.List(networkClient, listOpts).AllPages()
+					if err != nil {
+						return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
+					}
+
+					mPorts, err := ports.ExtractPorts(allPages)
+					if err != nil {
+						return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
+					}
+					v["port"] = mPorts[0].ID
+
+				}
+				ordered_networks = append(ordered_networks, v)
+			}
+		}
+
+	}
+	d.Set("network", ordered_networks)
+	results[0] = d
+
+	return results, nil
+
+}
 func resourceComputeInstanceV2() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeInstanceV2Create,
@@ -33,6 +86,9 @@ func resourceComputeInstanceV2() *schema.Resource {
 		Update: resourceComputeInstanceV2Update,
 		Delete: resourceComputeInstanceV2Delete,
 
+		Importer: &schema.ResourceImporter{
+			State: resourceOpenStackComputeInstanceV2ImportState,
+		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
@@ -536,6 +592,7 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	}
 
 	return resourceComputeInstanceV2Read(d, meta)
+
 }
 
 func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) error {
@@ -608,6 +665,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	}
 	d.Set("flavor_id", flavorId)
 
+	d.Set("key_pair", server.KeyName)
 	flavor, err := flavors.Get(computeClient, flavorId).Extract()
 	if err != nil {
 		return err
