@@ -855,13 +855,29 @@ func TestAccNetworkingV2Port_portBinding_update(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_networking_port_v2.port_1", "binding.#", "1"),
 					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "binding.0.vnic_type", "baremetal"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "binding.0.host_id", "localhost"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "binding.0.profile", "null"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Port_updatePortBinding_4,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "extra_dhcp_option.#", "0"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "binding.#", "1"),
+					resource.TestCheckResourceAttr(
 						"openstack_networking_port_v2.port_1", "binding.0.vnic_type", "normal"),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_port_v2.port_1", "binding.0.host_id", ""),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_updatePortBinding_4,
+				Config: testAccNetworkingV2Port_updatePortBinding_5,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -2581,6 +2597,34 @@ resource "openstack_networking_port_v2" "port_1" {
   }
 
   binding {
+    vnic_type = "normal"
+  }
+}
+`
+
+const testAccNetworkingV2Port_updatePortBinding_5 = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  admin_state_up = "false"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  fixed_ip {
+    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.199.23"
+  }
+
+  binding {
     host_id = "localhost"
     vnic_type = "baremetal"
   }
@@ -2610,7 +2654,9 @@ resource "openstack_networking_port_v2" "port_1" {
   }
 
   binding {
-    vnic_type = "normal"
+    host_id = "localhost"
+    vnic_type = "baremetal"
+    profile = "null"
   }
 }
 `
