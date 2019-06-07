@@ -137,7 +137,7 @@ func TestAccComputeV2SecGroup_lowerCaseCIDR(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup),
 					resource.TestCheckResourceAttr(
-						"openstack_compute_secgroup_v2.sg_1", "rule.3862435458.cidr", "2001:558:fc00::/39"),
+						"openstack_compute_secgroup_v2.sg_1", "rule.768649014.cidr", "2001:558:fc00::/39"),
 				),
 			},
 		},
@@ -366,9 +366,9 @@ resource "openstack_compute_secgroup_v2" "sg_1" {
   name = "sg_1"
   description = "first test security group"
   rule {
-    from_port = 0
-    to_port = 0
-    ip_protocol = "icmp"
+    from_port = 22
+    to_port = 22
+    ip_protocol = "tcp"
     cidr = "2001:558:FC00::/39"
   }
 }
