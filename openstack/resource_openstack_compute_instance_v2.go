@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
@@ -33,6 +34,9 @@ func resourceComputeInstanceV2() *schema.Resource {
 		Update: resourceComputeInstanceV2Update,
 		Delete: resourceComputeInstanceV2Delete,
 
+		Importer: &schema.ResourceImporter{
+			State: resourceOpenStackComputeInstanceV2ImportState,
+		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
@@ -608,6 +612,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	}
 	d.Set("flavor_id", flavorId)
 
+	d.Set("key_pair", server.KeyName)
 	flavor, err := flavors.Get(computeClient, flavorId).Extract()
 	if err != nil {
 		return err
@@ -630,7 +635,6 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	if err != nil {
 		return CheckDeleted(d, err, "server")
 	}
-
 	// Set the availability zone
 	d.Set("availability_zone", serverWithAZ.AvailabilityZone)
 
@@ -945,6 +949,77 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 	return nil
 }
 
+func resourceOpenStackComputeInstanceV2ImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+
+	var serverWithAttachments struct {
+		VolumesAttached []map[string]interface{} `json:"os-extended-volumes:volumes_attached"`
+	}
+
+	config := meta.(*Config)
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
+	if err != nil {
+		return nil, fmt.Errorf("Error creating OpenStack compute client: %s", err)
+	}
+
+	results := make([]*schema.ResourceData, 1)
+	err = resourceComputeInstanceV2Read(d, meta)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading openstack_compute_instance_v2 %s: %s", d.Id(), err)
+	}
+
+	raw := servers.Get(computeClient, d.Id())
+	if raw.Err != nil {
+		return nil, CheckDeleted(d, raw.Err, "openstack_compute_instance_v2")
+	}
+
+	raw.ExtractInto(&serverWithAttachments)
+
+	log.Printf("[DEBUG] Retrieved openstack_compute_instance_v2 %s volume attachments: %#v",
+		d.Id(), serverWithAttachments)
+
+	bds := []map[string]interface{}{}
+	if len(serverWithAttachments.VolumesAttached) > 0 {
+		blockStorageClient, err := config.blockStorageV2Client(GetRegion(d, config))
+		if err != nil {
+			return nil, fmt.Errorf("Error creating OpenStack volume client: %s", err)
+		}
+
+		var volMetaData = struct {
+			VolumeImageMetadata map[string]interface{} `json:"volume_image_metadata"`
+			Id                  string                 `json:"id"`
+			Size                int                    `json:"size"`
+			Bootable            string                 `json:"bootable"`
+		}{}
+		for i, b := range serverWithAttachments.VolumesAttached {
+			rawVolume := volumes.Get(blockStorageClient, b["id"].(string))
+			rawVolume.ExtractInto(&volMetaData)
+
+			log.Printf("[DEBUG] retrieved volume%+v", volMetaData)
+			v := map[string]interface{}{
+				"delete_on_termination": true,
+				"uuid":                  volMetaData.VolumeImageMetadata["image_id"],
+				"boot_index":            i,
+				"destination_type":      "volume",
+				"source_type":           "image",
+				"volume_size":           volMetaData.Size,
+				"disk_bus":              "",
+				"device_type":           "",
+			}
+
+			if volMetaData.Bootable == "true" {
+				bds = append(bds, v)
+			}
+		}
+
+		d.Set("block_device", bds)
+	}
+	metadata, err := servers.Metadata(computeClient, d.Id()).Extract()
+	d.Set("metadata", metadata)
+	results[0] = d
+
+	return results, nil
+}
+
 // ServerV2StateRefreshFunc returns a resource.StateRefreshFunc that is used to watch
 // an OpenStack instance.
 func ServerV2StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string) resource.StateRefreshFunc {
@@ -1117,20 +1192,22 @@ func setImageInformation(computeClient *gophercloud.ServiceClient, server *serve
 		}
 	}
 
-	imageId := server.Image["id"].(string)
-	if imageId != "" {
-		d.Set("image_id", imageId)
-		if image, err := images.Get(computeClient, imageId).Extract(); err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				// If the image name can't be found, set the value to "Image not found".
-				// The most likely scenario is that the image no longer exists in the Image Service
-				// but the instance still has a record from when it existed.
-				d.Set("image_name", "Image not found")
-				return nil
+	if server.Image["id"] != nil {
+		imageId := server.Image["id"].(string)
+		if imageId != "" {
+			d.Set("image_id", imageId)
+			if image, err := images.Get(computeClient, imageId).Extract(); err != nil {
+				if _, ok := err.(gophercloud.ErrDefault404); ok {
+					// If the image name can't be found, set the value to "Image not found".
+					// The most likely scenario is that the image no longer exists in the Image Service
+					// but the instance still has a record from when it existed.
+					d.Set("image_name", "Image not found")
+					return nil
+				}
+				return err
+			} else {
+				d.Set("image_name", image.Name)
 			}
-			return err
-		} else {
-			d.Set("image_name", image.Name)
 		}
 	}
 
