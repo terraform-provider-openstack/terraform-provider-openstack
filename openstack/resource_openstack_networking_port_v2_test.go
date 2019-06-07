@@ -788,7 +788,6 @@ func TestAccNetworkingV2Port_portBinding_update(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
