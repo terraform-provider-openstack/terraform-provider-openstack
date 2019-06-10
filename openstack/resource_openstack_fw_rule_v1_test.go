@@ -141,6 +141,35 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 						"openstack_fw_rule_v1.rule_1", "enabled", "false"),
 				),
 			},
+
+			{
+				Config: testAccFWRuleV1_basic_6,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "name", "rule_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "protocol", "udp"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "action", "deny"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "description", "Terraform accept test"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "ip_version", "4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_ip_address", "1.2.3.4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_ip_address", "4.3.2.0/24"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_port", "444"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_port", "555"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "enabled", "true"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "policy_id", "9f9c3c03-t572-4a5c-ab6z-99cfe88a1234"),
+				),
+			},
 		},
 	})
 }
@@ -236,6 +265,76 @@ func TestAccFWRuleV1_updateName(t *testing.T) {
 						"openstack_fw_rule_v1.rule_1", "destination_port", "555"),
 					resource.TestCheckResourceAttr(
 						"openstack_fw_rule_v1.rule_1", "enabled", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccFWRuleV1_updatePolicyID(t *testing.T) {
+	var rule rules.Rule
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckFWRuleV1Destroy,
+		Steps: []resource.TestStep{
+
+			{
+				Config: testAccFWRuleV1_updatePolicyID_1,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "name", "rule_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "action", "deny"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "protocol", "udp"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "description", "Terraform accept test"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "ip_version", "4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_ip_address", "1.2.3.4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_ip_address", "4.3.2.0/24"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_port", "444"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_port", "555"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "enabled", "true"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "policy_id", "9f9c3c03-t572-4a5c-ab6z-99cfe88a1234"),
+				),
+			},
+
+			{
+				Config: testAccFWRuleV1_updatePolicyID_1,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "name", "rule_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "action", "deny"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "protocol", "udp"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "description", "Terraform accept test"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "ip_version", "4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_ip_address", "1.2.3.4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_ip_address", "4.3.2.0/24"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_port", "444"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_port", "555"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "enabled", "true"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "policy_id", "9f9c3c03-t572-4a5c-ab6z-99cfe88a1235"),
 				),
 			},
 		},
@@ -369,6 +468,21 @@ resource "openstack_fw_rule_v1" "rule_1" {
 }
 `
 
+const testAccFWRuleV1_basic_6 = `
+resource "openstack_fw_rule_v1" "rule_1" {
+	name = "rule_1"
+	description = "Terraform accept test updated"
+	protocol = "udp"
+	action = "allow"
+	ip_version = 4
+	source_ip_address = "1.2.3.0/24"
+	destination_ip_address = "4.3.2.8"
+	source_port = "666"
+	enabled = false
+	policy_id = "9f9c3c03-t572-4a5c-ab6z-99cfe88a1234"
+}
+`
+
 const testAccFWRuleV1_anyProtocol = `
 resource "openstack_fw_rule_v1" "rule_1" {
 	name = "rule_1"
@@ -408,5 +522,37 @@ resource "openstack_fw_rule_v1" "rule_1" {
 	source_port = "444"
 	destination_port = "555"
 	enabled = true
+}
+`
+
+const testAccFWRuleV1_updatePolicyID_1 = `
+resource "openstack_fw_rule_v1" "rule_1" {
+	name = "rule_1"
+	description = "Terraform accept test"
+	protocol = "udp"
+	action = "deny"
+	ip_version = 4
+	source_ip_address = "1.2.3.4"
+	destination_ip_address = "4.3.2.0/24"
+	source_port = "444"
+	destination_port = "555"
+	enabled = true
+	policy_id = "9f9c3c03-t572-4a5c-ab6z-99cfe88a1234"
+}
+`
+
+const testAccFWRuleV1_updatePolicyID_2 = `
+resource "openstack_fw_rule_v1" "rule_1" {
+	name = "rule_1"
+	description = "Terraform accept test"
+	protocol = "udp"
+	action = "deny"
+	ip_version = 4
+	source_ip_address = "1.2.3.4"
+	destination_ip_address = "4.3.2.0/24"
+	source_port = "444"
+	destination_port = "555"
+	enabled = true
+	policy_id = "9f9c3c03-t572-4a5c-ab6z-99cfe88a1235"
 }
 `

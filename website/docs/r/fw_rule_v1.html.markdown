@@ -73,6 +73,9 @@ The following arguments are supported:
     wants to create a firewall rule for another tenant. Changing this creates a
     new firewall rule.
 
+* `policy_id` - (Optional) The ID of the firewall policy. Changing this inserts or
+    removes the rule from policy.
+
 * `value_specs` - (Optional) Map of additional options.
 
 ## Attributes Reference

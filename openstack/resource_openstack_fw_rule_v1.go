@@ -90,6 +90,12 @@ func resourceFWRuleV1() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			
+			"policy_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -127,6 +133,20 @@ func resourceFWRuleV1Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] Created openstack_fw_rule_v1 %s: %#v", rule.ID, rule)
+	
+	policyID := d.Get("policy_id").(string)
+
+	if policyID != "" {
+
+		ruleOpts := policies.InsertRuleOpts{
+			ID: rule.ID,
+		}
+
+		_, err := policies.AddRule(networkingClient, policyID, ruleOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error adding openstack_fw_rule_v1 %s into policy %s: %s", d.Id(), policyID, err)
+		}
+	}
 
 	d.SetId(rule.ID)
 
@@ -253,6 +273,25 @@ func resourceFWRuleV1Update(d *schema.ResourceData, meta interface{}) error {
 	err = rules.Update(networkingClient, d.Id(), updateOpts).Err
 	if err != nil {
 		return fmt.Errorf("Error updating openstack_fw_rule_v1 %s: %s", d.Id(), err)
+	}
+
+	if d.HasChange("policy_id") {
+		policyID := d.Get("policy_id").(string)
+
+		if policyID != "" {
+			ruleOpts := policies.InsertRuleOpts{
+				ID: d.Id(),
+			}
+			_, err := policies.AddRule(networkingClient, policyID, ruleOpts).Extract()
+			if err != nil {
+				return fmt.Errorf("Error adding openstack_fw_rule_v1 %s into policy %s: %s", d.Id(), policyID, err)
+			}
+		} else {
+			_, err := policies.RemoveRule(networkingClient, policyID, d.Id()).Extract()
+			if err != nil {
+				return fmt.Errorf("Error removing openstack_fw_rule_v1 %s from policy %s: %s", d.Id(), policyID, err)
+			}
+		}
 	}
 
 	return resourceFWRuleV1Read(d, meta)

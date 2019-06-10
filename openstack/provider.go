@@ -228,6 +228,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_containerinfra_clustertemplate_v1":      dataSourceContainerInfraClusterTemplateV1(),
 			"openstack_containerinfra_cluster_v1":              dataSourceContainerInfraCluster(),
 			"openstack_dns_zone_v2":                            dataSourceDNSZoneV2(),
+			"openstack_fw_firewall_v1":                         dataSourceFWFirewallV1(),
 			"openstack_fw_policy_v1":                           dataSourceFWPolicyV1(),
 			"openstack_identity_role_v3":                       dataSourceIdentityRoleV3(),
 			"openstack_identity_project_v3":                    dataSourceIdentityProjectV3(),
