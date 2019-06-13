@@ -421,7 +421,15 @@ The `scheduler_hints` block supports:
     scheduled on the same host of those specified.
 
 * `query` - (Optional) A conditional query that a compute node must pass in
-    order to host an instance.
+    order to host an instance. The query must use the `JsonFilter` syntax
+    which is described
+    [here](https://docs.openstack.org/nova/latest/admin/configuration/schedulers.html#jsonfilter).
+    At this time, only simple queries are supported. Compound queries using
+    `and`, `or`, or `not` are not supported. An example of a simple query is:
+
+    ```
+    [">=", "$free_ram_mb", "1024"]
+    ```
 
 * `target_cell` - (Optional) The name of a cell to host the instance.
 
