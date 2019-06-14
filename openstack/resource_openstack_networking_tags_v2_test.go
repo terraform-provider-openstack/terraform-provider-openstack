@@ -2,9 +2,13 @@ package openstack
 
 import (
 	"fmt"
+	"reflect"
+	"sort"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
 )
 
 func TestAccNetworkingV2_tags(t *testing.T) {
@@ -67,6 +71,42 @@ func TestAccNetworkingV2_tags(t *testing.T) {
 			},
 		},
 	})
+}
+
+// Shared acceptance test for network tags
+func testAccCheckNetworkingV2Tags(name string, tags []string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[name]
+
+		if !ok {
+			return fmt.Errorf("resource not found: %s", name)
+		}
+
+		if _, ok := rs.Primary.Attributes["tags.#"]; !ok {
+			return fmt.Errorf("resource tags not found: %s.tags", name)
+		}
+
+		var rtags []string
+		for key, val := range rs.Primary.Attributes {
+			if !strings.HasPrefix(key, "tags.") {
+				continue
+			}
+
+			if key == "tags.#" {
+				continue
+			}
+
+			rtags = append(rtags, val)
+		}
+
+		sort.Strings(rtags)
+		sort.Strings(tags)
+		if !reflect.DeepEqual(rtags, tags) {
+			return fmt.Errorf(
+				"%s.tags: expected: %#v, got %#v", name, tags, rtags)
+		}
+		return nil
+	}
 }
 
 const testAccNetworkingV2_config = `
