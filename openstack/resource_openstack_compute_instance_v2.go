@@ -1036,7 +1036,7 @@ func resourceInstanceSchedulerHintsV2(d *schema.ResourceData, schedulerHintsRaw 
 		}
 	}
 
-	query := make([]interface{}, len(schedulerHintsRaw["query"].([]interface{})))
+	query := []interface{}{}
 	if len(schedulerHintsRaw["query"].([]interface{})) > 0 {
 		for _, q := range schedulerHintsRaw["query"].([]interface{}) {
 			query = append(query, q.(string))
