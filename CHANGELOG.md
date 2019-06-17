@@ -3,6 +3,7 @@
 BUG FIXES
 
 * Fixed bug preventing a floating IP from being re-associated with an instance when using `create_before_destroy` [GH-761]
+* Fixed bug preventing `openstack_compute_instance_v2` scheduler hint queries from working [GH-771]
 
 ## 1.19.0 (May 22, 2019)
 
