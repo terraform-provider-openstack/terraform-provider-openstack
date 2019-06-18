@@ -6,6 +6,12 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// QoSPolicyCreateOpts represents the attributes used when creating a new QoS policy.
+type QoSPolicyCreateOpts struct {
+	policies.CreateOpts
+	ValueSpecs map[string]string `json:"value_specs,omitempty"`
+}
+
 func networkingQoSPolicyV2StateRefreshFunc(client *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		policy, err := policies.Get(client, id).Extract()
