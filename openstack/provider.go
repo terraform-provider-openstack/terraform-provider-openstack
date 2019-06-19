@@ -301,6 +301,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_networking_network_v2":                 resourceNetworkingNetworkV2(),
 			"openstack_networking_port_v2":                    resourceNetworkingPortV2(),
 			"openstack_networking_port_secgroup_associate_v2": resourceNetworkingPortSecGroupAssociateV2(),
+			"openstack_networking_qos_policy_v2":              resourceNetworkingQoSPolicyV2(),
 			"openstack_networking_router_v2":                  resourceNetworkingRouterV2(),
 			"openstack_networking_router_interface_v2":        resourceNetworkingRouterInterfaceV2(),
 			"openstack_networking_router_route_v2":            resourceNetworkingRouterRouteV2(),
