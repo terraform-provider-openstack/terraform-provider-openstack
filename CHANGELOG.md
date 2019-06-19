@@ -1,5 +1,9 @@
 ## 1.20.0 (Unreleased)
 
+IMPROVEMENTS
+
+* __New Resource__: `openstack_networking_qos_policy_v2` [GH-774]
+
 BUG FIXES
 
 * Fixed bug preventing a floating IP from being re-associated with an instance when using `create_before_destroy` [GH-761]
