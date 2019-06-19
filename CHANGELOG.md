@@ -1,8 +1,12 @@
 ## 1.20.0 (Unreleased)
 
-IMPROVEMENTS
+FEATURES
 
 * __New Resource__: `openstack_networking_qos_policy_v2` [GH-774]
+
+IMPROVEMENTS
+
+* Updated documentation and Travis CI configuration with newer versions of Go and Terraform [GH-777]
 
 BUG FIXES
 
