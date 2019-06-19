@@ -1,7 +1,7 @@
 ---
 layout: "openstack"
 page_title: "OpenStack: openstack_networking_qos_policy_v2"
-sidebar_current: "docs-openstack-resource-networking-subnetpool-v2"
+sidebar_current: "docs-openstack-resource-networking-qos-policy-v2"
 description: |-
   Manages a V2 Neutron QoS policy resource within OpenStack.
 ---
