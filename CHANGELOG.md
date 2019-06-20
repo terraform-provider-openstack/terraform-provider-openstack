@@ -3,6 +3,7 @@
 FEATURES
 
 * __New Resource__: `openstack_networking_qos_policy_v2` [GH-774]
+* __New Data Source__: `openstack_networking_qos_policy_v2`[GH-779]
 
 IMPROVEMENTS
 
