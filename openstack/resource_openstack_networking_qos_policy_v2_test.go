@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
 )
 
 func TestAccNetworkingV2QoSPolicyBasic(t *testing.T) {

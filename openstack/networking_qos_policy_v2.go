@@ -1,9 +1,10 @@
 package openstack
 
 import (
+	"github.com/hashicorp/terraform/helper/resource"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
-	"github.com/hashicorp/terraform/helper/resource"
 )
 
 // QoSPolicyCreateOpts represents the attributes used when creating a new QoS policy.
