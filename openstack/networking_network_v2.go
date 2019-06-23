@@ -9,6 +9,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/mtu"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vlantransparent"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/pagination"
@@ -25,6 +26,7 @@ type networkExtended struct {
 	portsecurity.PortSecurityExt
 	mtu.NetworkMTUExt
 	dns.NetworkDNSExt
+	policies.QoSPolicyExt
 }
 
 // networkingNetworkV2ID retrieves network ID by the provided name.
