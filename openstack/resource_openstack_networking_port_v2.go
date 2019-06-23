@@ -6,16 +6,18 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/structure"
+	"github.com/hashicorp/terraform/helper/validation"
+
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsbinding"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/structure"
-	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func resourceNetworkingPortV2() *schema.Resource {
@@ -264,6 +266,13 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeMap},
 			},
+
+			"qos_policy_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -368,6 +377,13 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
+	if qosPolicyID := d.Get("qos_policy_id").(string); qosPolicyID != "" {
+		finalCreateOpts = policies.PortCreateOptsExt{
+			CreateOptsBuilder: finalCreateOpts,
+			QoSPolicyID:       qosPolicyID,
+		}
+	}
+
 	log.Printf("[DEBUG] openstack_networking_port_v2 create options: %#v", finalCreateOpts)
 
 	// Create a Neutron port and set extra options if they're specified.
@@ -451,6 +467,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	d.Set("binding", flattenNetworkingPortBindingV2(port))
 	d.Set("dns_name", port.DNSName)
 	d.Set("dns_assignment", port.DNSAssignment)
+	d.Set("qos_policy_id", port.QoSPolicyID)
 
 	d.Set("region", GetRegion(d, config))
 
@@ -608,6 +625,14 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		finalUpdateOpts = dns.PortUpdateOptsExt{
 			UpdateOptsBuilder: finalUpdateOpts,
 			DNSName:           &dnsName,
+		}
+	}
+
+	if d.HasChange("qos_policy_id") {
+		qosPolicyID := d.Get("qos_policy_id").(string)
+		finalUpdateOpts = policies.PortUpdateOptsExt{
+			UpdateOptsBuilder: finalUpdateOpts,
+			QoSPolicyID:       &qosPolicyID,
 		}
 	}
 

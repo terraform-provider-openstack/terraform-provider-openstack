@@ -142,6 +142,8 @@ The following arguments are supported:
 
 * `dns_name` - (Optional) The port DNS name. Available, when Neutron DNS extension
     is enabled.
+    
+* `qos_policy_id` - (Optional) Reference to the associated QoS policy.
 
 The `fixed_ip` block supports:
 
@@ -208,6 +210,7 @@ The following attributes are exported:
 * `binding` - See Argument Reference above.
 * `dns_name` - See Argument Reference above.
 * `dns_assignment` - The list of maps representing port DNS assignments.
+* `qos_policy_id` - See Argument Reference above.
 
 ## Import
 
