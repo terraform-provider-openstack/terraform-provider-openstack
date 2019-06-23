@@ -8,6 +8,8 @@ FEATURES
 IMPROVEMENTS
 
 * Updated documentation and Travis CI configuration with newer versions of Go and Terraform [GH-777]
+* Added `qos_policy_id` to `openstack_networking_network_v2` [GH-780]
+* Added `qos_policy_id` to `openstack_networking_port_v2` [GH-781]
 
 BUG FIXES
 
