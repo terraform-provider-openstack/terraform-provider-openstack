@@ -11,6 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
@@ -19,6 +20,7 @@ import (
 type testNetworkWithExtensions struct {
 	networks.Network
 	portsecurity.PortSecurityExt
+	policies.QoSPolicyExt
 }
 
 func TestAccNetworkingV2Network_basic(t *testing.T) {
@@ -429,6 +431,75 @@ func TestAccNetworkingV2Network_portSecurity_enabled(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Network_qos_policy_create(t *testing.T) {
+	var (
+		network   testNetworkWithExtensions
+		qosPolicy policies.Policy
+	)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_qos_policy,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkWithExtensionsExists(
+						"openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2QoSPolicyExists(
+						"openstack_networking_qos_policy_v2.qos_policy_1", &qosPolicy),
+					resource.TestCheckResourceAttrSet(
+						"openstack_networking_network_v2.network_1", "qos_policy_id"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_qos_policy_update(t *testing.T) {
+	var (
+		network   testNetworkWithExtensions
+		qosPolicy policies.Policy
+	)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_basic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkWithExtensionsExists(
+						"openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "name", "network_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "description", "my network description"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Network_qos_policy,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkWithExtensionsExists(
+						"openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2QoSPolicyExists(
+						"openstack_networking_qos_policy_v2.qos_policy_1", &qosPolicy),
+					resource.TestCheckResourceAttrSet(
+						"openstack_networking_network_v2.network_1", "qos_policy_id"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2NetworkDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
@@ -694,5 +765,18 @@ const testAccNetworkingV2Network_portSecurity_enabled = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   port_security_enabled = "true"
+}
+`
+
+const testAccNetworkingV2Network_qos_policy = `
+resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
+  name = "qos_policy_1"
+}
+
+resource "openstack_networking_network_v2" "network_1" {
+  name           = "network_1"
+  description    = "my network description"
+  admin_state_up = "true"
+  qos_policy_id  = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
 }
 `

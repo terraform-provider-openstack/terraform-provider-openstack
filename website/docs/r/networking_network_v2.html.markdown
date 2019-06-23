@@ -119,6 +119,8 @@ The following arguments are supported:
     extension is enabled. The `dns_domain` of a network in conjunction with the
     `dns_name` attribute of its ports will be published in an external DNS
     service when Neutron is configured to integrate with such a service.
+    
+* `qos_policy_id` - (Optional) Reference to the associated QoS policy.
 
 The `segments` block supports:
 
@@ -145,6 +147,7 @@ The following attributes are exported:
 * `port_security_enabled` - See Argument Reference above.
 * `mtu` - See Argument Reference above.
 * `dns_domain` - See Argument Reference above.
+* `qos_policy_id` - See Argument Reference above.
 
 ## Import
 

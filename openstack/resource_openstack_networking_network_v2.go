@@ -16,6 +16,7 @@ import (
 	mtuext "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/mtu"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vlantransparent"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 )
@@ -158,6 +159,13 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^$|\.$`), "fully-qualified (unambiguous) DNS domain names must have a dot at the end"),
 			},
+
+			"qos_policy_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -248,6 +256,14 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+	// Add the QoS policy ID attribute if specified.
+	if qosPolicyID := d.Get("qos_policy_id").(string); qosPolicyID != "" {
+		finalCreateOpts = policies.NetworkCreateOptsExt{
+			CreateOptsBuilder: finalCreateOpts,
+			QoSPolicyID:       qosPolicyID,
+		}
+	}
+
 	log.Printf("[DEBUG] openstack_networking_network_v2 create options: %#v", finalCreateOpts)
 	n, err := networks.Create(networkingClient, finalCreateOpts).Extract()
 	if err != nil {
@@ -312,6 +328,7 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 	d.Set("port_security_enabled", network.PortSecurityEnabled)
 	d.Set("mtu", network.MTU)
 	d.Set("dns_domain", network.DNSDomain)
+	d.Set("qos_policy_id", network.QoSPolicyID)
 	d.Set("region", GetRegion(d, config))
 
 	networkV2ReadAttributesTags(d, network.Tags)
@@ -399,6 +416,14 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 		finalUpdateOpts = dns.NetworkUpdateOptsExt{
 			UpdateOptsBuilder: finalUpdateOpts,
 			DNSDomain:         &dnsDomain,
+		}
+	}
+
+	if d.HasChange("qos_policy_id") {
+		qosPolicyID := d.Get("qos_policy_id").(string)
+		finalUpdateOpts = policies.NetworkUpdateOptsExt{
+			UpdateOptsBuilder: finalUpdateOpts,
+			QoSPolicyID:       &qosPolicyID,
 		}
 	}
 
