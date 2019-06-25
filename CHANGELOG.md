@@ -4,6 +4,7 @@ FEATURES
 
 * __New Resource__: `openstack_networking_qos_policy_v2` [GH-774]
 * __New Resource__: `openstack_networking_qos_bandwidth_limit_rule_v2` [GH-783]
+* __New Resource__: `openstack_networking_qos_dscp_marking_rule_v2` [GH-784]
 * __New Data Source__: `openstack_networking_qos_policy_v2`[GH-779]
 
 IMPROVEMENTS
