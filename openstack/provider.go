@@ -303,6 +303,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_networking_port_v2":                     resourceNetworkingPortV2(),
 			"openstack_networking_port_secgroup_associate_v2":  resourceNetworkingPortSecGroupAssociateV2(),
 			"openstack_networking_qos_bandwidth_limit_rule_v2": resourceNetworkingQoSBandwidthLimitRuleV2(),
+			"openstack_networking_qos_dscp_marking_rule_v2":    resourceNetworkingQoSDSCPMarkingRuleV2(),
 			"openstack_networking_qos_policy_v2":               resourceNetworkingQoSPolicyV2(),
 			"openstack_networking_router_v2":                   resourceNetworkingRouterV2(),
 			"openstack_networking_router_interface_v2":         resourceNetworkingRouterInterfaceV2(),
