@@ -40,3 +40,21 @@ func networkingQoSBandwidthLimitRuleV2StateRefreshFunc(client *gophercloud.Servi
 		return policy, "ACTIVE", nil
 	}
 }
+
+func networkingQoSDSCPMarkingRuleV2StateRefreshFunc(client *gophercloud.ServiceClient, policyID, ruleID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		policy, err := rules.GetDSCPMarkingRule(client, policyID, ruleID).ExtractDSCPMarkingRule()
+		if err != nil {
+			if _, ok := err.(gophercloud.ErrDefault404); ok {
+				return policy, "DELETED", nil
+			}
+			if _, ok := err.(gophercloud.ErrDefault409); ok {
+				return policy, "ACTIVE", nil
+			}
+
+			return nil, "", err
+		}
+
+		return policy, "ACTIVE", nil
+	}
+}
