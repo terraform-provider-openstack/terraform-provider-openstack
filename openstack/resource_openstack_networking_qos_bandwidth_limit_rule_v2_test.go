@@ -137,7 +137,6 @@ resource "openstack_networking_qos_bandwidth_limit_rule_v2" "bw_limit_rule_1" {
   qos_policy_id  = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
   max_kbps       = 3000
   max_burst_kbps = 300
-  direction      = "egress"
 }
 `
 
@@ -150,6 +149,5 @@ resource "openstack_networking_qos_bandwidth_limit_rule_v2" "bw_limit_rule_1" {
   qos_policy_id  = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
   max_kbps       = 2000
   max_burst_kbps = 100
-  direction      = "ingress"
 }
 `

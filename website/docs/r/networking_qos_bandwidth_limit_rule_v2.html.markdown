@@ -44,8 +44,8 @@ The following arguments are supported:
 * `max_burst_kbps` - (Optional) The maximum burst size in kilobits of a QoS bandwidth limit rule. Changing this updates the
     maximum burst size in kilobits of the existing QoS bandwidth limit rule.
    
-* `direction` - (Optional) The direction of traffic. Changing this updates the direction of the existing
-    QoS bandwidth limit rule.
+* `direction` - (Optional) The direction of traffic. Defaults to "egress". Changing this updates the direction of the
+    existing QoS bandwidth limit rule.
     
 ## Attributes Reference
 
