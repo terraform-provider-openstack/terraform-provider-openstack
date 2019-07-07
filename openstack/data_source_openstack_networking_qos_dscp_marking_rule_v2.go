@@ -28,6 +28,7 @@ func dataSourceNetworkingQoSDSCPMarkingRuleV2() *schema.Resource {
 
 			"dscp_mark": {
 				Type:     schema.TypeInt,
+				Computed: true,
 				Optional: true,
 				ForceNew: false,
 			},
