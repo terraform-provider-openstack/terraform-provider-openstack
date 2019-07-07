@@ -54,6 +54,7 @@ func resourceNetworkingQoSBandwidthLimitRuleV2() *schema.Resource {
 
 			"direction": {
 				Type:     schema.TypeString,
+				Default:  "egress",
 				Optional: true,
 				ForceNew: false,
 			},
