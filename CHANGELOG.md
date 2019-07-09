@@ -1,27 +1,27 @@
-## 1.20.0 (Unreleased)
+## 1.20.0 (July 09, 2019)
 
 FEATURES
 
-* __New Resource__: `openstack_networking_qos_policy_v2` [GH-774]
-* __New Resource__: `openstack_networking_qos_bandwidth_limit_rule_v2` [GH-783]
-* __New Resource__: `openstack_networking_qos_dscp_marking_rule_v2` [GH-784]
-* __New Resource__: `openstack_networking_qos_minimum_bandwidth_rule_v2` [GH-790]
-* __New Data Source__: `openstack_networking_qos_policy_v2`[GH-779]
-* __New Data Source__: `openstack_networking_qos_bandwidth_limit_rule_v2` [GH-788]
-* __New Data Source__: `openstack_networking_qos_dscp_marking_rule_v2` [GH-789]
-* __New Data Source__: `openstack_networking_qos_minimum_bandwidth_rule_v2` [GH-793]
+* __New Resource__: `openstack_networking_qos_policy_v2` ([#774](https://github.com/terraform-providers/terraform-provider-openstack/issues/774))
+* __New Resource__: `openstack_networking_qos_bandwidth_limit_rule_v2` ([#783](https://github.com/terraform-providers/terraform-provider-openstack/issues/783))
+* __New Resource__: `openstack_networking_qos_dscp_marking_rule_v2` ([#784](https://github.com/terraform-providers/terraform-provider-openstack/issues/784))
+* __New Resource__: `openstack_networking_qos_minimum_bandwidth_rule_v2` ([#790](https://github.com/terraform-providers/terraform-provider-openstack/issues/790))
+* __New Data Source__: `openstack_networking_qos_policy_v2`([#779](https://github.com/terraform-providers/terraform-provider-openstack/issues/779))
+* __New Data Source__: `openstack_networking_qos_bandwidth_limit_rule_v2` ([#788](https://github.com/terraform-providers/terraform-provider-openstack/issues/788))
+* __New Data Source__: `openstack_networking_qos_dscp_marking_rule_v2` ([#789](https://github.com/terraform-providers/terraform-provider-openstack/issues/789))
+* __New Data Source__: `openstack_networking_qos_minimum_bandwidth_rule_v2` ([#793](https://github.com/terraform-providers/terraform-provider-openstack/issues/793))
 
 IMPROVEMENTS
 
-* Updated documentation and Travis CI configuration with newer versions of Go and Terraform [GH-777]
-* Added `qos_policy_id` to `openstack_networking_network_v2` [GH-780]
-* Added `qos_policy_id` to `openstack_networking_port_v2` [GH-781]
-* Updated Terraform SDK to `v0.12.2` [GH-795]
+* Updated documentation and Travis CI configuration with newer versions of Go and Terraform ([#777](https://github.com/terraform-providers/terraform-provider-openstack/issues/777))
+* Added `qos_policy_id` to `openstack_networking_network_v2` ([#780](https://github.com/terraform-providers/terraform-provider-openstack/issues/780))
+* Added `qos_policy_id` to `openstack_networking_port_v2` ([#781](https://github.com/terraform-providers/terraform-provider-openstack/issues/781))
+* Updated Terraform SDK to `v0.12.2` ([#795](https://github.com/terraform-providers/terraform-provider-openstack/issues/795))
 
 BUG FIXES
 
-* Fixed bug preventing a floating IP from being re-associated with an instance when using `create_before_destroy` [GH-761]
-* Fixed bug preventing `openstack_compute_instance_v2` scheduler hint queries from working [GH-771]
+* Fixed bug preventing a floating IP from being re-associated with an instance when using `create_before_destroy` ([#761](https://github.com/terraform-providers/terraform-provider-openstack/issues/761))
+* Fixed bug preventing `openstack_compute_instance_v2` scheduler hint queries from working ([#771](https://github.com/terraform-providers/terraform-provider-openstack/issues/771))
 
 ## 1.19.0 (May 22, 2019)
 
