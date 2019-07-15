@@ -1,4 +1,9 @@
 ## 1.21.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Updated website documentation to formalize inline HCL code to canonical format according to Terraform v0.12 style conventions [GH-797]
+
 ## 1.20.0 (July 09, 2019)
 
 FEATURES
