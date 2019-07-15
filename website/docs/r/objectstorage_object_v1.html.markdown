@@ -35,7 +35,7 @@ resource "openstack_objectstorage_object_v1" "doc_1" {
   }
 
   content_type = "application/json"
-  content = <<JSON
+  content      = <<JSON
                {
                  "foo" : "bar"
                }

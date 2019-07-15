@@ -16,11 +16,11 @@ Manages a DNS zone in the OpenStack DNS Service.
 
 ```hcl
 resource "openstack_dns_zone_v2" "example.com" {
-  name = "example.com."
-  email = "jdoe@example.com"
+  name        = "example.com."
+  email       = "jdoe@example.com"
   description = "An example zone"
-  ttl = 3000
-  type = "PRIMARY"
+  ttl         = 3000
+  type        = "PRIMARY"
 }
 ```
 

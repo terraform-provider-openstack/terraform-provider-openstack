@@ -16,11 +16,11 @@ Manages a V1 Magnum cluster resource within OpenStack.
 
 ```hcl
 resource "openstack_containerinfra_cluster_v1" "cluster_1" {
-  name                 = "cluster_1"
-  cluster_template_id  = "b9a45c5c-cd03-4958-82aa-b80bf93cb922"
-  master_count         = 3
-  node_count           = 5
-  keypair              = "ssh_keypair"
+  name                = "cluster_1"
+  cluster_template_id = "b9a45c5c-cd03-4958-82aa-b80bf93cb922"
+  master_count        = 3
+  node_count          = 5
+  keypair             = "ssh_keypair"
 }
 ```
 

@@ -24,7 +24,7 @@ resource "openstack_objectstorage_container_v1" "container_1" {
   content_type = "application/json"
 
   versioning {
-    type = "versions"
+    type     = "versions"
     location = "tf-test-container-versions"
   }
 }
