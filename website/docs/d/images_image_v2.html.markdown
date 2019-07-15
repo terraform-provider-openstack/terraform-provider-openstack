@@ -14,7 +14,7 @@ Use this data source to get the ID of an available OpenStack image.
 
 ```hcl
 data "openstack_images_image_v2" "ubuntu" {
-  name = "Ubuntu 16.04"
+  name        = "Ubuntu 16.04"
   most_recent = true
 
   properties = {

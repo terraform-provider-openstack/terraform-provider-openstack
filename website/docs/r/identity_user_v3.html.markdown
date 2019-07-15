@@ -22,8 +22,8 @@ resource "openstack_identity_project_v3" "project_1" {
 
 resource "openstack_identity_user_v3" "user_1" {
   default_project_id = "${openstack_identity_project_v3.project_1.id}"
-  name = "user_1"
-  description = "A user"
+  name               = "user_1"
+  description        = "A user"
 
   password = "password123"
 

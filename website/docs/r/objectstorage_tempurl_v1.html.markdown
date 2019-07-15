@@ -21,9 +21,9 @@ a new ID and URL.
 ```hcl
 resource "openstack_objectstorage_tempurl_v1" "obj_tempurl" {
   container = "test"
-  object = "container"
-  method = "post"
-  ttl = 20
+  object    = "container"
+  method    = "post"
+  ttl       = 20
 }
 ```
 

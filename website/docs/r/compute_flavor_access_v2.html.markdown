@@ -23,10 +23,10 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_compute_flavor_v2" "flavor_1" {
-  name  = "my-flavor"
-  ram   = "8096"
-  vcpus = "2"
-  disk  = "20"
+  name      = "my-flavor"
+  ram       = "8096"
+  vcpus     = "2"
+  disk      = "20"
   is_public = false
 }
 

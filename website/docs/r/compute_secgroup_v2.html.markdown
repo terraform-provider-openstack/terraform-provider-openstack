@@ -100,10 +100,10 @@ When using ICMP as the `ip_protocol`, the `from_port` sets the ICMP _type_ and t
 
 ```hcl
 rule {
-  from_port = -1
-  to_port = -1
+  from_port   = -1
+  to_port     = -1
   ip_protocol = "icmp"
-  cidr = "0.0.0.0/0"
+  cidr        = "0.0.0.0/0"
 }
 ```
 

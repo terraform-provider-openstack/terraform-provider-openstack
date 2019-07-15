@@ -54,7 +54,7 @@ resource "openstack_compute_instance_v2" "myinstance" {
 
 resource "openstack_compute_volume_attach_v2" "attached" {
   instance_id = "${openstack_compute_instance_v2.myinstance.id}"
-  volume_id = "${openstack_blockstorage_volume_v2.myvol.id}"
+  volume_id   = "${openstack_blockstorage_volume_v2.myvol.id}"
 }
 ```
 
@@ -198,7 +198,7 @@ resource "openstack_compute_instance_v2" "multi-net" {
 resource "openstack_compute_floatingip_associate_v2" "myip" {
   floating_ip = "${openstack_networking_floatingip_v2.myip.address}"
   instance_id = "${openstack_compute_instance_v2.multi-net.id}"
-  fixed_ip = "${openstack_compute_instance_v2.multi-net.network.1.fixed_ip_v4}"
+  fixed_ip    = "${openstack_compute_instance_v2.multi-net.network.1.fixed_ip_v4}"
 }
 ```
 

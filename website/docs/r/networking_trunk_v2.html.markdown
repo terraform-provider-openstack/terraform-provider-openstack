@@ -14,17 +14,17 @@ Manages a networking V2 trunk resource within OpenStack.
 
 ```hcl
 resource "openstack_networking_network_v2" "network_1" {
-  name = "network_1"
+  name           = "network_1"
   admin_state_up = "true"
 }
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-  cidr = "192.168.1.0/24"
-  ip_version = 4
+  name        = "subnet_1"
+  network_id  = "${openstack_networking_network_v2.network_1.id}"
+  cidr        = "192.168.1.0/24"
+  ip_version  = 4
   enable_dhcp = true
-  no_gateway = true
+  no_gateway  = true
 }
 
 resource "openstack_networking_port_v2" "parent_port_1" {
@@ -32,8 +32,8 @@ resource "openstack_networking_port_v2" "parent_port_1" {
     "openstack_networking_subnet_v2.subnet_1",
   ]
 
-  name = "parent_port_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  name           = "parent_port_1"
+  network_id     = "${openstack_networking_network_v2.network_1.id}"
   admin_state_up = "true"
 }
 
@@ -42,25 +42,25 @@ resource "openstack_networking_port_v2" "subport_1" {
     "openstack_networking_subnet_v2.subnet_1",
   ]
 
-  name = "subport_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  name           = "subport_1"
+  network_id     = "${openstack_networking_network_v2.network_1.id}"
   admin_state_up = "true"
 }
 
 resource "openstack_networking_trunk_v2" "trunk_1" {
-  name = "trunk_1"
+  name           = "trunk_1"
   admin_state_up = "true"
-  port_id = "${openstack_networking_port_v2.parent_port_1.id}"
+  port_id        = "${openstack_networking_port_v2.parent_port_1.id}"
 
   sub_port {
-    port_id = "${openstack_networking_port_v2.subport_1.id}"
-    segmentation_id = 1
+    port_id           = "${openstack_networking_port_v2.subport_1.id}"
+    segmentation_id   = 1
     segmentation_type = "vlan"
   }
 }
 
 resource "openstack_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
 
   network {

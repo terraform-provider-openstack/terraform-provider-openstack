@@ -103,7 +103,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
 }
 
 resource "openstack_compute_interface_attach_v2" "attachments" {
-  count          = 2
+  count       = 2
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   port_id     = "${openstack_networking_port_v2.ports.*.id[count.index]}"
 }
