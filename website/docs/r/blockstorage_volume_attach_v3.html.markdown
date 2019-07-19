@@ -20,7 +20,7 @@ such as a bare-metal server or a remote virtual machine in a
 different cloud provider.
 
 This does not actually attach a volume to an instance. Please use
-the `openstack_compute_volume_attach_v3` resource for that.
+the `openstack_compute_volume_attach_v2` resource for that.
 
 ## Example Usage
 
