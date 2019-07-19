@@ -3,6 +3,11 @@
 IMPROVEMENTS
 
 * Updated website documentation to formalize inline HCL code to canonical format according to Terraform v0.12 style conventions [GH-797]
+* Updated website documentation to use `openstack_compute_volume_attach_v2` instead of `openstack_compute_volume_attach_v3` that doesn't exist [GH-800]
+
+BUG FIXES
+
+* Fixed bug where `openstack_vpnaas_site_connection` resource set `admin_state_up` argument to `false` istead of `true` by default [GH-799]
 
 ## 1.20.0 (July 09, 2019)
 
