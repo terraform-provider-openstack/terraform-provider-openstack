@@ -80,7 +80,7 @@ func resourceSiteConnectionV2() *schema.Resource {
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Default:  true,
 			},
 			"psk": {
 				Type:     schema.TypeString,
