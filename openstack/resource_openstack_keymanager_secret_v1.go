@@ -278,6 +278,11 @@ func resourceKeyManagerSecretV1Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("created_at", secret.Created.Format(time.RFC3339))
 	d.Set("updated_at", secret.Updated.Format(time.RFC3339))
 	d.Set("content_types", secret.ContentTypes)
+
+	// don't fail, if the default key doesn't exist
+	payloadContentType, _ := secret.ContentTypes["default"]
+	d.Set("payload_content_type", payloadContentType)
+
 	d.Set("payload", keyManagerSecretV1GetPayload(kmClient, d.Id()))
 	metadataMap, err := secrets.GetMetadata(kmClient, d.Id()).Extract()
 	if err != nil {
