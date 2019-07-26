@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
@@ -93,6 +94,12 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 				Optional:  true,
 				Sensitive: true,
 				ForceNew:  true,
+				DiffSuppressFunc: func(k, o, n string, d *schema.ResourceData) bool {
+					if strings.TrimSpace(o) == strings.TrimSpace(n) {
+						return true
+					}
+					return false
+				},
 			},
 
 			"payload_content_type": {
