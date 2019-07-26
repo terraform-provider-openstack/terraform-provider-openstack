@@ -4,6 +4,7 @@ IMPROVEMENTS
 
 * Updated website documentation to formalize inline HCL code to canonical format according to Terraform v0.12 style conventions [GH-797]
 * Updated website documentation to use `openstack_compute_volume_attach_v2` instead of `openstack_compute_volume_attach_v3` that doesn't exist [GH-800]
+* Enabled the `openstack_compute_instance_v2` resource import [GH-768]
 
 BUG FIXES
 
