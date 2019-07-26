@@ -312,6 +312,7 @@ func resourceKeyManagerSecretV1Update(d *schema.ResourceData, meta interface{}) 
 		o, n := d.GetChange("metadata")
 		oldMetadata := o.(map[string]interface{})
 		newMetadata := n.(map[string]interface{})
+		existingMetadata := d.Get("all_metadata").(map[string]interface{})
 
 		// Determine if any metadata keys were removed from the configuration.
 		// Then request those keys to be deleted.
@@ -335,6 +336,10 @@ func resourceKeyManagerSecretV1Update(d *schema.ResourceData, meta interface{}) 
 		for newKey, newValue := range newMetadata {
 			if oldValue, ok := oldMetadata[newKey]; ok {
 				if newValue != oldValue {
+					metadataToUpdate = append(metadataToUpdate, newKey)
+				}
+			} else if existingValue, ok := existingMetadata[newKey]; ok {
+				if newValue != existingValue {
 					metadataToUpdate = append(metadataToUpdate, newKey)
 				}
 			} else {
