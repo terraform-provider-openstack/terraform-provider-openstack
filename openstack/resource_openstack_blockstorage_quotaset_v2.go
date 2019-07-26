@@ -113,16 +113,15 @@ func resourceBlockStorageQuotasetV2Create(d *schema.ResourceData, meta interface
 		Groups:             &groups,
 		Force:              d.Get("force").(bool),
 	}
-	projectID := d.Get("project_id").(string)
 
-	q, err := quotasets.Update(blockStorageClient, projectID, updateOpts).Extract()
+	q, err := quotasets.Update(blockStorageClient, d.Get("project_id").(string), updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error creating openstack_blockstorage_quotaset_v2: %s", err)
 	}
 
-	d.SetId(projectID)
+	d.SetId(q.ID)
 
-	log.Printf("[DEBUG] Created openstack_blockstorage_quotaset_v2 %s: %#v", projectID, q)
+	log.Printf("[DEBUG] Created openstack_blockstorage_quotaset_v2 %#v", q)
 
 	return resourceBlockStorageQuotasetV2Read(d, meta)
 }
