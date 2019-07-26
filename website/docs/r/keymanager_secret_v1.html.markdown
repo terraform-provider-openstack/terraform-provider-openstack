@@ -16,6 +16,8 @@ deployments is *not* recommended**.
 
 ## Example Usage
 
+### Simple secret
+
 ```hcl
 resource "openstack_keymanager_secret_v1" "secret_1" {
   algorithm = "aes"
@@ -27,6 +29,36 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   secret_type = "passphrase"
   metadata = {
     key = "foo"
+  }
+}
+```
+
+### Secret with whitespaces
+
+```hcl
+resource "openstack_keymanager_secret_v1" "secret_1" {
+  name                     = "password"
+  payload                  = "${base64encode("password with the whitespace at the end ")}"
+  secret_type              = "passphrase"
+  payload_content_type     = "application/octet-stream"
+  payload_content_encoding = "base64"
+}
+```
+
+### Secret with the expiration date
+
+```hcl
+resource "openstack_keymanager_secret_v1" "secret_1" {
+  name                 = "certificate"
+  payload              = "${file("certificate.pem")}"
+  secret_type          = "certificate"
+  payload_content_type = "text/plain"
+  expiration           = "${timeadd(timestamp(), format("%dh", 8760))}" # one year in hours
+
+  lifecycle {
+    ignore_changes = [
+      expiration
+    ]
   }
 }
 ```
@@ -51,11 +83,11 @@ The following arguments are supported:
 
 * `secret_type` - (Optional) Used to indicate the type of secret being stored. For more information see [Secret types](https://docs.openstack.org/barbican/latest/api/reference/secret_types.html).
  
-* `payload` - (Optional) The secret’s data to be stored. **payload_content_type** must also be supplied if **payload** is included.
+* `payload` - (Optional) The secret's data to be stored. **payload\_content\_type** must also be supplied if **payload** is included.
 
 * `payload_content_type` - (Optional) (required if **payload** is included) The media type for the content of the payload. Must be one of `'text/plain', 'text/plain;charset=utf-8', 'text/plain; charset=utf-8', 'application/octet-stream', 'application/pkcs8'`.
 
-* `payload_content_encoding` - (Optional) (required if payload is encoded) The encoding used for the payload to be able to include it in the JSON request. Currently only `base64` is supported.
+* `payload_content_encoding` - (Optional) (required if **payload** is encoded) The encoding used for the payload to be able to include it in the JSON request. Must be ieither `base64` or `binary`.
 
 * `expiration` - (Optional) The expiration time of the secret in the RFC3339 timestamp format (e.g. `2019-03-09T12:58:49Z`). If omitted, a secret will never expire. Changing this creates a new secret.
 
@@ -68,7 +100,6 @@ The following attributes are exported:
 * `secret_ref` - The secret reference / where to find the secret.
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
-* `description` - See Argument Reference above.
 * `bit_length` - See Argument Reference above.
 * `algorithm` - See Argument Reference above.
 * `mode` - See Argument Reference above.
@@ -77,10 +108,13 @@ The following attributes are exported:
 * `payload_content_type` - See Argument Reference above.
 * `payload_content_encoding` - See Argument Reference above.
 * `expiration` - See Argument Reference above.
+* `content_types` - The map of the content types, assigned on the secret.
 * `creator_id` - The creator of the secret.
 * `status` - The status of the secret.
 * `created_at` - The date the secret was created.
 * `updated_at` - The date the secret was last updated.
+* `all_metadata` - The map of metadata, assigned on the secret, which has been
+  explicitly and implicitly added.
 
 ## Import
 
