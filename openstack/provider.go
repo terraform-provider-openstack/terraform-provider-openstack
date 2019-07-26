@@ -259,6 +259,7 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
+			"openstack_blockstorage_quotaset_v2":                 resourceBlockStorageQuotasetV2(),
 			"openstack_blockstorage_volume_v1":                   resourceBlockStorageVolumeV1(),
 			"openstack_blockstorage_volume_v2":                   resourceBlockStorageVolumeV2(),
 			"openstack_blockstorage_volume_v3":                   resourceBlockStorageVolumeV3(),
