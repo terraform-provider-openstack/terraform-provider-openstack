@@ -117,6 +117,19 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"metadata": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				ForceNew: false,
+			},
+
+			"expiration": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.ValidateRFC3339TimeString,
+			},
+
 			"created_at": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -127,20 +140,9 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 				Computed: true,
 			},
 
-			"expiration": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"content_types": {
 				Type:     schema.TypeMap,
 				Computed: true,
-			},
-
-			"metadata": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				ForceNew: false,
 			},
 
 			"all_metadata": {
@@ -158,6 +160,12 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 	}
 
+	var expiration *time.Time
+	if v, _ := time.Parse(time.RFC3339, d.Get("expiration").(string)); v != (time.Time{}) {
+		expiration = new(time.Time)
+		*expiration = v
+	}
+
 	secretType := keyManagerSecretV1SecretType(d.Get("secret_type").(string))
 
 	createOpts := secrets.CreateOpts{
@@ -167,6 +175,7 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 		Mode:                   d.Get("mode").(string),
 		PayloadContentType:     d.Get("payload_content_type").(string),
 		PayloadContentEncoding: d.Get("payload_content_encoding").(string),
+		Expiration:             expiration,
 		SecretType:             secretType,
 	}
 
@@ -260,7 +269,6 @@ func resourceKeyManagerSecretV1Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("status", secret.Status)
 	d.Set("created_at", secret.Created.Format(time.RFC3339))
 	d.Set("updated_at", secret.Updated.Format(time.RFC3339))
-	d.Set("expiration", secret.Expiration.Format(time.RFC3339))
 	d.Set("content_types", secret.ContentTypes)
 	d.Set("payload", keyManagerSecretV1GetPayload(kmClient, d.Id()))
 	metadataMap, err := secrets.GetMetadata(kmClient, d.Id()).Extract()
@@ -268,6 +276,12 @@ func resourceKeyManagerSecretV1Read(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[DEBUG] Unable to get metadata: %s", err)
 	}
 	d.Set("all_metadata", metadataMap)
+
+	if secret.Expiration == (time.Time{}) {
+		d.Set("expiration", "")
+	} else {
+		d.Set("expiration", secret.Expiration.Format(time.RFC3339))
+	}
 
 	// Set the region
 	d.Set("region", GetRegion(d, config))
