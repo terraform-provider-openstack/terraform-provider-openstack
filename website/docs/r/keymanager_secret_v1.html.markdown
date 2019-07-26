@@ -87,7 +87,7 @@ The following arguments are supported:
 
 * `payload_content_type` - (Optional) (required if **payload** is included) The media type for the content of the payload. Must be one of `'text/plain', 'text/plain;charset=utf-8', 'text/plain; charset=utf-8', 'application/octet-stream', 'application/pkcs8'`.
 
-* `payload_content_encoding` - (Optional) (required if **payload** is encoded) The encoding used for the payload to be able to include it in the JSON request. Must be ieither `base64` or `binary`.
+* `payload_content_encoding` - (Optional) (required if **payload** is encoded) The encoding used for the payload to be able to include it in the JSON request. Must be either `base64` or `binary`.
 
 * `expiration` - (Optional) The expiration time of the secret in the RFC3339 timestamp format (e.g. `2019-03-09T12:58:49Z`). If omitted, a secret will never expire. Changing this creates a new secret.
 
