@@ -619,3 +619,141 @@ Expected HTTP response code [201 202] when accessing [POST https://example.com:8
 you still need to make sure one of the above points is satisfied. An instance
 cannot be created without a valid network configuration even if you intend to
 use `openstack_compute_interface_attach_v2` after the instance has been created.
+
+## Importing instances
+
+Importing instances can be tricky, since the nova api does not offer all
+information provided at creation time for later retrieval.
+Network interface attachment order, and number and sizes of ephemeral
+disks are examples of this.
+
+### Importing basic instance
+Assume you want to import an instance with one ephemeral root disk,
+and one network interface.
+
+Your configuration would look like the following:
+
+```hcl
+resource "openstack_compute_instance_v2" "basic_instance" {
+  name            = "basic"
+  flavor_id       = "<flavor_id>"
+  key_pair        = "<keyname>"
+  security_groups = ["default"]
+  image_id =  "<image_id>"
+
+  network {
+    name = "<network_name>"
+  }
+}
+
+```
+Then you execute
+```
+terraform import openstack_compute_instance_v2.basic_instance <instance_id>
+```
+
+### Importing an instance with multiple emphemeral disks
+
+The importer cannot read the emphemeral disk configuration
+of an instance, so just specify image_id as in the configuration 
+of the basic instance example.
+
+### Importing instance with multiple network interfaces.
+
+Nova returns the network interfaces grouped by network, thus not in creation
+order.
+That means that if you have multiple network interfaces you must take
+care of the order of networks in your configuration.
+
+
+As example we want to import an instance with one ephemeral root disk,
+and 3 network interfaces.
+
+Examples
+```hcl
+resource "openstack_compute_instance_v2" "boot-from-volume" {
+  name            = "boot-from-volume"
+  flavor_id       = "<flavor_id"
+  key_pair        = "<keyname>"
+  image_id        = <image_id>
+  security_groups = ["default"]
+
+  network {
+    name = "<network1>"
+  }
+  network {
+    name = "<netowork2>"
+  }
+  network {
+    name = "<network1>"
+    fixed_ip_v4 = "<fixed_ip_v4>"
+  }
+
+}
+```
+
+In the above configuration the networks are out of order compared to what nova
+and thus the import code returns, which means the plan will not
+be empty after import.
+
+So either with care check the plan and modify configuration, or read the
+network order in the state file after import and modify your
+configuration accordingly.
+
+ * A note on ports. If you have created a neutron port independent of an
+ instance, then the import code has no way to detect that the port is created
+ idenpendently, and therefore on deletion of imported instances you might have
+ port resources in your project, which you expected to be created by the
+ instance and thus to also be deleted with the instance.
+
+
+### Importing instances with multiple block storage volumes.
+
+We have an instance with two block storage volumes, one bootable and one
+non-bootable.
+Note that we only configure the bootable device as block_device.
+The other volumes can be specified as `openstack_blockstorage_volume_v2`
+```hcl
+resource "openstack_compute_instance_v2" "instance_2" {
+  name            = "instance_2"
+  image_id        = "<image_id>"
+  flavor_id       = "<flavor_id>"
+  key_pair        = "<keyname>"
+  security_groups = ["default"]
+
+  block_device {
+    uuid = <image_id>"
+    source_type = "image"
+    destination_type = "volume"
+    boot_index = 0
+    delete_on_termination = true
+  }
+
+   network {
+    name = "<network_name>"
+  }
+}
+resource "openstack_blockstorage_volume_v2" "volume_1" {
+  size        = 1
+  name =     "<vol_name>"
+}
+resource "openstack_compute_volume_attach_v2" "va_1" {
+  volume_id = "${openstack_blockstorage_volume_v2.volume_1.id}"
+  instance_id = "${openstack_compute_instance_v2.instance_2.id}"
+}
+```
+To import the instance outlined in the above configuration
+do the following:
+
+```
+terraform import openstack_compute_instance_v2.instance_2 <instance_id>
+import openstack_blockstorage_volume_v2.volume_1 <volume_id>
+terraform import openstack_compute_volume_attach_v2.va_1
+<instance_id>/<volume_id>
+```
+
+* A note on block storage volumes, the importer does not read
+  delete_on_termination flag, and always assumes true. If you
+  import an instance created with delete_on_termination false,
+  you end up with "orphaned" volumes after destruction of
+  instances.
