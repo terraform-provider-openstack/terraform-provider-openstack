@@ -119,6 +119,16 @@ func TestAccUpdateSecretV1_payload(t *testing.T) {
 					testAccCheckPayloadEquals("updatedfoobar", &secret),
 				),
 			},
+			{
+				Config: testAccKeyManagerSecretV1_update_base64,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSecretV1Exists(
+						"openstack_keymanager_secret_v1.secret_1", &secret),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
+					testAccCheckPayloadEquals("base64foobar ", &secret),
+				),
+			},
 		},
 	})
 }
@@ -285,5 +295,17 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
 updatedfoobar
 EOF
   payload_content_type = "text/plain"
+  secret_type = "passphrase"
+}`
+
+const testAccKeyManagerSecretV1_update_base64 = `
+resource "openstack_keymanager_secret_v1" "secret_1" {
+  algorithm = "aes"
+  bit_length = 256
+  mode = "cbc"
+  name = "mysecret"
+  payload = "${base64encode("base64foobar ")}"
+  payload_content_type = "application/octet-stream"
+  payload_content_encoding = "base64"
   secret_type = "passphrase"
 }`

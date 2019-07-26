@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
+	"github.com/hashicorp/terraform/helper/customdiff"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
@@ -77,11 +78,11 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 			"secret_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"symmetric", "public", "private", "passphrase", "certificate", "opaque",
 				}, false),
-				ForceNew: true,
-				Computed: true,
 			},
 
 			"status": {
@@ -94,6 +95,7 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 				Optional:  true,
 				Sensitive: true,
 				ForceNew:  true,
+				Computed:  true,
 				DiffSuppressFunc: func(k, o, n string, d *schema.ResourceData) bool {
 					if strings.TrimSpace(o) == strings.TrimSpace(n) {
 						return true
@@ -115,6 +117,9 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"base64", "binary",
+				}, false),
 			},
 
 			"metadata": {
@@ -150,6 +155,13 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 				Computed: true,
 			},
 		},
+
+		CustomizeDiff: customdiff.Sequence(
+			// Clear the diff if the source payload is base64 encoded.
+			func(diff *schema.ResourceDiff, v interface{}) error {
+				return resourceSecretV1PayloadBase64CustomizeDiff(diff)
+			},
+		),
 	}
 }
 
@@ -186,7 +198,6 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 
 	var secret *secrets.Secret
 	secret, err = secrets.Create(kmClient, createOpts).Extract()
-
 	if err != nil {
 		return fmt.Errorf("Error creating openstack_keymanager_secret_v1: %s", err)
 	}
@@ -203,7 +214,6 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 	}
 
 	_, err = stateConf.WaitForState()
-
 	if err != nil {
 		return CheckDeleted(d, err, "Error creating openstack_keymanager_secret_v1")
 	}
@@ -218,7 +228,6 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 
 	if len(metadataCreateOpts) > 0 {
 		_, err = secrets.CreateMetadata(kmClient, uuid, metadataCreateOpts).Extract()
-
 		if err != nil {
 			return fmt.Errorf("Error creating metadata for openstack_keymanager_secret_v1 with ID %v", uuid)
 		}
@@ -233,7 +242,6 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 		}
 
 		_, err = stateConf.WaitForState()
-
 		if err != nil {
 			return fmt.Errorf("Error creating metadata for openstack_keymanager_secret_v1: %s: %s", uuid, err)
 		}
