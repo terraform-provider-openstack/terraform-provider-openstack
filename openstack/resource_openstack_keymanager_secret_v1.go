@@ -229,7 +229,7 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 	if len(metadataCreateOpts) > 0 {
 		_, err = secrets.CreateMetadata(kmClient, uuid, metadataCreateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error creating metadata for openstack_keymanager_secret_v1 with ID %v", uuid)
+			return fmt.Errorf("Error creating metadata for openstack_keymanager_secret_v1 with ID %s", uuid)
 		}
 
 		stateConf = &resource.StateChangeConf{
@@ -243,7 +243,7 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("Error creating metadata for openstack_keymanager_secret_v1: %s: %s", uuid, err)
+			return fmt.Errorf("Error creating metadata for openstack_keymanager_secret_v1 %s: %s", uuid, err)
 		}
 	}
 
@@ -391,7 +391,7 @@ func resourceKeyManagerSecretV1Delete(d *schema.ResourceData, meta interface{}) 
 		Pending:    []string{"PENDING"},
 		Target:     []string{"DELETED"},
 		Refresh:    keyManagerSecretV1WaitForSecretDeletion(kmClient, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
