@@ -20,13 +20,14 @@ deployments is *not* recommended**.
 
 ```hcl
 resource "openstack_keymanager_secret_v1" "secret_1" {
-  algorithm = "aes"
-  bit_length = 256
-  mode = "cbc"
-  name = "mysecret"
-  payload = "foobar"
+  algorithm            = "aes"
+  bit_length           = 256
+  mode                 = "cbc"
+  name                 = "mysecret"
+  payload              = "foobar"
   payload_content_type = "text/plain"
-  secret_type = "passphrase"
+  secret_type          = "passphrase"
+
   metadata = {
     key = "foo"
   }
@@ -85,7 +86,7 @@ The following arguments are supported:
  
 * `payload` - (Optional) The secret's data to be stored. **payload\_content\_type** must also be supplied if **payload** is included.
 
-* `payload_content_type` - (Optional) (required if **payload** is included) The media type for the content of the payload. Must be one of `'text/plain', 'text/plain;charset=utf-8', 'text/plain; charset=utf-8', 'application/octet-stream', 'application/pkcs8'`.
+* `payload_content_type` - (Optional) (required if **payload** is included) The media type for the content of the payload. Must be one of `text/plain`, `text/plain;charset=utf-8`, `text/plain; charset=utf-8`, `application/octet-stream`, `application/pkcs8`.
 
 * `payload_content_encoding` - (Optional) (required if **payload** is encoded) The encoding used for the payload to be able to include it in the JSON request. Must be either `base64` or `binary`.
 
