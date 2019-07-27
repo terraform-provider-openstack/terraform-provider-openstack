@@ -229,7 +229,7 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 	if len(metadataCreateOpts) > 0 {
 		_, err = secrets.CreateMetadata(kmClient, uuid, metadataCreateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error creating metadata for openstack_keymanager_secret_v1 with ID %s", uuid)
+			return fmt.Errorf("Error creating metadata for openstack_keymanager_secret_v1 with ID %s: %s", uuid, err)
 		}
 
 		stateConf = &resource.StateChangeConf{
