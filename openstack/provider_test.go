@@ -35,6 +35,7 @@ var (
 	OS_CONTAINER_INFRA_ENVIRONMENT  = os.Getenv("OS_CONTAINER_INFRA_ENVIRONMENT")
 	OS_SFS_ENVIRONMENT              = os.Getenv("OS_SFS_ENVIRONMENT")
 	OS_TRANSPARENT_VLAN_ENVIRONMENT = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
+	OS_KEYMANAGER_ENVIRONMENT       = os.Getenv("OS_KEYMANAGER_ENVIRONMENT")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -136,6 +137,14 @@ func testAccPreCheckVPN(t *testing.T) {
 
 	if OS_VPN_ENVIRONMENT == "" {
 		t.Skip("This environment does not support VPN tests")
+	}
+}
+
+func testAccPreCheckKeyManager(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_KEYMANAGER_ENVIRONMENT == "" {
+		t.Skip("This environment does not support Barbican Keymanager tests")
 	}
 }
 

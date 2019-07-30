@@ -479,3 +479,19 @@ func (c *Config) sharedfilesystemV2Client(region string) (*gophercloud.ServiceCl
 
 	return client, nil
 }
+
+func (c *Config) keyManagerV1Client(region string) (*gophercloud.ServiceClient, error) {
+	client, err := openstack.NewKeyManagerV1(c.OsClient, gophercloud.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getEndpointType(),
+	})
+
+	if err != nil {
+		return client, err
+	}
+
+	// Check if an endpoint override was specified for the keymanager service.
+	client = c.determineEndpoint(client, "key-manager")
+
+	return client, nil
+}
