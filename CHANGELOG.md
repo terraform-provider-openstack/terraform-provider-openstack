@@ -1,5 +1,9 @@
 ## 1.21.0 (Unreleased)
 
+FEATURES
+
+* __New Resource__: `openstack_keymanager_secret_v1` [GH-650], [GH-807]
+
 IMPROVEMENTS
 
 * Updated website documentation to formalize inline HCL code to canonical format according to Terraform v0.12 style conventions [GH-797]
