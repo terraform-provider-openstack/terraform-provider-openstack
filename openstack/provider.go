@@ -254,6 +254,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_sharedfilesystem_sharenetwork_v2":         dataSourceSharedFilesystemShareNetworkV2(),
 			"openstack_sharedfilesystem_share_v2":                dataSourceSharedFilesystemShareV2(),
 			"openstack_sharedfilesystem_snapshot_v2":             dataSourceSharedFilesystemSnapshotV2(),
+			"openstack_keymanager_secret_v1":                     dataSourceKeyManagerSecretV1(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
