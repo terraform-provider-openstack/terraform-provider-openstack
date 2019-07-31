@@ -11,7 +11,7 @@ var osMutexKV = mutexkv.NewMutexKV()
 
 // Provider returns a schema.Provider for OpenStack.
 func Provider() terraform.ResourceProvider {
-	return &schema.Provider{
+	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"auth_url": {
 				Type:        schema.TypeString,
@@ -333,9 +333,13 @@ func Provider() terraform.ResourceProvider {
 			"openstack_sharedfilesystem_share_access_v2":         resourceSharedFilesystemShareAccessV2(),
 			"openstack_keymanager_secret_v1":                     resourceKeyManagerSecretV1(),
 		},
-
-		ConfigureFunc: configureProvider,
 	}
+
+	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+		return configureProvider(d, provider.TerraformVersion)
+	}
+
+	return provider
 }
 
 var descriptions map[string]string
@@ -405,7 +409,7 @@ func init() {
 	}
 }
 
-func configureProvider(d *schema.ResourceData) (interface{}, error) {
+func configureProvider(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
 	config := Config{
 		CACertFile:                  d.Get("cacert_file").(string),
 		ClientCertFile:              d.Get("cert").(string),
@@ -434,6 +438,7 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		ApplicationCredentialSecret: d.Get("application_credential_secret").(string),
 		useOctavia:                  d.Get("use_octavia").(bool),
 		MaxRetries:                  d.Get("max_retries").(int),
+		terraformVersion:            terraformVersion,
 	}
 
 	v, ok := d.GetOkExists("insecure")

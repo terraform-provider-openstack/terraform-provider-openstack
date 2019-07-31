@@ -13,7 +13,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/swauth"
 	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/hashicorp/terraform/helper/pathorcontents"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform/httpclient"
 )
 
 type Config struct {
@@ -46,7 +46,8 @@ type Config struct {
 	useOctavia                  bool
 	MaxRetries                  int
 
-	OsClient *gophercloud.ProviderClient
+	OsClient         *gophercloud.ProviderClient
+	terraformVersion string
 }
 
 // LoadAndValidate performs the authentication and initial configuration
@@ -143,7 +144,8 @@ func (c *Config) LoadAndValidate() error {
 	}
 
 	// Set UserAgent
-	client.UserAgent.Prepend(terraform.UserAgentString())
+	tfUserAgent := httpclient.UserAgent(c.terraformVersion)
+	client.UserAgent.Prepend(tfUserAgent.String())
 
 	config := &tls.Config{}
 	if c.CACertFile != "" {
