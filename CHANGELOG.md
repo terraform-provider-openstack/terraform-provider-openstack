@@ -15,6 +15,7 @@ BUG FIXES
 
 * Fixed the bug where `openstack_vpnaas_site_connection` resource set `admin_state_up` argument to `false` istead of `true` by default [GH-799]
 * Fixed the bug where `openstack_networking_subnet_v2` resource could cause a panic if `dns_nameservers` argument set to an empty list [GH-726]
+* Fixed the bug where `openstack_lb_pool_v2` resource could cause a panic because of passing a struct instead of a flattened list into the `persistence` attribute [GH-725]
 
 ## 1.20.0 (July 09, 2019)
 
