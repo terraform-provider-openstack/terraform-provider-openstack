@@ -96,7 +96,6 @@ func resourceSharedFilesystemShareV2() *schema.Resource {
 			"metadata": {
 				Type:     schema.TypeMap,
 				Optional: true,
-				ForceNew: true,
 			},
 
 			"share_network_id": {
@@ -147,6 +146,11 @@ func resourceSharedFilesystemShareV2() *schema.Resource {
 
 			"share_server_id": {
 				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"all_metadata": {
+				Type:     schema.TypeMap,
 				Computed: true,
 			},
 		},
@@ -265,7 +269,7 @@ func resourceSharedFilesystemShareV2Read(d *schema.ResourceData, meta interface{
 	d.Set("share_type", share.ShareTypeName)
 	d.Set("snapshot_id", share.SnapshotID)
 	d.Set("is_public", share.IsPublic)
-	d.Set("metadata", share.Metadata)
+	d.Set("all_metadata", share.Metadata)
 	d.Set("share_network_id", share.ShareNetworkID)
 	d.Set("availability_zone", share.AvailabilityZone)
 	// Computed
@@ -384,6 +388,55 @@ func resourceSharedFilesystemShareV2Update(d *schema.ResourceData, meta interfac
 		err = waitForSFV2Share(sfsClient, d.Id(), "available", pending, timeout)
 		if err != nil {
 			return err
+		}
+	}
+
+	if d.HasChange("metadata") {
+		metadataToDelete := make(map[string]string)
+		metadataToUpdate := make(map[string]string)
+
+		o, n := d.GetChange("metadata")
+		oldMetadata := o.(map[string]interface{})
+		newMetadata := n.(map[string]interface{})
+		existingMetadata := d.Get("all_metadata").(map[string]interface{})
+
+		// Determine if any metadata keys were removed from the configuration.
+		// Then request those keys to be deleted.
+		for oldKey, oldValue := range oldMetadata {
+			if _, ok := newMetadata[oldKey]; !ok {
+				metadataToDelete[oldKey] = oldValue.(string)
+			}
+		}
+
+		log.Printf("[DEBUG] Deleting the following items from metadata for openstack_sharedfilesystem_share_v2 %s: %v", d.Id(), metadataToDelete)
+
+		for oldKey := range metadataToDelete {
+			err := shares.DeleteMetadatum(sfsClient, d.Id(), oldKey).ExtractErr()
+			if err != nil {
+				return fmt.Errorf("Error deleting openstack_sharedfilesystem_share_v2 %s metadata %s: %s", d.Id(), oldKey, err)
+			}
+		}
+
+		for newKey, newValue := range newMetadata {
+			metadataToUpdate[newKey] = newValue.(string)
+		}
+
+		for newKey, newValue := range existingMetadata {
+			metadataToUpdate[newKey] = newValue.(string)
+		}
+
+		// Remove already removed metadata from the update list
+		for oldKey := range metadataToDelete {
+			if _, ok := metadataToUpdate[oldKey]; ok {
+				delete(metadataToUpdate, oldKey)
+			}
+		}
+
+		log.Printf("[DEBUG] Updating the following items in metadata for openstack_sharedfilesystem_share_v2 %s: %v", d.Id(), metadataToUpdate)
+
+		_, err := shares.UpdateMetadata(sfsClient, d.Id(), shares.UpdateMetadataOpts{Metadata: metadataToUpdate}).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating openstack_sharedfilesystem_share_v2 %s metadata: %s", d.Id(), err)
 		}
 	}
 
