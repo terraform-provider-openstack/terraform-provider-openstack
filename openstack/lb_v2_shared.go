@@ -551,3 +551,12 @@ func waitForLBV2L7Rule(lbClient *gophercloud.ServiceClient, parentListener *list
 
 	return nil
 }
+
+func flattenLBPoolPersistenceV2(p pools.SessionPersistence) []map[string]interface{} {
+	return []map[string]interface{}{
+		{
+			"type":        p.Type,
+			"cookie_name": p.CookieName,
+		},
+	}
+}

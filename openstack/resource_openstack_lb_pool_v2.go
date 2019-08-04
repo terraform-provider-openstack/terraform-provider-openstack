@@ -98,6 +98,8 @@ func resourcePoolV2() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
@@ -247,7 +249,7 @@ func resourcePoolV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("tenant_id", pool.TenantID)
 	d.Set("admin_state_up", pool.AdminStateUp)
 	d.Set("name", pool.Name)
-	d.Set("persistence", pool.Persistence)
+	d.Set("persistence", flattenLBPoolPersistenceV2(pool.Persistence))
 	d.Set("region", GetRegion(d, config))
 
 	return nil
