@@ -4,12 +4,14 @@ FEATURES
 
 * __New Resource__: `openstack_keymanager_secret_v1` [GH-650], [GH-807]
 * __New Resource__: `openstack_keymanager_container_v1` [GH-808]
+* __New Resource__: `openstack_identity_service_v3` [GH-821]
 
 IMPROVEMENTS
 
 * Updated website documentation to formalize inline HCL code to canonical format according to Terraform v0.12 style conventions [GH-797]
 * Updated website documentation to use `openstack_compute_volume_attach_v2` instead of `openstack_compute_volume_attach_v3` that doesn't exist [GH-800]
 * Enabled the `openstack_compute_instance_v2` resource import [GH-768]
+* Added ability to update metadata of the `openstack_sharedfilesystem_share_v2` resource [GH-825]
 
 BUG FIXES
 
