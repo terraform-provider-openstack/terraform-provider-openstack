@@ -79,11 +79,6 @@ func resourceBlockStorageQuotasetV2() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-
-			"force": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
 		},
 	}
 }
@@ -111,7 +106,6 @@ func resourceBlockStorageQuotasetV2Create(d *schema.ResourceData, meta interface
 		Backups:            &backups,
 		BackupGigabytes:    &backupGigabytes,
 		Groups:             &groups,
-		Force:              d.Get("force").(bool),
 	}
 
 	q, err := quotasets.Update(blockStorageClient, d.Get("project_id").(string), updateOpts).Extract()
@@ -157,10 +151,10 @@ func resourceBlockStorageQuotasetV2Update(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
-	hasChange := false
-	updateOpts := quotasets.UpdateOpts{
-		Force: d.Get("force").(bool),
-	}
+	var (
+		hasChange  bool
+		updateOpts quotasets.UpdateOpts
+	)
 
 	if d.HasChange("volumes") {
 		hasChange = true
