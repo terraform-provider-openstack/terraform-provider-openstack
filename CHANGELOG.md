@@ -5,6 +5,7 @@ FEATURES
 * __New Resource__: `openstack_keymanager_secret_v1` [GH-650], [GH-807]
 * __New Resource__: `openstack_keymanager_container_v1` [GH-808]
 * __New Resource__: `openstack_identity_service_v3` [GH-821]
+* __New Data Source__: `openstack_keymanager_secret_v1` [GH-815]
 
 IMPROVEMENTS
 
