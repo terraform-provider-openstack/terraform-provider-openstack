@@ -102,6 +102,8 @@ The following arguments are supported:
 * `host` - The share host name.
 * `replication_type` - The share replication type.
 * `share_server_id` - The UUID of the share server.
+* `all_metadata` - The map of metadata, assigned on the share, which has been
+  explicitly and implicitly added.
 
 ## Import
 
