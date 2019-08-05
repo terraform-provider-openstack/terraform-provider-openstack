@@ -286,6 +286,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_fw_firewall_v1":                           resourceFWFirewallV1(),
 			"openstack_fw_policy_v1":                             resourceFWPolicyV1(),
 			"openstack_fw_rule_v1":                               resourceFWRuleV1(),
+			"openstack_identity_endpoint_v3":                     resourceIdentityEndpointV3(),
 			"openstack_identity_project_v3":                      resourceIdentityProjectV3(),
 			"openstack_identity_role_v3":                         resourceIdentityRoleV3(),
 			"openstack_identity_role_assignment_v3":              resourceIdentityRoleAssignmentV3(),
