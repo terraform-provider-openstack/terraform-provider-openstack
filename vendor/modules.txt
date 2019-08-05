@@ -76,9 +76,10 @@ github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
 # github.com/googleapis/gax-go/v2 v2.0.3
 github.com/googleapis/gax-go/v2
-# github.com/gophercloud/gophercloud v0.3.1-0.20190805022109-951d29d7ead8
+# github.com/gophercloud/gophercloud v0.3.1-0.20190805134041-ef348b655090
 github.com/gophercloud/gophercloud
 github.com/gophercloud/gophercloud/openstack
+github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/quotasets
 github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions
 github.com/gophercloud/gophercloud/openstack/blockstorage/v1/volumes
 github.com/gophercloud/gophercloud/openstack/blockstorage/v2/snapshots
