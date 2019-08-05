@@ -145,6 +145,7 @@ github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecuri
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/rules
+github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/rbacpolicies
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools

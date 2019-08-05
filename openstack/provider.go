@@ -306,6 +306,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_networking_floatingip_associate_v2":       resourceNetworkingFloatingIPAssociateV2(),
 			"openstack_networking_network_v2":                    resourceNetworkingNetworkV2(),
 			"openstack_networking_port_v2":                       resourceNetworkingPortV2(),
+			"openstack_networking_rbac_policy_v2":                resourceNetworkingRBACPolicyV2(),
 			"openstack_networking_port_secgroup_associate_v2":    resourceNetworkingPortSecGroupAssociateV2(),
 			"openstack_networking_qos_bandwidth_limit_rule_v2":   resourceNetworkingQoSBandwidthLimitRuleV2(),
 			"openstack_networking_qos_dscp_marking_rule_v2":      resourceNetworkingQoSDSCPMarkingRuleV2(),
