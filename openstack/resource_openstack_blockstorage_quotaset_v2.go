@@ -90,6 +90,7 @@ func resourceBlockStorageQuotasetV2Create(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
+	projectID := d.Get("project_id").(string)
 	volumes := d.Get("volumes").(int)
 	snapshots := d.Get("snapshots").(int)
 	gigabytes := d.Get("gigabytes").(int)
@@ -108,12 +109,12 @@ func resourceBlockStorageQuotasetV2Create(d *schema.ResourceData, meta interface
 		Groups:             &groups,
 	}
 
-	q, err := quotasets.Update(blockStorageClient, d.Get("project_id").(string), updateOpts).Extract()
+	q, err := quotasets.Update(blockStorageClient, projectID, updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error creating openstack_blockstorage_quotaset_v2: %s", err)
 	}
 
-	d.SetId(q.ID)
+	d.SetId(projectID)
 
 	log.Printf("[DEBUG] Created openstack_blockstorage_quotaset_v2 %#v", q)
 
@@ -134,6 +135,7 @@ func resourceBlockStorageQuotasetV2Read(d *schema.ResourceData, meta interface{}
 
 	log.Printf("[DEBUG] Retrieved openstack_blockstorage_quotaset_v2 %s: %#v", d.Id(), q)
 
+	d.Set("project_id", d.Id())
 	d.Set("volumes", q.Volumes)
 	d.Set("snapshots", q.Snapshots)
 	d.Set("gigabytes", q.Gigabytes)
