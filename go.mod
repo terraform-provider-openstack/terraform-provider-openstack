@@ -2,7 +2,7 @@ module github.com/terraform-providers/terraform-provider-openstack
 
 require (
 	github.com/Unknwon/com v0.0.0-20151008135407-28b053d5a292
-	github.com/gophercloud/gophercloud v0.3.0
+	github.com/gophercloud/gophercloud v0.3.1-0.20190805022109-951d29d7ead8
 	github.com/gophercloud/utils v0.0.0-20190313033024-0bcc8e728cb5
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/hashicorp/terraform v0.12.2

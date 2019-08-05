@@ -9,7 +9,8 @@ import (
 )
 
 func TestAccOpenStackIdentityV3EndpointDataSource_basic(t *testing.T) {
-	endpointName := "identity"
+	serviceName := "keystone"
+	serviceType := "identity"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -19,11 +20,13 @@ func TestAccOpenStackIdentityV3EndpointDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackIdentityEndpointV3DataSource_basic(endpointName, "public"),
+				Config: testAccOpenStackIdentityEndpointV3DataSource_basic(serviceName, "public"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityEndpointV3DataSourceID("data.openstack_identity_endpoint_v3.endpoint_1"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_identity_endpoint_v3.endpoint_1", "service_name", endpointName),
+						"data.openstack_identity_endpoint_v3.endpoint_1", "service_name", serviceName),
+					resource.TestCheckResourceAttr(
+						"data.openstack_identity_endpoint_v3.endpoint_1", "service_type", serviceType),
 				),
 			},
 		},
