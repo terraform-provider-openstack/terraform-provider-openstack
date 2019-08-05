@@ -14,6 +14,7 @@ IMPROVEMENTS
 * Updated website documentation to use `openstack_compute_volume_attach_v2` instead of `openstack_compute_volume_attach_v3` that doesn't exist [GH-800]
 * Enabled the `openstack_compute_instance_v2` resource import [GH-768]
 * Added ability to update metadata of the `openstack_sharedfilesystem_share_v2` resource [GH-825]
+* Added ability to filter `openstack_identity_endpoint_v3` datasource by `service_type`, `endpoint_region` and `name` arguments [GH-817]
 
 BUG FIXES
 
