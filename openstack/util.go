@@ -316,8 +316,8 @@ func validateJsonObject(v interface{}, k string) ([]string, []error) {
 }
 
 func diffSuppressJsonObject(k, old, new string, d *schema.ResourceData) bool {
-	if strSliceContains([]string{"{}", "null", ""}, old) &&
-		strSliceContains([]string{"{}", "null", ""}, new) {
+	if strSliceContains([]string{"{}", ""}, old) &&
+		strSliceContains([]string{"{}", ""}, new) {
 		return true
 	}
 	return false
