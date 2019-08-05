@@ -28,63 +28,63 @@ func TestAccBlockStorageQuotasetV2_basic(t *testing.T) {
 				Config: testAccBlockStorageQuotasetV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
-					testAccCheckBlockStorageQuotasetV2Exists("openstack_blockstorage_quotaset_v2", &quotaset),
+					testAccCheckBlockStorageQuotasetV2Exists("openstack_blockstorage_quotaset_v2.quotaset_1", &quotaset),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_quotaset_v2.quotaset_1", "volumes", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "snapshots", "2"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "snapshots", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "gigabytes", "2"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "gigabytes", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "per_volume_gigabytes", "1"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "per_volume_gigabytes", "1"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "backups", "2"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "backups", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "backup_gigabytes", "1"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "backup_gigabytes", "1"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "groups", "1"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "groups", "1"),
 				),
 			},
 			{
 				Config: testAccBlockStorageQuotasetV2_update_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
-					testAccCheckBlockStorageQuotasetV2Exists("openstack_blockstorage_quotaset_v2", &quotaset),
+					testAccCheckBlockStorageQuotasetV2Exists("openstack_blockstorage_quotaset_v2.quotaset_1", &quotaset),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_quotaset_v2.quotaset_1", "volumes", "3"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "snapshots", "3"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "snapshots", "3"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "gigabytes", "4"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "gigabytes", "4"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "per_volume_gigabytes", "1"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "per_volume_gigabytes", "1"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "backups", "2"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "backups", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "backup_gigabytes", "1"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "backup_gigabytes", "1"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "groups", "1"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "groups", "1"),
 				),
 			},
 			{
 				Config: testAccBlockStorageQuotasetV2_update_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
-					testAccCheckBlockStorageQuotasetV2Exists("openstack_blockstorage_quotaset_v2", &quotaset),
+					testAccCheckBlockStorageQuotasetV2Exists("openstack_blockstorage_quotaset_v2.quotaset_1", &quotaset),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_quotaset_v2.quotaset_1", "volumes", "3"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "snapshots", "3"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "snapshots", "3"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "gigabytes", "4"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "gigabytes", "4"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "per_volume_gigabytes", "2"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "per_volume_gigabytes", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "backups", "4"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "backups", "4"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "backup_gigabytes", "4"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "backup_gigabytes", "4"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "groups", "4"),
+						"openstack_blockstorage_quotaset_v2.quotaset_1", "groups", "4"),
 				),
 			},
 		},
@@ -125,51 +125,51 @@ func testAccCheckBlockStorageQuotasetV2Exists(n string, quotaset *quotasets.Quot
 
 const testAccBlockStorageQuotasetV2_basic = `
 resource "openstack_identity_project_v3" "project_1" {
-  name = project_1
+  name = "project_1"
 }
 
 resource "openstack_blockstorage_quotaset_v2" "quotaset_1" {
-  project_id = "${openstack_identity_project_v3.project_1.id}"
-  volumes   = 2
-  snapshots = 2
-  gigabytes = 2
+  project_id            = "${openstack_identity_project_v3.project_1.id}"
+  volumes               = 2
+  snapshots             = 2
+  gigabytes             = 2
   per_volume_gigabytes = 1
-  backups = 2
-  backup_gigabytes = 1
-  groups = 1
+  backups               = 2
+  backup_gigabytes      = 1
+  groups                = 1
 }
 `
 
 const testAccBlockStorageQuotasetV2_update_1 = `
 resource "openstack_identity_project_v3" "project_1" {
-  name = project_1
+  name = "project_1"
 }
 
 resource "openstack_blockstorage_quotaset_v2" "quotaset_1" {
-  project_id = "${openstack_identity_project_v3.project_1.id}"
-  volumes   = 3
-  snapshots = 3
-  gigabytes = 4
+  project_id           = "${openstack_identity_project_v3.project_1.id}"
+  volumes              = 3
+  snapshots            = 3
+  gigabytes            = 4
   per_volume_gigabytes = 1
-  backups = 2
-  backup_gigabytes = 1
-  groups = 1
+  backups              = 2
+  backup_gigabytes     = 1
+  groups               = 1
 }
 `
 
 const testAccBlockStorageQuotasetV2_update_2 = `
 resource "openstack_identity_project_v3" "project_1" {
-  name = project_1
+  name = "project_1"
 }
 
 resource "openstack_blockstorage_quotaset_v2" "quotaset_1" {
-  project_id = "${openstack_identity_project_v3.project_1.id}"
-  volumes   = 3
-  snapshots = 3
-  gigabytes = 4
+  project_id           = "${openstack_identity_project_v3.project_1.id}"
+  volumes              = 3
+  snapshots            = 3
+  gigabytes            = 4
   per_volume_gigabytes = 2
-  backups = 4
-  backup_gigabytes = 4
-  groups = 4
+  backups              = 4
+  backup_gigabytes     = 4
+  groups               = 4
 }
 `
