@@ -13,11 +13,12 @@ FEATURES
 
 IMPROVEMENTS
 
-* Updated website documentation to formalize inline HCL code to canonical format according to Terraform v0.12 style conventions [GH-797]
-* Updated website documentation to use `openstack_compute_volume_attach_v2` instead of `openstack_compute_volume_attach_v3` that doesn't exist [GH-800]
 * Enabled the `openstack_compute_instance_v2` resource import [GH-768]
 * Added ability to update metadata of the `openstack_sharedfilesystem_share_v2` resource [GH-825]
 * Added ability to filter `openstack_identity_endpoint_v3` datasource by `service_type`, `endpoint_region` and `name` arguments [GH-817]
+* Updated the website documentation to formalize inline HCL code to canonical format according to Terraform v0.12 style conventions [GH-797]
+* Updated the website documentation to use `openstack_compute_volume_attach_v2` instead of `openstack_compute_volume_attach_v3` that doesn't exist [GH-800]
+* Updated the website documentation for the `security_groups` argument of the `openstack_compute_instance_v2` resource [GH-826]
 
 BUG FIXES
 
