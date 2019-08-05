@@ -21,10 +21,9 @@ func TestAccBlockStorageV2Quotaset_importBasic(t *testing.T) {
 				Config: testAccBlockStorageQuotasetV2_basic,
 			},
 			{
-				ResourceName:            resourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"groups"},
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

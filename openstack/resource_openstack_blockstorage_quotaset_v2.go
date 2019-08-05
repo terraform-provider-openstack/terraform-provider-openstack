@@ -78,6 +78,7 @@ func resourceBlockStorageQuotasetV2() *schema.Resource {
 			"groups": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 		},
 	}
@@ -142,6 +143,7 @@ func resourceBlockStorageQuotasetV2Read(d *schema.ResourceData, meta interface{}
 	d.Set("per_volume_gigabytes", q.PerVolumeGigabytes)
 	d.Set("backups", q.Backups)
 	d.Set("backup_gigabytes", q.BackupGigabytes)
+	d.Set("groups", q.Groups)
 
 	return nil
 }
