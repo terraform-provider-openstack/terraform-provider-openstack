@@ -6,9 +6,14 @@ description: |-
   Manages a V2 quotaset resource within OpenStack.
 ---
 
-# openstack\_blockstorage\_quotaset_v2
+# openstack\_blockstorage\_quotaset\_v2
 
-Manages a V2 quotaset resource within OpenStack.
+Manages a V2 block storage quotaset resource within OpenStack.
+
+~> **Note:** This usually requires admin privileges.
+
+~> **Note:** This resource has a no-op deletion so no actual actions will be done against the OpenStack API 
+    in case of delete call.
 
 ## Example Usage
 
