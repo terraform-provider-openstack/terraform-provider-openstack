@@ -76,7 +76,7 @@ github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
 # github.com/googleapis/gax-go/v2 v2.0.3
 github.com/googleapis/gax-go/v2
-# github.com/gophercloud/gophercloud v0.3.1-0.20190805022109-951d29d7ead8
+# github.com/gophercloud/gophercloud v0.3.1-0.20190805134041-ef348b655090
 github.com/gophercloud/gophercloud
 github.com/gophercloud/gophercloud/openstack
 github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/quotasets
@@ -146,7 +146,6 @@ github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecuri
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/rules
-github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/rbacpolicies
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools
