@@ -228,8 +228,8 @@ func resourceNetworkingPortV2() *schema.Resource {
 						"profile": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							ValidateFunc:     validation.ValidateJsonString,
-							DiffSuppressFunc: suppressDiffPortBindingProfileV2,
+							ValidateFunc:     validateJsonObject,
+							DiffSuppressFunc: diffSuppressJsonObject,
 							StateFunc: func(v interface{}) string {
 								json, _ := structure.NormalizeJsonString(v)
 								return json
@@ -350,7 +350,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 	if v, ok := d.GetOkExists("binding"); ok {
 		for _, raw := range v.([]interface{}) {
 			binding := raw.(map[string]interface{})
-			profile := map[string]interface{}{}
+			var profile map[string]interface{}
 
 			// Convert raw string into the map
 			rawProfile := binding["profile"].(string)
@@ -582,40 +582,47 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	// Next, perform port binding option changes.
 	if d.HasChange("binding") {
-		hasChange = true
+		var newOpts portsbinding.UpdateOptsExt
+		var bindingChanged bool
 
 		profile := map[string]interface{}{}
-
-		// default options, when unsetting the port bindings
-		newOpts := portsbinding.UpdateOptsExt{
-			UpdateOptsBuilder: finalUpdateOpts,
-			HostID:            new(string),
-			Profile:           profile,
-			VNICType:          "normal",
-		}
 
 		for _, raw := range d.Get("binding").([]interface{}) {
 			binding := raw.(map[string]interface{})
 
-			// Convert raw string into the map
-			rawProfile := binding["profile"].(string)
-			if len(rawProfile) > 0 {
-				err := json.Unmarshal([]byte(rawProfile), &profile)
-				if err != nil {
-					return fmt.Errorf("Failed to unmarshal the JSON: %s", err)
-				}
+			if d.HasChange("binding.0.vnic_type") {
+				bindingChanged = true
+				newOpts.VNICType = binding["vnic_type"].(string)
 			}
 
-			hostID := binding["host_id"].(string)
-			newOpts = portsbinding.UpdateOptsExt{
-				UpdateOptsBuilder: finalUpdateOpts,
-				HostID:            &hostID,
-				Profile:           profile,
-				VNICType:          binding["vnic_type"].(string),
+			if d.HasChange("binding.0.host_id") {
+				bindingChanged = true
+				hostID := binding["host_id"].(string)
+				newOpts.HostID = &hostID
+			}
+
+			if d.HasChange("binding.0.profile") {
+				bindingChanged = true
+				// Convert raw string into the map
+				rawProfile := binding["profile"].(string)
+				if len(rawProfile) > 0 {
+					err := json.Unmarshal([]byte(rawProfile), &profile)
+					if err != nil {
+						return fmt.Errorf("Failed to unmarshal the JSON: %s", err)
+					}
+					if profile == nil {
+						profile = map[string]interface{}{}
+					}
+				}
+				newOpts.Profile = profile
 			}
 		}
 
-		finalUpdateOpts = newOpts
+		if bindingChanged {
+			hasChange = true
+			newOpts.UpdateOptsBuilder = finalUpdateOpts
+			finalUpdateOpts = newOpts
+		}
 	}
 
 	if d.HasChange("dns_name") {
