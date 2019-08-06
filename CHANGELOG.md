@@ -1,32 +1,32 @@
-## 1.21.0 (Unreleased)
+## 1.21.0 (August 06, 2019)
 
 FEATURES
 
-* __New Resource__: `openstack_keymanager_secret_v1` [GH-650], [GH-807]
-* __New Resource__: `openstack_keymanager_container_v1` [GH-808]
-* __New Resource__: `openstack_identity_service_v3` [GH-821]
-* __New Resource__: `openstack_identity_endpoint_v3` [GH-823]
-* __New Resource__: `openstack_networking_rbac_policy_v2` [GH-811]
-* __New Resource__: `openstack_blockstorage_quotaset_v2` [GH-806]
-* __New Resource__: `openstack_blockstorage_quotaset_v3` [GH-828]
-* __New Data Source__: `openstack_keymanager_secret_v1` [GH-815]
-* __New Data Source__: `openstack_identity_service_v3` [GH-819]
+* __New Resource__: `openstack_keymanager_secret_v1` ([#650](https://github.com/terraform-providers/terraform-provider-openstack/issues/650)], [[#807](https://github.com/terraform-providers/terraform-provider-openstack/issues/807))
+* __New Resource__: `openstack_keymanager_container_v1` ([#808](https://github.com/terraform-providers/terraform-provider-openstack/issues/808))
+* __New Resource__: `openstack_identity_service_v3` ([#821](https://github.com/terraform-providers/terraform-provider-openstack/issues/821))
+* __New Resource__: `openstack_identity_endpoint_v3` ([#823](https://github.com/terraform-providers/terraform-provider-openstack/issues/823))
+* __New Resource__: `openstack_networking_rbac_policy_v2` ([#811](https://github.com/terraform-providers/terraform-provider-openstack/issues/811))
+* __New Resource__: `openstack_blockstorage_quotaset_v2` ([#806](https://github.com/terraform-providers/terraform-provider-openstack/issues/806))
+* __New Resource__: `openstack_blockstorage_quotaset_v3` ([#828](https://github.com/terraform-providers/terraform-provider-openstack/issues/828))
+* __New Data Source__: `openstack_keymanager_secret_v1` ([#815](https://github.com/terraform-providers/terraform-provider-openstack/issues/815))
+* __New Data Source__: `openstack_identity_service_v3` ([#819](https://github.com/terraform-providers/terraform-provider-openstack/issues/819))
 
 IMPROVEMENTS
 
-* Enabled the `openstack_compute_instance_v2` resource import [GH-768]
-* Added ability to update metadata of the `openstack_sharedfilesystem_share_v2` resource [GH-825]
-* Added ability to filter `openstack_identity_endpoint_v3` datasource by `service_type`, `endpoint_region` and `name` arguments [GH-817]
-* Updated the website documentation to formalize inline HCL code to canonical format according to Terraform v0.12 style conventions [GH-797]
-* Updated the website documentation to use `openstack_compute_volume_attach_v2` instead of `openstack_compute_volume_attach_v3` that doesn't exist [GH-800]
-* Updated the website documentation for the `security_groups` argument of the `openstack_compute_instance_v2` resource [GH-826]
+* Enabled the `openstack_compute_instance_v2` resource import ([#768](https://github.com/terraform-providers/terraform-provider-openstack/issues/768))
+* Added ability to update metadata of the `openstack_sharedfilesystem_share_v2` resource ([#825](https://github.com/terraform-providers/terraform-provider-openstack/issues/825))
+* Added ability to filter `openstack_identity_endpoint_v3` datasource by `service_type`, `endpoint_region` and `name` arguments ([#817](https://github.com/terraform-providers/terraform-provider-openstack/issues/817))
+* Updated the website documentation to formalize inline HCL code to canonical format according to Terraform v0.12 style conventions ([#797](https://github.com/terraform-providers/terraform-provider-openstack/issues/797))
+* Updated the website documentation to use `openstack_compute_volume_attach_v2` instead of `openstack_compute_volume_attach_v3` that doesn't exist ([#800](https://github.com/terraform-providers/terraform-provider-openstack/issues/800))
+* Updated the website documentation for the `security_groups` argument of the `openstack_compute_instance_v2` resource ([#826](https://github.com/terraform-providers/terraform-provider-openstack/issues/826))
 
 BUG FIXES
 
-* Fixed the bug where `openstack_vpnaas_site_connection` resource set `admin_state_up` argument to `false` istead of `true` by default [GH-799]
-* Fixed the bug where `openstack_networking_subnet_v2` resource could cause a panic if `dns_nameservers` argument set to an empty list [GH-726]
-* Fixed the bug where `openstack_lb_pool_v2` resource could cause a panic because of passing a struct instead of a flattened list into the `persistence` attribute [GH-725]
-* Fixed the bug where `openstack_networking_port_v2` resource built an invalid request against the API with the empty `binding:profile` parameter [GH-759]
+* Fixed the bug where `openstack_vpnaas_site_connection` resource set `admin_state_up` argument to `false` istead of `true` by default ([#799](https://github.com/terraform-providers/terraform-provider-openstack/issues/799))
+* Fixed the bug where `openstack_networking_subnet_v2` resource could cause a panic if `dns_nameservers` argument set to an empty list ([#726](https://github.com/terraform-providers/terraform-provider-openstack/issues/726))
+* Fixed the bug where `openstack_lb_pool_v2` resource could cause a panic because of passing a struct instead of a flattened list into the `persistence` attribute ([#725](https://github.com/terraform-providers/terraform-provider-openstack/issues/725))
+* Fixed the bug where `openstack_networking_port_v2` resource built an invalid request against the API with the empty `binding:profile` parameter ([#759](https://github.com/terraform-providers/terraform-provider-openstack/issues/759))
 
 ## 1.20.0 (July 09, 2019)
 
