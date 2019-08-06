@@ -8,6 +8,7 @@ FEATURES
 * __New Resource__: `openstack_identity_endpoint_v3` [GH-823]
 * __New Resource__: `openstack_networking_rbac_policy_v2` [GH-811]
 * __New Resource__: `openstack_blockstorage_quotaset_v2` [GH-806]
+* __New Resource__: `openstack_blockstorage_quotaset_v3` [GH-828]
 * __New Data Source__: `openstack_keymanager_secret_v1` [GH-815]
 * __New Data Source__: `openstack_identity_service_v3` [GH-819]
 
