@@ -2,13 +2,13 @@
 
 BUG FIXES
 
-* Fixed the bug where OpenStack Networking V2 resources and data sources didn't work in old OpenStack environments because of different time format used for `created_at` and `updated_at` fields[GH-831]
+* Fixed the bug where OpenStack Networking V2 resources and data sources didn't work in old OpenStack environments because of different time format used for `created_at` and `updated_at` fields [GH-831]
 
 ## 1.21.0 (August 06, 2019)
 
 FEATURES
 
-* __New Resource__: `openstack_keymanager_secret_v1` ([#650](https://github.com/terraform-providers/terraform-provider-openstack/issues/650)], [[#807](https://github.com/terraform-providers/terraform-provider-openstack/issues/807))
+* __New Resource__: `openstack_keymanager_secret_v1` ([#650](https://github.com/terraform-providers/terraform-provider-openstack/issues/650)), ([#807](https://github.com/terraform-providers/terraform-provider-openstack/issues/807))
 * __New Resource__: `openstack_keymanager_container_v1` ([#808](https://github.com/terraform-providers/terraform-provider-openstack/issues/808))
 * __New Resource__: `openstack_identity_service_v3` ([#821](https://github.com/terraform-providers/terraform-provider-openstack/issues/821))
 * __New Resource__: `openstack_identity_endpoint_v3` ([#823](https://github.com/terraform-providers/terraform-provider-openstack/issues/823))
