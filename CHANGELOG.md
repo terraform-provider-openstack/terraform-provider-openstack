@@ -1,4 +1,9 @@
 ## 1.21.1 (Unreleased)
+
+BUG FIXES
+
+* Fixed the bug where OpenStack Networking V2 resources and data sources didn't work in old OpenStack environments because of different time format used for `created_at` and `updated_at` fields[GH-831]
+
 ## 1.21.0 (August 06, 2019)
 
 FEATURES
