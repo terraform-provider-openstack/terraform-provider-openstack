@@ -1,8 +1,8 @@
-## 1.21.1 (Unreleased)
+## 1.21.1 (August 08, 2019)
 
 BUG FIXES
 
-* Fixed the bug where OpenStack Networking V2 resources and data sources didn't work in old OpenStack environments because of different time format used for `created_at` and `updated_at` fields [GH-831]
+* Fixed the bug where OpenStack Networking V2 resources and data sources didn't work in old OpenStack environments because of different time format used for `created_at` and `updated_at` fields ([#831](https://github.com/terraform-providers/terraform-provider-openstack/issues/831))
 
 ## 1.21.0 (August 06, 2019)
 
