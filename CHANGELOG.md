@@ -1,4 +1,9 @@
 ## 1.22.0 (Unreleased)
+
+BUG FIXES
+
+* Fixed code highlighting in website documentation for the `openstack_compute_instance_v2` resource [GH-834]
+
 ## 1.21.1 (August 08, 2019)
 
 BUG FIXES
