@@ -670,6 +670,7 @@ As example we want to import an instance with one ephemeral root disk,
 and 3 network interfaces.
 
 Examples
+
 ```hcl
 resource "openstack_compute_instance_v2" "boot-from-volume" {
   name            = "boot-from-volume"
@@ -713,6 +714,7 @@ We have an instance with two block storage volumes, one bootable and one
 non-bootable.
 Note that we only configure the bootable device as block_device.
 The other volumes can be specified as `openstack_blockstorage_volume_v2`
+
 ```hcl
 resource "openstack_compute_instance_v2" "instance_2" {
   name            = "instance_2"
