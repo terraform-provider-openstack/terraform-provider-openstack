@@ -133,6 +133,80 @@ func TestAccUpdateSecretV1_payload(t *testing.T) {
 	})
 }
 
+func TestAccKeyManagerSecretV1_acls(t *testing.T) {
+	var secret secrets.Secret
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckSecretV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKeyManagerSecretV1_acls,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSecretV1Exists(
+						"openstack_keymanager_secret_v1.secret_1", &secret),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.project_access", "false"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.users.#", "2"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.project_access", "true"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.users.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKeyManagerSecretV1_acls_update(t *testing.T) {
+	var secret secrets.Secret
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckSecretV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKeyManagerSecretV1_acls,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSecretV1Exists(
+						"openstack_keymanager_secret_v1.secret_1", &secret),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.project_access", "false"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.users.#", "2"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.project_access", "true"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.users.#", "0"),
+				),
+			},
+			{
+				Config: testAccKeyManagerSecretV1_acls_update1,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSecretV1Exists(
+						"openstack_keymanager_secret_v1.secret_1", &secret),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.project_access", "false"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.users.#", "2"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.project_access", "false"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.users.#", "1"),
+				),
+			},
+			{
+				Config: testAccKeyManagerSecretV1_acls_update2,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSecretV1Exists(
+						"openstack_keymanager_secret_v1.secret_1", &secret),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.project_access", "true"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.users.#", "0"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.project_access", "true"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.users.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckSecretV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	kmClient, err := config.KeyManagerV1Client(OS_REGION_NAME)
@@ -309,3 +383,103 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   payload_content_encoding = "base64"
   secret_type = "passphrase"
 }`
+
+const testAccKeyManagerSecretV1_acls = `
+resource "openstack_keymanager_secret_v1" "secret_1" {
+  algorithm = "aes"
+  bit_length = 256
+  mode = "cbc"
+  name = "mysecret"
+  payload = "${base64encode("base64foobar ")}"
+  payload_content_type = "application/octet-stream"
+  payload_content_encoding = "base64"
+  secret_type = "passphrase"
+
+  acl {
+    project_access = false
+    users = [
+	"619e2ad074321cf246b03a89e95afee95fb26bb0b2d1fc7ba3bd30fcca25588a",
+	"96b3ebddf275996285eae440e71227ba47c651be18391b0f2ebf1032ebae5dca",
+    ]
+  }
+}
+
+resource "openstack_keymanager_secret_v1" "secret_2" {
+  algorithm = "aes"
+  bit_length = 256
+  mode = "cbc"
+  name = "mysecret"
+  payload = "foobar"
+  payload_content_type = "text/plain"
+  secret_type = "passphrase"
+}
+`
+
+const testAccKeyManagerSecretV1_acls_update1 = `
+resource "openstack_keymanager_secret_v1" "secret_1" {
+  algorithm = "aes"
+  bit_length = 256
+  mode = "cbc"
+  name = "mysecret"
+  payload = "${base64encode("base64foobar ")}"
+  payload_content_type = "application/octet-stream"
+  payload_content_encoding = "base64"
+  secret_type = "passphrase"
+
+  acl {
+    project_access = false
+    users = [
+	"96b3ebddf275996285eae440e71227ba47c651be18391b0f2ebf1032ebae5dca",
+	"619e2ad074321cf246b03a89e95afee95fb26bb0b2d1fc7ba3bd30fcca25588a",
+    ]
+  }
+}
+
+resource "openstack_keymanager_secret_v1" "secret_2" {
+  algorithm = "aes"
+  bit_length = 256
+  mode = "cbc"
+  name = "mysecret"
+  payload = "foobar"
+  payload_content_type = "text/plain"
+  secret_type = "passphrase"
+
+  acl {
+    project_access = false
+    users = [
+	"96b3ebddf275996285eae440e71227ba47c651be18391b0f2ebf1032ebae5dca",
+    ]
+  }
+}
+`
+
+const testAccKeyManagerSecretV1_acls_update2 = `
+resource "openstack_keymanager_secret_v1" "secret_1" {
+  algorithm = "aes"
+  bit_length = 256
+  mode = "cbc"
+  name = "mysecret"
+  payload = "${base64encode("base64foobar ")}"
+  payload_content_type = "application/octet-stream"
+  payload_content_encoding = "base64"
+  secret_type = "passphrase"
+
+  acl {
+    project_access = true
+  }
+}
+
+resource "openstack_keymanager_secret_v1" "secret_2" {
+  algorithm = "aes"
+  bit_length = 256
+  mode = "cbc"
+  name = "mysecret"
+  payload = "foobar"
+  payload_content_type = "text/plain"
+  secret_type = "passphrase"
+
+  acl {
+    project_access = true
+  }
+}
+`

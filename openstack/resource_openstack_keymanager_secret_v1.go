@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/acls"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -128,6 +129,29 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 				ForceNew: false,
 			},
 
+			"acl": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"project_access": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  true,
+						},
+						"users": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+					},
+				},
+			},
+
 			"expiration": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -181,20 +205,15 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 	secretType := keyManagerSecretV1SecretType(d.Get("secret_type").(string))
 
 	createOpts := secrets.CreateOpts{
-		Name:                   d.Get("name").(string),
-		Algorithm:              d.Get("algorithm").(string),
-		BitLength:              d.Get("bit_length").(int),
-		Mode:                   d.Get("mode").(string),
-		PayloadContentType:     d.Get("payload_content_type").(string),
-		PayloadContentEncoding: d.Get("payload_content_encoding").(string),
-		Expiration:             expiration,
-		SecretType:             secretType,
+		Name:       d.Get("name").(string),
+		Algorithm:  d.Get("algorithm").(string),
+		BitLength:  d.Get("bit_length").(int),
+		Mode:       d.Get("mode").(string),
+		Expiration: expiration,
+		SecretType: secretType,
 	}
 
 	log.Printf("[DEBUG] Create Options for resource_keymanager_secret_v1: %#v", createOpts)
-
-	//Add payload here so it does not get printed in the above log
-	createOpts.Payload = d.Get("payload").(string)
 
 	var secret *secrets.Secret
 	secret, err = secrets.Create(kmClient, createOpts).Extract()
@@ -219,6 +238,31 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 	}
 
 	d.SetId(uuid)
+
+	// set the acl
+	setOpts := expandKeyManagerV1ACLs(d.Get("acl"))
+	_, err = acls.SetSecretACL(kmClient, uuid, setOpts).Extract()
+	if err != nil {
+		return CheckDeleted(d, err, "Error settings ACLs for the openstack_keymanager_secret_v1")
+	}
+
+	// set the payload
+	updateOpts := secrets.UpdateOpts{
+		Payload:         d.Get("payload").(string),
+		ContentType:     d.Get("payload_content_type").(string),
+		ContentEncoding: d.Get("payload_content_encoding").(string),
+	}
+	err = secrets.Update(kmClient, uuid, updateOpts).Err
+	if err != nil {
+		return err
+	}
+
+	_, err = stateConf.WaitForState()
+	if err != nil {
+		return CheckDeleted(d, err, "Error creating openstack_keymanager_secret_v1")
+	}
+
+	// set the metadata
 	d.Partial(true)
 
 	var metadataCreateOpts secrets.MetadataOpts
@@ -250,6 +294,50 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 	d.Partial(false)
 
 	return resourceKeyManagerSecretV1Read(d, meta)
+}
+
+func expandKeyManagerV1ACLs(v interface{}) acls.SetOpts {
+	var res acls.SetOpts
+	users := []string{}
+	res.Type = "read"
+
+	if v, ok := v.([]interface{}); ok {
+		for _, v := range v {
+			if v, ok := v.(map[string]interface{}); ok {
+				if v, ok := v["project_access"]; ok {
+					if v, ok := v.(bool); ok {
+						res.ProjectAccess = &v
+					}
+				}
+				if v, ok := v["users"]; ok {
+					if v, ok := v.(*schema.Set); ok {
+						for _, v := range v.List() {
+							users = append(users, v.(string))
+						}
+					}
+				}
+			}
+		}
+	}
+
+	res.Users = &users
+
+	return res
+}
+
+func flattenKeyManagerV1ACLs(acl *acls.ACL) []map[string]interface{} {
+	m := make(map[string]interface{})
+
+	// defaults
+	m["project_access"] = true
+	m["users"] = []string{}
+
+	if acl != nil {
+		m["project_access"] = (*acl)["read"].ProjectAccess
+		m["users"] = (*acl)["read"].Users
+	}
+
+	return []map[string]interface{}{m}
 }
 
 func resourceKeyManagerSecretV1Read(d *schema.ResourceData, meta interface{}) error {
@@ -296,6 +384,12 @@ func resourceKeyManagerSecretV1Read(d *schema.ResourceData, meta interface{}) er
 		d.Set("expiration", secret.Expiration.Format(time.RFC3339))
 	}
 
+	acl, err := acls.GetSecretACL(kmClient, d.Id()).Extract()
+	if err != nil {
+		log.Printf("[DEBUG] Unable to get acls: %s", err)
+	}
+	d.Set("acl", flattenKeyManagerV1ACLs(acl))
+
 	// Set the region
 	d.Set("region", GetRegion(d, config))
 
@@ -307,6 +401,14 @@ func resourceKeyManagerSecretV1Update(d *schema.ResourceData, meta interface{}) 
 	kmClient, err := config.KeyManagerV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack barbican client: %s", err)
+	}
+
+	if d.HasChange("acl") {
+		updateOpts := expandKeyManagerV1ACLs(d.Get("acl"))
+		_, err := acls.UpdateSecretACL(kmClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating openstack_keymanager_secret_v1 %s acl: %s", d.Id(), err)
+		}
 	}
 
 	if d.HasChange("metadata") {
