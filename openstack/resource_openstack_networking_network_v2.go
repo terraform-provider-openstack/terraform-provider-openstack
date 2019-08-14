@@ -157,6 +157,7 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 			"dns_domain": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^$|\.$`), "fully-qualified (unambiguous) DNS domain names must have a dot at the end"),
 			},
 
