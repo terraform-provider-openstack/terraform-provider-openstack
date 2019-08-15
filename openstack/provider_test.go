@@ -77,6 +77,11 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 		t.Fatal("OS_EXTGW_ID must be set for acceptance tests")
 	}
 
+	// Openlab test environment sets only TF_ACC=1, forcing TF_SCHEMA_PANIC_ON_ERROR=1 as well
+	if os.Getenv("TF_ACC") != "" {
+		os.Setenv("TF_SCHEMA_PANIC_ON_ERROR", "1")
+		os.Setenv("OS_DEBUG", "1")
+	}
 }
 
 func testAccPreCheck(t *testing.T) {
