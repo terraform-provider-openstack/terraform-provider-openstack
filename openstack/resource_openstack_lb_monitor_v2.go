@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -19,7 +20,7 @@ func resourceMonitorV2() *schema.Resource {
 		Update: resourceMonitorV2Update,
 		Delete: resourceMonitorV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceMonitorV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -178,8 +179,8 @@ func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Retrieved monitor %s: %#v", d.Id(), monitor)
 
-	// Required by import
-	if len(monitor.Pools) > 0 {
+	// OpenContrail workaround (https://github.com/terraform-providers/terraform-provider-openstack/issues/762)
+	if len(monitor.Pools) > 0 && monitor.Pools[0].ID != "" {
 		d.Set("pool_id", monitor.Pools[0].ID)
 	}
 
@@ -328,4 +329,21 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	return nil
+}
+
+func resourceMonitorV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.SplitN(d.Id(), "/", 2)
+	monitorID := parts[0]
+
+	if len(monitorID) == 0 {
+		return nil, fmt.Errorf("Invalid format specified for openstack_lb_monitor_v2. Format must be <monitorID>[/<poolID>]")
+	}
+
+	d.SetId(monitorID)
+
+	if len(parts) == 2 {
+		d.Set("pool_id", parts[1])
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
