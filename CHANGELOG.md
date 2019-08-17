@@ -1,7 +1,10 @@
 ## 1.22.0 (Unreleased)
 
-BUG FIXES
+IMPROVEMENTS
 
+* Added workaround for cases when the Neutron API doesn't provide the status for some load-balancer resources [GH-839]
+* Added workaround for cases when the OpenContrail API doesn't provide the ID for some load-balancer resources [GH-840]
+* Set computed attribute to `dns_name` and `dns_domain` for the `openstack_networking_network_v2` and  `openstack_networking_floatingip_v2` resources [GH-837]
 * Fixed code highlighting in website documentation for the `openstack_compute_instance_v2` resource [GH-834]
 
 ## 1.21.1 (August 08, 2019)
