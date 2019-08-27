@@ -33,25 +33,42 @@ func identityRoleAssignmentV3FindAssignment(identityClient *gophercloud.ServiceC
 		return assignment, err
 	}
 
-	var opts roles.ListAssignmentsOpts
-	opts = roles.ListAssignmentsOpts{
-		GroupID:        groupID,
-		ScopeDomainID:  domainID,
-		ScopeProjectID: projectID,
-		UserID:         userID,
+	opts := roles.ListAssignmentsOnResourceOpts{
+		GroupID:   groupID,
+		DomainID:  domainID,
+		ProjectID: projectID,
+		UserID:    userID,
 	}
 
-	pager := roles.ListAssignments(identityClient, opts)
+	pager := roles.ListAssignmentsOnResource(identityClient, opts)
 
 	err = pager.EachPage(func(page pagination.Page) (bool, error) {
-		assignmentList, err := roles.ExtractRoleAssignments(page)
+		assignmentList, err := roles.ExtractRoles(page)
 		if err != nil {
 			return false, err
 		}
 
 		for _, a := range assignmentList {
-			if a.Role.ID == roleID {
-				assignment = a
+			if a.ID == roleID {
+				assignment = roles.RoleAssignment{
+					Role: roles.AssignedRole{
+						ID: a.ID,
+					},
+					Scope: roles.Scope{
+						Domain: roles.Domain{
+							ID: domainID,
+						},
+						Project: roles.Project{
+							ID: projectID,
+						},
+					},
+					User: roles.User{
+						ID: userID,
+					},
+					Group: roles.Group{
+						ID: groupID,
+					},
+				}
 				return false, nil
 			}
 		}
