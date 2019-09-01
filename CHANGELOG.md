@@ -1,5 +1,10 @@
 ## 1.22.0 (Unreleased)
 
+BUG FIXES
+
+* Fixed the bug where project info wasn't accessible to non-admin users [GH-833]
+* Fixed the bug wher role assignments weren't accessible to non-admin users [GH-845]
+
 IMPROVEMENTS
 
 * Added workaround for cases when the Neutron API doesn't provide the status for some load-balancer resources [GH-839]
