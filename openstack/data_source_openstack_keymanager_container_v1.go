@@ -106,21 +106,21 @@ func dataSourceKeyManagerContainerV1Read(d *schema.ResourceData, meta interface{
 
 	allPages, err := containers.List(kmClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query containers: %s", err)
+		return fmt.Errorf("Unable to query openstack_keymanager_container_v1 containers: %s", err)
 	}
 
 	allContainers, err := containers.ExtractContainers(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve containers: %s", err)
+		return fmt.Errorf("Unable to retrieve openstack_keymanager_container_v1 containers: %s", err)
 	}
 
 	if len(allContainers) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return fmt.Errorf("Your query returned no openstack_keymanager_container_v1 results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allContainers) > 1 {
-		log.Printf("[DEBUG] Multiple results found: %#v", allContainers)
+		log.Printf("[DEBUG] Multiple openstack_keymanager_container_v1 results found: %#v", allContainers)
 		return fmt.Errorf("Your query returned more than one result. Please try a more " +
 			"specific search criteria.")
 	}
