@@ -1,9 +1,8 @@
 ## 1.22.0 (Unreleased)
 
-BUG FIXES
+FEATURES
 
-* Fixed the bug where project info wasn't accessible to non-admin users [GH-833]
-* Fixed the bug wher role assignments weren't accessible to non-admin users [GH-845]
+* __New Data Source__: `openstack_keymanager_container_v1` [GH-846]
 
 IMPROVEMENTS
 
@@ -11,6 +10,11 @@ IMPROVEMENTS
 * Added workaround for cases when the OpenContrail API doesn't provide the ID for some load-balancer resources [GH-840]
 * Set computed attribute to `dns_name` and `dns_domain` for the `openstack_networking_network_v2` and  `openstack_networking_floatingip_v2` resources [GH-837]
 * Fixed code highlighting in website documentation for the `openstack_compute_instance_v2` resource [GH-834]
+
+BUG FIXES
+
+* Fixed the bug where project info wasn't accessible to non-admin users [GH-833]
+* Fixed the bug wher role assignments weren't accessible to non-admin users [GH-845]
 
 ## 1.21.1 (August 08, 2019)
 
