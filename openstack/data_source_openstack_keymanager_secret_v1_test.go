@@ -10,7 +10,7 @@ func TestAccKeyManagerSecretV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckKeyManager(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerSecretV1DataSource_basic,

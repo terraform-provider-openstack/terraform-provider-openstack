@@ -86,11 +86,11 @@ func resourceKeyManagerContainerV1() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"name": {
 							Type:     schema.TypeString,
-							Computed: true,
+							Optional: true,
 						},
 						"url": {
 							Type:     schema.TypeString,
-							Computed: true,
+							Optional: true,
 						},
 					},
 				},
