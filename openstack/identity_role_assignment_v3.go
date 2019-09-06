@@ -42,6 +42,7 @@ func identityRoleAssignmentV3FindAssignment(identityClient *gophercloud.ServiceC
 
 	pager := roles.ListAssignmentsOnResource(identityClient, opts)
 
+	found := false
 	err = pager.EachPage(func(page pagination.Page) (bool, error) {
 		assignmentList, err := roles.ExtractRoles(page)
 		if err != nil {
@@ -50,6 +51,7 @@ func identityRoleAssignmentV3FindAssignment(identityClient *gophercloud.ServiceC
 
 		for _, a := range assignmentList {
 			if a.ID == roleID {
+				found = true
 				assignment = roles.RoleAssignment{
 					Role: roles.AssignedRole{
 						ID: a.ID,
@@ -75,6 +77,10 @@ func identityRoleAssignmentV3FindAssignment(identityClient *gophercloud.ServiceC
 
 		return true, nil
 	})
+
+	if !found {
+		return assignment, gophercloud.ErrDefault404{}
+	}
 
 	return assignment, err
 }
