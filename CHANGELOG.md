@@ -5,6 +5,7 @@ BUG FIXES
 * Fixed the bug where `openstack_identity_auth_scope_v3` caused a panic within the domain-scope [GH-851]
 * Fixed the bug where `openstack_compute_flavor_access_v2` resource wasn't removed from the Terraform state when it has been deleted in the OpenStack [GH-856]
 * Fixed the bug where `openstack_identity_role_assignment_v3` resource wasn't removed from the Terraform state when it has been deleted in the OpenStack [GH-856]
+* Fixed the bug where `ephemeral` argument wasn't set for `openstack_compute_flavor_v2` while reading this resource from the API [GH-855]
 
 ## 1.22.0 (September 05, 2019)
 
