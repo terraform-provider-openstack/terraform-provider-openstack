@@ -1,4 +1,9 @@
 ## 1.22.1 (Unreleased)
+
+IMPROVEMENTS
+
+* Added workaround for cases when Openstack API doesn't provide proper HTTP Cache-Control headers ([#264](https://github.com/terraform-providers/terraform-provider-openstack/issues/264))
+
 ## 1.22.0 (September 05, 2019)
 
 FEATURES
@@ -11,7 +16,6 @@ IMPROVEMENTS
 * Added workaround for cases when the OpenContrail API doesn't provide the ID for some load-balancer resources ([#840](https://github.com/terraform-providers/terraform-provider-openstack/issues/840))
 * Set computed attribute to `dns_name` and `dns_domain` for the `openstack_networking_network_v2` and  `openstack_networking_floatingip_v2` resources ([#837](https://github.com/terraform-providers/terraform-provider-openstack/issues/837))
 * Fixed code highlighting in website documentation for the `openstack_compute_instance_v2` resource ([#834](https://github.com/terraform-providers/terraform-provider-openstack/issues/834))
-* Added workaround for cases when Openstack API doesn't provide proper HTTP Cache-Control headers ([#264](https://github.com/terraform-providers/terraform-provider-openstack/issues/264))
 
 BUG FIXES
 
