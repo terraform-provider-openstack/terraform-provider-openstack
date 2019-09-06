@@ -149,7 +149,7 @@ func resourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) error
 	d.Set("swap", fl.Swap)
 	d.Set("rx_tx_factor", fl.RxTxFactor)
 	d.Set("is_public", fl.IsPublic)
-	// d.Set("ephemeral", fl.Ephemeral) TODO: Implement this in gophercloud
+	d.Set("ephemeral", fl.Ephemeral)
 	d.Set("region", GetRegion(d, config))
 
 	es, err := flavors.ListExtraSpecs(computeClient, d.Id()).Extract()
