@@ -1,4 +1,11 @@
 ## 1.22.1 (Unreleased)
+
+BUG FIXES
+
+* Fixed the bug where `openstack_identity_auth_scope_v3` caused a panic within the domain-scope [GH-851]
+* Fixed the bug where `openstack_compute_flavor_access_v2` resource wasn't removed from the Terraform state when it has been deleted in the OpenStack [GH-856]
+* Fixed the bug where `openstack_identity_role_assignment_v3` resource wasn't removed from the Terraform state when it has been deleted in the OpenStack [GH-856]
+
 ## 1.22.0 (September 05, 2019)
 
 FEATURES
@@ -15,7 +22,7 @@ IMPROVEMENTS
 BUG FIXES
 
 * Fixed the bug where project info wasn't accessible to non-admin users ([#833](https://github.com/terraform-providers/terraform-provider-openstack/issues/833))
-* Fixed the bug wher role assignments weren't accessible to non-admin users ([#845](https://github.com/terraform-providers/terraform-provider-openstack/issues/845))
+* Fixed the bug where role assignments weren't accessible to non-admin users ([#845](https://github.com/terraform-providers/terraform-provider-openstack/issues/845))
 
 ## 1.21.1 (August 08, 2019)
 
