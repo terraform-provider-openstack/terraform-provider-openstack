@@ -95,14 +95,14 @@ func resourceComputeFlavorAccessV2Delete(d *schema.ResourceData, meta interface{
 
 	flavorAccess, err := getFlavorAccess(computeClient, d)
 	if err != nil {
-		return fmt.Errorf("Error getting flavor access: %s", err)
+		return CheckDeleted(d, err, "Error getting flavor access")
 	}
 
 	removeAccessOpts := flavors.RemoveAccessOpts{Tenant: flavorAccess.TenantID}
 	log.Printf("[DEBUG] RemoveAccess Options: %#v", removeAccessOpts)
 
 	if _, err := flavors.RemoveAccess(computeClient, flavorAccess.FlavorID, removeAccessOpts).Extract(); err != nil {
-		return fmt.Errorf("Error removing tenant %s access from flavor %s: %s", flavorAccess.TenantID, flavorAccess.FlavorID, err)
+		return CheckDeleted(d, err, fmt.Sprintf("Error removing tenant %s access from flavor %s", flavorAccess.TenantID, flavorAccess.FlavorID))
 	}
 
 	return nil
@@ -127,6 +127,7 @@ func getFlavorAccess(computeClient *gophercloud.ServiceClient, d *schema.Resourc
 		return access, err
 	}
 
+	found := false
 	pager := flavors.ListAccesses(computeClient, flavorID)
 	err = pager.EachPage(func(page pagination.Page) (bool, error) {
 		accessList, err := flavors.ExtractAccesses(page)
@@ -137,12 +138,17 @@ func getFlavorAccess(computeClient *gophercloud.ServiceClient, d *schema.Resourc
 		for _, a := range accessList {
 			if a.TenantID == tenantID && a.FlavorID == flavorID {
 				access = a
+				found = true
 				return false, nil
 			}
 		}
 
 		return true, nil
 	})
+
+	if !found {
+		return access, gophercloud.ErrDefault404{}
+	}
 
 	return access, err
 }
