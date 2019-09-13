@@ -5,6 +5,7 @@ IMPROVEMENTS
 
 * Added `Cache-Control: no-cache` header by default in all requests. This behaviour can be disabled via config flag [GH-849]
 * Updated Terraform SDK to `v0.12.8` [GH-859]
+* Refactored headers formatting functions to not use external libraries and nested loops [GH-865]
 
 BUG FIXES
 
