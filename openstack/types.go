@@ -54,7 +54,7 @@ func (lrt *LogRoundTripper) RoundTrip(request *http.Request) (*http.Response, er
 
 	if lrt.OsDebug {
 		log.Printf("[DEBUG] OpenStack Request URL: %s %s", request.Method, request.URL)
-		log.Printf("[DEBUG] OpenStack Request Headers:\n%s", FormatHeaders(request.Header, "\n"))
+		log.Printf("[DEBUG] OpenStack Request Headers:\n%s", formatHeaders(request.Header, "\n"))
 
 		if request.Body != nil {
 			request.Body, err = lrt.logRequest(request.Body, request.Header.Get("Content-Type"))
@@ -86,7 +86,7 @@ func (lrt *LogRoundTripper) RoundTrip(request *http.Request) (*http.Response, er
 
 	if lrt.OsDebug {
 		log.Printf("[DEBUG] OpenStack Response Code: %d", response.StatusCode)
-		log.Printf("[DEBUG] OpenStack Response Headers:\n%s", FormatHeaders(response.Header, "\n"))
+		log.Printf("[DEBUG] OpenStack Response Headers:\n%s", formatHeaders(response.Header, "\n"))
 
 		response.Body, err = lrt.logResponse(response.Body, response.Header.Get("Content-Type"))
 	}
