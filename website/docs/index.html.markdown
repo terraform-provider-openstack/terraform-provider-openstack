@@ -148,6 +148,11 @@ The following arguments are supported:
 * `use_octavia` - (Optional) If set to `true`, API requests will go the Load Balancer
   service (Octavia) instead of the Networking service (Neutron).
 
+* `disable_no_cache_header` - (Optional) If set to `true`, the HTTP
+  `Cache-Control: no-cache` header will not be added by default to all API requests.
+  If omitted this header is added to all API requests to force HTTP caches (if any)
+  to go upstream instead of serving cached responses.
+
 ## Overriding Service API Endpoints
 
 There might be a situation in which you want or need to override an API endpoint

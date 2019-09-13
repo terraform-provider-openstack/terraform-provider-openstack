@@ -45,6 +45,7 @@ type Config struct {
 	ApplicationCredentialSecret string
 	useOctavia                  bool
 	MaxRetries                  int
+	DisableNoCacheHeader        bool
 
 	OsClient *gophercloud.ProviderClient
 }
@@ -191,9 +192,10 @@ func (c *Config) LoadAndValidate() error {
 	transport := &http.Transport{Proxy: http.ProxyFromEnvironment, TLSClientConfig: config}
 	client.HTTPClient = http.Client{
 		Transport: &LogRoundTripper{
-			Rt:         transport,
-			OsDebug:    osDebug,
-			MaxRetries: c.MaxRetries,
+			Rt:                   transport,
+			OsDebug:              osDebug,
+			DisableNoCacheHeader: c.DisableNoCacheHeader,
+			MaxRetries:           c.MaxRetries,
 		},
 	}
 

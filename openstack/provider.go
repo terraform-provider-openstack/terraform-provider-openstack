@@ -216,6 +216,13 @@ func Provider() terraform.ResourceProvider {
 				Optional:    true,
 				Description: descriptions["endpoint_overrides"],
 			},
+
+			"disable_no_cache_header": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: descriptions["disable_no_cache_header"],
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -411,6 +418,8 @@ func init() {
 
 		"endpoint_overrides": "A map of services with an endpoint to override what was\n" +
 			"from the Keystone catalog",
+
+		"disable_no_cache_header": "If set to `true`, the HTTP `Cache-Control: no-cache` header will not be added by default to all API requests.",
 	}
 }
 
@@ -443,6 +452,7 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		ApplicationCredentialSecret: d.Get("application_credential_secret").(string),
 		useOctavia:                  d.Get("use_octavia").(bool),
 		MaxRetries:                  d.Get("max_retries").(int),
+		DisableNoCacheHeader:        d.Get("disable_no_cache_header").(bool),
 	}
 
 	v, ok := d.GetOkExists("insecure")

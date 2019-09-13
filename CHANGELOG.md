@@ -1,5 +1,9 @@
 ## 1.22.1 (Unreleased)
 
+IMPROVEMENTS
+
+* Added workaround for cases when Openstack API doesn't provide proper HTTP Cache-Control headers [GH-264]
+
 BUG FIXES
 
 * Fixed the bug where `openstack_identity_auth_scope_v3` caused a panic within the domain-scope [GH-851]

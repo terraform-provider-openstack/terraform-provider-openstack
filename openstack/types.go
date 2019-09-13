@@ -26,9 +26,10 @@ import (
 // LogRoundTripper satisfies the http.RoundTripper interface and is used to
 // customize the default http client RoundTripper to allow for logging.
 type LogRoundTripper struct {
-	Rt         http.RoundTripper
-	OsDebug    bool
-	MaxRetries int
+	Rt                   http.RoundTripper
+	OsDebug              bool
+	DisableNoCacheHeader bool
+	MaxRetries           int
 }
 
 // RoundTrip performs a round-trip HTTP request and logs relevant information about it.
@@ -41,6 +42,13 @@ func (lrt *LogRoundTripper) RoundTrip(request *http.Request) (*http.Response, er
 
 	// for future reference, this is how to access the Transport struct:
 	//tlsconfig := lrt.Rt.(*http.Transport).TLSClientConfig
+
+	if !lrt.DisableNoCacheHeader {
+		// set Cache-Control header to no-cache on request to force HTTP caches (if any) to go upstream.
+		// This is a work-around until all Openstack APIs implement proper Cache-Control headers by their own.
+		// The guidelines for this were added to http://specs.openstack.org/openstack/api-sig/guidelines/http/caching.html in 03/2018.
+		request.Header.Set("Cache-Control", "no-cache")
+	}
 
 	var err error
 
