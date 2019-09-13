@@ -1,8 +1,10 @@
 ## 1.22.1 (Unreleased)
 
+
 IMPROVEMENTS
 
-* Added workaround for cases when Openstack API doesn't provide proper HTTP Cache-Control headers [GH-264]
+* Added `Cache-Control: no-cache` header by default in all requests. This behaviour can be disabled via config flag [GH-849]
+* Updated Terraform SDK to `v0.12.8` [GH-859]
 
 BUG FIXES
 
