@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Unknwon/com"
 	"github.com/gophercloud/gophercloud"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -72,32 +71,42 @@ func MapValueSpecs(d *schema.ResourceData) map[string]string {
 	return m
 }
 
-// List of headers that need to be redacted
-var REDACT_HEADERS = []string{"x-auth-token", "x-auth-key", "x-service-token",
-	"x-storage-token", "x-account-meta-temp-url-key", "x-account-meta-temp-url-key-2",
-	"x-container-meta-temp-url-key", "x-container-meta-temp-url-key-2", "set-cookie",
-	"x-subject-token"}
-
-// RedactHeaders processes a headers object, returning a redacted list
-func RedactHeaders(headers http.Header) (processedHeaders []string) {
-	for name, header := range headers {
-		for _, v := range header {
-			if com.IsSliceContainsStr(REDACT_HEADERS, name) {
-				processedHeaders = append(processedHeaders, fmt.Sprintf("%v: %v", name, "***"))
-			} else {
-				processedHeaders = append(processedHeaders, fmt.Sprintf("%v: %v", name, v))
-			}
-		}
-	}
-	return
+// List of headers that contain sensitive data.
+var sensitiveHeaders = map[string]struct{}{
+	"x-auth-token":                    {},
+	"x-auth-key":                      {},
+	"x-service-token":                 {},
+	"x-storage-token":                 {},
+	"x-account-meta-temp-url-key":     {},
+	"x-account-meta-temp-url-key-2":   {},
+	"x-container-meta-temp-url-key":   {},
+	"x-container-meta-temp-url-key-2": {},
+	"set-cookie":                      {},
+	"x-subject-token":                 {},
 }
 
-// FormatHeaders processes a headers object plus a deliminator, returning a string
-func FormatHeaders(headers http.Header, seperator string) string {
-	redactedHeaders := RedactHeaders(headers)
+func hideSensitiveHeadersData(headers http.Header) []string {
+	result := make([]string, len(headers))
+	headerIdx := 0
+	for header, data := range headers {
+		if _, ok := sensitiveHeaders[strings.ToLower(header)]; ok {
+			result[headerIdx] = fmt.Sprintf("%s: %s", header, "***")
+		} else {
+			result[headerIdx] = fmt.Sprintf("%s: %s", header, strings.Join(data, " "))
+		}
+		headerIdx++
+	}
+
+	return result
+}
+
+// formatHeaders converts standard http.Header type to a string with separated headers.
+// It will hide data of sensitive headers.
+func formatHeaders(headers http.Header, separator string) string {
+	redactedHeaders := hideSensitiveHeadersData(headers)
 	sort.Strings(redactedHeaders)
 
-	return strings.Join(redactedHeaders, seperator)
+	return strings.Join(redactedHeaders, separator)
 }
 
 func checkForRetryableError(err error) *resource.RetryError {
