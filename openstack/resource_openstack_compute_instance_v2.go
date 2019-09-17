@@ -913,6 +913,16 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
+	allInstanceNetworks, err := getAllInstanceNetworks(d, meta)
+	if err != nil {
+		return CheckDeleted(d, err, "Unable to get instance network state openstack_compute_instance_v2")
+	}
+	for _, network := range allInstanceNetworks {
+		if network.Port != "" {
+			computeInterfaceAttachV2DetachFunc(computeClient, d.Id(), network.Port)
+		}
+	}
+
 	if d.Get("force_delete").(bool) {
 		log.Printf("[DEBUG] Force deleting OpenStack Instance %s", d.Id())
 		err = servers.ForceDelete(computeClient, d.Id()).ExtractErr()
