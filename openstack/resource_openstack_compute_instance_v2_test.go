@@ -1112,6 +1112,25 @@ resource "openstack_compute_instance_v2" "instance_1" {
 }
 `, OS_NETWORK_ID)
 
+var testAccComputeV2Instance_detachPortsBeforeDestroy = fmt.Sprintf(`
+
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  network_id = "%s"
+  admin_state_up = "true"
+}
+
+
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  detach_ports_before_destroy = true
+  network {
+    port = "${openstack_networking_port_v2.port_4.id}"
+  }
+}
+`, OS_NETWORK_ID)
+
 var testAccComputeV2Instance_metadataRemove_1 = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"

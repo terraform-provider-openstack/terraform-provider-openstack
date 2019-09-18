@@ -351,6 +351,11 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"detach_ports_before_destroy": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"force_delete": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -912,28 +917,28 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 			}
 		}
 	}
+	if d.Get("detach_ports_before_destroy").(bool) {
+		allInstanceNetworks, err := getAllInstanceNetworks(d, meta)
+		if err != nil {
+			return CheckDeleted(d, err, "Unable to get openstack_compute_instance_v2 ports")
+		}
 
-	allInstanceNetworks, err := getAllInstanceNetworks(d, meta)
-	if err != nil {
-		return CheckDeleted(d, err, "Unable to get openstack_compute_instance_v2 ports")
-	}
-
-	for _, network := range allInstanceNetworks {
-		if network.Port != "" {
-			stateConf := &resource.StateChangeConf{
-				Pending:    []string{""},
-				Target:     []string{"DETACHED"},
-				Refresh:    computeInterfaceAttachV2DetachFunc(computeClient, d.Id(), network.Port),
-				Timeout:    d.Timeout(schema.TimeoutDelete),
-				Delay:      5 * time.Second,
-				MinTimeout: 5 * time.Second,
-			}
-			if _, err = stateConf.WaitForState(); err != nil {
-				return fmt.Errorf("Error detaching openstack_compute_instance_v2 %s: %s", d.Id(), err)
+		for _, network := range allInstanceNetworks {
+			if network.Port != "" {
+				stateConf := &resource.StateChangeConf{
+					Pending:    []string{""},
+					Target:     []string{"DETACHED"},
+					Refresh:    computeInterfaceAttachV2DetachFunc(computeClient, d.Id(), network.Port),
+					Timeout:    d.Timeout(schema.TimeoutDelete),
+					Delay:      5 * time.Second,
+					MinTimeout: 5 * time.Second,
+				}
+				if _, err = stateConf.WaitForState(); err != nil {
+					return fmt.Errorf("Error detaching openstack_compute_instance_v2 %s: %s", d.Id(), err)
+				}
 			}
 		}
 	}
-
 	if d.Get("force_delete").(bool) {
 		log.Printf("[DEBUG] Force deleting OpenStack Instance %s", d.Id())
 		err = servers.ForceDelete(computeClient, d.Id()).ExtractErr()
