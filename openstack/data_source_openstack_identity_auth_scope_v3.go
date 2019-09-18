@@ -47,6 +47,16 @@ func dataSourceIdentityAuthScopeV3() *schema.Resource {
 				Computed: true,
 			},
 
+			"domain_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"domain_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"project_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -109,11 +119,22 @@ func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{})
 	d.Set("user_domain_name", user.Domain.Name)
 	d.Set("user_domain_id", user.Domain.ID)
 
+	domain, err := result.ExtractDomain()
+	if err != nil {
+		return err
+	}
+	if domain != nil {
+		d.Set("domain_name", domain.Name)
+		d.Set("domain_id", domain.ID)
+	} else {
+		d.Set("domain_name", "")
+		d.Set("domain_id", "")
+	}
+
 	project, err := result.ExtractProject()
 	if err != nil {
 		return err
 	}
-
 	if project != nil {
 		d.Set("project_name", project.Name)
 		d.Set("project_id", project.ID)
