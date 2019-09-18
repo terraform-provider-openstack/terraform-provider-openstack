@@ -13,6 +13,7 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
+	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/members"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -190,4 +191,34 @@ func resourceImagesImageV2UpdateComputedAttributes(diff *schema.ResourceDiff, me
 	}
 
 	return nil
+}
+
+func resourceImagesShareV2ParseID(id string) (string, string, error) {
+	idParts := strings.Split(id, "/")
+	if len(idParts) < 2 {
+		return "", "", fmt.Errorf("Unable to determine image share access ID")
+	}
+
+	imageID := idParts[0]
+	memberID := idParts[1]
+
+	return imageID, memberID, nil
+}
+
+func resourceImagesShareV2DetectMemberID(client *gophercloud.ServiceClient, imageID string) (string, error) {
+	allPages, err := members.List(client, imageID).AllPages()
+	if err != nil {
+		return "", fmt.Errorf("Unable to list image members: %s", err)
+	}
+	allMembers, err := members.ExtractMembers(allPages)
+	if err != nil {
+		return "", fmt.Errorf("Unable to extract image members: %s", err)
+	}
+	if len(allMembers) == 0 {
+		return "", fmt.Errorf("No members found for the %q image", imageID)
+	}
+	if len(allMembers) > 1 {
+		return "", fmt.Errorf("Too many members found for the %q image, please specify the member_id explicitly", imageID)
+	}
+	return allMembers[0].MemberID, nil
 }
