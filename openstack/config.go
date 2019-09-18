@@ -47,6 +47,7 @@ type Config struct {
 	MaxRetries                  int
 	DisableNoCacheHeader        bool
 
+	delayedAuth   bool
 	OsClient      *gophercloud.ProviderClient
 	authOpts      *gophercloud.AuthOptions
 	authenticated bool
@@ -204,6 +205,13 @@ func (c *Config) LoadAndValidate() error {
 		},
 	}
 
+	if !c.delayedAuth && !c.Swauth {
+		err = openstack.Authenticate(client, *ao)
+		if err != nil {
+			return err
+		}
+	}
+
 	if c.MaxRetries < 0 {
 		return fmt.Errorf("max_retries should be a positive value")
 	}
@@ -215,6 +223,10 @@ func (c *Config) LoadAndValidate() error {
 }
 
 func (c *Config) authenticate() error {
+	if !c.delayedAuth {
+		return nil
+	}
+
 	osMutexKV.Lock("auth")
 	defer osMutexKV.Unlock("auth")
 
@@ -446,26 +458,33 @@ func (c *Config) objectStorageV1Client(region string) (*gophercloud.ServiceClien
 	// If Swift Authentication is being used, return a swauth client.
 	// Otherwise, use a Keystone-based client.
 	if c.Swauth {
-		osMutexKV.Lock("SwAuth")
-		defer osMutexKV.Unlock("SwAuth")
-
-		if c.swAuthFailed != nil {
-			return nil, c.swAuthFailed
-		}
-
-		if c.swClient == nil {
-			c.swClient, err = swauth.NewObjectStorageV1(c.OsClient, swauth.AuthOpts{
+		if !c.delayedAuth {
+			client, err = swauth.NewObjectStorageV1(c.OsClient, swauth.AuthOpts{
 				User: c.Username,
 				Key:  c.Password,
 			})
+		} else {
+			osMutexKV.Lock("SwAuth")
+			defer osMutexKV.Unlock("SwAuth")
 
-			if err != nil {
-				c.swAuthFailed = err
-				return nil, err
+			if c.swAuthFailed != nil {
+				return nil, c.swAuthFailed
 			}
-		}
 
-		client = c.swClient
+			if c.swClient == nil {
+				c.swClient, err = swauth.NewObjectStorageV1(c.OsClient, swauth.AuthOpts{
+					User: c.Username,
+					Key:  c.Password,
+				})
+
+				if err != nil {
+					c.swAuthFailed = err
+					return nil, err
+				}
+			}
+
+			client = c.swClient
+		}
 	} else {
 		if err := c.authenticate(); err != nil {
 			return nil, err
