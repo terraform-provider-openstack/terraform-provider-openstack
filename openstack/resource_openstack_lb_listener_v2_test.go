@@ -38,6 +38,54 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 	})
 }
 
+func TestAccLBV2Listener_octavia(t *testing.T) {
+	var listener listeners.Listener
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckLB(t)
+			testAccPreCheckUseOctavia(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckLBV2ListenerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: TestAccLBV2ListenerConfig_octavia,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_listener_v2.listener_1", "connection_limit", "5"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_listener_v2.listener_1", "timeout_client_data", "10"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_listener_v2.listener_1", "timeout_member_connect", "20"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_listener_v2.listener_1", "timeout_member_data", "30"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_listener_v2.listener_1", "timeout_tcp_inspect", "40"),
+				),
+			},
+			{
+				Config: TestAccLBV2ListenerConfig_octavia_update,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_lb_listener_v2.listener_1", "name", "listener_1_updated"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_listener_v2.listener_1", "connection_limit", "100"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_listener_v2.listener_1", "timeout_client_data", "40"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_listener_v2.listener_1", "timeout_member_connect", "30"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_listener_v2.listener_1", "timeout_member_data", "20"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_listener_v2.listener_1", "timeout_tcp_inspect", "10"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckLBV2ListenerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
@@ -123,11 +171,11 @@ resource "openstack_lb_listener_v2" "listener_1" {
   default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
 
-	timeouts {
-		create = "5m"
-		update = "5m"
-		delete = "5m"
-	}
+  timeouts {
+    create = "5m"
+    update = "5m"
+    delete = "5m"
+  }
 }
 `
 
@@ -157,10 +205,101 @@ resource "openstack_lb_listener_v2" "listener_1" {
   admin_state_up = "true"
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
 
-	timeouts {
-		create = "5m"
-		update = "5m"
-		delete = "5m"
-	}
+  timeouts {
+    create = "5m"
+    update = "5m"
+    delete = "5m"
+  }
+}
+`
+
+const TestAccLBV2ListenerConfig_octavia = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
+  name = "loadbalancer_1"
+  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+}
+
+resource "openstack_lb_pool_v2" "pool_1" {
+  name            = "pool_1"
+  protocol        = "HTTP"
+  lb_method       = "ROUND_ROBIN"
+  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+}
+
+resource "openstack_lb_listener_v2" "listener_1" {
+  name = "listener_1"
+  protocol = "HTTP"
+  protocol_port = 8080
+  connection_limit = 5
+  timeout_client_data = 10
+  timeout_member_connect = 20
+  timeout_member_data = 30
+  timeout_tcp_inspect = 40
+  default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
+  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+
+  timeouts {
+    create = "5m"
+    update = "5m"
+    delete = "5m"
+  }
+}
+`
+
+const TestAccLBV2ListenerConfig_octavia_update = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
+  name = "loadbalancer_1"
+  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+}
+
+resource "openstack_lb_pool_v2" "pool_1" {
+  name            = "pool_1"
+  protocol        = "HTTP"
+  lb_method       = "ROUND_ROBIN"
+  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+}
+
+resource "openstack_lb_listener_v2" "listener_1" {
+  name = "listener_1"
+  protocol = "HTTP"
+  protocol_port = 8080
+  connection_limit = 100
+  timeout_client_data = 40
+  timeout_member_connect = 30
+  timeout_member_data = 20
+  timeout_tcp_inspect = 10
+  admin_state_up = "true"
+  default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
+  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+
+  timeouts {
+    create = "5m"
+    update = "5m"
+    delete = "5m"
+  }
 }
 `
