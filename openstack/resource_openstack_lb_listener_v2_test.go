@@ -56,13 +56,13 @@ func TestAccLBV2Listener_octavia(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "connection_limit", "5"),
 					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_client_data", "10"),
+						"openstack_lb_listener_v2.listener_1", "timeout_client_data", "1000"),
 					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_member_connect", "20"),
+						"openstack_lb_listener_v2.listener_1", "timeout_member_connect", "2000"),
 					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_member_data", "30"),
+						"openstack_lb_listener_v2.listener_1", "timeout_member_data", "3000"),
 					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_tcp_inspect", "40"),
+						"openstack_lb_listener_v2.listener_1", "timeout_tcp_inspect", "4000"),
 				),
 			},
 			{
@@ -73,13 +73,13 @@ func TestAccLBV2Listener_octavia(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "connection_limit", "100"),
 					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_client_data", "40"),
+						"openstack_lb_listener_v2.listener_1", "timeout_client_data", "4000"),
 					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_member_connect", "30"),
+						"openstack_lb_listener_v2.listener_1", "timeout_member_connect", "3000"),
 					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_member_data", "20"),
+						"openstack_lb_listener_v2.listener_1", "timeout_member_data", "2000"),
 					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_tcp_inspect", "10"),
+						"openstack_lb_listener_v2.listener_1", "timeout_tcp_inspect", "1000"),
 				),
 			},
 		},
@@ -243,10 +243,10 @@ resource "openstack_lb_listener_v2" "listener_1" {
   protocol = "HTTP"
   protocol_port = 8080
   connection_limit = 5
-  timeout_client_data = 10
-  timeout_member_connect = 20
-  timeout_member_data = 30
-  timeout_tcp_inspect = 40
+  timeout_client_data = 1000
+  timeout_member_connect = 2000
+  timeout_member_data = 3000
+  timeout_tcp_inspect = 4000
   default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
 
@@ -288,10 +288,10 @@ resource "openstack_lb_listener_v2" "listener_1" {
   protocol = "HTTP"
   protocol_port = 8080
   connection_limit = 100
-  timeout_client_data = 40
-  timeout_member_connect = 30
-  timeout_member_data = 20
-  timeout_tcp_inspect = 10
+  timeout_client_data = 4000
+  timeout_member_connect = 3000
+  timeout_member_data = 2000
+  timeout_tcp_inspect = 1000
   admin_state_up = "true"
   default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"

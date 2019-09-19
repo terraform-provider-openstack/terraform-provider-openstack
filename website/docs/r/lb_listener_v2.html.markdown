@@ -52,6 +52,15 @@ The following arguments are supported:
 
 * `connection_limit` - (Optional) The maximum number of connections allowed
     for the Listener.
+    
+* `timeout_client_data` - (Optional) The client inactivity timeout in milliseconds.
+    
+* `timeout_member_connect` - (Optional) The member connection timeout in milliseconds.
+    
+* `timeout_member_data` - (Optional) The member inactivity timeout in milliseconds.
+    
+* `timeout_tcp_inspect` - (Optional) The time in milliseconds, to wait for additional
+    TCP packets for content inspection.
 
 * `default_tls_container_ref` - (Optional) A reference to a Barbican Secrets
     container which stores TLS information. This is required if the protocol
@@ -79,6 +88,10 @@ The following attributes are exported:
 * `default_port_id` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `connection_limit` - See Argument Reference above.
+* `timeout_client_data` - See Argument Reference above.
+* `timeout_member_connect` - See Argument Reference above.
+* `timeout_member_data` - See Argument Reference above.
+* `timeout_tcp_inspect` - See Argument Reference above.
 * `default_tls_container_ref` - See Argument Reference above.
 * `sni_container_refs` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
