@@ -38,6 +38,8 @@ are exported:
 * `user_id` - The user ID the of the scope.
 * `user_domain_name` - The domain name of the user.
 * `user_domain_id` - The domain ID of the user.
+* `domain_name` - The domain name of the scope.
+* `domain_id` - The domain ID of the scope.
 * `project_name` - The project name of the scope.
 * `project_id` - The project ID of the scope.
 * `project_domain_name` - The domain name of the project.
