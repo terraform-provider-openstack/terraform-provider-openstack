@@ -6,7 +6,7 @@ description: |-
   Get information on an OpenStack User.
 ---
 
-# openstack\_identity\_user_v3
+# openstack\_identity\_user\_v3
 
 Use this data source to get the ID of an OpenStack user.
 
@@ -21,8 +21,6 @@ data "openstack_identity_user_v3" "user_1" {
 ## Argument Reference
 
 The following arguments are supported:
-
-* `description` - (Optional) A description of the user.
 
 * `default_project_id` - (Optional) The default project this user belongs to.
 
@@ -54,3 +52,4 @@ The following attributes are exported:
 * `protocol_id` - See Argument Reference above.
 * `region` - The region the user is located in.
 * `unique_id` - See Argument Reference above.
+* `description` - A description of the user.
