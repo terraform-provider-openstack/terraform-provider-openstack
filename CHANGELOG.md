@@ -4,6 +4,7 @@
 IMPROVEMENTS
 
 * Added `Cache-Control: no-cache` header by default in all requests. This behaviour can be disabled via config flag [GH-849]
+* Added `domain_id`, `domain_name` attributes to the `openstack_identity_auth_scope_v3` data source [GH-871]
 * Updated Terraform SDK to `v0.12.8` [GH-859]
 * Refactored headers formatting functions to not use external libraries and nested loops [GH-865]
 
