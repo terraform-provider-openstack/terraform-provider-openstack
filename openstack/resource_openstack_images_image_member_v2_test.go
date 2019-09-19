@@ -24,6 +24,8 @@ func TestAccImagesImageMemberV2_basic(t *testing.T) {
 					testAccCheckImagesImageMemberV2Exists("openstack_images_image_member_v2.image_member_1", &member),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_images_image_member_v2.image_member_1", "status", &member.Status),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_member_v2.image_member_1", "status", "pending"),
 				),
 			},
 			{
@@ -32,6 +34,8 @@ func TestAccImagesImageMemberV2_basic(t *testing.T) {
 					testAccCheckImagesImageMemberV2Exists("openstack_images_image_member_v2.image_member_1", &member),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_images_image_member_v2.image_member_1", "status", &member.Status),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_member_v2.image_member_1", "status", "accepted"),
 				),
 			},
 		},
