@@ -310,6 +310,8 @@ func Provider() terraform.ResourceProvider {
 			"openstack_identity_user_v3":                         resourceIdentityUserV3(),
 			"openstack_identity_application_credential_v3":       resourceIdentityApplicationCredentialV3(),
 			"openstack_images_image_v2":                          resourceImagesImageV2(),
+			"openstack_images_image_access_v2":                   resourceImagesImageAccessV2(),
+			"openstack_images_image_access_accept_v2":            resourceImagesImageAccessAcceptV2(),
 			"openstack_lb_member_v1":                             resourceLBMemberV1(),
 			"openstack_lb_monitor_v1":                            resourceLBMonitorV1(),
 			"openstack_lb_pool_v1":                               resourceLBPoolV1(),

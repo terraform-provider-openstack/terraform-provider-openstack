@@ -6,7 +6,7 @@ description: |-
   Manages a V2 Image resource within OpenStack Glance.
 ---
 
-# openstack\_images\_image_v2
+# openstack\_images\_image\_v2
 
 Manages a V2 Image resource within OpenStack Glance.
 

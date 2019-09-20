@@ -9,6 +9,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func dataSourceImagesImageV2() *schema.Resource {
@@ -33,12 +34,24 @@ func dataSourceImagesImageV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					string(images.ImageVisibilityPublic),
+					string(images.ImageVisibilityPrivate),
+					string(images.ImageVisibilityShared),
+					string(images.ImageVisibilityCommunity),
+				}, false),
 			},
 
 			"member_status": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					string(images.ImageMemberStatusAccepted),
+					string(images.ImageMemberStatusPending),
+					string(images.ImageMemberStatusRejected),
+					string(images.ImageMemberStatusAll),
+				}, false),
 			},
 
 			"owner": {
@@ -67,11 +80,13 @@ func dataSourceImagesImageV2() *schema.Resource {
 			},
 
 			"sort_direction": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Default:      "asc",
-				ValidateFunc: dataSourceImagesImageV2SortDirection,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "asc",
+				ValidateFunc: validation.StringInSlice([]string{
+					"asc", "desc",
+				}, false),
 			},
 
 			"tag": {
@@ -255,11 +270,7 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 	}
 
 	log.Printf("[DEBUG] Single Image found: %s", image.ID)
-	return dataSourceImagesImageV2Attributes(d, &image)
-}
 
-// dataSourceImagesImageV2Attributes populates the fields of an Image resource.
-func dataSourceImagesImageV2Attributes(d *schema.ResourceData, image *images.Image) error {
 	log.Printf("[DEBUG] openstack_images_image details: %#v", image)
 
 	d.SetId(image.ID)
@@ -298,13 +309,4 @@ func mostRecentImage(images []images.Image) images.Image {
 	sortedImages := images
 	sort.Sort(imageSort(sortedImages))
 	return sortedImages[len(sortedImages)-1]
-}
-
-func dataSourceImagesImageV2SortDirection(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	if value != "asc" && value != "desc" {
-		err := fmt.Errorf("%s must be either asc or desc", k)
-		errors = append(errors, err)
-	}
-	return
 }
