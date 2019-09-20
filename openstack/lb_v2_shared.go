@@ -9,8 +9,10 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	octavialisteners "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
+	neutronlisteners "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/monitors"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
@@ -45,11 +47,249 @@ func chooseLBV2AccTestClient(config *Config, region string) (*gophercloud.Servic
 	return config.networkingV2Client(region)
 }
 
+// chooseLBV2ListenerCreateOpts will determine which load balancer listener Create options to use:
+// Either the Octavia/LBaaS or the Neutron/Networking v2.
+func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config) neutronlisteners.CreateOptsBuilder {
+	adminStateUp := d.Get("admin_state_up").(bool)
+
+	var sniContainerRefs []string
+	if raw, ok := d.GetOk("sni_container_refs"); ok {
+		for _, v := range raw.([]interface{}) {
+			sniContainerRefs = append(sniContainerRefs, v.(string))
+		}
+	}
+
+	var createOpts neutronlisteners.CreateOptsBuilder
+
+	if config.useOctavia {
+		// Use Octavia.
+		opts := octavialisteners.CreateOpts{
+			Protocol:               octavialisteners.Protocol(d.Get("protocol").(string)),
+			ProtocolPort:           d.Get("protocol_port").(int),
+			ProjectID:              d.Get("tenant_id").(string),
+			LoadbalancerID:         d.Get("loadbalancer_id").(string),
+			Name:                   d.Get("name").(string),
+			DefaultPoolID:          d.Get("default_pool_id").(string),
+			Description:            d.Get("description").(string),
+			DefaultTlsContainerRef: d.Get("default_tls_container_ref").(string),
+			SniContainerRefs:       sniContainerRefs,
+			AdminStateUp:           &adminStateUp,
+		}
+
+		if v, ok := d.GetOk("connection_limit"); ok {
+			connectionLimit := v.(int)
+			opts.ConnLimit = &connectionLimit
+		}
+
+		if v, ok := d.GetOk("timeout_client_data"); ok {
+			timeoutClientData := v.(int)
+			opts.TimeoutClientData = &timeoutClientData
+		}
+
+		if v, ok := d.GetOk("timeout_member_connect"); ok {
+			timeoutMemberConnect := v.(int)
+			opts.TimeoutMemberConnect = &timeoutMemberConnect
+		}
+
+		if v, ok := d.GetOk("timeout_member_data"); ok {
+			timeoutMemberData := v.(int)
+			opts.TimeoutMemberData = &timeoutMemberData
+		}
+
+		if v, ok := d.GetOk("timeout_tcp_inspect"); ok {
+			timeoutTCPInspect := v.(int)
+			opts.TimeoutTCPInspect = &timeoutTCPInspect
+		}
+
+		createOpts = opts
+	} else {
+		// Use Neutron.
+		opts := neutronlisteners.CreateOpts{
+			Protocol:               neutronlisteners.Protocol(d.Get("protocol").(string)),
+			ProtocolPort:           d.Get("protocol_port").(int),
+			TenantID:               d.Get("tenant_id").(string),
+			LoadbalancerID:         d.Get("loadbalancer_id").(string),
+			Name:                   d.Get("name").(string),
+			DefaultPoolID:          d.Get("default_pool_id").(string),
+			Description:            d.Get("description").(string),
+			DefaultTlsContainerRef: d.Get("default_tls_container_ref").(string),
+			SniContainerRefs:       sniContainerRefs,
+			AdminStateUp:           &adminStateUp,
+		}
+
+		if v, ok := d.GetOk("connection_limit"); ok {
+			connectionLimit := v.(int)
+			opts.ConnLimit = &connectionLimit
+		}
+
+		createOpts = opts
+	}
+
+	return createOpts
+}
+
+// chooseLBV2ListenerUpdateOpts will determine which load balancer listener Update options to use:
+// Either the Octavia/LBaaS or the Neutron/Networking v2.
+func chooseLBV2ListenerUpdateOpts(d *schema.ResourceData, config *Config) neutronlisteners.UpdateOptsBuilder {
+	var updateOpts neutronlisteners.UpdateOptsBuilder
+
+	if config.useOctavia {
+		// Use Octavia.
+		var opts octavialisteners.UpdateOpts
+		if d.HasChange("name") {
+			name := d.Get("name").(string)
+			opts.Name = &name
+		}
+		if d.HasChange("description") {
+			description := d.Get("description").(string)
+			opts.Description = &description
+		}
+		if d.HasChange("connection_limit") {
+			connLimit := d.Get("connection_limit").(int)
+			opts.ConnLimit = &connLimit
+		}
+		if d.HasChange("timeout_client_data") {
+			timeoutClientData := d.Get("timeout_client_data").(int)
+			opts.ConnLimit = &timeoutClientData
+		}
+		if d.HasChange("timeout_member_connect") {
+			timeoutMemberConnect := d.Get("timeout_member_connect").(int)
+			opts.ConnLimit = &timeoutMemberConnect
+		}
+		if d.HasChange("timeout_member_data") {
+			timeoutMemberData := d.Get("timeout_member_data").(int)
+			opts.ConnLimit = &timeoutMemberData
+		}
+		if d.HasChange("timeout_tcp_inspect") {
+			timeoutTCPInspect := d.Get("timeout_tcp_inspect").(int)
+			opts.ConnLimit = &timeoutTCPInspect
+		}
+		if d.HasChange("default_pool_id") {
+			defaultPoolID := d.Get("default_pool_id").(string)
+			opts.DefaultPoolID = &defaultPoolID
+		}
+		if d.HasChange("default_tls_container_ref") {
+			opts.DefaultTlsContainerRef = d.Get("default_tls_container_ref").(string)
+		}
+		if d.HasChange("sni_container_refs") {
+			var sniContainerRefs []string
+			if raw, ok := d.GetOk("sni_container_refs"); ok {
+				for _, v := range raw.([]interface{}) {
+					sniContainerRefs = append(sniContainerRefs, v.(string))
+				}
+			}
+			opts.SniContainerRefs = sniContainerRefs
+		}
+		if d.HasChange("admin_state_up") {
+			asu := d.Get("admin_state_up").(bool)
+			opts.AdminStateUp = &asu
+		}
+
+		updateOpts = opts
+	} else {
+		// Use Neutron.
+		var opts neutronlisteners.UpdateOpts
+		if d.HasChange("name") {
+			name := d.Get("name").(string)
+			opts.Name = &name
+		}
+		if d.HasChange("description") {
+			description := d.Get("description").(string)
+			opts.Description = &description
+		}
+		if d.HasChange("connection_limit") {
+			connLimit := d.Get("connection_limit").(int)
+			opts.ConnLimit = &connLimit
+		}
+		if d.HasChange("default_pool_id") {
+			defaultPoolID := d.Get("default_pool_id").(string)
+			opts.DefaultPoolID = &defaultPoolID
+		}
+		if d.HasChange("default_tls_container_ref") {
+			opts.DefaultTlsContainerRef = d.Get("default_tls_container_ref").(string)
+		}
+		if d.HasChange("sni_container_refs") {
+			var sniContainerRefs []string
+			if raw, ok := d.GetOk("sni_container_refs"); ok {
+				for _, v := range raw.([]interface{}) {
+					sniContainerRefs = append(sniContainerRefs, v.(string))
+				}
+			}
+			opts.SniContainerRefs = sniContainerRefs
+		}
+		if d.HasChange("admin_state_up") {
+			asu := d.Get("admin_state_up").(bool)
+			opts.AdminStateUp = &asu
+		}
+
+		updateOpts = opts
+	}
+
+	return updateOpts
+}
+
+// chooseLBV2ListenerReadBody will determine which load balancer listener response body to use:
+// Either the Octavia/LBaaS or the Neutron/Networking v2.
+func chooseLBV2ListenerReadBody(res neutronlisteners.GetResult, d *schema.ResourceData, config *Config) error {
+	if config.useOctavia {
+		var listener octavialisteners.Listener
+		err := res.ExtractInto(listener)
+		if err != nil {
+			return CheckDeleted(d, err, "openstack_lb_listener_v2")
+		}
+
+		log.Printf("[DEBUG] Retrieved openstack_lb_listener_v2 %s: %#v", d.Id(), listener)
+
+		d.Set("name", listener.Name)
+		d.Set("protocol", listener.Protocol)
+		d.Set("tenant_id", listener.ProjectID)
+		d.Set("description", listener.Description)
+		d.Set("protocol_port", listener.ProtocolPort)
+		d.Set("admin_state_up", listener.AdminStateUp)
+		d.Set("default_pool_id", listener.DefaultPoolID)
+		d.Set("connection_limit", listener.ConnLimit)
+		d.Set("timeout_client_data", listener.TimeoutClientData)
+		d.Set("timeout_member_connect", listener.TimeoutMemberConnect)
+		d.Set("timeout_member_data", listener.TimeoutMemberData)
+		d.Set("timeout_tcp_inspect", listener.TimeoutTCPInspect)
+		d.Set("sni_container_refs", listener.SniContainerRefs)
+		d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
+		d.Set("region", GetRegion(d, config))
+	} else {
+		var listener neutronlisteners.Listener
+		err := res.ExtractInto(listener)
+		if err != nil {
+			return CheckDeleted(d, err, "openstack_lb_listener_v2")
+		}
+
+		log.Printf("[DEBUG] Retrieved openstack_lb_listener_v2 %s: %#v", d.Id(), listener)
+
+		// Required by import
+		if len(listener.Loadbalancers) > 0 {
+			d.Set("loadbalancer_id", listener.Loadbalancers[0].ID)
+		}
+
+		d.Set("name", listener.Name)
+		d.Set("protocol", listener.Protocol)
+		d.Set("tenant_id", listener.TenantID)
+		d.Set("description", listener.Description)
+		d.Set("protocol_port", listener.ProtocolPort)
+		d.Set("admin_state_up", listener.AdminStateUp)
+		d.Set("default_pool_id", listener.DefaultPoolID)
+		d.Set("connection_limit", listener.ConnLimit)
+		d.Set("sni_container_refs", listener.SniContainerRefs)
+		d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
+		d.Set("region", GetRegion(d, config))
+	}
+
+	return nil
+}
+
 func waitForLBV2Listener(lbClient *gophercloud.ServiceClient, listener *listeners.Listener, target string, pending []string, timeout time.Duration) error {
-	log.Printf("[DEBUG] Waiting for listener %s to become %s.", listener.ID, target)
+	log.Printf("[DEBUG] Waiting for openstack_lb_listener_v2 %s to become %s.", listener.ID, target)
 
 	if len(listener.Loadbalancers) == 0 {
-		return fmt.Errorf("Failed to detect a Load Balancer for the %s Listener", listener.ID)
+		return fmt.Errorf("Failed to detect a openstack_lb_loadbalancer_v2 for the %s openstack_lb_listener_v2", listener.ID)
 	}
 
 	lbID := listener.Loadbalancers[0].ID
@@ -71,7 +311,7 @@ func waitForLBV2Listener(lbClient *gophercloud.ServiceClient, listener *listener
 			}
 		}
 
-		return fmt.Errorf("Error waiting for listener %s to become %s: %s", listener.ID, target, err)
+		return fmt.Errorf("Error waiting for openstack_lb_listener_v2 %s to become %s: %s", listener.ID, target, err)
 	}
 
 	return nil

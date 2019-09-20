@@ -10,10 +10,11 @@ type Protocol string
 
 // Supported attributes for create/update operations.
 const (
-	ProtocolTCP             Protocol = "TCP"
-	ProtocolHTTP            Protocol = "HTTP"
-	ProtocolHTTPS           Protocol = "HTTPS"
-	ProtocolTerminatedHTTPS Protocol = "TERMINATED_HTTPS"
+	ProtocolTCP   Protocol = "TCP"
+	ProtocolUDP   Protocol = "UDP"
+	ProtocolPROXY Protocol = "PROXY"
+	ProtocolHTTP  Protocol = "HTTP"
+	ProtocolHTTPS Protocol = "HTTPS"
 )
 
 // ListOptsBuilder allows extensions to add additional parameters to the
@@ -28,20 +29,23 @@ type ListOptsBuilder interface {
 // sort by a particular listener attribute. SortDir sets the direction, and is
 // either `asc' or `desc'. Marker and Limit are used for pagination.
 type ListOpts struct {
-	ID              string `q:"id"`
-	Name            string `q:"name"`
-	AdminStateUp    *bool  `q:"admin_state_up"`
-	TenantID        string `q:"tenant_id"`
-	ProjectID       string `q:"project_id"`
-	LoadbalancerID  string `q:"loadbalancer_id"`
-	DefaultPoolID   string `q:"default_pool_id"`
-	Protocol        string `q:"protocol"`
-	ProtocolPort    int    `q:"protocol_port"`
-	ConnectionLimit int    `q:"connection_limit"`
-	Limit           int    `q:"limit"`
-	Marker          string `q:"marker"`
-	SortKey         string `q:"sort_key"`
-	SortDir         string `q:"sort_dir"`
+	ID                   string `q:"id"`
+	Name                 string `q:"name"`
+	AdminStateUp         *bool  `q:"admin_state_up"`
+	ProjectID            string `q:"project_id"`
+	LoadbalancerID       string `q:"loadbalancer_id"`
+	DefaultPoolID        string `q:"default_pool_id"`
+	Protocol             string `q:"protocol"`
+	ProtocolPort         int    `q:"protocol_port"`
+	ConnectionLimit      int    `q:"connection_limit"`
+	Limit                int    `q:"limit"`
+	Marker               string `q:"marker"`
+	SortKey              string `q:"sort_key"`
+	SortDir              string `q:"sort_dir"`
+	TimeoutClientData    *int   `q:"timeout_client_data"`
+	TimeoutMemberData    *int   `q:"timeout_member_data"`
+	TimeoutMemberConnect *int   `q:"timeout_member_connect"`
+	TimeoutTCPInspect    *int   `q:"timeout_tcp_inspect"`
 }
 
 // ToListenerListQuery formats a ListOpts into a query string.
@@ -55,7 +59,7 @@ func (opts ListOpts) ToListenerListQuery() (string, error) {
 // the returned collection for greater efficiency.
 //
 // Default policy settings return only those listeners that are owned by the
-// tenant who submits the request, unless an admin user submits the request.
+// project who submits the request, unless an admin user submits the request.
 func List(c *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pager {
 	url := rootURL(c)
 	if opts != nil {
@@ -87,10 +91,6 @@ type CreateOpts struct {
 	// The port on which to listen for client traffic.
 	ProtocolPort int `json:"protocol_port" required:"true"`
 
-	// TenantID is only required if the caller has an admin role and wants
-	// to create a pool for another project.
-	TenantID string `json:"tenant_id,omitempty"`
-
 	// ProjectID is only required if the caller has an admin role and wants
 	// to create a pool for another project.
 	ProjectID string `json:"project_id,omitempty"`
@@ -116,6 +116,24 @@ type CreateOpts struct {
 	// The administrative state of the Listener. A valid value is true (UP)
 	// or false (DOWN).
 	AdminStateUp *bool `json:"admin_state_up,omitempty"`
+
+	// Frontend client inactivity timeout in milliseconds
+	TimeoutClientData *int `json:"timeout_client_data,omitempty"`
+
+	// Backend member inactivity timeout in milliseconds
+	TimeoutMemberData *int `json:"timeout_member_data,omitempty"`
+
+	// Backend member connection timeout in milliseconds
+	TimeoutMemberConnect *int `json:"timeout_member_connect,omitempty"`
+
+	// Time, in milliseconds, to wait for additional TCP packets for content inspection
+	TimeoutTCPInspect *int `json:"timeout_tcp_inspect,omitempty"`
+
+	// A dictionary of optional headers to insert into the request before it is sent to the backend member.
+	InsertHeaders map[string]string `json:"insert_headers,omitempty"`
+
+	// A list of IPv4, IPv6 or mix of both CIDRs
+	AllowedCIDRs []string `json:"allowed_cidrs,omitempty"`
 }
 
 // ToListenerCreateMap builds a request body from CreateOpts.
@@ -128,8 +146,8 @@ func (opts CreateOpts) ToListenerCreateMap() (map[string]interface{}, error) {
 // validated and progress has started on the provisioning process, a
 // CreateResult will be returned.
 //
-// Users with an admin role can create Listeners on behalf of other tenants by
-// specifying a TenantID attribute different than their own.
+// Users with an admin role can create Listeners on behalf of other projects by
+// specifying a ProjectID attribute different than their own.
 func Create(c *gophercloud.ServiceClient, opts CreateOptsBuilder) (r CreateResult) {
 	b, err := opts.ToListenerCreateMap()
 	if err != nil {
@@ -175,6 +193,21 @@ type UpdateOpts struct {
 	// The administrative state of the Listener. A valid value is true (UP)
 	// or false (DOWN).
 	AdminStateUp *bool `json:"admin_state_up,omitempty"`
+
+	// Frontend client inactivity timeout in milliseconds
+	TimeoutClientData *int `json:"timeout_client_data,omitempty"`
+
+	// Backend member inactivity timeout in milliseconds
+	TimeoutMemberData *int `json:"timeout_member_data,omitempty"`
+
+	// Backend member connection timeout in milliseconds
+	TimeoutMemberConnect *int `json:"timeout_member_connect,omitempty"`
+
+	// Time, in milliseconds, to wait for additional TCP packets for content inspection
+	TimeoutTCPInspect *int `json:"timeout_tcp_inspect,omitempty"`
+
+	// A list of IPv4, IPv6 or mix of both CIDRs
+	AllowedCIDRs []string `json:"allowed_cidrs,omitempty"`
 }
 
 // ToListenerUpdateMap builds a request body from UpdateOpts.
@@ -193,7 +226,7 @@ func (opts UpdateOpts) ToListenerUpdateMap() (map[string]interface{}, error) {
 
 // Update is an operation which modifies the attributes of the specified
 // Listener.
-func Update(c *gophercloud.ServiceClient, id string, opts UpdateOptsBuilder) (r UpdateResult) {
+func Update(c *gophercloud.ServiceClient, id string, opts UpdateOpts) (r UpdateResult) {
 	b, err := opts.ToListenerUpdateMap()
 	if err != nil {
 		r.Err = err
@@ -208,5 +241,11 @@ func Update(c *gophercloud.ServiceClient, id string, opts UpdateOptsBuilder) (r 
 // Delete will permanently delete a particular Listeners based on its unique ID.
 func Delete(c *gophercloud.ServiceClient, id string) (r DeleteResult) {
 	_, r.Err = c.Delete(resourceURL(c, id), nil)
+	return
+}
+
+// GetStats will return the shows the current statistics of a particular Listeners.
+func GetStats(c *gophercloud.ServiceClient, id string) (r StatsResult) {
+	_, r.Err = c.Get(statisticsRootURL(c, id), &r.Body, nil)
 	return
 }

@@ -123,6 +123,14 @@ func testAccPreCheckLB(t *testing.T) {
 	}
 }
 
+func testAccPreCheckUseOctavia(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_USE_OCTAVIA == "" {
+		t.Skip("This environment does not support Octavia tests")
+	}
+}
+
 func testAccPreCheckFW(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
