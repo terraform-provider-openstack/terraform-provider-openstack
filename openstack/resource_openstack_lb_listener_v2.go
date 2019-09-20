@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 
+	octavialisteners "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
 	neutronlisteners "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 )
 
@@ -185,7 +186,65 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	return chooseLBV2ListenerReadBody(neutronlisteners.Get(lbClient, d.Id()), d, config)
+	// Use Octavia listener body if Octavia/LBaaS is enabled.
+	if config.useOctavia {
+		listener, err := octavialisteners.Get(lbClient, d.Id()).Extract()
+		if err != nil {
+			return CheckDeleted(d, err, "openstack_lb_listener_v2")
+		}
+
+		log.Printf("[DEBUG] Retrieved openstack_lb_listener_v2 %s: %#v", d.Id(), listener)
+
+		d.Set("name", listener.Name)
+		d.Set("protocol", listener.Protocol)
+		d.Set("tenant_id", listener.ProjectID)
+		d.Set("description", listener.Description)
+		d.Set("protocol_port", listener.ProtocolPort)
+		d.Set("admin_state_up", listener.AdminStateUp)
+		d.Set("default_pool_id", listener.DefaultPoolID)
+		d.Set("connection_limit", listener.ConnLimit)
+		d.Set("timeout_client_data", listener.TimeoutClientData)
+		d.Set("timeout_member_connect", listener.TimeoutMemberConnect)
+		d.Set("timeout_member_data", listener.TimeoutMemberData)
+		d.Set("timeout_tcp_inspect", listener.TimeoutTCPInspect)
+		d.Set("sni_container_refs", listener.SniContainerRefs)
+		d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
+		d.Set("region", GetRegion(d, config))
+
+		// Required by import.
+		if len(listener.Loadbalancers) > 0 {
+			d.Set("loadbalancer_id", listener.Loadbalancers[0].ID)
+		}
+
+		return nil
+	}
+
+	// Use Neutron/Networking in other case.
+	listener, err := neutronlisteners.Get(lbClient, d.Id()).Extract()
+	if err != nil {
+		return CheckDeleted(d, err, "openstack_lb_listener_v2")
+	}
+
+	log.Printf("[DEBUG] Retrieved openstack_lb_listener_v2 %s: %#v", d.Id(), listener)
+
+	// Required by import.
+	if len(listener.Loadbalancers) > 0 {
+		d.Set("loadbalancer_id", listener.Loadbalancers[0].ID)
+	}
+
+	d.Set("name", listener.Name)
+	d.Set("protocol", listener.Protocol)
+	d.Set("tenant_id", listener.TenantID)
+	d.Set("description", listener.Description)
+	d.Set("protocol_port", listener.ProtocolPort)
+	d.Set("admin_state_up", listener.AdminStateUp)
+	d.Set("default_pool_id", listener.DefaultPoolID)
+	d.Set("connection_limit", listener.ConnLimit)
+	d.Set("sni_container_refs", listener.SniContainerRefs)
+	d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
+	d.Set("region", GetRegion(d, config))
+
+	return nil
 }
 
 func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {

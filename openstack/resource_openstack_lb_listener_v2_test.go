@@ -284,7 +284,7 @@ resource "openstack_lb_pool_v2" "pool_1" {
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
-  name = "listener_1"
+  name = "listener_1_updated"
   protocol = "HTTP"
   protocol_port = 8080
   connection_limit = 100
