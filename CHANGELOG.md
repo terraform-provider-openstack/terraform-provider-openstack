@@ -1,5 +1,9 @@
 ## 1.23.0 (Unreleased)
 
+FEATURES
+
+* __New Resource__: `openstack_images_image_access_accept_v2` [GH-872]
+* __New Resource__: `openstack_images_image_access_v2` [GH-872]
 
 IMPROVEMENTS
 
