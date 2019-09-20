@@ -63,6 +63,11 @@ func dataSourceIdentityUserV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
+			"description": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }

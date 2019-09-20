@@ -30,6 +30,11 @@ func dataSourceIdentityGroupV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+
+			"description": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -80,6 +85,7 @@ func dataSourceIdentityGroupV3Attributes(d *schema.ResourceData, config *Config,
 
 	d.SetId(group.ID)
 	d.Set("name", group.Name)
+	d.Set("description", group.Description)
 	d.Set("domain_id", group.DomainID)
 	d.Set("region", GetRegion(d, config))
 
