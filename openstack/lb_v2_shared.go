@@ -150,19 +150,19 @@ func chooseLBV2ListenerUpdateOpts(d *schema.ResourceData, config *Config) neutro
 		}
 		if d.HasChange("timeout_client_data") {
 			timeoutClientData := d.Get("timeout_client_data").(int)
-			opts.ConnLimit = &timeoutClientData
+			opts.TimeoutClientData = &timeoutClientData
 		}
 		if d.HasChange("timeout_member_connect") {
 			timeoutMemberConnect := d.Get("timeout_member_connect").(int)
-			opts.ConnLimit = &timeoutMemberConnect
+			opts.TimeoutMemberConnect = &timeoutMemberConnect
 		}
 		if d.HasChange("timeout_member_data") {
 			timeoutMemberData := d.Get("timeout_member_data").(int)
-			opts.ConnLimit = &timeoutMemberData
+			opts.TimeoutMemberData = &timeoutMemberData
 		}
 		if d.HasChange("timeout_tcp_inspect") {
 			timeoutTCPInspect := d.Get("timeout_tcp_inspect").(int)
-			opts.ConnLimit = &timeoutTCPInspect
+			opts.TimeoutTCPInspect = &timeoutTCPInspect
 		}
 		if d.HasChange("default_pool_id") {
 			defaultPoolID := d.Get("default_pool_id").(string)
