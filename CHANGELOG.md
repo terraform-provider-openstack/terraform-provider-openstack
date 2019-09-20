@@ -1,26 +1,26 @@
-## 1.23.0 (Unreleased)
+## 1.23.0 (September 20, 2019)
 
 FEATURES
 
-* __New Resource__: `openstack_images_image_access_accept_v2` [GH-872]
-* __New Resource__: `openstack_images_image_access_v2` [GH-872]
+* __New Resource__: `openstack_images_image_access_accept_v2` ([#872](https://github.com/terraform-providers/terraform-provider-openstack/issues/872))
+* __New Resource__: `openstack_images_image_access_v2` ([#872](https://github.com/terraform-providers/terraform-provider-openstack/issues/872))
 
 IMPROVEMENTS
 
-* Added ability to reduce auth requests against the Identity service. This behaviour can be enabled via `delayed_auth` config flag [GH-861]
-* Added `Cache-Control: no-cache` header by default in all requests. This behaviour can be disabled via `disable_no_cache_header` config flag [GH-849]
-* Added `timeout_client_data`, `timeout_member_connect`, `timeout_member_data`, `timeout_tcp_inspect` arguments to the `openstack_lb_listener_v2` resource. Those arguments available if `use_octavia` is set to `true` [GH-876], [GH-877]
-* Added `domain_id`, `domain_name` attributes to the `openstack_identity_auth_scope_v3` data source [GH-871]
-* Added `description` attributes to the `openstack_identity_group_v3`, `openstack_identity_user_v3` data sources [GH-874]
-* Updated Terraform SDK to `v0.12.8` [GH-859]
-* Refactored headers formatting functions to not use external libraries and nested loops [GH-865]
+* Added ability to reduce auth requests against the Identity service. This behaviour can be enabled via `delayed_auth` config flag ([#861](https://github.com/terraform-providers/terraform-provider-openstack/issues/861))
+* Added `Cache-Control: no-cache` header by default in all requests. This behaviour can be disabled via `disable_no_cache_header` config flag ([#849](https://github.com/terraform-providers/terraform-provider-openstack/issues/849))
+* Added `timeout_client_data`, `timeout_member_connect`, `timeout_member_data`, `timeout_tcp_inspect` arguments to the `openstack_lb_listener_v2` resource. Those arguments available if `use_octavia` is set to `true` ([#876](https://github.com/terraform-providers/terraform-provider-openstack/issues/876)], [[#877](https://github.com/terraform-providers/terraform-provider-openstack/issues/877))
+* Added `domain_id`, `domain_name` attributes to the `openstack_identity_auth_scope_v3` data source ([#871](https://github.com/terraform-providers/terraform-provider-openstack/issues/871))
+* Added `description` attributes to the `openstack_identity_group_v3`, `openstack_identity_user_v3` data sources ([#874](https://github.com/terraform-providers/terraform-provider-openstack/issues/874))
+* Updated Terraform SDK to `v0.12.8` ([#859](https://github.com/terraform-providers/terraform-provider-openstack/issues/859))
+* Refactored headers formatting functions to not use external libraries and nested loops ([#865](https://github.com/terraform-providers/terraform-provider-openstack/issues/865))
 
 BUG FIXES
 
-* Fixed the bug where `openstack_identity_auth_scope_v3` caused a panic within the domain-scope [GH-851]
-* Fixed the bug where `openstack_compute_flavor_access_v2` resource wasn't removed from the Terraform state when it has been deleted in the OpenStack [GH-856]
-* Fixed the bug where `openstack_identity_role_assignment_v3` resource wasn't removed from the Terraform state when it has been deleted in the OpenStack [GH-856]
-* Fixed the bug where `ephemeral` argument wasn't set for `openstack_compute_flavor_v2` while reading this resource from the API [GH-855]
+* Fixed the bug where `openstack_identity_auth_scope_v3` caused a panic within the domain-scope ([#851](https://github.com/terraform-providers/terraform-provider-openstack/issues/851))
+* Fixed the bug where `openstack_compute_flavor_access_v2` resource wasn't removed from the Terraform state when it has been deleted in the OpenStack ([#856](https://github.com/terraform-providers/terraform-provider-openstack/issues/856))
+* Fixed the bug where `openstack_identity_role_assignment_v3` resource wasn't removed from the Terraform state when it has been deleted in the OpenStack ([#856](https://github.com/terraform-providers/terraform-provider-openstack/issues/856))
+* Fixed the bug where `ephemeral` argument wasn't set for `openstack_compute_flavor_v2` while reading this resource from the API ([#855](https://github.com/terraform-providers/terraform-provider-openstack/issues/855))
 
 ## 1.22.0 (September 05, 2019)
 
