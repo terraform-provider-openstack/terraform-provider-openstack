@@ -153,6 +153,9 @@ The following arguments are supported:
   If omitted this header is added to all API requests to force HTTP caches (if any)
   to go upstream instead of serving cached responses.
 
+* `delayed_auth` - (Optional) If set to `true`, OpenStack authorization will be perfomed,
+  when the service provider client is called.
+
 ## Overriding Service API Endpoints
 
 There might be a situation in which you want or need to override an API endpoint

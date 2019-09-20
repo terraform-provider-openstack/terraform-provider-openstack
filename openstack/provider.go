@@ -197,6 +197,13 @@ func Provider() terraform.ResourceProvider {
 				Description: descriptions["use_octavia"],
 			},
 
+			"delayed_auth": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_DELAYED_AUTH", false),
+				Description: descriptions["delayed_auth"],
+			},
+
 			"cloud": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -412,6 +419,9 @@ func init() {
 		"use_octavia": "If set to `true`, API requests will go the Load Balancer\n" +
 			"service (Octavia) instead of the Networking service (Neutron).",
 
+		"delayed_auth": "If set to `true`, OpenStack authorization will be perfomed,\n" +
+			"when the service provider client is called.",
+
 		"cloud": "An entry in a `clouds.yaml` file to use.",
 
 		"max_retries": "How many times HTTP connection should be retried until giving up.",
@@ -451,6 +461,7 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		ApplicationCredentialName:   d.Get("application_credential_name").(string),
 		ApplicationCredentialSecret: d.Get("application_credential_secret").(string),
 		useOctavia:                  d.Get("use_octavia").(bool),
+		delayedAuth:                 d.Get("delayed_auth").(bool),
 		MaxRetries:                  d.Get("max_retries").(int),
 		DisableNoCacheHeader:        d.Get("disable_no_cache_header").(bool),
 	}
