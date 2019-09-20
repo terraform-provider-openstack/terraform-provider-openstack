@@ -6,16 +6,16 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-func TestAccImagesImageMembershipV2_importBasic(t *testing.T) {
-	resourceName := "openstack_images_image_membership_v2.image_membership_1"
+func TestAccImagesImageAccessAcceptV2_importBasic(t *testing.T) {
+	resourceName := "openstack_images_image_access_accept_v2.image_access_accept_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckImagesImageMembershipV2Destroy,
+		CheckDestroy: testAccCheckImagesImageAccessAcceptV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageMembershipV2_basic,
+				Config: testAccImagesImageAccessAcceptV2_basic,
 			},
 
 			{

@@ -12,14 +12,14 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 )
 
-func resourceImagesImageMembershipV2() *schema.Resource {
+func resourceImagesImageAccessAcceptV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceImagesImageMembershipV2Create,
-		Read:   resourceImagesImageMembershipV2Read,
-		Update: resourceImagesImageMembershipV2Update,
-		Delete: resourceImagesImageMembershipV2Delete,
+		Create: resourceImagesImageAccessAcceptV2Create,
+		Read:   resourceImagesImageAccessAcceptV2Read,
+		Update: resourceImagesImageAccessAcceptV2Update,
+		Delete: resourceImagesImageAccessAcceptV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: resourceImagesImageMembershipV2Import,
+			State: resourceImagesImageAccessAcceptV2Import,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -70,7 +70,7 @@ func resourceImagesImageMembershipV2() *schema.Resource {
 	}
 }
 
-func resourceImagesImageMembershipV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceImagesImageAccessAcceptV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	imageClient, err := config.imageV2Client(GetRegion(d, config))
 	if err != nil {
@@ -100,10 +100,10 @@ func resourceImagesImageMembershipV2Create(d *schema.ResourceData, meta interfac
 	id := fmt.Sprintf("%s/%s", imageID, memberID)
 	d.SetId(id)
 
-	return resourceImagesImageMembershipV2Read(d, meta)
+	return resourceImagesImageAccessAcceptV2Read(d, meta)
 }
 
-func resourceImagesImageMembershipV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceImagesImageAccessAcceptV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	imageClient, err := config.imageV2Client(GetRegion(d, config))
 	if err != nil {
@@ -117,7 +117,7 @@ func resourceImagesImageMembershipV2Read(d *schema.ResourceData, meta interface{
 
 	member, err := members.Get(imageClient, imageID, memberID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving the openstack_images_image_membership_v2")
+		return CheckDeleted(d, err, "Error retrieving the openstack_images_image_access_accept_v2")
 	}
 
 	log.Printf("[DEBUG] Retrieved Image member %s: %#v", d.Id(), member)
@@ -134,7 +134,7 @@ func resourceImagesImageMembershipV2Read(d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func resourceImagesImageMembershipV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceImagesImageAccessAcceptV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	imageClient, err := config.imageV2Client(GetRegion(d, config))
 	if err != nil {
@@ -156,10 +156,10 @@ func resourceImagesImageMembershipV2Update(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Error updateing the %q image with the %q member: %s", imageID, memberID, err)
 	}
 
-	return resourceImagesImageMembershipV2Read(d, meta)
+	return resourceImagesImageAccessAcceptV2Read(d, meta)
 }
 
-func resourceImagesImageMembershipV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceImagesImageAccessAcceptV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	imageClient, err := config.imageV2Client(GetRegion(d, config))
 	if err != nil {
@@ -177,13 +177,13 @@ func resourceImagesImageMembershipV2Delete(d *schema.ResourceData, meta interfac
 		Status: "rejected",
 	}
 	if err := members.Update(imageClient, imageID, memberID, opts).Err; err != nil {
-		return CheckDeleted(d, err, "Error rejecting the openstack_images_image_membership_v2")
+		return CheckDeleted(d, err, "Error rejecting the openstack_images_image_access_accept_v2")
 	}
 
 	return nil
 }
 
-func resourceImagesImageMembershipV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceImagesImageAccessAcceptV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 
 	config := meta.(*Config)

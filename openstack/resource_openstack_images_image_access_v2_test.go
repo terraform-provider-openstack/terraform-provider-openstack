@@ -10,39 +10,39 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestAccImagesImageMemberV2_basic(t *testing.T) {
+func TestAccImagesImageAccessV2_basic(t *testing.T) {
 	var member members.Member
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckImagesImageMemberV2Destroy,
+		CheckDestroy: testAccCheckImagesImageAccessV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageMemberV2_basic,
+				Config: testAccImagesImageAccessV2_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageMemberV2Exists("openstack_images_image_member_v2.image_member_1", &member),
+					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_v2.image_access_1", &member),
 					resource.TestCheckResourceAttrPtr(
-						"openstack_images_image_member_v2.image_member_1", "status", &member.Status),
+						"openstack_images_image_access_v2.image_access_1", "status", &member.Status),
 					resource.TestCheckResourceAttr(
-						"openstack_images_image_member_v2.image_member_1", "status", "pending"),
+						"openstack_images_image_access_v2.image_access_1", "status", "pending"),
 				),
 			},
 			{
-				Config: testAccImagesImageMemberV2_update,
+				Config: testAccImagesImageAccessV2_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageMemberV2Exists("openstack_images_image_member_v2.image_member_1", &member),
+					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_v2.image_access_1", &member),
 					resource.TestCheckResourceAttrPtr(
-						"openstack_images_image_member_v2.image_member_1", "status", &member.Status),
+						"openstack_images_image_access_v2.image_access_1", "status", &member.Status),
 					resource.TestCheckResourceAttr(
-						"openstack_images_image_member_v2.image_member_1", "status", "accepted"),
+						"openstack_images_image_access_v2.image_access_1", "status", "accepted"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckImagesImageMemberV2Destroy(s *terraform.State) error {
+func testAccCheckImagesImageAccessV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	imageClient, err := config.imageV2Client(OS_REGION_NAME)
 	if err != nil {
@@ -50,7 +50,7 @@ func testAccCheckImagesImageMemberV2Destroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_images_image_member_v2" {
+		if rs.Type != "openstack_images_image_access_v2" {
 			continue
 		}
 
@@ -68,7 +68,7 @@ func testAccCheckImagesImageMemberV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckImagesImageMemberV2Exists(n string, member *members.Member) resource.TestCheckFunc {
+func testAccCheckImagesImageAccessV2Exists(n string, member *members.Member) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -106,7 +106,7 @@ func testAccCheckImagesImageMemberV2Exists(n string, member *members.Member) res
 	}
 }
 
-const testAccImagesImageMemberV2 = `
+const testAccImagesImageAccessV2 = `
 data "openstack_identity_auth_scope_v3" "scope" {
   name = "scope"
 }
@@ -123,21 +123,21 @@ resource "openstack_images_image_v2" "image_1" {
   }
 }`
 
-var testAccImagesImageMemberV2_basic = fmt.Sprintf(`
+var testAccImagesImageAccessV2_basic = fmt.Sprintf(`
 %s
 
-resource "openstack_images_image_member_v2" "image_member_1" {
+resource "openstack_images_image_access_v2" "image_access_1" {
   image_id  = "${openstack_images_image_v2.image_1.id}"
   member_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
 }
-`, testAccImagesImageMemberV2)
+`, testAccImagesImageAccessV2)
 
-var testAccImagesImageMemberV2_update = fmt.Sprintf(`
+var testAccImagesImageAccessV2_update = fmt.Sprintf(`
 %s
 
-resource "openstack_images_image_member_v2" "image_member_1" {
+resource "openstack_images_image_access_v2" "image_access_1" {
   image_id  = "${openstack_images_image_v2.image_1.id}"
   member_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
   status    = "accepted"
 }
-`, testAccImagesImageMemberV2)
+`, testAccImagesImageAccessV2)

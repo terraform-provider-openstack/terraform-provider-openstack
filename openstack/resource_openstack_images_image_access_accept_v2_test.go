@@ -10,39 +10,39 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestAccImagesImageMembershipV2_basic(t *testing.T) {
+func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 	var member members.Member
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckImagesImageMembershipV2Destroy,
+		CheckDestroy: testAccCheckImagesImageAccessAcceptV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageMembershipV2_basic,
+				Config: testAccImagesImageAccessAcceptV2_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageMemberV2Exists("openstack_images_image_membership_v2.image_membership_1", &member),
+					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_accept_v2.image_access_accept_1", &member),
 					resource.TestCheckResourceAttrPtr(
-						"openstack_images_image_membership_v2.image_membership_1", "status", &member.Status),
+						"openstack_images_image_access_accept_v2.image_access_accept_1", "status", &member.Status),
 					resource.TestCheckResourceAttr(
-						"openstack_images_image_membership_v2.image_membership_1", "status", "accepted"),
+						"openstack_images_image_access_accept_v2.image_access_accept_1", "status", "accepted"),
 				),
 			},
 			{
-				Config: testAccImagesImageMembershipV2_update,
+				Config: testAccImagesImageAccessAcceptV2_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageMemberV2Exists("openstack_images_image_membership_v2.image_membership_1", &member),
+					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_accept_v2.image_access_accept_1", &member),
 					resource.TestCheckResourceAttrPtr(
-						"openstack_images_image_membership_v2.image_membership_1", "status", &member.Status),
+						"openstack_images_image_access_accept_v2.image_access_accept_1", "status", &member.Status),
 					resource.TestCheckResourceAttr(
-						"openstack_images_image_membership_v2.image_membership_1", "status", "rejected"),
+						"openstack_images_image_access_accept_v2.image_access_accept_1", "status", "rejected"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckImagesImageMembershipV2Destroy(s *terraform.State) error {
+func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	imageClient, err := config.imageV2Client(OS_REGION_NAME)
 	if err != nil {
@@ -50,7 +50,7 @@ func testAccCheckImagesImageMembershipV2Destroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_images_image_membership_v2" {
+		if rs.Type != "openstack_images_image_access_accept_v2" {
 			continue
 		}
 
@@ -68,7 +68,7 @@ func testAccCheckImagesImageMembershipV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-const testAccImagesImageMembershipV2 = `
+const testAccImagesImageAccessAcceptV2 = `
 data "openstack_identity_auth_scope_v3" "scope" {
   name = "scope"
 }
@@ -85,26 +85,26 @@ resource "openstack_images_image_v2" "image_1" {
   }
 }
 
-resource "openstack_images_image_member_v2" "image_member_1" {
+resource "openstack_images_image_access_v2" "image_access_1" {
   image_id  = "${openstack_images_image_v2.image_1.id}"
   member_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
 }
 `
 
-var testAccImagesImageMembershipV2_basic = fmt.Sprintf(`
+var testAccImagesImageAccessAcceptV2_basic = fmt.Sprintf(`
 %s
 
-resource "openstack_images_image_membership_v2" "image_membership_1" {
-  image_id  = "${openstack_images_image_member_v2.image_member_1.image_id}"
+resource "openstack_images_image_access_accept_v2" "image_access_accept_1" {
+  image_id  = "${openstack_images_image_access_v2.image_access_1.image_id}"
   status    = "accepted"
 }
-`, testAccImagesImageMembershipV2)
+`, testAccImagesImageAccessAcceptV2)
 
-var testAccImagesImageMembershipV2_update = fmt.Sprintf(`
+var testAccImagesImageAccessAcceptV2_update = fmt.Sprintf(`
 %s
 
-resource "openstack_images_image_membership_v2" "image_membership_1" {
-  image_id  = "${openstack_images_image_member_v2.image_member_1.image_id}"
+resource "openstack_images_image_access_accept_v2" "image_access_accept_1" {
+  image_id  = "${openstack_images_image_access_v2.image_access_1.image_id}"
   status    = "rejected"
 }
-`, testAccImagesImageMembershipV2)
+`, testAccImagesImageAccessAcceptV2)

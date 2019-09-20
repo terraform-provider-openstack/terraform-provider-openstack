@@ -1,12 +1,12 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_images_image_membership_v2"
-sidebar_current: "docs-openstack-resource-images-image-membership-v2"
+page_title: "OpenStack: openstack_images_image_access_accept_v2"
+sidebar_current: "docs-openstack-resource-images-image-access-accept-v2"
 description: |-
   Manages a V2 Image membership proposal resource within OpenStack Glance.
 ---
 
-# openstack\_images\_image\_membership\_v2
+# openstack\_images\_image\_access\_accept\_v2
 
 Manages memberships status for the shared OpenStack Glance V2 Image within the
 destination project, which has a member proposal.
@@ -22,7 +22,7 @@ data "openstack_images_image_v2" "rancheros" {
   member_status = "all"
 }
 
-resource "openstack_images_image_membership_v2" "rancheros_member" {
+resource "openstack_images_image_access_accept_v2" "rancheros_member" {
   image_id = "${data.openstack_images_image_v2.rancheros.id}"
   status   = "accepted"
 }
@@ -55,8 +55,8 @@ The following attributes are exported:
 
 ## Import
 
-Image mambers can be imported using the `image_id`, e.g.
+Image access acceptance status can be imported using the `image_id`, e.g.
 
 ```
-$ terraform import openstack_images_image_membership_v2 89c60255-9bd6-460c-822a-e2b959ede9d2
+$ terraform import openstack_images_image_access_accept_v2 89c60255-9bd6-460c-822a-e2b959ede9d2
 ```
