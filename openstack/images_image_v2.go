@@ -21,13 +21,13 @@ import (
 
 func resourceImagesImageV2MemberStatusFromString(v string) images.ImageMemberStatus {
 	switch v {
-	case "accepted":
+	case string(images.ImageMemberStatusAccepted):
 		return images.ImageMemberStatusAccepted
-	case "pending":
+	case string(images.ImageMemberStatusPending):
 		return images.ImageMemberStatusPending
-	case "rejected":
+	case string(images.ImageMemberStatusRejected):
 		return images.ImageMemberStatusRejected
-	case "all":
+	case string(images.ImageMemberStatusAll):
 		return images.ImageMemberStatusAll
 	}
 
@@ -36,13 +36,13 @@ func resourceImagesImageV2MemberStatusFromString(v string) images.ImageMemberSta
 
 func resourceImagesImageV2VisibilityFromString(v string) images.ImageVisibility {
 	switch v {
-	case "public":
+	case string(images.ImageVisibilityPublic):
 		return images.ImageVisibilityPublic
-	case "private":
+	case string(images.ImageVisibilityPrivate):
 		return images.ImageVisibilityPrivate
-	case "shared":
+	case string(images.ImageVisibilityShared):
 		return images.ImageVisibilityShared
-	case "community":
+	case string(images.ImageVisibilityCommunity):
 		return images.ImageVisibilityCommunity
 	}
 
@@ -75,7 +75,6 @@ func resourceImagesImageV2FileProps(filename string) (int64, string, error) {
 
 	filesize = fstat.Size()
 	filechecksum, err = fileMD5Checksum(file)
-
 	if err != nil {
 		return -1, "", fmt.Errorf("Error computing image file %q checksum: %s", file.Name(), err)
 	}
@@ -133,9 +132,9 @@ func resourceImagesImageV2RefreshFunc(client *gophercloud.ServiceClient, id stri
 }
 
 func resourceImagesImageV2BuildTags(v []interface{}) []string {
-	var tags []string
-	for _, tag := range v {
-		tags = append(tags, tag.(string))
+	tags := make([]string, len(v))
+	for i, tag := range v {
+		tags[i] = tag.(string)
 	}
 
 	return tags

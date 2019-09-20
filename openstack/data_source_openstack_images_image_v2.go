@@ -34,12 +34,24 @@ func dataSourceImagesImageV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					string(images.ImageVisibilityPublic),
+					string(images.ImageVisibilityPrivate),
+					string(images.ImageVisibilityShared),
+					string(images.ImageVisibilityCommunity),
+				}, false),
 			},
 
 			"member_status": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					string(images.ImageMemberStatusAccepted),
+					string(images.ImageMemberStatusPending),
+					string(images.ImageMemberStatusRejected),
+					string(images.ImageMemberStatusAll),
+				}, false),
 			},
 
 			"owner": {
