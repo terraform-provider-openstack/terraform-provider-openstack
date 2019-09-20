@@ -228,63 +228,6 @@ func chooseLBV2ListenerUpdateOpts(d *schema.ResourceData, config *Config) neutro
 	return updateOpts
 }
 
-// chooseLBV2ListenerReadBody will determine which load balancer listener response body to use:
-// Either the Octavia/LBaaS or the Neutron/Networking v2.
-func chooseLBV2ListenerReadBody(res neutronlisteners.GetResult, d *schema.ResourceData, config *Config) error {
-	if config.useOctavia {
-		var listener octavialisteners.Listener
-		err := res.ExtractInto(listener)
-		if err != nil {
-			return CheckDeleted(d, err, "openstack_lb_listener_v2")
-		}
-
-		log.Printf("[DEBUG] Retrieved openstack_lb_listener_v2 %s: %#v", d.Id(), listener)
-
-		d.Set("name", listener.Name)
-		d.Set("protocol", listener.Protocol)
-		d.Set("tenant_id", listener.ProjectID)
-		d.Set("description", listener.Description)
-		d.Set("protocol_port", listener.ProtocolPort)
-		d.Set("admin_state_up", listener.AdminStateUp)
-		d.Set("default_pool_id", listener.DefaultPoolID)
-		d.Set("connection_limit", listener.ConnLimit)
-		d.Set("timeout_client_data", listener.TimeoutClientData)
-		d.Set("timeout_member_connect", listener.TimeoutMemberConnect)
-		d.Set("timeout_member_data", listener.TimeoutMemberData)
-		d.Set("timeout_tcp_inspect", listener.TimeoutTCPInspect)
-		d.Set("sni_container_refs", listener.SniContainerRefs)
-		d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
-		d.Set("region", GetRegion(d, config))
-	} else {
-		var listener neutronlisteners.Listener
-		err := res.ExtractInto(listener)
-		if err != nil {
-			return CheckDeleted(d, err, "openstack_lb_listener_v2")
-		}
-
-		log.Printf("[DEBUG] Retrieved openstack_lb_listener_v2 %s: %#v", d.Id(), listener)
-
-		// Required by import
-		if len(listener.Loadbalancers) > 0 {
-			d.Set("loadbalancer_id", listener.Loadbalancers[0].ID)
-		}
-
-		d.Set("name", listener.Name)
-		d.Set("protocol", listener.Protocol)
-		d.Set("tenant_id", listener.TenantID)
-		d.Set("description", listener.Description)
-		d.Set("protocol_port", listener.ProtocolPort)
-		d.Set("admin_state_up", listener.AdminStateUp)
-		d.Set("default_pool_id", listener.DefaultPoolID)
-		d.Set("connection_limit", listener.ConnLimit)
-		d.Set("sni_container_refs", listener.SniContainerRefs)
-		d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
-		d.Set("region", GetRegion(d, config))
-	}
-
-	return nil
-}
-
 func waitForLBV2Listener(lbClient *gophercloud.ServiceClient, listener *listeners.Listener, target string, pending []string, timeout time.Duration) error {
 	log.Printf("[DEBUG] Waiting for openstack_lb_listener_v2 %s to become %s.", listener.ID, target)
 
