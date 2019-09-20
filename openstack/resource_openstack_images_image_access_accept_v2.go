@@ -82,7 +82,7 @@ func resourceImagesImageAccessAcceptV2Create(d *schema.ResourceData, meta interf
 	status := d.Get("status").(string)
 
 	if memberID == "" {
-		memberID, err = resourceImagesShareV2DetectMemberID(imageClient, imageID)
+		memberID, err = resourceImagesImageAccessV2DetectMemberID(imageClient, imageID)
 		if err != nil {
 			return err
 		}
@@ -110,7 +110,7 @@ func resourceImagesImageAccessAcceptV2Read(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
-	imageID, memberID, err := resourceImagesShareV2ParseID(d.Id())
+	imageID, memberID, err := resourceImagesImageAccessV2ParseID(d.Id())
 	if err != nil {
 		return err
 	}
@@ -141,7 +141,7 @@ func resourceImagesImageAccessAcceptV2Update(d *schema.ResourceData, meta interf
 		return fmt.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
-	imageID, memberID, err := resourceImagesShareV2ParseID(d.Id())
+	imageID, memberID, err := resourceImagesImageAccessV2ParseID(d.Id())
 	if err != nil {
 		return err
 	}
@@ -166,7 +166,7 @@ func resourceImagesImageAccessAcceptV2Delete(d *schema.ResourceData, meta interf
 		return fmt.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
-	imageID, memberID, err := resourceImagesShareV2ParseID(d.Id())
+	imageID, memberID, err := resourceImagesImageAccessV2ParseID(d.Id())
 	if err != nil {
 		return err
 	}
@@ -197,7 +197,7 @@ func resourceImagesImageAccessAcceptV2Import(d *schema.ResourceData, meta interf
 	if len(parts) > 1 {
 		memberID = parts[1]
 	} else {
-		memberID, err = resourceImagesShareV2DetectMemberID(imageClient, imageID)
+		memberID, err = resourceImagesImageAccessV2DetectMemberID(imageClient, imageID)
 		if err != nil {
 			return nil, err
 		}

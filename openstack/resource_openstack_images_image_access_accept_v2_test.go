@@ -54,7 +54,7 @@ func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		imageID, memberID, err := resourceImagesShareV2ParseID(rs.Primary.ID)
+		imageID, memberID, err := resourceImagesImageAccessV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}

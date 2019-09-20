@@ -112,7 +112,7 @@ func resourceImagesImageAccessV2Read(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
-	imageID, memberID, err := resourceImagesShareV2ParseID(d.Id())
+	imageID, memberID, err := resourceImagesImageAccessV2ParseID(d.Id())
 	if err != nil {
 		return err
 	}
@@ -143,7 +143,7 @@ func resourceImagesImageAccessV2Update(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
-	imageID, memberID, err := resourceImagesShareV2ParseID(d.Id())
+	imageID, memberID, err := resourceImagesImageAccessV2ParseID(d.Id())
 	if err != nil {
 		return err
 	}
@@ -168,7 +168,7 @@ func resourceImagesImageAccessV2Delete(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
-	imageID, memberID, err := resourceImagesShareV2ParseID(d.Id())
+	imageID, memberID, err := resourceImagesImageAccessV2ParseID(d.Id())
 	if err != nil {
 		return err
 	}

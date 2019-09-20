@@ -54,7 +54,7 @@ func testAccCheckImagesImageAccessV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		imageID, memberID, err := resourceImagesShareV2ParseID(rs.Primary.ID)
+		imageID, memberID, err := resourceImagesImageAccessV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -85,7 +85,7 @@ func testAccCheckImagesImageAccessV2Exists(n string, member *members.Member) res
 			return fmt.Errorf("Error creating OpenStack Image: %s", err)
 		}
 
-		imageID, memberID, err := resourceImagesShareV2ParseID(rs.Primary.ID)
+		imageID, memberID, err := resourceImagesImageAccessV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
