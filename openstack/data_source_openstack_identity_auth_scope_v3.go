@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -100,6 +101,9 @@ func dataSourceIdentityAuthScopeV3() *schema.Resource {
 func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	identityClient, err := config.identityV3Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+	}
 	tokenID := config.OsClient.TokenID
 
 	d.SetId(d.Get("name").(string))

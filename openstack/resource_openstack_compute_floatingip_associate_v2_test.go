@@ -183,6 +183,9 @@ func testAccCheckComputeV2FloatingIPAssociateAssociated(
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
 		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		}
 
 		newInstance, err := servers.Get(computeClient, instance.ID).Extract()
 		if err != nil {
