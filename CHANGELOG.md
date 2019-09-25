@@ -1,4 +1,10 @@
-## 1.23.1 (Unreleased)
+## 1.24.0 (Unreleased)
+
+BUG FIXES
+
+* Fixed the bug with unchecked errors in initialization of Identity V3 client in `identity_auth_scope_v3` data source [GH-878] 
+* Fixed the bug with unchecked errors in initialization of Compute V2 client in `compute_floatingip_associate_v2` resource [GH-878] 
+
 ## 1.23.0 (September 20, 2019)
 
 FEATURES
