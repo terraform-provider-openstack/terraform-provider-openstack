@@ -13,7 +13,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/swauth"
 	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/hashicorp/terraform/helper/pathorcontents"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform/httpclient"
 )
 
 type Config struct {
@@ -54,6 +54,8 @@ type Config struct {
 	authFailed    error
 	swClient      *gophercloud.ServiceClient
 	swAuthFailed  error
+
+	terraformVersion string
 }
 
 // LoadAndValidate performs the authentication and initial configuration
@@ -150,7 +152,7 @@ func (c *Config) LoadAndValidate() error {
 	}
 
 	// Set UserAgent
-	client.UserAgent.Prepend(terraform.UserAgentString())
+	client.UserAgent.Prepend(httpclient.TerraformUserAgent(c.terraformVersion))
 
 	config := &tls.Config{}
 	if c.CACertFile != "" {
