@@ -5,8 +5,8 @@ import (
 	"sort"
 
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/availabilityzones"
-	"github.com/hashicorp/terraform/helper/hashcode"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceSharedFilesystemAvailabilityZonesV2() *schema.Resource {

@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 var validDateFilters = []string{

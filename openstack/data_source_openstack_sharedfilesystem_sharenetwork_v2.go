@@ -6,7 +6,7 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/sharenetworks"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceSharedFilesystemShareNetworkV2() *schema.Resource {

@@ -6,8 +6,8 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/quotasets"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccBlockStorageQuotasetV3_basic(t *testing.T) {

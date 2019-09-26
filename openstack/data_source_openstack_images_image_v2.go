@@ -8,8 +8,8 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func dataSourceImagesImageV2() *schema.Resource {

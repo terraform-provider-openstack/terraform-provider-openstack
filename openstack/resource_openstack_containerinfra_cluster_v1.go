@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceContainerInfraClusterV1() *schema.Resource {

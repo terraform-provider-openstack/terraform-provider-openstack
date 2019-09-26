@@ -6,7 +6,7 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/addressscopes"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceNetworkingAddressScopeV2() *schema.Resource {

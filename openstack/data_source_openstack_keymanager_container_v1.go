@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/containers"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceKeyManagerContainerV1() *schema.Resource {

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clustertemplates"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceContainerInfraClusterTemplateV1() *schema.Resource {
