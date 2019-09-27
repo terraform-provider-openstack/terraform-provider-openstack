@@ -2,7 +2,7 @@
 
 IMPROVEMENTS
 
-Migrated from Terraform in-tree `helper/*` SDK to the separate `terraform-plugin-sdk` v1.0.0 [GH-880]
+* Migrated from Terraform in-tree `helper/*` SDK to the separate `terraform-plugin-sdk` v1.0.0 [GH-880]
 
 BUG FIXES
 
