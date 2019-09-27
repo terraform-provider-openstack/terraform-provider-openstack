@@ -1,5 +1,9 @@
 ## 1.24.0 (Unreleased)
 
+IMPROVEMENTS
+
+Migrated from Terraform in-tree `helper/*` SDK to the separate `terraform-plugin-sdk` v1.0.0 [GH-880]
+
 BUG FIXES
 
 * Fixed the bug with unchecked errors in initialization of Identity V3 client in `identity_auth_scope_v3` data source [GH-878] 
