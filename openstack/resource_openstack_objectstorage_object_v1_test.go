@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 const (

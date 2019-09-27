@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 // BuildRequest takes an opts struct and builds a request body for

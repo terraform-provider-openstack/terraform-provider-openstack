@@ -6,7 +6,7 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func resourceNetworkingSecGroupRuleV2StateRefreshFunc(client *gophercloud.ServiceClient, sgRuleID string) resource.StateRefreshFunc {
