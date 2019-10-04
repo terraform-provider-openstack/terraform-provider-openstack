@@ -18,7 +18,7 @@ variable "pool" {
   default = "public"
 }
 
-variable "count" {
+variable "units" {
   default = 2
 }
 
