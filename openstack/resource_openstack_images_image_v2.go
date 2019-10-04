@@ -305,9 +305,8 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 		return CheckDeleted(d, err, "image")
 	}
 
-	if !useWebDownload {
-		verifyChecksum := d.Get("verify_checksum").(bool) || (!d.Get("verify_checksum").(bool) && !d.Get("web_download").(bool))
-		if img.Checksum != fileChecksum && verifyChecksum {
+	if v, ok := d.GetOkExists("verify_checksum"); !useWebDownload && (!ok || (ok && v.(bool))) {
+		if img.Checksum != fileChecksum {
 			return fmt.Errorf("Error wrong checksum: got %q, expected %q", img.Checksum, fileChecksum)
 		}
 	}
