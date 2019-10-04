@@ -37,7 +37,6 @@ resource "openstack_compute_floatingip_associate_v2" "fip" {
       "sudo mkdir /mnt/volume",
       "sudo mount ${openstack_compute_volume_attach_v2.attached.device} /mnt/volume",
       "sudo df -h /mnt/volume",
-      "sudo wget -P /mnt/volume/ https://github.com/mirror/wget/archive/v1.20.3.tar.gz"
     ]
   }
 }
