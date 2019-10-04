@@ -52,7 +52,7 @@ resource "openstack_compute_volume_attach_v2" "attachments" {
   volume_id   = "${openstack_blockstorage_volume_v2.volumes.*.id[count.index]}"
 }
 
-output "volume devices" {
+output "volume_devices" {
   value = "${openstack_compute_volume_attach_v2.attachments.*.device}"
 }
 ```
@@ -88,7 +88,7 @@ resource "openstack_compute_volume_attach_v2" "attach_2" {
   depends_on = ["openstack_compute_volume_attach_v2.attach_1"]
 }
 
-output "volume devices" {
+output "volume_devices" {
   value = "${openstack_compute_volume_attach_v2.attachments.*.device}"
 }
 ```
