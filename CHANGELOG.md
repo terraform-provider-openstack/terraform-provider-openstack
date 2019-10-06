@@ -8,6 +8,9 @@ BUG FIXES
 
 * Fixed the bug with unchecked errors in initialization of Identity V3 client in `identity_auth_scope_v3` data source [GH-878] 
 * Fixed the bug with unchecked errors in initialization of Compute V2 client in `compute_floatingip_associate_v2` resource [GH-878] 
+* Fixed the bug with 404 errors handling while getting statuses tree in `openstack_lb_loadbalancer_v2` resource [GH-883]
+* Fixed the bug where is was unable to remove TLS references in `openstack_lb_listener_v2` resource [GH-891]
+* Fixed the bug where empty `scheduler_hints` list caused a panic in `openstack_compute_instance_v2` resource [GH-885]
 
 ## 1.23.0 (September 20, 2019)
 
