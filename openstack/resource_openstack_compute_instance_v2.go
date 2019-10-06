@@ -1098,22 +1098,22 @@ func resourceInstanceBlockDevicesV2(d *schema.ResourceData, bds []interface{}) (
 
 func resourceInstanceSchedulerHintsV2(d *schema.ResourceData, schedulerHintsRaw map[string]interface{}) schedulerhints.SchedulerHints {
 	differentHost := []string{}
-	if len(schedulerHintsRaw["different_host"].([]interface{})) > 0 {
-		for _, dh := range schedulerHintsRaw["different_host"].([]interface{}) {
+	if v, ok := schedulerHintsRaw["different_host"].([]interface{}); ok {
+		for _, dh := range v {
 			differentHost = append(differentHost, dh.(string))
 		}
 	}
 
 	sameHost := []string{}
-	if len(schedulerHintsRaw["same_host"].([]interface{})) > 0 {
-		for _, sh := range schedulerHintsRaw["same_host"].([]interface{}) {
+	if v, ok := schedulerHintsRaw["same_host"].([]interface{}); ok {
+		for _, sh := range v {
 			sameHost = append(sameHost, sh.(string))
 		}
 	}
 
 	query := []interface{}{}
-	if len(schedulerHintsRaw["query"].([]interface{})) > 0 {
-		for _, q := range schedulerHintsRaw["query"].([]interface{}) {
+	if v, ok := schedulerHintsRaw["query"].([]interface{}); ok {
+		for _, q := range v {
 			query = append(query, q.(string))
 		}
 	}
