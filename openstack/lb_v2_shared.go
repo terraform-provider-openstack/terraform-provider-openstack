@@ -531,6 +531,13 @@ func resourceLBV2LoadBalancerStatusRefreshFuncNeutron(lbClient *gophercloud.Serv
 	return func() (interface{}, string, error) {
 		statuses, err := loadbalancers.GetStatuses(lbClient, lbID).Extract()
 		if err != nil {
+			if _, ok := err.(gophercloud.ErrDefault404); ok {
+				return nil, "", gophercloud.ErrDefault404{
+					gophercloud.ErrUnexpectedResponseCode{BaseError: gophercloud.BaseError{
+						DefaultErrString: fmt.Sprintf("Unable to get statuses from the Load Balancer %s statuses tree: %s", lbID, err),
+					}},
+				}
+			}
 			return nil, "", fmt.Errorf("Unable to get statuses from the Load Balancer %s statuses tree: %s", lbID, err)
 		}
 
