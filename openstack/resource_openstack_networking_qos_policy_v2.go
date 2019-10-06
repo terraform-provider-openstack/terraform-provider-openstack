@@ -146,7 +146,7 @@ func resourceNetworkingQoSPolicyV2Create(d *schema.ResourceData, meta interface{
 
 	d.SetId(p.ID)
 
-	tags := networkV2AttributesTags(d)
+	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "qos/policies", p.ID, tagOpts).Extract()
@@ -183,7 +183,7 @@ func resourceNetworkingQoSPolicyV2Read(d *schema.ResourceData, meta interface{})
 	d.Set("revision_number", p.RevisionNumber)
 	d.Set("region", GetRegion(d, config))
 
-	networkV2ReadAttributesTags(d, p.Tags)
+	networkingV2ReadAttributesTags(d, p.Tags)
 
 	if err := d.Set("created_at", p.CreatedAt.Format(time.RFC3339)); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_networking_qos_policy_v2 created_at: %s", err)
@@ -237,7 +237,7 @@ func resourceNetworkingQoSPolicyV2Update(d *schema.ResourceData, meta interface{
 	}
 
 	if d.HasChange("tags") {
-		tags := networkV2UpdateAttributesTags(d)
+		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "qos/policies", d.Id(), tagOpts).Extract()
 		if err != nil {

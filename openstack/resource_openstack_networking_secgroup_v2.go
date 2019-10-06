@@ -109,7 +109,7 @@ func resourceNetworkingSecGroupV2Create(d *schema.ResourceData, meta interface{}
 
 	d.SetId(security_group.ID)
 
-	tags := networkV2AttributesTags(d)
+	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "security-groups", security_group.ID, tagOpts).Extract()
@@ -142,7 +142,7 @@ func resourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}) 
 	d.Set("name", security_group.Name)
 	d.Set("region", GetRegion(d, config))
 
-	networkV2ReadAttributesTags(d, security_group.Tags)
+	networkingV2ReadAttributesTags(d, security_group.Tags)
 
 	return nil
 }
@@ -177,7 +177,7 @@ func resourceNetworkingSecGroupV2Update(d *schema.ResourceData, meta interface{}
 	}
 
 	if d.HasChange("tags") {
-		tags := networkV2UpdateAttributesTags(d)
+		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "security-groups", d.Id(), tagOpts).Extract()
 		if err != nil {

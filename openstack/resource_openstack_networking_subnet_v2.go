@@ -280,7 +280,7 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 
 	d.SetId(s.ID)
 
-	tags := networkV2AttributesTags(d)
+	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "subnets", s.ID, tagOpts).Extract()
@@ -321,7 +321,7 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("ipv6_ra_mode", s.IPv6RAMode)
 	d.Set("subnetpool_id", s.SubnetPoolID)
 
-	networkV2ReadAttributesTags(d, s.Tags)
+	networkingV2ReadAttributesTags(d, s.Tags)
 
 	// Set the allocation_pools
 	var allocationPools []map[string]interface{}
@@ -428,7 +428,7 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if d.HasChange("tags") {
-		tags := networkV2UpdateAttributesTags(d)
+		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "subnets", d.Id(), tagOpts).Extract()
 		if err != nil {

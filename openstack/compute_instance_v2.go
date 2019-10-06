@@ -528,3 +528,15 @@ func getInstanceAccessAddresses(
 
 	return hostv4, hostv6
 }
+
+func computeV2InstanceReadTags(d *schema.ResourceData, tags []string) {
+	expandObjectReadTags(d, tags)
+}
+
+func computeV2InstanceUpdateTags(d *schema.ResourceData) []string {
+	return expandObjectUpdateTags(d)
+}
+
+func computeV2InstanceTags(d *schema.ResourceData) []string {
+	return expandObjectTags(d)
+}

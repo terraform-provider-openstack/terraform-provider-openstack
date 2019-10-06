@@ -159,7 +159,7 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	tags := networkV2AttributesTags(d)
+	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		listOpts = networks.ListOpts{Tags: strings.Join(tags, ",")}
 	}

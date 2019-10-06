@@ -18,6 +18,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/schedulerhints"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/startstop"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tags"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
@@ -370,6 +371,16 @@ func resourceComputeInstanceV2() *schema.Resource {
 				}, true),
 				DiffSuppressFunc: suppressPowerStateDiffs,
 			},
+			"tags": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"all_tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 			"vendor_options": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -433,6 +444,12 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 
 	configDrive := d.Get("config_drive").(bool)
 
+	// Retrieve tags and set microversion if they're provided.
+	instanceTags := computeV2InstanceTags(d)
+	if len(instanceTags) > 0 {
+		computeClient.Microversion = "2.52"
+	}
+
 	createOpts = &servers.CreateOpts{
 		Name:             d.Get("name").(string),
 		ImageRef:         imageId,
@@ -445,6 +462,7 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 		AdminPass:        d.Get("admin_pass").(string),
 		UserData:         []byte(d.Get("user_data").(string)),
 		Personality:      resourceInstancePersonalityV2(d),
+		Tags:             instanceTags,
 	}
 
 	if keyName, ok := d.Get("key_pair").(string); ok && keyName != "" {
@@ -549,8 +567,15 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	server, err := servers.Get(computeClient, d.Id()).Extract()
-	if err != nil {
+	// ServerWithTags contains a standard server with the tags extension.
+	type ServerWithTags struct {
+		servers.Server
+		tags.ServerTagsExt
+	}
+
+	server := ServerWithTags{}
+
+	if err := servers.Get(computeClient, d.Id()).ExtractInto(&server); err != nil {
 		return CheckDeleted(d, err, "server")
 	}
 
@@ -620,7 +645,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	d.Set("flavor_name", flavor.Name)
 
 	// Set the instance's image information appropriately
-	if err := setImageInformation(computeClient, server, d); err != nil {
+	if err := setImageInformation(computeClient, &server.Server, d); err != nil {
 		return err
 	}
 
@@ -649,6 +674,9 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	default:
 		return fmt.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
 	}
+
+	// Populate tags.
+	computeV2InstanceReadTags(d, server.Tags)
 
 	return nil
 }
@@ -880,6 +908,17 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 				return fmt.Errorf("Error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
 			}
 		}
+	}
+
+	// Perform any required updates to the tags.
+	if d.HasChange("tags") {
+		instanceTags := computeV2InstanceUpdateTags(d)
+		instanceTagsOpts := tags.ReplaceAllOpts{Tags: instanceTags}
+		instanceTags, err := tags.ReplaceAll(computeClient, d.Id(), instanceTagsOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error setting tags on openstack_compute_instance_v2 %s: %s", d.Id(), err)
+		}
+		log.Printf("[DEBUG] Set tags %s on openstack_compute_instance_v2 %s", instanceTags, d.Id())
 	}
 
 	return resourceComputeInstanceV2Read(d, meta)

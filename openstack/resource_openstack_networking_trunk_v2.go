@@ -143,7 +143,7 @@ func resourceNetworkingTrunkV2Create(d *schema.ResourceData, meta interface{}) e
 
 	d.SetId(trunk.ID)
 
-	tags := networkV2AttributesTags(d)
+	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(client, "trunks", trunk.ID, tagOpts).Extract()
@@ -178,7 +178,7 @@ func resourceNetworkingTrunkV2Read(d *schema.ResourceData, meta interface{}) err
 	d.Set("admin_state_up", trunk.AdminStateUp)
 	d.Set("tenant_id", trunk.TenantID)
 
-	networkV2ReadAttributesTags(d, trunk.Tags)
+	networkingV2ReadAttributesTags(d, trunk.Tags)
 
 	err = d.Set("sub_port", flattenNetworkingTrunkV2Subports(trunk.Subports))
 	if err != nil {
@@ -264,7 +264,7 @@ func resourceNetworkingTrunkV2Update(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if d.HasChange("tags") {
-		tags := networkV2UpdateAttributesTags(d)
+		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(client, "trunks", d.Id(), tagOpts).Extract()
 		if err != nil {
