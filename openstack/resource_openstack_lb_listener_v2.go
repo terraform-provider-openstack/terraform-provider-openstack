@@ -268,6 +268,10 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	updateOpts := chooseLBV2ListenerUpdateOpts(d, config)
+	if updateOpts == nil {
+		log.Printf("[DEBUG] openstack_lb_listener_v2 %s: nothing to update", d.Id())
+		return resourceListenerV2Read(d, meta)
+	}
 
 	log.Printf("[DEBUG] openstack_lb_listener_v2 %s update options: %#v", d.Id(), updateOpts)
 	err = resource.Retry(timeout, func() *resource.RetryError {

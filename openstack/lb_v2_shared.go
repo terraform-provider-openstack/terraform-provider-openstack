@@ -131,101 +131,125 @@ func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config) neutro
 // chooseLBV2ListenerUpdateOpts will determine which load balancer listener Update options to use:
 // Either the Octavia/LBaaS or the Neutron/Networking v2.
 func chooseLBV2ListenerUpdateOpts(d *schema.ResourceData, config *Config) neutronlisteners.UpdateOptsBuilder {
-	var updateOpts neutronlisteners.UpdateOptsBuilder
+	var hasChange bool
 
 	if config.useOctavia {
 		// Use Octavia.
 		var opts octavialisteners.UpdateOpts
 		if d.HasChange("name") {
+			hasChange = true
 			name := d.Get("name").(string)
 			opts.Name = &name
 		}
 		if d.HasChange("description") {
+			hasChange = true
 			description := d.Get("description").(string)
 			opts.Description = &description
 		}
 		if d.HasChange("connection_limit") {
+			hasChange = true
 			connLimit := d.Get("connection_limit").(int)
 			opts.ConnLimit = &connLimit
 		}
 		if d.HasChange("timeout_client_data") {
+			hasChange = true
 			timeoutClientData := d.Get("timeout_client_data").(int)
 			opts.TimeoutClientData = &timeoutClientData
 		}
 		if d.HasChange("timeout_member_connect") {
+			hasChange = true
 			timeoutMemberConnect := d.Get("timeout_member_connect").(int)
 			opts.TimeoutMemberConnect = &timeoutMemberConnect
 		}
 		if d.HasChange("timeout_member_data") {
+			hasChange = true
 			timeoutMemberData := d.Get("timeout_member_data").(int)
 			opts.TimeoutMemberData = &timeoutMemberData
 		}
 		if d.HasChange("timeout_tcp_inspect") {
+			hasChange = true
 			timeoutTCPInspect := d.Get("timeout_tcp_inspect").(int)
 			opts.TimeoutTCPInspect = &timeoutTCPInspect
 		}
 		if d.HasChange("default_pool_id") {
+			hasChange = true
 			defaultPoolID := d.Get("default_pool_id").(string)
 			opts.DefaultPoolID = &defaultPoolID
 		}
 		if d.HasChange("default_tls_container_ref") {
-			opts.DefaultTlsContainerRef = d.Get("default_tls_container_ref").(string)
+			hasChange = true
+			defaultTlsContainerRef := d.Get("default_tls_container_ref").(string)
+			opts.DefaultTlsContainerRef = &defaultTlsContainerRef
 		}
 		if d.HasChange("sni_container_refs") {
+			hasChange = true
 			var sniContainerRefs []string
 			if raw, ok := d.GetOk("sni_container_refs"); ok {
 				for _, v := range raw.([]interface{}) {
 					sniContainerRefs = append(sniContainerRefs, v.(string))
 				}
 			}
-			opts.SniContainerRefs = sniContainerRefs
+			opts.SniContainerRefs = &sniContainerRefs
 		}
 		if d.HasChange("admin_state_up") {
+			hasChange = true
 			asu := d.Get("admin_state_up").(bool)
 			opts.AdminStateUp = &asu
 		}
 
-		updateOpts = opts
+		if hasChange {
+			return opts
+		}
 	} else {
 		// Use Neutron.
 		var opts neutronlisteners.UpdateOpts
 		if d.HasChange("name") {
+			hasChange = true
 			name := d.Get("name").(string)
 			opts.Name = &name
 		}
 		if d.HasChange("description") {
+			hasChange = true
 			description := d.Get("description").(string)
 			opts.Description = &description
 		}
 		if d.HasChange("connection_limit") {
+			hasChange = true
 			connLimit := d.Get("connection_limit").(int)
 			opts.ConnLimit = &connLimit
 		}
 		if d.HasChange("default_pool_id") {
+			hasChange = true
 			defaultPoolID := d.Get("default_pool_id").(string)
 			opts.DefaultPoolID = &defaultPoolID
 		}
 		if d.HasChange("default_tls_container_ref") {
-			opts.DefaultTlsContainerRef = d.Get("default_tls_container_ref").(string)
+			hasChange = true
+			defaultTlsContainerRef := d.Get("default_tls_container_ref").(string)
+			opts.DefaultTlsContainerRef = &defaultTlsContainerRef
 		}
 		if d.HasChange("sni_container_refs") {
+			hasChange = true
 			var sniContainerRefs []string
 			if raw, ok := d.GetOk("sni_container_refs"); ok {
 				for _, v := range raw.([]interface{}) {
 					sniContainerRefs = append(sniContainerRefs, v.(string))
 				}
 			}
-			opts.SniContainerRefs = sniContainerRefs
+			opts.SniContainerRefs = &sniContainerRefs
 		}
 		if d.HasChange("admin_state_up") {
+			hasChange = true
 			asu := d.Get("admin_state_up").(bool)
 			opts.AdminStateUp = &asu
 		}
 
-		updateOpts = opts
+		if hasChange {
+			return opts
+		}
 	}
 
-	return updateOpts
+	return nil
 }
 
 func waitForLBV2Listener(lbClient *gophercloud.ServiceClient, listener *listeners.Listener, target string, pending []string, timeout time.Duration) error {
@@ -507,6 +531,13 @@ func resourceLBV2LoadBalancerStatusRefreshFuncNeutron(lbClient *gophercloud.Serv
 	return func() (interface{}, string, error) {
 		statuses, err := loadbalancers.GetStatuses(lbClient, lbID).Extract()
 		if err != nil {
+			if _, ok := err.(gophercloud.ErrDefault404); ok {
+				return nil, "", gophercloud.ErrDefault404{
+					gophercloud.ErrUnexpectedResponseCode{BaseError: gophercloud.BaseError{
+						DefaultErrString: fmt.Sprintf("Unable to get statuses from the Load Balancer %s statuses tree: %s", lbID, err),
+					}},
+				}
+			}
 			return nil, "", fmt.Errorf("Unable to get statuses from the Load Balancer %s statuses tree: %s", lbID, err)
 		}
 
