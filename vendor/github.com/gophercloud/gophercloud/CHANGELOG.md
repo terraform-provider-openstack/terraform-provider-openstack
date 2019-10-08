@@ -16,11 +16,19 @@ IMPROVEMENTS
 * Added `compute/v2/extensions/tags.ReplaceAll` [GH-1694]
 * Added `compute/v2/extensions/tags.Delete` [GH-1699]
 * Added `compute/v2/extensions/tags.DeleteAll` [GH-1700]
+* Added `ImageStatusImporting` as an image status [GH-1725]
+* Added `ByPath` to `baremetalintrospection/v1/introspection.RootDiskType` [GH-1730]
 
 BUG FIXES
 
 * Changed struct type for options in `networking/v2/extensions/lbaas_v2/listeners` to `UpdateOptsBuilder` interface instead of specific UpdateOpts type [GH-1705]
 * Changed struct type for options in `networking/v2/extensions/lbaas_v2/loadbalancers` to `UpdateOptsBuilder` interface instead of specific UpdateOpts type [GH-1706]
+* Fixed issue with `blockstorage/v1/volumes.Create` where the response was expected to be 202 [GH-1720]
+* Changed `DefaultTlsContainerRef` from `string` to `*string` in `loadbalancer/v2/listeners.UpdateOpts` to allow the value to be removed during update.
+* Changed `SniContainerRefs` from `[]string{}` to `*[]string{}` in `loadbalancer/v2/listeners.UpdateOpts` to allow the value to be removed during update.
+* Changed `DefaultTlsContainerRef` from `string` to `*string` in `networking/v2/extensions/lbaas_v2/listeners.UpdateOpts` to allow the value to be removed during update.
+* Changed `SniContainerRefs` from `[]string{}` to `*[]string{}` in `networking/v2/extensions/lbaas_v2/listeners.UpdateOpts` to allow the value to be removed during update.
+
 
 ## 0.4.0 (September 3, 2019)
 
