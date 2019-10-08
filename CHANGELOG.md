@@ -3,6 +3,7 @@
 IMPROVEMENTS
 
 * Migrated from Terraform in-tree `helper/*` SDK to the separate `terraform-plugin-sdk` v1.0.0 [GH-880]
+* Added web-download import method to `openstack_images_image_v2` resource [GH-888]
 
 BUG FIXES
 
