@@ -611,7 +611,7 @@ func TestAccComputeV2Instance_tags(t *testing.T) {
 				Config: testAccComputeV2Instance_tags_clear,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceName, &instance),
-					testAccCheckComputeV2InstanceTags(resourceName, []string{}),
+					testAccCheckComputeV2InstanceTags(resourceName, nil),
 				),
 			},
 		},
