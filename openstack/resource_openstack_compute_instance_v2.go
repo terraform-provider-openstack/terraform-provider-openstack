@@ -447,7 +447,7 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	// Retrieve tags and set microversion if they're provided.
 	instanceTags := computeV2InstanceTags(d)
 	if len(instanceTags) > 0 {
-		computeClient.Microversion = "2.52"
+		computeClient.Microversion = computeV2InstanceCreateServerWithTagsMicroversion
 	}
 
 	createOpts = &servers.CreateOpts{
@@ -669,7 +669,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	}
 
 	// Populate tags.
-	computeClient.Microversion = computeV2TagsExtMicroversion
+	computeClient.Microversion = computeV2TagsExtensionMicroversion
 	instanceTags, err := tags.List(computeClient, server.ID).Extract()
 	if err != nil {
 		log.Printf("[DEBUG] Unable to get tags for openstack_compute_instance_v2: %s", err)
@@ -913,7 +913,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 	if d.HasChange("tags") {
 		instanceTags := computeV2InstanceUpdateTags(d)
 		instanceTagsOpts := tags.ReplaceAllOpts{Tags: instanceTags}
-		computeClient.Microversion = computeV2TagsExtMicroversion
+		computeClient.Microversion = computeV2TagsExtensionMicroversion
 		instanceTags, err := tags.ReplaceAll(computeClient, d.Id(), instanceTagsOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("Error setting tags on openstack_compute_instance_v2 %s: %s", d.Id(), err)
