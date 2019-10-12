@@ -567,15 +567,8 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	// ServerWithTags contains a standard server with the tags extension.
-	type ServerWithTags struct {
-		servers.Server
-		tags.ServerTagsExt
-	}
-
-	server := ServerWithTags{}
-
-	if err := servers.Get(computeClient, d.Id()).ExtractInto(&server); err != nil {
+	server, err := servers.Get(computeClient, d.Id()).Extract()
+	if err != nil {
 		return CheckDeleted(d, err, "server")
 	}
 
@@ -645,7 +638,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	d.Set("flavor_name", flavor.Name)
 
 	// Set the instance's image information appropriately
-	if err := setImageInformation(computeClient, &server.Server, d); err != nil {
+	if err := setImageInformation(computeClient, server, d); err != nil {
 		return err
 	}
 
@@ -676,7 +669,13 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	}
 
 	// Populate tags.
-	computeV2InstanceReadTags(d, server.Tags)
+	computeClient.Microversion = computeV2TagsExtMicroversion
+	instanceTags, err := tags.List(computeClient, server.ID).Extract()
+	if err != nil {
+		log.Printf("[DEBUG] Unable to get tags for openstack_compute_instance_v2: %s", err)
+	} else {
+		computeV2InstanceReadTags(d, instanceTags)
+	}
 
 	return nil
 }
@@ -914,6 +913,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 	if d.HasChange("tags") {
 		instanceTags := computeV2InstanceUpdateTags(d)
 		instanceTagsOpts := tags.ReplaceAllOpts{Tags: instanceTags}
+		computeClient.Microversion = computeV2TagsExtMicroversion
 		instanceTags, err := tags.ReplaceAll(computeClient, d.Id(), instanceTagsOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("Error setting tags on openstack_compute_instance_v2 %s: %s", d.Id(), err)

@@ -22,6 +22,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
+const (
+	computeV2TagsExtMicroversion = "2.26"
+)
+
 // InstanceNIC is a structured representation of a Gophercloud servers.Server
 // virtual NIC.
 type InstanceNIC struct {
