@@ -206,7 +206,7 @@ func resourceNetworkingSubnetPoolV2Create(d *schema.ResourceData, meta interface
 
 	d.SetId(s.ID)
 
-	tags := networkV2AttributesTags(d)
+	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "subnetpools", s.ID, tagOpts).Extract()
@@ -248,7 +248,7 @@ func resourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface{}
 	d.Set("revision_number", s.RevisionNumber)
 	d.Set("region", GetRegion(d, config))
 
-	networkV2ReadAttributesTags(d, s.Tags)
+	networkingV2ReadAttributesTags(d, s.Tags)
 
 	if err := d.Set("created_at", s.CreatedAt.Format(time.RFC3339)); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_networking_subnetpool_v2 created_at: %s", err)
@@ -336,7 +336,7 @@ func resourceNetworkingSubnetPoolV2Update(d *schema.ResourceData, meta interface
 	}
 
 	if d.HasChange("tags") {
-		tags := networkV2UpdateAttributesTags(d)
+		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "subnetpools", d.Id(), tagOpts).Extract()
 		if err != nil {

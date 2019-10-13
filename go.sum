@@ -67,8 +67,8 @@ github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+
 github.com/googleapis/gax-go/v2 v2.0.5 h1:sjZBwGj9Jlw33ImPtvFviGYvseOtDM7hkSKB7+Tv3SM=
 github.com/googleapis/gax-go/v2 v2.0.5/go.mod h1:DWXyrwAJ9X0FpwwEdw+IPEYBICEFu5mhpdKc/us6bOk=
 github.com/gophercloud/gophercloud v0.0.0-20190212181753-892256c46858/go.mod h1:vxM41WHh5uqHVBMZHzuwNOHh8XEoIEcSTewFxm1c5g8=
-github.com/gophercloud/gophercloud v0.4.1-0.20191003205902-dee9bb4c60ec h1:3SxprgLfo3z14pbUycibNq44/lKJt52rAFGAd0ZzBkg=
-github.com/gophercloud/gophercloud v0.4.1-0.20191003205902-dee9bb4c60ec/go.mod h1:vxM41WHh5uqHVBMZHzuwNOHh8XEoIEcSTewFxm1c5g8=
+github.com/gophercloud/gophercloud v0.4.1-0.20191011151343-9c34d1968ad7 h1:IFWEXgvvAQ/XNtnBSsfrZt7bXtKZCGJGtsPU/Ur/VDQ=
+github.com/gophercloud/gophercloud v0.4.1-0.20191011151343-9c34d1968ad7/go.mod h1:b1k/BkBA9smzYde6p6zYLIe5JNAEoJzUWaIRh+9A/j0=
 github.com/gophercloud/utils v0.0.0-20190829151529-94e6842399e5 h1:W6TC1Dd95ocK2YK5jLmKmh1lg+oZaXdLl+CRP7pUdfA=
 github.com/gophercloud/utils v0.0.0-20190829151529-94e6842399e5/go.mod h1:SZ9FTKibIotDtCrxAU/evccoyu1yhKST6hgBvwTB5Eg=
 github.com/hashicorp/errwrap v0.0.0-20180715044906-d6c0cd880357/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
@@ -256,6 +256,8 @@ golang.org/x/tools v0.0.0-20190506145303-2d16b83fe98c/go.mod h1:RgjU9mgBXZiqYHBn
 golang.org/x/tools v0.0.0-20190524140312-2c0ae7006135/go.mod h1:RgjU9mgBXZiqYHBnxXauZ1Gv1EHHAz9KjViQ78xBX0Q=
 golang.org/x/tools v0.0.0-20190606124116-d0a3d012864b/go.mod h1:/rFqwRUd4F7ZHNgwSSTFct+R/Kf4OFW1sUzUTQQTgfc=
 golang.org/x/tools v0.0.0-20190628153133-6cdbf07be9d0/go.mod h1:/rFqwRUd4F7ZHNgwSSTFct+R/Kf4OFW1sUzUTQQTgfc=
+golang.org/x/tools v0.0.0-20191004055002-72853e10c5a3/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
+golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 google.golang.org/api v0.4.0/go.mod h1:8k5glujaEP+g9n7WNsDg8QP6cUVNI86fCNMcbazEtwE=
 google.golang.org/api v0.7.0/go.mod h1:WtwebWUNSVBH/HAw79HIFXZNqEvBhG+Ra+ax0hx3E3M=
 google.golang.org/api v0.8.0/go.mod h1:o4eAsZoiT+ibD93RtjEohWalFOjRDx6CVaqeizhEnKg=

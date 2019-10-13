@@ -411,7 +411,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 
 	d.SetId(port.ID)
 
-	tags := networkV2AttributesTags(d)
+	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "ports", port.ID, tagOpts).Extract()
@@ -449,7 +449,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	d.Set("device_owner", port.DeviceOwner)
 	d.Set("device_id", port.DeviceID)
 
-	networkV2ReadAttributesTags(d, port.Tags)
+	networkingV2ReadAttributesTags(d, port.Tags)
 
 	// Set a slice of all returned Fixed IPs.
 	// This will be in the order returned by the API,
@@ -654,7 +654,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	// Next, perform any required updates to the tags.
 	if d.HasChange("tags") {
-		tags := networkV2UpdateAttributesTags(d)
+		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "ports", d.Id(), tagOpts).Extract()
 		if err != nil {

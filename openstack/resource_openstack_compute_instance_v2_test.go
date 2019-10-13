@@ -2,6 +2,8 @@ package openstack
 
 import (
 	"fmt"
+	"reflect"
+	"sort"
 	"strings"
 	"testing"
 
@@ -574,6 +576,48 @@ func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2Instance_tags(t *testing.T) {
+	var instance servers.Server
+
+	resourceName := "openstack_compute_instance_v2.instance_1"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2Instance_tags_create,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+					testAccCheckComputeV2InstanceTags(resourceName, []string{"tag1", "tag2", "tag3"}),
+				),
+			},
+			{
+				Config: testAccComputeV2Instance_tags_add,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+					testAccCheckComputeV2InstanceTags(resourceName, []string{"tag1", "tag2", "tag3", "tag4"}),
+				),
+			},
+			{
+				Config: testAccComputeV2Instance_tags_delete,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+					testAccCheckComputeV2InstanceTags(resourceName, []string{"tag2", "tag3"}),
+				),
+			},
+			{
+				Config: testAccComputeV2Instance_tags_clear,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+					testAccCheckComputeV2InstanceTags(resourceName, nil),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckComputeV2InstanceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	computeClient, err := config.computeV2Client(OS_REGION_NAME)
@@ -738,6 +782,41 @@ func testAccCheckComputeV2InstanceState(
 			return fmt.Errorf("Instance state is not match.")
 		}
 
+		return nil
+	}
+}
+
+func testAccCheckComputeV2InstanceTags(name string, tags []string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[name]
+
+		if !ok {
+			return fmt.Errorf("resource not found: %s", name)
+		}
+
+		if _, ok := rs.Primary.Attributes["tags.#"]; !ok {
+			return fmt.Errorf("resource tags not found: %s.tags", name)
+		}
+
+		var rtags []string
+		for key, val := range rs.Primary.Attributes {
+			if !strings.HasPrefix(key, "tags.") {
+				continue
+			}
+
+			if key == "tags.#" {
+				continue
+			}
+
+			rtags = append(rtags, val)
+		}
+
+		sort.Strings(rtags)
+		sort.Strings(tags)
+		if !reflect.DeepEqual(rtags, tags) {
+			return fmt.Errorf(
+				"%s.tags: expected: %#v, got %#v", name, tags, rtags)
+		}
 		return nil
 	}
 }
@@ -1336,6 +1415,49 @@ resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   power_state = "shutoff"
+  network {
+    uuid = "%s"
+  }
+}
+`, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_tags_create = fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
+  tags = ["tag1", "tag2", "tag3"]
+}
+`, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_tags_add = fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
+  tags = ["tag1", "tag2", "tag3", "tag4"]
+}
+`, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_tags_delete = fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
+  tags = ["tag2", "tag3"]
+}
+`, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_tags_clear = fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
   network {
     uuid = "%s"
   }

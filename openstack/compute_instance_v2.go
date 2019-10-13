@@ -22,6 +22,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
+const (
+	computeV2InstanceCreateServerWithTagsMicroversion = "2.52"
+	computeV2TagsExtensionMicroversion                = "2.26"
+)
+
 // InstanceNIC is a structured representation of a Gophercloud servers.Server
 // virtual NIC.
 type InstanceNIC struct {
@@ -527,4 +532,16 @@ func getInstanceAccessAddresses(
 	log.Printf("[DEBUG] OpenStack Instance Network Access Addresses: %s, %s", hostv4, hostv6)
 
 	return hostv4, hostv6
+}
+
+func computeV2InstanceReadTags(d *schema.ResourceData, tags []string) {
+	expandObjectReadTags(d, tags)
+}
+
+func computeV2InstanceUpdateTags(d *schema.ResourceData) []string {
+	return expandObjectUpdateTags(d)
+}
+
+func computeV2InstanceTags(d *schema.ResourceData) []string {
+	return expandObjectTags(d)
 }

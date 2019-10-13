@@ -167,7 +167,7 @@ func expandVendorOptions(vendOptsRaw []interface{}) map[string]interface{} {
 	return vendorOptions
 }
 
-func networkV2ReadAttributesTags(d *schema.ResourceData, tags []string) {
+func expandObjectReadTags(d *schema.ResourceData, tags []string) {
 	d.Set("all_tags", tags)
 
 	allTags := d.Get("all_tags").(*schema.Set)
@@ -178,24 +178,25 @@ func networkV2ReadAttributesTags(d *schema.ResourceData, tags []string) {
 	}
 }
 
-func networkV2UpdateAttributesTags(d *schema.ResourceData) (tags []string) {
+func expandObjectUpdateTags(d *schema.ResourceData) []string {
 	allTags := d.Get("all_tags").(*schema.Set)
 	oldTagsRaw, newTagsRaw := d.GetChange("tags")
 	oldTags, newTags := oldTagsRaw.(*schema.Set), newTagsRaw.(*schema.Set)
 
-	allWithoutOld := allTags.Difference(oldTags)
+	allTagsWithoutOld := allTags.Difference(oldTags)
 
-	return expandToStringSlice(allWithoutOld.Union(newTags).List())
+	return expandToStringSlice(allTagsWithoutOld.Union(newTags).List())
 }
 
-func networkV2AttributesTags(d *schema.ResourceData) (tags []string) {
+func expandObjectTags(d *schema.ResourceData) []string {
 	rawTags := d.Get("tags").(*schema.Set).List()
-	tags = make([]string, len(rawTags))
+	tags := make([]string, len(rawTags))
 
 	for i, raw := range rawTags {
 		tags[i] = raw.(string)
 	}
-	return
+
+	return tags
 }
 
 func expandToMapStringString(v map[string]interface{}) map[string]string {

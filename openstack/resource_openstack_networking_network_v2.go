@@ -289,7 +289,7 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 
 	d.SetId(n.ID)
 
-	tags := networkV2AttributesTags(d)
+	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "networks", n.ID, tagOpts).Extract()
@@ -332,7 +332,7 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 	d.Set("qos_policy_id", network.QoSPolicyID)
 	d.Set("region", GetRegion(d, config))
 
-	networkV2ReadAttributesTags(d, network.Tags)
+	networkingV2ReadAttributesTags(d, network.Tags)
 
 	if err := d.Set("availability_zone_hints", network.AvailabilityZoneHints); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_networking_network_v2 %s availability_zone_hints: %s", d.Id(), err)
@@ -374,7 +374,7 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 
 	// Change tags if needed.
 	if d.HasChange("tags") {
-		tags := networkV2UpdateAttributesTags(d)
+		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "networks", d.Id(), tagOpts).Extract()
 		if err != nil {
