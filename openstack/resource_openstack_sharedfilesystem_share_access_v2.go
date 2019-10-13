@@ -85,7 +85,7 @@ func resourceSharedFilesystemShareAccessV2Create(d *schema.ResourceData, meta in
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	sfsClient.Microversion = minManilaMicroversion
+	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
 	accessType := d.Get("access_type").(string)
 	if accessType == "cephx" {
 		sfsClient.Microversion = "2.13"
@@ -144,7 +144,7 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 	}
 
 	// Set the client to the minimum supported microversion.
-	sfsClient.Microversion = minManilaMicroversion
+	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
 
 	// Now check and see if the OpenStack environment supports microversion 2.21.
 	// If so, use that for the API request for access_key support.
@@ -198,7 +198,7 @@ func resourceSharedFilesystemShareAccessV2Delete(d *schema.ResourceData, meta in
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	sfsClient.Microversion = minManilaMicroversion
+	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
 
 	shareID := d.Get("share_id").(string)
 
@@ -253,7 +253,7 @@ func resourceSharedFilesystemShareAccessV2Import(d *schema.ResourceData, meta in
 		return nil, fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	sfsClient.Microversion = minManilaMicroversion
+	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
 
 	shareID := parts[0]
 	accessID := parts[1]
