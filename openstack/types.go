@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/portforwarding"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/endpointgroups"
@@ -123,4 +124,9 @@ type EndpointGroupCreateOpts struct {
 type SiteConnectionCreateOpts struct {
 	siteconnections.CreateOpts
 	ValueSpecs map[string]string `json:"value_specs,omitempty"`
+}
+
+// PortForwardingCreateOpts represents the attributes used when creating a Portforwarding.
+type PortForwardingCreateOpts struct {
+	portforwarding.CreateOpts
 }
