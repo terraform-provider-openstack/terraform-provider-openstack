@@ -3,6 +3,7 @@
 IMPROVEMENTS
 
 * Added `tags` argument/attribute and `all_tags` for `openstack_compute_instance_v2` resource [GH-899]
+* Added `UDP` protocol support for `openstack_lb_pool_v2`, `openstack_lb_monitor_v2`, `openstack_lb_listener_v2` resources. It is available only when `use_octavia` is set to `true` [GH-896]
 * Migrated from Terraform in-tree `helper/*` SDK to the separate `terraform-plugin-sdk` v1.0.0 [GH-880]
 
 BUG FIXES
