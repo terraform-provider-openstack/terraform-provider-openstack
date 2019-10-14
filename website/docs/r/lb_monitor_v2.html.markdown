@@ -39,9 +39,9 @@ The following arguments are supported:
     the monitor.  Only administrative users can specify a tenant UUID
     other than their own. Changing this creates a new monitor.
 
-* `type` - (Required) The type of probe, which is PING, TCP, HTTP, or HTTPS,
-    that is sent by the load balancer to verify the member state. Changing this
-    creates a new monitor.
+* `type` - (Required) The type of probe, which is PING, TCP, HTTP, HTTPS,
+  TLS-HELLO or UDP-CONNECT (supported only in Octavia), that is sent by the load
+  balancer to verify the member state. Changing this creates a new monitor.
 
 * `delay` - (Required) The time, in seconds, between sending probes to members.
 

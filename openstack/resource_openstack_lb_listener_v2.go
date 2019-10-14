@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	octavialisteners "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
 	neutronlisteners "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
@@ -40,14 +41,9 @@ func resourceListenerV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if value != "TCP" && value != "HTTP" && value != "HTTPS" && value != "TERMINATED_HTTPS" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'TCP', 'HTTP', 'HTTPS' and 'TERMINATED_HTTPS' are supported values for 'protocol'"))
-					}
-					return
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"TCP", "UDP", "HTTP", "HTTPS", "TERMINATED_HTTPS",
+				}, false),
 			},
 
 			"protocol_port": {
