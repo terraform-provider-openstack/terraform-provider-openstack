@@ -202,7 +202,7 @@ func dataSourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface
 		listOpts.IsDefault = &isDefault
 	}
 
-	tags := networkV2AttributesTags(d)
+	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		listOpts.Tags = strings.Join(tags, ",")
 	}

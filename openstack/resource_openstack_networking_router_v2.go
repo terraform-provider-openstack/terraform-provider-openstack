@@ -252,7 +252,7 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 		}
 	}
 
-	tags := networkV2AttributesTags(d)
+	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "routers", n.ID, tagOpts).Extract()
@@ -291,7 +291,7 @@ func resourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("tenant_id", n.TenantID)
 	d.Set("region", GetRegion(d, config))
 
-	networkV2ReadAttributesTags(d, n.Tags)
+	networkingV2ReadAttributesTags(d, n.Tags)
 
 	if err := d.Set("availability_zone_hints", n.AvailabilityZoneHints); err != nil {
 		log.Printf("[DEBUG] unable to set availability_zone_hints: %s", err)
@@ -406,7 +406,7 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if d.HasChange("tags") {
-		tags := networkV2UpdateAttributesTags(d)
+		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "routers", d.Id(), tagOpts).Extract()
 		if err != nil {

@@ -67,7 +67,7 @@ func dataSourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}
 		TenantID:    d.Get("tenant_id").(string),
 	}
 
-	tags := networkV2AttributesTags(d)
+	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		listOpts.Tags = strings.Join(tags, ",")
 	}

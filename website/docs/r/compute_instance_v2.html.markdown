@@ -359,6 +359,9 @@ The following arguments are supported:
     the VM will be stopped immediately after build and the provisioners like
     remote-exec or files are not supported.
 
+* `tags` - (Optional) A set of string tags for the instance. Changing this
+    updates the existing instance tags.
+
 * `vendor_options` - (Optional) Map of additional vendor-specific options.
     Supported options are described below.
 
@@ -474,6 +477,9 @@ The following attributes are exported:
 * `network/mac` - The MAC address of the NIC on that network.
 * `all_metadata` - Contains all instance metadata, even metadata not set
     by Terraform.
+* `tags` - See Argument Reference above.
+* `all_tags` - The collection of tags assigned on the instance, which have
+    been explicitly and implicitly added.
 
 ## Notes
 

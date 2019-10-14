@@ -183,7 +183,7 @@ func resourceNetworkFloatingIPV2Create(d *schema.ResourceData, meta interface{})
 
 	d.SetId(fip.ID)
 
-	tags := networkV2AttributesTags(d)
+	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "floatingips", fip.ID, tagOpts).Extract()
@@ -222,7 +222,7 @@ func resourceNetworkFloatingIPV2Read(d *schema.ResourceData, meta interface{}) e
 	d.Set("dns_domain", fip.DNSDomain)
 	d.Set("region", GetRegion(d, config))
 
-	networkV2ReadAttributesTags(d, fip.Tags)
+	networkingV2ReadAttributesTags(d, fip.Tags)
 
 	poolName, err := networkingNetworkV2Name(d, meta, fip.FloatingNetworkID)
 	if err != nil {
@@ -271,7 +271,7 @@ func resourceNetworkFloatingIPV2Update(d *schema.ResourceData, meta interface{})
 	}
 
 	if d.HasChange("tags") {
-		tags := networkV2UpdateAttributesTags(d)
+		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "floatingips", d.Id(), tagOpts).Extract()
 		if err != nil {
