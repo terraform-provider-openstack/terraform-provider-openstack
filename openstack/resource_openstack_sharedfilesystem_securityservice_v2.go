@@ -11,17 +11,13 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/securityservices"
 )
 
-const (
-	minManilaMicroversion   = "2.7"
-	minOUManilaMicroversion = "2.44"
-)
-
 func resourceSharedFilesystemSecurityServiceV2() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceSharedFilesystemSecurityServiceV2Create,
 		Read:   resourceSharedFilesystemSecurityServiceV2Read,
 		Update: resourceSharedFilesystemSecurityServiceV2Update,
 		Delete: resourceSharedFilesystemSecurityServiceV2Delete,
+
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -104,7 +100,7 @@ func resourceSharedFilesystemSecurityServiceV2Create(d *schema.ResourceData, met
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	sfsClient.Microversion = minManilaMicroversion
+	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
 
 	createOpts := securityservices.CreateOpts{
 		Name:        d.Get("name").(string),
@@ -119,15 +115,14 @@ func resourceSharedFilesystemSecurityServiceV2Create(d *schema.ResourceData, met
 	if v, ok := d.GetOkExists("ou"); ok {
 		createOpts.OU = v.(string)
 
-		sfsClient.Microversion = minOUManilaMicroversion
+		sfsClient.Microversion = sharedFilesystemV2SecurityServiceOUMicroversion
 	}
 
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-
+	log.Printf("[DEBUG] openstack_sharedfilesystem_securityservice_v2 create options: %#v", createOpts)
 	createOpts.Password = d.Get("password").(string)
 	securityservice, err := securityservices.Create(sfsClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating : %s", err)
+		return fmt.Errorf("Error creating openstack_sharedfilesystem_securityservice_v2: %s", err)
 	}
 
 	d.SetId(securityservice.ID)
@@ -142,20 +137,20 @@ func resourceSharedFilesystemSecurityServiceV2Read(d *schema.ResourceData, meta 
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	sfsClient.Microversion = minManilaMicroversion
-
+	// Select microversion to use.
+	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
 	if _, ok := d.GetOkExists("ou"); ok {
-		sfsClient.Microversion = minOUManilaMicroversion
+		sfsClient.Microversion = sharedFilesystemV2SecurityServiceOUMicroversion
 	}
 
 	securityservice, err := securityservices.Get(sfsClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "securityservice")
+		return CheckDeleted(d, err, "Error getting openstack_sharedfilesystem_securityservice_v2")
 	}
 
-	// Workaround for resource import
+	// Workaround for resource import.
 	if securityservice.OU == "" {
-		sfsClient.Microversion = minOUManilaMicroversion
+		sfsClient.Microversion = sharedFilesystemV2SecurityServiceOUMicroversion
 		securityserviceOU, err := securityservices.Get(sfsClient, d.Id()).Extract()
 		if err == nil {
 			d.Set("ou", securityserviceOU.OU)
@@ -164,7 +159,7 @@ func resourceSharedFilesystemSecurityServiceV2Read(d *schema.ResourceData, meta 
 
 	nopassword := securityservice
 	nopassword.Password = ""
-	log.Printf("[DEBUG] Retrieved securityservice %s: %#v", d.Id(), nopassword)
+	log.Printf("[DEBUG] Retrieved openstack_sharedfilesystem_securityservice_v2 %s: %#v", d.Id(), nopassword)
 
 	d.Set("name", securityservice.Name)
 	d.Set("description", securityservice.Description)
@@ -173,7 +168,8 @@ func resourceSharedFilesystemSecurityServiceV2Read(d *schema.ResourceData, meta 
 	d.Set("dns_ip", securityservice.DNSIP)
 	d.Set("user", securityservice.User)
 	d.Set("server", securityservice.Server)
-	// Computed
+
+	// Computed.
 	d.Set("project_id", securityservice.ProjectID)
 	d.Set("region", GetRegion(d, config))
 
@@ -187,43 +183,51 @@ func resourceSharedFilesystemSecurityServiceV2Update(d *schema.ResourceData, met
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	sfsClient.Microversion = minManilaMicroversion
+	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
 
 	var updateOpts securityservices.UpdateOpts
-	// Name should always be sent, otherwise it is vanished by manila backend
+
+	// Name should always be sent, otherwise it is vanished by manila backend.
 	name := d.Get("name").(string)
 	updateOpts.Name = &name
+
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
 	}
+
 	if d.HasChange("type") {
 		updateOpts.Type = d.Get("type").(string)
 	}
+
 	if d.HasChange("dns_ip") {
 		dnsIP := d.Get("dns_ip").(string)
 		updateOpts.DNSIP = &dnsIP
 	}
+
 	if d.HasChange("ou") {
 		ou := d.Get("ou").(string)
 		updateOpts.OU = &ou
 
-		sfsClient.Microversion = minOUManilaMicroversion
+		sfsClient.Microversion = sharedFilesystemV2SecurityServiceOUMicroversion
 	}
+
 	if d.HasChange("user") {
 		user := d.Get("user").(string)
 		updateOpts.User = &user
 	}
+
 	if d.HasChange("domain") {
 		domain := d.Get("domain").(string)
 		updateOpts.Domain = &domain
 	}
+
 	if d.HasChange("server") {
 		server := d.Get("server").(string)
 		updateOpts.Server = &server
 	}
 
-	log.Printf("[DEBUG] Updating securityservice %s with options: %#v", d.Id(), updateOpts)
+	log.Printf("[DEBUG] openstack_sharedfilesystem_securityservice_v2 %s update options: %#v", d.Id(), updateOpts)
 
 	if d.HasChange("password") {
 		password := d.Get("password").(string)
@@ -232,7 +236,7 @@ func resourceSharedFilesystemSecurityServiceV2Update(d *schema.ResourceData, met
 
 	_, err = securityservices.Update(sfsClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to update securityservice %s: %s", d.Id(), err)
+		return fmt.Errorf("Error updating openstack_sharedfilesystem_securityservice_v2 %s: %s", d.Id(), err)
 	}
 
 	return resourceSharedFilesystemSecurityServiceV2Read(d, meta)
@@ -245,10 +249,8 @@ func resourceSharedFilesystemSecurityServiceV2Delete(d *schema.ResourceData, met
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	log.Printf("[DEBUG] Attempting to delete securityservice %s", d.Id())
-	err = securityservices.Delete(sfsClient, d.Id()).ExtractErr()
-	if err != nil {
-		return CheckDeleted(d, err, "Error deleting securityservice")
+	if err := securityservices.Delete(sfsClient, d.Id()).ExtractErr(); err != nil {
+		return CheckDeleted(d, err, "Error deleting openstack_sharedfilesystem_securityservice_v2")
 	}
 
 	return nil
