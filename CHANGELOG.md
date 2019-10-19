@@ -13,6 +13,7 @@ BUG FIXES
 * Fixed the bug with 404 errors handling while getting statuses tree in `openstack_lb_loadbalancer_v2` resource [GH-883]
 * Fixed the bug where is was unable to remove TLS references in `openstack_lb_listener_v2` resource [GH-891]
 * Fixed the bug where empty `scheduler_hints` list caused a panic in `openstack_compute_instance_v2` resource [GH-885]
+* Fixed the bug with usage of the wrong `flavor` argument instead of `flavor_id` for `openstack_lb_loadbalancer_v2` resource. Old argument has never worked. [GH-904]
 
 ## 1.23.0 (September 20, 2019)
 
