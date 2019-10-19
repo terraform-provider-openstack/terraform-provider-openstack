@@ -19,7 +19,7 @@ resource "openstack_lb_pool_v2" "pool_1" {
   listener_id = "d9415786-5f1a-428b-b35f-2f1523e146d2"
 
   persistence {
-    type        = "HTTP_COOKIE"
+    type        = "APP_COOKIE"
     cookie_name = "testCookie"
   }
 }
