@@ -1,4 +1,16 @@
-## 0.5.0 (Unreleased)
+## 0.6.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Added `networking/v2/extensions/quotas.Get` [GH-1742](https://github.com/gophercloud/gophercloud/pull/1742)
+* Added `networking/v2/extensions/quotas.Update` [GH-1747](https://github.com/gophercloud/gophercloud/pull/1747)
+
+BUG FIXES
+
+* Changed `Flavor` to `FlavorID` in `loadbalancer/v2/loadbalancers` [GH-1744](https://github.com/gophercloud/gophercloud/pull/1744)
+* Changed `Flavor` to `FlavorID` in `networking/v2/extensions/lbaas_v2/loadbalancers` [GH-1744](https://github.com/gophercloud/gophercloud/pull/1744)
+
+## 0.5.0 (October 13, 2019)
 
 IMPROVEMENTS
 
@@ -21,6 +33,7 @@ IMPROVEMENTS
 * Added `AttachedVolumes` to `compute/v2/servers.Server` [GH-1732](https://github.com/gophercloud/gophercloud/pull/1732)
 * Enable unmarshaling server tags to a `compute/v2/servers.Server` struct [GH-1734]
 * Allow setting an empty members list in `loadbalancer/v2/pools.BatchUpdateMembers` [GH-1736](https://github.com/gophercloud/gophercloud/pull/1736)
+* Allow unsetting members' subnet ID and name in `loadbalancer/v2/pools.BatchUpdateMemberOpts` [GH-1738](https://github.com/gophercloud/gophercloud/pull/1738)
 
 BUG FIXES
 

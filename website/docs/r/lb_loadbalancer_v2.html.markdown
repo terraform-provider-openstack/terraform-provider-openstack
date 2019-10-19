@@ -47,7 +47,7 @@ The following arguments are supported:
 * `admin_state_up` - (Optional) The administrative state of the Loadbalancer.
     A valid value is true (UP) or false (DOWN).
 
-* `flavor` - (Optional) The UUID of a flavor. Changing this creates a new
+* `flavor_id` - (Optional) The UUID of a flavor. Changing this creates a new
     loadbalancer.
 
 * `loadbalancer_provider` - (Optional) The name of the provider. Changing this
@@ -68,7 +68,7 @@ The following attributes are exported:
 * `tenant_id` - See Argument Reference above.
 * `vip_address` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
-* `flavor` - See Argument Reference above.
+* `flavor_id` - See Argument Reference above.
 * `loadbalancer_provider` - See Argument Reference above.
 * `security_group_ids` - See Argument Reference above.
 * `vip_port_id` - The Port ID of the Load Balancer IP.
