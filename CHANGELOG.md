@@ -19,6 +19,7 @@ BUG FIXES
 * Fixed the bug where is was unable to remove TLS references in `openstack_lb_listener_v2` resource [GH-891]
 * Fixed the bug where empty `scheduler_hints` list caused a panic in `openstack_compute_instance_v2` resource [GH-885]
 * Fixed the bug with usage of the wrong `flavor` argument instead of `flavor_id` for `openstack_lb_loadbalancer_v2` resource. Old argument has never worked. [GH-904]
+* Fixed the documentation bug with usage of `type` and `name` of the `persistence` of the `lb_pool_v2` resource [908]
 
 ## 1.23.0 (September 20, 2019)
 
