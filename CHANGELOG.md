@@ -1,5 +1,10 @@
 ## 1.24.0 (Unreleased)
 
+
+FEATURES
+
+* __New Resource__: `openstack_networking_quotas_v2` [GH-907]
+
 IMPROVEMENTS
 
 * Added `tags` argument/attribute and `all_tags` for `openstack_compute_instance_v2` resource [GH-899]
