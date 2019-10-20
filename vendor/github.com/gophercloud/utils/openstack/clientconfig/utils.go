@@ -8,6 +8,8 @@ import (
 	"os/user"
 	"path/filepath"
 	"reflect"
+
+	"github.com/gophercloud/utils/env"
 )
 
 // defaultIfEmpty is a helper function to make it cleaner to set default value
@@ -98,7 +100,7 @@ func mergeInterfaces(overridingInterface, inferiorInterface interface{}) interfa
 // If found, the contents of the file is returned.
 func findAndReadCloudsYAML() ([]byte, error) {
 	// OS_CLIENT_CONFIG_FILE
-	if v := os.Getenv("OS_CLIENT_CONFIG_FILE"); v != "" {
+	if v := env.Getenv("OS_CLIENT_CONFIG_FILE"); v != "" {
 		if ok := fileExists(v); ok {
 			return ioutil.ReadFile(v)
 		}
