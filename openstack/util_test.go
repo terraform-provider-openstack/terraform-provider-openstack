@@ -1,7 +1,6 @@
 package openstack
 
 import (
-	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -66,16 +65,4 @@ func TestCompatibleMicroversion(t *testing.T) {
 	actual, err = compatibleMicroversion("min", "2.10", "2.17")
 	assert.Nil(t, err)
 	assert.Equal(t, true, actual)
-}
-
-func TestFormatHeaders(t *testing.T) {
-	headers := http.Header{
-		"X-Auth-Token": []string{"token"},
-		"User-Agent":   []string{"Terraform/x.x.x", "Gophercloud/y.y.y"},
-	}
-
-	expected := "User-Agent: Terraform/x.x.x Gophercloud/y.y.y\nX-Auth-Token: ***"
-	actual := formatHeaders(headers, "\n")
-
-	assert.Equal(t, expected, actual)
 }
