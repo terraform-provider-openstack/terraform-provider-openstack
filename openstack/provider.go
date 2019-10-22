@@ -333,7 +333,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_networking_qos_dscp_marking_rule_v2":      resourceNetworkingQoSDSCPMarkingRuleV2(),
 			"openstack_networking_qos_minimum_bandwidth_rule_v2": resourceNetworkingQoSMinimumBandwidthRuleV2(),
 			"openstack_networking_qos_policy_v2":                 resourceNetworkingQoSPolicyV2(),
-			"openstack_networking_quotas_v2":                     resourceNetworkingQuotasV2(),
+			"openstack_networking_quota_v2":                      resourceNetworkingQuotaV2(),
 			"openstack_networking_router_v2":                     resourceNetworkingRouterV2(),
 			"openstack_networking_router_interface_v2":           resourceNetworkingRouterInterfaceV2(),
 			"openstack_networking_router_route_v2":               resourceNetworkingRouterRouteV2(),
