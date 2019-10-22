@@ -288,6 +288,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_compute_keypair_v2":                       resourceComputeKeypairV2(),
 			"openstack_compute_secgroup_v2":                      resourceComputeSecGroupV2(),
 			"openstack_compute_servergroup_v2":                   resourceComputeServerGroupV2(),
+			"openstack_compute_quotaset_v2":                      resourceComputeQuotasetV2(),
 			"openstack_compute_floatingip_v2":                    resourceComputeFloatingIPV2(),
 			"openstack_compute_floatingip_associate_v2":          resourceComputeFloatingIPAssociateV2(),
 			"openstack_compute_volume_attach_v2":                 resourceComputeVolumeAttachV2(),
