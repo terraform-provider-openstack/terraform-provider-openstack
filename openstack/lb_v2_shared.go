@@ -11,6 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	octavialisteners "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
 	octaviamonitors "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/monitors"
+	octaviapools "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 	neutronlisteners "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
@@ -975,4 +976,59 @@ func flattenLBPoolPersistenceV2(p pools.SessionPersistence) []map[string]interfa
 			"cookie_name": p.CookieName,
 		},
 	}
+}
+
+func octaviaMemberToNeutronMember(member *octaviapools.Member) *pools.Member {
+	if member == nil {
+		return &pools.Member{}
+	}
+	return &pools.Member{
+		ID:                 member.ID,
+		ProvisioningStatus: member.ProvisioningStatus,
+	}
+}
+
+func flattenLBMembersV2(members []octaviapools.Member) []map[string]interface{} {
+	m := make([]map[string]interface{}, len(members))
+
+	for i, member := range members {
+		m[i] = map[string]interface{}{
+			"name":           member.Name,
+			"weight":         member.Weight,
+			"admin_state_up": member.AdminStateUp,
+			"subnet_id":      member.SubnetID,
+			"address":        member.Address,
+			"protocol_port":  member.ProtocolPort,
+			"id":             member.ID,
+		}
+	}
+
+	return m
+}
+
+func expandLBMembersV2(members *schema.Set) []octaviapools.BatchUpdateMemberOpts {
+	var m []octaviapools.BatchUpdateMemberOpts
+
+	if members != nil {
+		for _, raw := range members.List() {
+			rawMap := raw.(map[string]interface{})
+			name := rawMap["name"].(string)
+			subnetID := rawMap["subnet_id"].(string)
+			weight := rawMap["weight"].(int)
+			adminStateUp := rawMap["admin_state_up"].(bool)
+
+			member := octaviapools.BatchUpdateMemberOpts{
+				Address:      rawMap["address"].(string),
+				ProtocolPort: rawMap["protocol_port"].(int),
+				Name:         &name,
+				SubnetID:     &subnetID,
+				Weight:       &weight,
+				AdminStateUp: &adminStateUp,
+			}
+
+			m = append(m, member)
+		}
+	}
+
+	return m
 }

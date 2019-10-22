@@ -339,6 +339,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_lb_listener_v2":                           resourceListenerV2(),
 			"openstack_lb_pool_v2":                               resourcePoolV2(),
 			"openstack_lb_member_v2":                             resourceMemberV2(),
+			"openstack_lb_members_v2":                            resourceMembersV2(),
 			"openstack_lb_monitor_v2":                            resourceMonitorV2(),
 			"openstack_lb_l7policy_v2":                           resourceL7PolicyV2(),
 			"openstack_lb_l7rule_v2":                             resourceL7RuleV2(),
