@@ -1,27 +1,27 @@
-## 1.24.0 (Unreleased)
+## 1.24.0 (October 22, 2019)
 
 FEATURES
 
-* __New Resource__: `openstack_networking_quota_v2` [GH-915]
-* __New Resource__: `openstack_compute_quotaset_v2` [GH-914]
+* __New Resource__: `openstack_networking_quota_v2` ([#915](https://github.com/terraform-providers/terraform-provider-openstack/issues/915))
+* __New Resource__: `openstack_compute_quotaset_v2` ([#914](https://github.com/terraform-providers/terraform-provider-openstack/issues/914))
 
 IMPROVEMENTS
 
-* Added `tags` argument/attribute and `all_tags` for `openstack_compute_instance_v2` resource [GH-899]
-* Added `UDP` protocol support for `openstack_lb_pool_v2`, `openstack_lb_monitor_v2`, `openstack_lb_listener_v2` resources. It is available only when `use_octavia` is set to `true` [GH-896]
-* Added ability to reuse the existing token when scope parameters are not defined [GH-912]
-* Migrated from Terraform in-tree `helper/*` SDK to the separate `terraform-plugin-sdk v1.1.1` [GH-880], [GH-909]
-* Migrated to use the common JSON debugging implementation from the upstream `gophercloud/utils` library [GH-910]
+* Added `tags` argument/attribute and `all_tags` for `openstack_compute_instance_v2` resource ([#899](https://github.com/terraform-providers/terraform-provider-openstack/issues/899))
+* Added `UDP` protocol support for `openstack_lb_pool_v2`, `openstack_lb_monitor_v2`, `openstack_lb_listener_v2` resources. It is available only when `use_octavia` is set to `true` ([#896](https://github.com/terraform-providers/terraform-provider-openstack/issues/896))
+* Added ability to reuse the existing token when scope parameters are not defined ([#912](https://github.com/terraform-providers/terraform-provider-openstack/issues/912))
+* Migrated from Terraform in-tree `helper/*` SDK to the separate `terraform-plugin-sdk v1.1.1` ([#880](https://github.com/terraform-providers/terraform-provider-openstack/issues/880)], [[#909](https://github.com/terraform-providers/terraform-provider-openstack/issues/909))
+* Migrated to use the common JSON debugging implementation from the upstream `gophercloud/utils` library ([#910](https://github.com/terraform-providers/terraform-provider-openstack/issues/910))
 
 BUG FIXES
 
-* Fixed the bug with unchecked errors in initialization of Identity V3 client in `identity_auth_scope_v3` data source [GH-878] 
-* Fixed the bug with unchecked errors in initialization of Compute V2 client in `compute_floatingip_associate_v2` resource [GH-878] 
-* Fixed the bug with 404 errors handling while getting statuses tree in `openstack_lb_loadbalancer_v2` resource [GH-883]
-* Fixed the bug where is was unable to remove TLS references in `openstack_lb_listener_v2` resource [GH-891]
-* Fixed the bug where empty `scheduler_hints` list caused a panic in `openstack_compute_instance_v2` resource [GH-885]
-* Fixed the bug with usage of the wrong `flavor` argument instead of `flavor_id` for `openstack_lb_loadbalancer_v2` resource. Old argument has never worked. [GH-904]
-* Fixed the documentation bug with usage of `type` and `name` of the `persistence` of the `lb_pool_v2` resource [GH-908]
+* Fixed the bug with unchecked errors in initialization of Identity V3 client in `identity_auth_scope_v3` data source [[#878](https://github.com/terraform-providers/terraform-provider-openstack/issues/878)] 
+* Fixed the bug with unchecked errors in initialization of Compute V2 client in `compute_floatingip_associate_v2` resource [[#878](https://github.com/terraform-providers/terraform-provider-openstack/issues/878)] 
+* Fixed the bug with 404 errors handling while getting statuses tree in `openstack_lb_loadbalancer_v2` resource ([#883](https://github.com/terraform-providers/terraform-provider-openstack/issues/883))
+* Fixed the bug where is was unable to remove TLS references in `openstack_lb_listener_v2` resource ([#891](https://github.com/terraform-providers/terraform-provider-openstack/issues/891))
+* Fixed the bug where empty `scheduler_hints` list caused a panic in `openstack_compute_instance_v2` resource ([#885](https://github.com/terraform-providers/terraform-provider-openstack/issues/885))
+* Fixed the bug with usage of the wrong `flavor` argument instead of `flavor_id` for `openstack_lb_loadbalancer_v2` resource. Old argument has never worked. ([#904](https://github.com/terraform-providers/terraform-provider-openstack/issues/904))
+* Fixed the documentation bug with usage of `type` and `name` of the `persistence` of the `lb_pool_v2` resource ([#908](https://github.com/terraform-providers/terraform-provider-openstack/issues/908))
 
 ## 1.23.0 (September 20, 2019)
 
