@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-func TestAccNetworkingQuotasV2_basic(t *testing.T) {
+func TestAccNetworkingQuotaV2_basic(t *testing.T) {
 	var project projects.Project
 
 	resource.Test(t, resource.TestCase{
@@ -19,87 +19,87 @@ func TestAccNetworkingQuotasV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3ProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingQuotasV2_basic,
+				Config: testAccNetworkingQuotaV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "floatingip", "2"),
+						"openstack_networking_quota_v2.quota_1", "floatingip", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "network", "2"),
+						"openstack_networking_quota_v2.quota_1", "network", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "port", "2"),
+						"openstack_networking_quota_v2.quota_1", "port", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "rbac_policy", "1"),
+						"openstack_networking_quota_v2.quota_1", "rbac_policy", "1"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "router", "2"),
+						"openstack_networking_quota_v2.quota_1", "router", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "security_group", "2"),
+						"openstack_networking_quota_v2.quota_1", "security_group", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "security_group_rule", "2"),
+						"openstack_networking_quota_v2.quota_1", "security_group_rule", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "subnet", "1"),
+						"openstack_networking_quota_v2.quota_1", "subnet", "1"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "subnetpool", "1"),
+						"openstack_networking_quota_v2.quota_1", "subnetpool", "1"),
 				),
 			},
 			{
-				Config: testAccNetworkingQuotasV2_update_1,
+				Config: testAccNetworkingQuotaV2_update_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "floatingip", "3"),
+						"openstack_networking_quota_v2.quota_1", "floatingip", "3"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "network", "3"),
+						"openstack_networking_quota_v2.quota_1", "network", "3"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "port", "4"),
+						"openstack_networking_quota_v2.quota_1", "port", "4"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "rbac_policy", "1"),
+						"openstack_networking_quota_v2.quota_1", "rbac_policy", "1"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "router", "2"),
+						"openstack_networking_quota_v2.quota_1", "router", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "security_group", "2"),
+						"openstack_networking_quota_v2.quota_1", "security_group", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "security_group_rule", "2"),
+						"openstack_networking_quota_v2.quota_1", "security_group_rule", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "subnet", "1"),
+						"openstack_networking_quota_v2.quota_1", "subnet", "1"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "subnetpool", "1"),
+						"openstack_networking_quota_v2.quota_1", "subnetpool", "1"),
 				),
 			},
 			{
-				Config: testAccNetworkingQuotasV2_update_2,
+				Config: testAccNetworkingQuotaV2_update_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "floatingip", "2"),
+						"openstack_networking_quota_v2.quota_1", "floatingip", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "network", "2"),
+						"openstack_networking_quota_v2.quota_1", "network", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "port", "2"),
+						"openstack_networking_quota_v2.quota_1", "port", "2"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "rbac_policy", "4"),
+						"openstack_networking_quota_v2.quota_1", "rbac_policy", "4"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "router", "4"),
+						"openstack_networking_quota_v2.quota_1", "router", "4"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "security_group", "3"),
+						"openstack_networking_quota_v2.quota_1", "security_group", "3"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "security_group_rule", "3"),
+						"openstack_networking_quota_v2.quota_1", "security_group_rule", "3"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "subnet", "3"),
+						"openstack_networking_quota_v2.quota_1", "subnet", "3"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_quotas_v2.quotas_1", "subnetpool", "3"),
+						"openstack_networking_quota_v2.quota_1", "subnetpool", "3"),
 				),
 			},
 		},
 	})
 }
 
-const testAccNetworkingQuotasV2_basic = `
+const testAccNetworkingQuotaV2_basic = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"
 }
 
-resource "openstack_networking_quotas_v2" "quotas_1" {
+resource "openstack_networking_quota_v2" "quota_1" {
   project_id          = "${openstack_identity_project_v3.project_1.id}"
   floatingip          = 2
   network             = 2
@@ -113,12 +113,12 @@ resource "openstack_networking_quotas_v2" "quotas_1" {
 }
 `
 
-const testAccNetworkingQuotasV2_update_1 = `
+const testAccNetworkingQuotaV2_update_1 = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"
 }
 
-resource "openstack_networking_quotas_v2" "quotas_1" {
+resource "openstack_networking_quota_v2" "quota_1" {
   project_id          = "${openstack_identity_project_v3.project_1.id}"
   floatingip          = 3
   network             = 3
@@ -132,12 +132,12 @@ resource "openstack_networking_quotas_v2" "quotas_1" {
 }
 `
 
-const testAccNetworkingQuotasV2_update_2 = `
+const testAccNetworkingQuotaV2_update_2 = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"
 }
 
-resource "openstack_networking_quotas_v2" "quotas_1" {
+resource "openstack_networking_quota_v2" "quota_1" {
   project_id          = "${openstack_identity_project_v3.project_1.id}"
   floatingip          = 2
   network             = 2

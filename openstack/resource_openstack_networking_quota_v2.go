@@ -9,12 +9,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
-func resourceNetworkingQuotasV2() *schema.Resource {
+func resourceNetworkingQuotaV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingQuotasV2Create,
-		Read:   resourceNetworkingQuotasV2Read,
-		Update: resourceNetworkingQuotasV2Update,
-		Delete: resourceNetworkingQuotasV2Delete,
+		Create: resourceNetworkingQuotaV2Create,
+		Read:   resourceNetworkingQuotaV2Read,
+		Update: resourceNetworkingQuotaV2Update,
+		Delete: schema.RemoveFromState,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -96,7 +96,7 @@ func resourceNetworkingQuotasV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingQuotasV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQuotaV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
@@ -128,17 +128,17 @@ func resourceNetworkingQuotasV2Create(d *schema.ResourceData, meta interface{}) 
 
 	q, err := quotas.Update(networkingClient, projectID, updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_networking_quotas_v2: %s", err)
+		return fmt.Errorf("Error creating openstack_networking_quota_v2: %s", err)
 	}
 
 	d.SetId(projectID)
 
-	log.Printf("[DEBUG] Created openstack_networking_quotas_v2 %#v", q)
+	log.Printf("[DEBUG] Created openstack_networking_quota_v2 %#v", q)
 
-	return resourceNetworkingQuotasV2Read(d, meta)
+	return resourceNetworkingQuotaV2Read(d, meta)
 }
 
-func resourceNetworkingQuotasV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQuotaV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
@@ -147,10 +147,10 @@ func resourceNetworkingQuotasV2Read(d *schema.ResourceData, meta interface{}) er
 
 	q, err := quotas.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_networking_quotas_v2")
+		return CheckDeleted(d, err, "Error retrieving openstack_networking_quota_v2")
 	}
 
-	log.Printf("[DEBUG] Retrieved openstack_networking_quotas_v2 %s: %#v", d.Id(), q)
+	log.Printf("[DEBUG] Retrieved openstack_networking_quota_v2 %s: %#v", d.Id(), q)
 
 	d.Set("project_id", d.Id())
 	d.Set("floatingip", q.FloatingIP)
@@ -166,7 +166,7 @@ func resourceNetworkingQuotasV2Read(d *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-func resourceNetworkingQuotasV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQuotaV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
@@ -233,18 +233,12 @@ func resourceNetworkingQuotasV2Update(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if hasChange {
-		log.Printf("[DEBUG] openstack_networking_quotas_v2 %s update options: %#v", d.Id(), updateOpts)
+		log.Printf("[DEBUG] openstack_networking_quota_v2 %s update options: %#v", d.Id(), updateOpts)
 		_, err := quotas.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_networking_quotas_v2: %s", err)
+			return fmt.Errorf("Error updating openstack_networking_quota_v2: %s", err)
 		}
 	}
 
-	return resourceNetworkingQuotasV2Read(d, meta)
-}
-
-func resourceNetworkingQuotasV2Delete(_ *schema.ResourceData, _ interface{}) error {
-	log.Printf("[DEBUG] openstack_networking_quotas_v2 deletion is a no-op operation")
-
-	return nil
+	return resourceNetworkingQuotaV2Read(d, meta)
 }
