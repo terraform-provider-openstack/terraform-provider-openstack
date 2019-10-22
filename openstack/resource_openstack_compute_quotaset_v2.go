@@ -14,7 +14,7 @@ func resourceComputeQuotasetV2() *schema.Resource {
 		Create: resourceComputeQuotasetV2Create,
 		Read:   resourceComputeQuotasetV2Read,
 		Update: resourceComputeQuotasetV2Update,
-		Delete: resourceComputeQuotasetV2Delete,
+		Delete: schema.RemoveFromState,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -316,10 +316,4 @@ func resourceComputeQuotasetV2Update(d *schema.ResourceData, meta interface{}) e
 	}
 
 	return resourceComputeQuotasetV2Read(d, meta)
-}
-
-func resourceComputeQuotasetV2Delete(_ *schema.ResourceData, _ interface{}) error {
-	log.Printf("[DEBUG] openstack_compute_quotaset_v2 deletion is a no-op operation")
-
-	return nil
 }
