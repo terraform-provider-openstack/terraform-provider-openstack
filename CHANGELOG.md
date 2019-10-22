@@ -2,7 +2,8 @@
 
 FEATURES
 
-* __New Resource__: `openstack_networking_quotas_v2` [GH-907]
+* __New Resource__: `openstack_networking_quota_v2` [GH-915]
+* __New Resource__: `openstack_compute_quotaset_v2` [GH-914]
 
 IMPROVEMENTS
 
