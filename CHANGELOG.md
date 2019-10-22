@@ -1,6 +1,5 @@
 ## 1.24.0 (Unreleased)
 
-
 FEATURES
 
 * __New Resource__: `openstack_networking_quotas_v2` [GH-907]
@@ -9,8 +8,9 @@ IMPROVEMENTS
 
 * Added `tags` argument/attribute and `all_tags` for `openstack_compute_instance_v2` resource [GH-899]
 * Added `UDP` protocol support for `openstack_lb_pool_v2`, `openstack_lb_monitor_v2`, `openstack_lb_listener_v2` resources. It is available only when `use_octavia` is set to `true` [GH-896]
+* Added ability to reuse the existing token when scope parameters are not defined [GH-912]
 * Migrated from Terraform in-tree `helper/*` SDK to the separate `terraform-plugin-sdk v1.1.1` [GH-880], [GH-909]
-* Use common JSON debugging implementation from the upstream `gophercloud/utils` library [GH-910]
+* Migrated to use the common JSON debugging implementation from the upstream `gophercloud/utils` library [GH-910]
 
 BUG FIXES
 
