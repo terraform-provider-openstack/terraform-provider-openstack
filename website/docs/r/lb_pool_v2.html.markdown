@@ -19,7 +19,7 @@ resource "openstack_lb_pool_v2" "pool_1" {
   listener_id = "d9415786-5f1a-428b-b35f-2f1523e146d2"
 
   persistence {
-    type        = "HTTP_COOKIE"
+    type        = "APP_COOKIE"
     cookie_name = "testCookie"
   }
 }
@@ -42,8 +42,8 @@ The following arguments are supported:
 
 * `description` - (Optional) Human-readable description for the pool.
 
-* `protocol` = (Required) The protocol - can either be TCP, HTTP, HTTPS or PROXY.
-    Changing this creates a new pool.
+* `protocol` - (Required) The protocol - can either be TCP, HTTP, HTTPS, PROXY
+  or UDP (supported only in Octavia). Changing this creates a new pool.
 
 * `loadbalancer_id` - (Optional) The load balancer on which to provision this
     pool. Changing this creates a new pool.

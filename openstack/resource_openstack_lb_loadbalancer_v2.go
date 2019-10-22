@@ -78,7 +78,7 @@ func resourceLoadBalancerV2() *schema.Resource {
 				Optional: true,
 			},
 
-			"flavor": {
+			"flavor_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -122,7 +122,7 @@ func resourceLoadBalancerV2Create(d *schema.ResourceData, meta interface{}) erro
 		TenantID:     d.Get("tenant_id").(string),
 		VipAddress:   d.Get("vip_address").(string),
 		AdminStateUp: &adminStateUp,
-		Flavor:       d.Get("flavor").(string),
+		FlavorID:     d.Get("flavor_id").(string),
 		Provider:     lbProvider,
 	}
 
@@ -176,7 +176,7 @@ func resourceLoadBalancerV2Read(d *schema.ResourceData, meta interface{}) error 
 	d.Set("vip_address", lb.VipAddress)
 	d.Set("vip_port_id", lb.VipPortID)
 	d.Set("admin_state_up", lb.AdminStateUp)
-	d.Set("flavor", lb.Flavor)
+	d.Set("flavor_id", lb.FlavorID)
 	d.Set("loadbalancer_provider", lb.Provider)
 	d.Set("region", GetRegion(d, config))
 

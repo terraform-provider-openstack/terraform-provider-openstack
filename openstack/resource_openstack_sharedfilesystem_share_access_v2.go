@@ -85,10 +85,10 @@ func resourceSharedFilesystemShareAccessV2Create(d *schema.ResourceData, meta in
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	sfsClient.Microversion = minManilaMicroversion
+	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
 	accessType := d.Get("access_type").(string)
 	if accessType == "cephx" {
-		sfsClient.Microversion = "2.13"
+		sfsClient.Microversion = sharedFilesystemV2SharedAccessCephXMicroversion
 	}
 
 	shareID := d.Get("share_id").(string)
@@ -99,11 +99,10 @@ func resourceSharedFilesystemShareAccessV2Create(d *schema.ResourceData, meta in
 		AccessLevel: d.Get("access_level").(string),
 	}
 
-	log.Printf("[DEBUG] Create Options: %#v", grantOpts)
+	log.Printf("[DEBUG] openstack_sharedfilesystem_share_access_v2 create options: %#v", grantOpts)
 
 	timeout := d.Timeout(schema.TimeoutCreate)
 
-	log.Printf("[DEBUG] Attempting to grant access")
 	var access *shares.AccessRight
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		access, err = shares.GrantAccess(sfsClient, shareID, grantOpts).Extract()
@@ -117,21 +116,29 @@ func resourceSharedFilesystemShareAccessV2Create(d *schema.ResourceData, meta in
 		detailedErr := errors.ErrorDetails{}
 		e := errors.ExtractErrorInto(err, &detailedErr)
 		if e != nil {
-			return fmt.Errorf("Error granting access: %s: %s", err, e)
+			return fmt.Errorf("Error creating openstack_sharedfilesystem_share_access_v2: %s: %s", err, e)
 		}
 		for k, msg := range detailedErr {
-			return fmt.Errorf("Error granting access: %s (%d): %s", k, msg.Code, msg.Message)
+			return fmt.Errorf("Error creating openstack_sharedfilesystem_share_access_v2: %s (%d): %s", k, msg.Code, msg.Message)
 		}
+	}
+
+	log.Printf("[DEBUG] Waiting for openstack_sharedfilesystem_share_access_v2 %s to become available.", access.ID)
+	stateConf := &resource.StateChangeConf{
+		Target:     []string{"active"},
+		Pending:    []string{"new", "queued_to_apply", "applying"},
+		Refresh:    sharedFilesystemShareAccessV2StateRefreshFunc(sfsClient, shareID, access.ID),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      1 * time.Second,
+		MinTimeout: 1 * time.Second,
+	}
+
+	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("Error waiting for openstack_sharedfilesystem_share_access_v2 %s to become available: %s", access.ID, err)
 	}
 
 	d.SetId(access.ID)
-
-	pending := []string{"new", "queued_to_apply", "applying"}
-	// Wait for access to become active before continuing
-	err = waitForSFV2Access(sfsClient, shareID, access.ID, "active", pending, timeout)
-	if err != nil {
-		return err
-	}
 
 	return resourceSharedFilesystemShareAccessV2Read(d, meta)
 }
@@ -144,13 +151,13 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 	}
 
 	// Set the client to the minimum supported microversion.
-	sfsClient.Microversion = minManilaMicroversion
+	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
 
 	// Now check and see if the OpenStack environment supports microversion 2.21.
 	// If so, use that for the API request for access_key support.
 	apiInfo, err := apiversions.Get(sfsClient, "v2").Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to query Shared Filesystem API endpoint: %s", err)
+		return fmt.Errorf("Unable to query API endpoint for openstack_sharedfilesystem_share_access_v2: %s", err)
 	}
 
 	compatible, err := compatibleMicroversion("min", "2.21", apiInfo.Version)
@@ -159,7 +166,7 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 	}
 
 	if compatible {
-		sfsClient.Microversion = "2.21"
+		sfsClient.Microversion = sharedFilesystemV2SharedAccessMinMicroversion
 	}
 
 	shareID := d.Get("share_id").(string)
@@ -170,7 +177,7 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 
 	for _, v := range access {
 		if v.ID == d.Id() {
-			log.Printf("[DEBUG] Retrieved %s share ACL: %#v", d.Id(), v)
+			log.Printf("[DEBUG] Retrieved openstack_sharedfilesystem_share_access_v2 %s: %#v", d.Id(), v)
 
 			d.Set("access_type", v.AccessType)
 			d.Set("access_to", v.AccessTo)
@@ -185,7 +192,7 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 		}
 	}
 
-	log.Printf("[DEBUG] Unable to find %s share access", d.Id())
+	log.Printf("[DEBUG] Unable to find openstack_sharedfilesystem_share_access_v2 %s", d.Id())
 	d.SetId("")
 
 	return nil
@@ -198,7 +205,7 @@ func resourceSharedFilesystemShareAccessV2Delete(d *schema.ResourceData, meta in
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	sfsClient.Microversion = minManilaMicroversion
+	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
 
 	shareID := d.Get("share_id").(string)
 
@@ -206,7 +213,7 @@ func resourceSharedFilesystemShareAccessV2Delete(d *schema.ResourceData, meta in
 
 	timeout := d.Timeout(schema.TimeoutDelete)
 
-	log.Printf("[DEBUG] Attempting to revoke access %s", d.Id())
+	log.Printf("[DEBUG] Attempting to delete openstack_sharedfilesystem_share_access_v2 %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		err = shares.RevokeAccess(sfsClient, shareID, revokeOpts).ExtractErr()
 		if err != nil {
@@ -216,25 +223,36 @@ func resourceSharedFilesystemShareAccessV2Delete(d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		e := CheckDeleted(d, err, "")
+		e := CheckDeleted(d, err, "Error deleting openstack_sharedfilesystem_share_access_v2")
 		if e == nil {
 			return nil
 		}
 		detailedErr := errors.ErrorDetails{}
 		e = errors.ExtractErrorInto(err, &detailedErr)
 		if e != nil {
-			return fmt.Errorf("Error waiting for OpenStack share ACL on %s to be removed: %s: %s", shareID, err, e)
+			return fmt.Errorf("Error waiting for openstack_sharedfilesystem_share_access_v2 on %s to be removed: %s: %s", shareID, err, e)
 		}
 		for k, msg := range detailedErr {
-			return fmt.Errorf("Error waiting for OpenStack share ACL on %s to be removed: %s (%d): %s", shareID, k, msg.Code, msg.Message)
+			return fmt.Errorf("Error waiting for openstack_sharedfilesystem_share_access_v2 on %s to be removed: %s (%d): %s", shareID, k, msg.Code, msg.Message)
 		}
 	}
 
-	// Wait for access to become deleted before continuing
-	pending := []string{"active", "new", "queued_to_deny", "denying"}
-	err = waitForSFV2Access(sfsClient, shareID, d.Id(), "denied", pending, timeout)
+	log.Printf("[DEBUG] Waiting for openstack_sharedfilesystem_share_access_v2 %s to become denied.", d.Id())
+	stateConf := &resource.StateChangeConf{
+		Target:     []string{"denied"},
+		Pending:    []string{"active", "new", "queued_to_deny", "denying"},
+		Refresh:    sharedFilesystemShareAccessV2StateRefreshFunc(sfsClient, shareID, d.Id()),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      1 * time.Second,
+		MinTimeout: 1 * time.Second,
+	}
+
+	_, err = stateConf.WaitForState()
 	if err != nil {
-		return err
+		if _, ok := err.(gophercloud.ErrDefault404); ok {
+			return nil
+		}
+		return fmt.Errorf("Error waiting for openstack_sharedfilesystem_share_access_v2 %s to become denied: %s", d.Id(), err)
 	}
 
 	return nil
@@ -243,7 +261,7 @@ func resourceSharedFilesystemShareAccessV2Delete(d *schema.ResourceData, meta in
 func resourceSharedFilesystemShareAccessV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
-		err := fmt.Errorf("Invalid format specified for Openstack share ACL. Format must be <share id>/<ACL id>")
+		err := fmt.Errorf("Invalid format specified for openstack_sharedfilesystem_share_access_v2. Format must be <share id>/<ACL id>")
 		return nil, err
 	}
 
@@ -253,19 +271,19 @@ func resourceSharedFilesystemShareAccessV2Import(d *schema.ResourceData, meta in
 		return nil, fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	sfsClient.Microversion = minManilaMicroversion
+	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
 
 	shareID := parts[0]
 	accessID := parts[1]
 
 	access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
 	if err != nil {
-		return nil, fmt.Errorf("Unable to get %s Openstack share and its ACL's: %s", shareID, err)
+		return nil, fmt.Errorf("Unable to get %s openstack_sharedfilesystem_share_v2: %s", shareID, err)
 	}
 
 	for _, v := range access {
 		if v.ID == accessID {
-			log.Printf("[DEBUG] Retrieved %s share ACL: %#v", accessID, v)
+			log.Printf("[DEBUG] Retrieved openstack_sharedfilesystem_share_access_v2 %s: %#v", accessID, v)
 
 			d.SetId(accessID)
 			d.Set("share_id", shareID)
@@ -273,49 +291,5 @@ func resourceSharedFilesystemShareAccessV2Import(d *schema.ResourceData, meta in
 		}
 	}
 
-	return nil, fmt.Errorf("[DEBUG] Unable to find %s share access", accessID)
-}
-
-// Full list of the share access statuses: https://developer.openstack.org/api-ref/shared-file-system/?expanded=list-services-detail,list-access-rules-detail#list-access-rules
-func waitForSFV2Access(sfsClient *gophercloud.ServiceClient, shareID string, id string, target string, pending []string, timeout time.Duration) error {
-	log.Printf("[DEBUG] Waiting for access %s to become %s.", id, target)
-
-	stateConf := &resource.StateChangeConf{
-		Target:     []string{target},
-		Pending:    pending,
-		Refresh:    resourceSFV2AccessRefreshFunc(sfsClient, shareID, id),
-		Timeout:    timeout,
-		Delay:      1 * time.Second,
-		MinTimeout: 1 * time.Second,
-	}
-
-	_, err := stateConf.WaitForState()
-	if err != nil {
-		if _, ok := err.(gophercloud.ErrDefault404); ok {
-			switch target {
-			case "denied":
-				return nil
-			default:
-				return fmt.Errorf("Error: access %s not found: %s", id, err)
-			}
-		}
-		return fmt.Errorf("Error waiting for access %s to become %s: %s", id, target, err)
-	}
-
-	return nil
-}
-
-func resourceSFV2AccessRefreshFunc(sfsClient *gophercloud.ServiceClient, shareID string, id string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
-		if err != nil {
-			return nil, "", err
-		}
-		for _, v := range access {
-			if v.ID == id {
-				return v, v.State, nil
-			}
-		}
-		return nil, "", gophercloud.ErrDefault404{}
-	}
+	return nil, fmt.Errorf("[DEBUG] Unable to find openstack_sharedfilesystem_share_access_v2 %s", accessID)
 }

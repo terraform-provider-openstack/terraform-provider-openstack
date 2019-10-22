@@ -118,7 +118,7 @@ func testAccCheckSFSV2ShareAccessExists(n string, share *shares.AccessRight) res
 			}
 		}
 
-		sfsClient.Microversion = minManilaMicroversion
+		sfsClient.Microversion = sharedFilesystemV2MinMicroversion
 
 		access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
 		if err != nil {

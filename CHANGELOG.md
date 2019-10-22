@@ -1,9 +1,16 @@
 ## 1.24.0 (Unreleased)
 
+FEATURES
+
+* __New Resource__: `openstack_networking_quotas_v2` [GH-907]
+
 IMPROVEMENTS
 
 * Added `tags` argument/attribute and `all_tags` for `openstack_compute_instance_v2` resource [GH-899]
-* Migrated from Terraform in-tree `helper/*` SDK to the separate `terraform-plugin-sdk` v1.0.0 [GH-880]
+* Added `UDP` protocol support for `openstack_lb_pool_v2`, `openstack_lb_monitor_v2`, `openstack_lb_listener_v2` resources. It is available only when `use_octavia` is set to `true` [GH-896]
+* Added ability to reuse the existing token when scope parameters are not defined [GH-912]
+* Migrated from Terraform in-tree `helper/*` SDK to the separate `terraform-plugin-sdk v1.1.1` [GH-880], [GH-909]
+* Migrated to use the common JSON debugging implementation from the upstream `gophercloud/utils` library [GH-910]
 * Added web-download import method to `openstack_images_image_v2` resource [GH-888]
 
 BUG FIXES
@@ -13,6 +20,8 @@ BUG FIXES
 * Fixed the bug with 404 errors handling while getting statuses tree in `openstack_lb_loadbalancer_v2` resource [GH-883]
 * Fixed the bug where is was unable to remove TLS references in `openstack_lb_listener_v2` resource [GH-891]
 * Fixed the bug where empty `scheduler_hints` list caused a panic in `openstack_compute_instance_v2` resource [GH-885]
+* Fixed the bug with usage of the wrong `flavor` argument instead of `flavor_id` for `openstack_lb_loadbalancer_v2` resource. Old argument has never worked. [GH-904]
+* Fixed the documentation bug with usage of `type` and `name` of the `persistence` of the `lb_pool_v2` resource [GH-908]
 
 ## 1.23.0 (September 20, 2019)
 
