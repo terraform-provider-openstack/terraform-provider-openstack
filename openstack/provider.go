@@ -204,6 +204,13 @@ func Provider() terraform.ResourceProvider {
 				Description: descriptions["delayed_auth"],
 			},
 
+			"allow_reauth": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_ALLOW_REAUTH", false),
+				Description: descriptions["allow_reauth"],
+			},
+
 			"cloud": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -436,6 +443,11 @@ func init() {
 		"delayed_auth": "If set to `true`, OpenStack authorization will be perfomed,\n" +
 			"when the service provider client is called.",
 
+		"allow_reauth": "If set to `true`, OpenStack authorization will be perfomed\n" +
+			"automatically, if the initial auth token get expired. This is useful,\n" +
+			"when the token TTL is low or the overall Terraform provider execution\n" +
+			"time expected to be greater than the initial token TTL.",
+
 		"cloud": "An entry in a `clouds.yaml` file to use.",
 
 		"max_retries": "How many times HTTP connection should be retried until giving up.",
@@ -476,6 +488,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 		ApplicationCredentialSecret: d.Get("application_credential_secret").(string),
 		useOctavia:                  d.Get("use_octavia").(bool),
 		delayedAuth:                 d.Get("delayed_auth").(bool),
+		allowReauth:                 d.Get("allow_reauth").(bool),
 		MaxRetries:                  d.Get("max_retries").(int),
 		DisableNoCacheHeader:        d.Get("disable_no_cache_header").(bool),
 		terraformVersion:            terraformVersion,

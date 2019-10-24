@@ -156,6 +156,11 @@ The following arguments are supported:
 * `delayed_auth` - (Optional) If set to `true`, OpenStack authorization will be perfomed,
   when the service provider client is called.
 
+* `allow_reauth` - (Optional) If set to `true`, OpenStack authorization will be
+  perfomed automatically, if the initial auth token get expired. This is useful,
+  when the token TTL is low or the overall Terraform provider execution time
+  expected to be greater than the initial token TTL.
+
 ## Overriding Service API Endpoints
 
 There might be a situation in which you want or need to override an API endpoint
