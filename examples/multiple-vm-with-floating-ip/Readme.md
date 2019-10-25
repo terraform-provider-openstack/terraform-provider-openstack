@@ -30,7 +30,7 @@ terraform plan
 # or with specific variables
 terraform plan -var 'pool=gateway' \
                 -var 'flavor=m02.c02.d20' \
-                -var 'units=3' \
+                -var 'instance_count=3' \
                 -var 'network_name=my-network' \
                 -var 'ssh_key_file=./id_rsa_os'
 ```
@@ -43,7 +43,7 @@ terraform apply -auto-approve
 terraform apply -auto-approve \
                 -var 'pool=gateway' \
                 -var 'flavor=m02.c02.d20' \
-                -var 'units=3' \
+                -var 'instance_count=3' \
                 -var 'network_name=my-network' \
                 -var 'ssh_key_file=./id_rsa_os'
 ```
@@ -59,7 +59,7 @@ terraform destroy -force
 terraform destroy -force \
                 -var 'pool=gateway' \
                 -var 'flavor=m02.c02.d20' \
-                -var 'units=3' \
+                -var 'instance_count=3' \
                 -var 'network_name=my-network' \
                 -var 'ssh_key_file=./id_rsa_os'
 ```
