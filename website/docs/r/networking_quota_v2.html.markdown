@@ -1,14 +1,14 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_networking_quotas_v2"
-sidebar_current: "docs-openstack-resource-networking-quotas-v2"
+page_title: "OpenStack: openstack_networking_quota_v2"
+sidebar_current: "docs-openstack-resource-networking-quota-v2"
 description: |-
-  Manages a V2 quotas resource within OpenStack.
+  Manages a V2 networking quota resource within OpenStack.
 ---
 
-# openstack\_networking\_quotas\_v2
+# openstack\_networking\_quota\_v2
 
-Manages a V2 networking quotas resource within OpenStack.
+Manages a V2 networking quota resource within OpenStack.
 
 ~> **Note:** This usually requires admin privileges.
 
@@ -22,7 +22,7 @@ resource "openstack_identity_project_v2" "project_1" {
   name = project_1
 }
 
-resource "openstack_networking_quotas_v2" "quotas_1" {
+resource "openstack_networking_quota_v2" "quota_1" {
   project_id          = "${openstack_identity_project_v2.project_1.id}"
   floatingip          = 10
   network             = 4
@@ -40,39 +40,39 @@ resource "openstack_networking_quotas_v2" "quotas_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to create the quotas. If
+* `region` - (Optional) The region in which to create the quota. If
     omitted, the `region` argument of the provider is used. Changing this
-    creates new quotas.
+    creates new quota.
 
-* `project_id` - (Required) ID of the project to manage quotas. Changing this
-    creates new quotas.
+* `project_id` - (Required) ID of the project to manage quota. Changing this
+    creates new quota.
 
 * `floatingip` - (Optional) Quota value for floating IPs. Changing this updates the
-    existing quotas.
+    existing quota.
 
 * `network` - (Optional) Quota value for networks. Changing this updates the
-    existing quotas.
+    existing quota.
 
 * `port` - (Optional) Quota value for ports. Changing this updates the
-    existing quotas.
+    existing quota.
 
 * `rbac_policy` - (Optional) Quota value for RBAC policies.
-    Changing this updates the existing quotas.
+    Changing this updates the existing quota.
 
 * `router` - (Optional) Quota value for routers. Changing this updates the
-    existing quotas.
+    existing quota.
 
 * `security_group` - (Optional) Quota value for security groups. Changing
-    this updates the existing quotas.
+    this updates the existing quota.
 
 * `security_group_rule` - (Optional) Quota value for security group rules.
-    Changing this updates the existing quotas.
+    Changing this updates the existing quota.
     
 * `subnet` - (Optional) Quota value for subnets. Changing
-    this updates the existing quotas.
+    this updates the existing quota.
 
 * `subnetpool` - (Optional) Quota value for subnetpools.
-    Changing this updates the existing quotas.
+    Changing this updates the existing quota.
 
 ## Attributes Reference
 
@@ -95,5 +95,5 @@ The following attributes are exported:
 Quotas can be imported using the `project_id`, e.g.
 
 ```
-$ terraform import openstack_networking_quotas_v2.quotas_1 2a0f2240-c5e6-41de-896d-e80d97428d6b
+$ terraform import openstack_networking_quota_v2.quota_1 2a0f2240-c5e6-41de-896d-e80d97428d6b
 ```

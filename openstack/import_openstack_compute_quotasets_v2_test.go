@@ -6,8 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-func TestAccNetworkingQuotaV2_importBasic(t *testing.T) {
-	resourceName := "openstack_networking_quota_v2.quota_1"
+func TestAccComputeQuotasetV2_importBasic(t *testing.T) {
+	resourceName := "openstack_compute_quotaset_v2.quotaset_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -18,7 +18,7 @@ func TestAccNetworkingQuotaV2_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3ProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingQuotaV2_basic,
+				Config: testAccComputeQuotasetV2_basic,
 			},
 			{
 				ResourceName:      resourceName,
