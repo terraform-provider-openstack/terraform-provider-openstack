@@ -97,6 +97,26 @@ func TestAccIdentityV3ApplicationCredential_access_rules(t *testing.T) {
 						"openstack_identity_application_credential_v3.app_cred_1", "access_rules.1.method", "POST"),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_application_credential_v3.app_cred_1", "access_rules.2.method", "PUT"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.#", "3"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.0.method", "POST"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.0.path", "/v2.0/metrics"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.0.service", "monitoring"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.1.method", "PUT"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.1.path", "/v2.0/metrics"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.1.service", "monitoring"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.2.method", "GET"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.2.path", "/v2.0/metrics"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.2.service", "monitoring"),
 				),
 			},
 		},
@@ -208,7 +228,6 @@ resource "openstack_identity_application_credential_v3" "app_cred_1" {
 const testAccIdentityV3ApplicationCredential_access_rules = `
 resource "openstack_identity_application_credential_v3" "app_cred_1" {
   name        = "monitoring"
-  description = "read-only technical user"
   roles       = ["reader"]
   expires_at  = "2219-02-13T12:12:12Z"
 
@@ -228,6 +247,24 @@ resource "openstack_identity_application_credential_v3" "app_cred_1" {
     path    = "/v2.0/metrics"
     service = "monitoring"
     method  = "PUT"
+  }
+}
+
+resource "openstack_identity_application_credential_v3" "app_cred_2" {
+  name        = "monitoring2"
+  roles       = ["reader"]
+  expires_at  = "2219-02-13T12:12:12Z"
+
+  access_rules {
+    id = "${openstack_identity_application_credential_v3.app_cred_1.access_rules.1.id}"
+  }
+
+  access_rules {
+    id = "${openstack_identity_application_credential_v3.app_cred_1.access_rules.2.id}"
+  }
+
+  access_rules {
+    id = "${openstack_identity_application_credential_v3.app_cred_1.access_rules.0.id}"
   }
 }
 `

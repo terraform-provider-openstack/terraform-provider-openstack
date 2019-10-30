@@ -85,11 +85,13 @@ func resourceIdentityApplicationCredentialV3() *schema.Resource {
 						"path": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 
 						"method": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"POST", "GET", "HEAD", "PATCH", "PUT", "DELETE",
 							}, false),
@@ -98,6 +100,7 @@ func resourceIdentityApplicationCredentialV3() *schema.Resource {
 						"service": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
