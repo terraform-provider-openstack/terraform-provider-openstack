@@ -55,6 +55,30 @@ output "application_credential_secret" {
 }
 ```
 
+### Application credential with access rules
+
+~> **Note:** Application Credential access rules are supported only in Keystone
+starting from [Train](https://releases.openstack.org/train/highlights.html#keystone-identity-service) release.
+
+```hcl
+resource "openstack_identity_application_credential_v3" "monitoring" {
+  name        = "monitoring"
+  expires_at  = "2019-02-13T12:12:12Z"
+
+  access_rules {
+    path    = "/v2.0/metrics"
+    service = "monitoring"
+    method  = "GET"
+  }
+
+  access_rules {
+    path    = "/v2.0/metrics"
+    service = "monitoring"
+    method  = "PUT"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -83,10 +107,34 @@ The following arguments are supported:
     a new application credential. Changing this creates a new application
     credential.
 
+* `access_rules` - (Optional) A list of one or more access rules, which this
+    application credential allows to follow. The structure is described below.
+    Changing this creates a new application credential.
+
 * `expires_at` - (Optional) The expiration time of the application credential
     in the RFC3339 timestamp format (e.g. `2019-03-09T12:58:49Z`). If omitted,
     an application credential will never expire. Changing this creates a new
     application credential.
+
+The `access_rules` block supports:
+
+* `id` - (Optional) The ID of the existing access rule. The access rule ID of
+  another application credential can be provided.
+
+* `path` - (Optional) The API path that the application credential is permitted
+  to access. May use named wildcards such as **{tag}** or the unnamed wildcard
+  **\*** to match against any string in the path up to a **/**, or the recursive
+  wildcard **\*\*** to include **/** in the matched path.
+
+* `service` - (Optional) The service type identifier for the service that the
+  application credential is granted to access. Must be a service type that is
+  listed in the service catalog and not a code name for a service. E.g.
+  **identity**, **compute**, **volumev3**, **image**, **network**,
+  **object-store**, **sharev2**, **dns**, **key-manager**, **monitoring**, etc.
+
+* `method` - (Optional) The request method that the application credential is
+  permitted to use for a given API endpoint. Allowed values: `POST`, `GET`,
+  `HEAD`, `PATCH`, `PUT` and `DELETE`.
 
 ## Attributes Reference
 
@@ -98,6 +146,7 @@ The following attributes are exported:
 * `unrestricted` - See Argument Reference above.
 * `secret` - See Argument Reference above.
 * `roles` - See Argument Reference above.
+* `access_rules` - See Argument Reference above.
 * `expires_at` - See Argument Reference above.
 * `project_id` - The ID of the project the application credential was created
     for and that authentication requests using this application credential will

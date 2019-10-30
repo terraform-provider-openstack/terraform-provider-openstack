@@ -55,8 +55,11 @@ type ApplicationCredential struct {
 	ExpiresAt time.Time `json:"-"`
 	// A list of access rules objects.
 	AccessRules []AccessRule `json:"access_rules,omitempty"`
+<<<<<<< HEAD
 	// Links contains referencing links to the application credential.
 	Links map[string]interface{} `json:"links"`
+=======
+>>>>>>> Identivy V3: add access rules support for application credentials
 }
 
 func (r *ApplicationCredential) UnmarshalJSON(b []byte) error {

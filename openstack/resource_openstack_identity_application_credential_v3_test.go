@@ -65,6 +65,44 @@ func TestAccIdentityV3ApplicationCredential_basic(t *testing.T) {
 	})
 }
 
+func TestAccIdentityV3ApplicationCredential_access_rules(t *testing.T) {
+	var applicationCredential applicationcredentials.ApplicationCredential
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckIdentityV3ApplicationCredentialDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIdentityV3ApplicationCredential_access_rules,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3ApplicationCredentialExists("openstack_identity_application_credential_v3.app_cred_1", &applicationCredential),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_application_credential_v3.app_cred_1", "name", &applicationCredential.Name),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_application_credential_v3.app_cred_1", "description", &applicationCredential.Description),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_1", "unrestricted", "false"),
+					resource.TestCheckResourceAttrSet(
+						"openstack_identity_application_credential_v3.app_cred_1", "secret"),
+					resource.TestCheckResourceAttrSet(
+						"openstack_identity_application_credential_v3.app_cred_1", "project_id"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_1", "expires_at", "2219-02-13T12:12:12Z"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_1", "access_rules.#", "3"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_1", "access_rules.0.method", "GET"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_1", "access_rules.1.method", "POST"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_1", "access_rules.2.method", "PUT"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckIdentityV3ApplicationCredentialDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
@@ -164,5 +202,32 @@ resource "openstack_identity_application_credential_v3" "app_cred_1" {
   description  = "wheel technical user"
   secret       = "foo"
   unrestricted = true
+}
+`
+
+const testAccIdentityV3ApplicationCredential_access_rules = `
+resource "openstack_identity_application_credential_v3" "app_cred_1" {
+  name        = "monitoring"
+  description = "read-only technical user"
+  roles       = ["reader"]
+  expires_at  = "2219-02-13T12:12:12Z"
+
+  access_rules {
+    path    = "/v2.0/metrics"
+    service = "monitoring"
+    method  = "GET"
+  }
+
+  access_rules {
+    path    = "/v2.0/metrics"
+    service = "monitoring"
+    method  = "POST"
+  }
+
+  access_rules {
+    path    = "/v2.0/metrics"
+    service = "monitoring"
+    method  = "PUT"
+  }
 }
 `
