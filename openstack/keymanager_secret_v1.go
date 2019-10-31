@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/acls"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -124,4 +125,28 @@ func resourceSecretV1PayloadBase64CustomizeDiff(diff *schema.ResourceDiff) error
 	}
 
 	return nil
+}
+
+func flattenKeyManagerV1ACLs(acl *acls.ACL) []map[string]map[string]interface{} {
+	m := make(map[string]map[string]interface{})
+
+	// defaults
+	m["read"]["project_access"] = true
+	m["read"]["users"] = []string{}
+	m["write"]["project_access"] = true
+	m["write"]["users"] = []string{}
+
+	if acl != nil {
+		v := *acl
+		if v, ok := v["read"]; ok {
+			m["read"]["project_access"] = v.ProjectAccess
+			m["read"]["users"] = v.Users
+		}
+		if v, ok := v["write"]; ok {
+			m["write"]["project_access"] = v.ProjectAccess
+			m["write"]["users"] = v.Users
+		}
+	}
+
+	return []map[string]map[string]interface{}{m}
 }

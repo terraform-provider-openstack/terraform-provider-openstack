@@ -136,16 +136,42 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"project_access": {
-							Type:     schema.TypeBool,
+						"read": {
+							Type:     schema.TypeList, // the list, returned by Barbican, is always ordered
 							Optional: true,
-							Default:  true,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"project_access": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Default:  true, // defaults to true in OpenStack Barbican code
+									},
+									"users": {
+										Type:     schema.TypeSet,
+										Optional: true,
+										Elem:     &schema.Schema{Type: schema.TypeString},
+									},
+								},
+							},
 						},
-						"users": {
-							Type:     schema.TypeSet,
+						"write": {
+							Type:     schema.TypeList, // the list, returned by Barbican, is always ordered
 							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"project_access": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Default:  true, // defaults to true in OpenStack Barbican code
+									},
+									"users": {
+										Type:     schema.TypeSet,
+										Optional: true,
+										Elem:     &schema.Schema{Type: schema.TypeString},
+									},
+								},
 							},
 						},
 					},
@@ -239,11 +265,18 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 
 	d.SetId(uuid)
 
-	// set the acl
-	setOpts := expandKeyManagerV1ACLs(d.Get("acl"))
+	// set the read acl
+	setOpts := expandKeyManagerV1ACLs(d.Get("acl"), false)
 	_, err = acls.SetSecretACL(kmClient, uuid, setOpts).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error settings ACLs for the openstack_keymanager_secret_v1")
+		return CheckDeleted(d, err, "Error settings read ACLs for the openstack_keymanager_secret_v1")
+	}
+
+	// set the write acl
+	setOpts = expandKeyManagerV1ACLs(d.Get("acl"), true)
+	_, err = acls.SetSecretACL(kmClient, uuid, setOpts).Extract()
+	if err != nil {
+		return CheckDeleted(d, err, "Error settings write ACLs for the openstack_keymanager_secret_v1")
 	}
 
 	// set the payload
@@ -294,50 +327,6 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 	d.Partial(false)
 
 	return resourceKeyManagerSecretV1Read(d, meta)
-}
-
-func expandKeyManagerV1ACLs(v interface{}) acls.SetOpts {
-	var res acls.SetOpts
-	users := []string{}
-	res.Type = "read"
-
-	if v, ok := v.([]interface{}); ok {
-		for _, v := range v {
-			if v, ok := v.(map[string]interface{}); ok {
-				if v, ok := v["project_access"]; ok {
-					if v, ok := v.(bool); ok {
-						res.ProjectAccess = &v
-					}
-				}
-				if v, ok := v["users"]; ok {
-					if v, ok := v.(*schema.Set); ok {
-						for _, v := range v.List() {
-							users = append(users, v.(string))
-						}
-					}
-				}
-			}
-		}
-	}
-
-	res.Users = &users
-
-	return res
-}
-
-func flattenKeyManagerV1ACLs(acl *acls.ACL) []map[string]interface{} {
-	m := make(map[string]interface{})
-
-	// defaults
-	m["project_access"] = true
-	m["users"] = []string{}
-
-	if acl != nil {
-		m["project_access"] = (*acl)["read"].ProjectAccess
-		m["users"] = (*acl)["read"].Users
-	}
-
-	return []map[string]interface{}{m}
 }
 
 func resourceKeyManagerSecretV1Read(d *schema.ResourceData, meta interface{}) error {
@@ -403,11 +392,19 @@ func resourceKeyManagerSecretV1Update(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error creating OpenStack barbican client: %s", err)
 	}
 
-	if d.HasChange("acl") {
-		updateOpts := expandKeyManagerV1ACLs(d.Get("acl"))
+	if d.HasChange("acl.0.read") {
+		updateOpts := expandKeyManagerV1ACLs(d.Get("acl"), false)
 		_, err := acls.UpdateSecretACL(kmClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_keymanager_secret_v1 %s acl: %s", d.Id(), err)
+			return fmt.Errorf("Error updating openstack_keymanager_secret_v1 %s read acl: %s", d.Id(), err)
+		}
+	}
+
+	if d.HasChange("acl.0.write") {
+		updateOpts := expandKeyManagerV1ACLs(d.Get("acl"), true)
+		_, err := acls.UpdateSecretACL(kmClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating openstack_keymanager_secret_v1 %s write acl: %s", d.Id(), err)
 		}
 	}
 
@@ -503,4 +500,41 @@ func resourceKeyManagerSecretV1Delete(d *schema.ResourceData, meta interface{}) 
 	}
 
 	return nil
+}
+
+func expandKeyManagerV1ACLs(v interface{}, write bool) acls.SetOpts {
+	var res acls.SetOpts
+	users := []string{}
+	if write {
+		res.Type = "write"
+	} else {
+		res.Type = "read"
+	}
+
+	if v, ok := v.([]interface{}); ok {
+		for _, v := range v {
+			if v, ok := v.(map[string]interface{}); ok {
+				if v, ok := v[res.Type]; ok {
+					if v, ok := v.(map[string]interface{}); ok {
+						if v, ok := v["project_access"]; ok {
+							if v, ok := v.(bool); ok {
+								res.ProjectAccess = &v
+							}
+						}
+						if v, ok := v["users"]; ok {
+							if v, ok := v.(*schema.Set); ok {
+								for _, v := range v.List() {
+									users = append(users, v.(string))
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	res.Users = &users
+
+	return res
 }

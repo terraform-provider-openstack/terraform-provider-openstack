@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/acls"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -81,6 +82,49 @@ func dataSourceKeyManagerSecretV1() *schema.Resource {
 			},
 
 			// computed
+			"acl": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"read": {
+							Type:     schema.TypeList, // the list, returned by Barbican, is always ordered
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"project_access": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									"users": {
+										Type:     schema.TypeSet,
+										Computed: true,
+										Elem:     &schema.Schema{Type: schema.TypeString},
+									},
+								},
+							},
+						},
+						"write": {
+							Type:     schema.TypeList, // the list, returned by Barbican, is always ordered
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"project_access": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									"users": {
+										Type:     schema.TypeSet,
+										Computed: true,
+										Elem:     &schema.Schema{Type: schema.TypeString},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+
 			"secret_ref": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -218,6 +262,12 @@ func dataSourceKeyManagerSecretV1Read(d *schema.ResourceData, meta interface{}) 
 	} else {
 		d.Set("expiration", secret.Expiration.Format(time.RFC3339))
 	}
+
+	acl, err := acls.GetSecretACL(kmClient, d.Id()).Extract()
+	if err != nil {
+		log.Printf("[DEBUG] Unable to get acls: %s", err)
+	}
+	d.Set("acl", flattenKeyManagerV1ACLs(acl))
 
 	// Set the region
 	d.Set("region", GetRegion(d, config))
