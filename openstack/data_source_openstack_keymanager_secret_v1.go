@@ -21,7 +21,7 @@ var validDateFilters = []string{
 }
 
 func dataSourceKeyManagerSecretV1() *schema.Resource {
-	return &schema.Resource{
+	ret := &schema.Resource{
 		Read: dataSourceKeyManagerSecretV1Read,
 
 		Schema: map[string]*schema.Schema{
@@ -85,44 +85,6 @@ func dataSourceKeyManagerSecretV1() *schema.Resource {
 			"acl": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"read": {
-							Type:     schema.TypeList, // the list, returned by Barbican, is always ordered
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"project_access": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"users": {
-										Type:     schema.TypeSet,
-										Computed: true,
-										Elem:     &schema.Schema{Type: schema.TypeString},
-									},
-								},
-							},
-						},
-						"write": {
-							Type:     schema.TypeList, // the list, returned by Barbican, is always ordered
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"project_access": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"users": {
-										Type:     schema.TypeSet,
-										Computed: true,
-										Elem:     &schema.Schema{Type: schema.TypeString},
-									},
-								},
-							},
-						},
-					},
-				},
 			},
 
 			"secret_ref": {
@@ -161,8 +123,9 @@ func dataSourceKeyManagerSecretV1() *schema.Resource {
 			},
 
 			"payload": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 
 			"payload_content_type": {
@@ -181,6 +144,16 @@ func dataSourceKeyManagerSecretV1() *schema.Resource {
 			},
 		},
 	}
+
+	elem := &schema.Resource{
+		Schema: make(map[string]*schema.Schema),
+	}
+	for _, aclOp := range aclOperations {
+		elem.Schema[aclOp] = aclSchema
+	}
+	ret.Schema["acl"].Elem = elem
+
+	return ret
 }
 
 func dataSourceKeyManagerSecretV1Read(d *schema.ResourceData, meta interface{}) error {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/acls"
@@ -12,6 +13,38 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
+
+// so far only "read" is supported
+var aclOperations = []string{"read"}
+
+var aclSchema = &schema.Schema{
+	Type:     schema.TypeList, // the list, returned by Barbican, is always ordered
+	Optional: true,
+	Computed: true,
+	MaxItems: 1,
+	Elem: &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"project_access": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true, // defaults to true in OpenStack Barbican code
+			},
+			"users": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	},
+}
 
 func keyManagerSecretV1WaitForSecretDeletion(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
@@ -127,26 +160,81 @@ func resourceSecretV1PayloadBase64CustomizeDiff(diff *schema.ResourceDiff) error
 	return nil
 }
 
-func flattenKeyManagerV1ACLs(acl *acls.ACL) []map[string]map[string]interface{} {
-	m := make(map[string]map[string]interface{})
+func expandKeyManagerV1ACLsRaw(v interface{}, aclType string) acls.SetOpts {
+	var res acls.SetOpts
 
-	// defaults
-	m["read"]["project_access"] = true
-	m["read"]["users"] = []string{}
-	m["write"]["project_access"] = true
-	m["write"]["users"] = []string{}
+	if v, ok := v.(map[string]interface{}); ok {
+		if v, ok := v[aclType]; ok {
+			if v, ok := v.([]interface{}); ok {
+				for _, v := range v {
+					if v, ok := v.(map[string]interface{}); ok {
+						if v, ok := v["project_access"]; ok {
+							if v, ok := v.(bool); ok {
+								res.ProjectAccess = &v
+							}
+						}
+						if v, ok := v["users"]; ok {
+							if v, ok := v.(*schema.Set); ok {
+								for _, v := range v.List() {
+									if res.Users == nil {
+										users := []string{}
+										res.Users = &users
+									}
+									*res.Users = append(*res.Users, v.(string))
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return res
+}
+
+func expandKeyManagerV1ACLs(v interface{}, aclType string) acls.SetOpts {
+	var res acls.SetOpts
+	users := []string{}
+	iTrue := true // set default value to true
+	res.ProjectAccess = &iTrue
+	res.Type = aclType
+
+	raw := expandKeyManagerV1ACLsRaw(v, aclType)
+	if raw.ProjectAccess != nil {
+		res.ProjectAccess = raw.ProjectAccess
+	}
+	if raw.Users != nil {
+		res.Users = raw.Users
+	} else {
+		res.Users = &users
+	}
+
+	return res
+}
+
+func flattenKeyManagerV1ACLs(acl *acls.ACL) []map[string][]map[string]interface{} {
+	var m []map[string][]map[string]interface{}
 
 	if acl != nil {
-		v := *acl
-		if v, ok := v["read"]; ok {
-			m["read"]["project_access"] = v.ProjectAccess
-			m["read"]["users"] = v.Users
-		}
-		if v, ok := v["write"]; ok {
-			m["write"]["project_access"] = v.ProjectAccess
-			m["write"]["users"] = v.Users
+		allAcls := *acl
+		for _, aclOp := range aclOperations {
+			if v, ok := allAcls[aclOp]; ok {
+				if m == nil {
+					m = make([]map[string][]map[string]interface{}, 1)
+					m[0] = make(map[string][]map[string]interface{})
+				}
+				if m[0][aclOp] == nil {
+					m[0][aclOp] = make([]map[string]interface{}, 1)
+				}
+				m[0][aclOp][0] = map[string]interface{}{
+					"project_access": v.ProjectAccess,
+					"users":          v.Users,
+					"created_at":     v.Created.UTC().Format(time.RFC3339),
+					"updated_at":     v.Updated.UTC().Format(time.RFC3339),
+				}
+			}
 		}
 	}
 
-	return []map[string]map[string]interface{}{m}
+	return m
 }
