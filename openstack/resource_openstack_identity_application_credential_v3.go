@@ -71,7 +71,7 @@ func resourceIdentityApplicationCredentialV3() *schema.Resource {
 			},
 
 			"access_rules": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: true,
 				Elem: &schema.Resource{
@@ -138,7 +138,7 @@ func resourceIdentityApplicationCredentialV3Create(d *schema.ResourceData, meta 
 		Description:  d.Get("description").(string),
 		Unrestricted: d.Get("unrestricted").(bool),
 		Roles:        expandIdentityApplicationCredentialRolesV3(d.Get("roles").(*schema.Set).List()),
-		AccessRules:  expandIdentityApplicationCredentialAccessRulesV3(d.Get("access_rules").([]interface{})),
+		AccessRules:  expandIdentityApplicationCredentialAccessRulesV3(d.Get("access_rules").(*schema.Set).List()),
 		ExpiresAt:    d.Get("expires_at").(string),
 	}
 
@@ -229,6 +229,6 @@ func resourceIdentityApplicationCredentialV3Delete(d *schema.ResourceData, meta 
 	}
 
 	// cleanup access rules
-	accessRules := expandIdentityApplicationCredentialAccessRulesV3(d.Get("access_rules").([]interface{}))
+	accessRules := expandIdentityApplicationCredentialAccessRulesV3(d.Get("access_rules").(*schema.Set).List())
 	return applicationCredentialCleanupAccessRulesV3(identityClient, user.ID, d.Id(), accessRules)
 }

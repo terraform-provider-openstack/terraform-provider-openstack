@@ -107,9 +107,9 @@ The following arguments are supported:
     a new application credential. Changing this creates a new application
     credential.
 
-* `access_rules` - (Optional) A list of one or more access rules, which this
-    application credential allows to follow. The structure is described below.
-    Changing this creates a new application credential.
+* `access_rules` - (Optional) A collection of one or more access rules, which
+    this application credential allows to follow. The structure is described
+    below. Changing this creates a new application credential.
 
 * `expires_at` - (Optional) The expiration time of the application credential
     in the RFC3339 timestamp format (e.g. `2019-03-09T12:58:49Z`). If omitted,

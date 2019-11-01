@@ -24,6 +24,19 @@ func expandIdentityApplicationCredentialRolesV3(roles []interface{}) []applicati
 	return res
 }
 
+func flattenIdentityApplicationCredentialAccessRulesV3(rules []applicationcredentials.AccessRule) []map[string]string {
+	res := make([]map[string]string, len(rules))
+	for i, v := range rules {
+		res[i] = map[string]string{
+			"id":      v.ID,
+			"path":    v.Path,
+			"method":  v.Method,
+			"service": v.Service,
+		}
+	}
+	return res
+}
+
 func expandIdentityApplicationCredentialAccessRulesV3(rules []interface{}) []applicationcredentials.AccessRule {
 	var res []applicationcredentials.AccessRule
 	for _, v := range rules {
@@ -36,19 +49,6 @@ func expandIdentityApplicationCredentialAccessRulesV3(rules []interface{}) []app
 				Service: rule["service"].(string),
 			},
 		)
-	}
-	return res
-}
-
-func flattenIdentityApplicationCredentialAccessRulesV3(rules []applicationcredentials.AccessRule) []map[string]string {
-	res := make([]map[string]string, len(rules))
-	for i, v := range rules {
-		res[i] = map[string]string{
-			"id":      v.ID,
-			"path":    v.Path,
-			"method":  v.Method,
-			"service": v.Service,
-		}
 	}
 	return res
 }

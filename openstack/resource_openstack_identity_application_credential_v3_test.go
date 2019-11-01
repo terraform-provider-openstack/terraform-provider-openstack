@@ -92,31 +92,9 @@ func TestAccIdentityV3ApplicationCredential_access_rules(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_identity_application_credential_v3.app_cred_1", "access_rules.#", "3"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_application_credential_v3.app_cred_1", "access_rules.0.method", "GET"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_application_credential_v3.app_cred_1", "access_rules.1.method", "POST"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_application_credential_v3.app_cred_1", "access_rules.2.method", "PUT"),
-					resource.TestCheckResourceAttr(
 						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.#", "3"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.0.method", "POST"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.0.path", "/v2.0/metrics"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.0.service", "monitoring"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.1.method", "PUT"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.1.path", "/v2.0/metrics"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.1.service", "monitoring"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.2.method", "GET"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.2.path", "/v2.0/metrics"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.2.service", "monitoring"),
+					resource.TestCheckResourceAttrPair(
+						"openstack_identity_application_credential_v3.app_cred_1", "access_rules", "openstack_identity_application_credential_v3.app_cred_2", "access_rules"),
 				),
 			},
 		},
