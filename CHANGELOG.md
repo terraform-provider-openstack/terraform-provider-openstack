@@ -1,7 +1,8 @@
-## 1.24.1 (Unreleased)
+## 1.25.0 (Unreleased)
 
 IMPROVEMENTS
 
+* Added `allow_reauth` optional boolean flag to the provided configuration block. This flag allows to automatically re-issue a new auth token if the initial token was expired [GH-918]
 * Added web-download import method to `openstack_images_image_v2` resource [GH-888]
 
 ## 1.24.0 (October 22, 2019)
@@ -16,7 +17,7 @@ IMPROVEMENTS
 * Added `tags` argument/attribute and `all_tags` for `openstack_compute_instance_v2` resource ([#899](https://github.com/terraform-providers/terraform-provider-openstack/issues/899))
 * Added `UDP` protocol support for `openstack_lb_pool_v2`, `openstack_lb_monitor_v2`, `openstack_lb_listener_v2` resources. It is available only when `use_octavia` is set to `true` ([#896](https://github.com/terraform-providers/terraform-provider-openstack/issues/896))
 * Added ability to reuse the existing token when scope parameters are not defined ([#912](https://github.com/terraform-providers/terraform-provider-openstack/issues/912))
-* Migrated from Terraform in-tree `helper/*` SDK to the separate `terraform-plugin-sdk v1.1.1` ([#880](https://github.com/terraform-providers/terraform-provider-openstack/issues/880)], [[#909](https://github.com/terraform-providers/terraform-provider-openstack/issues/909))
+* Migrated from Terraform in-tree `helper/*` SDK to the separate `terraform-plugin-sdk v1.1.1` ([#880](https://github.com/terraform-providers/terraform-provider-openstack/issues/880)), ([#909](https://github.com/terraform-providers/terraform-provider-openstack/issues/909))
 * Migrated to use the common JSON debugging implementation from the upstream `gophercloud/utils` library ([#910](https://github.com/terraform-providers/terraform-provider-openstack/issues/910))
 
 BUG FIXES

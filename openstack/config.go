@@ -49,6 +49,7 @@ type Config struct {
 	DisableNoCacheHeader        bool
 
 	delayedAuth   bool
+	allowReauth   bool
 	OsClient      *gophercloud.ProviderClient
 	authOpts      *gophercloud.AuthOptions
 	authenticated bool
@@ -146,6 +147,9 @@ func (c *Config) LoadAndValidate() error {
 	if err != nil {
 		return err
 	}
+
+	log.Printf("[DEBUG] OpenStack allowReauth: %t", c.allowReauth)
+	ao.AllowReauth = c.allowReauth
 
 	client, err := openstack.NewClient(ao.IdentityEndpoint)
 	if err != nil {
