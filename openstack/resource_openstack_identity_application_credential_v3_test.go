@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
 	"testing"
 
@@ -66,7 +67,7 @@ func TestAccIdentityV3ApplicationCredential_basic(t *testing.T) {
 }
 
 func TestAccIdentityV3ApplicationCredential_access_rules(t *testing.T) {
-	var applicationCredential applicationcredentials.ApplicationCredential
+	var ac1, ac2 applicationcredentials.ApplicationCredential
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -76,11 +77,12 @@ func TestAccIdentityV3ApplicationCredential_access_rules(t *testing.T) {
 			{
 				Config: testAccIdentityV3ApplicationCredential_access_rules,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3ApplicationCredentialExists("openstack_identity_application_credential_v3.app_cred_1", &applicationCredential),
+					testAccCheckIdentityV3ApplicationCredentialExists("openstack_identity_application_credential_v3.app_cred_1", &ac1),
+					testAccCheckIdentityV3ApplicationCredentialExists("openstack_identity_application_credential_v3.app_cred_1", &ac2),
 					resource.TestCheckResourceAttrPtr(
-						"openstack_identity_application_credential_v3.app_cred_1", "name", &applicationCredential.Name),
+						"openstack_identity_application_credential_v3.app_cred_1", "name", &ac1.Name),
 					resource.TestCheckResourceAttrPtr(
-						"openstack_identity_application_credential_v3.app_cred_1", "description", &applicationCredential.Description),
+						"openstack_identity_application_credential_v3.app_cred_1", "description", &ac2.Description),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_application_credential_v3.app_cred_1", "unrestricted", "false"),
 					resource.TestCheckResourceAttrSet(
@@ -93,8 +95,7 @@ func TestAccIdentityV3ApplicationCredential_access_rules(t *testing.T) {
 						"openstack_identity_application_credential_v3.app_cred_1", "access_rules.#", "3"),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.#", "3"),
-					resource.TestCheckResourceAttrPair(
-						"openstack_identity_application_credential_v3.app_cred_1", "access_rules", "openstack_identity_application_credential_v3.app_cred_2", "access_rules"),
+					testAccCheckIdentityV3ApplicationCredentialAccessRulesEqual(&ac1, &ac2),
 				),
 			},
 		},
@@ -182,6 +183,15 @@ func testAccCheckIdentityV3ApplicationCredentialRoleNameExists(role string, appl
 			return nil
 		}
 		return fmt.Errorf("The %s role was not found in %+q", role, roles)
+	}
+}
+
+func testAccCheckIdentityV3ApplicationCredentialAccessRulesEqual(ac1, ac2 *applicationcredentials.ApplicationCredential) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if !reflect.DeepEqual(ac1.AccessRules, ac2.AccessRules) {
+			return fmt.Errorf("AccessRules are not equal: %v != %v", ac1.AccessRules, ac2.AccessRules)
+		}
+		return nil
 	}
 }
 
