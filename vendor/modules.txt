@@ -75,7 +75,11 @@ github.com/google/go-cmp/cmp/internal/value
 github.com/google/uuid
 # github.com/googleapis/gax-go/v2 v2.0.5
 github.com/googleapis/gax-go/v2
+<<<<<<< HEAD
 # github.com/gophercloud/gophercloud v0.6.1-0.20191127023939-978be3847c66
+=======
+# github.com/gophercloud/gophercloud v0.6.1-0.20191101230605-d7ebd7045c19
+>>>>>>> Bump gophercloud
 github.com/gophercloud/gophercloud
 github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/quotasets
 github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions
