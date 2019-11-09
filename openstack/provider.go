@@ -488,7 +488,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 		ApplicationCredentialSecret: d.Get("application_credential_secret").(string),
 		useOctavia:                  d.Get("use_octavia").(bool),
 		delayedAuth:                 d.Get("delayed_auth").(bool),
-		allowReauth:                 d.Get("allow_reauth").(bool),
+		AllowReauth:                 d.Get("allow_reauth").(bool),
 		MaxRetries:                  d.Get("max_retries").(int),
 		DisableNoCacheHeader:        d.Get("disable_no_cache_header").(bool),
 		terraformVersion:            terraformVersion,
