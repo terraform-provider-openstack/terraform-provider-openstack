@@ -92,6 +92,7 @@ func resourceNetworkingRouterV2() *schema.Resource {
 						"ip_address": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
