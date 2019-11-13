@@ -4,6 +4,10 @@ IMPROVEMENTS
 
 * Added `allow_reauth` optional boolean flag to the provided configuration block. This flag allows to automatically re-issue a new auth token if the initial token was expired [GH-918]
 
+BUG FIXES
+
+* Fixed the bug where empty `external_fixed_ips.ip_address` of `openstack_networking_router_v2` caused errors [GH-628] 
+
 ## 1.24.0 (October 22, 2019)
 
 FEATURES
