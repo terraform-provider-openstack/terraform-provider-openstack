@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
