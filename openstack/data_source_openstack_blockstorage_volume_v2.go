@@ -1,7 +1,6 @@
 package openstack
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 
@@ -41,7 +40,7 @@ func dataSourceBlockStorageVolumeV2() *schema.Resource {
 
 			// Computed values
 			"bootable": {
-				Type:     schema.TypeBool,
+				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
@@ -113,10 +112,8 @@ func dataSourceBlockStorageSnapshotV2Volume(d *schema.ResourceData, volume volum
 	d.Set("source_volume_id", volume.SourceVolID)
 
 	if err := d.Set("metadata", volume.Metadata); err != nil {
-		log.Printf("[DEBUG] Unable to set metadata for snapshot %s: %s", volume.ID, err)
+		log.Printf("[DEBUG] Unable to set metadata for volume %s: %s", volume.ID, err)
 	}
 
-	b, err := json.Marshal(d.State())
-	log.Printf("[DEBUG] Unable to set metadata for snapshot %v, %v", string(b), err)
 	return nil
 }
