@@ -14,7 +14,7 @@ Use this data source to get information about an existing volume.
 
 ```hcl
 data "openstack_blockstorage_volume_v2" "volume_1" {
-  name        = "volume_1"
+  name = "volume_1"
 }
 ```
 
