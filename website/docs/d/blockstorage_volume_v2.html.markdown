@@ -39,6 +39,6 @@ are exported:
 * `status` - See Argument Reference above.
 * `metadata` - See Argument Reference above.
 * `volume_type` - The type of the volume.
-* `bootable` - Indicates if the volume is bootable..
-* `size` - The size of the volume.
+* `bootable` - Indicates if the volume is bootable.
+* `size` - The size of the volume in GBs.
 * `source_volume_id` - The ID of the volume from which the current volume was created.

@@ -70,13 +70,9 @@ func dataSourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
-	m := make(map[string]string)
-	for key, val := range d.Get("metadata").(map[string]interface{}) {
-		m[key] = val.(string)
-	}
 
 	listOpts := volumes.ListOpts{
-		Metadata: m,
+		Metadata: expandToMapStringString(d.Get("metadata").(map[string]interface{})),
 		Name:     d.Get("name").(string),
 		Status:   d.Get("status").(string),
 	}
@@ -92,7 +88,7 @@ func dataSourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}
 	}
 
 	if len(allVolumes) > 1 {
-		return fmt.Errorf("Your openstack_blockstorage_volume_v2 query returned multiple results for your query.")
+		return fmt.Errorf("Your openstack_blockstorage_volume_v2 query returned multiple results.")
 	}
 
 	if len(allVolumes) < 1 {
