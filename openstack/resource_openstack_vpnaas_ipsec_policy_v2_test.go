@@ -113,7 +113,7 @@ func TestAccIPSecPolicyV2_withLifetimeUpdate(t *testing.T) {
 
 func testAccCheckIPSecPolicyV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -144,7 +144,7 @@ func testAccCheckIPSecPolicyV2Exists(n string, policy *ipsecpolicies.Policy) res
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}

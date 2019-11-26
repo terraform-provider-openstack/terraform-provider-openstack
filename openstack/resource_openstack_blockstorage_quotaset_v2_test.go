@@ -103,7 +103,7 @@ func testAccCheckBlockStorageQuotasetV2Exists(n string, quotaset *quotasets.Quot
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.blockStorageV2Client(OS_REGION_NAME)
+		blockStorageClient, err := config.BlockStorageV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}

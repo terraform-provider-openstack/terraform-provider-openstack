@@ -85,7 +85,7 @@ func TestAccComputeV2ServerGroup_soft_affinity(t *testing.T) {
 
 func testAccCheckComputeV2ServerGroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.computeV2Client(OS_REGION_NAME)
+	computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -116,7 +116,7 @@ func testAccCheckComputeV2ServerGroupExists(n string, kp *servergroups.ServerGro
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}

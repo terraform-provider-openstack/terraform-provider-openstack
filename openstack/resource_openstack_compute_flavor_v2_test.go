@@ -79,7 +79,7 @@ func TestAccComputeV2Flavor_extraSpecs(t *testing.T) {
 
 func testAccCheckComputeV2FlavorDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.computeV2Client(OS_REGION_NAME)
+	computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -110,7 +110,7 @@ func testAccCheckComputeV2FlavorExists(n string, flavor *flavors.Flavor) resourc
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
