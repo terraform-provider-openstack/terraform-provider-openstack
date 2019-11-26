@@ -274,7 +274,7 @@ resource "openstack_networking_subnet_v2" "subnet_2" {
   name = "subnet_2"
   cidr = "192.168.198.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = "${openstack_networking_network_v2.network_2.id}"
 }
 
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
