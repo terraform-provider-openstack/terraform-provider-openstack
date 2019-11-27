@@ -13,7 +13,7 @@ import (
 
 func testAccCheckLBV2MembersComputeHash(members *[]pools.Member, weight string, address string, idx *int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		membersResource := resourceMembersV2().Schema["members"].Elem.(*schema.Resource)
+		membersResource := resourceMembersV2().Schema["member"].Elem.(*schema.Resource)
 		f := schema.HashResource(membersResource)
 
 		for _, m := range flattenLBMembersV2(*members) {
