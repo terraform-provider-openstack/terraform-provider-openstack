@@ -70,6 +70,10 @@ attributes are exported:
 
 * `node_count` - The number of nodes for the cluster.
 
+* `fixed_network` - The fixed network that is attached to the cluster.
+
+* `fixed_subnet` - The fixed subnet that is attached to the cluster.
+
 * `master_addresses` - IP addresses of the master node of the cluster.
 
 * `node_addresses` - IP addresses of the node of the cluster.

@@ -75,6 +75,12 @@ The following arguments are supported:
 
 * `node_count` - (Optional) The number of nodes for the cluster. Changing this
     creates a new cluster.
+    
+* `fixed_network` - (Optional) The fixed network that will be attached to the
+    cluster. Changing this creates a new cluster.
+
+* `fixed_subnet` - (Optional) The fixed subnet that will be attached to the
+    cluster. Changing this creates a new cluster.
 
 ## Attributes reference
 
@@ -98,6 +104,8 @@ The following attributes are exported:
 * `labels` - See Argument Reference above.
 * `master_count` - See Argument Reference above.
 * `node_count` - See Argument Reference above.
+* `fixed_network` - See Argument Reference above.
+* `fixed_subnet` - See Argument Reference above.
 * `master_addresses` - IP addresses of the master node of the cluster.
 * `node_addresses` - IP addresses of the node of the cluster.
 * `stack_id` - UUID of the Orchestration service stack.
