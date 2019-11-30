@@ -172,6 +172,20 @@ func resourceContainerInfraClusterV1() *schema.Resource {
 				ForceNew: false,
 				Computed: true,
 			},
+
+			"fixed_network": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
+
+			"fixed_subnet": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -211,6 +225,8 @@ func resourceContainerInfraClusterV1Create(d *schema.ResourceData, meta interfac
 		Labels:            labels,
 		MasterFlavorID:    masterFlavor,
 		Name:              d.Get("name").(string),
+		FixedNetwork:      d.Get("fixed_network").(string),
+		FixedSubnet:       d.Get("fixed_subnet").(string),
 	}
 
 	// Set int parameters that will be passed by reference.
@@ -294,6 +310,8 @@ func resourceContainerInfraClusterV1Read(d *schema.ResourceData, meta interface{
 	d.Set("master_addresses", s.MasterAddresses)
 	d.Set("node_addresses", s.NodeAddresses)
 	d.Set("stack_id", s.StackID)
+	d.Set("fixed_network", s.FixedNetwork)
+	d.Set("fixed_subnet", s.FixedSubnet)
 
 	if err := d.Set("created_at", s.CreatedAt.Format(time.RFC3339)); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_containerinfra_cluster_v1 created_at: %s", err)
