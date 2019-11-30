@@ -129,7 +129,7 @@ func TestAccFWFirewallV1_router_remove(t *testing.T) {
 
 func testAccCheckFWFirewallV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -161,7 +161,7 @@ func testAccCheckFWFirewallV1Exists(n string, firewall *Firewall) resource.TestC
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Exists) Error creating OpenStack networking client: %s", err)
 		}
@@ -204,7 +204,7 @@ func testAccCheckFWFirewallV1(n, expectedName, expectedDescription string, polic
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Exists) Error creating OpenStack networking client: %s", err)
 		}

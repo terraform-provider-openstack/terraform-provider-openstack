@@ -44,7 +44,7 @@ func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 
 func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	imageClient, err := config.imageV2Client(OS_REGION_NAME)
+	imageClient, err := config.ImageV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack Image: %s", err)
 	}

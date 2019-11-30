@@ -51,7 +51,7 @@ func testAccBlockStorageV3CreateVolumeAndSnapshot(volumeName, snapshotName strin
 		return "", "", err
 	}
 
-	bsClient, err := config.blockStorageV3Client(OS_REGION_NAME)
+	bsClient, err := config.BlockStorageV3Client(OS_REGION_NAME)
 	if err != nil {
 		return "", "", err
 	}
@@ -95,7 +95,7 @@ func testAccBlockStorageV3DeleteVolumeAndSnapshot(t *testing.T, volumeID, snapsh
 		t.Fatal(err)
 	}
 
-	bsClient, err := config.blockStorageV3Client(OS_REGION_NAME)
+	bsClient, err := config.BlockStorageV3Client(OS_REGION_NAME)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -81,7 +81,7 @@ func TestAccBlockStorageV1Volume_timeout(t *testing.T) {
 
 func testAccCheckBlockStorageV1VolumeDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	blockStorageClient, err := config.blockStorageV1Client(OS_REGION_NAME)
+	blockStorageClient, err := config.BlockStorageV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
@@ -112,7 +112,7 @@ func testAccCheckBlockStorageV1VolumeExists(n string, volume *volumes.Volume) re
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.blockStorageV1Client(OS_REGION_NAME)
+		blockStorageClient, err := config.BlockStorageV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
@@ -135,7 +135,7 @@ func testAccCheckBlockStorageV1VolumeExists(n string, volume *volumes.Volume) re
 func testAccCheckBlockStorageV1VolumeDoesNotExist(t *testing.T, n string, volume *volumes.Volume) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.blockStorageV1Client(OS_REGION_NAME)
+		blockStorageClient, err := config.BlockStorageV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}

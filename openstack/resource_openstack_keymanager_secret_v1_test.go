@@ -135,7 +135,7 @@ func TestAccUpdateSecretV1_payload(t *testing.T) {
 
 func testAccCheckSecretV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	kmClient, err := config.keyManagerV1Client(OS_REGION_NAME)
+	kmClient, err := config.KeyManagerV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 	}
@@ -166,7 +166,7 @@ func testAccCheckSecretV1Exists(n string, secret *secrets.Secret) resource.TestC
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		kmClient, err := config.keyManagerV1Client(OS_REGION_NAME)
+		kmClient, err := config.KeyManagerV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 		}
@@ -186,7 +186,7 @@ func testAccCheckSecretV1Exists(n string, secret *secrets.Secret) resource.TestC
 func testAccCheckPayloadEquals(payload string, secret *secrets.Secret) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		kmClient, err := config.keyManagerV1Client(OS_REGION_NAME)
+		kmClient, err := config.KeyManagerV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 		}
@@ -207,7 +207,7 @@ func testAccCheckPayloadEquals(payload string, secret *secrets.Secret) resource.
 func testAccCheckMetadataEquals(key string, value string, secret *secrets.Secret) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		kmClient, err := config.keyManagerV1Client(OS_REGION_NAME)
+		kmClient, err := config.KeyManagerV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}

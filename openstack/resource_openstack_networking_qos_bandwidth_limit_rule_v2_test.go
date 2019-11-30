@@ -75,7 +75,7 @@ func testAccCheckNetworkingV2QoSBandwidthLimitRuleExists(n string, rule *rules.B
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -104,7 +104,7 @@ func testAccCheckNetworkingV2QoSBandwidthLimitRuleExists(n string, rule *rules.B
 
 func testAccCheckNetworkingV2QoSBandwidthLimitRuleDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}

@@ -132,7 +132,7 @@ func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName strin
 		return nil, err
 	}
 
-	client, err := config.networkingV2Client(OS_REGION_NAME)
+	client, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func testAccCheckNetworkingV2PortSecGroupDeletePort(t *testing.T, port *ports.Po
 		return err
 	}
 
-	client, err := config.networkingV2Client(OS_REGION_NAME)
+	client, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return err
 	}
@@ -248,7 +248,7 @@ func testAccCheckNetworkingV2PortSecGroupAssociateExists(n string, port *ports.P
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}

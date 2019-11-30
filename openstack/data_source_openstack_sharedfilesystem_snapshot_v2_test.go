@@ -110,7 +110,7 @@ func testAccSFSV2SnapshotCreate(t *testing.T, snapshotName string) (*snapshots.S
 		return nil, err
 	}
 
-	client, err := config.sharedfilesystemV2Client(OS_REGION_NAME)
+	client, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +165,7 @@ func testAccSFSV2SnapshotDelete(t *testing.T, snapshot *snapshots.Snapshot) erro
 		return err
 	}
 
-	client, err := config.sharedfilesystemV2Client(OS_REGION_NAME)
+	client, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
 	if err != nil {
 		return err
 	}
