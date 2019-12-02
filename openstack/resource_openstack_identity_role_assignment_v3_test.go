@@ -45,7 +45,7 @@ func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 
 func testAccCheckIdentityV3RoleAssignmentDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.identityV3Client(OS_REGION_NAME)
+	identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -76,7 +76,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.identityV3Client(OS_REGION_NAME)
+		identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}

@@ -63,7 +63,7 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 
 func testAccCheckContainerV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	kmClient, err := config.keyManagerV1Client(OS_REGION_NAME)
+	kmClient, err := config.KeyManagerV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 	}
@@ -94,7 +94,7 @@ func testAccCheckContainerV1Exists(n string, container *containers.Container) re
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		kmClient, err := config.keyManagerV1Client(OS_REGION_NAME)
+		kmClient, err := config.KeyManagerV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 		}
