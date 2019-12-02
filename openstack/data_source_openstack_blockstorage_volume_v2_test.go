@@ -49,7 +49,7 @@ func testAccBlockStorageV2CreateVolume(volumeName string) (string, error) {
 		return "", err
 	}
 
-	bsClient, err := config.blockStorageV2Client(OS_REGION_NAME)
+	bsClient, err := config.BlockStorageV2Client(OS_REGION_NAME)
 	if err != nil {
 		return "", err
 	}
@@ -78,7 +78,7 @@ func testAccBlockStorageV2DeleteVolume(t *testing.T, volumeID string) {
 		t.Fatal(err)
 	}
 
-	bsClient, err := config.blockStorageV2Client(OS_REGION_NAME)
+	bsClient, err := config.BlockStorageV2Client(OS_REGION_NAME)
 	if err != nil {
 		t.Fatal(err)
 	}
