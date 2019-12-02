@@ -95,10 +95,10 @@ func dataSourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("Your openstack_blockstorage_volume_v2 query returned no results.")
 	}
 
-	return dataSourceBlockStorageSnapshotV2Volume(d, allVolumes[0])
+	return dataSourceBlockStorageVolumeV2Attributes(d, allVolumes[0])
 }
 
-func dataSourceBlockStorageSnapshotV2Volume(d *schema.ResourceData, volume volumes.Volume) error {
+func dataSourceBlockStorageVolumeV2Attributes(d *schema.ResourceData, volume volumes.Volume) error {
 	d.SetId(volume.ID)
 	d.Set("name", volume.Name)
 	d.Set("status", volume.Status)
