@@ -112,7 +112,7 @@ func TestAccSFSV2Share_update(t *testing.T) {
 
 func testAccCheckSFSV2ShareDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	sfsClient, err := config.sharedfilesystemV2Client(OS_REGION_NAME)
+	sfsClient, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
@@ -143,7 +143,7 @@ func testAccCheckSFSV2ShareExists(n string, share *shares.Share) resource.TestCh
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.sharedfilesystemV2Client(OS_REGION_NAME)
+		sfsClient, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
@@ -166,7 +166,7 @@ func testAccCheckSFSV2ShareExists(n string, share *shares.Share) resource.TestCh
 func testAccCheckSFSV2ShareMetadataEquals(key string, value string, share *shares.Share) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.sharedfilesystemV2Client(OS_REGION_NAME)
+		sfsClient, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
@@ -187,7 +187,7 @@ func testAccCheckSFSV2ShareMetadataEquals(key string, value string, share *share
 func testAccCheckSFSV2ShareMetadataAbsent(key string, share *shares.Share) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.sharedfilesystemV2Client(OS_REGION_NAME)
+		sfsClient, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}

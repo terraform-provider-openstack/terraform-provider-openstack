@@ -39,7 +39,7 @@ resource "openstack_identity_user_v3" "user_1" {
     rule = ["password"]
   }
 
-  extra {
+  extra = {
     email = "user_1@foobar.com"
   }
 }

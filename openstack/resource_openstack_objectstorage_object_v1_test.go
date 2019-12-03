@@ -205,7 +205,7 @@ func TestAccObjectStorageV1Object_objectManifest(t *testing.T) {
 
 func testAccCheckObjectStorageV1ObjectDestroy(s *terraform.State, objectname string) error {
 	config := testAccProvider.Meta().(*Config)
-	objectStorageClient, err := config.objectStorageV1Client(OS_REGION_NAME)
+	objectStorageClient, err := config.ObjectStorageV1Client(OS_REGION_NAME)
 	if err != nil {
 
 		return fmt.Errorf("Error creating OpenStack object storage client: %s", err)
@@ -237,7 +237,7 @@ func testAccCheckObjectStorageV1ObjectExists(n string, object *objects.GetHeader
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		objectStorageClient, err := config.objectStorageV1Client(OS_REGION_NAME)
+		objectStorageClient, err := config.ObjectStorageV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack object storage client: %s", err)
 		}

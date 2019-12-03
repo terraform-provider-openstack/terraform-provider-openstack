@@ -56,6 +56,8 @@ The following arguments are supported:
 * `enable_snat` - (Optional) Enable Source NAT for the router. Valid values are
     "true" or "false". An `external_network_id` has to be set in order to
     set this property. Changing this updates the `enable_snat` of the router.
+    Setting this value **requires** an **ext-gw-mode** extension to be enabled
+    in OpenStack Neutron.
 
 * `external_fixed_ip` - (Optional) An external fixed IP for the router. This
     can be repeated. The structure is described below. An `external_network_id`
