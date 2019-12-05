@@ -1,5 +1,9 @@
 ## 1.25.0 (Unreleased)
 
+FEATURES
+
+* __New Data Source__: `openstack_blockstorage_volume_v2` [GH-928]
+
 IMPROVEMENTS
 
 * Added `allow_reauth` optional boolean flag to the provided configuration block. This flag allows to automatically re-issue a new auth token if the initial token was expired [GH-918]
