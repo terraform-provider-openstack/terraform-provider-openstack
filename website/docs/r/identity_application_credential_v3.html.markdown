@@ -118,7 +118,7 @@ The following arguments are supported:
 
 The `access_rules` block supports:
 
-* `id` - (Optional) The ID of the existing access rule. The access rule ID of
+* `id` - (Computed) The ID of the existing access rule. The access rule ID of
   another application credential can be provided.
 
 * `path` - (Optional) The API path that the application credential is permitted

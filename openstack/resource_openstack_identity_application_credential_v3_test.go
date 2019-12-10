@@ -239,20 +239,23 @@ resource "openstack_identity_application_credential_v3" "app_cred_1" {
 }
 
 resource "openstack_identity_application_credential_v3" "app_cred_2" {
+  depends_on  = [ openstack_identity_application_credential_v3.app_cred_1 ]
   name        = "monitoring2"
   roles       = ["reader"]
   expires_at  = "2219-02-13T12:12:12Z"
 
-  access_rules {
-    id = "${openstack_identity_application_credential_v3.app_cred_1.access_rules.1.id}"
-  }
+  dynamic "access_rules" {
+    for_each = [for rule in openstack_identity_application_credential_v3.app_cred_1.access_rules : {
+      path = rule.path
+      service = rule.service
+      method = rule.method
+    }]
 
-  access_rules {
-    id = "${openstack_identity_application_credential_v3.app_cred_1.access_rules.2.id}"
-  }
-
-  access_rules {
-    id = "${openstack_identity_application_credential_v3.app_cred_1.access_rules.0.id}"
+    content {
+      path = "${access_rules.value.path}"
+      service = "${access_rules.value.service}"
+      method = "${access_rules.value.method}"
+    }
   }
 }
 `
