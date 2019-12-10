@@ -84,20 +84,20 @@ func dataSourceBlockStorageVolumeV3Read(d *schema.ResourceData, meta interface{}
 
 	allPages, err := volumes.List(client, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query openstack_blockstorage_volume_v2: %s", err)
+		return fmt.Errorf("Unable to query openstack_blockstorage_volume_v3: %s", err)
 	}
 
 	allVolumes, err := volumes.ExtractVolumes(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_blockstorage_volume_v2: %s", err)
+		return fmt.Errorf("Unable to retrieve openstack_blockstorage_volume_v3: %s", err)
 	}
 
 	if len(allVolumes) > 1 {
-		return fmt.Errorf("Your openstack_blockstorage_volume_v2 query returned multiple results.")
+		return fmt.Errorf("Your openstack_blockstorage_volume_v3 query returned multiple results.")
 	}
 
 	if len(allVolumes) < 1 {
-		return fmt.Errorf("Your openstack_blockstorage_volume_v2 query returned no results.")
+		return fmt.Errorf("Your openstack_blockstorage_volume_v3 query returned no results.")
 	}
 
 	return dataSourceBlockStorageVolumeV3Attributes(d, allVolumes[0])
