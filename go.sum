@@ -67,8 +67,8 @@ github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+
 github.com/googleapis/gax-go/v2 v2.0.5 h1:sjZBwGj9Jlw33ImPtvFviGYvseOtDM7hkSKB7+Tv3SM=
 github.com/googleapis/gax-go/v2 v2.0.5/go.mod h1:DWXyrwAJ9X0FpwwEdw+IPEYBICEFu5mhpdKc/us6bOk=
 github.com/gophercloud/gophercloud v0.0.0-20190212181753-892256c46858/go.mod h1:vxM41WHh5uqHVBMZHzuwNOHh8XEoIEcSTewFxm1c5g8=
-github.com/gophercloud/gophercloud v0.7.1-0.20191210042042-7aa2e52d21f9 h1:IoCZciViKnIJAd53mO/UEom/oht1XRGgY2SFiXiHYts=
-github.com/gophercloud/gophercloud v0.7.1-0.20191210042042-7aa2e52d21f9/go.mod h1:gmC5oQqMDOMO1t1gq5DquX/yAU808e/4mzjjDA76+Ss=
+github.com/gophercloud/gophercloud v0.7.1-0.20191211202411-f940f50ff1f7 h1:iYD//82P8YSpKrCUaYhLMoxnIXmT5qvNNKTy5iGgc30=
+github.com/gophercloud/gophercloud v0.7.1-0.20191211202411-f940f50ff1f7/go.mod h1:gmC5oQqMDOMO1t1gq5DquX/yAU808e/4mzjjDA76+Ss=
 github.com/gophercloud/utils v0.0.0-20191129022341-463e26ffa30d h1:lHwkWOlNjHUNDVdoOacrVD/UKqLn/xsEGyD8JBATv9Y=
 github.com/gophercloud/utils v0.0.0-20191129022341-463e26ffa30d/go.mod h1:SZ9FTKibIotDtCrxAU/evccoyu1yhKST6hgBvwTB5Eg=
 github.com/hashicorp/errwrap v0.0.0-20180715044906-d6c0cd880357/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=

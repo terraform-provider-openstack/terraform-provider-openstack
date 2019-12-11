@@ -17,6 +17,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/schedulerhints"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/shelveunshelve"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/startstop"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tags"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
@@ -662,7 +663,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	// Set the current power_state
 	currentStatus := strings.ToLower(server.Status)
 	switch currentStatus {
-	case "active", "shutoff", "error", "migrating":
+	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved":
 		d.Set("power_state", currentStatus)
 	default:
 		return fmt.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
@@ -700,8 +701,10 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if d.HasChange("power_state") {
-		vmState := d.Get("power_state").(string)
-		if strings.ToLower(vmState) == "shutoff" {
+		powerStateOldRaw, powerStateNewRaw := d.GetChange("power_state")
+		powerStateOld := powerStateOldRaw.(string)
+		powerStateNew := powerStateNewRaw.(string)
+		if strings.ToLower(powerStateNew) == "shutoff" {
 			err = startstop.Stop(computeClient, d.Id()).ExtractErr()
 			if err != nil {
 				return fmt.Errorf("Error stopping OpenStack instance: %s", err)
@@ -721,10 +724,20 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 				return fmt.Errorf("Error waiting for instance (%s) to become inactive(shutoff): %s", d.Id(), err)
 			}
 		}
-		if strings.ToLower(vmState) == "active" {
-			err = startstop.Start(computeClient, d.Id()).ExtractErr()
-			if err != nil {
-				return fmt.Errorf("Error starting OpenStack instance: %s", err)
+		if strings.ToLower(powerStateNew) == "active" {
+			if strings.ToLower(powerStateOld) == "shelved" || strings.ToLower(powerStateOld) == "shelved_offloaded" {
+				unshelveOpt := &shelveunshelve.UnshelveOpts{
+					AvailabilityZone: d.Get("availability_zone").(string),
+				}
+				err = shelveunshelve.Unshelve(computeClient, d.Id(), unshelveOpt).ExtractErr()
+				if err != nil {
+					return fmt.Errorf("Error unshelving OpenStack instance: %s", err)
+				}
+			} else {
+				err = startstop.Start(computeClient, d.Id()).ExtractErr()
+				if err != nil {
+					return fmt.Errorf("Error starting OpenStack instance: %s", err)
+				}
 			}
 			startStateConf := &resource.StateChangeConf{
 				//Pending:    []string{"SHUTOFF"},
@@ -735,7 +748,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 				MinTimeout: 3 * time.Second,
 			}
 
-			log.Printf("[DEBUG] Waiting for instance (%s) to start", d.Id())
+			log.Printf("[DEBUG] Waiting for instance (%s) to start/unshelve", d.Id())
 			_, err = startStateConf.WaitForState()
 			if err != nil {
 				return fmt.Errorf("Error waiting for instance (%s) to become active: %s", d.Id(), err)
