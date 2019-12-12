@@ -13,6 +13,7 @@ BUG FIXES
 
 * Fixed the bug where empty `external_fixed_ips.ip_address` of `openstack_networking_router_v2` caused errors [GH-628]
 * Fixed documentation example for `openstack_identity_user_v3.extra` [GH-923]
+* Fixed documentation link for `clouds.yaml` [GH-943]
 
 ## 1.24.0 (October 22, 2019)
 
