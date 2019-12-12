@@ -40,8 +40,8 @@ The following arguments are supported:
   authentication URL. If omitted, the `OS_AUTH_URL` environment variable is used.
 
 * `cloud` - (Optional; required if `auth_url` is not specified) An entry in a
-  `clouds.yaml` file. See the OpenStack `os-client-config`
-  [documentation](https://docs.openstack.org/os-client-config/latest/user/configuration.html)
+  `clouds.yaml` file. See the OpenStack `openstacksdk`
+  [documentation](https://docs.openstack.org/openstacksdk/latest/user/config/configuration.html)
   for more information about `clouds.yaml` files. If omitted, the `OS_CLOUD`
   environment variable is used.
 
