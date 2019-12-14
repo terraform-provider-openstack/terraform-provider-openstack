@@ -51,7 +51,11 @@ The following arguments are supported:
 
 * `max_retries` - (Required) Number of permissible ping failures before
     changing the member's status to INACTIVE. Must be a number between 1
-    and 10..
+    and 10.
+    
+* `max_retries_down` - (Optional) Number of permissible ping failures befor changing the member's
+    status to ERROR. Must be a number between 1 and 10 (supported only in Octavia).
+    Changing this updates the max_retries_down of the existing monitor.
 
 * `url_path` - (Optional) Required for HTTP(S) types. URI path that will be
     accessed if monitor type is HTTP or HTTPS.
@@ -77,6 +81,7 @@ The following attributes are exported:
 * `delay` - See Argument Reference above.
 * `timeout` - See Argument Reference above.
 * `max_retries` - See Argument Reference above.
+* `max_retries_down` - See Argument Reference above.
 * `url_path` - See Argument Reference above.
 * `http_method` - See Argument Reference above.
 * `expected_codes` - See Argument Reference above.
