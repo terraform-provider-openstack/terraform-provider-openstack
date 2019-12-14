@@ -8,6 +8,7 @@ IMPROVEMENTS
 
 * Added `allow_reauth` optional boolean flag to the provided configuration block. This flag allows to automatically re-issue a new auth token if the initial token was expired [GH-918]
 * Added `fixed_network` and `fixed_subnet` arguments and attributes to `openstack_containerinfra_cluster_v1` resource and datasource [GH-933]
+* Added `access_rules` argument into `openstack_identity_application_credential_v3` resource [GH-920]
 
 BUG FIXES
 
