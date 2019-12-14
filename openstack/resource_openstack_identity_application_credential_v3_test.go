@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
 	"testing"
 
@@ -59,6 +60,42 @@ func TestAccIdentityV3ApplicationCredential_basic(t *testing.T) {
 						"openstack_identity_application_credential_v3.app_cred_1", "expires_at", ""),
 					resource.TestMatchResourceAttr(
 						"openstack_identity_application_credential_v3.app_cred_1", "roles.#", regexp.MustCompile("^[2-9]\\d*")),
+				),
+			},
+		},
+	})
+}
+
+func TestAccIdentityV3ApplicationCredential_access_rules(t *testing.T) {
+	var ac1, ac2 applicationcredentials.ApplicationCredential
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckIdentityV3ApplicationCredentialDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIdentityV3ApplicationCredential_access_rules,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3ApplicationCredentialExists("openstack_identity_application_credential_v3.app_cred_1", &ac1),
+					testAccCheckIdentityV3ApplicationCredentialExists("openstack_identity_application_credential_v3.app_cred_1", &ac2),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_application_credential_v3.app_cred_1", "name", &ac1.Name),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_application_credential_v3.app_cred_1", "description", &ac2.Description),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_1", "unrestricted", "false"),
+					resource.TestCheckResourceAttrSet(
+						"openstack_identity_application_credential_v3.app_cred_1", "secret"),
+					resource.TestCheckResourceAttrSet(
+						"openstack_identity_application_credential_v3.app_cred_1", "project_id"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_1", "expires_at", "2219-02-13T12:12:12Z"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_1", "access_rules.#", "3"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_2", "access_rules.#", "3"),
+					testAccCheckIdentityV3ApplicationCredentialAccessRulesEqual(&ac1, &ac2),
 				),
 			},
 		},
@@ -149,6 +186,15 @@ func testAccCheckIdentityV3ApplicationCredentialRoleNameExists(role string, appl
 	}
 }
 
+func testAccCheckIdentityV3ApplicationCredentialAccessRulesEqual(ac1, ac2 *applicationcredentials.ApplicationCredential) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if !reflect.DeepEqual(ac1.AccessRules, ac2.AccessRules) {
+			return fmt.Errorf("AccessRules are not equal: %v != %v", ac1.AccessRules, ac2.AccessRules)
+		}
+		return nil
+	}
+}
+
 const testAccIdentityV3ApplicationCredential_basic = `
 resource "openstack_identity_application_credential_v3" "app_cred_1" {
   name        = "monitoring"
@@ -164,5 +210,52 @@ resource "openstack_identity_application_credential_v3" "app_cred_1" {
   description  = "wheel technical user"
   secret       = "foo"
   unrestricted = true
+}
+`
+
+const testAccIdentityV3ApplicationCredential_access_rules = `
+resource "openstack_identity_application_credential_v3" "app_cred_1" {
+  name        = "monitoring"
+  roles       = ["reader"]
+  expires_at  = "2219-02-13T12:12:12Z"
+
+  access_rules {
+    path    = "/v2.0/metrics"
+    service = "monitoring"
+    method  = "GET"
+  }
+
+  access_rules {
+    path    = "/v2.0/metrics"
+    service = "monitoring"
+    method  = "POST"
+  }
+
+  access_rules {
+    path    = "/v2.0/metrics"
+    service = "monitoring"
+    method  = "PUT"
+  }
+}
+
+resource "openstack_identity_application_credential_v3" "app_cred_2" {
+  depends_on  = [ openstack_identity_application_credential_v3.app_cred_1 ]
+  name        = "monitoring2"
+  roles       = ["reader"]
+  expires_at  = "2219-02-13T12:12:12Z"
+
+  dynamic "access_rules" {
+    for_each = [for rule in openstack_identity_application_credential_v3.app_cred_1.access_rules : {
+      path = rule.path
+      service = rule.service
+      method = rule.method
+    }]
+
+    content {
+      path = "${access_rules.value.path}"
+      service = "${access_rules.value.service}"
+      method = "${access_rules.value.method}"
+    }
+  }
 }
 `
