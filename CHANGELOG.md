@@ -1,15 +1,22 @@
 ## 1.25.0 (Unreleased)
 
+FEATURES
+
+* __New Data Source__: `openstack_blockstorage_volume_v2` [GH-928]
+
 IMPROVEMENTS
 
 * Added `allow_reauth` optional boolean flag to the provided configuration block. This flag allows to automatically re-issue a new auth token if the initial token was expired [GH-918]
 * Added `fixed_network` and `fixed_subnet` arguments and attributes to `openstack_containerinfra_cluster_v1` resource and datasource [GH-933]
+* Added `access_rules` argument into `openstack_identity_application_credential_v3` resource [GH-920]
+* Support `SHELVE_OFFLOADED` status for `openstack_compute_instance_v2` resource [GH-942]
 * Added web-download import method to `openstack_images_image_v2` resource [GH-888]
 
 BUG FIXES
 
 * Fixed the bug where empty `external_fixed_ips.ip_address` of `openstack_networking_router_v2` caused errors [GH-628]
 * Fixed documentation example for `openstack_identity_user_v3.extra` [GH-923]
+* Fixed documentation link for `clouds.yaml` [GH-943]
 
 ## 1.24.0 (October 22, 2019)
 
