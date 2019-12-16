@@ -79,7 +79,7 @@ func testAccBlockStorageV3DeleteVolume(t *testing.T, volumeID string) {
 		t.Fatal(err)
 	}
 
-	bsClient, err := config.BlockStorageV2Client(OS_REGION_NAME)
+	bsClient, err := config.BlockStorageV3Client(OS_REGION_NAME)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -115,7 +115,7 @@ func testAccCheckBlockStorageV3VolumeDataSourceID(n, id string) resource.TestChe
 func testAccBlockStorageV3VolumeDataSource_basic(snapshotName string) string {
 	return fmt.Sprintf(`
     data "openstack_blockstorage_volume_v3" "volume_1" {
-      name        = "%s"
+      name = "%s"
     }
   `, snapshotName)
 }

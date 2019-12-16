@@ -20,7 +20,7 @@ data "openstack_blockstorage_volume_v3" "volume_1" {
 
 ## Argument Reference
 
-* `region` - (Optional) The region in which to obtain the V2 Block Storage
+* `region` - (Optional) The region in which to obtain the V3 Block Storage
     client. If omitted, the `region` argument of the provider is used.
 
 * `name` - (Optional) The name of the volume.
