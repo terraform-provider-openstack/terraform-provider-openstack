@@ -6,11 +6,13 @@ import (
 	"strings"
 	"time"
 
+	octaviamonitors "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/monitors"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/monitors"
+	neutronmonitors "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/monitors"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 )
 
@@ -140,7 +142,7 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] openstack_lb_monitor_v2 create options: %#v", createOpts)
 	var monitor *monitors.Monitor
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		monitor, err = monitors.Create(lbClient, createOpts).Extract()
+		monitor, err = neutronmonitors.Create(lbClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -169,7 +171,38 @@ func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	monitor, err := monitors.Get(lbClient, d.Id()).Extract()
+	// Use Octavia monitor body if Octavia/LBaaS is enabled.
+	if config.UseOctavia {
+		monitor, err := octaviamonitors.Get(lbClient, d.Id()).Extract()
+		if err != nil {
+			return CheckDeleted(d, err, "monitor")
+		}
+
+		log.Printf("[DEBUG] Retrieved openstack_lb_monitor_v2 %s: %#v", d.Id(), monitor)
+
+		d.Set("tenant_id", monitor.ProjectID)
+		d.Set("type", monitor.Type)
+		d.Set("delay", monitor.Delay)
+		d.Set("timeout", monitor.Timeout)
+		d.Set("max_retries", monitor.MaxRetries)
+		d.Set("max_retries_down", monitor.MaxRetriesDown)
+		d.Set("url_path", monitor.URLPath)
+		d.Set("http_method", monitor.HTTPMethod)
+		d.Set("expected_codes", monitor.ExpectedCodes)
+		d.Set("admin_state_up", monitor.AdminStateUp)
+		d.Set("name", monitor.Name)
+		d.Set("region", GetRegion(d, config))
+
+		// OpenContrail workaround (https://github.com/terraform-providers/terraform-provider-openstack/issues/762)
+		if len(monitor.Pools) > 0 && monitor.Pools[0].ID != "" {
+			d.Set("pool_id", monitor.Pools[0].ID)
+		}
+
+		return nil
+	}
+
+	// Use Neutron/Networking in other case.
+	monitor, err := neutronmonitors.Get(lbClient, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "monitor")
 	}
@@ -217,7 +250,7 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Get a clean copy of the monitor.
-	monitor, err := monitors.Get(lbClient, d.Id()).Extract()
+	monitor, err := neutronmonitors.Get(lbClient, d.Id()).Extract()
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve openstack_lb_monitor_v2 %s: %s", d.Id(), err)
 	}
@@ -237,7 +270,7 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] openstack_lb_monitor_v2 %s update options: %#v", d.Id(), updateOpts)
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		_, err = monitors.Update(lbClient, d.Id(), updateOpts).Extract()
+		_, err = neutronmonitors.Update(lbClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -273,7 +306,7 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Get a clean copy of the monitor.
-	monitor, err := monitors.Get(lbClient, d.Id()).Extract()
+	monitor, err := neutronmonitors.Get(lbClient, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "Unable to retrieve openstack_lb_monitor_v2")
 	}
@@ -287,7 +320,7 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Deleting openstack_lb_monitor_v2 %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		err = monitors.Delete(lbClient, d.Id()).ExtractErr()
+		err = neutronmonitors.Delete(lbClient, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
