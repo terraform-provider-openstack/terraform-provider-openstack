@@ -121,84 +121,6 @@ func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
 	})
 }
 
-func TestAccComputerV2Instance_initialStateShelved(t *testing.T) {
-	var instance servers.Server
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeV2Instance_stateShelved,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"openstack_compute_instance_v2.instance_1", "power_state", "shelved"),
-					testAccCheckComputeV2InstanceState(&instance, "shelved"),
-				),
-			},
-			{
-				Config: testAccComputeV2Instance_stateActive,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"openstack_compute_instance_v2.instance_1", "power_state", "active"),
-					testAccCheckComputeV2InstanceState(&instance, "active"),
-				),
-			},
-			{
-				Config: testAccComputeV2Instance_stateShutoff,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"openstack_compute_instance_v2.instance_1", "power_state", "shutoff"),
-					testAccCheckComputeV2InstanceState(&instance, "shutoff"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputerV2Instance_initialStateShelvedOffloaded(t *testing.T) {
-	var instance servers.Server
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeV2Instance_stateShelvedOffloaded,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"openstack_compute_instance_v2.instance_1", "power_state", "shelved_offloaded"),
-					testAccCheckComputeV2InstanceState(&instance, "shelved_offloaded"),
-				),
-			},
-			{
-				Config: testAccComputeV2Instance_stateActive,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"openstack_compute_instance_v2.instance_1", "power_state", "active"),
-					testAccCheckComputeV2InstanceState(&instance, "active"),
-				),
-			},
-			{
-				Config: testAccComputeV2Instance_stateShutoff,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"openstack_compute_instance_v2.instance_1", "power_state", "shutoff"),
-					testAccCheckComputeV2InstanceState(&instance, "shutoff"),
-				),
-			},
-		},
-	})
-}
-
 func TestAccComputeV2Instance_secgroupMulti(t *testing.T) {
 	var instance_1 servers.Server
 	var secgroup_1 secgroups.SecurityGroup
@@ -1493,28 +1415,6 @@ resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   power_state = "shutoff"
-  network {
-    uuid = "%s"
-  }
-}
-`, OS_NETWORK_ID)
-
-var testAccComputeV2Instance_stateShelved = fmt.Sprintf(`
-resource "openstack_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
-  power_state = "shelved"
-  network {
-    uuid = "%s"
-  }
-}
-`, OS_NETWORK_ID)
-
-var testAccComputeV2Instance_stateShelvedOffloaded = fmt.Sprintf(`
-resource "openstack_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
-  power_state = "shelved_offloaded"
   network {
     uuid = "%s"
   }
