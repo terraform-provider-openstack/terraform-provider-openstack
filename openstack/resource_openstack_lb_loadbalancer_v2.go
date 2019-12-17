@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	octavia "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 )
@@ -47,10 +48,18 @@ func resourceLoadBalancerV2() *schema.Resource {
 				Optional: true,
 			},
 
+			"vip_network_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
+
 			"vip_subnet_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
+				Computed: true,
 			},
 
 			"tenant_id": {
@@ -114,27 +123,56 @@ func resourceLoadBalancerV2Create(d *schema.ResourceData, meta interface{}) erro
 		lbProvider = v.(string)
 	}
 
-	adminStateUp := d.Get("admin_state_up").(bool)
-	createOpts := loadbalancers.CreateOpts{
-		Name:         d.Get("name").(string),
-		Description:  d.Get("description").(string),
-		VipSubnetID:  d.Get("vip_subnet_id").(string),
-		TenantID:     d.Get("tenant_id").(string),
-		VipAddress:   d.Get("vip_address").(string),
-		AdminStateUp: &adminStateUp,
-		FlavorID:     d.Get("flavor_id").(string),
-		Provider:     lbProvider,
-	}
+	var lbID string
+	var vipPortID string
 
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	lb, err := loadbalancers.Create(lbClient, createOpts).Extract()
-	if err != nil {
-		return fmt.Errorf("Error creating LoadBalancer: %s", err)
+	adminStateUp := d.Get("admin_state_up").(bool)
+	if lbClient.Type == "load-balancer" { // Using octavia.
+		createOpts := octavia.CreateOpts{
+			Name:         d.Get("name").(string),
+			Description:  d.Get("description").(string),
+			VipNetworkID: d.Get("vip_network_id").(string),
+			VipSubnetID:  d.Get("vip_subnet_id").(string),
+			ProjectID:    d.Get("tenant_id").(string),
+			VipAddress:   d.Get("vip_address").(string),
+			AdminStateUp: &adminStateUp,
+			FlavorID:     d.Get("flavor_id").(string),
+			Provider:     lbProvider,
+		}
+		log.Printf("[DEBUG][OCTAVIA] Create Options: %#v", createOpts)
+		lb, err := octavia.Create(lbClient, createOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error creating LoadBalancer: %s", err)
+		}
+		lbID = lb.ID
+		vipPortID = lb.VipPortID
+	} else {
+		if d.Get("vip_network_id").(string) != "" {
+			return fmt.Errorf("can only set vip_network_id when using octavia")
+		}
+		createOpts := loadbalancers.CreateOpts{
+			Name:         d.Get("name").(string),
+			Description:  d.Get("description").(string),
+			VipSubnetID:  d.Get("vip_subnet_id").(string),
+			TenantID:     d.Get("tenant_id").(string),
+			VipAddress:   d.Get("vip_address").(string),
+			AdminStateUp: &adminStateUp,
+			FlavorID:     d.Get("flavor_id").(string),
+			Provider:     lbProvider,
+		}
+
+		log.Printf("[DEBUG] Create Options: %#v", createOpts)
+		lb, err := loadbalancers.Create(lbClient, createOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error creating LoadBalancer: %s", err)
+		}
+		lbID = lb.ID
+		vipPortID = lb.VipPortID
 	}
 
 	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2LoadBalancer(lbClient, lb.ID, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -145,12 +183,12 @@ func resourceLoadBalancerV2Create(d *schema.ResourceData, meta interface{}) erro
 	}
 	// Once the loadbalancer has been created, apply any requested security groups
 	// to the port that was created behind the scenes.
-	if err := resourceLoadBalancerV2SecurityGroups(networkingClient, lb.VipPortID, d); err != nil {
+	if err := resourceLoadBalancerV2SecurityGroups(networkingClient, vipPortID, d); err != nil {
 		return err
 	}
 
 	// If all has been successful, set the ID on the resource
-	d.SetId(lb.ID)
+	d.SetId(lbID)
 
 	return resourceLoadBalancerV2Read(d, meta)
 }
@@ -162,31 +200,56 @@ func resourceLoadBalancerV2Read(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	lb, err := loadbalancers.Get(lbClient, d.Id()).Extract()
-	if err != nil {
-		return CheckDeleted(d, err, "loadbalancer")
+	var vipPortID string
+
+	if lbClient.Type == "load-balancer" { // Using octavia.
+		lb, err := octavia.Get(lbClient, d.Id()).Extract()
+		if err != nil {
+			return CheckDeleted(d, err, "loadbalancer")
+		}
+
+		log.Printf("[DEBUG][OCTAVIA] Retrieved loadbalancer %s: %#v", d.Id(), lb)
+
+		d.Set("name", lb.Name)
+		d.Set("description", lb.Description)
+		d.Set("vip_subnet_id", lb.VipSubnetID)
+		d.Set("vip_network_id", lb.VipNetworkID)
+		d.Set("tenant_id", lb.ProjectID)
+		d.Set("vip_address", lb.VipAddress)
+		d.Set("vip_port_id", lb.VipPortID)
+		d.Set("admin_state_up", lb.AdminStateUp)
+		d.Set("flavor_id", lb.FlavorID)
+		d.Set("loadbalancer_provider", lb.Provider)
+		d.Set("region", GetRegion(d, config))
+		vipPortID = lb.VipPortID
+	} else {
+		lb, err := loadbalancers.Get(lbClient, d.Id()).Extract()
+		if err != nil {
+			return CheckDeleted(d, err, "loadbalancer")
+		}
+
+		log.Printf("[DEBUG] Retrieved loadbalancer %s: %#v", d.Id(), lb)
+
+		d.Set("name", lb.Name)
+		d.Set("description", lb.Description)
+		d.Set("vip_subnet_id", lb.VipSubnetID)
+		d.Set("tenant_id", lb.TenantID)
+		d.Set("vip_address", lb.VipAddress)
+		d.Set("vip_port_id", lb.VipPortID)
+		d.Set("admin_state_up", lb.AdminStateUp)
+		d.Set("flavor_id", lb.FlavorID)
+		d.Set("loadbalancer_provider", lb.Provider)
+		d.Set("region", GetRegion(d, config))
+		vipPortID = lb.VipPortID
 	}
 
-	log.Printf("[DEBUG] Retrieved loadbalancer %s: %#v", d.Id(), lb)
-
-	d.Set("name", lb.Name)
-	d.Set("description", lb.Description)
-	d.Set("vip_subnet_id", lb.VipSubnetID)
-	d.Set("tenant_id", lb.TenantID)
-	d.Set("vip_address", lb.VipAddress)
-	d.Set("vip_port_id", lb.VipPortID)
-	d.Set("admin_state_up", lb.AdminStateUp)
-	d.Set("flavor_id", lb.FlavorID)
-	d.Set("loadbalancer_provider", lb.Provider)
-	d.Set("region", GetRegion(d, config))
-
 	// Get any security groups on the VIP Port
-	if lb.VipPortID != "" {
+	if vipPortID != "" {
 		networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
-		port, err := ports.Get(networkingClient, lb.VipPortID).Extract()
+		port, err := ports.Get(networkingClient, vipPortID).Extract()
 		if err != nil {
 			return err
 		}
