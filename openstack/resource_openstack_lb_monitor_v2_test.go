@@ -40,7 +40,10 @@ func TestAccLBV2Monitor_octavia(t *testing.T) {
 	var monitor monitors.Monitor
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckLB(t) },
+		PreCheck: func() {
+			testAccPreCheckLB(t)
+			testAccPreCheckUseOctavia(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2MonitorDestroy,
 		Steps: []resource.TestStep{

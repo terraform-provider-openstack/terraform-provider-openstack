@@ -6,12 +6,11 @@ import (
 	"strings"
 	"time"
 
-	octaviamonitors "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/monitors"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/monitors"
+	octaviamonitors "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/monitors"
 	neutronmonitors "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/monitors"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 )
@@ -140,7 +139,7 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] openstack_lb_monitor_v2 create options: %#v", createOpts)
-	var monitor *monitors.Monitor
+	var monitor *neutronmonitors.Monitor
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		monitor, err = neutronmonitors.Create(lbClient, createOpts).Extract()
 		if err != nil {
@@ -239,7 +238,7 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 	updateOpts := chooseLBV2MonitorUpdateOpts(d, config)
 	if updateOpts == nil {
 		log.Printf("[DEBUG] openstack_lb_monitor_v2 %s: nothing to update", d.Id())
-		return resourceListenerV2Read(d, meta)
+		return resourceMonitorV2Read(d, meta)
 	}
 
 	// Get a clean copy of the parent pool.
