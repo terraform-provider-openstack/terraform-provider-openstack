@@ -10,21 +10,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 )
 
-func TestAccBlockStorageV2VolumeDataSource_basic(t *testing.T) {
-	resourceName := "data.openstack_blockstorage_volume_v2.volume_1"
+func TestAccBlockStorageV3VolumeDataSource_basic(t *testing.T) {
+	resourceName := "data.openstack_blockstorage_volume_v3.volume_1"
 	volumeName := acctest.RandomWithPrefix("tf-acc-volume")
 
 	var volumeID string
 	if os.Getenv("TF_ACC") != "" {
 		var err error
-		volumeID, err = testAccBlockStorageV2CreateVolume(volumeName)
+		volumeID, err = testAccBlockStorageV3CreateVolume(volumeName)
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer testAccBlockStorageV2DeleteVolume(t, volumeID)
+		defer testAccBlockStorageV3DeleteVolume(t, volumeID)
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -32,24 +32,25 @@ func TestAccBlockStorageV2VolumeDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2VolumeDataSource_basic(volumeName),
+				Config: testAccBlockStorageV3VolumeDataSource_basic(volumeName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV2VolumeDataSourceID(resourceName, volumeID),
+					testAccCheckBlockStorageV3VolumeDataSourceID(resourceName, volumeID),
 					resource.TestCheckResourceAttr(resourceName, "name", volumeName),
 					resource.TestCheckResourceAttr(resourceName, "size", "1"),
+					resource.TestCheckResourceAttr(resourceName, "multiattach", "false"),
 				),
 			},
 		},
 	})
 }
 
-func testAccBlockStorageV2CreateVolume(volumeName string) (string, error) {
+func testAccBlockStorageV3CreateVolume(volumeName string) (string, error) {
 	config, err := testAccAuthFromEnv()
 	if err != nil {
 		return "", err
 	}
 
-	bsClient, err := config.BlockStorageV2Client(OS_REGION_NAME)
+	bsClient, err := config.BlockStorageV3Client(OS_REGION_NAME)
 	if err != nil {
 		return "", err
 	}
@@ -72,13 +73,13 @@ func testAccBlockStorageV2CreateVolume(volumeName string) (string, error) {
 	return volume.ID, nil
 }
 
-func testAccBlockStorageV2DeleteVolume(t *testing.T, volumeID string) {
+func testAccBlockStorageV3DeleteVolume(t *testing.T, volumeID string) {
 	config, err := testAccAuthFromEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	bsClient, err := config.BlockStorageV2Client(OS_REGION_NAME)
+	bsClient, err := config.BlockStorageV3Client(OS_REGION_NAME)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +97,7 @@ func testAccBlockStorageV2DeleteVolume(t *testing.T, volumeID string) {
 	}
 }
 
-func testAccCheckBlockStorageV2VolumeDataSourceID(n, id string) resource.TestCheckFunc {
+func testAccCheckBlockStorageV3VolumeDataSourceID(n, id string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -111,9 +112,9 @@ func testAccCheckBlockStorageV2VolumeDataSourceID(n, id string) resource.TestChe
 	}
 }
 
-func testAccBlockStorageV2VolumeDataSource_basic(snapshotName string) string {
+func testAccBlockStorageV3VolumeDataSource_basic(snapshotName string) string {
 	return fmt.Sprintf(`
-    data "openstack_blockstorage_volume_v2" "volume_1" {
+    data "openstack_blockstorage_volume_v3" "volume_1" {
       name = "%s"
     }
   `, snapshotName)
