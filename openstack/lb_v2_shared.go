@@ -365,32 +365,41 @@ func chooseLBV2MonitorUpdateOpts(d *schema.ResourceData, config *Config) neutron
 		var opts octaviamonitors.UpdateOpts
 
 		if d.HasChange("url_path") {
+			hasChange = true
 			opts.URLPath = d.Get("url_path").(string)
 		}
 		if d.HasChange("expected_codes") {
+			hasChange = true
 			opts.ExpectedCodes = d.Get("expected_codes").(string)
 		}
 		if d.HasChange("delay") {
+			hasChange = true
 			opts.Delay = d.Get("delay").(int)
 		}
 		if d.HasChange("timeout") {
+			hasChange = true
 			opts.Timeout = d.Get("timeout").(int)
 		}
 		if d.HasChange("max_retries") {
+			hasChange = true
 			opts.MaxRetries = d.Get("max_retries").(int)
 		}
 		if d.HasChange("max_retries_down") {
+			hasChange = true
 			opts.MaxRetriesDown = d.Get("max_retries_down").(int)
 		}
 		if d.HasChange("admin_state_up") {
+			hasChange = true
 			asu := d.Get("admin_state_up").(bool)
 			opts.AdminStateUp = &asu
 		}
 		if d.HasChange("name") {
+			hasChange = true
 			name := d.Get("name").(string)
 			opts.Name = &name
 		}
 		if d.HasChange("http_method") {
+			hasChange = true
 			opts.HTTPMethod = d.Get("http_method").(string)
 		}
 
@@ -402,29 +411,37 @@ func chooseLBV2MonitorUpdateOpts(d *schema.ResourceData, config *Config) neutron
 		var opts neutronmonitors.UpdateOpts
 
 		if d.HasChange("url_path") {
+			hasChange = true
 			opts.URLPath = d.Get("url_path").(string)
 		}
 		if d.HasChange("expected_codes") {
+			hasChange = true
 			opts.ExpectedCodes = d.Get("expected_codes").(string)
 		}
 		if d.HasChange("delay") {
+			hasChange = true
 			opts.Delay = d.Get("delay").(int)
 		}
 		if d.HasChange("timeout") {
+			hasChange = true
 			opts.Timeout = d.Get("timeout").(int)
 		}
 		if d.HasChange("max_retries") {
+			hasChange = true
 			opts.MaxRetries = d.Get("max_retries").(int)
 		}
 		if d.HasChange("admin_state_up") {
+			hasChange = true
 			asu := d.Get("admin_state_up").(bool)
 			opts.AdminStateUp = &asu
 		}
 		if d.HasChange("name") {
+			hasChange = true
 			name := d.Get("name").(string)
 			opts.Name = &name
 		}
 		if d.HasChange("http_method") {
+			hasChange = true
 			opts.HTTPMethod = d.Get("http_method").(string)
 		}
 
