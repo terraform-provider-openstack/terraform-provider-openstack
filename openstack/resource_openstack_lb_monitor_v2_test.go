@@ -59,7 +59,7 @@ func TestAccLBV2Monitor_octavia(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_lb_monitor_v2.monitor_1", "name", "monitor_1_updated"),
-					resource.TestCheckResourceAttr("openstack_lb_monitor_v2.monitor_1", "max_retries_down", "16"),
+					resource.TestCheckResourceAttr("openstack_lb_monitor_v2.monitor_1", "max_retries_down", "3"),
 				),
 			},
 		},
@@ -325,7 +325,7 @@ resource "openstack_lb_monitor_v2" "monitor_1" {
   delay = 30
   timeout = 15
   max_retries = 10
-  max_retries_down = 16
+  max_retries_down = 3
   admin_state_up = "true"
   pool_id = "${openstack_lb_pool_v2.pool_1.id}"
 
