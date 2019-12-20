@@ -114,7 +114,7 @@ func dataSourceBlockStorageVolumeV3Attributes(d *schema.ResourceData, volume vol
 	d.Set("multiattach", volume.Multiattach)
 
 	if err := d.Set("metadata", volume.Metadata); err != nil {
-		log.Printf("[DEBUG] Unable to set metadata for volume %s: %s", volume.ID, err)
+		log.Printf("[DEBUG] Unable to set metadata for openstack_blockstorage_volume_v3 %s: %s", volume.ID, err)
 	}
 
 	return nil
