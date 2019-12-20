@@ -2,6 +2,7 @@
 
 FEATURES
 
+* __New Resource__: `openstack_orchestration_stack_v1` [GH-944]
 * __New Data Source__: `openstack_blockstorage_volume_v2` [GH-928]
 
 IMPROVEMENTS
