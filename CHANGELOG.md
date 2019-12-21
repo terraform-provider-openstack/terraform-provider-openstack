@@ -13,6 +13,7 @@ IMPROVEMENTS
 * Added `access_rules` argument into `openstack_identity_application_credential_v3` resource [GH-920]
 * Support `SHELVE_OFFLOADED` status for `openstack_compute_instance_v2` resource [GH-942]
 * Added `max_retries_down` to `lb_monitor_v2` resource [GH-945]
+* Updated `terraform-plugin-sdk` to `v1.4.1` [GH-936]
 
 BUG FIXES
 
