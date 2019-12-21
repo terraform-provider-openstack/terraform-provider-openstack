@@ -12,6 +12,7 @@ IMPROVEMENTS
 * Added `fixed_network` and `fixed_subnet` arguments and attributes to `openstack_containerinfra_cluster_v1` resource and datasource [GH-933]
 * Added `access_rules` argument into `openstack_identity_application_credential_v3` resource [GH-920]
 * Support `SHELVE_OFFLOADED` status for `openstack_compute_instance_v2` resource [GH-942]
+* Added `max_retries_down` to `lb_monitor_v2` resource [GH-945]
 
 BUG FIXES
 
