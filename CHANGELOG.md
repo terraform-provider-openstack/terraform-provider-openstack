@@ -1,22 +1,31 @@
-## 1.25.0 (Unreleased)
-
-FEATURES
-
-* __New Data Source__: `openstack_blockstorage_volume_v2` [GH-928]
+## 1.25.1 (Unreleased)
 
 IMPROVEMENTS
 
-* Added `allow_reauth` optional boolean flag to the provided configuration block. This flag allows to automatically re-issue a new auth token if the initial token was expired [GH-918]
-* Added `fixed_network` and `fixed_subnet` arguments and attributes to `openstack_containerinfra_cluster_v1` resource and datasource [GH-933]
-* Added `access_rules` argument into `openstack_identity_application_credential_v3` resource [GH-920]
-* Support `SHELVE_OFFLOADED` status for `openstack_compute_instance_v2` resource [GH-942]
 * Added web-download import method to `openstack_images_image_v2` resource [GH-888]
+
+## 1.25.0 (December 25, 2019)
+
+FEATURES
+
+* __New Resource__: `openstack_orchestration_stack_v1` ([#944](https://github.com/terraform-providers/terraform-provider-openstack/issues/944))
+* __New Data Source__: `openstack_blockstorage_volume_v2` ([#928](https://github.com/terraform-providers/terraform-provider-openstack/issues/928))
+* __New Data Source__: `openstack_blockstorage_volume_v3` ([#947](https://github.com/terraform-providers/terraform-provider-openstack/issues/947))
+
+IMPROVEMENTS
+
+* Added `allow_reauth` optional boolean flag to the provided configuration block. This flag allows to automatically re-issue a new auth token if the initial token was expired ([#918](https://github.com/terraform-providers/terraform-provider-openstack/issues/918))
+* Added `fixed_network` and `fixed_subnet` arguments and attributes to `openstack_containerinfra_cluster_v1` resource and datasource ([#933](https://github.com/terraform-providers/terraform-provider-openstack/issues/933))
+* Added `access_rules` argument into `openstack_identity_application_credential_v3` resource ([#920](https://github.com/terraform-providers/terraform-provider-openstack/issues/920))
+* Support `SHELVE_OFFLOADED` status for `openstack_compute_instance_v2` resource ([#942](https://github.com/terraform-providers/terraform-provider-openstack/issues/942))
+* Added `max_retries_down` to `lb_monitor_v2` resource ([#945](https://github.com/terraform-providers/terraform-provider-openstack/issues/945))
+* Updated `terraform-plugin-sdk` to `v1.4.1` ([#936](https://github.com/terraform-providers/terraform-provider-openstack/issues/936))
 
 BUG FIXES
 
-* Fixed the bug where empty `external_fixed_ips.ip_address` of `openstack_networking_router_v2` caused errors [GH-628]
-* Fixed documentation example for `openstack_identity_user_v3.extra` [GH-923]
-* Fixed documentation link for `clouds.yaml` [GH-943]
+* Fixed the bug where empty `external_fixed_ips.ip_address` of `openstack_networking_router_v2` caused errors ([#628](https://github.com/terraform-providers/terraform-provider-openstack/issues/628))
+* Fixed documentation example for `openstack_identity_user_v3.extra` ([#923](https://github.com/terraform-providers/terraform-provider-openstack/issues/923))
+* Fixed documentation link for `clouds.yaml` ([#943](https://github.com/terraform-providers/terraform-provider-openstack/issues/943))
 
 ## 1.24.0 (October 22, 2019)
 
