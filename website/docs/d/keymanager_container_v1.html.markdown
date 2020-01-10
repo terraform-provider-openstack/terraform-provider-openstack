@@ -44,6 +44,8 @@ The following attributes are exported:
 * `updated_at` - The date the container was last updated.
 * `consumers` - The list of the container consumers. The structure is described
   below.
+* `acl` - The list of ACLs assigned to a container. The `read` structure is
+  described below.
 
 The `secret_refs` block supports:
 
@@ -58,3 +60,14 @@ The `consumers` block supports:
 * `name` - The name of the consumer.
 
 * `url` - The consumer URL.
+
+The `acl` `read` attribute supports:
+
+* `project_access` - Whether the container is accessible project wide.
+
+* `users` - The list of user IDs, which are allowed to access the container,
+  when `project_access` is set to `false`.
+
+* `created_at` - The date the container ACL was created.
+
+* `updated_at` - The date the container ACL was last updated.
