@@ -228,7 +228,7 @@ func resourceKeyManagerContainerV1Read(d *schema.ResourceData, meta interface{})
 
 	acl, err := acls.GetContainerACL(kmClient, d.Id()).Extract()
 	if err != nil {
-		log.Printf("[DEBUG] Unable to get container acls: %s", err)
+		log.Printf("[DEBUG] Unable to get %s container acls: %s", d.Id(), err)
 	}
 	d.Set("acl", flattenKeyManagerV1ACLs(acl))
 

@@ -326,7 +326,7 @@ func resourceKeyManagerSecretV1Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("payload", keyManagerSecretV1GetPayload(kmClient, d.Id()))
 	metadataMap, err := secrets.GetMetadata(kmClient, d.Id()).Extract()
 	if err != nil {
-		log.Printf("[DEBUG] Unable to get metadata: %s", err)
+		log.Printf("[DEBUG] Unable to get %s secret metadata: %s", d.Id(), err)
 	}
 	d.Set("all_metadata", metadataMap)
 
@@ -338,7 +338,7 @@ func resourceKeyManagerSecretV1Read(d *schema.ResourceData, meta interface{}) er
 
 	acl, err := acls.GetSecretACL(kmClient, d.Id()).Extract()
 	if err != nil {
-		log.Printf("[DEBUG] Unable to get acls: %s", err)
+		log.Printf("[DEBUG] Unable to get %s secret acls: %s", d.Id(), err)
 	}
 	d.Set("acl", flattenKeyManagerV1ACLs(acl))
 
