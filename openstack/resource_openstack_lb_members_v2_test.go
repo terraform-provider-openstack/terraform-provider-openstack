@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/gophercloud/gophercloud"
@@ -14,9 +15,15 @@ import (
 func testAccCheckLBV2MembersComputeHash(members *[]pools.Member, weight string, address string, idx *int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		membersResource := resourceMembersV2().Schema["member"].Elem.(*schema.Resource)
+		log.Printf("[DEBUG] membersResource: %+#v", membersResource)
 		f := schema.HashResource(membersResource)
 
+		log.Printf("[DEBUG] f: %+#v", f)
+
+		log.Printf("[DEBUG] members: %+#v", *members)
+
 		for _, m := range flattenLBMembersV2(*members) {
+			log.Printf("[DEBUG] m: %+#v", m)
 			if m["address"] == address && m["weight"] == weight {
 				*idx = f(m)
 				break
