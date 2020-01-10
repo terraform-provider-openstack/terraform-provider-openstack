@@ -238,7 +238,7 @@ func dataSourceKeyManagerSecretV1Read(d *schema.ResourceData, meta interface{}) 
 
 	acl, err := acls.GetSecretACL(kmClient, d.Id()).Extract()
 	if err != nil {
-		log.Printf("[DEBUG] Unable to get acls: %s", err)
+		log.Printf("[DEBUG] Unable to get %s secret acls: %s", uuid, err)
 	}
 	d.Set("acl", flattenKeyManagerV1ACLs(acl))
 

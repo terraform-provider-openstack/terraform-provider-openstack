@@ -228,7 +228,7 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return CheckDeleted(d, err, "Error creating openstack_keymanager_secret_v1")
+		return fmt.Errorf("Error waiting for openstack_keymanager_secret_v1: %s", err)
 	}
 
 	d.SetId(uuid)
@@ -240,7 +240,7 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 		setOpts := expandKeyManagerV1ACLs(acl)
 		_, err = acls.SetSecretACL(kmClient, uuid, setOpts).Extract()
 		if err != nil {
-			return CheckDeleted(d, err, "Error settings read ACLs for the openstack_keymanager_secret_v1")
+			return fmt.Errorf("Error settings ACLs for the openstack_keymanager_secret_v1: %s", err)
 		}
 	}
 
@@ -252,12 +252,12 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 	}
 	err = secrets.Update(kmClient, uuid, updateOpts).Err
 	if err != nil {
-		return CheckDeleted(d, err, "Error setting openstack_keymanager_secret_v1 payload")
+		return fmt.Errorf("Error setting openstack_keymanager_secret_v1 payload: %s", err)
 	}
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return CheckDeleted(d, err, "Error creating openstack_keymanager_secret_v1")
+		return fmt.Errorf("Error waiting for openstack_keymanager_secret_v1: %s", err)
 	}
 
 	// set the metadata
