@@ -236,18 +236,11 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 	d.Partial(true)
 
 	// set the acl first before uploading the payload
-	for i, aclOp := range aclOperations {
-		if _, ok := d.GetOk("acl.0." + aclOp); ok {
-			setOpts := expandKeyManagerV1ACLs(d.Get("acl.0"), aclOp)
-			if i == 0 {
-				// the first should be set, then further methods - update
-				_, err = acls.SetSecretACL(kmClient, uuid, setOpts).Extract()
-			} else {
-				_, err = acls.UpdateSecretACL(kmClient, uuid, setOpts).Extract()
-			}
-			if err != nil {
-				return CheckDeleted(d, err, "Error settings read ACLs for the openstack_keymanager_secret_v1")
-			}
+	if acl, ok := d.GetOk("acl"); ok {
+		setOpts := expandKeyManagerV1ACLs(acl)
+		_, err = acls.SetSecretACL(kmClient, uuid, setOpts).Extract()
+		if err != nil {
+			return CheckDeleted(d, err, "Error settings read ACLs for the openstack_keymanager_secret_v1")
 		}
 	}
 
@@ -362,14 +355,11 @@ func resourceKeyManagerSecretV1Update(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error creating OpenStack barbican client: %s", err)
 	}
 
-	for _, aclOp := range aclOperations {
-		// TODO: try to do delete ACLs when old ACLs are removed ("all of them", not only the "map" key)
-		if d.HasChange("acl.0." + aclOp) {
-			updateOpts := expandKeyManagerV1ACLs(d.Get("acl.0"), aclOp)
-			_, err := acls.UpdateSecretACL(kmClient, d.Id(), updateOpts).Extract()
-			if err != nil {
-				return fmt.Errorf("Error updating openstack_keymanager_secret_v1 %s %s acl: %s", d.Id(), aclOp, err)
-			}
+	if d.HasChange("acl") {
+		updateOpts := expandKeyManagerV1ACLs(d.Get("acl"))
+		_, err := acls.UpdateSecretACL(kmClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating openstack_keymanager_secret_v1 %s acl: %s", d.Id(), err)
 		}
 	}
 

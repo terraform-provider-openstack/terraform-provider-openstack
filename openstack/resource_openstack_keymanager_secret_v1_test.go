@@ -147,10 +147,10 @@ func TestAccKeyManagerSecretV1_acls(t *testing.T) {
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.project_access", "false"),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.users.#", "2"),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.project_access", "true"),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.users.#", "0"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.read.0.project_access", "false"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.read.0.users.#", "2"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.read.0.project_access", "true"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.read.0.users.#", "0"),
 				),
 			},
 		},
@@ -171,10 +171,10 @@ func TestAccKeyManagerSecretV1_acls_update(t *testing.T) {
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.project_access", "false"),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.users.#", "2"),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.project_access", "true"),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.users.#", "0"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.read.0.project_access", "false"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.read.0.users.#", "2"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.read.0.project_access", "true"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.read.0.users.#", "0"),
 				),
 			},
 			{
@@ -184,10 +184,10 @@ func TestAccKeyManagerSecretV1_acls_update(t *testing.T) {
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.project_access", "false"),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.users.#", "2"),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.project_access", "false"),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.users.#", "1"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.read.0.project_access", "false"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.read.0.users.#", "2"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.read.0.project_access", "false"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.read.0.users.#", "1"),
 				),
 			},
 			{
@@ -197,10 +197,10 @@ func TestAccKeyManagerSecretV1_acls_update(t *testing.T) {
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.project_access", "true"),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.users.#", "0"),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.project_access", "true"),
-					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.users.#", "0"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.read.0.project_access", "true"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "acl.0.read.0.users.#", "0"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.read.0.project_access", "true"),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_2", "acl.0.read.0.users.#", "0"),
 				),
 			},
 		},
@@ -396,11 +396,13 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   secret_type = "passphrase"
 
   acl {
-    project_access = false
-    users = [
-	"619e2ad074321cf246b03a89e95afee95fb26bb0b2d1fc7ba3bd30fcca25588a",
-	"96b3ebddf275996285eae440e71227ba47c651be18391b0f2ebf1032ebae5dca",
-    ]
+    read {
+      project_access = false
+      users = [
+        "619e2ad074321cf246b03a89e95afee95fb26bb0b2d1fc7ba3bd30fcca25588a",
+        "96b3ebddf275996285eae440e71227ba47c651be18391b0f2ebf1032ebae5dca",
+      ]
+    }
   }
 }
 
@@ -427,11 +429,13 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   secret_type = "passphrase"
 
   acl {
-    project_access = false
-    users = [
-	"96b3ebddf275996285eae440e71227ba47c651be18391b0f2ebf1032ebae5dca",
-	"619e2ad074321cf246b03a89e95afee95fb26bb0b2d1fc7ba3bd30fcca25588a",
-    ]
+    read {
+      project_access = false
+      users = [
+        "96b3ebddf275996285eae440e71227ba47c651be18391b0f2ebf1032ebae5dca",
+        "619e2ad074321cf246b03a89e95afee95fb26bb0b2d1fc7ba3bd30fcca25588a",
+      ]
+    }
   }
 }
 
@@ -445,10 +449,12 @@ resource "openstack_keymanager_secret_v1" "secret_2" {
   secret_type = "passphrase"
 
   acl {
-    project_access = false
-    users = [
-	"96b3ebddf275996285eae440e71227ba47c651be18391b0f2ebf1032ebae5dca",
-    ]
+    read {
+      project_access = false
+      users = [
+        "96b3ebddf275996285eae440e71227ba47c651be18391b0f2ebf1032ebae5dca",
+      ]
+    }
   }
 }
 `
@@ -465,7 +471,9 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   secret_type = "passphrase"
 
   acl {
-    project_access = true
+    read {
+      project_access = true
+    }
   }
 }
 
@@ -479,7 +487,9 @@ resource "openstack_keymanager_secret_v1" "secret_2" {
   secret_type = "passphrase"
 
   acl {
-    project_access = true
+    read {
+      project_access = true
+    }
   }
 }
 `
