@@ -2,7 +2,6 @@ package openstack
 
 import (
 	"fmt"
-	"log"
 	"testing"
 
 	"github.com/gophercloud/gophercloud"
@@ -12,18 +11,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
-func testAccCheckLBV2MembersComputeHash(members *[]pools.Member, weight string, address string, idx *int) resource.TestCheckFunc {
+func testAccCheckLBV2MembersComputeHash(members *[]pools.Member, weight int, address string, idx *int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		membersResource := resourceMembersV2().Schema["member"].Elem.(*schema.Resource)
-		log.Printf("[DEBUG] membersResource: %+#v", membersResource)
 		f := schema.HashResource(membersResource)
 
-		log.Printf("[DEBUG] f: %+#v", f)
-
-		log.Printf("[DEBUG] members: %+#v", *members)
-
 		for _, m := range flattenLBMembersV2(*members) {
-			log.Printf("[DEBUG] m: %+#v", m)
 			if m["address"] == address && m["weight"] == weight {
 				*idx = f(m)
 				break
@@ -64,8 +57,8 @@ func TestAccLBV2Members_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MembersExists("openstack_lb_members_v2.members_1", &members),
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.#", "2"),
-					testAccCheckLBV2MembersComputeHash(&members, "0", "192.168.199.110", &idx1),
-					testAccCheckLBV2MembersComputeHash(&members, "1", "192.168.199.111", &idx2),
+					testAccCheckLBV2MembersComputeHash(&members, 0, "192.168.199.110", &idx1),
+					testAccCheckLBV2MembersComputeHash(&members, 1, "192.168.199.111", &idx2),
 					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx1, "0"),
 					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx2, "1"),
 					testCheckResourceAttrSetWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.subnet_id", &idx1),
@@ -77,8 +70,8 @@ func TestAccLBV2Members_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MembersExists("openstack_lb_members_v2.members_1", &members),
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.#", "2"),
-					testAccCheckLBV2MembersComputeHash(&members, "10", "192.168.199.110", &idx1),
-					testAccCheckLBV2MembersComputeHash(&members, "15", "192.168.199.111", &idx2),
+					testAccCheckLBV2MembersComputeHash(&members, 10, "192.168.199.110", &idx1),
+					testAccCheckLBV2MembersComputeHash(&members, 15, "192.168.199.111", &idx2),
 					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx1, "10"),
 					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx2, "15"),
 					testCheckResourceAttrSetWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.subnet_id", &idx1),
@@ -90,8 +83,8 @@ func TestAccLBV2Members_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MembersExists("openstack_lb_members_v2.members_1", &members),
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.#", "2"),
-					testAccCheckLBV2MembersComputeHash(&members, "10", "192.168.199.110", &idx1),
-					testAccCheckLBV2MembersComputeHash(&members, "15", "192.168.199.111", &idx2),
+					testAccCheckLBV2MembersComputeHash(&members, 10, "192.168.199.110", &idx1),
+					testAccCheckLBV2MembersComputeHash(&members, 15, "192.168.199.111", &idx2),
 					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx1, "10"),
 					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx2, "15"),
 					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.subnet_id", &idx1, ""),
