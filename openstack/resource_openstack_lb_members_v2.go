@@ -233,7 +233,7 @@ func resourceMembersV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return CheckDeleted(d, err, "Error waiting for the members' pool status")
 	}
 
-	log.Printf("[DEBUG] Attempting to delete member %s", d.Id())
+	log.Printf("[DEBUG] Attempting to delete %s pool members", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		err = octaviapools.BatchUpdateMembers(lbClient, d.Id(), []octaviapools.BatchUpdateMemberOpts{}).ExtractErr()
 		if err != nil {
