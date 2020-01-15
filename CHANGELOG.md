@@ -1,4 +1,9 @@
-## 1.25.1 (Unreleased)
+## 1.26.1 (Unreleased)
+
+IMPROVEMENTS
+
+* Added `acl` argument and attribute to `openstack_keymanager_secret_v1`, `openstack_keymanager_container_v1` resources and datasources [GH-956]
+
 ## 1.25.0 (December 25, 2019)
 
 FEATURES
