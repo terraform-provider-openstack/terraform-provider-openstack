@@ -1,4 +1,4 @@
-## 1.26.1 (Unreleased)
+## 1.26.0 (Unreleased)
 
 IMPROVEMENTS
 
