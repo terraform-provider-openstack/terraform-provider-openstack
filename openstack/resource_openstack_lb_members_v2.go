@@ -246,5 +246,11 @@ func resourceMembersV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return CheckDeleted(d, err, "Error deleting members")
 	}
 
+	// Wait for parent pool to become active before continuing.
+	err = waitForLBV2Pool(lbClient, parentPool, "ACTIVE", lbPendingStatuses, timeout)
+	if err != nil {
+		return CheckDeleted(d, err, "Error waiting for the members' pool status")
+	}
+
 	return nil
 }
