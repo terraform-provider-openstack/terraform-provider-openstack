@@ -221,9 +221,9 @@ resource "openstack_lb_members_v2" "members_1" {
   }
 
   timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
+    create = "10m"
+    update = "10m"
+    delete = "10m"
   }
 }
 `
@@ -280,9 +280,9 @@ resource "openstack_lb_members_v2" "members_1" {
   }
 
   timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
+    create = "10m"
+    update = "10m"
+    delete = "10m"
   }
 }
 `
@@ -337,9 +337,9 @@ resource "openstack_lb_members_v2" "members_1" {
   }
 
   timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
+    create = "10m"
+    update = "10m"
+    delete = "10m"
   }
 }
 `
@@ -380,9 +380,9 @@ resource "openstack_lb_members_v2" "members_1" {
   pool_id = "${openstack_lb_pool_v2.pool_1.id}"
 
   timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
+    create = "10m"
+    update = "10m"
+    delete = "10m"
   }
 }
 `
