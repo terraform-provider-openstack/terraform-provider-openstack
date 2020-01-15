@@ -64,6 +64,29 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
 }
 ```
 
+### Secret with the ACL
+
+~> **Note** Only read ACLs are supported
+
+```hcl
+resource "openstack_keymanager_secret_v1" "secret_1" {
+  name                 = "certificate"
+  payload              = "${file("certificate.pem")}"
+  secret_type          = "certificate"
+  payload_content_type = "text/plain"
+
+  acl {
+    read {
+      project_access = false
+      users = [
+        "userid1",
+        "userid2",
+      ]
+    }
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -94,6 +117,22 @@ The following arguments are supported:
 
 * `metadata` - (Optional) Additional Metadata for the secret.
 
+* `acl` - (Optional) Allows to control an access to a secret. Currently only the
+  `read` operation is supported. If not specified, the secret is accessible
+  project wide.
+
+The `acl` `read` block supports:
+
+* `project_access` - (Optional) Whether the secret is accessible project wide.
+  Defaults to `true`.
+
+* `users` - (Optional) The list of user IDs, which are allowed to access the
+  secret, when `project_access` is set to `false`.
+
+* `created_at` - (Computed) The date the secret ACL was created.
+
+* `updated_at` - (Computed) The date the secret ACL was last updated.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -107,6 +146,7 @@ The following attributes are exported:
 * `secret_type` - See Argument Reference above.
 * `payload` - See Argument Reference above.
 * `payload_content_type` - See Argument Reference above.
+* `acl` - See Argument Reference above.
 * `payload_content_encoding` - See Argument Reference above.
 * `expiration` - See Argument Reference above.
 * `content_types` - The map of the content types, assigned on the secret.
