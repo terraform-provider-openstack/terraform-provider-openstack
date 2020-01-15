@@ -93,7 +93,7 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `id` - The unique ID for the L7 {olicy.
+* `id` - The unique ID for the L7 Policy.
 * `region` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
 * `name` - See Argument Reference above.
