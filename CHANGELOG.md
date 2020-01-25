@@ -4,6 +4,10 @@ IMPROVEMENTS
 
 * Added `acl` argument and attribute to `openstack_keymanager_secret_v1`, `openstack_keymanager_container_v1` resources and datasources [GH-956]
 
+BUG FIXES
+
+* Fixed the documentation bug for the `id` attribute of the `lb_policy_v2` resource [GH-957]
+
 ## 1.25.0 (December 25, 2019)
 
 FEATURES
