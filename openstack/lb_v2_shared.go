@@ -50,7 +50,7 @@ func chooseLBV2AccTestClient(config *Config, region string) (*gophercloud.Servic
 
 // chooseLBV2ListenerCreateOpts will determine which load balancer listener Create options to use:
 // Either the Octavia/LBaaS or the Neutron/Networking v2.
-func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config) neutronlisteners.CreateOptsBuilder {
+func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config) (neutronlisteners.CreateOptsBuilder, error) {
 	adminStateUp := d.Get("admin_state_up").(bool)
 
 	var sniContainerRefs []string
@@ -102,6 +102,14 @@ func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config) neutro
 			opts.TimeoutTCPInspect = &timeoutTCPInspect
 		}
 
+		// Get and check insert  headers map.
+		rawHeaders := d.Get("insert_headers").(map[string]interface{})
+		headers, err := expandLBV2ListenerHeadersMap(rawHeaders)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse insert_headers argument: %s", err)
+		}
+		opts.InsertHeaders = headers
+
 		createOpts = opts
 	} else {
 		// Use Neutron.
@@ -126,7 +134,7 @@ func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config) neutro
 		createOpts = opts
 	}
 
-	return createOpts
+	return createOpts, nil
 }
 
 // chooseLBV2ListenerUpdateOpts will determine which load balancer listener Update options to use:
@@ -142,46 +150,55 @@ func chooseLBV2ListenerUpdateOpts(d *schema.ResourceData, config *Config) neutro
 			name := d.Get("name").(string)
 			opts.Name = &name
 		}
+
 		if d.HasChange("description") {
 			hasChange = true
 			description := d.Get("description").(string)
 			opts.Description = &description
 		}
+
 		if d.HasChange("connection_limit") {
 			hasChange = true
 			connLimit := d.Get("connection_limit").(int)
 			opts.ConnLimit = &connLimit
 		}
+
 		if d.HasChange("timeout_client_data") {
 			hasChange = true
 			timeoutClientData := d.Get("timeout_client_data").(int)
 			opts.TimeoutClientData = &timeoutClientData
 		}
+
 		if d.HasChange("timeout_member_connect") {
 			hasChange = true
 			timeoutMemberConnect := d.Get("timeout_member_connect").(int)
 			opts.TimeoutMemberConnect = &timeoutMemberConnect
 		}
+
 		if d.HasChange("timeout_member_data") {
 			hasChange = true
 			timeoutMemberData := d.Get("timeout_member_data").(int)
 			opts.TimeoutMemberData = &timeoutMemberData
 		}
+
 		if d.HasChange("timeout_tcp_inspect") {
 			hasChange = true
 			timeoutTCPInspect := d.Get("timeout_tcp_inspect").(int)
 			opts.TimeoutTCPInspect = &timeoutTCPInspect
 		}
+
 		if d.HasChange("default_pool_id") {
 			hasChange = true
 			defaultPoolID := d.Get("default_pool_id").(string)
 			opts.DefaultPoolID = &defaultPoolID
 		}
+
 		if d.HasChange("default_tls_container_ref") {
 			hasChange = true
 			defaultTlsContainerRef := d.Get("default_tls_container_ref").(string)
 			opts.DefaultTlsContainerRef = &defaultTlsContainerRef
 		}
+
 		if d.HasChange("sni_container_refs") {
 			hasChange = true
 			var sniContainerRefs []string
@@ -192,6 +209,7 @@ func chooseLBV2ListenerUpdateOpts(d *schema.ResourceData, config *Config) neutro
 			}
 			opts.SniContainerRefs = &sniContainerRefs
 		}
+
 		if d.HasChange("admin_state_up") {
 			hasChange = true
 			asu := d.Get("admin_state_up").(bool)
@@ -209,26 +227,31 @@ func chooseLBV2ListenerUpdateOpts(d *schema.ResourceData, config *Config) neutro
 			name := d.Get("name").(string)
 			opts.Name = &name
 		}
+
 		if d.HasChange("description") {
 			hasChange = true
 			description := d.Get("description").(string)
 			opts.Description = &description
 		}
+
 		if d.HasChange("connection_limit") {
 			hasChange = true
 			connLimit := d.Get("connection_limit").(int)
 			opts.ConnLimit = &connLimit
 		}
+
 		if d.HasChange("default_pool_id") {
 			hasChange = true
 			defaultPoolID := d.Get("default_pool_id").(string)
 			opts.DefaultPoolID = &defaultPoolID
 		}
+
 		if d.HasChange("default_tls_container_ref") {
 			hasChange = true
 			defaultTlsContainerRef := d.Get("default_tls_container_ref").(string)
 			opts.DefaultTlsContainerRef = &defaultTlsContainerRef
 		}
+
 		if d.HasChange("sni_container_refs") {
 			hasChange = true
 			var sniContainerRefs []string
@@ -239,6 +262,7 @@ func chooseLBV2ListenerUpdateOpts(d *schema.ResourceData, config *Config) neutro
 			}
 			opts.SniContainerRefs = &sniContainerRefs
 		}
+
 		if d.HasChange("admin_state_up") {
 			hasChange = true
 			asu := d.Get("admin_state_up").(bool)
@@ -251,6 +275,20 @@ func chooseLBV2ListenerUpdateOpts(d *schema.ResourceData, config *Config) neutro
 	}
 
 	return nil
+}
+
+func expandLBV2ListenerHeadersMap(raw map[string]interface{}) (map[string]string, error) {
+	m := make(map[string]string, len(raw))
+	for key, val := range raw {
+		labelValue, ok := val.(string)
+		if !ok {
+			return nil, fmt.Errorf("label %s value should be string", key)
+		}
+
+		m[key] = labelValue
+	}
+
+	return m, nil
 }
 
 func waitForLBV2Listener(lbClient *gophercloud.ServiceClient, listener *listeners.Listener, target string, pending []string, timeout time.Duration) error {
