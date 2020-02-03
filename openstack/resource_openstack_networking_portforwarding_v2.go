@@ -61,6 +61,11 @@ func resourceNetworkingPortForwardingV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -80,6 +85,8 @@ func resourceNetworkPortForwardingV2Create(d *schema.ResourceData, meta interfac
 		InternalPortID:    d.Get("internal_port_id").(string),
 		Protocol:          d.Get("protocol").(string),
 	}
+
+	// TODO: add description.
 
 	log.Printf("[DEBUG] openstack_networking_portforwarding_v2 create options: %#v", createOpts)
 
@@ -133,6 +140,8 @@ func resourceNetworkPortForwardingV2Read(d *schema.ResourceData, meta interface{
 	d.Set("protocol", pf.Protocol)
 	d.Set("region", GetRegion(d, config))
 
+	// TODO: add description.
+
 	return nil
 }
 
@@ -170,6 +179,8 @@ func resourceNetworkPortForwardingV2Update(d *schema.ResourceData, meta interfac
 		protocol := d.Get("protocol").(string)
 		updateOpts.Protocol = protocol
 	}
+
+	// TODO: add description.
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_networking_portforwarding_v2 %s update options: %#v", d.Id(), updateOpts)
