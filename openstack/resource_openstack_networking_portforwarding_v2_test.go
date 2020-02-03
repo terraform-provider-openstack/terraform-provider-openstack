@@ -11,6 +11,7 @@ import (
 
 func TestAccNetworkingV2Portforwarding_basic(t *testing.T) {
 	var pf portforwarding.PortForwarding
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -74,7 +75,7 @@ func testAccCheckNetworkingV2PortForwardingExists(n string, fipID string, kp *po
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("PortForwarding not found")
+			return fmt.Errorf("openstack_networking_portforwarding_v2 not found")
 		}
 
 		*kp = *found
@@ -105,7 +106,6 @@ resource "openstack_networking_router_v2" "router_1" {
   admin_state_up = "true"
 }
 
-
 resource "openstack_networking_port_v2" "port_1" {
   admin_state_up = "true"
   network_id = "${openstack_networking_network_v2.network_1.id}"
@@ -120,7 +120,6 @@ resource "openstack_networking_router_interface_v2" "router_interface_1" {
   router_id = "${openstack_networking_router_v2.router_1.id}"
   port_id = "${openstack_networking_port_v2.port_1.id}"
 }
-
 
 resource "openstack_networking_floatingip_v2" "fip_1" {
   description = "test"
