@@ -39,7 +39,7 @@ func testAccCheckNetworkingV2PortForwardingDestroy(s *terraform.State) error {
 		if rs.Type != "openstack_networking_portforwarding_v2" {
 			continue
 		}
-		fipId := rs.Primary.Attributes["fip_id"]
+		fipId := rs.Primary.Attributes["floatingip_id"]
 		primId := rs.Primary.ID
 		_, err := portforwarding.Get(networkClient, fipId, primId).Extract()
 		if err == nil {
@@ -134,7 +134,7 @@ resource "openstack_networking_portforwarding_v2" "pf_1" {
   internal_port = 25
   internal_port_id = "${openstack_networking_port_v2.port_1.id}"
   external_port = 2230
-  fip_id = "${openstack_networking_floatingip_v2.fip_1.id}"
+  floatingip_id = "${openstack_networking_floatingip_v2.fip_1.id}"
   depends_on = [openstack_networking_port_v2.port_1, openstack_networking_floatingip_v2.fip_1]
 }
 `, OS_EXTGW_ID, OS_POOL_NAME)

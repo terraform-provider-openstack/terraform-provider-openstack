@@ -31,7 +31,7 @@ func resourceNetworkingPortForwardingV2() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"fip_id": {
+			"floatingip_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -72,7 +72,7 @@ func resourceNetworkPortForwardingV2Create(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	fipID := d.Get("fip_id").(string)
+	fipID := d.Get("floatingip_id").(string)
 	createOpts := portforwarding.CreateOpts{
 		InternalIPAddress: d.Get("internal_ip_address").(string),
 		ExternalPort:      d.Get("external_port").(int),
@@ -116,7 +116,7 @@ func resourceNetworkPortForwardingV2Read(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	fipID := d.Get("fip_id").(string)
+	fipID := d.Get("floatingip_id").(string)
 
 	pf, err := portforwarding.Get(networkingClient, fipID, d.Id()).Extract()
 	if err != nil {
@@ -189,7 +189,7 @@ func resourceNetworkPortForwardingV2Delete(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	fipID := d.Get("fip_id").(string)
+	fipID := d.Get("floatingip_id").(string)
 
 	if err := portforwarding.Delete(networkingClient, fipID, d.Id()).ExtractErr(); err != nil {
 		return CheckDeleted(d, err, "Error deleting openstack_networking_portforwarding_v2")
