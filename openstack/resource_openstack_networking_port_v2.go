@@ -117,8 +117,9 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"subnet_id": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.NoZeroValues,
 						},
 						"ip_address": {
 							Type:     schema.TypeString,
