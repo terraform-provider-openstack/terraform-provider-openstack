@@ -169,13 +169,21 @@ func expandNetworkingPortFixedIPV2(d *schema.ResourceData) interface{} {
 		return nil
 	}
 
-	ip := make([]ports.IP, len(rawIP))
-	for i, raw := range rawIP {
+	ip := make([]ports.IP, 0, len(rawIP))
+	for _, raw := range rawIP {
+		if raw == nil {
+			continue
+		}
 		rawMap := raw.(map[string]interface{})
-		ip[i] = ports.IP{
+		subnetID := rawMap["subnet_id"].(string)
+		ipAddress := rawMap["ip_address"].(string)
+		if subnetID == "" && ipAddress == "" {
+			continue
+		}
+		ip = append(ip, ports.IP{
 			SubnetID:  rawMap["subnet_id"].(string),
 			IPAddress: rawMap["ip_address"].(string),
-		}
+		})
 	}
 	return ip
 }
