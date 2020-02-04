@@ -179,7 +179,7 @@ The following arguments are supported:
 
 The `fixed_ip` block supports:
 
-* `subnet_id` - (Required) Subnet in which to allocate IP address for
+* `subnet_id` - (Optional) Subnet in which to allocate IP address for
 this port.
 
 * `ip_address` - (Optional) IP address desired in the subnet for this port. If
