@@ -1352,7 +1352,7 @@ func checkBlockDeviceConfig(d *schema.ResourceData) error {
 				}
 			}
 
-			if vM["volume_type"] != ""  {
+			if vM["volume_type"] != "" {
 				computeClient.Microversion = computeV2InstanceBlockDeviceVolumeTypeMicroversion
 			}
 		}
