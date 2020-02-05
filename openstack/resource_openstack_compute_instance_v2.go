@@ -488,11 +488,6 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 			CreateOptsBuilder: createOpts,
 			BlockDevice:       blockDevices,
 		}
-
-		specifyVolumeType := d.Get("volume_type").(bool)
-		if specifyVolumeType {
-			computeClient.Microversion = computeV2InstanceBlockDeviceVolumeTypeMicroversion
-		}
 	}
 
 	schedulerHintsRaw := d.Get("scheduler_hints").(*schema.Set).List()
@@ -1355,6 +1350,10 @@ func checkBlockDeviceConfig(d *schema.ResourceData) error {
 				if vM["volume_size"] == 0 {
 					return fmt.Errorf("You must specify a volume_size when creating a blank block device")
 				}
+			}
+
+			if vM["volume_type"] != ""  {
+				computeClient.Microversion = computeV2InstanceBlockDeviceVolumeTypeMicroversion
 			}
 		}
 	}
