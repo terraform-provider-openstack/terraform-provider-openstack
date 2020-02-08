@@ -489,7 +489,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
     delete = "5m"
   }
 
-  insert_headers {
+  insert_headers = {
     X-Forwarded-For = "true"
     X-Forwarded-Port = "false"
   }
@@ -539,7 +539,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
     delete = "5m"
   }
 
-  insert_headers {
+  insert_headers = {
     X-Forwarded-For = "false"
     X-Forwarded-Port = "true"
   }

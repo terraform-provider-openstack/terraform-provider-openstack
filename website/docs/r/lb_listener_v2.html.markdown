@@ -18,7 +18,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
   protocol_port   = 8080
   loadbalancer_id = "d9415786-5f1a-428b-b35f-2f1523e146d2"
 
-  insert_headers {
+  insert_headers = {
     X-Forwarded-For = "true"
   }
 }
