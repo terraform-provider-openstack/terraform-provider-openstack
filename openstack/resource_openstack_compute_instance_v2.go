@@ -484,6 +484,14 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 			return err
 		}
 
+		// Check if VolumeType was set in any of the Block Devices.
+		// If so, set the client's microversion appropriately.
+		for _, bd := range blockDevices {
+			if bd.VolumeType != "" {
+				computeClient.Microversion = computeV2InstanceBlockDeviceVolumeTypeMicroversion
+			}
+		}
+
 		createOpts = &bootfromvolume.CreateOptsExt{
 			CreateOptsBuilder: createOpts,
 			BlockDevice:       blockDevices,
@@ -1350,10 +1358,6 @@ func checkBlockDeviceConfig(d *schema.ResourceData) error {
 				if vM["volume_size"] == 0 {
 					return fmt.Errorf("You must specify a volume_size when creating a blank block device")
 				}
-			}
-
-			if vM["volume_type"] != "" {
-				computeClient.Microversion = computeV2InstanceBlockDeviceVolumeTypeMicroversion
 			}
 		}
 	}
