@@ -157,6 +157,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
   vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+
+  timeouts {
+    create = "15m"
+    update = "15m"
+    delete = "15m"
+  }
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
@@ -205,6 +211,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
   vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+
+  timeouts {
+    create = "15m"
+    update = "15m"
+    delete = "15m"
+  }
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
@@ -254,6 +266,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
   vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+
+  timeouts {
+    create = "15m"
+    update = "15m"
+    delete = "15m"
+  }
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
@@ -303,6 +321,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
   vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+
+  timeouts {
+    create = "15m"
+    update = "15m"
+    delete = "15m"
+  }
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
@@ -353,6 +377,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
   vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+
+  timeouts {
+    create = "15m"
+    update = "15m"
+    delete = "15m"
+  }
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {

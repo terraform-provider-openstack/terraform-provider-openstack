@@ -200,9 +200,9 @@ func testAccLBV2LoadBalancerConfig_basic(lbProvider string) string {
       vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
 
       timeouts {
-        create = "5m"
-        update = "5m"
-        delete = "5m"
+        create = "15m"
+        update = "15m"
+        delete = "15m"
       }
     }`, lbProvider)
 }
@@ -228,9 +228,9 @@ func testAccLBV2LoadBalancerConfig_update(lbProvider string) string {
       vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
 
       timeouts {
-        create = "5m"
-        update = "5m"
-        delete = "5m"
+        create = "15m"
+        update = "15m"
+        delete = "15m"
       }
     }`, lbProvider)
 }
@@ -263,6 +263,12 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
     security_group_ids = [
       "${openstack_networking_secgroup_v2.secgroup_1.id}"
     ]
+
+    timeouts {
+      create = "15m"
+      update = "15m"
+      delete = "15m"
+    }
 }
 `
 
@@ -295,6 +301,12 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
       "${openstack_networking_secgroup_v2.secgroup_1.id}",
       "${openstack_networking_secgroup_v2.secgroup_2.id}"
     ]
+
+    timeouts {
+      create = "15m"
+      update = "15m"
+      delete = "15m"
+    }
 }
 `
 
@@ -327,5 +339,11 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
       "${openstack_networking_secgroup_v2.secgroup_2.id}"
     ]
     depends_on = ["openstack_networking_secgroup_v2.secgroup_1"]
+
+    timeouts {
+      create = "15m"
+      update = "15m"
+      delete = "15m"
+    }
 }
 `
