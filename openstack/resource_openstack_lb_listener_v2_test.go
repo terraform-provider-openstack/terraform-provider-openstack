@@ -18,7 +18,7 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2ListenerConfig_basic,
+				Config: testAccLBV2ListenerConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
@@ -26,7 +26,7 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: TestAccLBV2ListenerConfig_update,
+				Config: testAccLBV2ListenerConfig_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "name", "listener_1_updated"),
@@ -50,7 +50,7 @@ func TestAccLBV2Listener_octavia(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2ListenerConfig_octavia,
+				Config: testAccLBV2ListenerConfig_octavia,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
@@ -66,7 +66,7 @@ func TestAccLBV2Listener_octavia(t *testing.T) {
 				),
 			},
 			{
-				Config: TestAccLBV2ListenerConfig_octavia_update,
+				Config: testAccLBV2ListenerConfig_octavia_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "name", "listener_1_updated"),
@@ -98,7 +98,7 @@ func TestAccLBV2Listener_octavia_udp(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2ListenerConfig_octavia_udp,
+				Config: testAccLBV2ListenerConfig_octavia_udp,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
@@ -109,7 +109,7 @@ func TestAccLBV2Listener_octavia_udp(t *testing.T) {
 	})
 }
 
-func TestAccLBV2Listener_octavia_insert_headers(t *testing.T) {
+func TestAccLBV2ListenerConfig_basic(t *testing.T) {
 	var listener listeners.Listener
 
 	resource.Test(t, resource.TestCase{
@@ -121,21 +121,9 @@ func TestAccLBV2Listener_octavia_insert_headers(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2ListenerConfig_octavia_insert_headers_1,
+				Config: testAccLBV2ListenerConfig_octavia_insert_headers_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "name", "listener_1_insert_headers_1"),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "connection_limit", "100"),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_client_data", "4000"),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_member_connect", "3000"),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_member_data", "2000"),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_tcp_inspect", "1000"),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "insert_headers.X-Forwarded-For", "true"),
 					resource.TestCheckResourceAttr(
@@ -143,21 +131,9 @@ func TestAccLBV2Listener_octavia_insert_headers(t *testing.T) {
 				),
 			},
 			{
-				Config: TestAccLBV2ListenerConfig_octavia_insert_headers_2,
+				Config: testAccLBV2ListenerConfig_octavia_insert_headers_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "name", "listener_1_insert_headers_2"),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "connection_limit", "100"),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_client_data", "4000"),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_member_connect", "3000"),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_member_data", "2000"),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_tcp_inspect", "1000"),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "insert_headers.X-Forwarded-For", "false"),
 					resource.TestCheckResourceAttr(
@@ -165,19 +141,9 @@ func TestAccLBV2Listener_octavia_insert_headers(t *testing.T) {
 				),
 			},
 			{
-				Config: TestAccLBV2ListenerConfig_octavia,
+				Config: testAccLBV2ListenerConfig_octavia,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "connection_limit", "5"),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_client_data", "1000"),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_member_connect", "2000"),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_member_data", "3000"),
-					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "timeout_tcp_inspect", "4000"),
 					resource.TestCheckNoResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "insert_headers.X-Forwarded-For"),
 					resource.TestCheckNoResourceAttr(
@@ -241,7 +207,7 @@ func testAccCheckLBV2ListenerExists(n string, listener *listeners.Listener) reso
 	}
 }
 
-const TestAccLBV2ListenerConfig_basic = `
+const testAccLBV2ListenerConfig_basic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -281,7 +247,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
 }
 `
 
-const TestAccLBV2ListenerConfig_update = `
+const testAccLBV2ListenerConfig_update = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -315,7 +281,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
 }
 `
 
-const TestAccLBV2ListenerConfig_octavia = `
+const testAccLBV2ListenerConfig_octavia = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -360,7 +326,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
 }
 `
 
-const TestAccLBV2ListenerConfig_octavia_update = `
+const testAccLBV2ListenerConfig_octavia_update = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -406,7 +372,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
 }
 `
 
-const TestAccLBV2ListenerConfig_octavia_udp = `
+const testAccLBV2ListenerConfig_octavia_udp = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -446,7 +412,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
 }
 `
 
-const TestAccLBV2ListenerConfig_octavia_insert_headers_1 = `
+const testAccLBV2ListenerConfig_octavia_insert_headers_1 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -475,28 +441,23 @@ resource "openstack_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  connection_limit = 100
-  timeout_client_data = 4000
-  timeout_member_connect = 3000
-  timeout_member_data = 2000
-  timeout_tcp_inspect = 1000
   default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
-
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
 
   insert_headers = {
     X-Forwarded-For = "true"
     X-Forwarded-Port = "false"
   }
+
+  timeouts {
+    create = "5m"
+    update = "5m"
+    delete = "5m"
+  }
 }
 `
 
-const TestAccLBV2ListenerConfig_octavia_insert_headers_2 = `
+const testAccLBV2ListenerConfig_octavia_insert_headers_2 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -525,23 +486,18 @@ resource "openstack_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  connection_limit = 100
-  timeout_client_data = 4000
-  timeout_member_connect = 3000
-  timeout_member_data = 2000
-  timeout_tcp_inspect = 1000
   default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+
+  insert_headers = {
+    X-Forwarded-For = "false"
+    X-Forwarded-Port = "true"
+  }
 
   timeouts {
     create = "5m"
     update = "5m"
     delete = "5m"
-  }
-
-  insert_headers = {
-    X-Forwarded-For = "false"
-    X-Forwarded-Port = "true"
   }
 }
 `
