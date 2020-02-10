@@ -220,6 +220,8 @@ func chooseLBV2ListenerUpdateOpts(d *schema.ResourceData, config *Config) (neutr
 		}
 
 		if d.HasChange("insert_headers") {
+			hasChange = true
+
 			// Get and check insert headers map.
 			rawHeaders := d.Get("insert_headers").(map[string]interface{})
 			headers, err := expandLBV2ListenerHeadersMap(rawHeaders)

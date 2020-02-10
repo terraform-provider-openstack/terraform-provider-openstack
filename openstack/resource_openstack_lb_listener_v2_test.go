@@ -109,7 +109,7 @@ func TestAccLBV2Listener_octavia_udp(t *testing.T) {
 	})
 }
 
-func TestAccLBV2ListenerConfig_basic(t *testing.T) {
+func TestAccLBV2ListenerConfig_octavia_insert_headers(t *testing.T) {
 	var listener listeners.Listener
 
 	resource.Test(t, resource.TestCase{
