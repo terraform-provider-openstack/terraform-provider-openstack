@@ -132,7 +132,7 @@ func resourceListenerV2() *schema.Resource {
 			"insert_headers": {
 				Type:     schema.TypeMap,
 				Optional: true,
-				Computed: true,
+				ForceNew: false,
 			},
 		},
 	}
