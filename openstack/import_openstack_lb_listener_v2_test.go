@@ -15,7 +15,7 @@ func TestAccLBV2Listener_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2ListenerConfig_basic,
+				Config: testAccLBV2ListenerConfig_basic,
 			},
 
 			{
@@ -36,7 +36,7 @@ func TestAccLBV2Listener_importOctavia(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2ListenerConfig_octavia,
+				Config: testAccLBV2ListenerConfig_octavia,
 			},
 
 			{
