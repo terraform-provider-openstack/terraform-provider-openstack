@@ -3,6 +3,7 @@
 IMPROVEMENTS
 
 * Added `acl` argument and attribute to `openstack_keymanager_secret_v1`, `openstack_keymanager_container_v1` resources and datasources [GH-956]
+* Added `insert_headers` argument to `openstack_lb_listener_v2` resource [GH-959]
 
 BUG FIXES
 
