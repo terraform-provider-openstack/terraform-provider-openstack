@@ -406,6 +406,11 @@ The `block_device` block supports:
     termination of the instance. Defaults to false. Changing this creates a
     new server.
 
+* `volume_type` - (Optional) The volume type that will be used, for example SSD
+    or HDD storage. The available options depend on how your specific OpenStack
+    cloud is configured and what classes of storage are provided. Changing this
+    creates a new server.
+
 * `device_type` - (Optional) The low-level device type that will be used. Most
     common thing is to leave this empty. Changing this creates a new server.
 
