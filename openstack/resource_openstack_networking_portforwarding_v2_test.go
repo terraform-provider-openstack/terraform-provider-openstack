@@ -5,12 +5,22 @@ import (
 	"testing"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/portforwarding"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccNetworkingV2Portforwarding_basic(t *testing.T) {
-	var pf portforwarding.PortForwarding
+	var (
+		network networks.Network
+		subnet  subnets.Subnet
+		router  routers.Router
+		port    ports.Port
+		pf      portforwarding.PortForwarding
+	)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -20,6 +30,11 @@ func TestAccNetworkingV2Portforwarding_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingV2PortForwarding_basic,
 				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
+					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
 					testAccCheckNetworkingV2PortForwardingExists("openstack_networking_portforwarding_v2.pf_1", "openstack_networking_floatingip_v2.fip_1", &pf),
 					resource.TestCheckResourceAttr("openstack_networking_portforwarding_v2.pf_1", "internal_port", "25"),
 				),
