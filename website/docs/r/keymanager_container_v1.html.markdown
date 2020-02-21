@@ -12,6 +12,8 @@ Manages a V1 Barbican container resource within OpenStack.
 
 ## Example Usage
 
+### Simple secret
+
 The container with the TLS certificates, which can be used by the loadbalancer HTTPS listener.
 
 ```hcl
@@ -74,6 +76,42 @@ resource "openstack_lb_listener_v2" "listener_1" {
 }
 ```
 
+### Container with the ACL
+
+~> **Note** Only read ACLs are supported
+
+```hcl
+resource "openstack_keymanager_container_v1" "tls_1" {
+  name = "tls"
+  type = "certificate"
+
+  secret_refs {
+    name       = "certificate"
+    secret_ref = "${openstack_keymanager_secret_v1.certificate_1.secret_ref}"
+  }
+
+  secret_refs {
+    name       = "private_key"
+    secret_ref = "${openstack_keymanager_secret_v1.private_key_1.secret_ref}"
+  }
+
+  secret_refs {
+    name       = "intermediates"
+    secret_ref = "${openstack_keymanager_secret_v1.intermediate_1.secret_ref}"
+  }
+
+  acl {
+    read {
+      project_access = false
+      users = [
+        "userid1",
+        "userid2",
+      ]
+    }
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -91,11 +129,27 @@ The following arguments are supported:
 * `secret_refs` - (Optional) A set of dictionaries containing references to secrets. The structure is described
     below.
 
+* `acl` - (Optional) Allows to control an access to a container. Currently only
+  the `read` operation is supported. If not specified, the container is
+  accessible project wide. The `read` structure is described below.
+
 The `secret_refs` block supports:
 
 * `name` - (Optional) The name of the secret reference. The reference names must correspond the container type, more details are available [here](https://docs.openstack.org/barbican/stein/api/reference/containers.html).
 
 * `secret_ref` - (Required) The secret reference / where to find the secret, URL.
+
+The `acl` `read` block supports:
+
+* `project_access` - (Optional) Whether the container is accessible project wide.
+  Defaults to `true`.
+
+* `users` - (Optional) The list of user IDs, which are allowed to access the
+  container, when `project_access` is set to `false`.
+
+* `created_at` - (Computed) The date the container ACL was created.
+
+* `updated_at` - (Computed) The date the container ACL was last updated.
 
 ## Attributes Reference
 
@@ -106,6 +160,7 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `type` - See Argument Reference above.
 * `secret_refs` - See Argument Reference above.
+* `acl` - See Argument Reference above.
 * `creator_id` - The creator of the container.
 * `status` - The status of the container.
 * `created_at` - The date the container was created.

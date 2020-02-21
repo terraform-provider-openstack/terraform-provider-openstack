@@ -1,8 +1,18 @@
-## 1.25.1 (Unreleased)
+## 1.26.0 (Unreleased)
 
 IMPROVEMENTS
 
+* Added `acl` argument and attribute to `openstack_keymanager_secret_v1`, `openstack_keymanager_container_v1` resources and datasources [GH-956]
+* Added `insert_headers` argument to `openstack_lb_listener_v2` resource [GH-959]
 * Added web-download import method to `openstack_images_image_v2` resource [GH-888]
+
+BUG FIXES
+
+* Fixed the documentation bug for the `id` attribute of the `lb_policy_v2` resource [GH-957]
+
+NOTES
+
+* This release drops Ubuntu Trusty and OpenStack Mitaka from it's testing CI environment.
 
 ## 1.25.0 (December 25, 2019)
 

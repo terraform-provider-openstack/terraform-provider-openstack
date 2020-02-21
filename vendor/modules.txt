@@ -77,7 +77,7 @@ github.com/google/go-cmp/cmp/internal/value
 github.com/google/uuid
 # github.com/googleapis/gax-go/v2 v2.0.5
 github.com/googleapis/gax-go/v2
-# github.com/gophercloud/gophercloud v0.7.1-0.20191211202411-f940f50ff1f7
+# github.com/gophercloud/gophercloud v0.8.1-0.20200210022740-9fb9244fa670
 github.com/gophercloud/gophercloud
 github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/quotasets
 github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions
@@ -123,6 +123,7 @@ github.com/gophercloud/gophercloud/openstack/imageservice/v2/imagedata
 github.com/gophercloud/gophercloud/openstack/imageservice/v2/imageimport
 github.com/gophercloud/gophercloud/openstack/imageservice/v2/images
 github.com/gophercloud/gophercloud/openstack/imageservice/v2/members
+github.com/gophercloud/gophercloud/openstack/keymanager/v1/acls
 github.com/gophercloud/gophercloud/openstack/keymanager/v1/containers
 github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets
 github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners

@@ -61,6 +61,64 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 	})
 }
 
+func TestAccKeyManagerContainerV1_acls(t *testing.T) {
+	var container containers.Container
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckSecretV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKeyManagerContainerV1_acls,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckContainerV1Exists(
+						"openstack_keymanager_container_v1.container_1", &container),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "name", &container.Name),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "type", &container.Type),
+					resource.TestCheckResourceAttr("openstack_keymanager_container_v1.container_1", "secret_refs.#", "3"),
+					resource.TestCheckResourceAttr("openstack_keymanager_container_v1.container_1", "acl.0.read.0.project_access", "false"),
+					resource.TestCheckResourceAttr("openstack_keymanager_container_v1.container_1", "acl.0.read.0.users.#", "2"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
+	var container containers.Container
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckSecretV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKeyManagerContainerV1_acls,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckContainerV1Exists(
+						"openstack_keymanager_container_v1.container_1", &container),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "name", &container.Name),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "type", &container.Type),
+					resource.TestCheckResourceAttr("openstack_keymanager_container_v1.container_1", "secret_refs.#", "3"),
+					resource.TestCheckResourceAttr("openstack_keymanager_container_v1.container_1", "acl.0.read.0.project_access", "false"),
+					resource.TestCheckResourceAttr("openstack_keymanager_container_v1.container_1", "acl.0.read.0.users.#", "2"),
+				),
+			},
+			{
+				Config: testAccKeyManagerContainerV1_acls_update,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckContainerV1Exists(
+						"openstack_keymanager_container_v1.container_1", &container),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "name", &container.Name),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "type", &container.Type),
+					resource.TestCheckResourceAttr("openstack_keymanager_container_v1.container_1", "secret_refs.#", "3"),
+					resource.TestCheckResourceAttr("openstack_keymanager_container_v1.container_1", "acl.0.read.0.project_access", "true"),
+					resource.TestCheckResourceAttr("openstack_keymanager_container_v1.container_1", "acl.0.read.0.users.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckContainerV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	kmClient, err := config.KeyManagerV1Client(OS_REGION_NAME)
@@ -207,5 +265,67 @@ var testAccKeyManagerContainerV1_update2 = fmt.Sprintf(`
 resource "openstack_keymanager_container_v1" "container_1" {
   name = "generic"
   type = "generic"
+}
+`, testAccKeyManagerContainerV1)
+
+var testAccKeyManagerContainerV1_acls = fmt.Sprintf(`
+%s
+
+resource "openstack_keymanager_container_v1" "container_1" {
+  name = "generic"
+  type = "generic"
+
+  secret_refs {
+    name       = "certificate"
+    secret_ref = "${openstack_keymanager_secret_v1.certificate_1.secret_ref}"
+  }
+
+  secret_refs {
+    name       = "private_key"
+    secret_ref = "${openstack_keymanager_secret_v1.private_key_1.secret_ref}"
+  }
+
+  secret_refs {
+    name       = "intermediate"
+    secret_ref = "${openstack_keymanager_secret_v1.intermediate_1.secret_ref}"
+  }
+
+  acl {
+    read {
+      project_access = false
+      users = [
+        "96b3ebddf275996285eae440e71227ba47c651be18391b0f2ebf1032ebae5dca",
+        "619e2ad074321cf246b03a89e95afee95fb26bb0b2d1fc7ba3bd30fcca25588a",
+      ]
+    }
+  }
+}
+`, testAccKeyManagerContainerV1)
+
+var testAccKeyManagerContainerV1_acls_update = fmt.Sprintf(`
+%s
+
+resource "openstack_keymanager_container_v1" "container_1" {
+  name = "generic"
+  type = "generic"
+
+  secret_refs {
+    name       = "certificate"
+    secret_ref = "${openstack_keymanager_secret_v1.certificate_1.secret_ref}"
+  }
+
+  secret_refs {
+    name       = "private_key"
+    secret_ref = "${openstack_keymanager_secret_v1.private_key_1.secret_ref}"
+  }
+
+  secret_refs {
+    name       = "intermediate"
+    secret_ref = "${openstack_keymanager_secret_v1.intermediate_1.secret_ref}"
+  }
+
+  acl {
+    read {}
+  }
 }
 `, testAccKeyManagerContainerV1)
