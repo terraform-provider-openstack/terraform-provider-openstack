@@ -4,6 +4,7 @@ IMPROVEMENTS
 
 * Added `acl` argument and attribute to `openstack_keymanager_secret_v1`, `openstack_keymanager_container_v1` resources and datasources [GH-956]
 * Added `insert_headers` argument to `openstack_lb_listener_v2` resource [GH-959]
+* Added `block_device.volume_type` argument to `openstack_compute_instance_v2` resource [GH-963]
 
 BUG FIXES
 
