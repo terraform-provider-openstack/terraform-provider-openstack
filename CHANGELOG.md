@@ -8,11 +8,11 @@ IMPROVEMENTS
 
 BUG FIXES
 
-* Fixed the documentation bug for the `id` attribute of the `lb_policy_v2` resource [GH-957]
+* Fixed documentation bug for the `id` attribute of the `lb_policy_v2` resource [GH-957]
 
 NOTES
 
-* This release drops Ubuntu Trusty and OpenStack Mitaka from it's testing CI environment.
+* This release drops Ubuntu Trusty and OpenStack Mitaka from testing CI environment.
 
 ## 1.25.0 (December 25, 2019)
 
