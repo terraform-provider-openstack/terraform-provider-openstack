@@ -247,6 +247,11 @@ func resourceComputeInstanceV2() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 						},
+						"volume_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
 						"device_type": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -477,6 +482,14 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 		blockDevices, err := resourceInstanceBlockDevicesV2(d, vL.([]interface{}))
 		if err != nil {
 			return err
+		}
+
+		// Check if VolumeType was set in any of the Block Devices.
+		// If so, set the client's microversion appropriately.
+		for _, bd := range blockDevices {
+			if bd.VolumeType != "" {
+				computeClient.Microversion = computeV2InstanceBlockDeviceVolumeTypeMicroversion
+			}
 		}
 
 		createOpts = &bootfromvolume.CreateOptsExt{
@@ -1055,6 +1068,7 @@ func resourceOpenStackComputeInstanceV2ImportState(d *schema.ResourceData, meta 
 				"source_type":           "image",
 				"volume_size":           volMetaData.Size,
 				"disk_bus":              "",
+				"volume_type":           "",
 				"device_type":           "",
 			}
 
@@ -1115,6 +1129,7 @@ func resourceInstanceBlockDevicesV2(d *schema.ResourceData, bds []interface{}) (
 			BootIndex:           bdM["boot_index"].(int),
 			DeleteOnTermination: bdM["delete_on_termination"].(bool),
 			GuestFormat:         bdM["guest_format"].(string),
+			VolumeType:          bdM["volume_type"].(string),
 			DeviceType:          bdM["device_type"].(string),
 			DiskBus:             bdM["disk_bus"].(string),
 		}
