@@ -1,15 +1,15 @@
-## 1.26.0 (Unreleased)
+## 1.26.0 (February 25, 2020)
 
 IMPROVEMENTS
 
-* Added `acl` argument and attribute to `openstack_keymanager_secret_v1`, `openstack_keymanager_container_v1` resources and datasources [GH-956]
-* Added `insert_headers` argument to `openstack_lb_listener_v2` resource [GH-959]
-* Added `block_device.volume_type` argument to `openstack_compute_instance_v2` resource [GH-963]
-* Updated `terraform-plugin-sdk` to `v1.7.0` [GH-970]
+* Added `acl` argument and attribute to `openstack_keymanager_secret_v1`, `openstack_keymanager_container_v1` resources and datasources ([#956](https://github.com/terraform-providers/terraform-provider-openstack/issues/956))
+* Added `insert_headers` argument to `openstack_lb_listener_v2` resource ([#959](https://github.com/terraform-providers/terraform-provider-openstack/issues/959))
+* Added `block_device.volume_type` argument to `openstack_compute_instance_v2` resource ([#963](https://github.com/terraform-providers/terraform-provider-openstack/issues/963))
+* Updated `terraform-plugin-sdk` to `v1.7.0` ([#970](https://github.com/terraform-providers/terraform-provider-openstack/issues/970))
 
 BUG FIXES
 
-* Fixed documentation bug for the `id` attribute of the `lb_policy_v2` resource [GH-957]
+* Fixed documentation bug for the `id` attribute of the `lb_policy_v2` resource ([#957](https://github.com/terraform-providers/terraform-provider-openstack/issues/957))
 
 NOTES
 
