@@ -93,7 +93,7 @@ func testAccOpenStackIdentityUserV3DataSource_user(name, password string) string
 	  password = "%s"
 	  default_project_id = "${openstack_identity_project_v3.project_1.id}"
 	}
-`, testAccOpenStackIdentityProjectV3DataSource_project(fmt.Sprintf("%s_project", name), acctest.RandString(20)), name, password)
+`, testAccOpenStackIdentityProjectV3DataSource_project(fmt.Sprintf("%s_project", name), acctest.RandString(20), "tag1", "tag2"), name, password)
 }
 
 func testAccOpenStackIdentityUserV3DataSource_basic(name, password string) string {
