@@ -478,7 +478,7 @@ const testAccImagesImageV2_properties_4 = `
 const testAccImagesImageV2_webdownload = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "http://81.83.239.248/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
       web_download = true
