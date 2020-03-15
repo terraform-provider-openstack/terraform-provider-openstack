@@ -23,7 +23,6 @@ func TestAccComputeV2Instance_importBasic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
-					"detach_ports_before_destroy",
 					"stop_before_destroy",
 					"force_delete",
 				},
@@ -50,7 +49,6 @@ func TestAccComputeV2Instance_DetachPortsBeforeDelete(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"stop_before_destroy",
-					"detach_ports_before_destroy",
 					"force_delete",
 				},
 			},
@@ -74,7 +72,6 @@ func TestAccComputeV2Instance_importbootFromVolumeForceNew_1(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"stop_before_destroy",
-					"detach_ports_before_destroy",
 					"force_delete",
 				},
 			},
@@ -98,7 +95,6 @@ func TestAccComputeV2Instance_importbootFromVolumeImage(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"stop_before_destroy",
-					"detach_ports_before_destroy",
 					"force_delete",
 				},
 			},
