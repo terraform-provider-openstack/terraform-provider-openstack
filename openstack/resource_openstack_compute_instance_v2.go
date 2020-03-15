@@ -351,11 +351,6 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"detach_ports_before_destroy": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
 			"force_delete": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -383,6 +378,11 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ignore_resize_confirmation": {
+							Type:     schema.TypeBool,
+							Default:  false,
+							Optional: true,
+						},
+						"detach_ports_before_destroy": {
 							Type:     schema.TypeBool,
 							Default:  false,
 							Optional: true,
@@ -917,7 +917,13 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 			}
 		}
 	}
-	if d.Get("detach_ports_before_destroy").(bool) {
+	vendorOptionsRaw := d.Get("vendor_options").(*schema.Set)
+	var detachPortBeforeDestroy bool
+	if vendorOptionsRaw.Len() > 0 {
+		vendorOptions := expandVendorOptions(vendorOptionsRaw.List())
+		detachPortBeforeDestroy = vendorOptions["detach_ports_before_destroy"].(bool)
+	}
+	if detachPortBeforeDestroy {
 		allInstanceNetworks, err := getAllInstanceNetworks(d, meta)
 		if err != nil {
 			return CheckDeleted(d, err, "Unable to get openstack_compute_instance_v2 ports")

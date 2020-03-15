@@ -1124,9 +1124,11 @@ resource "openstack_networking_port_v2" "port_1" {
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
-  detach_ports_before_destroy = true
+  vendor_options {
+    detach_ports_before_destroy = true
+  }
   network {
-    port = "${openstack_networking_port_v2.port_4.id}"
+    port = "${openstack_networking_port_v2.port_1.id}"
   }
 }
 `, OS_NETWORK_ID)
