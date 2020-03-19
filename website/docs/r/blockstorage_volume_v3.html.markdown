@@ -67,18 +67,18 @@ The following arguments are supported:
 * `multiattach` - (Optional) Allow the volume to be attached to more than one Compute instance.
 
 * `scheduler_hints` - (Optional) Provide the Cinder scheduler with hints on where
-    the volume will be created in the OpenStack cloud. The available hints are described below.
+    to instantiate a volume in the OpenStack cloud. The available hints are described below.
     
 The `scheduler_hints` block supports:
 
-* `different_host` - (Optional) A list of volume UUIDs. The volume will
-    be scheduled on a different host than all other volumes.
+* `different_host` - (Optional) The volume should be scheduled on a 
+    different host from the set of volumes specified in the list provided.
 
-* `same_host` - (Optional) A list of volume UUIDs. The volume will be
-    scheduled on the same host of those specified.
+* `same_host` - (Optional) A list of volume UUIDs. The volume should be
+    scheduled on the same host as another volume specified in the list provided.
 
-* `local_to_instance` - (Optional) An instance UUID. The volume will be 
-    placed on the same host as the given instance.
+* `local_to_instance` - (Optional) An instance UUID. The volume should be 
+    scheduled on the same host as the instance.
 
 * `query` - (Optional) A conditional query that a back-end must pass in
     order to host a volume. The query must use the `JsonFilter` syntax
