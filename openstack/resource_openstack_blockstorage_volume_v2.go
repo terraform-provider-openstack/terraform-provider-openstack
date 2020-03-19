@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints"
 	"log"
 	"time"
 
@@ -126,6 +127,42 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 				},
 				Set: blockStorageVolumeV2AttachmentHash,
 			},
+			"scheduler_hints": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"different_host": {
+							Type:     schema.TypeList,
+							Optional: true,
+							ForceNew: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"same_host": {
+							Type:     schema.TypeList,
+							Optional: true,
+							ForceNew: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"query": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"local_to_instance": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"additional_properties": {
+							Type:     schema.TypeMap,
+							Optional: true,
+							ForceNew: true,
+						},
+					},
+				},
+				Set: blockStorageExtensionsSchedulerHintsHash,
+			},
 		},
 	}
 }
@@ -138,7 +175,7 @@ func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}
 	}
 
 	metadata := d.Get("metadata").(map[string]interface{})
-	createOpts := &volumes.CreateOpts{
+	volumeCreateOpts := &volumes.CreateOpts{
 		AvailabilityZone:   d.Get("availability_zone").(string),
 		ConsistencyGroupID: d.Get("consistency_group_id").(string),
 		Description:        d.Get("description").(string),
@@ -150,6 +187,19 @@ func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}
 		SourceReplica:      d.Get("source_replica").(string),
 		SourceVolID:        d.Get("source_vol_id").(string),
 		VolumeType:         d.Get("volume_type").(string),
+	}
+
+	var createOpts schedulerhints.CreateOptsExt
+	var schedulerHints schedulerhints.SchedulerHints
+
+	schedulerHintsRaw := d.Get("scheduler_hints").(*schema.Set).List()
+	if len(schedulerHintsRaw) > 0 {
+		log.Printf("[DEBUG] schedulerhints: %+v", schedulerHintsRaw)
+		schedulerHints = resourceBlockStorageSchedulerHintsV2(d, schedulerHintsRaw[0].(map[string]interface{}))
+	}
+	createOpts = schedulerhints.CreateOptsExt{
+		VolumeCreateOptsBuilder: volumeCreateOpts,
+		SchedulerHints:          schedulerHints,
 	}
 
 	log.Printf("[DEBUG] openstack_blockstorage_volume_v2 create options: %#v", createOpts)
@@ -324,4 +374,30 @@ func resourceBlockStorageVolumeV2Delete(d *schema.ResourceData, meta interface{}
 	}
 
 	return nil
+}
+
+func resourceBlockStorageSchedulerHintsV2(d *schema.ResourceData, schedulerHintsRaw map[string]interface{}) schedulerhints.SchedulerHints {
+	var differentHost []string
+	if v, ok := schedulerHintsRaw["different_host"].([]interface{}); ok {
+		for _, dh := range v {
+			differentHost = append(differentHost, dh.(string))
+		}
+	}
+
+	var sameHost []string
+	if v, ok := schedulerHintsRaw["same_host"].([]interface{}); ok {
+		for _, sh := range v {
+			sameHost = append(sameHost, sh.(string))
+		}
+	}
+
+	schedulerHints := schedulerhints.SchedulerHints{
+		DifferentHost:        differentHost,
+		SameHost:             sameHost,
+		Query:                schedulerHintsRaw["query"].(string),
+		LocalToInstance:      schedulerHintsRaw["local_to_instance"].(string),
+		AdditionalProperties: schedulerHintsRaw["additional_properties"].(map[string]interface{}),
+	}
+
+	return schedulerHints
 }

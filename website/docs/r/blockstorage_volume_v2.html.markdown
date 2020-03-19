@@ -61,6 +61,34 @@ The following arguments are supported:
 * `volume_type` - (Optional) The type of volume to create.
     Changing this creates a new volume.
 
+* `scheduler_hints` - (Optional) Provide the Cinder scheduler with hints on where
+    the volume will be created in the OpenStack cloud. The available hints are described below.
+    
+The `scheduler_hints` block supports:
+
+* `different_host` - (Optional) A list of volume UUIDs. The volume will
+    be scheduled on a different host than all other volumes.
+
+* `same_host` - (Optional) A list of volume UUIDs. The volume will be
+    scheduled on the same host of those specified.
+
+* `local_to_instance` - (Optional) An instance UUID. The volume will be 
+    placed on the same host as the given instance.
+
+* `query` - (Optional) A conditional query that a back-end must pass in
+    order to host a volume. The query must use the `JsonFilter` syntax
+    which is described
+    [here](https://docs.openstack.org/cinder/latest/configuration/block-storage/scheduler-filters.html#jsonfilter).
+    At this time, only simple queries are supported. Compound queries using
+    `and`, `or`, or `not` are not supported. An example of a simple query is:
+
+    ```
+    [“=”, “$backend_id”, “rbd:vol@ceph#cloud”]
+    ```
+
+* `additional_properties` - (Optional) Arbitrary key/value pairs of additional
+  properties to pass to the scheduler.
+
 ## Attributes Reference
 
 The following attributes are exported:
