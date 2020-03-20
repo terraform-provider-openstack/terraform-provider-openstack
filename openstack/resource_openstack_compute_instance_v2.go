@@ -926,21 +926,22 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 	if detachPortBeforeDestroy {
 		allInstanceNetworks, err := getAllInstanceNetworks(d, meta)
 		if err != nil {
-			return CheckDeleted(d, err, "Unable to get openstack_compute_instance_v2 ports")
-		}
+			log.Printf("[WARN] Unable to get openstack_compute_instance_v2 ports: %s", err)
+		} else {
 
-		for _, network := range allInstanceNetworks {
-			if network.Port != "" {
-				stateConf := &resource.StateChangeConf{
-					Pending:    []string{""},
-					Target:     []string{"DETACHED"},
-					Refresh:    computeInterfaceAttachV2DetachFunc(computeClient, d.Id(), network.Port),
-					Timeout:    d.Timeout(schema.TimeoutDelete),
-					Delay:      5 * time.Second,
-					MinTimeout: 5 * time.Second,
-				}
-				if _, err = stateConf.WaitForState(); err != nil {
-					return fmt.Errorf("Error detaching openstack_compute_instance_v2 %s: %s", d.Id(), err)
+			for _, network := range allInstanceNetworks {
+				if network.Port != "" {
+					stateConf := &resource.StateChangeConf{
+						Pending:    []string{""},
+						Target:     []string{"DETACHED"},
+						Refresh:    computeInterfaceAttachV2DetachFunc(computeClient, d.Id(), network.Port),
+						Timeout:    d.Timeout(schema.TimeoutDelete),
+						Delay:      5 * time.Second,
+						MinTimeout: 5 * time.Second,
+					}
+					if _, err = stateConf.WaitForState(); err != nil {
+						return fmt.Errorf("Error detaching openstack_compute_instance_v2 %s: %s", d.Id(), err)
+					}
 				}
 			}
 		}
