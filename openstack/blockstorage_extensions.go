@@ -10,8 +10,19 @@ import (
 
 func flattenBlockStorageExtensionsSchedulerHints(v schedulerhints.SchedulerHints) map[string]interface{} {
 	schedulerHints := make(map[string]interface{})
-	schedulerHints["same_host"] = v.SameHost
-	schedulerHints["different_host"] = v.DifferentHost
+
+	var differentHost []interface{}
+	for _, dh := range v.DifferentHost {
+		differentHost = append(differentHost, dh)
+	}
+
+	var sameHost []interface{}
+	for _, sh := range v.SameHost {
+		sameHost = append(sameHost, sh)
+	}
+
+	schedulerHints["different_host"] = differentHost
+	schedulerHints["same_host"] = sameHost
 	schedulerHints["local_to_instance"] = v.LocalToInstance
 	schedulerHints["query"] = v.Query
 	schedulerHints["additional_properties"] = v.AdditionalProperties
@@ -36,8 +47,8 @@ func blockStorageExtensionsSchedulerHintsHash(v interface{}) int {
 		}
 	}
 
-	buf.WriteString(fmt.Sprintf("%s-", m["different_host"].([]string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["same_host"].([]string)))
+	buf.WriteString(fmt.Sprintf("%s-", m["different_host"].([]interface{})))
+	buf.WriteString(fmt.Sprintf("%s-", m["same_host"].([]interface{})))
 
 	return hashcode.String(buf.String())
 }

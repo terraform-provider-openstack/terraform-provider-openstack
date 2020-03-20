@@ -16,8 +16,8 @@ var blockStorageExtensionsSchedulerHints = schedulerhints.SchedulerHints{
 
 func TestFlattenBlockStorageExtensionsSchedulerHints(t *testing.T) {
 	expectedSchedulerHints := map[string]interface{}{
-		"same_host":             []string{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
-		"different_host":        []string{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
+		"same_host":             []interface{}{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
+		"different_host":        []interface{}{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
 		"local_to_instance":     "83ec2e3b-4321-422b-8706-a84185f52a0a",
 		"query":                 "[“=”, “$backend_id”, “rbd:vol@ceph#cloud”]",
 		"additional_properties": map[string]interface{}{},
