@@ -399,6 +399,11 @@ func resourceComputeInstanceV2() *schema.Resource {
 							Default:  false,
 							Optional: true,
 						},
+						"detach_ports_before_destroy": {
+							Type:     schema.TypeBool,
+							Default:  false,
+							Optional: true,
+						},
 					},
 				},
 			},
@@ -977,7 +982,35 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 			}
 		}
 	}
+	vendorOptionsRaw := d.Get("vendor_options").(*schema.Set)
+	var detachPortBeforeDestroy bool
+	if vendorOptionsRaw.Len() > 0 {
+		vendorOptions := expandVendorOptions(vendorOptionsRaw.List())
+		detachPortBeforeDestroy = vendorOptions["detach_ports_before_destroy"].(bool)
+	}
+	if detachPortBeforeDestroy {
+		allInstanceNetworks, err := getAllInstanceNetworks(d, meta)
+		if err != nil {
+			log.Printf("[WARN] Unable to get openstack_compute_instance_v2 ports: %s", err)
+		} else {
 
+			for _, network := range allInstanceNetworks {
+				if network.Port != "" {
+					stateConf := &resource.StateChangeConf{
+						Pending:    []string{""},
+						Target:     []string{"DETACHED"},
+						Refresh:    computeInterfaceAttachV2DetachFunc(computeClient, d.Id(), network.Port),
+						Timeout:    d.Timeout(schema.TimeoutDelete),
+						Delay:      5 * time.Second,
+						MinTimeout: 5 * time.Second,
+					}
+					if _, err = stateConf.WaitForState(); err != nil {
+						return fmt.Errorf("Error detaching openstack_compute_instance_v2 %s: %s", d.Id(), err)
+					}
+				}
+			}
+		}
+	}
 	if d.Get("force_delete").(bool) {
 		log.Printf("[DEBUG] Force deleting OpenStack Instance %s", d.Id())
 		err = servers.ForceDelete(computeClient, d.Id()).ExtractErr()

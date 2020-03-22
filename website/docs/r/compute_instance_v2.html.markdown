@@ -460,6 +460,10 @@ The `vendor_options` block supports:
     to work with some OpenStack clouds which automatically confirm resizing of
     instances after some timeout.
 
+* `detach_ports_before_destroy` - (Optional) Whether to try to detach all attached
+    ports to the vm before destroying it to make sure the port state is correct
+    after the vm destruction. This is helpful when the port is not deleted.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -666,7 +670,7 @@ terraform import openstack_compute_instance_v2.basic_instance <instance_id>
 ### Importing an instance with multiple emphemeral disks
 
 The importer cannot read the emphemeral disk configuration
-of an instance, so just specify image_id as in the configuration 
+of an instance, so just specify image_id as in the configuration
 of the basic instance example.
 
 ### Importing instance with multiple network interfaces.
