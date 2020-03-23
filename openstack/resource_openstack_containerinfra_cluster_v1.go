@@ -156,15 +156,17 @@ func resourceContainerInfraClusterV1() *schema.Resource {
 			},
 
 			"master_addresses": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeList,
 				ForceNew: false,
 				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
 			"node_addresses": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeList,
 				ForceNew: false,
 				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
 			"stack_id": {
