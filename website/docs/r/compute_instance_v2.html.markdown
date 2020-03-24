@@ -312,8 +312,16 @@ The following arguments are supported:
     instance to networks using Ports, place the security groups on the Port
     and not the instance.
 
+* `availability_zone_hints` - (Optional) The availability zone in which to
+    create the server. This argument is preferred to `availability_zone`, when
+    scheduling the server on a
+    [particular](https://docs.openstack.org/nova/latest/admin/availability-zones.html)
+    host or node. Conflicts with `availability_zone`. Changing this creates a
+    new server.
+
 * `availability_zone` - (Optional) The availability zone in which to create
-    the server. Changing this creates a new server.
+    the server. Conflicts with `availability_zone_hints`. Changing this creates
+    a new server.
 
 * `network` - (Optional) An array of one or more networks to attach to the
     instance. The network object structure is documented below. Changing this

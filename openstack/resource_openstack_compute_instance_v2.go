@@ -111,11 +111,18 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
+			"availability_zone_hints": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"availability_zone"},
+			},
 			"availability_zone": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ForceNew:         true,
 				Computed:         true,
+				ConflictsWith:    []string{"availability_zone_hints"},
 				DiffSuppressFunc: suppressAvailabilityZoneDetailDiffs,
 			},
 			"network": {
@@ -419,6 +426,7 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	}
 
 	var createOpts servers.CreateOptsBuilder
+	var availabilityZone string
 
 	// Determines the Image ID using the following rules:
 	// If a bootable block_device was specified, ignore the image altogether.
@@ -461,12 +469,18 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 		computeClient.Microversion = computeV2InstanceCreateServerWithTagsMicroversion
 	}
 
+	if v, ok := d.GetOkExists("availability_zone"); ok {
+		availabilityZone = v.(string)
+	} else {
+		availabilityZone = d.Get("availability_zone_hints").(string)
+	}
+
 	createOpts = &servers.CreateOpts{
 		Name:             d.Get("name").(string),
 		ImageRef:         imageId,
 		FlavorRef:        flavorId,
 		SecurityGroups:   resourceInstanceSecGroupsV2(d),
-		AvailabilityZone: d.Get("availability_zone").(string),
+		AvailabilityZone: availabilityZone,
 		Networks:         networks,
 		Metadata:         resourceInstanceMetadataV2(d),
 		ConfigDrive:      &configDrive,
