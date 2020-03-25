@@ -2,7 +2,12 @@
 
 IMPROVEMENTS
 
+* Added `detach_ports_before_destroy` argument for `compute_instance_v2` resource that allows to detach all instance ports prior trying to delete the instance [GH-866]
 * Added web-download import method to `openstack_images_image_v2` resource [GH-888]
+
+BUG FIXES
+
+* Fixed `master_addresses`, `node_addresses` types to `schema.TypeList` since they are lists of strings instead of just strings [GH-981]
 
 ## 1.26.0 (February 25, 2020)
 
