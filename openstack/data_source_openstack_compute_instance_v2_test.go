@@ -23,7 +23,7 @@ func TestAccComputeV2InstanceDataSource(t *testing.T) {
 					testAccCheckComputeInstanceV2DataSourceId("data.openstack_compute_instance_v2.source_1"),
 					resource.TestCheckResourceAttr("data.openstack_compute_instance_v2.source_1", "name", "instance_1"),
 					resource.TestCheckResourceAttrPair("data.openstack_compute_instance_v2.source_1", "metadata", "openstack_compute_instance_v2.instance_1", "metadata"),
-					resource.TestCheckResourceAttr("data.openstack.compute_instance_v2.source_1", "network.0.uuid", OS_NETWORK_ID),
+					resource.TestCheckResourceAttrSet("data.openstack_compute_instance_v2.source_1", "network.0.name"),
 				),
 			},
 		},
