@@ -12,6 +12,8 @@ Manages a V1 container resource within OpenStack.
 
 ## Example Usage
 
+### Basic Container
+
 ```hcl
 resource "openstack_objectstorage_container_v1" "container_1" {
   region = "RegionOne"
@@ -27,6 +29,50 @@ resource "openstack_objectstorage_container_v1" "container_1" {
     type     = "versions"
     location = "tf-test-container-versions"
   }
+}
+```
+
+### Global Read Access
+
+```hcl
+# Requires that a user know the object name they are attempting to download
+
+resource "openstack_objectstorage_container_v1" "container_1" {
+  region = "RegionOne"
+  name   = "tf-test-container-1"
+
+  container_read = ".r:*"
+}
+```
+
+### Global Read and List Access
+
+```hcl
+# Any user can read any object, and list all objects in the container
+
+resource "openstack_objectstorage_container_v1" "container_1" {
+  region = "RegionOne"
+  name   = "tf-test-container-1"
+
+  container_read = ".r:*,.rlistings"
+}
+```
+
+### Write-Only Access for a User
+
+```hcl
+data "openstack_identity_auth_scope_v3" "current" {
+  name = "current"
+}
+
+# The named user can only upload objects, not read objects or list the container
+
+resource "openstack_objectstorage_container_v1" "container_1" {
+  region = "RegionOne"
+  name   = "tf-test-container-1"
+
+  container_read  = ".r:-${var.username}"
+  container_write = "${data.openstack_identity_auth_scope_v3.current.project_id}:${var.username}"
 }
 ```
 
