@@ -67,7 +67,7 @@ The following arguments are supported:
 
 The `versioning` block supports:
 
-  * `type` - (Required) Versioning type which can be `versions` or `history` according to [Openstack documentation](https://docs.openstack.org/swift/latest/overview_object_versioning.html).
+  * `type` - (Required) Versioning type which can be `versions` or `history` according to [Openstack documentation](https://docs.openstack.org/swift/latest/api/object_versioning.html).
   * `location` - (Required) Container in which versions will be stored.
 
 
