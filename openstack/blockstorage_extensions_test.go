@@ -24,12 +24,12 @@ func TestFlattenBlockStorageExtensionsSchedulerHints(t *testing.T) {
 		"additional_properties": map[string]interface{}{},
 	}
 
-	actualSchedulerHints := flattenBlockStorageExtensionsSchedulerHints(blockStorageExtensionsSchedulerHints)
+	actualSchedulerHints := expandBlockStorageExtensionsSchedulerHints(blockStorageExtensionsSchedulerHints)
 	assert.Equal(t, expectedSchedulerHints, actualSchedulerHints)
 }
 
 func TestBlockStorageExtensionsSchedulerHintsHash(t *testing.T) {
-	s := flattenBlockStorageExtensionsSchedulerHints(blockStorageExtensionsSchedulerHints)
+	s := expandBlockStorageExtensionsSchedulerHints(blockStorageExtensionsSchedulerHints)
 
 	expectedHashcode := 1530836638
 	actualHashcode := blockStorageExtensionsSchedulerHintsHash(s)

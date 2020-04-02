@@ -196,7 +196,7 @@ func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}
 	schedulerHintsRaw := d.Get("scheduler_hints").(*schema.Set).List()
 	if len(schedulerHintsRaw) > 0 {
 		log.Printf("[DEBUG] openstack_blockstorage_volume_v2 scheduler hints: %+v", schedulerHintsRaw)
-		schedulerHints = resourceBlockStorageSchedulerHintsV2(d, schedulerHintsRaw[0].(map[string]interface{}))
+		schedulerHints = resourceBlockStorageSchedulerHints(d, schedulerHintsRaw[0].(map[string]interface{}))
 	}
 	createOpts = schedulerhints.CreateOptsExt{
 		VolumeCreateOptsBuilder: volumeCreateOpts,
@@ -375,30 +375,4 @@ func resourceBlockStorageVolumeV2Delete(d *schema.ResourceData, meta interface{}
 	}
 
 	return nil
-}
-
-func resourceBlockStorageSchedulerHintsV2(d *schema.ResourceData, schedulerHintsRaw map[string]interface{}) schedulerhints.SchedulerHints {
-	var differentHost []string
-	if v, ok := schedulerHintsRaw["different_host"].([]interface{}); ok {
-		for _, dh := range v {
-			differentHost = append(differentHost, dh.(string))
-		}
-	}
-
-	var sameHost []string
-	if v, ok := schedulerHintsRaw["same_host"].([]interface{}); ok {
-		for _, sh := range v {
-			sameHost = append(sameHost, sh.(string))
-		}
-	}
-
-	schedulerHints := schedulerhints.SchedulerHints{
-		DifferentHost:        differentHost,
-		SameHost:             sameHost,
-		Query:                schedulerHintsRaw["query"].(string),
-		LocalToInstance:      schedulerHintsRaw["local_to_instance"].(string),
-		AdditionalProperties: schedulerHintsRaw["additional_properties"].(map[string]interface{}),
-	}
-
-	return schedulerHints
 }
