@@ -12,14 +12,14 @@ import (
 func flattenBlockStorageExtensionsSchedulerHints(v schedulerhints.SchedulerHints) map[string]interface{} {
 	schedulerHints := make(map[string]interface{})
 
-	var differentHost []interface{}
-	for _, dh := range v.DifferentHost {
-		differentHost = append(differentHost, dh)
+	differentHost := make([]interface{}, len(v.DifferentHost))
+	for i, dh := range v.DifferentHost {
+		differentHost[i] = dh
 	}
 
-	var sameHost []interface{}
-	for _, sh := range v.SameHost {
-		sameHost = append(sameHost, sh)
+	sameHost := make([]interface{}, len(v.SameHost))
+	for i, sh := range v.SameHost {
+		sameHost[i] = sh
 	}
 
 	schedulerHints["different_host"] = differentHost
