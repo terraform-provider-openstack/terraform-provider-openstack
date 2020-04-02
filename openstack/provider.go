@@ -378,6 +378,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_sharedfilesystem_share_access_v2":         resourceSharedFilesystemShareAccessV2(),
 			"openstack_keymanager_secret_v1":                     resourceKeyManagerSecretV1(),
 			"openstack_keymanager_container_v1":                  resourceKeyManagerContainerV1(),
+			"openstack_keymanager_order_v1":                      resourceKeyManagerOrderV1(),
 		},
 	}
 
