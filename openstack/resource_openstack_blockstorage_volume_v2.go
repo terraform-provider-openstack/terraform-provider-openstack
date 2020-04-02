@@ -2,9 +2,10 @@ package openstack
 
 import (
 	"fmt"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints"
 	"log"
 	"time"
+
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"

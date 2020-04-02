@@ -1,9 +1,10 @@
 package openstack
 
 import (
+	"testing"
+
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 var blockStorageExtensionsSchedulerHints = schedulerhints.SchedulerHints{

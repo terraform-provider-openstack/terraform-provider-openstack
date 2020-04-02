@@ -3,6 +3,7 @@ package openstack
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
