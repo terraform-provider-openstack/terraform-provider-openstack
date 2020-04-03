@@ -80,6 +80,10 @@ func resourceKeyManagerOrderV1() *schema.Resource {
 					"asymmetric", "key",
 				}, false),
 			},
+			"container_ref": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"created": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -181,6 +185,7 @@ func resourceKeyManagerOrderV1Read(d *schema.ResourceData, meta interface{}) err
 
 	log.Printf("[DEBUG] Retrieved openstack_keymanager_order_v1 %s: %#v", d.Id(), order)
 
+	d.Set("container_ref", order.ContainerRef)
 	d.Set("created", order.Created.Format(time.RFC3339))
 	d.Set("creator_id", order.CreatorID)
 	d.Set("order_ref", order.OrderRef)

@@ -12,16 +12,29 @@ Manages a V1 Barbican order resource within OpenStack.
 
 ## Example Usage
 
-### Basic order
+### Symmetric key order
 
 ```hcl
 resource "openstack_keymanager_order_v1" "order_1" {
   type                 = "key"
-  meta                 = {
+  meta                   {
     algorithm            = "aes"
     bit_length           = 256
     name                 = "mysecret"
     mode                 = "cbc"
+  }
+}
+```
+
+### Asymmetric key pair order
+
+```hcl
+resource "openstack_keymanager_order_v1" "order_1" {
+  type                 = "asymmetric"
+  meta                   {
+    algorithm            = "rsa"
+    bit_length           = 4096
+    name                 = "mysecret"
   }
 }
 ```
@@ -57,6 +70,7 @@ The `meta` block supports:
 
 The following attributes are exported:
 
+* `container_ref` - The container reference / where to find the container.
 * `created` - The date the order was created.
 * `creator_id` - The creator of the order.
 * `meta` - See Argument Reference above.
@@ -75,4 +89,4 @@ Orders can be imported using the order id (the last part of the order reference)
 
 ```
 $ terraform import openstack_keymanager_order_v1.order_1 0c6cd26a-c012-4d7b-8034-057c0f1c2953
-
+```
