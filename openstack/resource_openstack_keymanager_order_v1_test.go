@@ -25,10 +25,10 @@ func TestAccKeyManagerOrderV1_basic(t *testing.T) {
 					testAccCheckOrderV1Exists(
 						"openstack_keymanager_order_v1.test-acc-basic", &order),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_order_v1.test-acc-basic", "type", &order.Type),
-					resource.TestCheckResourceAttrPtr("openstack_keymanager_order_v1.test-acc-basic", "meta.name", &order.Meta.Name),
-					resource.TestCheckResourceAttrPtr("openstack_keymanager_order_v1.test-acc-basic", "meta.algorithm", &order.Meta.Algorithm),
-					resource.TestCheckResourceAttrSet("openstack_keymanager_order_v1.test-acc-basic", "meta.bit_length"),
-					resource.TestCheckResourceAttrPtr("openstack_keymanager_order_v1.test-acc-basic", "meta.mode", &order.Meta.Mode),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_order_v1.test-acc-basic", "meta.0.name", &order.Meta.Name),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_order_v1.test-acc-basic", "meta.0.algorithm", &order.Meta.Algorithm),
+					resource.TestCheckResourceAttrSet("openstack_keymanager_order_v1.test-acc-basic", "meta.0.bit_length"),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_order_v1.test-acc-basic", "meta.0.mode", &order.Meta.Mode),
 				),
 			},
 			{
@@ -99,7 +99,7 @@ func testAccCheckOrderV1Exists(n string, order *orders.Order) resource.TestCheck
 const testAccKeyManagerOrderV1_symmetric = `
 resource "openstack_keymanager_order_v1" "test-acc-basic" {
   type = "key"
-  meta = {
+  meta {
     name = "test-acc-basic"
     algorithm = "aes"
     bit_length = 256

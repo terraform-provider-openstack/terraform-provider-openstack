@@ -2,7 +2,6 @@ package openstack
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -65,16 +64,16 @@ func keyManagerOrderV1GetUUIDfromOrderRef(ref string) string {
 	return uuid
 }
 
-func expandKeyManagerOrderV1Meta(m map[string]interface{}) orders.MetaOpts {
+func expandKeyManagerOrderV1Meta(s []interface{}) orders.MetaOpts {
 	var meta orders.MetaOpts
+	m := s[0].(map[string]interface{})
 
 	if v, ok := m["algorithm"]; ok {
 		meta.Algorithm = v.(string)
 	}
 
 	if v, ok := m["bit_length"]; ok {
-		i, _ := strconv.Atoi(v.(string))
-		meta.BitLength = i
+		meta.BitLength = v.(int)
 	}
 
 	if v, ok := m["expiration"]; ok {
@@ -98,33 +97,34 @@ func expandKeyManagerOrderV1Meta(m map[string]interface{}) orders.MetaOpts {
 	return meta
 }
 
-func flattenKeyManagerOrderV1Meta(m orders.Meta) map[string]interface{} {
-	meta := make(map[string]interface{})
+func flattenKeyManagerOrderV1Meta(m orders.Meta) []map[string]interface{} {
+	var meta []map[string]interface{}
+	s := make(map[string]interface{})
 
 	if m.Algorithm != "" {
-		meta["algorithm"] = m.Algorithm
+		s["algorithm"] = m.Algorithm
 	}
 
 	if m.BitLength != 0 {
-		meta["bit_length"] = strconv.Itoa(m.BitLength)
+		s["bit_length"] = m.BitLength
 	}
 
 	if !m.Expiration.IsZero() {
-		meta["expiration"] = m.Expiration.UTC().Format(time.RFC3339)
+		s["expiration"] = m.Expiration.UTC().Format(time.RFC3339)
 	}
 
 	if m.Mode != "" {
-		meta["mode"] = m.Mode
+		s["mode"] = m.Mode
 	}
 
 	if m.Name != "" {
-		meta["name"] = m.Name
+		s["name"] = m.Name
 	}
 
 	if m.PayloadContentType != "" {
-		meta["payload_content_type"] = m.PayloadContentType
+		s["payload_content_type"] = m.PayloadContentType
 
 	}
 
-	return meta
+	return append(meta, s)
 }

@@ -27,6 +27,59 @@ func resourceKeyManagerOrderV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"meta": {
+				Type:     schema.TypeList,
+				Required: true,
+				ForceNew: true,
+				MaxItems: 1,
+				MinItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"algorithm": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"bit_length": {
+							Type:     schema.TypeInt,
+							Required: true,
+							ForceNew: true,
+						},
+						"expiration": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.ValidateRFC3339TimeString,
+						},
+						"mode": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"payload_content_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"text/plain", "text/plain;charset=utf-8", "text/plain; charset=utf-8", "application/octet-stream", "application/pkcs8",
+							}, true),
+						},
+					},
+				},
+			},
+			"type": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"asymmetric", "key",
+				}, false),
+			},
 			"created": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -34,14 +87,6 @@ func resourceKeyManagerOrderV1() *schema.Resource {
 			"creator_id": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-			"meta": {
-				Type:     schema.TypeMap,
-				Required: true,
-				ForceNew: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
 			},
 			"order_ref": {
 				Type:     schema.TypeString,
@@ -69,14 +114,6 @@ func resourceKeyManagerOrderV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"type": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"asymmetric", "key",
-				}, false),
-			},
 			"updated": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -95,7 +132,7 @@ func resourceKeyManagerOrderV1Create(d *schema.ResourceData, meta interface{}) e
 	}
 
 	orderType := keyManagerOrderV1OrderType(d.Get("type").(string))
-	metaOpts := expandKeyManagerOrderV1Meta(d.Get("meta").(map[string]interface{}))
+	metaOpts := expandKeyManagerOrderV1Meta(d.Get("meta").([]interface{}))
 	createOpts := orders.CreateOpts{
 		Type: orderType,
 		Meta: metaOpts,

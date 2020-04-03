@@ -41,15 +41,17 @@ The following arguments are supported:
 
 The `meta` block supports:
 
-* `algorithm` - Algorithm to use for key generation.
+* `algorithm` - (Required) Algorithm to use for key generation.
 
-* `bit_length` - Bit lenght of key to be generated.
+* `bit_length` - (Required) - Bit lenght of key to be generated.
 
-* `mode` - The mode to use for key generation.
+* `expiration` - (Optional) This is a UTC timestamp in ISO 8601 format YYYY-MM-DDTHH:MM:SSZ. If set, the secret will not be available after this time.
 
-* `name` - Name of the key to generate.
+* `mode` - (Optional) The mode to use for key generation.
 
-* `payload_content_type` - The media type for the content of the payload. Must be one of `text/plain`, `text/plain;charset=utf-8`, `text/plain; charset=utf-8`, `application/octet-stream`, `application/pkcs8`.
+* `name` - (Optional) The name of the secret set by the user.
+
+* `payload_content_type` - (Optional) The media type for the content of the secrets payload. Must be one of `text/plain`, `text/plain;charset=utf-8`, `text/plain; charset=utf-8`, `application/octet-stream`, `application/pkcs8`.
 
 ## Attributes Reference
 
