@@ -209,7 +209,7 @@ func TestAccImagesImageV2_webdownload(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckAdminOnly(t)
+			testAccPreCheckGlanceImport(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckImagesImageV2Destroy,
