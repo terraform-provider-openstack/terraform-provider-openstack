@@ -31,11 +31,6 @@ func TestAccKeyManagerOrderV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_order_v1.test-acc-basic", "meta.0.mode", &order.Meta.Mode),
 				),
 			},
-			{
-				ResourceName:      "openstack_keymanager_order_v1.test-acc-basic",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 		},
 	})
 }
