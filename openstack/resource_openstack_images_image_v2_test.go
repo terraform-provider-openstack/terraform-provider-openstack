@@ -481,12 +481,12 @@ const testAccImagesImageV2_properties_4 = `
 const testAccImagesImageV2_webdownload = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "http://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
       web_download = true
 
       timeouts {
-        create = "15m"
+        create = "10m"
       }
   }`
