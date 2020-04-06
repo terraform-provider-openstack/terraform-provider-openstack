@@ -37,6 +37,7 @@ var (
 	OS_SFS_ENVIRONMENT              = os.Getenv("OS_SFS_ENVIRONMENT")
 	OS_TRANSPARENT_VLAN_ENVIRONMENT = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
 	OS_KEYMANAGER_ENVIRONMENT       = os.Getenv("OS_KEYMANAGER_ENVIRONMENT")
+	OS_GLANCEIMPORT_ENVIRONMENT     = os.Getenv("OS_GLANCEIMPORT_ENVIRONMENT")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -201,6 +202,13 @@ func testAccPreCheckAdminOnly(t *testing.T) {
 	v := os.Getenv("OS_USERNAME")
 	if v != "admin" {
 		t.Skip("Skipping test because it requires the admin user")
+	}
+}
+
+func testAccPreCheckGlanceImport(t *testing.T) {
+
+	if OS_GLANCEIMPORT_ENVIRONMENT == "" {
+		t.Skip("This environment does not support Glance import tests")
 	}
 }
 

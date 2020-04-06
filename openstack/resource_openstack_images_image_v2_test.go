@@ -203,6 +203,35 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 	})
 }
 
+func TestAccImagesImageV2_webdownload(t *testing.T) {
+	var image images.Image
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckGlanceImport(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckImagesImageV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccImagesImageV2_webdownload,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "name", "Rancher TerraformAccTest"),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "container_format", "bare"),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "disk_format", "qcow2"),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "schema", "/v2/schemas/image"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckImagesImageV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	imageClient, err := config.ImageV2Client(OS_REGION_NAME)
@@ -446,5 +475,18 @@ const testAccImagesImageV2_properties_4 = `
       properties = {
         foo = "baz"
         bar = "foo"
+      }
+  }`
+
+const testAccImagesImageV2_webdownload = `
+  resource "openstack_images_image_v2" "image_1" {
+      name   = "Rancher TerraformAccTest"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      container_format = "bare"
+      disk_format = "qcow2"
+      web_download = true
+
+      timeouts {
+        create = "10m"
       }
   }`

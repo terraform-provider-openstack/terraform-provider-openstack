@@ -36,16 +36,16 @@ The following arguments are supported:
    "ami", "ari", "aki", "vhd", "vmdk", "raw", "qcow2", "vdi", "iso".
 
 * `local_file_path` - (Optional) This is the filepath of the raw image file
-   that will be uploaded to Glance. Conflicts with `image_source_url`.
+   that will be uploaded to Glance. Conflicts with `image_source_url` and
+   `web_download`.
 
 * `image_cache_path` - (Optional) This is the directory where the images will
    be downloaded. Images will be stored with a filename corresponding to
    the url's md5 hash. Defaults to "$HOME/.terraform/image_cache"
 
-* `image_source_url` - (Optional) This is the url of the raw image that will
-   be downloaded in the `image_cache_path` before being uploaded to Glance.
-   Glance is able to download image from internet but the `gophercloud` library
-   does not yet provide a way to do so.
+* `image_source_url` - (Optional) This is the url of the raw image. If `web_download`
+   is not used, then the image will be downloaded in the `image_cache_path` before
+   being uploaded to Glance.
    Conflicts with `local_file_path`.
 
 * `min_disk_gb` - (Optional) Amount of disk space (in GB) required to boot image.
@@ -72,11 +72,16 @@ The following arguments are supported:
     At this time, it is not possible to delete all tags of an image.
 
 * `verify_checksum` - (Optional) If false, the checksum will not be verified
-    once the image is finished uploading. Defaults to true.
+    once the image is finished uploading. Conflicts with `web_download`.
+    Defaults to true when not using `web_download`.
 
 * `visibility` - (Optional) The visibility of the image. Must be one of
    "public", "private", "community", or "shared". The ability to set the
    visibility depends upon the configuration of the OpenStack cloud.
+
+* `web_download` - (Optional) If true, the "web-download" import method will
+    be used to let Openstack download the image directly from the remote source.
+    Conflicts with `local_file_path`. Defaults to false.
 
 ## Attributes Reference
 
