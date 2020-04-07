@@ -48,6 +48,7 @@ func TestAccLBV2Members_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
+			testAccPreCheckOctaviaBatchMembersEnv(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2MembersDestroy,

@@ -140,7 +140,7 @@ resource "openstack_lb_member_v2" "member_1" {
   timeouts {
     create = "5m"
     update = "5m"
-    delete = "10m"
+    delete = "5m"
   }
 }
 
@@ -153,7 +153,7 @@ resource "openstack_lb_member_v2" "member_2" {
   timeouts {
     create = "5m"
     update = "5m"
-    delete = "10m"
+    delete = "5m"
   }
 }
 `
@@ -207,7 +207,7 @@ resource "openstack_lb_member_v2" "member_1" {
   timeouts {
     create = "5m"
     update = "5m"
-    delete = "10m"
+    delete = "5m"
   }
 }
 
@@ -222,7 +222,7 @@ resource "openstack_lb_member_v2" "member_2" {
   timeouts {
     create = "5m"
     update = "5m"
-    delete = "10m"
+    delete = "5m"
   }
 }
 `
