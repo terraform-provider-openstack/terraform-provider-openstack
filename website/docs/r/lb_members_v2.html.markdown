@@ -72,7 +72,7 @@ The following attributes are exported:
 
 * `id` - The unique ID for the members.
 * `pool_id` - See Argument Reference above.
-* `members` - See Argument Reference above.
+* `member` - See Argument Reference above.
 
 ## Import
 
