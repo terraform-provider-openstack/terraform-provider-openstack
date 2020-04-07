@@ -978,16 +978,6 @@ func flattenLBPoolPersistenceV2(p pools.SessionPersistence) []map[string]interfa
 	}
 }
 
-func octaviaMemberToNeutronMember(member *octaviapools.Member) *pools.Member {
-	if member == nil {
-		return &pools.Member{}
-	}
-	return &pools.Member{
-		ID:                 member.ID,
-		ProvisioningStatus: member.ProvisioningStatus,
-	}
-}
-
 func flattenLBMembersV2(members []octaviapools.Member) []map[string]interface{} {
 	m := make([]map[string]interface{}, len(members))
 
