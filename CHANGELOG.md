@@ -3,6 +3,7 @@
 FEATURES
 
 * __New Resource__: `openstack_keymanager_order_v1` [GH-992]
+* __New Resource__: `openstack_lb_members_v2` [GH-898]
 
 IMPROVEMENTS
 
