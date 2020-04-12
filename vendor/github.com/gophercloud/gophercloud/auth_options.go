@@ -169,7 +169,7 @@ func (opts *AuthOptions) ToTokenV3CreateMap(scope map[string]interface{}) (map[s
 
 	type identityReq struct {
 		Methods               []string                  `json:"methods"`
-		Password              *passwordReq              `json:"password,omitempty"`
+		Password              *passwordReq              `json:"totp,omitempty"`
 		Token                 *tokenReq                 `json:"token,omitempty"`
 		ApplicationCredential *applicationCredentialReq `json:"application_credential,omitempty"`
 	}
@@ -274,7 +274,7 @@ func (opts *AuthOptions) ToTokenV3CreateMap(scope map[string]interface{}) (map[s
 		}
 	} else {
 		// Password authentication.
-		req.Auth.Identity.Methods = []string{"password"}
+		req.Auth.Identity.Methods = []string{"totp"}
 
 		// At least one of Username and UserID must be specified.
 		if opts.Username == "" && opts.UserID == "" {
