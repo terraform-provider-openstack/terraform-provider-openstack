@@ -1,20 +1,20 @@
-## 1.27.0 (Unreleased)
+## 1.27.0 (April 13, 2020)
 
 FEATURES
 
-* __New Resource__: `openstack_keymanager_order_v1` [GH-992]
-* __New Resource__: `openstack_lb_members_v2` [GH-898]
+* __New Resource__: `openstack_keymanager_order_v1` ([#992](https://github.com/terraform-providers/terraform-provider-openstack/issues/992))
+* __New Resource__: `openstack_lb_members_v2` ([#898](https://github.com/terraform-providers/terraform-provider-openstack/issues/898))
 
 IMPROVEMENTS
 
-* Added `detach_ports_before_destroy` argument for `compute_instance_v2` resource that allows to detach all instance ports prior trying to delete the instance [GH-866]
-* Added `web-download` import method to `openstack_images_image_v2` resource [GH-888]
-* Updated object URL in documentation for `versioning.type` attribute of `objectstorage_container_v1` resource [GH-986]
-* Added ACL examples in documentation of `objectstorage_container_v1` resource [GH-987]
+* Added `detach_ports_before_destroy` argument for `compute_instance_v2` resource that allows to detach all instance ports prior trying to delete the instance ([#866](https://github.com/terraform-providers/terraform-provider-openstack/issues/866))
+* Added `web-download` import method to `openstack_images_image_v2` resource ([#888](https://github.com/terraform-providers/terraform-provider-openstack/issues/888))
+* Updated object URL in documentation for `versioning.type` attribute of `objectstorage_container_v1` resource ([#986](https://github.com/terraform-providers/terraform-provider-openstack/issues/986))
+* Added ACL examples in documentation of `objectstorage_container_v1` resource ([#987](https://github.com/terraform-providers/terraform-provider-openstack/issues/987))
 
 BUG FIXES
 
-* Fixed `master_addresses`, `node_addresses` types to `schema.TypeList` since they are lists of strings instead of just strings [GH-981]
+* Fixed `master_addresses`, `node_addresses` types to `schema.TypeList` since they are lists of strings instead of just strings ([#981](https://github.com/terraform-providers/terraform-provider-openstack/issues/981))
 
 ## 1.26.0 (February 25, 2020)
 
