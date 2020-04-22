@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -11,6 +12,8 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules"
 )
+
+var resourceNetworkingSecGroupRuleMutex = &sync.Mutex{}
 
 func resourceNetworkingSecGroupRuleV2() *schema.Resource {
 	return &schema.Resource{
@@ -159,6 +162,9 @@ func resourceNetworkingSecGroupRuleV2Create(d *schema.ResourceData, meta interfa
 
 	log.Printf("[DEBUG] openstack_networking_secgroup_rule_v2 create options: %#v", opts)
 
+	resourceNetworkingSecGroupRuleMutex.Lock()
+	defer resourceNetworkingSecGroupRuleMutex.Unlock()
+
 	sgRule, err := rules.Create(networkingClient, opts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error creating openstack_networking_secgroup_rule_v2: %s", err)
@@ -205,6 +211,9 @@ func resourceNetworkingSecGroupRuleV2Delete(d *schema.ResourceData, meta interfa
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
+
+	resourceNetworkingSecGroupRuleMutex.Lock()
+	defer resourceNetworkingSecGroupRuleMutex.Unlock()
 
 	if err := rules.Delete(networkingClient, d.Id()).ExtractErr(); err != nil {
 		return CheckDeleted(d, err, "Error deleting openstack_networking_secgroup_rule_v2")
