@@ -191,9 +191,8 @@ func resourceKeyManagerSecretV1Create(d *schema.ResourceData, meta interface{}) 
 	}
 
 	var expiration *time.Time
-	if v, _ := time.Parse(time.RFC3339, d.Get("expiration").(string)); v != (time.Time{}) {
-		expiration = new(time.Time)
-		*expiration = v
+	if v, err := time.Parse(time.RFC3339, d.Get("expiration").(string)); err == nil {
+		expiration = &v
 	}
 
 	secretType := keyManagerSecretV1SecretType(d.Get("secret_type").(string))
