@@ -130,3 +130,16 @@ The following attributes are exported:
 * `versioning` - See Argument Reference above.
 * `metadata` - See Argument Reference above.
 * `content_type` - See Argument Reference above.
+
+## Import
+
+This resource can be imported by specifying the name of the container:
+
+Some attributes can't be imported :
+* `force_destroy`
+* `container_sync_to` (missing reading field in [Gophercloud](https://github.com/gophercloud/gophercloud/issues/1958))
+* `container_sync_key` (missing reading field in [Gophercloud](https://github.com/gophercloud/gophercloud/issues/1958))
+
+```
+$ terraform import openstack_objectstorage_container_v1.container_1 <name>
+```

@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/containers"
@@ -18,6 +19,9 @@ func resourceObjectStorageContainerV1() *schema.Resource {
 		Read:   resourceObjectStorageContainerV1Read,
 		Update: resourceObjectStorageContainerV1Update,
 		Delete: resourceObjectStorageContainerV1Delete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -148,7 +152,62 @@ func resourceObjectStorageContainerV1Read(d *schema.ResourceData, meta interface
 		return CheckDeleted(d, result.Err, "container")
 	}
 
-	d.Set("region", GetRegion(d, config))
+	container, err := result.Extract()
+	if err != nil {
+		return err
+	}
+	log.Printf("[DEBUG] Retrieved ObjectStorage Definition for container '%s' : %#v", d.Id(), container)
+
+	metadata, err := result.ExtractMetadata()
+	if err != nil {
+		return err
+	}
+	log.Printf("[DEBUG] Retrieved ObjectStorage Metadata for container '%s' : %#v", d.Id(), metadata)
+
+	err = d.Set("name", d.Id())
+	err = d.Set("content_type", strings.Split(container.ContentType, ";")[0])
+
+	if len(container.Read) > 0 && container.Read[0] != "" {
+		err = d.Set("container_read", strings.Join(container.Read, ","))
+	}
+
+	if len(container.Write) > 0 && container.Write[0] != "" {
+		err = d.Set("container_write", strings.Join(container.Write, ","))
+	}
+
+	versioningResource := resourceObjectStorageContainerV1().Schema["versioning"].Elem.(*schema.Resource)
+
+	if container.VersionsLocation != "" && container.HistoryLocation != "" {
+		return fmt.Errorf("error reading ObjectStorage Definition for container '%s': found both VersionsLocation ('%s') and HistoryLocation ('%s')", d.Id(), container.VersionsLocation, container.HistoryLocation)
+	}
+
+	if container.VersionsLocation != "" {
+		versioning := map[string]interface{}{
+			"type":     "versions",
+			"location": container.VersionsLocation,
+		}
+		err = d.Set("versioning", schema.NewSet(schema.HashResource(versioningResource), []interface{}{versioning}))
+	}
+
+	if container.HistoryLocation != "" {
+		versioning := map[string]interface{}{
+			"type":     "history",
+			"location": container.HistoryLocation,
+		}
+		err = d.Set("versioning", schema.NewSet(schema.HashResource(versioningResource), []interface{}{versioning}))
+	}
+
+	lowercaseMetadata := map[string]string{}
+	for k, v := range metadata {
+		lowercaseMetadata[strings.ToLower(k)] = v
+	}
+	err = d.Set("metadata", lowercaseMetadata)
+
+	err = d.Set("region", GetRegion(d, config))
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

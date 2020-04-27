@@ -69,6 +69,22 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 }
 `
 
+const testAccObjectStorageV1Container_complete = `
+resource "openstack_objectstorage_container_v1" "container_1" {
+  name = "container_1"
+  metadata = {
+    test = "true"
+  }
+  content_type = "application/json"
+  versioning {
+    type = "versions"
+    location = "othercontainer"
+  }
+  container_read = ".r:*,.rlistings"
+  container_write = "*"
+}
+`
+
 const testAccObjectStorageV1Container_update = `
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "container_1"
