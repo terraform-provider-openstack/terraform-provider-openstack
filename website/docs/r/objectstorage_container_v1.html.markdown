@@ -141,6 +141,8 @@ Some attributes can't be imported :
 * `container_sync_to` (missing reading field in [Gophercloud](https://github.com/gophercloud/gophercloud/issues/1958))
 * `container_sync_key` (missing reading field in [Gophercloud](https://github.com/gophercloud/gophercloud/issues/1958))
 
+So you'll have to `terraform plan` and `terraform apply` after the import to fix those missing attributes.
+
 ```
 $ terraform import openstack_objectstorage_container_v1.container_1 <name>
 ```
