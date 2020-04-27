@@ -24,6 +24,7 @@ func TestAccObjectStorageV1Container_importBasic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{
 					"force_destroy",
 					"content_type",
+					"metadata",
 				},
 			},
 		},

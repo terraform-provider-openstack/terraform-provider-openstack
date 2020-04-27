@@ -196,12 +196,6 @@ func resourceObjectStorageContainerV1Read(d *schema.ResourceData, meta interface
 		err = d.Set("versioning", schema.NewSet(schema.HashResource(versioningResource), []interface{}{versioning}))
 	}
 
-	lowercaseMetadata := map[string]string{}
-	for k, v := range metadata {
-		lowercaseMetadata[strings.ToLower(k)] = v
-	}
-	err = d.Set("metadata", lowercaseMetadata)
-
 	err = d.Set("region", GetRegion(d, config))
 
 	if err != nil {

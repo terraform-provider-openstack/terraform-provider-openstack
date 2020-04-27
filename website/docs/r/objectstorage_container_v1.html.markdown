@@ -138,6 +138,7 @@ This resource can be imported by specifying the name of the container:
 Some attributes can't be imported :
 * `force_destroy`
 * `content_type`
+* `metadata`
 * `container_sync_to` (missing reading field in [Gophercloud](https://github.com/gophercloud/gophercloud/issues/1958))
 * `container_sync_key` (missing reading field in [Gophercloud](https://github.com/gophercloud/gophercloud/issues/1958))
 
