@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-func TestAccObjectStorageContainerV1_importBasic(t *testing.T) {
+func TestAccObjectStorageV1Container_importBasic(t *testing.T) {
 	resourceName := "openstack_objectstorage_container_v1.container_1"
 
 	resource.Test(t, resource.TestCase{
@@ -23,6 +23,7 @@ func TestAccObjectStorageContainerV1_importBasic(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"force_destroy",
+					"content_type",
 				},
 			},
 		},

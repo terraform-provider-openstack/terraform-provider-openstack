@@ -165,7 +165,6 @@ func resourceObjectStorageContainerV1Read(d *schema.ResourceData, meta interface
 	log.Printf("[DEBUG] Retrieved ObjectStorage Metadata for container '%s' : %#v", d.Id(), metadata)
 
 	err = d.Set("name", d.Id())
-	err = d.Set("content_type", strings.Split(container.ContentType, ";")[0])
 
 	if len(container.Read) > 0 && container.Read[0] != "" {
 		err = d.Set("container_read", strings.Join(container.Read, ","))
