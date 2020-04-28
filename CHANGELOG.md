@@ -1,4 +1,9 @@
 ## 1.28.0 (Unreleased)
+
+BUG FIXES
+
+* Fixed race conditions for `networking_secgroup_rule_v2` resource on some OpenStack environments [GH-994]
+
 ## 1.27.0 (April 13, 2020)
 
 FEATURES
