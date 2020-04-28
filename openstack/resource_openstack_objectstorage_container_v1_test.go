@@ -24,6 +24,10 @@ func TestAccObjectStorageV1Container_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_container_v1.container_1", "name", "container_1"),
 					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_container_v1.container_1", "metadata.test", "true"),
+					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_container_v1.container_1", "metadata.upperTest", "true"),
+					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_container_v1.container_1", "content_type", "application/json"),
 				),
 			},
@@ -64,8 +68,26 @@ resource "openstack_objectstorage_container_v1" "container_1" {
   name = "container_1"
   metadata = {
     test = "true"
+    upperTest = "true"
   }
   content_type = "application/json"
+}
+`
+
+const testAccObjectStorageV1Container_complete = `
+resource "openstack_objectstorage_container_v1" "container_1" {
+  name = "container_1"
+  metadata = {
+    test = "true"
+    upperTest = "true"
+  }
+  content_type = "application/json"
+  versioning {
+    type = "versions"
+    location = "othercontainer"
+  }
+  container_read = ".r:*,.rlistings"
+  container_write = "*"
 }
 `
 

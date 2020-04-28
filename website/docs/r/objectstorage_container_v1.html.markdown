@@ -130,3 +130,20 @@ The following attributes are exported:
 * `versioning` - See Argument Reference above.
 * `metadata` - See Argument Reference above.
 * `content_type` - See Argument Reference above.
+
+## Import
+
+This resource can be imported by specifying the name of the container:
+
+Some attributes can't be imported :
+* `force_destroy`
+* `content_type`
+* `metadata`
+* `container_sync_to`
+* `container_sync_key`
+
+So you'll have to `terraform plan` and `terraform apply` after the import to fix those missing attributes.
+
+```
+$ terraform import openstack_objectstorage_container_v1.container_1 <name>
+```
