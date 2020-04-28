@@ -107,7 +107,6 @@ func resourceNetworkingSecGroupRuleV2() *schema.Resource {
 }
 
 func resourceNetworkingSecGroupRuleV2Create(d *schema.ResourceData, meta interface{}) error {
-
 	securityGroupId := d.Get("security_group_id").(string)
 	osMutexKV.Lock(securityGroupId)
 	defer osMutexKV.Unlock(securityGroupId)
@@ -205,7 +204,6 @@ func resourceNetworkingSecGroupRuleV2Read(d *schema.ResourceData, meta interface
 }
 
 func resourceNetworkingSecGroupRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
-
 	securityGroupId := d.Get("security_group_id").(string)
 	osMutexKV.Lock(securityGroupId)
 	defer osMutexKV.Unlock(securityGroupId)
