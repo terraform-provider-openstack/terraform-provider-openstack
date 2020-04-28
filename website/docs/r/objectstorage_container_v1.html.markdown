@@ -139,8 +139,8 @@ Some attributes can't be imported :
 * `force_destroy`
 * `content_type`
 * `metadata`
-* `container_sync_to` (missing reading field in [Gophercloud](https://github.com/gophercloud/gophercloud/issues/1958))
-* `container_sync_key` (missing reading field in [Gophercloud](https://github.com/gophercloud/gophercloud/issues/1958))
+* `container_sync_to`
+* `container_sync_key`
 
 So you'll have to `terraform plan` and `terraform apply` after the import to fix those missing attributes.
 
