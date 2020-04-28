@@ -1,5 +1,9 @@
 ## 1.28.0 (Unreleased)
 
+IMPROVEMENTS
+
+* Added support to import `objectstorage_container_v1` resource. Some attributes can't be imported yet: `force_destroy`, `content_type`, `metadata`, `container_sync_to`, `container_sync_key` [GH-998]
+
 BUG FIXES
 
 * Fixed race conditions for `networking_secgroup_rule_v2` resource on some OpenStack environments [GH-994]
