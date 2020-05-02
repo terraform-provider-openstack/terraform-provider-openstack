@@ -1,5 +1,9 @@
 ## 1.28.0 (Unreleased)
 
+NOTES
+
+* This release sets `delayed_auth` and `allow_reauth` to `true` so Terraform provider won't request a new Identity token for every request against OpenStack API. We're happy to see you feedback about this change in our provider repo.
+
 IMPROVEMENTS
 
 * Provider parameters `delayed_auth` and `allow_reauth` are set to `true` by default [GH-996]
@@ -11,10 +15,6 @@ BUG FIXES
 
 * Fixed race conditions for `networking_secgroup_rule_v2` resource on some OpenStack environments [GH-994]
 * Fixed error logs for `keymanager_secret_v1` resource [GH-997]
-
-NOTES
-
-* This release sets `delayed_auth` and `allow_reauth` to `true` so Terraform provider won't request a new Identity token for every request against OpenStack API. We're happy to see you feedback about this change in our provider repo.
 
 ## 1.27.0 (April 13, 2020)
 
