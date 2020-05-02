@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/gophercloud/gophercloud"
@@ -131,4 +132,20 @@ func networkingSubnetV2AllocationPoolsMatch(oldPools, newPools []interface{}) bo
 	}
 
 	return true
+}
+
+func networkingSubnetV2DNSNameserverAreUnique(raw []interface{}) error {
+	set := make(map[string]struct{})
+	for _, rawNS := range raw {
+		nameserver, ok := rawNS.(string)
+		if ok {
+			if _, exists := set[nameserver]; exists {
+				return fmt.Errorf("got duplicate nameserver %s", nameserver)
+			} else {
+				set[nameserver] = struct{}{}
+			}
+		}
+	}
+
+	return nil
 }

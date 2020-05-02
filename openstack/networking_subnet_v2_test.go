@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
@@ -203,4 +204,28 @@ func TestNetworkingSubnetV2AllocationPoolsMatch(t *testing.T) {
 
 	same = networkingSubnetV2AllocationPoolsMatch(oldPools, newPools)
 	assert.Equal(t, same, false)
+}
+
+func TestNetworkingSubnetV2DNSNameserverAreUnique(t *testing.T) {
+	tableTest := []struct {
+		input []interface{}
+		err   error
+	}{
+		{
+			input: []interface{}{"192.168.199.2", "192.168.199.3"},
+			err:   nil,
+		},
+		{
+			input: []interface{}{"192.168.199.1", "192.168.199.5", "192.168.199.1"},
+			err:   errors.New("got duplicate nameserver 192.168.199.1"),
+		},
+		{
+			input: []interface{}{},
+			err:   nil,
+		},
+	}
+
+	for _, test := range tableTest {
+		assert.Equal(t, test.err, networkingSubnetV2DNSNameserverAreUnique(test.input))
+	}
 }

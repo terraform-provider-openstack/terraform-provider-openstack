@@ -149,11 +149,10 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 			},
 
 			"dns_nameservers": {
-				Type:         schema.TypeList,
-				Optional:     true,
-				ForceNew:     false,
-				Elem:         &schema.Schema{Type: schema.TypeString},
-				ValidateFunc: validation.ListOfUniqueStrings,
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: false,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
 			"host_routes": {
@@ -234,6 +233,11 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+	}
+
+	// Check nameservers.
+	if err := networkingSubnetV2DNSNameserverAreUnique(d.Get("dns_nameservers").([]interface{})); err != nil {
+		return fmt.Errorf("openstack_networking_subnet_v2 dns_nameservers argument is invalid: %s", err)
 	}
 
 	// Get raw allocation pool value.
@@ -416,6 +420,9 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if d.HasChange("dns_nameservers") {
+		if err := networkingSubnetV2DNSNameserverAreUnique(d.Get("dns_nameservers").([]interface{})); err != nil {
+			return fmt.Errorf("openstack_networking_subnet_v2 dns_nameservers argument is invalid: %s", err)
+		}
 		hasChange = true
 		nameservers := expandToStringSlice(d.Get("dns_nameservers").([]interface{}))
 		updateOpts.DNSNameservers = &nameservers
