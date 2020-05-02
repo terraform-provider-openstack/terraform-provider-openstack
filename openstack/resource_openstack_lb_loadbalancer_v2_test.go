@@ -386,6 +386,7 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
   loadbalancer_provider = "octavia"
   vip_network_id = "${openstack_networking_network_v2.network_1.id}"
+  depends_on = ["openstack_networking_subnet_v2.subnet_1"]
   timeouts {
     create = "15m"
     update = "15m"
