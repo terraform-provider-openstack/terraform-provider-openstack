@@ -55,7 +55,8 @@ The following arguments are supported:
 
 * `lb_method` - (Required) The load balancing algorithm to
     distribute traffic to the pool's members. Must be one of
-    ROUND_ROBIN, LEAST_CONNECTIONS, or SOURCE_IP.
+    ROUND_ROBIN, LEAST_CONNECTIONS, SOURCE_IP, or SOURCE_IP_PORT (supported only
+    in Octavia).
 
 * `persistence` - Omit this field to prevent session persistence.  Indicates
     whether connections in the same session will be processed by the same Pool
