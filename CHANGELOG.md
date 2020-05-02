@@ -9,6 +9,7 @@ IMPROVEMENTS
 BUG FIXES
 
 * Fixed race conditions for `networking_secgroup_rule_v2` resource on some OpenStack environments [GH-994]
+* Fixed error logs for `keymanager_secret_v1` resource [GH-997]
 
 ## 1.27.0 (April 13, 2020)
 
