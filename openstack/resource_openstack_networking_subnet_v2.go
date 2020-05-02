@@ -476,15 +476,11 @@ func resourceNetworkingSubnetV2Delete(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	if err := subnets.Delete(networkingClient, d.Id()).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_networking_subnet_v2")
-	}
-
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    networkingSubnetV2StateRefreshFunc(networkingClient, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Refresh:    networkingSubnetV2StateRefreshFuncDelete(networkingClient, d.Id()),
+		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
