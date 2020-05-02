@@ -9,6 +9,9 @@ variable "flavor" {
 variable "ssh_key_file" {
   default = "~/.ssh/id_rsa"
 }
+variable "volume_size" {
+  default = 1
+}
 
 variable "ssh_user_name" {
   default = "ubuntu"
@@ -18,14 +21,7 @@ variable "pool" {
   default = "public"
 }
 
-variable "instance_count " {
-  default = 2
-}
-
 variable "network_name" {
-  default = "my-network"
+  default = "my_network"
 }
 
-variable "instance_prefix" {
-  default = "multi"
-}
