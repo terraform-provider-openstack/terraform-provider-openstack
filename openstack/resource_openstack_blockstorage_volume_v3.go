@@ -137,8 +137,9 @@ func resourceBlockStorageVolumeV3() *schema.Resource {
 				},
 				Set: blockStorageVolumeV3AttachmentHash,
 			},
+
 			"scheduler_hints": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -161,20 +162,22 @@ func resourceBlockStorageVolumeV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
+							Computed: true,
 						},
 						"local_to_instance": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
+							Computed: true,
 						},
 						"additional_properties": {
 							Type:     schema.TypeMap,
 							Optional: true,
 							ForceNew: true,
+							Computed: true,
 						},
 					},
 				},
-				Set: blockStorageExtensionsSchedulerHintsHash,
 			},
 		},
 	}
@@ -206,9 +209,9 @@ func resourceBlockStorageVolumeV3Create(d *schema.ResourceData, meta interface{}
 	var createOpts schedulerhints.CreateOptsExt
 	var schedulerHints schedulerhints.SchedulerHints
 
-	schedulerHintsRaw := d.Get("scheduler_hints").(*schema.Set).List()
+	schedulerHintsRaw := d.Get("scheduler_hints").([]interface{})
 	if len(schedulerHintsRaw) > 0 {
-		log.Printf("[DEBUG] openstack_blockstorage_volume_v3 scheduler hints: %+v", schedulerHintsRaw)
+		log.Printf("[DEBUG] openstack_blockstorage_volume_v3 scheduler hints: %#v", schedulerHintsRaw[0])
 		schedulerHints = resourceBlockStorageSchedulerHints(schedulerHintsRaw[0].(map[string]interface{}))
 	}
 	createOpts = schedulerhints.CreateOptsExt{
@@ -238,7 +241,6 @@ func resourceBlockStorageVolumeV3Create(d *schema.ResourceData, meta interface{}
 			"Error waiting for openstack_blockstorage_volume_v3 %s to become ready: %s", v.ID, err)
 	}
 
-	// Store the ID now
 	d.SetId(v.ID)
 
 	return resourceBlockStorageVolumeV3Read(d, meta)

@@ -5,9 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints"
-
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 
@@ -128,8 +127,9 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 				},
 				Set: blockStorageVolumeV2AttachmentHash,
 			},
+
 			"scheduler_hints": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -152,20 +152,22 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
+							Computed: true,
 						},
 						"local_to_instance": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
+							Computed: true,
 						},
 						"additional_properties": {
 							Type:     schema.TypeMap,
 							Optional: true,
 							ForceNew: true,
+							Computed: true,
 						},
 					},
 				},
-				Set: blockStorageExtensionsSchedulerHintsHash,
 			},
 		},
 	}
@@ -196,9 +198,9 @@ func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}
 	var createOpts schedulerhints.CreateOptsExt
 	var schedulerHints schedulerhints.SchedulerHints
 
-	schedulerHintsRaw := d.Get("scheduler_hints").(*schema.Set).List()
+	schedulerHintsRaw := d.Get("scheduler_hints").([]interface{})
 	if len(schedulerHintsRaw) > 0 {
-		log.Printf("[DEBUG] openstack_blockstorage_volume_v2 scheduler hints: %+v", schedulerHintsRaw)
+		log.Printf("[DEBUG] openstack_blockstorage_volume_v2 scheduler hints: %#v", schedulerHintsRaw[0])
 		schedulerHints = resourceBlockStorageSchedulerHints(schedulerHintsRaw[0].(map[string]interface{}))
 	}
 	createOpts = schedulerhints.CreateOptsExt{
@@ -228,7 +230,6 @@ func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}
 			"Error waiting for openstack_blockstorage_volume_v2 %s to become ready: %s", v.ID, err)
 	}
 
-	// Store the ID now
 	d.SetId(v.ID)
 
 	return resourceBlockStorageVolumeV2Read(d, meta)

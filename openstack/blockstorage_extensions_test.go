@@ -27,12 +27,3 @@ func TestFlattenBlockStorageExtensionsSchedulerHints(t *testing.T) {
 	actualSchedulerHints := expandBlockStorageExtensionsSchedulerHints(blockStorageExtensionsSchedulerHints)
 	assert.Equal(t, expectedSchedulerHints, actualSchedulerHints)
 }
-
-func TestBlockStorageExtensionsSchedulerHintsHash(t *testing.T) {
-	s := expandBlockStorageExtensionsSchedulerHints(blockStorageExtensionsSchedulerHints)
-
-	expectedHashcode := 1530836638
-	actualHashcode := blockStorageExtensionsSchedulerHintsHash(s)
-
-	assert.Equal(t, expectedHashcode, actualHashcode)
-}
