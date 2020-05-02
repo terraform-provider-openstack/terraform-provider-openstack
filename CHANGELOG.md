@@ -10,6 +10,7 @@ IMPROVEMENTS
 * Added support to import `objectstorage_container_v1` resource. Some attributes can't be imported yet: `force_destroy`, `content_type`, `metadata`, `container_sync_to`, `container_sync_key` [GH-998]
 * Added `availability_zone_hints` parameter to `compute_instance_v2` resource [GH-985]
 * Added `SOURCE_IP_PORT` load balancing method for `lb_pool_v2` resource. It's only available in Octavia LoadBalancer service [GH-993]
+* Added `tags` for `identity_project_v3` resource and data source [GH-978]
 
 BUG FIXES
 
