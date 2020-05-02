@@ -34,6 +34,8 @@ The following arguments are supported:
 
 * `parent_id` - (Optional) The parent of this project.
 
+* `tags` - (Optional) Tags for the project.
+
 ## Attributes Reference
 
 `id` is set to the ID of the found project. In addition, the following attributes
@@ -45,4 +47,5 @@ are exported:
 * `is_domain` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `parent_id` - See Argument Reference above.
+* `tags` - See Argument Reference above.
 * `region` - The region the project is located in.
