@@ -25,29 +25,20 @@ func TestAccNetworkingV2RouterRoute_basic(t *testing.T) {
 				Config: testAccNetworkingV2RouterRoute_create,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
-					testAccCheckNetworkingV2NetworkExists(
-						"openstack_networking_network_v2.network_1", &network[0]),
-					testAccCheckNetworkingV2SubnetExists(
-						"openstack_networking_subnet_v2.subnet_1", &subnet[0]),
-					testAccCheckNetworkingV2NetworkExists(
-						"openstack_networking_network_v2.network_1", &network[1]),
-					testAccCheckNetworkingV2SubnetExists(
-						"openstack_networking_subnet_v2.subnet_1", &subnet[1]),
-					testAccCheckNetworkingV2RouterInterfaceExists(
-						"openstack_networking_router_interface_v2.int_1"),
-					testAccCheckNetworkingV2RouterInterfaceExists(
-						"openstack_networking_router_interface_v2.int_2"),
-					testAccCheckNetworkingV2RouterRouteExists(
-						"openstack_networking_router_route_v2.router_route_1"),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network[0]),
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet[0]),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network[1]),
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet[1]),
+					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
+					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_2"),
+					testAccCheckNetworkingV2RouterRouteExists("openstack_networking_router_route_v2.router_route_1"),
 				),
 			},
 			{
 				Config: testAccNetworkingV2RouterRoute_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2RouterRouteExists(
-						"openstack_networking_router_route_v2.router_route_1"),
-					testAccCheckNetworkingV2RouterRouteExists(
-						"openstack_networking_router_route_v2.router_route_2"),
+					testAccCheckNetworkingV2RouterRouteExists("openstack_networking_router_route_v2.router_route_1"),
+					testAccCheckNetworkingV2RouterRouteExists("openstack_networking_router_route_v2.router_route_2"),
 				),
 			},
 			{
