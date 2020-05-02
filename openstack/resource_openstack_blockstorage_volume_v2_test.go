@@ -80,7 +80,11 @@ func TestAccBlockStorageV2Volume_timeout(t *testing.T) {
 }
 
 func TestAccBlockStorageV2Volume_scheduler_hints(t *testing.T) {
-	var volume volumes.Volume
+	var (
+		volume1 volumes.Volume
+		volume2 volumes.Volume
+		volume3 volumes.Volume
+	)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -92,9 +96,9 @@ func TestAccBlockStorageV2Volume_scheduler_hints(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					// Basic test as there is no means of verifying the host which a volume is provisioned on,
 					// as gophercloud doesn't expose `os-vol-host-attr:host` in the sdk
-					testAccCheckBlockStorageV2VolumeExists("openstack_blockstorage_volume_v2.volume_1", &volume),
-					testAccCheckBlockStorageV2VolumeExists("openstack_blockstorage_volume_v2.volume_2", &volume),
-					testAccCheckBlockStorageV2VolumeExists("openstack_blockstorage_volume_v2.volume_3", &volume),
+					testAccCheckBlockStorageV2VolumeExists("openstack_blockstorage_volume_v2.volume_1", &volume1),
+					testAccCheckBlockStorageV2VolumeExists("openstack_blockstorage_volume_v2.volume_2", &volume2),
+					testAccCheckBlockStorageV2VolumeExists("openstack_blockstorage_volume_v2.volume_3", &volume3),
 				),
 			},
 		},
