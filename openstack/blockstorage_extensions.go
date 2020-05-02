@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
@@ -56,7 +54,7 @@ func blockStorageExtensionsSchedulerHintsHash(v interface{}) int {
 	return hashcode.String(buf.String())
 }
 
-func resourceBlockStorageSchedulerHints(d *schema.ResourceData, schedulerHintsRaw map[string]interface{}) schedulerhints.SchedulerHints {
+func resourceBlockStorageSchedulerHints(schedulerHintsRaw map[string]interface{}) schedulerhints.SchedulerHints {
 	var differentHost []string
 	if v, ok := schedulerHintsRaw["different_host"].([]interface{}); ok {
 		for _, dh := range v {

@@ -206,7 +206,7 @@ func resourceBlockStorageVolumeV3Create(d *schema.ResourceData, meta interface{}
 	schedulerHintsRaw := d.Get("scheduler_hints").(*schema.Set).List()
 	if len(schedulerHintsRaw) > 0 {
 		log.Printf("[DEBUG] openstack_blockstorage_volume_v3 scheduler hints: %+v", schedulerHintsRaw)
-		schedulerHints = resourceBlockStorageSchedulerHints(d, schedulerHintsRaw[0].(map[string]interface{}))
+		schedulerHints = resourceBlockStorageSchedulerHints(schedulerHintsRaw[0].(map[string]interface{}))
 	}
 	createOpts = schedulerhints.CreateOptsExt{
 		VolumeCreateOptsBuilder: volumeCreateOpts,
