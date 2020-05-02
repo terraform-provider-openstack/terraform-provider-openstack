@@ -89,7 +89,7 @@ func resourceIdentityProjectV3Create(d *schema.ResourceData, meta interface{}) e
 
 	if v, ok := d.GetOk("tags"); ok {
 		tags := v.(*schema.Set).List()
-		createOpts.Tags = *resourceIdentityProjectV3BuildTags(tags)
+		createOpts.Tags = expandToStringSlice(tags)
 	}
 
 	log.Printf("[DEBUG] openstack_identity_project_v3 create options: %#v", createOpts)
@@ -176,7 +176,8 @@ func resourceIdentityProjectV3Update(d *schema.ResourceData, meta interface{}) e
 		hasChange = true
 		if v, ok := d.GetOk("tags"); ok {
 			tags := v.(*schema.Set).List()
-			updateOpts.Tags = resourceIdentityProjectV3BuildTags(tags)
+			tagsToUpdate := expandToStringSlice(tags)
+			updateOpts.Tags = &tagsToUpdate
 		} else {
 			updateOpts.Tags = &[]string{}
 		}
