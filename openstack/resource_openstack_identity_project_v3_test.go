@@ -53,6 +53,12 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 						"openstack_identity_project_v3.project_1", "enabled", "false"),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_project_v3.project_1", "is_domain", "false"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_project_v3.project_1", "tags.#", "2"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_project_v3.project_1", "tags.1", "tag1"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_project_v3.project_1", "tags.2", "tag2"),
 				),
 			},
 		},
@@ -126,7 +132,8 @@ func testAccIdentityV3Project_update(projectName string) string {
     resource "openstack_identity_project_v3" "project_1" {
       name = "%s"
       description = "Some project"
-      enabled = false
+	  enabled = false
+	  tags = ["tag1","tag2"]
     }
   `, projectName)
 }

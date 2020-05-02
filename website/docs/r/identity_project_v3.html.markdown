@@ -42,14 +42,23 @@ The following arguments are supported:
 
 * `region` - (Optional) The region in which to obtain the V3 Keystone client.
     If omitted, the `region` argument of the provider is used. Changing this
-    creates a new User.
+    creates a new project.
+
+* `tags` - (Optional) Tags for the project. Changing this updates the existing
+    project.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
+* `description` - The description of the project.
 * `domain_id` - See Argument Reference above.
+* `enabled` - See Argument Reference above.
+* `is_domain` - See Argument Reference above.
+* `name` - See Argument Reference above.
 * `parent_id` - See Argument Reference above.
+* `tags` - See Argument Reference above.
+* `region` - See Argument Reference above.
 
 ## Import
 
