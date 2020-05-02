@@ -387,8 +387,9 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   loadbalancer_provider = "octavia"
   vip_network_id = "${openstack_networking_network_v2.network_1.id}"
   timeouts {
-  create = "15m"
-  update = "15m"
-  delete = "15m"
+    create = "15m"
+    update = "15m"
+    delete = "15m"
+  }
 }
 `
