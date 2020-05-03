@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
-	var security_group groups.SecGroup
+	var securityGroup groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -21,18 +21,15 @@ func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingV2SecGroup_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &security_group),
-					testAccCheckNetworkingV2SecGroupRuleCount(&security_group, 2),
+					testAccCheckNetworkingV2SecGroupExists("openstack_networking_secgroup_v2.secgroup_1", &securityGroup),
+					testAccCheckNetworkingV2SecGroupRuleCount(&securityGroup, 2),
 				),
 			},
 			{
 				Config: testAccNetworkingV2SecGroup_update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPtr(
-						"openstack_networking_secgroup_v2.secgroup_1", "id", &security_group.ID),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_secgroup_v2.secgroup_1", "name", "security_group_2"),
+					resource.TestCheckResourceAttrPtr("openstack_networking_secgroup_v2.secgroup_1", "id", &securityGroup.ID),
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "name", "security_group_2"),
 				),
 			},
 		},
@@ -40,7 +37,7 @@ func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 }
 
 func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
-	var security_group groups.SecGroup
+	var securityGroup groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -51,8 +48,8 @@ func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 				Config: testAccNetworkingV2SecGroup_noDefaultRules,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &security_group),
-					testAccCheckNetworkingV2SecGroupRuleCount(&security_group, 0),
+						"openstack_networking_secgroup_v2.secgroup_1", &securityGroup),
+					testAccCheckNetworkingV2SecGroupRuleCount(&securityGroup, 0),
 				),
 			},
 		},
@@ -60,7 +57,7 @@ func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 }
 
 func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
-	var security_group groups.SecGroup
+	var securityGroup groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -71,7 +68,7 @@ func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 				Config: testAccNetworkingV2SecGroup_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &security_group),
+						"openstack_networking_secgroup_v2.secgroup_1", &securityGroup),
 				),
 			},
 		},
