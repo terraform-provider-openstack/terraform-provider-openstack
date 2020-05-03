@@ -131,19 +131,16 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 			"scheduler_hints": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"different_host": {
 							Type:     schema.TypeList,
 							Optional: true,
-							Computed: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 						"same_host": {
 							Type:     schema.TypeList,
 							Optional: true,
-							Computed: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 						"query": {
@@ -154,7 +151,6 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 						"local_to_instance": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Computed: true,
 						},
 						"additional_properties": {
 							Type:     schema.TypeMap,
