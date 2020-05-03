@@ -98,7 +98,7 @@ func resourceNetworkingSubnetRouteV2Create(d *schema.ResourceData, meta interfac
 	updateOpts := subnets.UpdateOpts{
 		HostRoutes: &subnet.HostRoutes,
 	}
-	log.Printf("[DEBUG] Updating openstack_networking_subnet_v2 %s with options: %#v", subnetID, updateOpts)
+	log.Printf("[DEBUG] Updating openstack_networking_subnet_v2 %s with options: %+v", subnetID, updateOpts)
 	_, err = subnets.Update(networkingClient, subnetID, updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error updating openstack_networking_subnet_v2: %s", err)
@@ -146,6 +146,7 @@ func resourceNetworkingSubnetRouteV2Read(d *schema.ResourceData, meta interface{
 		)
 	}
 
+	d.Set("subnet_id", subnetID)
 	d.Set("next_hop", nextHop)
 	d.Set("destination_cidr", destCIDR)
 	d.Set("region", GetRegion(d, config))
