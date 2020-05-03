@@ -129,18 +129,20 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 			},
 
 			"scheduler_hints": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"different_host": {
 							Type:     schema.TypeList,
 							Optional: true,
+							ForceNew: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 						"same_host": {
 							Type:     schema.TypeList,
 							Optional: true,
+							ForceNew: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 						"query": {
@@ -151,6 +153,7 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 						"local_to_instance": {
 							Type:     schema.TypeString,
 							Optional: true,
+							ForceNew: true,
 						},
 						"additional_properties": {
 							Type:     schema.TypeMap,
@@ -159,6 +162,7 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 						},
 					},
 				},
+				Set: blockStorageExtensionsSchedulerHintsHash,
 			},
 		},
 	}
@@ -189,9 +193,9 @@ func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}
 	var createOpts schedulerhints.CreateOptsExt
 	var schedulerHints schedulerhints.SchedulerHints
 
-	schedulerHintsRaw := d.Get("scheduler_hints").([]interface{})
+	schedulerHintsRaw := d.Get("scheduler_hints").(*schema.Set).List()
 	if len(schedulerHintsRaw) > 0 {
-		log.Printf("[DEBUG] openstack_blockstorage_volume_v2 scheduler hints: %#v", schedulerHintsRaw[0])
+		log.Printf("[DEBUG] openstack_blockstorage_volume_v2 scheduler hints: %+v", schedulerHintsRaw[0])
 		schedulerHints = resourceBlockStorageSchedulerHints(schedulerHintsRaw[0].(map[string]interface{}))
 	}
 	createOpts = schedulerhints.CreateOptsExt{

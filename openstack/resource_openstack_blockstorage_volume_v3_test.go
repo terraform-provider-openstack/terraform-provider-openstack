@@ -129,32 +129,6 @@ func TestAccBlockStorageV3Volume_timeout(t *testing.T) {
 	})
 }
 
-func TestAccBlockStorageV3Volume_scheduler_hints(t *testing.T) {
-	var (
-		volume1 volumes.Volume
-		volume2 volumes.Volume
-		volume3 volumes.Volume
-	)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccBlockStorageV3Volume_scheduler_hints,
-				Check: resource.ComposeTestCheckFunc(
-					// Basic test as there is no means of verifying the host which a volume is provisioned on,
-					// as gophercloud doesn't expose `os-vol-host-attr:host` in the sdk
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume1),
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_2", &volume2),
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_3", &volume3),
-				),
-			},
-		},
-	})
-}
-
 func testAccCheckBlockStorageV3VolumeDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	blockStorageClient, err := config.BlockStorageV3Client(OS_REGION_NAME)
@@ -342,51 +316,3 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   }
 }
 `
-
-var testAccBlockStorageV3Volume_scheduler_hints = fmt.Sprintf(`
-resource "openstack_compute_instance_v2" "basic" {
-  name            = "instance_1"
-  flavor_name     = "%s"
-  image_name      = "%s"
-
-  network {
-    uuid = "%s"
-  }
-}
-
-resource "openstack_blockstorage_volume_v3" "volume_1" {
-  name = "volume_1"
-  description = "first test volume"
-  metadata = {
-    foo = "bar"
-  }
-  size = 1
-  scheduler_hints {
-    local_to_instance = openstack_compute_instance_v2.basic.id
-  }
-}
-
-resource "openstack_blockstorage_volume_v3" "volume_2" {
-  name = "volume_2"
-  description = "second test volume"
-  metadata = {
-    foo = "bar"
-  }
-  size = 1
-  scheduler_hints {
-    same_host = [openstack_blockstorage_volume_v3.volume_1.id]
-  }
-}
-
-resource "openstack_blockstorage_volume_v3" "volume_3" {
-  name = "volume_3"
-  description = "third test volume"
-  metadata = {
-    foo = "bar"
-  }
-  size = 1
-  scheduler_hints {
-    different_host = [openstack_blockstorage_volume_v3.volume_1.id]
-  }
-}
-`, OS_FLAVOR_NAME, OS_IMAGE_ID, OS_NETWORK_ID)
