@@ -13,9 +13,11 @@ import (
 )
 
 func TestAccNetworkingV2SubnetRoute_basic(t *testing.T) {
-	var router routers.Router
-	var network [1]networks.Network
-	var subnet [1]subnets.Subnet
+	var (
+		router  routers.Router
+		network networks.Network
+		subnet  subnets.Subnet
+	)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -25,23 +27,17 @@ func TestAccNetworkingV2SubnetRoute_basic(t *testing.T) {
 				Config: testAccNetworkingV2SubnetRoute_create,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
-					testAccCheckNetworkingV2NetworkExists(
-						"openstack_networking_network_v2.network_1", &network[0]),
-					testAccCheckNetworkingV2SubnetExists(
-						"openstack_networking_subnet_v2.subnet_1", &subnet[0]),
-					testAccCheckNetworkingV2RouterInterfaceExists(
-						"openstack_networking_router_interface_v2.int_1"),
-					testAccCheckNetworkingV2SubnetRouteExists(
-						"openstack_networking_subnet_route_v2.subnet_route_1"),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
+					testAccCheckNetworkingV2SubnetRouteExists("openstack_networking_subnet_route_v2.subnet_route_1"),
 				),
 			},
 			{
 				Config: testAccNetworkingV2SubnetRoute_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetRouteExists(
-						"openstack_networking_subnet_route_v2.subnet_route_1"),
-					testAccCheckNetworkingV2SubnetRouteExists(
-						"openstack_networking_subnet_route_v2.subnet_route_2"),
+					testAccCheckNetworkingV2SubnetRouteExists("openstack_networking_subnet_route_v2.subnet_route_1"),
+					testAccCheckNetworkingV2SubnetRouteExists("openstack_networking_subnet_route_v2.subnet_route_2"),
 				),
 			},
 			{
