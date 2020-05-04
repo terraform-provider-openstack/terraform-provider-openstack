@@ -80,6 +80,7 @@ github.com/googleapis/gax-go/v2
 # github.com/gophercloud/gophercloud v0.10.1-0.20200424014253-c3bfe50899e5
 github.com/gophercloud/gophercloud
 github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/quotasets
+github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints
 github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions
 github.com/gophercloud/gophercloud/openstack/blockstorage/v1/volumes
 github.com/gophercloud/gophercloud/openstack/blockstorage/v2/snapshots
