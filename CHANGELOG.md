@@ -14,6 +14,8 @@ IMPROVEMENTS
 * Added `scheduler_hints` for `blockstorage_volume_v2`, `blockstorage_volume_v3` resources [GH-983]
 * Added `kubeconfig` attribute for `containerinfra_cluster_v1` resource [GH-937]
 * Updated the existing manifests in the `examples` directory and added new manifests with attaching and using a new volume [GH-892]
+* Updated Go version to `1.14.2` [GH-1001]
+* Updated `terraform-plugin-sdk` to `v1.11.0` [GH-1001]
 
 BUG FIXES
 
