@@ -1,4 +1,4 @@
-## 1.28.0 (Unreleased)
+## 1.28.0 (May 04, 2020)
 
 NOTES
 
@@ -6,21 +6,21 @@ NOTES
 
 IMPROVEMENTS
 
-* Provider parameters `delayed_auth` and `allow_reauth` are set to `true` by default [GH-996]
-* Added support to import `objectstorage_container_v1` resource. Some attributes can't be imported yet: `force_destroy`, `content_type`, `metadata`, `container_sync_to`, `container_sync_key` [GH-998]
-* Added `availability_zone_hints` parameter to `compute_instance_v2` resource [GH-985]
-* Added `SOURCE_IP_PORT` load balancing method for `lb_pool_v2` resource. It's only available in Octavia LoadBalancer service [GH-993]
-* Added `tags` for `identity_project_v3` resource and data source [GH-978]
-* Added `scheduler_hints` for `blockstorage_volume_v2`, `blockstorage_volume_v3` resources [GH-983]
-* Added `kubeconfig` attribute for `containerinfra_cluster_v1` resource [GH-937]
-* Updated the existing manifests in the `examples` directory and added new manifests with attaching and using a new volume [GH-892]
-* Updated Go version to `1.14.2` [GH-1001]
-* Updated `terraform-plugin-sdk` to `v1.11.0` [GH-1001]
+* Provider parameters `delayed_auth` and `allow_reauth` are set to `true` by default ([#996](https://github.com/terraform-providers/terraform-provider-openstack/issues/996))
+* Added support to import `objectstorage_container_v1` resource. Some attributes can't be imported yet: `force_destroy`, `content_type`, `metadata`, `container_sync_to`, `container_sync_key` ([#998](https://github.com/terraform-providers/terraform-provider-openstack/issues/998))
+* Added `availability_zone_hints` parameter to `compute_instance_v2` resource ([#985](https://github.com/terraform-providers/terraform-provider-openstack/issues/985))
+* Added `SOURCE_IP_PORT` load balancing method for `lb_pool_v2` resource. It's only available in Octavia LoadBalancer service ([#993](https://github.com/terraform-providers/terraform-provider-openstack/issues/993))
+* Added `tags` for `identity_project_v3` resource and data source ([#978](https://github.com/terraform-providers/terraform-provider-openstack/issues/978))
+* Added `scheduler_hints` for `blockstorage_volume_v2`, `blockstorage_volume_v3` resources ([#983](https://github.com/terraform-providers/terraform-provider-openstack/issues/983))
+* Added `kubeconfig` attribute for `containerinfra_cluster_v1` resource ([#937](https://github.com/terraform-providers/terraform-provider-openstack/issues/937))
+* Updated the existing manifests in the `examples` directory and added new manifests with attaching and using a new volume ([#892](https://github.com/terraform-providers/terraform-provider-openstack/issues/892))
+* Updated Go version to `1.14.2` ([#1001](https://github.com/terraform-providers/terraform-provider-openstack/issues/1001))
+* Updated `terraform-plugin-sdk` to `v1.11.0` ([#1001](https://github.com/terraform-providers/terraform-provider-openstack/issues/1001))
 
 BUG FIXES
 
-* Fixed race conditions for `networking_secgroup_rule_v2` resource on some OpenStack environments [GH-994]
-* Fixed error logs for `keymanager_secret_v1` resource [GH-997]
+* Fixed race conditions for `networking_secgroup_rule_v2` resource on some OpenStack environments ([#994](https://github.com/terraform-providers/terraform-provider-openstack/issues/994))
+* Fixed error logs for `keymanager_secret_v1` resource ([#997](https://github.com/terraform-providers/terraform-provider-openstack/issues/997))
 
 ## 1.27.0 (April 13, 2020)
 
