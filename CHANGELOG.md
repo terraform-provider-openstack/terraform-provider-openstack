@@ -11,6 +11,7 @@ IMPROVEMENTS
 * Added `availability_zone_hints` parameter to `compute_instance_v2` resource [GH-985]
 * Added `SOURCE_IP_PORT` load balancing method for `lb_pool_v2` resource. It's only available in Octavia LoadBalancer service [GH-993]
 * Added `tags` for `identity_project_v3` resource and data source [GH-978]
+* Added `scheduler_hints` for `blockstorage_volume_v2`, `blockstorage_volume_v3` resources [GH-983]
 * Updated the existing manifests in the `examples` directory and added new manifests with attaching and using a new volume [GH-892]
 
 BUG FIXES
