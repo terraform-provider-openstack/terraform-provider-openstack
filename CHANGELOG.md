@@ -1,4 +1,9 @@
 ## 1.29.0 (Unreleased)
+
+FEATURES
+
+* __New Data Source__: `compute_instance_v2` [GH-984]
+
 ## 1.28.0 (May 04, 2020)
 
 NOTES
