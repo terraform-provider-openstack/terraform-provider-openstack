@@ -4,6 +4,10 @@ FEATURES
 
 * __New Data Source__: `compute_instance_v2` [GH-984]
 
+IMPROVEMENTS
+
+* Added `vip_network_id` argument to `openstack_lb_loadbalancer_v2` resource. It can be used only with Octavia [GH-948]
+
 ## 1.28.0 (May 04, 2020)
 
 NOTES
