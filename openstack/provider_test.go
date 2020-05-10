@@ -136,14 +136,6 @@ func testAccPreCheckUseOctavia(t *testing.T) {
 	}
 }
 
-func testAccPreCheckOctaviaBatchMembersEnv(t *testing.T) {
-	testAccPreCheckRequiredEnvVars(t)
-
-	if OS_OCTAVIA_BATCH_MEMBERS_ENVIRONMENT == "" {
-		t.Skip("This environment does not support Octavia batch member update tests")
-	}
-}
-
 func testAccPreCheckFW(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
