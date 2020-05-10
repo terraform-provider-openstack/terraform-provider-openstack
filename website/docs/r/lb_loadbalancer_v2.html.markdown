@@ -27,10 +27,17 @@ The following arguments are supported:
     `region` argument of the provider is used. Changing this creates a new
     LB member.
 
-* `vip_subnet_id` - (Required) The network on which to allocate the
+* `vip_subnet_id` - (Optional) The subnet on which to allocate the
     Loadbalancer's address. A tenant can only create Loadbalancers on networks
     authorized by policy (e.g. networks that belong to them or networks that
     are shared).  Changing this creates a new loadbalancer.
+    It is required to Neutron LBaaS but optional for Octavia.
+    
+* `vip_network_id` - (Optional) The network on which to allocate the
+    Loadbalancer's address. A tenant can only create Loadbalancers on networks
+    authorized by policy (e.g. networks that belong to them or networks that
+    are shared).  Changing this creates a new loadbalancer.
+    It is available only for Octavia.
 
 * `name` - (Optional) Human-readable name for the Loadbalancer. Does not have
     to be unique.
@@ -63,6 +70,7 @@ The following attributes are exported:
 
 * `region` - See Argument Reference above.
 * `vip_subnet_id` - See Argument Reference above.
+* `vip_network_id` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
