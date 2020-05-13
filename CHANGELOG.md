@@ -8,6 +8,10 @@ IMPROVEMENTS
 
 * Added `vip_network_id` argument to `openstack_lb_loadbalancer_v2` resource. It can be used only with Octavia [GH-948]
 
+BUG FIXES
+
+* Fixed documentation bug for the `binding` argument of the `networking_port_v2` resource [GH-1009]
+
 ## 1.28.0 (May 04, 2020)
 
 NOTES
