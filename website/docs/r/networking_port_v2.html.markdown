@@ -42,7 +42,7 @@ resource "openstack_networking_port_v2" "port_1" {
   device_owner   = "baremetal:none"
   admin_state_up = "true"
 
-  binding = {
+  binding {
     host_id   = "b080b9cf-46e0-4ce8-ad47-0fd4accc872b"
     vnic_type = "baremetal"
     profile   = <<EOF
@@ -70,31 +70,31 @@ EOF
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 networking client.
-    A networking client is needed to create a port. If omitted, the
+* `region` - (Optional) The region in which to obtain the V2 Networking client.
+    A Networking client is needed to create a port. If omitted, the
     `region` argument of the provider is used. Changing this creates a new
     port.
 
 * `name` - (Optional) A unique name for the port. Changing this
     updates the `name` of an existing port.
 
-* `description` - (Optional) Human-readable description of the floating IP. Changing
+* `description` - (Optional) Human-readable description of the port. Changing
     this updates the `description` of an existing port.
 
 * `network_id` - (Required) The ID of the network to attach the port to. Changing
     this creates a new port.
 
 * `admin_state_up` - (Optional) Administrative up/down status for the port
-    (must be "true" or "false" if provided). Changing this updates the
+    (must be `true` or `false` if provided). Changing this updates the
     `admin_state_up` of an existing port.
 
 * `mac_address` - (Optional) Specify a specific MAC address for the port. Changing
     this creates a new port.
 
-* `tenant_id` - (Optional) The owner of the Port. Required if admin wants
+* `tenant_id` - (Optional) The owner of the port. Required if admin wants
     to create a port for another tenant. Changing this creates a new port.
 
-* `device_owner` - (Optional) The device owner of the Port. Changing this creates
+* `device_owner` - (Optional) The device owner of the port. Changing this creates
     a new port.
 
 * `security_group_ids` - (Optional - Conflicts with `no_security_groups`) A list
@@ -104,7 +104,7 @@ The following arguments are supported:
 
 * `no_security_groups` - (Optional - Conflicts with `security_group_ids`) If set to
     `true`, then no security groups are applied to the port. If set to `false` and
-    no `security_group_ids` are specified, then the Port will yield to the default
+    no `security_group_ids` are specified, then the port will yield to the default
     behavior of the Networking service, which is to usually apply the "default"
     security group.
 
@@ -128,7 +128,7 @@ The following arguments are supported:
 
 * `port_security_enabled` - (Optional) Whether to explicitly enable or disable
   port security on the port. Port Security is usually enabled by default, so
-  omitting argument will usually result in a value of "true". Setting this
+  omitting argument will usually result in a value of `true`. Setting this
   explicitly to `false` will disable port security. In order to disable port
   security, the port must not have any security groups. Valid values are `true`
   and `false`.
