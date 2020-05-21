@@ -1,6 +1,9 @@
 package groups
 
 import (
+	"encoding/json"
+	"time"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules"
 	"github.com/gophercloud/gophercloud/pagination"
@@ -11,8 +14,8 @@ type SecGroup struct {
 	// The UUID for the security group.
 	ID string
 
-	// Human-readable name for the security group. Might not be unique. Cannot be
-	// named "default" as that is automatically created for a tenant.
+	// Human-readable name for the security group. Might not be unique.
+	// Cannot be named "default" as that is automatically created for a tenant.
 	Name string
 
 	// The security group description.
@@ -22,9 +25,57 @@ type SecGroup struct {
 	// traffic entering and leaving the group.
 	Rules []rules.SecGroupRule `json:"security_group_rules"`
 
-	// Owner of the security group. Only admin users can specify a TenantID
-	// other than their own.
+	// TenantID is the project owner of the security group.
 	TenantID string `json:"tenant_id"`
+
+	// UpdatedAt and CreatedAt contain ISO-8601 timestamps of when the state of the
+	// security group last changed, and when it was created.
+	UpdatedAt time.Time `json:"-"`
+	CreatedAt time.Time `json:"-"`
+
+	// ProjectID is the project owner of the security group.
+	ProjectID string `json:"project_id"`
+
+	// Tags optionally set via extensions/attributestags
+	Tags []string `json:"tags"`
+}
+
+func (r *SecGroup) UnmarshalJSON(b []byte) error {
+	type tmp SecGroup
+
+	// Support for older neutron time format
+	var s1 struct {
+		tmp
+		CreatedAt gophercloud.JSONRFC3339NoZ `json:"created_at"`
+		UpdatedAt gophercloud.JSONRFC3339NoZ `json:"updated_at"`
+	}
+
+	err := json.Unmarshal(b, &s1)
+	if err == nil {
+		*r = SecGroup(s1.tmp)
+		r.CreatedAt = time.Time(s1.CreatedAt)
+		r.UpdatedAt = time.Time(s1.UpdatedAt)
+
+		return nil
+	}
+
+	// Support for newer neutron time format
+	var s2 struct {
+		tmp
+		CreatedAt time.Time `json:"created_at"`
+		UpdatedAt time.Time `json:"updated_at"`
+	}
+
+	err = json.Unmarshal(b, &s2)
+	if err != nil {
+		return err
+	}
+
+	*r = SecGroup(s2.tmp)
+	r.CreatedAt = time.Time(s2.CreatedAt)
+	r.UpdatedAt = time.Time(s2.UpdatedAt)
+
+	return nil
 }
 
 // SecGroupPage is the page returned by a pager when traversing over a
@@ -78,22 +129,26 @@ func (r commonResult) Extract() (*SecGroup, error) {
 	return s.SecGroup, err
 }
 
-// CreateResult represents the result of a create operation.
+// CreateResult represents the result of a create operation. Call its Extract
+// method to interpret it as a SecGroup.
 type CreateResult struct {
 	commonResult
 }
 
-// UpdateResult represents the result of an update operation.
+// UpdateResult represents the result of an update operation. Call its Extract
+// method to interpret it as a SecGroup.
 type UpdateResult struct {
 	commonResult
 }
 
-// GetResult represents the result of a get operation.
+// GetResult represents the result of a get operation. Call its Extract
+// method to interpret it as a SecGroup.
 type GetResult struct {
 	commonResult
 }
 
-// DeleteResult represents the result of a delete operation.
+// DeleteResult represents the result of a delete operation. Call its
+// ExtractErr method to determine if the request succeeded or failed.
 type DeleteResult struct {
 	gophercloud.ErrResult
 }

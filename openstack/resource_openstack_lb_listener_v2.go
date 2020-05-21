@@ -5,10 +5,12 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
+	octavialisteners "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
+	neutronlisteners "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 )
 
 func resourceListenerV2() *schema.Resource {
@@ -17,6 +19,9 @@ func resourceListenerV2() *schema.Resource {
 		Read:   resourceListenerV2Read,
 		Update: resourceListenerV2Update,
 		Delete: resourceListenerV2Delete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -25,85 +30,109 @@ func resourceListenerV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"protocol": &schema.Schema{
+			"protocol": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if value != "TCP" && value != "HTTP" && value != "HTTPS" && value != "TERMINATED_HTTPS" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'TCP', 'HTTP', 'HTTPS' and 'TERMINATED_HTTPS' are supported values for 'protocol'"))
-					}
-					return
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"TCP", "UDP", "HTTP", "HTTPS", "TERMINATED_HTTPS",
+				}, false),
 			},
 
-			"protocol_port": &schema.Schema{
+			"protocol_port": {
 				Type:     schema.TypeInt,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"loadbalancer_id": &schema.Schema{
+			"loadbalancer_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"default_pool_id": &schema.Schema{
+			"default_pool_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"connection_limit": &schema.Schema{
+			"connection_limit": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 			},
 
-			"default_tls_container_ref": &schema.Schema{
+			"default_tls_container_ref": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"sni_container_refs": &schema.Schema{
+			"sni_container_refs": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
-			"admin_state_up": &schema.Schema{
+			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Default:  true,
 				Optional: true,
+			},
+
+			"timeout_client_data": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+
+			"timeout_member_connect": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+
+			"timeout_member_data": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+
+			"timeout_tcp_inspect": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+
+			"insert_headers": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				ForceNew: false,
 			},
 		},
 	}
@@ -111,61 +140,41 @@ func resourceListenerV2() *schema.Resource {
 
 func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	adminStateUp := d.Get("admin_state_up").(bool)
-	var sniContainerRefs []string
-	if raw, ok := d.GetOk("sni_container_refs"); ok {
-		for _, v := range raw.([]interface{}) {
-			sniContainerRefs = append(sniContainerRefs, v.(string))
-		}
-	}
-	createOpts := listeners.CreateOpts{
-		Protocol:               listeners.Protocol(d.Get("protocol").(string)),
-		ProtocolPort:           d.Get("protocol_port").(int),
-		TenantID:               d.Get("tenant_id").(string),
-		LoadbalancerID:         d.Get("loadbalancer_id").(string),
-		Name:                   d.Get("name").(string),
-		DefaultPoolID:          d.Get("default_pool_id").(string),
-		Description:            d.Get("description").(string),
-		DefaultTlsContainerRef: d.Get("default_tls_container_ref").(string),
-		SniContainerRefs:       sniContainerRefs,
-		AdminStateUp:           &adminStateUp,
-	}
-
-	if v, ok := d.GetOk("connection_limit"); ok {
-		connectionLimit := v.(int)
-		createOpts.ConnLimit = &connectionLimit
-	}
-
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-
-	// Wait for LoadBalancer to become active before continuing
-	lbID := createOpts.LoadbalancerID
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+
+	// Wait for LoadBalancer to become active before continuing.
+	err = waitForLBV2LoadBalancer(lbClient, d.Get("loadbalancer_id").(string), "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[DEBUG] Attempting to create listener")
-	var listener *listeners.Listener
+	// Choose either the Octavia or Neutron create options.
+	createOpts, err := chooseLBV2ListenerCreateOpts(d, config)
+	if err != nil {
+		return fmt.Errorf("Error building openstack_lb_listener_v2 create options: %s", err)
+	}
+
+	log.Printf("[DEBUG] openstack_lb_listener_v2 create options: %#v", createOpts)
+	var listener *neutronlisteners.Listener
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		listener, err = listeners.Create(networkingClient, createOpts).Extract()
+		listener, err = neutronlisteners.Create(lbClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
 		return nil
 	})
+
 	if err != nil {
-		return fmt.Errorf("Error creating listener: %s", err)
+		return fmt.Errorf("Error creating openstack_lb_listener_v2: %s", err)
 	}
 
-	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	// Wait for the listener to become ACTIVE.
+	err = waitForLBV2Listener(lbClient, listener, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -177,17 +186,60 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 
 func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	listener, err := listeners.Get(networkingClient, d.Id()).Extract()
-	if err != nil {
-		return CheckDeleted(d, err, "listener")
+	// Use Octavia listener body if Octavia/LBaaS is enabled.
+	if config.UseOctavia {
+		listener, err := octavialisteners.Get(lbClient, d.Id()).Extract()
+		if err != nil {
+			return CheckDeleted(d, err, "openstack_lb_listener_v2")
+		}
+
+		log.Printf("[DEBUG] Retrieved openstack_lb_listener_v2 %s: %#v", d.Id(), listener)
+
+		d.Set("name", listener.Name)
+		d.Set("protocol", listener.Protocol)
+		d.Set("tenant_id", listener.ProjectID)
+		d.Set("description", listener.Description)
+		d.Set("protocol_port", listener.ProtocolPort)
+		d.Set("admin_state_up", listener.AdminStateUp)
+		d.Set("default_pool_id", listener.DefaultPoolID)
+		d.Set("connection_limit", listener.ConnLimit)
+		d.Set("timeout_client_data", listener.TimeoutClientData)
+		d.Set("timeout_member_connect", listener.TimeoutMemberConnect)
+		d.Set("timeout_member_data", listener.TimeoutMemberData)
+		d.Set("timeout_tcp_inspect", listener.TimeoutTCPInspect)
+		d.Set("sni_container_refs", listener.SniContainerRefs)
+		d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
+		d.Set("region", GetRegion(d, config))
+
+		// Required by import.
+		if len(listener.Loadbalancers) > 0 {
+			d.Set("loadbalancer_id", listener.Loadbalancers[0].ID)
+		}
+
+		if err := d.Set("insert_headers", listener.InsertHeaders); err != nil {
+			return fmt.Errorf("Unable to set openstack_lb_listener_v2 insert_headers: %s", err)
+		}
+
+		return nil
 	}
 
-	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)
+	// Use Neutron/Networking in other case.
+	listener, err := neutronlisteners.Get(lbClient, d.Id()).Extract()
+	if err != nil {
+		return CheckDeleted(d, err, "openstack_lb_listener_v2")
+	}
+
+	log.Printf("[DEBUG] Retrieved openstack_lb_listener_v2 %s: %#v", d.Id(), listener)
+
+	// Required by import.
+	if len(listener.Loadbalancers) > 0 {
+		d.Set("loadbalancer_id", listener.Loadbalancers[0].ID)
+	}
 
 	d.Set("name", listener.Name)
 	d.Set("protocol", listener.Protocol)
@@ -206,50 +258,36 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 
 func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	var updateOpts listeners.UpdateOpts
-	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
-	}
-	if d.HasChange("description") {
-		updateOpts.Description = d.Get("description").(string)
-	}
-	if d.HasChange("connection_limit") {
-		connLimit := d.Get("connection_limit").(int)
-		updateOpts.ConnLimit = &connLimit
-	}
-	if d.HasChange("default_tls_container_ref") {
-		updateOpts.DefaultTlsContainerRef = d.Get("default_tls_container_ref").(string)
-	}
-	if d.HasChange("sni_container_refs") {
-		var sniContainerRefs []string
-		if raw, ok := d.GetOk("sni_container_refs"); ok {
-			for _, v := range raw.([]interface{}) {
-				sniContainerRefs = append(sniContainerRefs, v.(string))
-			}
-		}
-		updateOpts.SniContainerRefs = sniContainerRefs
-	}
-	if d.HasChange("admin_state_up") {
-		asu := d.Get("admin_state_up").(bool)
-		updateOpts.AdminStateUp = &asu
+	// Get a clean copy of the listener.
+	listener, err := neutronlisteners.Get(lbClient, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve openstack_lb_listener_v2 %s: %s", d.Id(), err)
 	}
 
-	// Wait for LoadBalancer to become active before continuing
-	lbID := d.Get("loadbalancer_id").(string)
+	// Wait for the listener to become ACTIVE.
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	err = waitForLBV2Listener(lbClient, listener, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[DEBUG] Updating listener %s with options: %#v", d.Id(), updateOpts)
+	updateOpts, err := chooseLBV2ListenerUpdateOpts(d, config)
+	if err != nil {
+		return fmt.Errorf("Error building openstack_lb_listener_v2 update options: %s", err)
+	}
+	if updateOpts == nil {
+		log.Printf("[DEBUG] openstack_lb_listener_v2 %s: nothing to update", d.Id())
+		return resourceListenerV2Read(d, meta)
+	}
+
+	log.Printf("[DEBUG] openstack_lb_listener_v2 %s update options: %#v", d.Id(), updateOpts)
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		_, err = listeners.Update(networkingClient, d.Id(), updateOpts).Extract()
+		_, err = neutronlisteners.Update(lbClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -257,11 +295,11 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error updating listener %s: %s", d.Id(), err)
+		return fmt.Errorf("Error updating openstack_lb_listener_v2 %s: %s", d.Id(), err)
 	}
 
-	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	// Wait for the listener to become ACTIVE.
+	err = waitForLBV2Listener(lbClient, listener, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -272,22 +310,22 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 
 func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	// Wait for LoadBalancer to become active before continuing
-	lbID := d.Get("loadbalancer_id").(string)
-	timeout := d.Timeout(schema.TimeoutDelete)
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	// Get a clean copy of the listener.
+	listener, err := neutronlisteners.Get(lbClient, d.Id()).Extract()
 	if err != nil {
-		return err
+		return CheckDeleted(d, err, "Unable to retrieve openstack_lb_listener_v2")
 	}
 
-	log.Printf("[DEBUG] Deleting listener %s", d.Id())
+	timeout := d.Timeout(schema.TimeoutDelete)
+
+	log.Printf("[DEBUG] Deleting openstack_lb_listener_v2 %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		err = listeners.Delete(networkingClient, d.Id()).ExtractErr()
+		err = neutronlisteners.Delete(lbClient, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -295,17 +333,11 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error deleting listener %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Error deleting openstack_lb_listener_v2")
 	}
 
-	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-	if err != nil {
-		return err
-	}
-
-	// Wait for Listener to delete
-	err = waitForLBV2Listener(networkingClient, d.Id(), "DELETED", nil, timeout)
+	// Wait for the listener to become DELETED.
+	err = waitForLBV2Listener(lbClient, listener, "DELETED", lbPendingDeleteStatuses, timeout)
 	if err != nil {
 		return err
 	}

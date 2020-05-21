@@ -6,7 +6,7 @@ description: |-
   Manages a V2 Image resource within OpenStack Glance.
 ---
 
-# openstack\_images\_image_v2
+# openstack\_images\_image\_v2
 
 Manages a V2 Image resource within OpenStack Glance.
 
@@ -14,12 +14,12 @@ Manages a V2 Image resource within OpenStack Glance.
 
 ```hcl
 resource "openstack_images_image_v2" "rancheros" {
-  name   = "RancherOS"
+  name             = "RancherOS"
   image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
   container_format = "bare"
-  disk_format = "qcow2"
+  disk_format      = "qcow2"
 
-  properties {
+  properties = {
     key = "value"
   }
 }
@@ -36,16 +36,16 @@ The following arguments are supported:
    "ami", "ari", "aki", "vhd", "vmdk", "raw", "qcow2", "vdi", "iso".
 
 * `local_file_path` - (Optional) This is the filepath of the raw image file
-   that will be uploaded to Glance. Conflicts with `image_source_url`.
+   that will be uploaded to Glance. Conflicts with `image_source_url` and
+   `web_download`.
 
 * `image_cache_path` - (Optional) This is the directory where the images will
    be downloaded. Images will be stored with a filename corresponding to
    the url's md5 hash. Defaults to "$HOME/.terraform/image_cache"
 
-* `image_source_url` - (Optional) This is the url of the raw image that will
-   be downloaded in the `image_cache_path` before being uploaded to Glance.
-   Glance is able to download image from internet but the `gophercloud` library
-   does not yet provide a way to do so.
+* `image_source_url` - (Optional) This is the url of the raw image. If `web_download`
+   is not used, then the image will be downloaded in the `image_cache_path` before
+   being uploaded to Glance.
    Conflicts with `local_file_path`.
 
 * `min_disk_gb` - (Optional) Amount of disk space (in GB) required to boot image.
@@ -57,7 +57,8 @@ The following arguments are supported:
 * `name` - (Required) The name of the image.
 
 * `properties` - (Optional) A map of key/value pairs to set freeform
-    information about an image.
+    information about an image. See the "Notes" section for further
+    information about properties.
 
 * `protected` - (Optional) If true, image will not be deletable.
    Defaults to false.
@@ -70,9 +71,17 @@ The following arguments are supported:
 * `tags` - (Optional) The tags of the image. It must be a list of strings.
     At this time, it is not possible to delete all tags of an image.
 
+* `verify_checksum` - (Optional) If false, the checksum will not be verified
+    once the image is finished uploading. Conflicts with `web_download`.
+    Defaults to true when not using `web_download`.
+
 * `visibility` - (Optional) The visibility of the image. Must be one of
    "public", "private", "community", or "shared". The ability to set the
    visibility depends upon the configuration of the OpenStack cloud.
+
+* `web_download` - (Optional) If true, the "web-download" import method will
+    be used to let Openstack download the image directly from the remote source.
+    Conflicts with `local_file_path`. Defaults to false.
 
 ## Attributes Reference
 
@@ -88,7 +97,7 @@ The following attributes are exported:
 * `id` - A unique ID assigned by Glance.
 * `metadata` - The metadata associated with the image.
    Image metadata allow for meaningfully define the image properties
-   and tags. See http://docs.openstack.org/developer/glance/metadefs-concepts.html.
+   and tags. See https://docs.openstack.org/glance/latest/user/metadefs-concepts.html.
 * `min_disk_gb` - See Argument Reference above.
 * `min_ram_mb` - See Argument Reference above.
 * `name` - See Argument Reference above.
@@ -102,8 +111,25 @@ The following attributes are exported:
 * `status` - The status of the image. It can be "queued", "active"
    or "saving".
 * `tags` - See Argument Reference above.
-* `update_at` - The date the image was last updated.
+* `updated_at` - The date the image was last updated.
+* `update_at` - (**Deprecated** - use `updated_at` instead)
 * `visibility` - See Argument Reference above.
+
+## Notes
+
+### Properties
+
+This resource supports the ability to add properties to a resource during
+creation as well as add, update, and delete properties during an update of this
+resource.
+
+Newer versions of OpenStack are adding some read-only properties to each image.
+These properties start with the prefix `os_`. If these properties are detected,
+this resource will automatically reconcile these with the user-provided
+properties.
+
+In addition, the `direct_url` property is also automatically reconciled if the
+Image Service set it.
 
 ## Import
 

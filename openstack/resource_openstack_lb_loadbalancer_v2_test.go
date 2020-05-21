@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
@@ -16,19 +16,24 @@ import (
 func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
 
+	lbProvider := "haproxy"
+	if OS_USE_OCTAVIA != "" {
+		lbProvider = "octavia"
+	}
+
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckLB(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccLBV2LoadBalancerConfig_basic,
+			{
+				Config: testAccLBV2LoadBalancerConfig_basic(lbProvider),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2LoadBalancerExists("openstack_lb_loadbalancer_v2.loadbalancer_1", &lb),
 				),
 			},
-			resource.TestStep{
-				Config: testAccLBV2LoadBalancerConfig_update,
+			{
+				Config: testAccLBV2LoadBalancerConfig_update(lbProvider),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_lb_loadbalancer_v2.loadbalancer_1", "name", "loadbalancer_1_updated"),
@@ -46,11 +51,11 @@ func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
 	var sg_1, sg_2 groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckLB(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccLBV2LoadBalancer_secGroup,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2LoadBalancerExists(
@@ -64,7 +69,7 @@ func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
 					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg_1),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccLBV2LoadBalancer_secGroup_update1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2LoadBalancerExists(
@@ -79,7 +84,7 @@ func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
 					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg_2),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccLBV2LoadBalancer_secGroup_update2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2LoadBalancerExists(
@@ -97,11 +102,32 @@ func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
 	})
 }
 
+func TestAccLBV2LoadBalancer_vip_network(t *testing.T) {
+	var lb loadbalancers.LoadBalancer
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckLB(t)
+			testAccPreCheckUseOctavia(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV2LoadBalancerConfig_vip_network,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV2LoadBalancerExists("openstack_lb_loadbalancer_v2.loadbalancer_1", &lb),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckLBV2LoadBalancerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -109,8 +135,8 @@ func testAccCheckLBV2LoadBalancerDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := loadbalancers.Get(networkingClient, rs.Primary.ID).Extract()
-		if err == nil {
+		lb, err := loadbalancers.Get(lbClient, rs.Primary.ID).Extract()
+		if err == nil && lb.ProvisioningStatus != "DELETED" {
 			return fmt.Errorf("LoadBalancer still exists: %s", rs.Primary.ID)
 		}
 	}
@@ -131,12 +157,12 @@ func testAccCheckLBV2LoadBalancerExists(
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
 
-		found, err := loadbalancers.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := loadbalancers.Get(lbClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -155,7 +181,7 @@ func testAccCheckLBV2LoadBalancerHasSecGroup(
 	lb *loadbalancers.LoadBalancer, sg *groups.SecGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -175,58 +201,60 @@ func testAccCheckLBV2LoadBalancerHasSecGroup(
 	}
 }
 
-const testAccLBV2LoadBalancerConfig_basic = `
-resource "openstack_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
+func testAccLBV2LoadBalancerConfig_basic(lbProvider string) string {
+	return fmt.Sprintf(`
+    resource "openstack_networking_network_v2" "network_1" {
+      name = "network_1"
+      admin_state_up = "true"
+    }
+
+    resource "openstack_networking_subnet_v2" "subnet_1" {
+      name = "subnet_1"
+      cidr = "192.168.199.0/24"
+      ip_version = 4
+      network_id = "${openstack_networking_network_v2.network_1.id}"
+    }
+
+    resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
+      name = "loadbalancer_1"
+      loadbalancer_provider = "%s"
+      vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+
+      timeouts {
+        create = "15m"
+        update = "15m"
+        delete = "15m"
+      }
+    }`, lbProvider)
 }
 
-resource "openstack_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+func testAccLBV2LoadBalancerConfig_update(lbProvider string) string {
+	return fmt.Sprintf(`
+    resource "openstack_networking_network_v2" "network_1" {
+      name = "network_1"
+      admin_state_up = "true"
+    }
+
+    resource "openstack_networking_subnet_v2" "subnet_1" {
+      name = "subnet_1"
+      cidr = "192.168.199.0/24"
+      ip_version = 4
+      network_id = "${openstack_networking_network_v2.network_1.id}"
+    }
+
+    resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
+      name = "loadbalancer_1_updated"
+      loadbalancer_provider = "%s"
+      admin_state_up = "true"
+      vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+
+      timeouts {
+        create = "15m"
+        update = "15m"
+        delete = "15m"
+      }
+    }`, lbProvider)
 }
-
-resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
-  name = "loadbalancer_1"
-  loadbalancer_provider = "haproxy"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
-
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
-}
-`
-
-const testAccLBV2LoadBalancerConfig_update = `
-resource "openstack_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "openstack_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-}
-
-resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
-  name = "loadbalancer_1_updated"
-  loadbalancer_provider = "haproxy"
-  admin_state_up = "true"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
-
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
-}
-`
 
 const testAccLBV2LoadBalancer_secGroup = `
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
@@ -256,6 +284,12 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
     security_group_ids = [
       "${openstack_networking_secgroup_v2.secgroup_1.id}"
     ]
+
+    timeouts {
+      create = "15m"
+      update = "15m"
+      delete = "15m"
+    }
 }
 `
 
@@ -282,12 +316,18 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
-    name = "loadbalancer_1"
-    vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
-    security_group_ids = [
-      "${openstack_networking_secgroup_v2.secgroup_1.id}",
-      "${openstack_networking_secgroup_v2.secgroup_2.id}"
-    ]
+  name = "loadbalancer_1"
+  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  security_group_ids = [
+    "${openstack_networking_secgroup_v2.secgroup_1.id}",
+    "${openstack_networking_secgroup_v2.secgroup_2.id}"
+  ]
+
+  timeouts {
+    create = "15m"
+    update = "15m"
+    delete = "15m"
+  }
 }
 `
 
@@ -314,11 +354,43 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
-    name = "loadbalancer_1"
-    vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
-    security_group_ids = [
-      "${openstack_networking_secgroup_v2.secgroup_2.id}"
-    ]
-    depends_on = ["openstack_networking_secgroup_v2.secgroup_1"]
+  name = "loadbalancer_1"
+  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  security_group_ids = [
+    "${openstack_networking_secgroup_v2.secgroup_2.id}"
+  ]
+  depends_on = ["openstack_networking_secgroup_v2.secgroup_1"]
+
+  timeouts {
+    create = "15m"
+    update = "15m"
+    delete = "15m"
+  }
+}
+`
+
+const testAccLBV2LoadBalancerConfig_vip_network = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
+  name = "loadbalancer_1"
+  loadbalancer_provider = "octavia"
+  vip_network_id = "${openstack_networking_network_v2.network_1.id}"
+  depends_on = ["openstack_networking_subnet_v2.subnet_1"]
+  timeouts {
+    create = "15m"
+    update = "15m"
+    delete = "15m"
+  }
 }
 `

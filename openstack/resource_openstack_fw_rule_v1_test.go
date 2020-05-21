@@ -2,72 +2,143 @@ package openstack
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 	"time"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/rules"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccFWRuleV1_basic(t *testing.T) {
-	rule1 := &rules.Rule{
-		Name:      "rule_1",
-		Protocol:  "udp",
-		Action:    "deny",
-		IPVersion: 4,
-		Enabled:   true,
-	}
-
-	rule2 := &rules.Rule{
-		Name:                 "rule_1",
-		Protocol:             "udp",
-		Action:               "deny",
-		Description:          "Terraform accept test",
-		IPVersion:            4,
-		SourceIPAddress:      "1.2.3.4",
-		DestinationIPAddress: "4.3.2.0/24",
-		SourcePort:           "444",
-		DestinationPort:      "555",
-		Enabled:              true,
-	}
-
-	rule3 := &rules.Rule{
-		Name:                 "rule_1",
-		Protocol:             "tcp",
-		Action:               "allow",
-		Description:          "Terraform accept test updated",
-		IPVersion:            4,
-		SourceIPAddress:      "1.2.3.0/24",
-		DestinationIPAddress: "4.3.2.8",
-		SourcePort:           "666",
-		DestinationPort:      "777",
-		Enabled:              false,
-	}
+	var rule rules.Rule
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckFW(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWRuleV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccFWRuleV1_basic_1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", rule1),
+					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "name", "rule_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "protocol", "udp"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "action", "deny"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "ip_version", "4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "enabled", "true"),
 				),
 			},
-			resource.TestStep{
+
+			{
 				Config: testAccFWRuleV1_basic_2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", rule2),
+					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "name", "rule_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "protocol", "udp"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "action", "deny"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "description", "Terraform accept test"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "ip_version", "4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_ip_address", "1.2.3.4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_ip_address", "4.3.2.0/24"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_port", "444"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_port", "555"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "enabled", "true"),
 				),
 			},
-			resource.TestStep{
+
+			{
 				Config: testAccFWRuleV1_basic_3,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", rule3),
+					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "name", "rule_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "protocol", "tcp"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "action", "allow"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "description", "Terraform accept test updated"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "ip_version", "4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_ip_address", "1.2.3.0/24"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_ip_address", "4.3.2.8"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_port", "666"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_port", "777"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "enabled", "false"),
+				),
+			},
+
+			{
+				Config: testAccFWRuleV1_basic_4,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "name", "rule_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "protocol", "udp"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "action", "allow"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "description", "Terraform accept test updated"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "ip_version", "4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_ip_address", "1.2.3.0/24"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_ip_address", "4.3.2.8"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_port", "666"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_port", "777"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "enabled", "false"),
+				),
+			},
+
+			{
+				Config: testAccFWRuleV1_basic_5,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "name", "rule_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "protocol", "udp"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "action", "allow"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "description", "Terraform accept test updated"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "ip_version", "4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_ip_address", "1.2.3.0/24"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_ip_address", "4.3.2.8"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_port", "666"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "enabled", "false"),
 				),
 			},
 		},
@@ -75,25 +146,96 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 }
 
 func TestAccFWRuleV1_anyProtocol(t *testing.T) {
-	rule := &rules.Rule{
-		Name:            "rule_1",
-		Description:     "Allow any protocol",
-		Protocol:        "",
-		Action:          "allow",
-		IPVersion:       4,
-		SourceIPAddress: "192.168.199.0/24",
-		Enabled:         true,
-	}
+	var rule rules.Rule
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckFW(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckFWRuleV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFWRuleV1_anyProtocol,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "name", "rule_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "action", "allow"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "protocol", "any"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "description", "Allow any protocol"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "ip_version", "4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_ip_address", "192.168.199.0/24"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "enabled", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccFWRuleV1_updateName(t *testing.T) {
+	var rule rules.Rule
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWRuleV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccFWRuleV1_anyProtocol,
+			{
+				Config: testAccFWRuleV1_updateName_1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", rule),
+					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "name", "rule_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "action", "deny"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "protocol", "udp"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "description", "Terraform accept test"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "ip_version", "4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_ip_address", "1.2.3.4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_ip_address", "4.3.2.0/24"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_port", "444"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_port", "555"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "enabled", "true"),
+				),
+			},
+
+			{
+				Config: testAccFWRuleV1_updateName_2,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "name", "updated_rule_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "action", "deny"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "protocol", "udp"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "description", "Terraform accept test"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "ip_version", "4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_ip_address", "1.2.3.4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_ip_address", "4.3.2.0/24"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "source_port", "444"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "destination_port", "555"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v1.rule_1", "enabled", "true"),
 				),
 			},
 		},
@@ -102,7 +244,7 @@ func TestAccFWRuleV1_anyProtocol(t *testing.T) {
 
 func testAccCheckFWRuleV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -122,7 +264,7 @@ func testAccCheckFWRuleV1Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckFWRuleV1Exists(n string, expected *rules.Rule) resource.TestCheckFunc {
+func testAccCheckFWRuleV1Exists(n string, rule *rules.Rule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -134,7 +276,7 @@ func testAccCheckFWRuleV1Exists(n string, expected *rules.Rule) resource.TestChe
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -154,14 +296,7 @@ func testAccCheckFWRuleV1Exists(n string, expected *rules.Rule) resource.TestChe
 			break
 		}
 
-		expected.ID = found.ID
-		// Erase the tenant id because we don't want to compare
-		// it as long it is not present in the expected
-		found.TenantID = ""
-
-		if !reflect.DeepEqual(expected, found) {
-			return fmt.Errorf("Expected:\n%#v\nFound:\n%#v", expected, found)
-		}
+		*rule = *found
 
 		return nil
 	}
@@ -205,6 +340,35 @@ resource "openstack_fw_rule_v1" "rule_1" {
 }
 `
 
+const testAccFWRuleV1_basic_4 = `
+resource "openstack_fw_rule_v1" "rule_1" {
+	name = "rule_1"
+	description = "Terraform accept test updated"
+	protocol = "udp"
+	action = "allow"
+	ip_version = 4
+	source_ip_address = "1.2.3.0/24"
+	destination_ip_address = "4.3.2.8"
+	source_port = "666"
+	destination_port = "777"
+	enabled = false
+}
+`
+
+const testAccFWRuleV1_basic_5 = `
+resource "openstack_fw_rule_v1" "rule_1" {
+	name = "rule_1"
+	description = "Terraform accept test updated"
+	protocol = "udp"
+	action = "allow"
+	ip_version = 4
+	source_ip_address = "1.2.3.0/24"
+	destination_ip_address = "4.3.2.8"
+	source_port = "666"
+	enabled = false
+}
+`
+
 const testAccFWRuleV1_anyProtocol = `
 resource "openstack_fw_rule_v1" "rule_1" {
 	name = "rule_1"
@@ -213,6 +377,36 @@ resource "openstack_fw_rule_v1" "rule_1" {
 	action = "allow"
 	ip_version = 4
 	source_ip_address = "192.168.199.0/24"
+	enabled = true
+}
+`
+
+const testAccFWRuleV1_updateName_1 = `
+resource "openstack_fw_rule_v1" "rule_1" {
+	name = "rule_1"
+	description = "Terraform accept test"
+	protocol = "udp"
+	action = "deny"
+	ip_version = 4
+	source_ip_address = "1.2.3.4"
+	destination_ip_address = "4.3.2.0/24"
+	source_port = "444"
+	destination_port = "555"
+	enabled = true
+}
+`
+
+const testAccFWRuleV1_updateName_2 = `
+resource "openstack_fw_rule_v1" "rule_1" {
+	name = "updated_rule_1"
+	description = "Terraform accept test"
+	protocol = "udp"
+	action = "deny"
+	ip_version = 4
+	source_ip_address = "1.2.3.4"
+	destination_ip_address = "4.3.2.0/24"
+	source_port = "444"
+	destination_port = "555"
 	enabled = true
 }
 `

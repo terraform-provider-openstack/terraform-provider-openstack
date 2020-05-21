@@ -1,16 +1,22 @@
 package openstack
 
 import (
-	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/hashcode"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/structure"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
-	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsbinding"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 )
 
@@ -30,115 +36,242 @@ func resourceNetworkingPortV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"name": &schema.Schema{
+
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
-			"network_id": &schema.Schema{
+
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"network_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"admin_state_up": &schema.Schema{
+
+			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
-			"mac_address": &schema.Schema{
+
+			"mac_address": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"tenant_id": &schema.Schema{
+
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"device_owner": &schema.Schema{
+
+			"device_owner": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"security_group_ids": &schema.Schema{
+
+			"security_group_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: false,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
-			"no_security_groups": &schema.Schema{
+
+			"no_security_groups": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
 			},
-			"device_id": &schema.Schema{
+
+			"device_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"fixed_ip": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				ForceNew: false,
+
+			"fixed_ip": {
+				Type:          schema.TypeList,
+				Optional:      true,
+				ForceNew:      false,
+				ConflictsWith: []string{"no_fixed_ip"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"subnet_id": &schema.Schema{
+						"subnet_id": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"ip_address": &schema.Schema{
+						"ip_address": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
 					},
 				},
 			},
-			"allowed_address_pairs": &schema.Schema{
+
+			"no_fixed_ip": {
+				Type:          schema.TypeBool,
+				Optional:      true,
+				ForceNew:      false,
+				ConflictsWith: []string{"fixed_ip"},
+			},
+
+			"allowed_address_pairs": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: false,
-				Set:      allowedAddressPairsHash,
+				Set:      resourceNetworkingPortV2AllowedAddressPairsHash,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"ip_address": &schema.Schema{
+						"ip_address": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"mac_address": &schema.Schema{
+						"mac_address": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Computed: true,
 						},
 					},
 				},
 			},
-			"value_specs": &schema.Schema{
+
+			"extra_dhcp_option": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: false,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"ip_version": {
+							Type:     schema.TypeInt,
+							Default:  4,
+							Optional: true,
+						},
+					},
+				},
+			},
+
+			"value_specs": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
 			},
-			"all_fixed_ips": &schema.Schema{
+
+			"all_fixed_ips": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"all_security_group_ids": &schema.Schema{
+
+			"all_security_group_ids": {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
+			},
+
+			"tags": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"all_tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"port_security_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+
+			"binding": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"host_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"profile": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateFunc:     validateJsonObject,
+							DiffSuppressFunc: diffSuppressJsonObject,
+							StateFunc: func(v interface{}) string {
+								json, _ := structure.NormalizeJsonString(v)
+								return json
+							},
+						},
+						"vif_details": {
+							Type:     schema.TypeMap,
+							Computed: true,
+						},
+						"vif_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"vnic_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "normal",
+							ValidateFunc: validation.StringInSlice([]string{
+								"direct", "direct-physical", "macvtap", "normal", "baremetal", "virtio-forwarder",
+							}, true),
+						},
+					},
+				},
+			},
+
+			"dns_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
+			"dns_assignment": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeMap},
+			},
+
+			"qos_policy_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+				Computed: true,
 			},
 		},
 	}
@@ -146,34 +279,38 @@ func resourceNetworkingPortV2() *schema.Resource {
 
 func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	var securityGroups []string
-	v := d.Get("security_group_ids")
-	securityGroups = resourcePortSecurityGroupsV2(v.(*schema.Set))
+	securityGroups := expandToStringSlice(d.Get("security_group_ids").(*schema.Set).List())
 	noSecurityGroups := d.Get("no_security_groups").(bool)
 
 	// Check and make sure an invalid security group configuration wasn't given.
 	if noSecurityGroups && len(securityGroups) > 0 {
-		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set")
+		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set for openstack_networking_port_v2")
 	}
 
+	allowedAddressPairs := d.Get("allowed_address_pairs").(*schema.Set)
 	createOpts := PortCreateOpts{
 		ports.CreateOpts{
 			Name:                d.Get("name").(string),
-			AdminStateUp:        resourcePortAdminStateUpV2(d),
+			Description:         d.Get("description").(string),
 			NetworkID:           d.Get("network_id").(string),
 			MACAddress:          d.Get("mac_address").(string),
 			TenantID:            d.Get("tenant_id").(string),
 			DeviceOwner:         d.Get("device_owner").(string),
 			DeviceID:            d.Get("device_id").(string),
-			FixedIPs:            resourcePortFixedIpsV2(d),
-			AllowedAddressPairs: resourceAllowedAddressPairsV2(d),
+			FixedIPs:            expandNetworkingPortFixedIPV2(d),
+			AllowedAddressPairs: expandNetworkingPortAllowedAddressPairsV2(allowedAddressPairs),
 		},
 		MapValueSpecs(d),
+	}
+
+	if v, ok := d.GetOkExists("admin_state_up"); ok {
+		asu := v.(bool)
+		createOpts.AdminStateUp = &asu
 	}
 
 	if noSecurityGroups {
@@ -187,75 +324,150 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		createOpts.SecurityGroups = &securityGroups
 	}
 
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	p, err := ports.Create(networkingClient, createOpts).Extract()
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Neutron network: %s", err)
-	}
-	log.Printf("[INFO] Network ID: %s", p.ID)
+	// Declare a finalCreateOpts interface to hold either the
+	// base create options or the extended DHCP options.
+	var finalCreateOpts ports.CreateOptsBuilder
+	finalCreateOpts = createOpts
 
-	log.Printf("[DEBUG] Waiting for OpenStack Neutron Port (%s) to become available.", p.ID)
+	dhcpOpts := d.Get("extra_dhcp_option").(*schema.Set)
+	if dhcpOpts.Len() > 0 {
+		finalCreateOpts = extradhcpopts.CreateOptsExt{
+			CreateOptsBuilder: createOpts,
+			ExtraDHCPOpts:     expandNetworkingPortDHCPOptsV2Create(dhcpOpts),
+		}
+	}
+
+	// Add the port security attribute if specified.
+	if v, ok := d.GetOkExists("port_security_enabled"); ok {
+		portSecurityEnabled := v.(bool)
+		finalCreateOpts = portsecurity.PortCreateOptsExt{
+			CreateOptsBuilder:   finalCreateOpts,
+			PortSecurityEnabled: &portSecurityEnabled,
+		}
+	}
+
+	// Add the port binding parameters if specified.
+	if v, ok := d.GetOkExists("binding"); ok {
+		for _, raw := range v.([]interface{}) {
+			binding := raw.(map[string]interface{})
+			var profile map[string]interface{}
+
+			// Convert raw string into the map
+			rawProfile := binding["profile"].(string)
+			if len(rawProfile) > 0 {
+				err := json.Unmarshal([]byte(rawProfile), &profile)
+				if err != nil {
+					return fmt.Errorf("Failed to unmarshal the JSON: %s", err)
+				}
+			}
+
+			finalCreateOpts = portsbinding.CreateOptsExt{
+				CreateOptsBuilder: finalCreateOpts,
+				HostID:            binding["host_id"].(string),
+				Profile:           profile,
+				VNICType:          binding["vnic_type"].(string),
+			}
+		}
+	}
+
+	if dnsName := d.Get("dns_name").(string); dnsName != "" {
+		finalCreateOpts = dns.PortCreateOptsExt{
+			CreateOptsBuilder: finalCreateOpts,
+			DNSName:           dnsName,
+		}
+	}
+
+	if qosPolicyID := d.Get("qos_policy_id").(string); qosPolicyID != "" {
+		finalCreateOpts = policies.PortCreateOptsExt{
+			CreateOptsBuilder: finalCreateOpts,
+			QoSPolicyID:       qosPolicyID,
+		}
+	}
+
+	log.Printf("[DEBUG] openstack_networking_port_v2 create options: %#v", finalCreateOpts)
+
+	// Create a Neutron port and set extra options if they're specified.
+	var port portExtended
+
+	err = ports.Create(networkingClient, finalCreateOpts).ExtractInto(&port)
+	if err != nil {
+		return fmt.Errorf("Error creating openstack_networking_port_v2: %s", err)
+	}
+
+	log.Printf("[DEBUG] Waiting for openstack_networking_port_v2 %s to become available.", port.ID)
 
 	stateConf := &resource.StateChangeConf{
-		Target:     []string{"ACTIVE"},
-		Refresh:    waitForNetworkPortActive(networkingClient, p.ID),
+		Target:     []string{"ACTIVE", "DOWN"},
+		Refresh:    resourceNetworkingPortV2StateRefreshFunc(networkingClient, port.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
 
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("Error waiting for openstack_networking_port_v2 %s to become available: %s", port.ID, err)
+	}
 
-	d.SetId(p.ID)
+	d.SetId(port.ID)
 
+	tags := networkingV2AttributesTags(d)
+	if len(tags) > 0 {
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "ports", port.ID, tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error setting tags on openstack_networking_port_v2 %s: %s", port.ID, err)
+		}
+		log.Printf("[DEBUG] Set tags %s on openstack_networking_port_v2 %s", tags, port.ID)
+	}
+
+	log.Printf("[DEBUG] Created openstack_networking_port_v2 %s: %#v", port.ID, port)
 	return resourceNetworkingPortV2Read(d, meta)
 }
 
 func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	p, err := ports.Get(networkingClient, d.Id()).Extract()
+	var port portExtended
+	err = ports.Get(networkingClient, d.Id()).ExtractInto(&port)
 	if err != nil {
-		return CheckDeleted(d, err, "port")
+		return CheckDeleted(d, err, "Error getting openstack_networking_port_v2")
 	}
 
-	log.Printf("[DEBUG] Retrieved Port %s: %+v", d.Id(), p)
+	log.Printf("[DEBUG] Retrieved openstack_networking_port_v2 %s: %#v", d.Id(), port)
 
-	d.Set("name", p.Name)
-	d.Set("admin_state_up", p.AdminStateUp)
-	d.Set("network_id", p.NetworkID)
-	d.Set("mac_address", p.MACAddress)
-	d.Set("tenant_id", p.TenantID)
-	d.Set("device_owner", p.DeviceOwner)
-	d.Set("device_id", p.DeviceID)
+	d.Set("name", port.Name)
+	d.Set("description", port.Description)
+	d.Set("admin_state_up", port.AdminStateUp)
+	d.Set("network_id", port.NetworkID)
+	d.Set("mac_address", port.MACAddress)
+	d.Set("tenant_id", port.TenantID)
+	d.Set("device_owner", port.DeviceOwner)
+	d.Set("device_id", port.DeviceID)
 
-	// Create a slice of all returned Fixed IPs.
+	networkingV2ReadAttributesTags(d, port.Tags)
+
+	// Set a slice of all returned Fixed IPs.
 	// This will be in the order returned by the API,
 	// which is usually alpha-numeric.
-	var ips []string
-	for _, ipObject := range p.FixedIPs {
-		ips = append(ips, ipObject.IPAddress)
-	}
-	d.Set("all_fixed_ips", ips)
+	d.Set("all_fixed_ips", expandNetworkingPortFixedIPToStringSlice(port.FixedIPs))
 
 	// Set all security groups.
 	// This can be different from what the user specified since
 	// the port can have the "default" group automatically applied.
-	d.Set("all_security_group_ids", p.SecurityGroups)
+	d.Set("all_security_group_ids", port.SecurityGroups)
 
-	// Convert AllowedAddressPairs to list of map
-	var pairs []map[string]interface{}
-	for _, pairObject := range p.AllowedAddressPairs {
-		pair := make(map[string]interface{})
-		pair["ip_address"] = pairObject.IPAddress
-		pair["mac_address"] = pairObject.MACAddress
-		pairs = append(pairs, pair)
-	}
-	d.Set("allowed_address_pairs", pairs)
+	d.Set("allowed_address_pairs", flattenNetworkingPortAllowedAddressPairsV2(port.MACAddress, port.AllowedAddressPairs))
+	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDHCPOptsExt))
+	d.Set("port_security_enabled", port.PortSecurityEnabled)
+	d.Set("binding", flattenNetworkingPortBindingV2(port))
+	d.Set("dns_name", port.DNSName)
+	d.Set("dns_assignment", port.DNSAssignment)
+	d.Set("qos_policy_id", port.QoSPolicyID)
 
 	d.Set("region", GetRegion(d, config))
 
@@ -264,18 +476,17 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 
 func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	v := d.Get("security_group_ids").(*schema.Set)
-	securityGroups := resourcePortSecurityGroupsV2(v)
+	securityGroups := expandToStringSlice(d.Get("security_group_ids").(*schema.Set).List())
 	noSecurityGroups := d.Get("no_security_groups").(bool)
 
 	// Check and make sure an invalid security group configuration wasn't given.
 	if noSecurityGroups && len(securityGroups) > 0 {
-		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set")
+		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set for openstack_networking_port_v2")
 	}
 
 	var hasChange bool
@@ -283,7 +494,8 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("allowed_address_pairs") {
 		hasChange = true
-		aap := resourceAllowedAddressPairsV2(d)
+		allowedAddressPairs := d.Get("allowed_address_pairs").(*schema.Set)
+		aap := expandNetworkingPortAllowedAddressPairsV2(allowedAddressPairs)
 		updateOpts.AllowedAddressPairs = &aap
 	}
 
@@ -297,43 +509,158 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("security_group_ids") {
 		hasChange = true
-		sgs := d.Get("security_group_ids").(*schema.Set)
-		securityGroups := resourcePortSecurityGroupsV2(sgs)
 		updateOpts.SecurityGroups = &securityGroups
 	}
 
 	if d.HasChange("name") {
 		hasChange = true
-		updateOpts.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
+	}
+
+	if d.HasChange("description") {
+		hasChange = true
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
 	}
 
 	if d.HasChange("admin_state_up") {
 		hasChange = true
-		updateOpts.AdminStateUp = resourcePortAdminStateUpV2(d)
+		asu := d.Get("admin_state_up").(bool)
+		updateOpts.AdminStateUp = &asu
 	}
 
 	if d.HasChange("device_owner") {
 		hasChange = true
-		updateOpts.DeviceOwner = d.Get("device_owner").(string)
+		deviceOwner := d.Get("device_owner").(string)
+		updateOpts.DeviceOwner = &deviceOwner
 	}
 
 	if d.HasChange("device_id") {
 		hasChange = true
-		updateOpts.DeviceID = d.Get("device_id").(string)
+		deviceId := d.Get("device_id").(string)
+		updateOpts.DeviceID = &deviceId
 	}
 
-	if d.HasChange("fixed_ip") {
-		hasChange = true
-		updateOpts.FixedIPs = resourcePortFixedIpsV2(d)
-	}
-
-	if hasChange {
-		log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), updateOpts)
-
-		_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
-		if err != nil {
-			return fmt.Errorf("Error updating OpenStack Neutron Network: %s", err)
+	if d.HasChange("fixed_ip") || d.HasChange("no_fixed_ip") {
+		fixedIPs := expandNetworkingPortFixedIPV2(d)
+		if fixedIPs != nil {
+			hasChange = true
+			updateOpts.FixedIPs = fixedIPs
 		}
+	}
+
+	var finalUpdateOpts ports.UpdateOptsBuilder
+	finalUpdateOpts = updateOpts
+
+	if d.HasChange("port_security_enabled") {
+		hasChange = true
+		portSecurityEnabled := d.Get("port_security_enabled").(bool)
+		finalUpdateOpts = portsecurity.PortUpdateOptsExt{
+			UpdateOptsBuilder:   finalUpdateOpts,
+			PortSecurityEnabled: &portSecurityEnabled,
+		}
+	}
+
+	// Next, perform any dhcp option changes.
+	if d.HasChange("extra_dhcp_option") {
+		hasChange = true
+
+		o, n := d.GetChange("extra_dhcp_option")
+		oldDHCPOpts := o.(*schema.Set)
+		newDHCPOpts := n.(*schema.Set)
+
+		deleteDHCPOpts := oldDHCPOpts.Difference(newDHCPOpts)
+		addDHCPOpts := newDHCPOpts.Difference(oldDHCPOpts)
+
+		updateExtraDHCPOpts := expandNetworkingPortDHCPOptsV2Update(deleteDHCPOpts, addDHCPOpts)
+		finalUpdateOpts = extradhcpopts.UpdateOptsExt{
+			UpdateOptsBuilder: finalUpdateOpts,
+			ExtraDHCPOpts:     updateExtraDHCPOpts,
+		}
+	}
+
+	// Next, perform port binding option changes.
+	if d.HasChange("binding") {
+		var newOpts portsbinding.UpdateOptsExt
+		var bindingChanged bool
+
+		profile := map[string]interface{}{}
+
+		for _, raw := range d.Get("binding").([]interface{}) {
+			binding := raw.(map[string]interface{})
+
+			if d.HasChange("binding.0.vnic_type") {
+				bindingChanged = true
+				newOpts.VNICType = binding["vnic_type"].(string)
+			}
+
+			if d.HasChange("binding.0.host_id") {
+				bindingChanged = true
+				hostID := binding["host_id"].(string)
+				newOpts.HostID = &hostID
+			}
+
+			if d.HasChange("binding.0.profile") {
+				bindingChanged = true
+				// Convert raw string into the map
+				rawProfile := binding["profile"].(string)
+				if len(rawProfile) > 0 {
+					err := json.Unmarshal([]byte(rawProfile), &profile)
+					if err != nil {
+						return fmt.Errorf("Failed to unmarshal the JSON: %s", err)
+					}
+					if profile == nil {
+						profile = map[string]interface{}{}
+					}
+				}
+				newOpts.Profile = profile
+			}
+		}
+
+		if bindingChanged {
+			hasChange = true
+			newOpts.UpdateOptsBuilder = finalUpdateOpts
+			finalUpdateOpts = newOpts
+		}
+	}
+
+	if d.HasChange("dns_name") {
+		hasChange = true
+
+		dnsName := d.Get("dns_name").(string)
+		finalUpdateOpts = dns.PortUpdateOptsExt{
+			UpdateOptsBuilder: finalUpdateOpts,
+			DNSName:           &dnsName,
+		}
+	}
+
+	if d.HasChange("qos_policy_id") {
+		qosPolicyID := d.Get("qos_policy_id").(string)
+		finalUpdateOpts = policies.PortUpdateOptsExt{
+			UpdateOptsBuilder: finalUpdateOpts,
+			QoSPolicyID:       &qosPolicyID,
+		}
+	}
+
+	// At this point, perform the update for all "standard" port changes.
+	if hasChange {
+		log.Printf("[DEBUG] openstack_networking_port_v2 %s update options: %#v", d.Id(), finalUpdateOpts)
+		_, err = ports.Update(networkingClient, d.Id(), finalUpdateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
+		}
+	}
+
+	// Next, perform any required updates to the tags.
+	if d.HasChange("tags") {
+		tags := networkingV2UpdateAttributesTags(d)
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "ports", d.Id(), tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error setting tags on openstack_networking_port_v2 %s: %s", d.Id(), err)
+		}
+		log.Printf("[DEBUG] Set tags %s on openstack_networking_port_v2 %s", tags, d.Id())
 	}
 
 	return resourceNetworkingPortV2Read(d, meta)
@@ -341,15 +668,19 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 func resourceNetworkingPortV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+	}
+
+	if err := ports.Delete(networkingClient, d.Id()).ExtractErr(); err != nil {
+		return CheckDeleted(d, err, "Error deleting openstack_networking_port_v2")
 	}
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForNetworkPortDelete(networkingClient, d.Id()),
+		Refresh:    resourceNetworkingPortV2StateRefreshFunc(networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -357,111 +688,9 @@ func resourceNetworkingPortV2Delete(d *schema.ResourceData, meta interface{}) er
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack Neutron Network: %s", err)
+		return fmt.Errorf("Error waiting for openstack_networking_port_v2 %s to delete: %s", d.Id(), err)
 	}
 
 	d.SetId("")
 	return nil
-}
-
-func resourcePortSecurityGroupsV2(v *schema.Set) []string {
-	var securityGroups []string
-	for _, v := range v.List() {
-		securityGroups = append(securityGroups, v.(string))
-	}
-	return securityGroups
-}
-
-func resourcePortFixedIpsV2(d *schema.ResourceData) interface{} {
-	rawIP := d.Get("fixed_ip").([]interface{})
-
-	if len(rawIP) == 0 {
-		return nil
-	}
-
-	ip := make([]ports.IP, len(rawIP))
-	for i, raw := range rawIP {
-		rawMap := raw.(map[string]interface{})
-		ip[i] = ports.IP{
-			SubnetID:  rawMap["subnet_id"].(string),
-			IPAddress: rawMap["ip_address"].(string),
-		}
-	}
-	return ip
-}
-
-func resourceAllowedAddressPairsV2(d *schema.ResourceData) []ports.AddressPair {
-	// ports.AddressPair
-	rawPairs := d.Get("allowed_address_pairs").(*schema.Set).List()
-
-	pairs := make([]ports.AddressPair, len(rawPairs))
-	for i, raw := range rawPairs {
-		rawMap := raw.(map[string]interface{})
-		pairs[i] = ports.AddressPair{
-			IPAddress:  rawMap["ip_address"].(string),
-			MACAddress: rawMap["mac_address"].(string),
-		}
-	}
-	return pairs
-}
-
-func resourcePortAdminStateUpV2(d *schema.ResourceData) *bool {
-	value := false
-
-	if raw, ok := d.GetOk("admin_state_up"); ok && raw == true {
-		value = true
-	}
-
-	return &value
-}
-
-func allowedAddressPairsHash(v interface{}) int {
-	var buf bytes.Buffer
-	m := v.(map[string]interface{})
-	buf.WriteString(fmt.Sprintf("%s", m["ip_address"].(string)))
-
-	return hashcode.String(buf.String())
-}
-
-func waitForNetworkPortActive(networkingClient *gophercloud.ServiceClient, portId string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		p, err := ports.Get(networkingClient, portId).Extract()
-		if err != nil {
-			return nil, "", err
-		}
-
-		log.Printf("[DEBUG] OpenStack Neutron Port: %+v", p)
-		if p.Status == "DOWN" || p.Status == "ACTIVE" {
-			return p, "ACTIVE", nil
-		}
-
-		return p, p.Status, nil
-	}
-}
-
-func waitForNetworkPortDelete(networkingClient *gophercloud.ServiceClient, portId string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		log.Printf("[DEBUG] Attempting to delete OpenStack Neutron Port %s", portId)
-
-		p, err := ports.Get(networkingClient, portId).Extract()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenStack Port %s", portId)
-				return p, "DELETED", nil
-			}
-			return p, "ACTIVE", err
-		}
-
-		err = ports.Delete(networkingClient, portId).ExtractErr()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenStack Port %s", portId)
-				return p, "DELETED", nil
-			}
-			return p, "ACTIVE", err
-		}
-
-		log.Printf("[DEBUG] OpenStack Port %s still active.\n", portId)
-		return p, "ACTIVE", nil
-	}
 }

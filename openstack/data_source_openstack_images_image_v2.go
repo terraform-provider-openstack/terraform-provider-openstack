@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func dataSourceImagesImageV2() *schema.Resource {
@@ -15,7 +17,7 @@ func dataSourceImagesImageV2() *schema.Resource {
 		Read: dataSourceImagesImageV2Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -32,6 +34,24 @@ func dataSourceImagesImageV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					string(images.ImageVisibilityPublic),
+					string(images.ImageVisibilityPrivate),
+					string(images.ImageVisibilityShared),
+					string(images.ImageVisibilityCommunity),
+				}, false),
+			},
+
+			"member_status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					string(images.ImageMemberStatusAccepted),
+					string(images.ImageMemberStatusPending),
+					string(images.ImageMemberStatusRejected),
+					string(images.ImageMemberStatusAll),
+				}, false),
 			},
 
 			"owner": {
@@ -60,11 +80,13 @@ func dataSourceImagesImageV2() *schema.Resource {
 			},
 
 			"sort_direction": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Default:      "asc",
-				ValidateFunc: dataSourceImagesImageV2SortDirection,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "asc",
+				ValidateFunc: validation.StringInSlice([]string{
+					"asc", "desc",
+				}, false),
 			},
 
 			"tag": {
@@ -127,6 +149,11 @@ func dataSourceImagesImageV2() *schema.Resource {
 				Computed: true,
 			},
 
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"updated_at": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -141,6 +168,13 @@ func dataSourceImagesImageV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
+			"tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
 		},
 	}
 }
@@ -148,23 +182,31 @@ func dataSourceImagesImageV2() *schema.Resource {
 // dataSourceImagesImageV2Read performs the image lookup.
 func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	imageClient, err := config.imageV2Client(GetRegion(d, config))
+	imageClient, err := config.ImageV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
 	visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
+	member_status := resourceImagesImageV2MemberStatusFromString(d.Get("member_status").(string))
+
+	var tags []string
+	tag := d.Get("tag").(string)
+	if tag != "" {
+		tags = append(tags, tag)
+	}
 
 	listOpts := images.ListOpts{
-		Name:       d.Get("name").(string),
-		Visibility: visibility,
-		Owner:      d.Get("owner").(string),
-		Status:     images.ImageStatusActive,
-		SizeMin:    int64(d.Get("size_min").(int)),
-		SizeMax:    int64(d.Get("size_max").(int)),
-		SortKey:    d.Get("sort_key").(string),
-		SortDir:    d.Get("sort_direction").(string),
-		Tag:        d.Get("tag").(string),
+		Name:         d.Get("name").(string),
+		Visibility:   visibility,
+		Owner:        d.Get("owner").(string),
+		Status:       images.ImageStatusActive,
+		SizeMin:      int64(d.Get("size_min").(int)),
+		SizeMax:      int64(d.Get("size_max").(int)),
+		SortKey:      d.Get("sort_key").(string),
+		SortDir:      d.Get("sort_direction").(string),
+		Tags:         tags,
+		MemberStatus: member_status,
 	}
 
 	log.Printf("[DEBUG] List Options: %#v", listOpts)
@@ -228,11 +270,7 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 	}
 
 	log.Printf("[DEBUG] Single Image found: %s", image.ID)
-	return dataSourceImagesImageV2Attributes(d, &image)
-}
 
-// dataSourceImagesImageV2Attributes populates the fields of an Image resource.
-func dataSourceImagesImageV2Attributes(d *schema.ResourceData, image *images.Image) error {
 	log.Printf("[DEBUG] openstack_images_image details: %#v", image)
 
 	d.SetId(image.ID)
@@ -248,8 +286,8 @@ func dataSourceImagesImageV2Attributes(d *schema.ResourceData, image *images.Ima
 	d.Set("checksum", image.Checksum)
 	d.Set("size_bytes", image.SizeBytes)
 	d.Set("metadata", image.Metadata)
-	d.Set("created_at", image.CreatedAt)
-	d.Set("updated_at", image.UpdatedAt)
+	d.Set("created_at", image.CreatedAt.Format(time.RFC3339))
+	d.Set("updated_at", image.UpdatedAt.Format(time.RFC3339))
 	d.Set("file", image.File)
 	d.Set("schema", image.Schema)
 
@@ -271,13 +309,4 @@ func mostRecentImage(images []images.Image) images.Image {
 	sortedImages := images
 	sort.Sort(imageSort(sortedImages))
 	return sortedImages[len(sortedImages)-1]
-}
-
-func dataSourceImagesImageV2SortDirection(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	if value != "asc" && value != "desc" {
-		err := fmt.Errorf("%s must be either asc or desc", k)
-		errors = append(errors, err)
-	}
-	return
 }

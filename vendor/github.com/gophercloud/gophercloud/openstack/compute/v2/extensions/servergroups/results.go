@@ -5,7 +5,9 @@ import (
 	"github.com/gophercloud/gophercloud/pagination"
 )
 
-// A ServerGroup creates a policy for instance placement in the cloud
+// A ServerGroup creates a policy for instance placement in the cloud.
+// You should use extract methods from microversions.go to retrieve additional
+// fields.
 type ServerGroup struct {
 	// ID is the unique ID of the Server Group.
 	ID string `json:"id"`
@@ -14,17 +16,42 @@ type ServerGroup struct {
 	Name string `json:"name"`
 
 	// Polices are the group policies.
+	//
+	// Normally a single policy is applied:
+	//
+	// "affinity" will place all servers within the server group on the
+	// same compute node.
+	//
+	// "anti-affinity" will place servers within the server group on different
+	// compute nodes.
 	Policies []string `json:"policies"`
 
 	// Members are the members of the server group.
 	Members []string `json:"members"`
 
-	// Metadata includes a list of all user-specified key-value pairs attached to the Server Group.
+	// Metadata includes a list of all user-specified key-value pairs attached
+	// to the Server Group.
 	Metadata map[string]interface{}
+
+	// Policy is the policy of a server group.
+	// This requires microversion 2.64 or later.
+	Policy *string `json:"policy"`
+
+	// Rules are the rules of the server group.
+	// This requires microversion 2.64 or later.
+	Rules *Rules `json:"rules"`
 }
 
-// ServerGroupPage stores a single, only page of ServerGroups
-// results from a List call.
+// Rules represents set of rules for a policy.
+// This requires microversion 2.64 or later.
+type Rules struct {
+	// MaxServerPerHost specifies how many servers can reside on a single compute host.
+	// It can be used only with the "anti-affinity" policy.
+	MaxServerPerHost int `json:"max_server_per_host"`
+}
+
+// ServerGroupPage stores a single page of all ServerGroups results from a
+// List call.
 type ServerGroupPage struct {
 	pagination.SinglePageBase
 }
@@ -59,20 +86,20 @@ func (r ServerGroupResult) Extract() (*ServerGroup, error) {
 	return s.ServerGroup, err
 }
 
-// CreateResult is the response from a Create operation. Call its Extract method to interpret it
-// as a ServerGroup.
+// CreateResult is the response from a Create operation. Call its Extract method
+// to interpret it as a ServerGroup.
 type CreateResult struct {
 	ServerGroupResult
 }
 
-// GetResult is the response from a Get operation. Call its Extract method to interpret it
-// as a ServerGroup.
+// GetResult is the response from a Get operation. Call its Extract method to
+// interpret it as a ServerGroup.
 type GetResult struct {
 	ServerGroupResult
 }
 
-// DeleteResult is the response from a Delete operation. Call its Extract method to determine if
-// the call succeeded or failed.
+// DeleteResult is the response from a Delete operation. Call its ExtractErr
+// method to determine if the call succeeded or failed.
 type DeleteResult struct {
 	gophercloud.ErrResult
 }

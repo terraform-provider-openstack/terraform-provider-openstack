@@ -3,10 +3,11 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceNetworkingSecGroupV2() *schema.Resource {
@@ -14,25 +15,39 @@ func dataSourceNetworkingSecGroupV2() *schema.Resource {
 		Read: dataSourceNetworkingSecGroupV2Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"secgroup_id": &schema.Schema{
+			"secgroup_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"tenant_id": &schema.Schema{
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
+			},
+			"tags": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"all_tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
@@ -40,15 +55,28 @@ func dataSourceNetworkingSecGroupV2() *schema.Resource {
 
 func dataSourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+	}
 
 	listOpts := groups.ListOpts{
-		ID:       d.Get("secgroup_id").(string),
-		Name:     d.Get("name").(string),
-		TenantID: d.Get("tenant_id").(string),
+		ID:          d.Get("secgroup_id").(string),
+		Name:        d.Get("name").(string),
+		Description: d.Get("description").(string),
+		TenantID:    d.Get("tenant_id").(string),
+	}
+
+	tags := networkingV2AttributesTags(d)
+	if len(tags) > 0 {
+		listOpts.Tags = strings.Join(tags, ",")
 	}
 
 	pages, err := groups.List(networkingClient, listOpts).AllPages()
+	if err != nil {
+		return err
+	}
+
 	allSecGroups, err := groups.ExtractGroups(pages)
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve security groups: %s", err)
@@ -70,6 +98,7 @@ func dataSourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}
 	d.Set("name", secGroup.Name)
 	d.Set("description", secGroup.Description)
 	d.Set("tenant_id", secGroup.TenantID)
+	d.Set("all_tags", secGroup.Tags)
 	d.Set("region", GetRegion(d, config))
 
 	return nil

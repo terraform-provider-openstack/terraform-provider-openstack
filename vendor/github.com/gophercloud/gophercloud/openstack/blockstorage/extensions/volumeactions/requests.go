@@ -13,7 +13,7 @@ type AttachOptsBuilder interface {
 // AttachMode describes the attachment mode for volumes.
 type AttachMode string
 
-// These constants determine how a volume is attached
+// These constants determine how a volume is attached.
 const (
 	ReadOnly  AttachMode = "ro"
 	ReadWrite AttachMode = "rw"
@@ -21,13 +21,16 @@ const (
 
 // AttachOpts contains options for attaching a Volume.
 type AttachOpts struct {
-	// The mountpoint of this volume
+	// The mountpoint of this volume.
 	MountPoint string `json:"mountpoint,omitempty"`
-	// The nova instance ID, can't set simultaneously with HostName
+
+	// The nova instance ID, can't set simultaneously with HostName.
 	InstanceUUID string `json:"instance_uuid,omitempty"`
-	// The hostname of baremetal host, can't set simultaneously with InstanceUUID
+
+	// The hostname of baremetal host, can't set simultaneously with InstanceUUID.
 	HostName string `json:"host_name,omitempty"`
-	// Mount mode of this volume
+
+	// Mount mode of this volume.
 	Mode AttachMode `json:"mode,omitempty"`
 }
 
@@ -44,18 +47,20 @@ func Attach(client *gophercloud.ServiceClient, id string, opts AttachOptsBuilder
 		r.Err = err
 		return
 	}
-	_, r.Err = client.Post(attachURL(client, id), b, nil, &gophercloud.RequestOpts{
+	resp, err := client.Post(actionURL(client, id), b, nil, &gophercloud.RequestOpts{
 		OkCodes: []int{202},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
-// BeginDetach will mark the volume as detaching
+// BeginDetach will mark the volume as detaching.
 func BeginDetaching(client *gophercloud.ServiceClient, id string) (r BeginDetachingResult) {
 	b := map[string]interface{}{"os-begin_detaching": make(map[string]interface{})}
-	_, r.Err = client.Post(beginDetachingURL(client, id), b, nil, &gophercloud.RequestOpts{
+	resp, err := client.Post(actionURL(client, id), b, nil, &gophercloud.RequestOpts{
 		OkCodes: []int{202},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
@@ -65,7 +70,9 @@ type DetachOptsBuilder interface {
 	ToVolumeDetachMap() (map[string]interface{}, error)
 }
 
+// DetachOpts contains options for detaching a Volume.
 type DetachOpts struct {
+	// AttachmentID is the ID of the attachment between a volume and instance.
 	AttachmentID string `json:"attachment_id,omitempty"`
 }
 
@@ -75,34 +82,37 @@ func (opts DetachOpts) ToVolumeDetachMap() (map[string]interface{}, error) {
 	return gophercloud.BuildRequestBody(opts, "os-detach")
 }
 
-// Detach will detach a volume based on volume id.
+// Detach will detach a volume based on volume ID.
 func Detach(client *gophercloud.ServiceClient, id string, opts DetachOptsBuilder) (r DetachResult) {
 	b, err := opts.ToVolumeDetachMap()
 	if err != nil {
 		r.Err = err
 		return
 	}
-	_, r.Err = client.Post(detachURL(client, id), b, nil, &gophercloud.RequestOpts{
+	resp, err := client.Post(actionURL(client, id), b, nil, &gophercloud.RequestOpts{
 		OkCodes: []int{202},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
-// Reserve will reserve a volume based on volume id.
+// Reserve will reserve a volume based on volume ID.
 func Reserve(client *gophercloud.ServiceClient, id string) (r ReserveResult) {
 	b := map[string]interface{}{"os-reserve": make(map[string]interface{})}
-	_, r.Err = client.Post(reserveURL(client, id), b, nil, &gophercloud.RequestOpts{
+	resp, err := client.Post(actionURL(client, id), b, nil, &gophercloud.RequestOpts{
 		OkCodes: []int{200, 201, 202},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
-// Unreserve will unreserve a volume based on volume id.
+// Unreserve will unreserve a volume based on volume ID.
 func Unreserve(client *gophercloud.ServiceClient, id string) (r UnreserveResult) {
 	b := map[string]interface{}{"os-unreserve": make(map[string]interface{})}
-	_, r.Err = client.Post(unreserveURL(client, id), b, nil, &gophercloud.RequestOpts{
+	resp, err := client.Post(actionURL(client, id), b, nil, &gophercloud.RequestOpts{
 		OkCodes: []int{200, 201, 202},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
@@ -113,6 +123,8 @@ type InitializeConnectionOptsBuilder interface {
 }
 
 // InitializeConnectionOpts hosts options for InitializeConnection.
+// The fields are specific to the storage driver in use and the destination
+// attachment.
 type InitializeConnectionOpts struct {
 	IP        string   `json:"ip,omitempty"`
 	Host      string   `json:"host,omitempty"`
@@ -131,16 +143,17 @@ func (opts InitializeConnectionOpts) ToVolumeInitializeConnectionMap() (map[stri
 	return map[string]interface{}{"os-initialize_connection": b}, err
 }
 
-// InitializeConnection initializes iscsi connection.
+// InitializeConnection initializes an iSCSI connection by volume ID.
 func InitializeConnection(client *gophercloud.ServiceClient, id string, opts InitializeConnectionOptsBuilder) (r InitializeConnectionResult) {
 	b, err := opts.ToVolumeInitializeConnectionMap()
 	if err != nil {
 		r.Err = err
 		return
 	}
-	_, r.Err = client.Post(initializeConnectionURL(client, id), b, &r.Body, &gophercloud.RequestOpts{
+	resp, err := client.Post(actionURL(client, id), b, &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200, 201, 202},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
@@ -169,16 +182,17 @@ func (opts TerminateConnectionOpts) ToVolumeTerminateConnectionMap() (map[string
 	return map[string]interface{}{"os-terminate_connection": b}, err
 }
 
-// TerminateConnection terminates iscsi connection.
+// TerminateConnection terminates an iSCSI connection by volume ID.
 func TerminateConnection(client *gophercloud.ServiceClient, id string, opts TerminateConnectionOptsBuilder) (r TerminateConnectionResult) {
 	b, err := opts.ToVolumeTerminateConnectionMap()
 	if err != nil {
 		r.Err = err
 		return
 	}
-	_, r.Err = client.Post(teminateConnectionURL(client, id), b, nil, &gophercloud.RequestOpts{
+	resp, err := client.Post(actionURL(client, id), b, nil, &gophercloud.RequestOpts{
 		OkCodes: []int{202},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
@@ -188,10 +202,10 @@ type ExtendSizeOptsBuilder interface {
 	ToVolumeExtendSizeMap() (map[string]interface{}, error)
 }
 
-// ExtendSizeOpts contain options for extending the size of an existing Volume. This object is passed
-// to the volumes.ExtendSize function.
+// ExtendSizeOpts contains options for extending the size of an existing Volume.
+// This object is passed to the volumes.ExtendSize function.
 type ExtendSizeOpts struct {
-	// NewSize is the new size of the volume, in GB
+	// NewSize is the new size of the volume, in GB.
 	NewSize int `json:"new_size" required:"true"`
 }
 
@@ -209,9 +223,10 @@ func ExtendSize(client *gophercloud.ServiceClient, id string, opts ExtendSizeOpt
 		r.Err = err
 		return
 	}
-	_, r.Err = client.Post(extendSizeURL(client, id), b, &r.Body, &gophercloud.RequestOpts{
+	resp, err := client.Post(actionURL(client, id), b, nil, &gophercloud.RequestOpts{
 		OkCodes: []int{202},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
@@ -225,12 +240,23 @@ type UploadImageOptsBuilder interface {
 type UploadImageOpts struct {
 	// Container format, may be bare, ofv, ova, etc.
 	ContainerFormat string `json:"container_format,omitempty"`
+
 	// Disk format, may be raw, qcow2, vhd, vdi, vmdk, etc.
 	DiskFormat string `json:"disk_format,omitempty"`
-	// The name of image that will be stored in glance
+
+	// The name of image that will be stored in glance.
 	ImageName string `json:"image_name,omitempty"`
-	// Force image creation, usable if volume attached to instance
+
+	// Force image creation, usable if volume attached to instance.
 	Force bool `json:"force,omitempty"`
+
+	// Visibility defines who can see/use the image.
+	// supported since 3.1 microversion
+	Visibility string `json:"visibility,omitempty"`
+
+	// whether the image is not deletable.
+	// supported since 3.1 microversion
+	Protected bool `json:"protected,omitempty"`
 }
 
 // ToVolumeUploadImageMap assembles a request body based on the contents of a
@@ -239,15 +265,81 @@ func (opts UploadImageOpts) ToVolumeUploadImageMap() (map[string]interface{}, er
 	return gophercloud.BuildRequestBody(opts, "os-volume_upload_image")
 }
 
-// UploadImage will upload image base on the values in UploadImageOptsBuilder
+// UploadImage will upload an image based on the values in UploadImageOptsBuilder.
 func UploadImage(client *gophercloud.ServiceClient, id string, opts UploadImageOptsBuilder) (r UploadImageResult) {
 	b, err := opts.ToVolumeUploadImageMap()
 	if err != nil {
 		r.Err = err
 		return
 	}
-	_, r.Err = client.Post(uploadURL(client, id), b, nil, &gophercloud.RequestOpts{
+	resp, err := client.Post(actionURL(client, id), b, &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{202},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
+	return
+}
+
+// ForceDelete will delete the volume regardless of state.
+func ForceDelete(client *gophercloud.ServiceClient, id string) (r ForceDeleteResult) {
+	resp, err := client.Post(actionURL(client, id), map[string]interface{}{"os-force_delete": ""}, nil, nil)
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
+	return
+}
+
+// ImageMetadataOptsBuilder allows extensions to add additional parameters to the
+// ImageMetadataRequest request.
+type ImageMetadataOptsBuilder interface {
+	ToImageMetadataMap() (map[string]interface{}, error)
+}
+
+// ImageMetadataOpts contains options for setting image metadata to a volume.
+type ImageMetadataOpts struct {
+	// The image metadata to add to the volume as a set of metadata key and value pairs.
+	Metadata map[string]string `json:"metadata"`
+}
+
+// ToImageMetadataMap assembles a request body based on the contents of a
+// ImageMetadataOpts.
+func (opts ImageMetadataOpts) ToImageMetadataMap() (map[string]interface{}, error) {
+	return gophercloud.BuildRequestBody(opts, "os-set_image_metadata")
+}
+
+// SetImageMetadata will set image metadata on a volume based on the values in ImageMetadataOptsBuilder.
+func SetImageMetadata(client *gophercloud.ServiceClient, id string, opts ImageMetadataOptsBuilder) (r SetImageMetadataResult) {
+	b, err := opts.ToImageMetadataMap()
+	if err != nil {
+		r.Err = err
+		return
+	}
+	resp, err := client.Post(actionURL(client, id), b, &r.Body, &gophercloud.RequestOpts{
+		OkCodes: []int{200},
+	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
+	return
+}
+
+// BootableOpts contains options for setting bootable status to a volume.
+type BootableOpts struct {
+	// Enables or disables the bootable attribute. You can boot an instance from a bootable volume.
+	Bootable bool `json:"bootable"`
+}
+
+// ToBootableMap assembles a request body based on the contents of a
+// BootableOpts.
+func (opts BootableOpts) ToBootableMap() (map[string]interface{}, error) {
+	return gophercloud.BuildRequestBody(opts, "os-set_bootable")
+}
+
+// SetBootable will set bootable status on a volume based on the values in BootableOpts
+func SetBootable(client *gophercloud.ServiceClient, id string, opts BootableOpts) (r SetBootableResult) {
+	b, err := opts.ToBootableMap()
+	if err != nil {
+		r.Err = err
+		return
+	}
+	resp, err := client.Post(actionURL(client, id), b, nil, &gophercloud.RequestOpts{
+		OkCodes: []int{200},
+	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }

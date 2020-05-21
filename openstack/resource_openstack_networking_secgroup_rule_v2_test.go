@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules"
@@ -22,7 +22,7 @@ func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SecGroupRule_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists(
@@ -33,6 +33,10 @@ func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", &secgroup_rule_1),
 					testAccCheckNetworkingV2SecGroupRuleExists(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_2", &secgroup_rule_2),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", "description", "secgroup_rule_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_secgroup_rule_v2.secgroup_rule_2", "description", ""),
 				),
 			},
 		},
@@ -48,7 +52,7 @@ func TestAccNetworkingV2SecGroupRule_lowerCaseCIDR(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SecGroupRule_lowerCaseCIDR,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists(
@@ -72,7 +76,7 @@ func TestAccNetworkingV2SecGroupRule_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SecGroupRule_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists(
@@ -111,7 +115,7 @@ func TestAccNetworkingV2SecGroupRule_protocols(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SecGroupRule_protocols,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists(
@@ -203,7 +207,7 @@ func TestAccNetworkingV2SecGroupRule_numericProtocol(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SecGroupRule_numericProtocol,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists(
@@ -211,7 +215,7 @@ func TestAccNetworkingV2SecGroupRule_numericProtocol(t *testing.T) {
 					testAccCheckNetworkingV2SecGroupRuleExists(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", &secgroup_rule_1),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", "protocol", "115"),
+						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", "protocol", "6"),
 				),
 			},
 		},
@@ -220,7 +224,7 @@ func TestAccNetworkingV2SecGroupRule_numericProtocol(t *testing.T) {
 
 func testAccCheckNetworkingV2SecGroupRuleDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -251,7 +255,7 @@ func testAccCheckNetworkingV2SecGroupRuleExists(n string, security_group_rule *r
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -290,6 +294,7 @@ resource "openstack_networking_secgroup_rule_v2" "secgroup_rule_1" {
   protocol = "tcp"
   remote_ip_prefix = "0.0.0.0/0"
   security_group_id = "${openstack_networking_secgroup_v2.secgroup_1.id}"
+	description = "secgroup_rule_1"
 }
 
 resource "openstack_networking_secgroup_rule_v2" "secgroup_rule_2" {
@@ -522,7 +527,7 @@ resource "openstack_networking_secgroup_rule_v2" "secgroup_rule_1" {
   ethertype = "IPv4"
   port_range_max = 22
   port_range_min = 22
-  protocol = "115"
+  protocol = "6"
   remote_ip_prefix = "0.0.0.0/0"
   security_group_id = "${openstack_networking_secgroup_v2.secgroup_1.id}"
 }

@@ -4,35 +4,32 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
 )
 
 func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
-	var security_group groups.SecGroup
+	var securityGroup groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SecGroup_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &security_group),
-					testAccCheckNetworkingV2SecGroupRuleCount(&security_group, 2),
+					testAccCheckNetworkingV2SecGroupExists("openstack_networking_secgroup_v2.secgroup_1", &securityGroup),
+					testAccCheckNetworkingV2SecGroupRuleCount(&securityGroup, 2),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SecGroup_update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPtr(
-						"openstack_networking_secgroup_v2.secgroup_1", "id", &security_group.ID),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_secgroup_v2.secgroup_1", "name", "security_group_2"),
+					resource.TestCheckResourceAttrPtr("openstack_networking_secgroup_v2.secgroup_1", "id", &securityGroup.ID),
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "name", "security_group_2"),
 				),
 			},
 		},
@@ -40,19 +37,19 @@ func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 }
 
 func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
-	var security_group groups.SecGroup
+	var securityGroup groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SecGroup_noDefaultRules,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &security_group),
-					testAccCheckNetworkingV2SecGroupRuleCount(&security_group, 0),
+						"openstack_networking_secgroup_v2.secgroup_1", &securityGroup),
+					testAccCheckNetworkingV2SecGroupRuleCount(&securityGroup, 0),
 				),
 			},
 		},
@@ -60,18 +57,18 @@ func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 }
 
 func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
-	var security_group groups.SecGroup
+	var securityGroup groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2SecGroup_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &security_group),
+						"openstack_networking_secgroup_v2.secgroup_1", &securityGroup),
 				),
 			},
 		},
@@ -80,7 +77,7 @@ func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 
 func testAccCheckNetworkingV2SecGroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -111,7 +108,7 @@ func testAccCheckNetworkingV2SecGroupExists(n string, security_group *groups.Sec
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}

@@ -49,13 +49,89 @@ resource "openstack_compute_instance_v2" "instance_1" {
 resource "openstack_compute_volume_attach_v2" "attachments" {
   count       = 2
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  volume_id   = "${element(openstack_blockstorage_volume_v2.volumes.*.id, count.index)}"
+  volume_id   = "${openstack_blockstorage_volume_v2.volumes.*.id[count.index]}"
 }
 
-output "volume devices" {
+output "volume_devices" {
   value = "${openstack_compute_volume_attach_v2.attachments.*.device}"
 }
 ```
+
+Note that the above example will not guarantee that the volumes are attached in
+a deterministic manner. The volumes will be attached in a seemingly random
+order.
+
+If you want to ensure that the volumes are attached in a given order, create
+explicit dependencies between the volumes, such as:
+
+```hcl
+resource "openstack_blockstorage_volume_v2" "volumes" {
+  count = 2
+  name  = "${format("vol-%02d", count.index + 1)}"
+  size  = 1
+}
+
+resource "openstack_compute_instance_v2" "instance_1" {
+  name            = "instance_1"
+  security_groups = ["default"]
+}
+
+resource "openstack_compute_volume_attach_v2" "attach_1" {
+  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+  volume_id   = "${openstack_blockstorage_volume_v2.volumes.0.id}"
+}
+
+resource "openstack_compute_volume_attach_v2" "attach_2" {
+  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+  volume_id   = "${openstack_blockstorage_volume_v2.volumes.1.id}"
+
+  depends_on = ["openstack_compute_volume_attach_v2.attach_1"]
+}
+
+output "volume_devices" {
+  value = "${openstack_compute_volume_attach_v2.attachments.*.device}"
+}
+```
+
+### Using Multiattach-enabled volumes
+
+Multiattach Volumes are dependent upon your OpenStack cloud and not all
+clouds support multiattach.
+
+```hcl
+resource "openstack_blockstorage_volume_v3" "volume_1" {
+  name        = "volume_1"
+  size        = 1
+  multiattach = true
+}
+
+resource "openstack_compute_instance_v2" "instance_1" {
+  name            = "instance_1"
+  security_groups = ["default"]
+}
+
+resource "openstack_compute_instance_v2" "instance_2" {
+  name            = "instance_2"
+  security_groups = ["default"]
+}
+
+resource "openstack_compute_volume_attach_v2" "va_1" {
+  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+  volume_id   = "${openstack_blockstorage_volume_v2.volume_1.id}"
+  multiattach = true
+}
+
+resource "openstack_compute_volume_attach_v2" "va_2" {
+  instance_id = "${openstack_compute_instance_v2.instance_2.id}"
+  volume_id   = "${openstack_blockstorage_volume_v2.volume_1.id}"
+  multiattach = true
+
+  depends_on = ["openstack_compute_volume_attach_v2.va_1"]
+}
+```
+
+It is recommended to use `depends_on` for the attach resources
+to enforce the volume attachments to happen one at a time.
 
 ## Argument Reference
 
@@ -77,6 +153,8 @@ The following arguments are supported:
   to update the device upon subsequent applying which will cause the volume
   to be detached and reattached indefinitely. Please use with caution.
 
+* `multiattach` - (Optional) Enable attachment of multiattach-capable volumes.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -87,6 +165,7 @@ The following attributes are exported:
 * `device` - See Argument Reference above. _NOTE_: The correctness of this
   information is dependent upon the hypervisor in use. In some cases, this
   should not be used as an authoritative piece of information.
+* `multiattach` - See Argument Reference above.
 
 ## Import
 

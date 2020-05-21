@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
@@ -19,7 +19,7 @@ func TestAccBlockStorageVolumeAttachV2_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageVolumeAttachV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageVolumeAttachV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageVolumeAttachV2Exists("openstack_blockstorage_volume_attach_v2.va_1", &va),
@@ -37,7 +37,7 @@ func TestAccBlockStorageVolumeAttachV2_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageVolumeAttachV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageVolumeAttachV2_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageVolumeAttachV2Exists("openstack_blockstorage_volume_attach_v2.va_1", &va),
@@ -49,7 +49,7 @@ func TestAccBlockStorageVolumeAttachV2_timeout(t *testing.T) {
 
 func testAccCheckBlockStorageVolumeAttachV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	client, err := config.blockStorageV2Client(OS_REGION_NAME)
+	client, err := config.BlockStorageV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
@@ -59,7 +59,7 @@ func testAccCheckBlockStorageVolumeAttachV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		volumeId, attachmentId, err := blockStorageVolumeAttachV2ParseId(rs.Primary.ID)
+		volumeId, attachmentId, err := blockStorageVolumeAttachV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -94,12 +94,12 @@ func testAccCheckBlockStorageVolumeAttachV2Exists(n string, va *volumes.Attachme
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		client, err := config.blockStorageV2Client(OS_REGION_NAME)
+		client, err := config.BlockStorageV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
 
-		volumeId, attachmentId, err := blockStorageVolumeAttachV2ParseId(rs.Primary.ID)
+		volumeId, attachmentId, err := blockStorageVolumeAttachV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}

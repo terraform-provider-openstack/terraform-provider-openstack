@@ -17,6 +17,10 @@ resource "openstack_lb_listener_v2" "listener_1" {
   protocol        = "HTTP"
   protocol_port   = 8080
   loadbalancer_id = "d9415786-5f1a-428b-b35f-2f1523e146d2"
+
+  insert_headers = {
+    X-Forwarded-For = "true"
+  }
 }
 ```
 
@@ -29,8 +33,9 @@ The following arguments are supported:
     `region` argument of the provider is used. Changing this creates a new
     Listener.
 
-* `protocol` - (Required) The protocol - can either be TCP, HTTP, HTTPS or TERMINATED_HTTPS.
-    Changing this creates a new Listener.
+* `protocol` - (Required) The protocol - can either be TCP, HTTP, HTTPS,
+  TERMINATED_HTTPS or UDP (supported only in Octavia). Changing this creates a
+  new Listener.
 
 * `protocol_port` - (Required) The port on which to listen for client traffic.
     Changing this creates a new Listener.
@@ -46,12 +51,21 @@ The following arguments are supported:
     to be unique.
 
 * `default_pool_id` - (Optional) The ID of the default pool with which the
-    Listener is associated. Changing this creates a new Listener.
+    Listener is associated.
 
 * `description` - (Optional) Human-readable description for the Listener.
 
 * `connection_limit` - (Optional) The maximum number of connections allowed
     for the Listener.
+    
+* `timeout_client_data` - (Optional) The client inactivity timeout in milliseconds.
+    
+* `timeout_member_connect` - (Optional) The member connection timeout in milliseconds.
+    
+* `timeout_member_data` - (Optional) The member inactivity timeout in milliseconds.
+    
+* `timeout_tcp_inspect` - (Optional) The time in milliseconds, to wait for additional
+    TCP packets for content inspection.
 
 * `default_tls_container_ref` - (Optional) A reference to a Barbican Secrets
     container which stores TLS information. This is required if the protocol
@@ -66,6 +80,10 @@ The following arguments are supported:
 
 * `admin_state_up` - (Optional) The administrative state of the Listener.
     A valid value is true (UP) or false (DOWN).
+    
+* `insert_headers` - (Optional) The list of key value pairs representing headers to insert
+    into the request before it is sent to the backend members. Changing this updates the headers of the
+    existing listener.
 
 ## Attributes Reference
 
@@ -79,6 +97,19 @@ The following attributes are exported:
 * `default_port_id` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `connection_limit` - See Argument Reference above.
+* `timeout_client_data` - See Argument Reference above.
+* `timeout_member_connect` - See Argument Reference above.
+* `timeout_member_data` - See Argument Reference above.
+* `timeout_tcp_inspect` - See Argument Reference above.
 * `default_tls_container_ref` - See Argument Reference above.
 * `sni_container_refs` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
+* `insert_headers` - See Argument Reference above.
+
+## Import
+
+Load Balancer Listener can be imported using the Listener ID, e.g.:
+
+```
+$ terraform import openstack_lb_listener_v2.listener_1 b67ce64e-8b26-405d-afeb-4a078901f15a
+```

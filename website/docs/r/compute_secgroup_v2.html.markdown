@@ -10,6 +10,12 @@ description: |-
 
 Manages a V2 security group resource within OpenStack.
 
+Please note that managing security groups through the OpenStack Compute API
+has been deprecated. Unless you are using an older OpenStack environment, it is
+recommended to use the [`openstack_networking_secgroup_v2`](networking_secgroup_v2.html)
+and [`openstack_networking_secgroup_rule_v2`](networking_secgroup_rule_v2.html)
+resources instead, which uses the OpenStack Networking API.
+
 ## Example Usage
 
 ```hcl
@@ -94,10 +100,10 @@ When using ICMP as the `ip_protocol`, the `from_port` sets the ICMP _type_ and t
 
 ```hcl
 rule {
-  from_port = -1
-  to_port = -1
+  from_port   = -1
+  to_port     = -1
   ip_protocol = "icmp"
-  cidr = "0.0.0.0/0"
+  cidr        = "0.0.0.0/0"
 }
 ```
 

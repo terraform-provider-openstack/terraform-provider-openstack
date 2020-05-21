@@ -24,40 +24,17 @@ Afterwards run with a command like this:
 
 ```
 terraform apply \
-  -var 'external_gateway=c1901f39-f76e-498a-9547-c29ba45f64df' \
   -var 'pool=public'
 ```
 
-To get a list of usable floating IP pools run this command:
+To get a list of usable floating IP pools run this command, and the UUID of the external gateway
+is in the following `ID` column:
 
 ```
-$ nova floating-ip-pool-list
-+--------+
-| name   |
-+--------+
-| public |
-+--------+
-```
-
-To get the UUID of the external gateway run this command:
-
-```
-$ neutron net-show FLOATING_IP_POOL
-+---------------------------+--------------------------------------+
-| Field                     | Value                                |
-+---------------------------+--------------------------------------+
-| admin_state_up            | True                                 |
-| id                        | c1901f39-f76e-498a-9547-c29ba45f64df |
-| mtu                       | 0                                    |
-| name                      | public                               |
-| port_security_enabled     | True                                 |
-| provider:network_type     | vxlan                                |
-| provider:physical_network |                                      |
-| provider:segmentation_id  | 1092                                 |
-| router:external           | True                                 |
-| shared                    | False                                |
-| status                    | ACTIVE                               |
-| subnets                   | 42b672ae-8d51-4a18-a028-ddae7859ec4c |
-| tenant_id                 | 1bde0a49d2ff44ffb44e6339a8cefe3a     |
-+---------------------------+--------------------------------------+
+$ openstack network list --external
++--------------------------------------+--------+----------------------------------------------------------------------------+
+| ID                                   | Name   | Subnets                                                                    |
++--------------------------------------+--------+----------------------------------------------------------------------------+
+| fd21df30-693b-496a-ac69-8637b9c24cd3 | public | a2d7c467-44f9-43c5-b387-8a6742f45b5c, ee51200c-9b64-4977-ad30-622039d7bba1 |
++--------------------------------------+--------+----------------------------------------------------------------------------+
 ```

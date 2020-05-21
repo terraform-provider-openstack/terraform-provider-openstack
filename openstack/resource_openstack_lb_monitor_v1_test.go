@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas/monitors"
 )
@@ -18,13 +18,13 @@ func TestAccLBV1Monitor_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1MonitorDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccLBV1Monitor_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1MonitorExists("openstack_lb_monitor_v1.monitor_1", &monitor),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccLBV1Monitor_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_lb_monitor_v1.monitor_1", "delay", "20"),
@@ -42,7 +42,7 @@ func TestAccLBV1Monitor_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1MonitorDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccLBV1Monitor_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1MonitorExists("openstack_lb_monitor_v1.monitor_1", &monitor),
@@ -54,7 +54,7 @@ func TestAccLBV1Monitor_timeout(t *testing.T) {
 
 func testAccCheckLBV1MonitorDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -85,7 +85,7 @@ func testAccCheckLBV1MonitorExists(n string, monitor *monitors.Monitor) resource
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}

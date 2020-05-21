@@ -4,16 +4,24 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
+
+type testNetworkWithExtensions struct {
+	networks.Network
+	portsecurity.PortSecurityExt
+	policies.QoSPolicyExt
+}
 
 func TestAccNetworkingV2Network_basic(t *testing.T) {
 	var network networks.Network
@@ -23,17 +31,23 @@ func TestAccNetworkingV2Network_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Network_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "name", "network_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "description", "my network description"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Network_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_network_v2.network_1", "name", "network_2"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "description", ""),
 				),
 			},
 		},
@@ -50,7 +64,7 @@ func TestAccNetworkingV2Network_netstack(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Network_netstack,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -76,7 +90,7 @@ func TestAccNetworkingV2Network_fullstack(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Network_fullstack,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -98,7 +112,7 @@ func TestAccNetworkingV2Network_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Network_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -119,7 +133,7 @@ func TestAccNetworkingV2Network_multipleSegmentMappings(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2Network_multipleSegmentMappings,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -129,9 +143,366 @@ func TestAccNetworkingV2Network_multipleSegmentMappings(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Network_externalCreate(t *testing.T) {
+	var network networks.Network
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_external,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "external", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_externalUpdate(t *testing.T) {
+	var network networks.Network
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_basic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Network_external,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "external", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_transparent_vlan_Create(t *testing.T) {
+	var network networks.Network
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckTransparentVLAN(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_transparent_vlan,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "transparent_vlan", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_adminStateUp_omit(t *testing.T) {
+	var network networks.Network
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_adminStateUp_omit,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "admin_state_up", "true"),
+					testAccCheckNetworkingV2NetworkAdminStateUp(&network, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_adminStateUp_true(t *testing.T) {
+	var network networks.Network
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_adminStateUp_true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "admin_state_up", "true"),
+					testAccCheckNetworkingV2NetworkAdminStateUp(&network, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_adminStateUp_false(t *testing.T) {
+	var network networks.Network
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_adminStateUp_false,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "admin_state_up", "false"),
+					testAccCheckNetworkingV2NetworkAdminStateUp(&network, false),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_adminStateUp_update(t *testing.T) {
+	var network networks.Network
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_adminStateUp_omit,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "admin_state_up", "true"),
+					testAccCheckNetworkingV2NetworkAdminStateUp(&network, true),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Network_adminStateUp_false,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "admin_state_up", "false"),
+					testAccCheckNetworkingV2NetworkAdminStateUp(&network, false),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_portSecurity_omit(t *testing.T) {
+	var network testNetworkWithExtensions
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_adminStateUp_omit,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkWithExtensionsExists(
+						"openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "port_security_enabled", "true"),
+					testAccCheckNetworkingV2NetworkPortSecurityEnabled(&network, true),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Network_portSecurity_disabled,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkWithExtensionsExists(
+						"openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "port_security_enabled", "false"),
+					testAccCheckNetworkingV2NetworkPortSecurityEnabled(&network, false),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Network_portSecurity_enabled,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkWithExtensionsExists(
+						"openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "port_security_enabled", "true"),
+					testAccCheckNetworkingV2NetworkPortSecurityEnabled(&network, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_portSecurity_disabled(t *testing.T) {
+	var network testNetworkWithExtensions
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_portSecurity_disabled,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkWithExtensionsExists(
+						"openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "port_security_enabled", "false"),
+					testAccCheckNetworkingV2NetworkPortSecurityEnabled(&network, false),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Network_portSecurity_enabled,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkWithExtensionsExists(
+						"openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "port_security_enabled", "true"),
+					testAccCheckNetworkingV2NetworkPortSecurityEnabled(&network, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_portSecurity_enabled(t *testing.T) {
+	var network testNetworkWithExtensions
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_portSecurity_enabled,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkWithExtensionsExists(
+						"openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "port_security_enabled", "true"),
+					testAccCheckNetworkingV2NetworkPortSecurityEnabled(&network, true),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Network_portSecurity_disabled,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkWithExtensionsExists(
+						"openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "port_security_enabled", "false"),
+					testAccCheckNetworkingV2NetworkPortSecurityEnabled(&network, false),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_qos_policy_create(t *testing.T) {
+	var (
+		network   testNetworkWithExtensions
+		qosPolicy policies.Policy
+	)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_qos_policy,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkWithExtensionsExists(
+						"openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2QoSPolicyExists(
+						"openstack_networking_qos_policy_v2.qos_policy_1", &qosPolicy),
+					resource.TestCheckResourceAttrSet(
+						"openstack_networking_network_v2.network_1", "qos_policy_id"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_qos_policy_update(t *testing.T) {
+	var (
+		network   testNetworkWithExtensions
+		qosPolicy policies.Policy
+	)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2Network_basic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkWithExtensionsExists(
+						"openstack_networking_network_v2.network_1", &network),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "name", "network_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_network_v2.network_1", "description", "my network description"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2Network_qos_policy,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkWithExtensionsExists(
+						"openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2QoSPolicyExists(
+						"openstack_networking_qos_policy_v2.qos_policy_1", &qosPolicy),
+					resource.TestCheckResourceAttrSet(
+						"openstack_networking_network_v2.network_1", "qos_policy_id"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2NetworkDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -162,7 +533,7 @@ func testAccCheckNetworkingV2NetworkExists(n string, network *networks.Network) 
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -182,9 +553,67 @@ func testAccCheckNetworkingV2NetworkExists(n string, network *networks.Network) 
 	}
 }
 
+func testAccCheckNetworkingV2NetworkWithExtensionsExists(n string, network *testNetworkWithExtensions) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := testAccProvider.Meta().(*Config)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		}
+
+		var n testNetworkWithExtensions
+		err = networks.Get(networkingClient, rs.Primary.ID).ExtractInto(&n)
+		if err != nil {
+			return err
+		}
+
+		if n.ID != rs.Primary.ID {
+			return fmt.Errorf("Network not found")
+		}
+
+		*network = n
+
+		return nil
+	}
+}
+
+func testAccCheckNetworkingV2NetworkAdminStateUp(
+	network *networks.Network, expected bool) resource.TestCheckFunc {
+
+	return func(s *terraform.State) error {
+		if network.AdminStateUp != expected {
+			return fmt.Errorf("Network has wrong admin_state_up. Expected %t, got %t", expected, network.AdminStateUp)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckNetworkingV2NetworkPortSecurityEnabled(
+	network *testNetworkWithExtensions, expected bool) resource.TestCheckFunc {
+
+	return func(s *terraform.State) error {
+		if network.PortSecurityEnabled != expected {
+			return fmt.Errorf("Network has wrong port_security_enabled. Expected %t, got %t", expected, network.PortSecurityEnabled)
+		}
+
+		return nil
+	}
+}
+
 const testAccNetworkingV2Network_basic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
+  description = "my network description"
   admin_state_up = "true"
 }
 `
@@ -250,8 +679,8 @@ resource "openstack_networking_port_v2" "port_1" {
   network_id = "${openstack_networking_network_v2.network_1.id}"
 
   fixed_ip {
-    "subnet_id" =  "${openstack_networking_subnet_v2.subnet_1.id}"
-    "ip_address" =  "192.168.199.23"
+    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address =  "192.168.199.23"
   }
 }
 
@@ -280,12 +709,74 @@ resource "openstack_networking_network_v2" "network_1" {
 const testAccNetworkingV2Network_multipleSegmentMappings = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
-  segments =[
-    {
-      segmentation_id = 2,
-      network_type = "vxlan"
-    }
-  ],
   admin_state_up = "true"
+
+  segments {
+    segmentation_id = 2
+    network_type = "vxlan"
+  }
+}
+`
+
+const testAccNetworkingV2Network_external = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+	admin_state_up = "true"
+	external = "true"
+}
+`
+
+const testAccNetworkingV2Network_transparent_vlan = `
+resource "openstack_networking_network_v2" "network_1" {
+  name             = "network_1"
+	admin_state_up   = "true"
+	transparent_vlan = "true"
+}
+`
+
+const testAccNetworkingV2Network_adminStateUp_omit = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+`
+
+const testAccNetworkingV2Network_adminStateUp_true = `
+resource "openstack_networking_network_v2" "network_1" {
+  name           = "network_1"
+  admin_state_up = "true"
+}
+`
+
+const testAccNetworkingV2Network_adminStateUp_false = `
+resource "openstack_networking_network_v2" "network_1" {
+  name           = "network_1"
+  admin_state_up = "false"
+}
+`
+
+const testAccNetworkingV2Network_portSecurity_disabled = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  port_security_enabled = "false"
+}
+`
+
+const testAccNetworkingV2Network_portSecurity_enabled = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  port_security_enabled = "true"
+}
+`
+
+const testAccNetworkingV2Network_qos_policy = `
+resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
+  name = "qos_policy_1"
+}
+
+resource "openstack_networking_network_v2" "network_1" {
+  name           = "network_1"
+  description    = "my network description"
+  admin_state_up = "true"
+  qos_policy_id  = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
 }
 `

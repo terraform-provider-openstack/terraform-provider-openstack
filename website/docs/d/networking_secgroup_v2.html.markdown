@@ -28,6 +28,10 @@ data "openstack_networking_secgroup_v2" "secgroup" {
 
 * `name` - (Optional) The name of the security group.
 
+* `description` - (Optional) Human-readable description the the subnet.
+
+* `tags` - (Optional) The list of security group tags to filter.
+
 * `tenant_id` - (Optional) The owner of the security group.
 
 ## Attributes Reference
@@ -36,5 +40,6 @@ data "openstack_networking_secgroup_v2" "secgroup" {
 attributes are exported:
 
 * `name` - See Argument Reference above.
-* `description`- The description of the security group.
+* `description`- See Argument Reference above.
+* `all_tags` - The set of string tags applied on the security group.
 * `region` - See Argument Reference above.

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
@@ -21,36 +21,27 @@ func TestAccNetworkingV2RouterRoute_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2RouterRoute_create,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
-					testAccCheckNetworkingV2NetworkExists(
-						"openstack_networking_network_v2.network_1", &network[0]),
-					testAccCheckNetworkingV2SubnetExists(
-						"openstack_networking_subnet_v2.subnet_1", &subnet[0]),
-					testAccCheckNetworkingV2NetworkExists(
-						"openstack_networking_network_v2.network_1", &network[1]),
-					testAccCheckNetworkingV2SubnetExists(
-						"openstack_networking_subnet_v2.subnet_1", &subnet[1]),
-					testAccCheckNetworkingV2RouterInterfaceExists(
-						"openstack_networking_router_interface_v2.int_1"),
-					testAccCheckNetworkingV2RouterInterfaceExists(
-						"openstack_networking_router_interface_v2.int_2"),
-					testAccCheckNetworkingV2RouterRouteExists(
-						"openstack_networking_router_route_v2.router_route_1"),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network[0]),
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet[0]),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network[1]),
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet[1]),
+					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
+					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_2"),
+					testAccCheckNetworkingV2RouterRouteExists("openstack_networking_router_route_v2.router_route_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2RouterRoute_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2RouterRouteExists(
-						"openstack_networking_router_route_v2.router_route_1"),
-					testAccCheckNetworkingV2RouterRouteExists(
-						"openstack_networking_router_route_v2.router_route_2"),
+					testAccCheckNetworkingV2RouterRouteExists("openstack_networking_router_route_v2.router_route_1"),
+					testAccCheckNetworkingV2RouterRouteExists("openstack_networking_router_route_v2.router_route_2"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccNetworkingV2RouterRoute_destroy,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterRouteEmpty("openstack_networking_router_v2.router_1"),
@@ -72,7 +63,7 @@ func testAccCheckNetworkingV2RouterRouteEmpty(n string) resource.TestCheckFunc {
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -106,7 +97,7 @@ func testAccCheckNetworkingV2RouterRouteExists(n string) resource.TestCheckFunc 
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -120,7 +111,7 @@ func testAccCheckNetworkingV2RouterRouteExists(n string) resource.TestCheckFunc 
 			return fmt.Errorf("Router for route not found")
 		}
 
-		var found bool = false
+		found := false
 		for _, r := range router.Routes {
 			if r.DestinationCIDR == rs.Primary.Attributes["destination_cidr"] && r.NextHop == rs.Primary.Attributes["next_hop"] {
 				found = true
@@ -136,7 +127,7 @@ func testAccCheckNetworkingV2RouterRouteExists(n string) resource.TestCheckFunc 
 
 func testAccCheckNetworkingV2RouterRouteDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}

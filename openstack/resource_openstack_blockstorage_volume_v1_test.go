@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v1/volumes"
@@ -19,7 +19,7 @@ func TestAccBlockStorageV1Volume_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageV1VolumeDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageV1Volume_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV1VolumeExists("openstack_blockstorage_volume_v1.volume_1", &volume),
@@ -28,7 +28,7 @@ func TestAccBlockStorageV1Volume_basic(t *testing.T) {
 						"openstack_blockstorage_volume_v1.volume_1", "name", "volume_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageV1Volume_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV1VolumeExists("openstack_blockstorage_volume_v1.volume_1", &volume),
@@ -49,7 +49,7 @@ func TestAccBlockStorageV1Volume_image(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageV1VolumeDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageV1Volume_image,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV1VolumeExists("openstack_blockstorage_volume_v1.volume_1", &volume),
@@ -69,7 +69,7 @@ func TestAccBlockStorageV1Volume_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageV1VolumeDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBlockStorageV1Volume_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV1VolumeExists("openstack_blockstorage_volume_v1.volume_1", &volume),
@@ -81,7 +81,7 @@ func TestAccBlockStorageV1Volume_timeout(t *testing.T) {
 
 func testAccCheckBlockStorageV1VolumeDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	blockStorageClient, err := config.blockStorageV1Client(OS_REGION_NAME)
+	blockStorageClient, err := config.BlockStorageV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
@@ -112,7 +112,7 @@ func testAccCheckBlockStorageV1VolumeExists(n string, volume *volumes.Volume) re
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.blockStorageV1Client(OS_REGION_NAME)
+		blockStorageClient, err := config.BlockStorageV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
@@ -135,7 +135,7 @@ func testAccCheckBlockStorageV1VolumeExists(n string, volume *volumes.Volume) re
 func testAccCheckBlockStorageV1VolumeDoesNotExist(t *testing.T, n string, volume *volumes.Volume) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.blockStorageV1Client(OS_REGION_NAME)
+		blockStorageClient, err := config.BlockStorageV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
@@ -181,7 +181,7 @@ resource "openstack_blockstorage_volume_v1" "volume_1" {
   name = "volume_1"
   description = "first test volume"
   availability_zone = "nova"
-  metadata {
+  metadata = {
     foo = "bar"
   }
   size = 1
@@ -192,7 +192,7 @@ const testAccBlockStorageV1Volume_update = `
 resource "openstack_blockstorage_volume_v1" "volume_1" {
   name = "volume_1-updated"
   description = "first test volume"
-  metadata {
+  metadata = {
     foo = "bar"
   }
   size = 1

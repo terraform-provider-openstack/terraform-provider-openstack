@@ -3,10 +3,12 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 )
@@ -17,6 +19,9 @@ func resourceMemberV2() *schema.Resource {
 		Read:   resourceMemberV2Read,
 		Update: resourceMemberV2Update,
 		Delete: resourceMemberV2Delete,
+		Importer: &schema.ResourceImporter{
+			State: resourceMemberV2Import,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -25,64 +30,58 @@ func resourceMemberV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
-
-			"address": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-
-			"protocol_port": &schema.Schema{
-				Type:     schema.TypeInt,
-				Required: true,
-				ForceNew: true,
-			},
-
-			"weight": &schema.Schema{
-				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(int)
-					if value < 1 {
-						errors = append(errors, fmt.Errorf(
-							"Only numbers greater than 0 are supported values for 'weight'"))
-					}
-					return
-				},
+				ForceNew: true,
 			},
 
-			"subnet_id": &schema.Schema{
+			"address": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"admin_state_up": &schema.Schema{
+			"protocol_port": {
+				Type:         schema.TypeInt,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(1, 65535),
+			},
+
+			"weight": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(0, 256),
+			},
+
+			"subnet_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Default:  true,
 				Optional: true,
 			},
 
-			"pool_id": &schema.Schema{
+			"pool_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -93,7 +92,7 @@ func resourceMemberV2() *schema.Resource {
 
 func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -104,7 +103,6 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 		TenantID:     d.Get("tenant_id").(string),
 		Address:      d.Get("address").(string),
 		ProtocolPort: d.Get("protocol_port").(int),
-		Weight:       d.Get("weight").(int),
 		AdminStateUp: &adminStateUp,
 	}
 
@@ -113,12 +111,25 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 		createOpts.SubnetID = v.(string)
 	}
 
+	// Set the weight only if it's defined in the configuration.
+	// This prevents all members from being created with a default weight of 0.
+	if v, ok := d.GetOkExists("weight"); ok {
+		weight := v.(int)
+		createOpts.Weight = &weight
+	}
+
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	// Wait for LB to become active before continuing
+	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
+	parentPool, err := pools.Get(lbClient, poolID).Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve parent pool %s: %s", poolID, err)
+	}
+
+	// Wait for parent pool to become active before continuing
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2Pool(lbClient, parentPool, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -126,7 +137,7 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Attempting to create member")
 	var member *pools.Member
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		member, err = pools.CreateMember(networkingClient, poolID, createOpts).Extract()
+		member, err = pools.CreateMember(lbClient, poolID, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -137,8 +148,8 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating member: %s", err)
 	}
 
-	// Wait for LB to become ACTIVE again
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	// Wait for member to become active before continuing
+	err = waitForLBV2Member(lbClient, parentPool, member, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -150,12 +161,14 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 
 func resourceMemberV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	member, err := pools.GetMember(networkingClient, d.Get("pool_id").(string), d.Id()).Extract()
+	poolID := d.Get("pool_id").(string)
+
+	member, err := pools.GetMember(lbClient, poolID, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "member")
 	}
@@ -176,34 +189,54 @@ func resourceMemberV2Read(d *schema.ResourceData, meta interface{}) error {
 
 func resourceMemberV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var updateOpts pools.UpdateMemberOpts
 	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
 	}
 	if d.HasChange("weight") {
-		updateOpts.Weight = d.Get("weight").(int)
+		weight := d.Get("weight").(int)
+		updateOpts.Weight = &weight
 	}
 	if d.HasChange("admin_state_up") {
 		asu := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &asu
 	}
 
-	// Wait for LB to become active before continuing
+	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
+	parentPool, err := pools.Get(lbClient, poolID).Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve parent pool %s: %s", poolID, err)
+	}
+
+	// Get a clean copy of the member.
+	member, err := pools.GetMember(lbClient, poolID, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve member: %s: %s", d.Id(), err)
+	}
+
+	// Wait for parent pool to become active before continuing.
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2Pool(lbClient, parentPool, "ACTIVE", lbPendingStatuses, timeout)
+	if err != nil {
+		return err
+	}
+
+	// Wait for the member to become active before continuing.
+	err = waitForLBV2Member(lbClient, parentPool, member, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Updating member %s with options: %#v", d.Id(), updateOpts)
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		_, err = pools.UpdateMember(networkingClient, poolID, d.Id(), updateOpts).Extract()
+		_, err = pools.UpdateMember(lbClient, poolID, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -214,7 +247,8 @@ func resourceMemberV2Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to update member %s: %s", d.Id(), err)
 	}
 
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	// Wait for the member to become active before continuing.
+	err = waitForLBV2Member(lbClient, parentPool, member, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -224,33 +258,65 @@ func resourceMemberV2Update(d *schema.ResourceData, meta interface{}) error {
 
 func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	// Wait for Pool to become active before continuing
+	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
-	timeout := d.Timeout(schema.TimeoutDelete)
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	parentPool, err := pools.Get(lbClient, poolID).Extract()
 	if err != nil {
-		return err
+		return fmt.Errorf("Unable to retrieve parent pool (%s) for the member: %s", poolID, err)
+	}
+
+	// Get a clean copy of the member.
+	member, err := pools.GetMember(lbClient, poolID, d.Id()).Extract()
+	if err != nil {
+		return CheckDeleted(d, err, "Unable to retrieve member")
+	}
+
+	// Wait for parent pool to become active before continuing.
+	timeout := d.Timeout(schema.TimeoutDelete)
+	err = waitForLBV2Pool(lbClient, parentPool, "ACTIVE", lbPendingStatuses, timeout)
+	if err != nil {
+		return CheckDeleted(d, err, "Error waiting for the members pool status")
 	}
 
 	log.Printf("[DEBUG] Attempting to delete member %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		err = pools.DeleteMember(networkingClient, poolID, d.Id()).ExtractErr()
+		err = pools.DeleteMember(lbClient, poolID, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
 		return nil
 	})
 
-	// Wait for LB to become ACTIVE
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	if err != nil {
+		return CheckDeleted(d, err, "Error deleting member")
+	}
+
+	// Wait for the member to become DELETED.
+	err = waitForLBV2Member(lbClient, parentPool, member, "DELETED", lbPendingDeleteStatuses, timeout)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func resourceMemberV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.SplitN(d.Id(), "/", 2)
+	if len(parts) != 2 {
+		err := fmt.Errorf("Invalid format specified for Member. Format must be <pool id>/<member id>")
+		return nil, err
+	}
+
+	poolID := parts[0]
+	memberID := parts[1]
+
+	d.SetId(memberID)
+	d.Set("pool_id", poolID)
+
+	return []*schema.ResourceData{d}, nil
 }

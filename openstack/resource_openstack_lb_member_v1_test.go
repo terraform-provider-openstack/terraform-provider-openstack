@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas/members"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccLBV1Member_basic(t *testing.T) {
@@ -17,13 +17,13 @@ func TestAccLBV1Member_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1MemberDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccLBV1Member_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1MemberExists("openstack_lb_member_v1.member_1", &member),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccLBV1Member_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_lb_member_v1.member_1", "admin_state_up", "false"),
@@ -41,7 +41,7 @@ func TestAccLBV1Member_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1MemberDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccLBV1Member_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1MemberExists("openstack_lb_member_v1.member_1", &member),
@@ -53,7 +53,7 @@ func TestAccLBV1Member_timeout(t *testing.T) {
 
 func testAccCheckLBV1MemberDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -84,7 +84,7 @@ func testAccCheckLBV1MemberExists(n string, member *members.Member) resource.Tes
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}

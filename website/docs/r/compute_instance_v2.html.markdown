@@ -22,7 +22,7 @@ resource "openstack_compute_instance_v2" "basic" {
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
 
-  metadata {
+  metadata = {
     this = "that"
   }
 
@@ -53,8 +53,8 @@ resource "openstack_compute_instance_v2" "myinstance" {
 }
 
 resource "openstack_compute_volume_attach_v2" "attached" {
-  compute_id = "${openstack_compute_instance_v2.myinstance.id}"
-  volume_id = "${openstack_blockstorage_volume_v2.myvol.id}"
+  instance_id = "${openstack_compute_instance_v2.myinstance.id}"
+  volume_id   = "${openstack_blockstorage_volume_v2.myvol.id}"
 }
 ```
 
@@ -198,7 +198,7 @@ resource "openstack_compute_instance_v2" "multi-net" {
 resource "openstack_compute_floatingip_associate_v2" "myip" {
   floating_ip = "${openstack_networking_floatingip_v2.myip.address}"
   instance_id = "${openstack_compute_instance_v2.multi-net.id}"
-  fixed_ip = "${openstack_compute_instance_v2.multi-net.network.1.fixed_ip_v4}"
+  fixed_ip    = "${openstack_compute_instance_v2.multi-net.network.1.fixed_ip_v4}"
 }
 ```
 
@@ -307,13 +307,21 @@ The following arguments are supported:
     Changing this creates a new server.
 
 * `security_groups` - (Optional) An array of one or more security group names
-    to associate with the server. Changing this results in adding/removing
+    or ids to associate with the server. Changing this results in adding/removing
     security groups from the existing server. *Note*: When attaching the
     instance to networks using Ports, place the security groups on the Port
     and not the instance.
 
+* `availability_zone_hints` - (Optional) The availability zone in which to
+    create the server. This argument is preferred to `availability_zone`, when
+    scheduling the server on a
+    [particular](https://docs.openstack.org/nova/latest/admin/availability-zones.html)
+    host or node. Conflicts with `availability_zone`. Changing this creates a
+    new server.
+
 * `availability_zone` - (Optional) The availability zone in which to create
-    the server. Changing this creates a new server.
+    the server. Conflicts with `availability_zone_hints`. Changing this creates
+    a new server.
 
 * `network` - (Optional) An array of one or more networks to attach to the
     instance. The network object structure is documented below. Changing this
@@ -336,7 +344,7 @@ The following arguments are supported:
     structure is documented below. Changing this creates a new server.
     You can specify multiple block devices which will create an instance with
     multiple disks. This configuration is very flexible, so please see the
-    following [reference](http://docs.openstack.org/developer/nova/block_device_mapping.html)
+    following [reference](https://docs.openstack.org/nova/latest/user/block-device-mapping.html)
     for more information.
 
 * `scheduler_hints` - (Optional) Provide the Nova scheduler with hints on how
@@ -354,6 +362,16 @@ The following arguments are supported:
     forcefully deleted. This is useful for environments that have reclaim / soft
     deletion enabled.
 
+* `power_state` - (Optional) Provide the VM state. Only 'active' and 'shutoff'
+    are supported values. *Note*: If the initial power_state is the shutoff
+    the VM will be stopped immediately after build and the provisioners like
+    remote-exec or files are not supported.
+
+* `tags` - (Optional) A set of string tags for the instance. Changing this
+    updates the existing instance tags.
+
+* `vendor_options` - (Optional) Map of additional vendor-specific options.
+    Supported options are described below.
 
 The `network` block supports:
 
@@ -367,9 +385,6 @@ The `network` block supports:
     network to attach to the server. Changing this creates a new server.
 
 * `fixed_ip_v4` - (Optional) Specifies a fixed IPv4 address to be used on this
-    network. Changing this creates a new server.
-
-* `fixed_ip_v6` - (Optional) Specifies a fixed IPv6 address to be used on this
     network. Changing this creates a new server.
 
 * `access_network` - (Optional) Specifies if this network should be used for
@@ -399,6 +414,17 @@ The `block_device` block supports:
     termination of the instance. Defaults to false. Changing this creates a
     new server.
 
+* `volume_type` - (Optional) The volume type that will be used, for example SSD
+    or HDD storage. The available options depend on how your specific OpenStack
+    cloud is configured and what classes of storage are provided. Changing this
+    creates a new server.
+
+* `device_type` - (Optional) The low-level device type that will be used. Most
+    common thing is to leave this empty. Changing this creates a new server.
+
+* `disk_bus` - (Optional) The low-level disk bus that will be used. Most common
+    thing is to leave this empty. Changing this creates a new server.
+
 The `scheduler_hints` block supports:
 
 * `group` - (Optional) A UUID of a Server Group. The instance will be placed
@@ -411,18 +437,40 @@ The `scheduler_hints` block supports:
     scheduled on the same host of those specified.
 
 * `query` - (Optional) A conditional query that a compute node must pass in
-    order to host an instance.
+    order to host an instance. The query must use the `JsonFilter` syntax
+    which is described
+    [here](https://docs.openstack.org/nova/latest/admin/configuration/schedulers.html#jsonfilter).
+    At this time, only simple queries are supported. Compound queries using
+    `and`, `or`, or `not` are not supported. An example of a simple query is:
+
+    ```
+    [">=", "$free_ram_mb", "1024"]
+    ```
 
 * `target_cell` - (Optional) The name of a cell to host the instance.
 
 * `build_near_host_ip` - (Optional) An IP Address in CIDR form. The instance
     will be placed on a compute node that is in the same subnet.
 
+* `additional_properties` - (Optional) Arbitrary key/value pairs of additional
+  properties to pass to the scheduler.
+
 The `personality` block supports:
 
 * `file` - (Required) The absolute path of the destination file.
 
-* `contents` - (Required) The contents of the file. Limited to 255 bytes.
+* `content` - (Required) The contents of the file. Limited to 255 bytes.
+
+The `vendor_options` block supports:
+
+* `ignore_resize_confirmation` - (Optional) Boolean to control whether
+    to ignore manual confirmation of the instance resizing. This can be helpful
+    to work with some OpenStack clouds which automatically confirm resizing of
+    instances after some timeout.
+
+* `detach_ports_before_destroy` - (Optional) Whether to try to detach all attached
+    ports to the vm before destroying it to make sure the port state is correct
+    after the vm destruction. This is helpful when the port is not deleted.
 
 ## Attributes Reference
 
@@ -430,8 +478,7 @@ The following attributes are exported:
 
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
-* `access_ip_v4` - The first detected Fixed IPv4 address _or_ the
-    Floating IP.
+* `access_ip_v4` - The first detected Fixed IPv4 address.
 * `access_ip_v6` - The first detected Fixed IPv6 address.
 * `metadata` - See Argument Reference above.
 * `security_groups` - See Argument Reference above.
@@ -447,6 +494,9 @@ The following attributes are exported:
 * `network/mac` - The MAC address of the NIC on that network.
 * `all_metadata` - Contains all instance metadata, even metadata not set
     by Terraform.
+* `tags` - See Argument Reference above.
+* `all_tags` - The collection of tags assigned on the instance, which have
+    been explicitly and implicitly added.
 
 ## Notes
 
@@ -460,7 +510,7 @@ equal to what the chosen flavor supports.
 The following example shows how to create an instance with multiple ephemeral
 disks:
 
-```
+```hcl
 resource "openstack_compute_instance_v2" "foo" {
   name            = "terraform-test"
   security_groups = ["default"]
@@ -491,10 +541,36 @@ resource "openstack_compute_instance_v2" "foo" {
 }
 ```
 
+### Instances and Security Groups
+
+When referencing a security group resource in an instance resource, always
+use the _name_ of the security group. If you specify the ID of the security
+group, Terraform will remove and reapply the security group upon each call.
+This is because the OpenStack Compute API returns the names of the associated
+security groups and not their IDs.
+
+Note the following example:
+
+```hcl
+resource "openstack_networking_secgroup_v2" "sg_1" {
+  name = "sg_1"
+}
+
+resource "openstack_compute_instance_v2" "foo" {
+  name            = "terraform-test"
+  security_groups = ["${openstack_networking_secgroup_v2.sg_1.name}"]
+}
+```
+
 ### Instances and Ports
 
 Neutron Ports are a great feature and provide a lot of functionality. However,
 there are some notes to be aware of when mixing Instances and Ports:
+
+* In OpenStack environments prior to the Kilo release, deleting or recreating
+an Instance will cause the Instance's Port(s) to be deleted. One way of working
+around this is to taint any Port(s) used in Instances which are to be recreated.
+See [here](https://review.openstack.org/#/c/126309/) for further information.
 
 * When attaching an Instance to one or more networks using Ports, place the
 security groups on the Port and not the Instance. If you place the security
@@ -542,3 +618,167 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 ```
+
+### Instances and Networks
+
+Instances almost always require a network. Here are some notes to be aware of
+with how Instances and Networks relate:
+
+* In scenarios where you only have one network available, you can create an
+instance without specifying a `network` block. OpenStack will automatically
+launch the instance on this network.
+
+* If you have access to more than one network, you will need to specify a network
+with a `network` block. Not specifying a network will result in the following
+error:
+
+```
+* openstack_compute_instance_v2.instance: Error creating OpenStack server:
+Expected HTTP response code [201 202] when accessing [POST https://example.com:8774/v2.1/servers], but got 409 instead
+{"conflictingRequest": {"message": "Multiple possible networks found, use a Network ID to be more specific.", "code": 409}}
+```
+
+* If you intend to use the `openstack_compute_interface_attach_v2` resource,
+you still need to make sure one of the above points is satisfied. An instance
+cannot be created without a valid network configuration even if you intend to
+use `openstack_compute_interface_attach_v2` after the instance has been created.
+
+## Importing instances
+
+Importing instances can be tricky, since the nova api does not offer all
+information provided at creation time for later retrieval.
+Network interface attachment order, and number and sizes of ephemeral
+disks are examples of this.
+
+### Importing basic instance
+Assume you want to import an instance with one ephemeral root disk,
+and one network interface.
+
+Your configuration would look like the following:
+
+```hcl
+resource "openstack_compute_instance_v2" "basic_instance" {
+  name            = "basic"
+  flavor_id       = "<flavor_id>"
+  key_pair        = "<keyname>"
+  security_groups = ["default"]
+  image_id =  "<image_id>"
+
+  network {
+    name = "<network_name>"
+  }
+}
+
+```
+Then you execute
+```
+terraform import openstack_compute_instance_v2.basic_instance <instance_id>
+```
+
+### Importing an instance with multiple emphemeral disks
+
+The importer cannot read the emphemeral disk configuration
+of an instance, so just specify image_id as in the configuration
+of the basic instance example.
+
+### Importing instance with multiple network interfaces.
+
+Nova returns the network interfaces grouped by network, thus not in creation
+order.
+That means that if you have multiple network interfaces you must take
+care of the order of networks in your configuration.
+
+
+As example we want to import an instance with one ephemeral root disk,
+and 3 network interfaces.
+
+Examples
+
+```hcl
+resource "openstack_compute_instance_v2" "boot-from-volume" {
+  name            = "boot-from-volume"
+  flavor_id       = "<flavor_id"
+  key_pair        = "<keyname>"
+  image_id        = <image_id>
+  security_groups = ["default"]
+
+  network {
+    name = "<network1>"
+  }
+  network {
+    name = "<netowork2>"
+  }
+  network {
+    name = "<network1>"
+    fixed_ip_v4 = "<fixed_ip_v4>"
+  }
+
+}
+```
+
+In the above configuration the networks are out of order compared to what nova
+and thus the import code returns, which means the plan will not
+be empty after import.
+
+So either with care check the plan and modify configuration, or read the
+network order in the state file after import and modify your
+configuration accordingly.
+
+ * A note on ports. If you have created a neutron port independent of an
+ instance, then the import code has no way to detect that the port is created
+ idenpendently, and therefore on deletion of imported instances you might have
+ port resources in your project, which you expected to be created by the
+ instance and thus to also be deleted with the instance.
+
+
+### Importing instances with multiple block storage volumes.
+
+We have an instance with two block storage volumes, one bootable and one
+non-bootable.
+Note that we only configure the bootable device as block_device.
+The other volumes can be specified as `openstack_blockstorage_volume_v2`
+
+```hcl
+resource "openstack_compute_instance_v2" "instance_2" {
+  name            = "instance_2"
+  image_id        = "<image_id>"
+  flavor_id       = "<flavor_id>"
+  key_pair        = "<keyname>"
+  security_groups = ["default"]
+
+  block_device {
+    uuid = <image_id>"
+    source_type = "image"
+    destination_type = "volume"
+    boot_index = 0
+    delete_on_termination = true
+  }
+
+   network {
+    name = "<network_name>"
+  }
+}
+resource "openstack_blockstorage_volume_v2" "volume_1" {
+  size        = 1
+  name =     "<vol_name>"
+}
+resource "openstack_compute_volume_attach_v2" "va_1" {
+  volume_id = "${openstack_blockstorage_volume_v2.volume_1.id}"
+  instance_id = "${openstack_compute_instance_v2.instance_2.id}"
+}
+```
+To import the instance outlined in the above configuration
+do the following:
+
+```
+terraform import openstack_compute_instance_v2.instance_2 <instance_id>
+import openstack_blockstorage_volume_v2.volume_1 <volume_id>
+terraform import openstack_compute_volume_attach_v2.va_1
+<instance_id>/<volume_id>
+```
+
+* A note on block storage volumes, the importer does not read
+  delete_on_termination flag, and always assumes true. If you
+  import an instance created with delete_on_termination false,
+  you end up with "orphaned" volumes after destruction of
+  instances.

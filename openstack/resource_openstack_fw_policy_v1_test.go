@@ -7,17 +7,17 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/policies"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccFWPolicyV1_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckFW(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWPolicyV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccFWPolicyV1_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWPolicyV1Exists(
@@ -30,11 +30,11 @@ func TestAccFWPolicyV1_basic(t *testing.T) {
 
 func TestAccFWPolicyV1_addRules(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckFW(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWPolicyV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccFWPolicyV1_addRules,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWPolicyV1Exists(
@@ -47,11 +47,11 @@ func TestAccFWPolicyV1_addRules(t *testing.T) {
 
 func TestAccFWPolicyV1_deleteRules(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckFW(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWPolicyV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccFWPolicyV1_deleteRules,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWPolicyV1Exists(
@@ -62,26 +62,9 @@ func TestAccFWPolicyV1_deleteRules(t *testing.T) {
 	})
 }
 
-func TestAccFWPolicyV1_timeout(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWPolicyV1Destroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccFWPolicyV1_timeout,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWPolicyV1Exists(
-						"openstack_fw_policy_v1.policy_1", "", "", 0),
-				),
-			},
-		},
-	})
-}
-
 func testAccCheckFWPolicyV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -112,7 +95,7 @@ func testAccCheckFWPolicyV1Exists(n, name, description string, ruleCount int) re
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -187,13 +170,5 @@ resource "openstack_fw_policy_v1" "policy_1" {
 resource "openstack_fw_rule_v1" "udp_deny" {
   protocol = "udp"
   action = "deny"
-}
-`
-
-const testAccFWPolicyV1_timeout = `
-resource "openstack_fw_policy_v1" "policy_1" {
-  timeouts {
-    create = "5m"
-  }
 }
 `

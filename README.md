@@ -7,26 +7,35 @@ Terraform OpenStack Provider
 
 <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
 
+Maintainers
+-----------
+
+This provider plugin is maintained by:
+
+* Andrei Ozerov ([@ozerovandrei](https://github.com/ozerovandrei))
+* Gavin Williams ([@fatmcgav](https://github.com/fatmcgav))
+* Joe Topjian ([@jtopjian](https://github.com/jtopjian))
+
 Requirements
 ------------
 
--	[Terraform](https://www.terraform.io/downloads.html) 0.10.x
--	[Go](https://golang.org/doc/install) 1.8 (to build the provider plugin)
+-	[Terraform](https://www.terraform.io/downloads.html) 0.12.x
+-	[Go](https://golang.org/doc/install) 1.14 (to build the provider plugin)
 
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/hashicorp/terraform-provider-$PROVIDER_NAME`
+Clone repository to: `$GOPATH/src/github.com/terraform-providers/terraform-provider-openstack`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/hashicorp; cd $GOPATH/src/github.com/hashicorp
-$ git clone git@github.com:hashicorp/terraform-provider-$PROVIDER_NAME
+$ mkdir -p $GOPATH/src/github.com/terraform-providers; cd $GOPATH/src/github.com/terraform-providers
+$ git clone https://github.com/terraform-providers/terraform-provider-openstack
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/hashicorp/terraform-provider-$PROVIDER_NAME
+$ cd $GOPATH/src/github.com/terraform-providers/terraform-provider-openstack
 $ make build
 ```
 
@@ -39,27 +48,34 @@ Or you can browse the documentation within this repo [here](https://github.com/t
 Developing the Provider
 ---------------------------
 
-If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.8+ is *required*). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
+If you wish to work on the provider, you'll first need [Go](https://golang.org) installed on your machine (version 1.12+ is *required*). You'll also need to correctly setup a [GOPATH](https://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
 
 To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
 ```sh
-$ make bin
+$ make build
 ...
-$ $GOPATH/bin/terraform-provider-$PROVIDER_NAME
+$ $GOPATH/bin/terraform-provider-openstack
 ...
 ```
 
-In order to test the provider, you can simply run `make test`.
+For further details on how to work on this provider, please see the [Testing and Development](https://www.terraform.io/docs/providers/openstack/index.html#testing-and-development) documentation.
 
-```sh
-$ make test
-```
+Thank You
+---------
 
-In order to run the full suite of Acceptance tests, run `make testacc`.
+We'd like to extend special thanks and appreciation to the following:
 
-*Note:* Acceptance tests create real resources, and often cost money to run.
+### OpenLab
 
-```sh
-$ make testacc
-```
+<a href="http://openlabtesting.org/"><img src="assets/openlab.png" width="600px"></a>
+
+OpenLab is providing a full CI environment to test each PR and merge for a variety of OpenStack releases.
+
+### VEXXHOST
+
+<a href="https://vexxhost.com/"><img src="assets/vexxhost.png" width="600px"></a>
+
+VEXXHOST is providing their services to assist with the development and testing of this provider.
+
+

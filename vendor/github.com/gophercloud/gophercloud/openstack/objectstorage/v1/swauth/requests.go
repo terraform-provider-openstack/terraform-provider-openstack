@@ -3,7 +3,6 @@ package swauth
 import "github.com/gophercloud/gophercloud"
 
 // AuthOptsBuilder describes struct types that can be accepted by the Auth call.
-// The AuthOpts struct in this package does.
 type AuthOptsBuilder interface {
 	ToAuthOptsMap() (map[string]string, error)
 }
@@ -12,6 +11,7 @@ type AuthOptsBuilder interface {
 type AuthOpts struct {
 	// User is an Swauth-based username in username:tenant format.
 	User string `h:"X-Auth-User" required:"true"`
+
 	// Key is a secret/password to authenticate the User with.
 	Key string `h:"X-Auth-Key" required:"true"`
 }
@@ -41,13 +41,7 @@ func Auth(c *gophercloud.ProviderClient, opts AuthOptsBuilder) (r GetAuthResult)
 		MoreHeaders: h,
 		OkCodes:     []int{200},
 	})
-
-	if resp != nil {
-		r.Header = resp.Header
-	}
-
-	r.Err = err
-
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return r
 }
 

@@ -5,10 +5,13 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
 
@@ -28,208 +31,349 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"network_id": &schema.Schema{
+
+			"network_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"cidr": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+
+			"cidr": {
+				Type:          schema.TypeString,
+				ConflictsWith: []string{"prefix_length"},
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
 			},
-			"name": &schema.Schema{
+
+			"prefix_length": {
+				Type:          schema.TypeInt,
+				ConflictsWith: []string{"cidr"},
+				Optional:      true,
+				ForceNew:      true,
+			},
+
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
-			"tenant_id": &schema.Schema{
+
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+			},
+
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"allocation_pools": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
+
+			"allocation_pools": {
+				Type:          schema.TypeList,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"allocation_pool"},
+				Deprecated:    "use allocation_pool instead",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"start": &schema.Schema{
+						"start": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"end": &schema.Schema{
+						"end": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
 					},
 				},
 			},
-			"gateway_ip": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: false,
-				Computed: true,
+
+			"allocation_pool": {
+				Type:          schema.TypeSet,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"allocation_pools"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"start": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"end": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
 			},
-			"no_gateway": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: false,
+
+			"gateway_ip": {
+				Type:          schema.TypeString,
+				ConflictsWith: []string{"no_gateway"},
+				Optional:      true,
+				ForceNew:      false,
+				Computed:      true,
 			},
-			"ip_version": &schema.Schema{
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  4,
-				ForceNew: true,
+
+			"no_gateway": {
+				Type:          schema.TypeBool,
+				ConflictsWith: []string{"gateway_ip"},
+				Optional:      true,
+				Default:       false,
+				ForceNew:      false,
 			},
-			"enable_dhcp": &schema.Schema{
+
+			"ip_version": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      4,
+				ForceNew:     true,
+				ValidateFunc: validation.IntInSlice([]int{4, 6}),
+			},
+
+			"enable_dhcp": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: false,
 				Default:  true,
 			},
-			"dns_nameservers": &schema.Schema{
-				Type:     schema.TypeSet,
-				Optional: true,
-				ForceNew: false,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
-			},
-			"host_routes": &schema.Schema{
+
+			"dns_nameservers": {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: false,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"host_routes": {
+				Type:       schema.TypeList,
+				Optional:   true,
+				ForceNew:   false,
+				Deprecated: "Use openstack_networking_subnet_route_v2 instead",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"destination_cidr": &schema.Schema{
+						"destination_cidr": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"next_hop": &schema.Schema{
+						"next_hop": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
 					},
 				},
 			},
-			"value_specs": &schema.Schema{
+
+			"ipv6_address_mode": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"slaac", "dhcpv6-stateful", "dhcpv6-stateless",
+				}, false),
+			},
+
+			"ipv6_ra_mode": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"slaac", "dhcpv6-stateful", "dhcpv6-stateless",
+				}, false),
+			},
+
+			"subnetpool_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"value_specs": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
 			},
+
+			"tags": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"all_tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
+
+		CustomizeDiff: customdiff.Sequence(
+			// Clear the diff if the old and new allocation_pools are the same.
+			func(diff *schema.ResourceDiff, v interface{}) error {
+				return networkingSubnetV2AllocationPoolsCustomizeDiff(diff)
+			},
+		),
 	}
 }
 
 func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	// Check nameservers.
+	if err := networkingSubnetV2DNSNameserverAreUnique(d.Get("dns_nameservers").([]interface{})); err != nil {
+		return fmt.Errorf("openstack_networking_subnet_v2 dns_nameservers argument is invalid: %s", err)
+	}
+
+	// Get raw allocation pool value.
+	allocationPool := networkingSubnetV2GetRawAllocationPoolsValueToExpand(d)
+
+	// Set basic options.
 	createOpts := SubnetCreateOpts{
 		subnets.CreateOpts{
 			NetworkID:       d.Get("network_id").(string),
-			CIDR:            d.Get("cidr").(string),
 			Name:            d.Get("name").(string),
+			Description:     d.Get("description").(string),
 			TenantID:        d.Get("tenant_id").(string),
-			AllocationPools: resourceSubnetAllocationPoolsV2(d),
-			DNSNameservers:  resourceSubnetDNSNameserversV2(d),
-			HostRoutes:      resourceSubnetHostRoutesV2(d),
-			EnableDHCP:      nil,
+			IPv6AddressMode: d.Get("ipv6_address_mode").(string),
+			IPv6RAMode:      d.Get("ipv6_ra_mode").(string),
+			AllocationPools: expandNetworkingSubnetV2AllocationPools(allocationPool),
+			DNSNameservers:  expandToStringSlice(d.Get("dns_nameservers").([]interface{})),
+			HostRoutes:      expandNetworkingSubnetV2HostRoutes(d.Get("host_routes").([]interface{})),
+			SubnetPoolID:    d.Get("subnetpool_id").(string),
+			IPVersion:       gophercloud.IPVersion(d.Get("ip_version").(int)),
 		},
 		MapValueSpecs(d),
 	}
 
-	noGateway := d.Get("no_gateway").(bool)
-	gatewayIP := d.Get("gateway_ip").(string)
-
-	if gatewayIP != "" && noGateway {
-		return fmt.Errorf("Both gateway_ip and no_gateway cannot be set")
+	// Set CIDR if provided.
+	if v, ok := d.GetOk("cidr"); ok {
+		cidr := v.(string)
+		createOpts.CIDR = cidr
 	}
 
-	if gatewayIP != "" {
+	// Set gateway options if provided.
+	if v, ok := d.GetOk("gateway_ip"); ok {
+		gatewayIP := v.(string)
 		createOpts.GatewayIP = &gatewayIP
 	}
 
+	noGateway := d.Get("no_gateway").(bool)
 	if noGateway {
-		disableGateway := ""
-		createOpts.GatewayIP = &disableGateway
+		gatewayIP := ""
+		createOpts.GatewayIP = &gatewayIP
 	}
 
+	// Validate and set prefix options.
+	if v, ok := d.GetOk("prefix_length"); ok {
+		if d.Get("subnetpool_id").(string) == "" {
+			return fmt.Errorf("'prefix_length' is only valid if 'subnetpool_id' is set for openstack_networking_subnet_v2")
+		}
+		prefixLength := v.(int)
+		createOpts.Prefixlen = prefixLength
+	}
+
+	// Set DHCP options if provided.
 	enableDHCP := d.Get("enable_dhcp").(bool)
 	createOpts.EnableDHCP = &enableDHCP
 
-	if v, ok := d.GetOk("ip_version"); ok {
-		ipVersion := resourceNetworkingSubnetV2DetermineIPVersion(v.(int))
-		createOpts.IPVersion = ipVersion
-	}
-
+	log.Printf("[DEBUG] openstack_networking_subnet_v2 create options: %#v", createOpts)
 	s, err := subnets.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Neutron subnet: %s", err)
+		return fmt.Errorf("Error creating openstack_networking_subnet_v2: %s", err)
 	}
 
-	log.Printf("[DEBUG] Waiting for Subnet (%s) to become available", s.ID)
+	log.Printf("[DEBUG] Waiting for openstack_networking_subnet_v2 %s to become available", s.ID)
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{"ACTIVE"},
-		Refresh:    waitForSubnetActive(networkingClient, s.ID),
+		Refresh:    networkingSubnetV2StateRefreshFunc(networkingClient, s.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
 
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("Error waiting for openstack_networking_subnet_v2 %s to become available: %s", s.ID, err)
+	}
 
 	d.SetId(s.ID)
 
-	log.Printf("[DEBUG] Created Subnet %s: %#v", s.ID, s)
+	tags := networkingV2AttributesTags(d)
+	if len(tags) > 0 {
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "subnets", s.ID, tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error creating tags on openstack_networking_subnet_v2 %s: %s", s.ID, err)
+		}
+		log.Printf("[DEBUG] Set tags %s on openstack_networking_subnet_v2 %s", tags, s.ID)
+	}
+
+	log.Printf("[DEBUG] Created openstack_networking_subnet_v2 %s: %#v", s.ID, s)
 	return resourceNetworkingSubnetV2Read(d, meta)
 }
 
 func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	s, err := subnets.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "subnet")
+		return CheckDeleted(d, err, "Error getting openstack_networking_subnet_v2")
 	}
 
-	log.Printf("[DEBUG] Retrieved Subnet %s: %#v", d.Id(), s)
+	log.Printf("[DEBUG] Retrieved openstack_networking_subnet_v2 %s: %#v", d.Id(), s)
 
 	d.Set("network_id", s.NetworkID)
 	d.Set("cidr", s.CIDR)
 	d.Set("ip_version", s.IPVersion)
 	d.Set("name", s.Name)
+	d.Set("description", s.Description)
 	d.Set("tenant_id", s.TenantID)
-	d.Set("gateway_ip", s.GatewayIP)
 	d.Set("dns_nameservers", s.DNSNameservers)
-	d.Set("host_routes", s.HostRoutes)
 	d.Set("enable_dhcp", s.EnableDHCP)
 	d.Set("network_id", s.NetworkID)
+	d.Set("ipv6_address_mode", s.IPv6AddressMode)
+	d.Set("ipv6_ra_mode", s.IPv6RAMode)
+	d.Set("subnetpool_id", s.SubnetPoolID)
 
-	// Set the allocation_pools
-	var allocationPools []map[string]interface{}
-	for _, v := range s.AllocationPools {
-		pool := make(map[string]interface{})
-		pool["start"] = v.Start
-		pool["end"] = v.End
+	networkingV2ReadAttributesTags(d, s.Tags)
 
-		allocationPools = append(allocationPools, pool)
+	// Set the allocation_pools, allocation_pool attributes.
+	allocationPools := flattenNetworkingSubnetV2AllocationPools(s.AllocationPools)
+	if err := d.Set("allocation_pools", allocationPools); err != nil {
+		log.Printf("[DEBUG] Unable to set openstack_networking_subnet_v2 allocation_pools: %s", err)
 	}
-	d.Set("allocation_pools", allocationPools)
+	if err := d.Set("allocation_pool", allocationPools); err != nil {
+		log.Printf("[DEBUG] Unable to set openstack_networking_subnet_v2 allocation_pool: %s", err)
+	}
+
+	// Set the subnet's "gateway_ip" and "no_gateway" attributes.
+	d.Set("gateway_ip", s.GatewayIP)
+	d.Set("no_gateway", false)
+	if s.GatewayIP != "" {
+		d.Set("no_gateway", false)
+	} else {
+		d.Set("no_gateway", true)
+	}
 
 	d.Set("region", GetRegion(d, config))
 
@@ -238,33 +382,28 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 
 func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	// Check if both gateway_ip and no_gateway are set
-	if _, ok := d.GetOk("gateway_ip"); ok {
-		noGateway := d.Get("no_gateway").(bool)
-		if noGateway {
-			return fmt.Errorf("Both gateway_ip and no_gateway cannot be set.")
-		}
-	}
-
+	var hasChange bool
 	var updateOpts subnets.UpdateOpts
 
-	noGateway := d.Get("no_gateway").(bool)
-	gatewayIP := d.Get("gateway_ip").(string)
-
-	if gatewayIP != "" && noGateway {
-		return fmt.Errorf("Both gateway_ip and no_gateway cannot be set")
+	if d.HasChange("name") {
+		hasChange = true
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
 	}
 
-	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
+	if d.HasChange("description") {
+		hasChange = true
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
 	}
 
 	if d.HasChange("gateway_ip") {
+		hasChange = true
 		updateOpts.GatewayIP = nil
 		if v, ok := d.GetOk("gateway_ip"); ok {
 			gatewayIP := v.(string)
@@ -274,33 +413,57 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 
 	if d.HasChange("no_gateway") {
 		if d.Get("no_gateway").(bool) {
+			hasChange = true
 			gatewayIP := ""
 			updateOpts.GatewayIP = &gatewayIP
 		}
 	}
 
 	if d.HasChange("dns_nameservers") {
-		updateOpts.DNSNameservers = resourceSubnetDNSNameserversV2(d)
+		if err := networkingSubnetV2DNSNameserverAreUnique(d.Get("dns_nameservers").([]interface{})); err != nil {
+			return fmt.Errorf("openstack_networking_subnet_v2 dns_nameservers argument is invalid: %s", err)
+		}
+		hasChange = true
+		nameservers := expandToStringSlice(d.Get("dns_nameservers").([]interface{}))
+		updateOpts.DNSNameservers = &nameservers
 	}
 
 	if d.HasChange("host_routes") {
-		updateOpts.HostRoutes = resourceSubnetHostRoutesV2(d)
+		hasChange = true
+		newHostRoutes := expandNetworkingSubnetV2HostRoutes(d.Get("host_routes").([]interface{}))
+		updateOpts.HostRoutes = &newHostRoutes
 	}
 
 	if d.HasChange("enable_dhcp") {
+		hasChange = true
 		v := d.Get("enable_dhcp").(bool)
 		updateOpts.EnableDHCP = &v
 	}
 
-	if d.HasChange("allocation_pools") {
-		updateOpts.AllocationPools = resourceSubnetAllocationPoolsV2(d)
+	if d.HasChange("allocation_pool") {
+		hasChange = true
+		updateOpts.AllocationPools = expandNetworkingSubnetV2AllocationPools(d.Get("allocation_pool").(*schema.Set).List())
+	} else if d.HasChange("allocation_pools") {
+		hasChange = true
+		updateOpts.AllocationPools = expandNetworkingSubnetV2AllocationPools(d.Get("allocation_pools").([]interface{}))
 	}
 
-	log.Printf("[DEBUG] Updating Subnet %s with options: %+v", d.Id(), updateOpts)
+	if hasChange {
+		log.Printf("[DEBUG] Updating openstack_networking_subnet_v2 %s with options: %#v", d.Id(), updateOpts)
+		_, err = subnets.Update(networkingClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenStack Neutron openstack_networking_subnet_v2 %s: %s", d.Id(), err)
+		}
+	}
 
-	_, err = subnets.Update(networkingClient, d.Id(), updateOpts).Extract()
-	if err != nil {
-		return fmt.Errorf("Error updating OpenStack Neutron Subnet: %s", err)
+	if d.HasChange("tags") {
+		tags := networkingV2UpdateAttributesTags(d)
+		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+		tags, err := attributestags.ReplaceAll(networkingClient, "subnets", d.Id(), tagOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating tags on openstack_networking_subnet_v2 %s: %s", d.Id(), err)
+		}
+		log.Printf("[DEBUG] Updated tags %s on openstack_networking_subnet_v2 %s", tags, d.Id())
 	}
 
 	return resourceNetworkingSubnetV2Read(d, meta)
@@ -308,7 +471,7 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 
 func resourceNetworkingSubnetV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -316,7 +479,7 @@ func resourceNetworkingSubnetV2Delete(d *schema.ResourceData, meta interface{}) 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForSubnetDelete(networkingClient, d.Id()),
+		Refresh:    networkingSubnetV2StateRefreshFuncDelete(networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -324,100 +487,8 @@ func resourceNetworkingSubnetV2Delete(d *schema.ResourceData, meta interface{}) 
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack Neutron Subnet: %s", err)
+		return fmt.Errorf("Error waiting for openstack_networking_subnet_v2 %s to become deleted: %s", d.Id(), err)
 	}
 
-	d.SetId("")
 	return nil
-}
-
-func resourceSubnetAllocationPoolsV2(d *schema.ResourceData) []subnets.AllocationPool {
-	rawAPs := d.Get("allocation_pools").([]interface{})
-	aps := make([]subnets.AllocationPool, len(rawAPs))
-	for i, raw := range rawAPs {
-		rawMap := raw.(map[string]interface{})
-		aps[i] = subnets.AllocationPool{
-			Start: rawMap["start"].(string),
-			End:   rawMap["end"].(string),
-		}
-	}
-	return aps
-}
-
-func resourceSubnetDNSNameserversV2(d *schema.ResourceData) []string {
-	rawDNSN := d.Get("dns_nameservers").(*schema.Set)
-	dnsn := make([]string, rawDNSN.Len())
-	for i, raw := range rawDNSN.List() {
-		dnsn[i] = raw.(string)
-	}
-	return dnsn
-}
-
-func resourceSubnetHostRoutesV2(d *schema.ResourceData) []subnets.HostRoute {
-	rawHR := d.Get("host_routes").([]interface{})
-	hr := make([]subnets.HostRoute, len(rawHR))
-	for i, raw := range rawHR {
-		rawMap := raw.(map[string]interface{})
-		hr[i] = subnets.HostRoute{
-			DestinationCIDR: rawMap["destination_cidr"].(string),
-			NextHop:         rawMap["next_hop"].(string),
-		}
-	}
-	return hr
-}
-
-func resourceNetworkingSubnetV2DetermineIPVersion(v int) gophercloud.IPVersion {
-	var ipVersion gophercloud.IPVersion
-	switch v {
-	case 4:
-		ipVersion = gophercloud.IPv4
-	case 6:
-		ipVersion = gophercloud.IPv6
-	}
-
-	return ipVersion
-}
-
-func waitForSubnetActive(networkingClient *gophercloud.ServiceClient, subnetId string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		s, err := subnets.Get(networkingClient, subnetId).Extract()
-		if err != nil {
-			return nil, "", err
-		}
-
-		log.Printf("[DEBUG] OpenStack Neutron Subnet: %+v", s)
-		return s, "ACTIVE", nil
-	}
-}
-
-func waitForSubnetDelete(networkingClient *gophercloud.ServiceClient, subnetId string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		log.Printf("[DEBUG] Attempting to delete OpenStack Subnet %s.\n", subnetId)
-
-		s, err := subnets.Get(networkingClient, subnetId).Extract()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenStack Subnet %s", subnetId)
-				return s, "DELETED", nil
-			}
-			return s, "ACTIVE", err
-		}
-
-		err = subnets.Delete(networkingClient, subnetId).ExtractErr()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenStack Subnet %s", subnetId)
-				return s, "DELETED", nil
-			}
-			if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 409 {
-					return s, "ACTIVE", nil
-				}
-			}
-			return s, "ACTIVE", err
-		}
-
-		log.Printf("[DEBUG] OpenStack Subnet %s still active.\n", subnetId)
-		return s, "ACTIVE", nil
-	}
 }

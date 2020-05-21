@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 )
 
 func TestAccComputeV2Flavor_basic(t *testing.T) {
 	var flavor flavors.Flavor
-	var flavorName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+	var flavorName = acctest.RandomWithPrefix("tf-acc-flavor")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -23,10 +23,54 @@ func TestAccComputeV2Flavor_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2FlavorDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Flavor_basic(flavorName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorExists("openstack_compute_flavor_v2.flavor_1", &flavor),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_flavor_v2.flavor_1", "ram", "2048"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_flavor_v2.flavor_1", "vcpus", "2"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_flavor_v2.flavor_1", "disk", "5"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Flavor_extraSpecs(t *testing.T) {
+	var flavor flavors.Flavor
+	var flavorName = acctest.RandomWithPrefix("tf-acc-flavor")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2FlavorDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2Flavor_extraSpecs_1(flavorName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2FlavorExists("openstack_compute_flavor_v2.flavor_1", &flavor),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_flavor_v2.flavor_1", "extra_specs.%", "2"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_flavor_v2.flavor_1", "extra_specs.hw:cpu_policy", "CPU-POLICY"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_flavor_v2.flavor_1", "extra_specs.hw:cpu_thread_policy", "CPU-THREAD-POLICY"),
+				),
+			},
+			{
+				Config: testAccComputeV2Flavor_extraSpecs_2(flavorName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2FlavorExists("openstack_compute_flavor_v2.flavor_1", &flavor),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_flavor_v2.flavor_1", "extra_specs.%", "1"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_flavor_v2.flavor_1", "extra_specs.hw:cpu_policy", "CPU-POLICY-2"),
 				),
 			},
 		},
@@ -35,7 +79,7 @@ func TestAccComputeV2Flavor_basic(t *testing.T) {
 
 func testAccCheckComputeV2FlavorDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.computeV2Client(OS_REGION_NAME)
+	computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -66,7 +110,7 @@ func testAccCheckComputeV2FlavorExists(n string, flavor *flavors.Flavor) resourc
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
@@ -93,6 +137,43 @@ func testAccComputeV2Flavor_basic(flavorName string) string {
       ram = 2048
       vcpus = 2
       disk = 5
+
+      is_public = true
+    }
+    `, flavorName)
+}
+
+func testAccComputeV2Flavor_extraSpecs_1(flavorName string) string {
+	return fmt.Sprintf(`
+    resource "openstack_compute_flavor_v2" "flavor_1" {
+      name = "%s"
+      ram = 2048
+      vcpus = 2
+      disk = 5
+
+      is_public = true
+
+      extra_specs = {
+        "hw:cpu_policy" = "CPU-POLICY",
+        "hw:cpu_thread_policy" = "CPU-THREAD-POLICY"
+      }
+    }
+    `, flavorName)
+}
+
+func testAccComputeV2Flavor_extraSpecs_2(flavorName string) string {
+	return fmt.Sprintf(`
+    resource "openstack_compute_flavor_v2" "flavor_1" {
+      name = "%s"
+      ram = 2048
+      vcpus = 2
+      disk = 5
+
+      is_public = true
+
+      extra_specs = {
+        "hw:cpu_policy" = "CPU-POLICY-2"
+      }
     }
     `, flavorName)
 }

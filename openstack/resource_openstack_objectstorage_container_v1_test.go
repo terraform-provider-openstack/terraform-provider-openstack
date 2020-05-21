@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/containers"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccObjectStorageV1Container_basic(t *testing.T) {
@@ -18,16 +18,20 @@ func TestAccObjectStorageV1Container_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckObjectStorageV1ContainerDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccObjectStorageV1Container_basic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_container_v1.container_1", "name", "container_1"),
 					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_container_v1.container_1", "metadata.test", "true"),
+					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_container_v1.container_1", "metadata.upperTest", "true"),
+					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_container_v1.container_1", "content_type", "application/json"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccObjectStorageV1Container_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -40,7 +44,7 @@ func TestAccObjectStorageV1Container_basic(t *testing.T) {
 
 func testAccCheckObjectStorageV1ContainerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	objectStorageClient, err := config.objectStorageV1Client(OS_REGION_NAME)
+	objectStorageClient, err := config.ObjectStorageV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack object storage client: %s", err)
 	}
@@ -50,7 +54,7 @@ func testAccCheckObjectStorageV1ContainerDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := containers.Get(objectStorageClient, rs.Primary.ID).Extract()
+		_, err := containers.Get(objectStorageClient, rs.Primary.ID, nil).Extract()
 		if err == nil {
 			return fmt.Errorf("Container still exists")
 		}
@@ -62,17 +66,35 @@ func testAccCheckObjectStorageV1ContainerDestroy(s *terraform.State) error {
 const testAccObjectStorageV1Container_basic = `
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "container_1"
-  metadata {
+  metadata = {
     test = "true"
+    upperTest = "true"
   }
   content_type = "application/json"
+}
+`
+
+const testAccObjectStorageV1Container_complete = `
+resource "openstack_objectstorage_container_v1" "container_1" {
+  name = "container_1"
+  metadata = {
+    test = "true"
+    upperTest = "true"
+  }
+  content_type = "application/json"
+  versioning {
+    type = "versions"
+    location = "othercontainer"
+  }
+  container_read = ".r:*,.rlistings"
+  container_write = "*"
 }
 `
 
 const testAccObjectStorageV1Container_update = `
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "container_1"
-  metadata {
+  metadata = {
     test = "true"
   }
   content_type = "text/plain"

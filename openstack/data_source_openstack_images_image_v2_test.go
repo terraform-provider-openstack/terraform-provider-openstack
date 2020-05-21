@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccOpenStackImagesV2ImageDataSource_basic(t *testing.T) {
@@ -13,10 +13,10 @@ func TestAccOpenStackImagesV2ImageDataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackImagesV2ImageDataSource_cirros,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackImagesV2ImageDataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
@@ -45,34 +45,34 @@ func TestAccOpenStackImagesV2ImageDataSource_testQueries(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenStackImagesV2ImageDataSource_cirros,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackImagesV2ImageDataSource_queryTag,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackImagesV2ImageDataSource_querySizeMin,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackImagesV2ImageDataSource_querySizeMax,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackImagesV2ImageDataSource_property,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenStackImagesV2ImageDataSource_cirros,
 			},
 		},
@@ -102,7 +102,7 @@ resource "openstack_images_image_v2" "image_1" {
   disk_format = "qcow2"
   image_source_url = "http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
   tags = ["cirros-tf_1"]
-  properties {
+  properties = {
     foo = "bar"
     bar = "foo"
   }
@@ -114,7 +114,7 @@ resource "openstack_images_image_v2" "image_2" {
   disk_format = "qcow2"
   image_source_url = "http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
   tags = ["cirros-tf_2"]
-  properties {
+  properties = {
     foo = "bar"
   }
 }
@@ -163,7 +163,7 @@ var testAccOpenStackImagesV2ImageDataSource_property = fmt.Sprintf(`
 %s
 
 data "openstack_images_image_v2" "image_1" {
-  properties {
+  properties = {
     foo = "bar"
     bar = "foo"
   }

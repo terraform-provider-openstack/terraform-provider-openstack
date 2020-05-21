@@ -3,7 +3,7 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccImagesImageV2_importBasic(t *testing.T) {
@@ -14,11 +14,11 @@ func TestAccImagesImageV2_importBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccImagesImageV2_basic,
 			},
 
-			resource.TestStep{
+			{
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -27,6 +27,7 @@ func TestAccImagesImageV2_importBasic(t *testing.T) {
 					"local_file_path",
 					"image_cache_path",
 					"image_source_url",
+					"verify_checksum",
 				},
 			},
 		},

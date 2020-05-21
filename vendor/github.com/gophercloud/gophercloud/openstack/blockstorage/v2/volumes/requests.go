@@ -55,22 +55,53 @@ func Create(client *gophercloud.ServiceClient, opts CreateOptsBuilder) (r Create
 		r.Err = err
 		return
 	}
-	_, r.Err = client.Post(createURL(client), b, &r.Body, &gophercloud.RequestOpts{
+	resp, err := client.Post(createURL(client), b, &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{202},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
+// DeleteOptsBuilder allows extensions to add additional parameters to the
+// Delete request.
+type DeleteOptsBuilder interface {
+	ToVolumeDeleteQuery() (string, error)
+}
+
+// DeleteOpts contains options for deleting a Volume. This object is passed to
+// the volumes.Delete function.
+type DeleteOpts struct {
+	// Delete all snapshots of this volume as well.
+	Cascade bool `q:"cascade"`
+}
+
+// ToLoadBalancerDeleteQuery formats a DeleteOpts into a query string.
+func (opts DeleteOpts) ToVolumeDeleteQuery() (string, error) {
+	q, err := gophercloud.BuildQueryString(opts)
+	return q.String(), err
+}
+
 // Delete will delete the existing Volume with the provided ID.
-func Delete(client *gophercloud.ServiceClient, id string) (r DeleteResult) {
-	_, r.Err = client.Delete(deleteURL(client, id), nil)
+func Delete(client *gophercloud.ServiceClient, id string, opts DeleteOptsBuilder) (r DeleteResult) {
+	url := deleteURL(client, id)
+	if opts != nil {
+		query, err := opts.ToVolumeDeleteQuery()
+		if err != nil {
+			r.Err = err
+			return
+		}
+		url += query
+	}
+	resp, err := client.Delete(url, nil)
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
 // Get retrieves the Volume with the provided ID. To extract the Volume object
 // from the response, call the Extract method on the GetResult.
 func Get(client *gophercloud.ServiceClient, id string) (r GetResult) {
-	_, r.Err = client.Get(getURL(client, id), &r.Body, nil)
+	resp, err := client.Get(getURL(client, id), &r.Body, nil)
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
@@ -83,14 +114,34 @@ type ListOptsBuilder interface {
 // ListOpts holds options for listing Volumes. It is passed to the volumes.List
 // function.
 type ListOpts struct {
-	// admin-only option. Set it to true to see all tenant volumes.
+	// AllTenants will retrieve volumes of all tenants/projects.
 	AllTenants bool `q:"all_tenants"`
-	// List only volumes that contain Metadata.
+
+	// Metadata will filter results based on specified metadata.
 	Metadata map[string]string `q:"metadata"`
-	// List only volumes that have Name as the display name.
+
+	// Name will filter by the specified volume name.
 	Name string `q:"name"`
-	// List only volumes that have a status of Status.
+
+	// Status will filter by the specified status.
 	Status string `q:"status"`
+
+	// TenantID will filter by a specific tenant/project ID.
+	// Setting AllTenants is required for this.
+	TenantID string `q:"project_id"`
+
+	// Comma-separated list of sort keys and optional sort directions in the
+	// form of <key>[:<direction>].
+	Sort string `q:"sort"`
+
+	// Requests a page size of items.
+	Limit int `q:"limit"`
+
+	// Used in conjunction with limit to return a slice of items.
+	Offset int `q:"offset"`
+
+	// The ID of the last-seen item.
+	Marker string `q:"marker"`
 }
 
 // ToVolumeListQuery formats a ListOpts into a query string.
@@ -111,7 +162,7 @@ func List(client *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pa
 	}
 
 	return pagination.NewPager(client, url, func(r pagination.PageResult) pagination.Page {
-		return VolumePage{pagination.SinglePageBase(r)}
+		return VolumePage{pagination.LinkedPageBase{PageResult: r}}
 	})
 }
 
@@ -125,8 +176,8 @@ type UpdateOptsBuilder interface {
 // to the volumes.Update function. For more information about the parameters, see
 // the Volume object.
 type UpdateOpts struct {
-	Name        string            `json:"name,omitempty"`
-	Description string            `json:"description,omitempty"`
+	Name        *string           `json:"name,omitempty"`
+	Description *string           `json:"description,omitempty"`
 	Metadata    map[string]string `json:"metadata,omitempty"`
 }
 
@@ -144,39 +195,9 @@ func Update(client *gophercloud.ServiceClient, id string, opts UpdateOptsBuilder
 		r.Err = err
 		return
 	}
-	_, r.Err = client.Put(updateURL(client, id), b, &r.Body, &gophercloud.RequestOpts{
+	resp, err := client.Put(updateURL(client, id), b, &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
-}
-
-// IDFromName is a convienience function that returns a server's ID given its name.
-func IDFromName(client *gophercloud.ServiceClient, name string) (string, error) {
-	count := 0
-	id := ""
-	pages, err := List(client, nil).AllPages()
-	if err != nil {
-		return "", err
-	}
-
-	all, err := ExtractVolumes(pages)
-	if err != nil {
-		return "", err
-	}
-
-	for _, s := range all {
-		if s.Name == name {
-			count++
-			id = s.ID
-		}
-	}
-
-	switch count {
-	case 0:
-		return "", gophercloud.ErrResourceNotFound{Name: name, ResourceType: "volume"}
-	case 1:
-		return id, nil
-	default:
-		return "", gophercloud.ErrMultipleResourcesFound{Name: name, Count: count, ResourceType: "volume"}
-	}
 }

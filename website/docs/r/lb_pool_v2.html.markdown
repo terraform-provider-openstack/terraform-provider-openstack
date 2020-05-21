@@ -19,7 +19,7 @@ resource "openstack_lb_pool_v2" "pool_1" {
   listener_id = "d9415786-5f1a-428b-b35f-2f1523e146d2"
 
   persistence {
-    type        = "HTTP_COOKIE"
+    type        = "APP_COOKIE"
     cookie_name = "testCookie"
   }
 }
@@ -42,8 +42,8 @@ The following arguments are supported:
 
 * `description` - (Optional) Human-readable description for the pool.
 
-* `protocol` = (Required) The protocol - can either be TCP, HTTP or HTTPS.
-    Changing this creates a new pool.
+* `protocol` - (Required) The protocol - can either be TCP, HTTP, HTTPS, PROXY
+  or UDP (supported only in Octavia). Changing this creates a new pool.
 
 * `loadbalancer_id` - (Optional) The load balancer on which to provision this
     pool. Changing this creates a new pool.
@@ -55,7 +55,8 @@ The following arguments are supported:
 
 * `lb_method` - (Required) The load balancing algorithm to
     distribute traffic to the pool's members. Must be one of
-    ROUND_ROBIN, LEAST_CONNECTIONS, or SOURCE_IP.
+    ROUND_ROBIN, LEAST_CONNECTIONS, SOURCE_IP, or SOURCE_IP_PORT (supported only
+    in Octavia).
 
 * `persistence` - Omit this field to prevent session persistence.  Indicates
     whether connections in the same session will be processed by the same Pool
@@ -84,3 +85,11 @@ The following attributes are exported:
 * `lb_method` - See Argument Reference above.
 * `persistence` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
+
+## Import
+
+Load Balancer Pool can be imported using the Pool ID, e.g.:
+
+```
+$ terraform import openstack_lb_pool_v2.pool_1 60ad9ee4-249a-4d60-a45b-aa60e046c513
+```

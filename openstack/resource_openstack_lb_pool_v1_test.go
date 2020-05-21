@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
@@ -24,14 +24,14 @@ func TestAccLBV1Pool_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccLBV1Pool_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1PoolExists("openstack_lb_pool_v1.pool_1", &pool),
 					resource.TestCheckResourceAttr("openstack_lb_pool_v1.pool_1", "lb_provider", "haproxy"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccLBV1Pool_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_lb_pool_v1.pool_1", "name", "pool_1"),
@@ -55,7 +55,7 @@ func TestAccLBV1Pool_fullstack(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccLBV1Pool_fullstack_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -68,7 +68,7 @@ func TestAccLBV1Pool_fullstack(t *testing.T) {
 					testAccCheckLBV1VIPExists("openstack_lb_vip_v1.vip_1", &vip),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccLBV1Pool_fullstack_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -93,7 +93,7 @@ func TestAccLBV1Pool_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccLBV1Pool_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1PoolExists("openstack_lb_pool_v1.pool_1", &pool),
@@ -116,7 +116,7 @@ func TestAccLBV1Pool_updateMonitor(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccLBV1Pool_updateMonitor_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -126,7 +126,7 @@ func TestAccLBV1Pool_updateMonitor(t *testing.T) {
 					testAccCheckLBV1MonitorExists("openstack_lb_monitor_v1.monitor_2", &monitor_2),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccLBV1Pool_updateMonitor_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -142,7 +142,7 @@ func TestAccLBV1Pool_updateMonitor(t *testing.T) {
 
 func testAccCheckLBV1PoolDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -173,7 +173,7 @@ func testAccCheckLBV1PoolExists(n string, pool *pools.Pool) resource.TestCheckFu
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}

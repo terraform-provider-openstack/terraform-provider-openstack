@@ -71,9 +71,16 @@ The following arguments are supported:
 * `name` - (Optional) The name of the network. Changing this updates the name of
     the existing network.
 
-* `shared` - (Optional)  Specifies whether the network resource can be accessed
-    by any tenant or not. Changing this updates the sharing capabalities of the
+* `description` - (Optional) Human-readable description of the network. Changing this
+    updates the name of the existing network.
+
+* `shared` - (Optional) Specifies whether the network resource can be accessed
+    by any tenant or not. Changing this updates the sharing capabilities of the
     existing network.
+
+* `external` - (Optional) Specifies whether the network resource has the
+    external routing facility. Valid values are true and false. Defaults to
+    false. Changing this updates the external attribute of the existing network.
 
 * `tenant_id` - (Optional) The owner of the network. Required if admin wants to
     create a network for another tenant. Changing this creates a new network.
@@ -86,9 +93,38 @@ The following arguments are supported:
 
 * `value_specs` - (Optional) Map of additional options.
 
+* `availability_zone_hints` -  (Optional) An availability zone is used to make
+    network resources highly available. Used for resources with high availability
+    so that they are scheduled on different availability zones. Changing this
+    creates a new network.
+
+* `tags` - (Optional) A set of string tags for the network.
+
+* `transparent_vlan` - (Optional) Specifies whether the network resource has the
+  VLAN transparent attribute set. Valid values are true and false. Defaults to
+  false. Changing this updates the `transparent_vlan` attribute of the existing
+  network.
+
+* `port_security_enabled` - (Optional) Whether to explicitly enable or disable
+  port security on the network. Port Security is usually enabled by default, so
+  omitting this argument will usually result in a value of "true". Setting this
+  explicitly to `false` will disable port security. Valid values are `true` and
+  `false`.
+
+* `mtu` - (Optional) The network MTU. Available for read-only, when Neutron
+   `net-mtu` extension is enabled. Available for the modification, when
+   Neutron `net-mtu-writable` extension is enabled.
+
+* `dns_domain` - (Optional) The network DNS domain. Available, when Neutron DNS
+    extension is enabled. The `dns_domain` of a network in conjunction with the
+    `dns_name` attribute of its ports will be published in an external DNS
+    service when Neutron is configured to integrate with such a service.
+    
+* `qos_policy_id` - (Optional) Reference to the associated QoS policy.
+
 The `segments` block supports:
 
-* `physical_network` - The phisical network where this network is implemented.
+* `physical_network` - The physical network where this network is implemented.
 * `segmentation_id` - An isolated segment on the physical network.
 * `network_type` - The type of physical network.
 
@@ -98,9 +134,20 @@ The following attributes are exported:
 
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
+* `description` - See Argument Reference above.
 * `shared` - See Argument Reference above.
+* `external` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
+* `availability_zone_hints` - See Argument Reference above.
+* `tags` - See Argument Reference above.
+* `all_tags` - The collection of tags assigned on the network, which have been
+  explicitly and implicitly added.
+* `transparent_vlan` - See Argument Reference above.
+* `port_security_enabled` - See Argument Reference above.
+* `mtu` - See Argument Reference above.
+* `dns_domain` - See Argument Reference above.
+* `qos_policy_id` - See Argument Reference above.
 
 ## Import
 

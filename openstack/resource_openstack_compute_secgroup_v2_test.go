@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 )
@@ -18,7 +18,7 @@ func TestAccComputeV2SecGroup_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2SecGroup_basic_orig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup),
@@ -36,13 +36,13 @@ func TestAccComputeV2SecGroup_update(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2SecGroup_basic_orig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2SecGroup_basic_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup),
@@ -61,7 +61,7 @@ func TestAccComputeV2SecGroup_groupID(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2SecGroup_groupID_orig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup1),
@@ -70,7 +70,7 @@ func TestAccComputeV2SecGroup_groupID(t *testing.T) {
 					testAccCheckComputeV2SecGroupGroupIDMatch(&secgroup1, &secgroup3),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2SecGroup_groupID_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup1),
@@ -91,7 +91,7 @@ func TestAccComputeV2SecGroup_self(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2SecGroup_self,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup),
@@ -114,7 +114,7 @@ func TestAccComputeV2SecGroup_icmpZero(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2SecGroup_icmpZero,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup),
@@ -132,30 +132,12 @@ func TestAccComputeV2SecGroup_lowerCaseCIDR(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2SecGroup_lowerCaseCIDR,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup),
 					resource.TestCheckResourceAttr(
-						"openstack_compute_secgroup_v2.sg_1", "rule.3862435458.cidr", "2001:558:fc00::/39"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeV2SecGroup_timeout(t *testing.T) {
-	var secgroup secgroups.SecurityGroup
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2SecGroup_timeout,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup),
+						"openstack_compute_secgroup_v2.sg_1", "rule.768649014.cidr", "2001:558:fc00::/39"),
 				),
 			},
 		},
@@ -164,7 +146,7 @@ func TestAccComputeV2SecGroup_timeout(t *testing.T) {
 
 func testAccCheckComputeV2SecGroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.computeV2Client(OS_REGION_NAME)
+	computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -195,7 +177,7 @@ func testAccCheckComputeV2SecGroupExists(n string, secgroup *secgroups.SecurityG
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
@@ -384,27 +366,10 @@ resource "openstack_compute_secgroup_v2" "sg_1" {
   name = "sg_1"
   description = "first test security group"
   rule {
-    from_port = 0
-    to_port = 0
-    ip_protocol = "icmp"
+    from_port = 22
+    to_port = 22
+    ip_protocol = "tcp"
     cidr = "2001:558:FC00::/39"
-  }
-}
-`
-
-const testAccComputeV2SecGroup_timeout = `
-resource "openstack_compute_secgroup_v2" "sg_1" {
-  name = "sg_1"
-  description = "first test security group"
-  rule {
-    from_port = 0
-    to_port = 0
-    ip_protocol = "icmp"
-    cidr = "0.0.0.0/0"
-  }
-
-  timeouts {
-    delete = "5m"
   }
 }
 `

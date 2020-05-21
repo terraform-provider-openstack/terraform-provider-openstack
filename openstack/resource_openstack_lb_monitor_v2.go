@@ -3,12 +3,16 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/monitors"
+	octaviamonitors "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/monitors"
+	neutronmonitors "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/monitors"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 )
 
 func resourceMonitorV2() *schema.Resource {
@@ -17,6 +21,9 @@ func resourceMonitorV2() *schema.Resource {
 		Read:   resourceMonitorV2Read,
 		Update: resourceMonitorV2Update,
 		Delete: resourceMonitorV2Delete,
+		Importer: &schema.ResourceImporter{
+			State: resourceMonitorV2Import,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -25,71 +32,80 @@ func resourceMonitorV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"pool_id": &schema.Schema{
+			"pool_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"type": &schema.Schema{
+			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"TCP", "UDP-CONNECT", "HTTP", "HTTPS", "TLS-HELLO", "PING",
+				}, false),
 			},
 
-			"delay": &schema.Schema{
+			"delay": {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
 
-			"timeout": &schema.Schema{
+			"timeout": {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
 
-			"max_retries": &schema.Schema{
+			"max_retries": {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
 
-			"url_path": &schema.Schema{
+			"max_retries_down": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+
+			"url_path": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"http_method": &schema.Schema{
+			"http_method": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"expected_codes": &schema.Schema{
+			"expected_codes": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"admin_state_up": &schema.Schema{
+			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Default:  true,
 				Optional: true,
@@ -100,38 +116,32 @@ func resourceMonitorV2() *schema.Resource {
 
 func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	adminStateUp := d.Get("admin_state_up").(bool)
-	createOpts := monitors.CreateOpts{
-		PoolID:        d.Get("pool_id").(string),
-		TenantID:      d.Get("tenant_id").(string),
-		Type:          d.Get("type").(string),
-		Delay:         d.Get("delay").(int),
-		Timeout:       d.Get("timeout").(int),
-		MaxRetries:    d.Get("max_retries").(int),
-		URLPath:       d.Get("url_path").(string),
-		HTTPMethod:    d.Get("http_method").(string),
-		ExpectedCodes: d.Get("expected_codes").(string),
-		Name:          d.Get("name").(string),
-		AdminStateUp:  &adminStateUp,
+	// Choose either the Octavia or Neutron create options.
+	createOpts := chooseLBV2MonitorCreateOpts(d, config)
+
+	// Get a clean copy of the parent pool.
+	poolID := d.Get("pool_id").(string)
+	parentPool, err := pools.Get(lbClient, poolID).Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve parent openstack_lb_pool_v2 %s: %s", poolID, err)
 	}
 
+	// Wait for parent pool to become active before continuing.
 	timeout := d.Timeout(schema.TimeoutCreate)
-	poolID := createOpts.PoolID
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2Pool(lbClient, parentPool, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	log.Printf("[DEBUG] Attempting to create monitor")
-	var monitor *monitors.Monitor
+	log.Printf("[DEBUG] openstack_lb_monitor_v2 create options: %#v", createOpts)
+	var monitor *neutronmonitors.Monitor
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		monitor, err = monitors.Create(networkingClient, createOpts).Extract()
+		monitor, err = neutronmonitors.Create(lbClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -139,10 +149,11 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Unable to create monitor: %s", err)
+		return fmt.Errorf("Unable to create openstack_lb_monitor_v2: %s", err)
 	}
 
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	// Wait for monitor to become active before continuing
+	err = waitForLBV2Monitor(lbClient, parentPool, monitor, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -154,17 +165,53 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 
 func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	monitor, err := monitors.Get(networkingClient, d.Id()).Extract()
+	// Use Octavia monitor body if Octavia/LBaaS is enabled.
+	if config.UseOctavia {
+		monitor, err := octaviamonitors.Get(lbClient, d.Id()).Extract()
+		if err != nil {
+			return CheckDeleted(d, err, "monitor")
+		}
+
+		log.Printf("[DEBUG] Retrieved openstack_lb_monitor_v2 %s: %#v", d.Id(), monitor)
+
+		d.Set("tenant_id", monitor.ProjectID)
+		d.Set("type", monitor.Type)
+		d.Set("delay", monitor.Delay)
+		d.Set("timeout", monitor.Timeout)
+		d.Set("max_retries", monitor.MaxRetries)
+		d.Set("max_retries_down", monitor.MaxRetriesDown)
+		d.Set("url_path", monitor.URLPath)
+		d.Set("http_method", monitor.HTTPMethod)
+		d.Set("expected_codes", monitor.ExpectedCodes)
+		d.Set("admin_state_up", monitor.AdminStateUp)
+		d.Set("name", monitor.Name)
+		d.Set("region", GetRegion(d, config))
+
+		// OpenContrail workaround (https://github.com/terraform-providers/terraform-provider-openstack/issues/762)
+		if len(monitor.Pools) > 0 && monitor.Pools[0].ID != "" {
+			d.Set("pool_id", monitor.Pools[0].ID)
+		}
+
+		return nil
+	}
+
+	// Use Neutron/Networking in other case.
+	monitor, err := neutronmonitors.Get(lbClient, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "monitor")
 	}
 
-	log.Printf("[DEBUG] Retrieved monitor %s: %#v", d.Id(), monitor)
+	log.Printf("[DEBUG] Retrieved openstack_lb_monitor_v2 %s: %#v", d.Id(), monitor)
+
+	// OpenContrail workaround (https://github.com/terraform-providers/terraform-provider-openstack/issues/762)
+	if len(monitor.Pools) > 0 && monitor.Pools[0].ID != "" {
+		d.Set("pool_id", monitor.Pools[0].ID)
+	}
 
 	d.Set("tenant_id", monitor.TenantID)
 	d.Set("type", monitor.Type)
@@ -183,48 +230,46 @@ func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
 
 func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	var updateOpts monitors.UpdateOpts
-	if d.HasChange("url_path") {
-		updateOpts.URLPath = d.Get("url_path").(string)
-	}
-	if d.HasChange("expected_codes") {
-		updateOpts.ExpectedCodes = d.Get("expected_codes").(string)
-	}
-	if d.HasChange("delay") {
-		updateOpts.Delay = d.Get("delay").(int)
-	}
-	if d.HasChange("timeout") {
-		updateOpts.Timeout = d.Get("timeout").(int)
-	}
-	if d.HasChange("max_retries") {
-		updateOpts.MaxRetries = d.Get("max_retries").(int)
-	}
-	if d.HasChange("admin_state_up") {
-		asu := d.Get("admin_state_up").(bool)
-		updateOpts.AdminStateUp = &asu
-	}
-	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
-	}
-	if d.HasChange("http_method") {
-		updateOpts.HTTPMethod = d.Get("http_method").(string)
+	updateOpts := chooseLBV2MonitorUpdateOpts(d, config)
+	if updateOpts == nil {
+		log.Printf("[DEBUG] openstack_lb_monitor_v2 %s: nothing to update", d.Id())
+		return resourceMonitorV2Read(d, meta)
 	}
 
-	log.Printf("[DEBUG] Updating monitor %s with options: %#v", d.Id(), updateOpts)
-	timeout := d.Timeout(schema.TimeoutUpdate)
+	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	parentPool, err := pools.Get(lbClient, poolID).Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve parent openstack_lb_pool_v2 %s: %s", poolID, err)
+	}
+
+	// Get a clean copy of the monitor.
+	monitor, err := neutronmonitors.Get(lbClient, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve openstack_lb_monitor_v2 %s: %s", d.Id(), err)
+	}
+
+	// Wait for parent pool to become active before continuing.
+	timeout := d.Timeout(schema.TimeoutUpdate)
+	err = waitForLBV2Pool(lbClient, parentPool, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
 
+	// Wait for monitor to become active before continuing.
+	err = waitForLBV2Monitor(lbClient, parentPool, monitor, "ACTIVE", lbPendingStatuses, timeout)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] openstack_lb_monitor_v2 %s update options: %#v", d.Id(), updateOpts)
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		_, err = monitors.Update(networkingClient, d.Id(), updateOpts).Extract()
+		_, err = neutronmonitors.Update(lbClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -232,11 +277,11 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Unable to update monitor %s: %s", d.Id(), err)
+		return fmt.Errorf("Unable to update openstack_lb_monitor_v2 %s: %s", d.Id(), err)
 	}
 
-	// Wait for LB to become active before continuing
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	// Wait for monitor to become active before continuing
+	err = waitForLBV2Monitor(lbClient, parentPool, monitor, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
@@ -246,21 +291,35 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 
 func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	log.Printf("[DEBUG] Deleting monitor %s", d.Id())
-	timeout := d.Timeout(schema.TimeoutUpdate)
+	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	parentPool, err := pools.Get(lbClient, poolID).Extract()
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve parent openstack_lb_pool_v2 (%s)"+
+			" for the openstack_lb_monitor_v2: %s", poolID, err)
+	}
+
+	// Get a clean copy of the monitor.
+	monitor, err := neutronmonitors.Get(lbClient, d.Id()).Extract()
+	if err != nil {
+		return CheckDeleted(d, err, "Unable to retrieve openstack_lb_monitor_v2")
+	}
+
+	// Wait for parent pool to become active before continuing
+	timeout := d.Timeout(schema.TimeoutUpdate)
+	err = waitForLBV2Pool(lbClient, parentPool, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return err
 	}
 
+	log.Printf("[DEBUG] Deleting openstack_lb_monitor_v2 %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		err = monitors.Delete(networkingClient, d.Id()).ExtractErr()
+		err = neutronmonitors.Delete(lbClient, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -268,13 +327,31 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Unable to delete monitor %s: %s", d.Id(), err)
+		return CheckDeleted(d, err, "Error deleting openstack_lb_monitor_v2")
 	}
 
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	// Wait for monitor to become DELETED
+	err = waitForLBV2Monitor(lbClient, parentPool, monitor, "DELETED", lbPendingDeleteStatuses, timeout)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func resourceMonitorV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.SplitN(d.Id(), "/", 2)
+	monitorID := parts[0]
+
+	if len(monitorID) == 0 {
+		return nil, fmt.Errorf("Invalid format specified for openstack_lb_monitor_v2. Format must be <monitorID>[/<poolID>]")
+	}
+
+	d.SetId(monitorID)
+
+	if len(parts) == 2 {
+		d.Set("pool_id", parts[1])
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

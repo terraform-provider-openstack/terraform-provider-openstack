@@ -10,8 +10,11 @@ description: |-
 
 Manages a V2 floating IP resource within OpenStack Nova (compute)
 that can be used for compute instances.
-These are similar to Neutron (networking) floating IP resources,
-but only networking floating IPs can be used with load balancers.
+
+Please note that managing floating IPs through the OpenStack Compute API has
+been deprecated. Unless you are using an older OpenStack environment, it is
+recommended to use the [`openstack_networking_floatingip_v2`](networking_floatingip_v2.html)
+resource instead, which uses the OpenStack Networking API.
 
 ## Example Usage
 

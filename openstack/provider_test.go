@@ -6,24 +6,39 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform/config"
-	"github.com/hashicorp/terraform/helper/pathorcontents"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+
+	"github.com/gophercloud/utils/terraform/auth"
 )
 
 var (
-	OS_DEPRECATED_ENVIRONMENT = os.Getenv("OS_DEPRECATED_ENVIRONMENT")
-	OS_DNS_ENVIRONMENT        = os.Getenv("OS_DNS_ENVIRONMENT")
-	OS_EXTGW_ID               = os.Getenv("OS_EXTGW_ID")
-	OS_FLAVOR_ID              = os.Getenv("OS_FLAVOR_ID")
-	OS_FLAVOR_NAME            = os.Getenv("OS_FLAVOR_NAME")
-	OS_IMAGE_ID               = os.Getenv("OS_IMAGE_ID")
-	OS_IMAGE_NAME             = os.Getenv("OS_IMAGE_NAME")
-	OS_NETWORK_ID             = os.Getenv("OS_NETWORK_ID")
-	OS_POOL_NAME              = os.Getenv("OS_POOL_NAME")
-	OS_REGION_NAME            = os.Getenv("OS_REGION_NAME")
-	OS_SWIFT_ENVIRONMENT      = os.Getenv("OS_SWIFT_ENVIRONMENT")
+	OS_DB_ENVIRONMENT                    = os.Getenv("OS_DB_ENVIRONMENT")
+	OS_DB_DATASTORE_VERSION              = os.Getenv("OS_DB_DATASTORE_VERSION")
+	OS_DB_DATASTORE_TYPE                 = os.Getenv("OS_DB_DATASTORE_TYPE")
+	OS_DEPRECATED_ENVIRONMENT            = os.Getenv("OS_DEPRECATED_ENVIRONMENT")
+	OS_DNS_ENVIRONMENT                   = os.Getenv("OS_DNS_ENVIRONMENT")
+	OS_EXTGW_ID                          = os.Getenv("OS_EXTGW_ID")
+	OS_FLAVOR_ID                         = os.Getenv("OS_FLAVOR_ID")
+	OS_FLAVOR_NAME                       = os.Getenv("OS_FLAVOR_NAME")
+	OS_IMAGE_ID                          = os.Getenv("OS_IMAGE_ID")
+	OS_IMAGE_NAME                        = os.Getenv("OS_IMAGE_NAME")
+	OS_MAGNUM_FLAVOR                     = os.Getenv("OS_MAGNUM_FLAVOR")
+	OS_NETWORK_ID                        = os.Getenv("OS_NETWORK_ID")
+	OS_POOL_NAME                         = os.Getenv("OS_POOL_NAME")
+	OS_REGION_NAME                       = os.Getenv("OS_REGION_NAME")
+	OS_SWIFT_ENVIRONMENT                 = os.Getenv("OS_SWIFT_ENVIRONMENT")
+	OS_LB_ENVIRONMENT                    = os.Getenv("OS_LB_ENVIRONMENT")
+	OS_FW_ENVIRONMENT                    = os.Getenv("OS_FW_ENVIRONMENT")
+	OS_VPN_ENVIRONMENT                   = os.Getenv("OS_VPN_ENVIRONMENT")
+	OS_USE_OCTAVIA                       = os.Getenv("OS_USE_OCTAVIA")
+	OS_OCTAVIA_BATCH_MEMBERS_ENVIRONMENT = os.Getenv("OS_OCTAVIA_BATCH_MEMBERS_ENVIRONMENT")
+	OS_CONTAINER_INFRA_ENVIRONMENT       = os.Getenv("OS_CONTAINER_INFRA_ENVIRONMENT")
+	OS_SFS_ENVIRONMENT                   = os.Getenv("OS_SFS_ENVIRONMENT")
+	OS_TRANSPARENT_VLAN_ENVIRONMENT      = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
+	OS_KEYMANAGER_ENVIRONMENT            = os.Getenv("OS_KEYMANAGER_ENVIRONMENT")
+	OS_GLANCEIMPORT_ENVIRONMENT          = os.Getenv("OS_GLANCEIMPORT_ENVIRONMENT")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -61,6 +76,7 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 	if OS_EXTGW_ID == "" {
 		t.Fatal("OS_EXTGW_ID must be set for acceptance tests")
 	}
+
 }
 
 func testAccPreCheck(t *testing.T) {
@@ -69,11 +85,6 @@ func testAccPreCheck(t *testing.T) {
 	// Do not run the test if this is a deprecated testing environment.
 	if OS_DEPRECATED_ENVIRONMENT != "" {
 		t.Skip("This environment only runs deprecated tests")
-	}
-
-	// Do not run the test if this is a standalone DNS environment.
-	if OS_DNS_ENVIRONMENT != "" {
-		t.Skip("This environment only runs DNS tests")
 	}
 }
 
@@ -86,10 +97,7 @@ func testAccPreCheckDeprecated(t *testing.T) {
 }
 
 func testAccPreCheckDNS(t *testing.T) {
-	v := os.Getenv("OS_AUTH_URL")
-	if v == "" {
-		t.Fatalf("OS_AUTH_URL must be set for acceptance tests")
-	}
+	testAccPreCheckRequiredEnvVars(t)
 
 	if OS_DNS_ENVIRONMENT == "" {
 		t.Skip("This environment does not support DNS tests")
@@ -97,13 +105,106 @@ func testAccPreCheckDNS(t *testing.T) {
 }
 
 func testAccPreCheckSwift(t *testing.T) {
-	v := os.Getenv("OS_AUTH_URL")
-	if v == "" {
-		t.Fatalf("OS_AUTH_URL must be set for acceptance tests")
-	}
+	testAccPreCheckRequiredEnvVars(t)
 
 	if OS_SWIFT_ENVIRONMENT == "" {
 		t.Skip("This environment does not support Swift tests")
+	}
+}
+
+func testAccPreCheckDatabase(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_DB_ENVIRONMENT == "" {
+		t.Skip("This environment does not support Database tests")
+	}
+}
+
+func testAccPreCheckLB(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_LB_ENVIRONMENT == "" {
+		t.Skip("This environment does not support LB tests")
+	}
+}
+
+func testAccPreCheckUseOctavia(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_USE_OCTAVIA == "" {
+		t.Skip("This environment does not support Octavia tests")
+	}
+}
+
+func testAccPreCheckOctaviaBatchMembersEnv(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_OCTAVIA_BATCH_MEMBERS_ENVIRONMENT == "" {
+		t.Skip("This environment does not support Octavia batch member update tests")
+	}
+}
+
+func testAccPreCheckFW(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_FW_ENVIRONMENT == "" {
+		t.Skip("This environment does not support FW tests")
+	}
+}
+
+func testAccPreCheckVPN(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_VPN_ENVIRONMENT == "" {
+		t.Skip("This environment does not support VPN tests")
+	}
+}
+
+func testAccPreCheckKeyManager(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_KEYMANAGER_ENVIRONMENT == "" {
+		t.Skip("This environment does not support Barbican Keymanager tests")
+	}
+}
+
+func testAccPreCheckContainerInfra(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_CONTAINER_INFRA_ENVIRONMENT == "" {
+		t.Skip("This environment does not support Container Infra tests")
+	}
+}
+
+func testAccPreCheckSFS(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	/* TODO: enable when ready in OpenLab
+	if OS_SFS_ENVIRONMENT == "" {
+		t.Skip("This environment does not support Shared File Systems tests")
+	}
+	*/
+}
+
+func testAccPreOnlineResize(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	v := os.Getenv("OS_ONLINE_RESIZE")
+	if v == "" {
+		t.Skip("This environment does not support online blockstorage resize tests")
+	}
+
+	v = os.Getenv("OS_FLAVOR_NAME")
+	if v == "" {
+		t.Skip("OS_FLAVOR_NAME required to support online blockstorage resize tests")
+	}
+}
+
+func testAccPreCheckTransparentVLAN(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_TRANSPARENT_VLAN_ENVIRONMENT == "" {
+		t.Skip("This environment does not support 'transparent-vlan' extension tests")
 	}
 }
 
@@ -111,6 +212,13 @@ func testAccPreCheckAdminOnly(t *testing.T) {
 	v := os.Getenv("OS_USERNAME")
 	if v != "admin" {
 		t.Skip("Skipping test because it requires the admin user")
+	}
+}
+
+func testAccPreCheckGlanceImport(t *testing.T) {
+
+	if OS_GLANCEIMPORT_ENVIRONMENT == "" {
+		t.Skip("This environment does not support Glance import tests")
 	}
 }
 
@@ -145,12 +253,8 @@ func TestAccProvider_caCertFile(t *testing.T) {
 	raw := map[string]interface{}{
 		"cacert_file": caFile,
 	}
-	rawConfig, err := config.NewRawConfig(raw)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
 
-	err = p.Configure(terraform.NewResourceConfig(rawConfig))
+	err = p.Configure(terraform.NewResourceConfigRaw(raw))
 	if err != nil {
 		t.Fatalf("Unexpected err when specifying OpenStack CA by file: %s", err)
 	}
@@ -173,12 +277,8 @@ func TestAccProvider_caCertString(t *testing.T) {
 	raw := map[string]interface{}{
 		"cacert_file": caContents,
 	}
-	rawConfig, err := config.NewRawConfig(raw)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
 
-	err = p.Configure(terraform.NewResourceConfig(rawConfig))
+	err = p.Configure(terraform.NewResourceConfigRaw(raw))
 	if err != nil {
 		t.Fatalf("Unexpected err when specifying OpenStack CA by string: %s", err)
 	}
@@ -209,12 +309,8 @@ func TestAccProvider_clientCertFile(t *testing.T) {
 		"cert": certFile,
 		"key":  keyFile,
 	}
-	rawConfig, err := config.NewRawConfig(raw)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
 
-	err = p.Configure(terraform.NewResourceConfig(rawConfig))
+	err = p.Configure(terraform.NewResourceConfigRaw(raw))
 	if err != nil {
 		t.Fatalf("Unexpected err when specifying OpenStack Client keypair by file: %s", err)
 	}
@@ -243,12 +339,8 @@ func TestAccProvider_clientCertString(t *testing.T) {
 		"cert": certContents,
 		"key":  keyContents,
 	}
-	rawConfig, err := config.NewRawConfig(raw)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
 
-	err = p.Configure(terraform.NewResourceConfig(rawConfig))
+	err = p.Configure(terraform.NewResourceConfigRaw(raw))
 	if err != nil {
 		t.Fatalf("Unexpected err when specifying OpenStack Client keypair by contents: %s", err)
 	}
@@ -281,4 +373,47 @@ func envVarFile(varName string) (string, error) {
 		return "", fmt.Errorf("Error closing temp file: %s", err)
 	}
 	return tmpFile.Name(), nil
+}
+
+func testAccAuthFromEnv() (*Config, error) {
+	tenantID := os.Getenv("OS_TENANT_ID")
+	if tenantID == "" {
+		tenantID = os.Getenv("OS_PROJECT_ID")
+	}
+
+	tenantName := os.Getenv("OS_TENANT_NAME")
+	if tenantName == "" {
+		tenantName = os.Getenv("OS_PROJECT_NAME")
+	}
+
+	config := Config{
+		auth.Config{
+			CACertFile:        os.Getenv("OS_CACERT"),
+			ClientCertFile:    os.Getenv("OS_CERT"),
+			ClientKeyFile:     os.Getenv("OS_KEY"),
+			Cloud:             os.Getenv("OS_CLOUD"),
+			DefaultDomain:     os.Getenv("OS_DEFAULT_DOMAIN"),
+			DomainID:          os.Getenv("OS_DOMAIN_ID"),
+			DomainName:        os.Getenv("OS_DOMAIN_NAME"),
+			EndpointType:      os.Getenv("OS_ENDPOINT_TYPE"),
+			IdentityEndpoint:  os.Getenv("OS_AUTH_URL"),
+			Password:          os.Getenv("OS_PASSWORD"),
+			ProjectDomainID:   os.Getenv("OS_PROJECT_DOMAIN_ID"),
+			ProjectDomainName: os.Getenv("OS_PROJECT_DOMAIN_NAME"),
+			Region:            os.Getenv("OS_REGION"),
+			Token:             os.Getenv("OS_TOKEN"),
+			TenantID:          tenantID,
+			TenantName:        tenantName,
+			UserDomainID:      os.Getenv("OS_USER_DOMAIN_ID"),
+			UserDomainName:    os.Getenv("OS_USER_DOMAIN_NAME"),
+			Username:          os.Getenv("OS_USERNAME"),
+			UserID:            os.Getenv("OS_USER_ID"),
+		},
+	}
+
+	if err := config.LoadAndValidate(); err != nil {
+		return nil, err
+	}
+
+	return &config, nil
 }

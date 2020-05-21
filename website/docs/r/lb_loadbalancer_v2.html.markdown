@@ -27,10 +27,17 @@ The following arguments are supported:
     `region` argument of the provider is used. Changing this creates a new
     LB member.
 
-* `vip_subnet_id` - (Required) The network on which to allocate the
+* `vip_subnet_id` - (Optional) The subnet on which to allocate the
     Loadbalancer's address. A tenant can only create Loadbalancers on networks
     authorized by policy (e.g. networks that belong to them or networks that
     are shared).  Changing this creates a new loadbalancer.
+    It is required to Neutron LBaaS but optional for Octavia.
+    
+* `vip_network_id` - (Optional) The network on which to allocate the
+    Loadbalancer's address. A tenant can only create Loadbalancers on networks
+    authorized by policy (e.g. networks that belong to them or networks that
+    are shared).  Changing this creates a new loadbalancer.
+    It is available only for Octavia.
 
 * `name` - (Optional) Human-readable name for the Loadbalancer. Does not have
     to be unique.
@@ -47,7 +54,7 @@ The following arguments are supported:
 * `admin_state_up` - (Optional) The administrative state of the Loadbalancer.
     A valid value is true (UP) or false (DOWN).
 
-* `flavor` - (Optional) The UUID of a flavor. Changing this creates a new
+* `flavor_id` - (Optional) The UUID of a flavor. Changing this creates a new
     loadbalancer.
 
 * `loadbalancer_provider` - (Optional) The name of the provider. Changing this
@@ -63,12 +70,21 @@ The following attributes are exported:
 
 * `region` - See Argument Reference above.
 * `vip_subnet_id` - See Argument Reference above.
+* `vip_network_id` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
 * `vip_address` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
-* `flavor` - See Argument Reference above.
+* `flavor_id` - See Argument Reference above.
 * `loadbalancer_provider` - See Argument Reference above.
 * `security_group_ids` - See Argument Reference above.
 * `vip_port_id` - The Port ID of the Load Balancer IP.
+
+## Import
+
+Load Balancer can be imported using the Load Balancer ID, e.g.:
+
+```
+$ terraform import openstack_lb_loadbalancer_v2.loadbalancer_1 19bcfdc7-c521-4a7e-9459-6750bd16df76
+```

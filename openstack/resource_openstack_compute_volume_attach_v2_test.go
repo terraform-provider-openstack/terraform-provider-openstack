@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 )
@@ -18,7 +18,7 @@ func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2VolumeAttach_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2VolumeAttachExists("openstack_compute_volume_attach_v2.va_1", &va),
@@ -36,7 +36,7 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2VolumeAttach_device,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2VolumeAttachExists("openstack_compute_volume_attach_v2.va_1", &va),
@@ -47,27 +47,9 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 	})
 }
 
-func TestAccComputeV2VolumeAttach_timeout(t *testing.T) {
-	var va volumeattach.VolumeAttachment
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2VolumeAttach_timeout,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2VolumeAttachExists("openstack_compute_volume_attach_v2.va_1", &va),
-				),
-			},
-		},
-	})
-}
-
 func testAccCheckComputeV2VolumeAttachDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.computeV2Client(OS_REGION_NAME)
+	computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -77,7 +59,7 @@ func testAccCheckComputeV2VolumeAttachDestroy(s *terraform.State) error {
 			continue
 		}
 
-		instanceId, volumeId, err := parseComputeVolumeAttachmentId(rs.Primary.ID)
+		instanceId, volumeId, err := computeVolumeAttachV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -103,12 +85,12 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		instanceId, volumeId, err := parseComputeVolumeAttachmentId(rs.Primary.ID)
+		instanceId, volumeId, err := computeVolumeAttachV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -140,7 +122,7 @@ func testAccCheckComputeV2VolumeAttachDevice(
 	}
 }
 
-const testAccComputeV2VolumeAttach_basic = `
+var testAccComputeV2VolumeAttach_basic = fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -149,15 +131,18 @@ resource "openstack_blockstorage_volume_v2" "volume_1" {
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
 }
 
 resource "openstack_compute_volume_attach_v2" "va_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   volume_id = "${openstack_blockstorage_volume_v2.volume_1.id}"
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2VolumeAttach_device = `
+var testAccComputeV2VolumeAttach_device = fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -166,6 +151,9 @@ resource "openstack_blockstorage_volume_v2" "volume_1" {
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
 }
 
 resource "openstack_compute_volume_attach_v2" "va_1" {
@@ -173,26 +161,4 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
   volume_id = "${openstack_blockstorage_volume_v2.volume_1.id}"
   device = "/dev/vdc"
 }
-`
-
-const testAccComputeV2VolumeAttach_timeout = `
-resource "openstack_blockstorage_volume_v2" "volume_1" {
-  name = "volume_1"
-  size = 1
-}
-
-resource "openstack_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
-}
-
-resource "openstack_compute_volume_attach_v2" "va_1" {
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  volume_id = "${openstack_blockstorage_volume_v2.volume_1.id}"
-
-  timeouts {
-    create = "5m"
-    delete = "5m"
-  }
-}
-`
+`, OS_NETWORK_ID)

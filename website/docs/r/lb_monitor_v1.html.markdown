@@ -54,7 +54,7 @@ The following arguments are supported:
     for requests by the monitor. If this attribute is not specified, it defaults
     to "GET". Changing this updates the http_method of the existing monitor.
 
-* `expected_codes` - (Optional) equired for HTTP(S) types. Expected HTTP codes
+* `expected_codes` - (Optional) Required for HTTP(S) types. Expected HTTP codes
     for a passing HTTP(S) monitor. You can either specify a single status like
     "200", or a range like "200-202". Changing this updates the expected_codes
     of the existing monitor.

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/users"
@@ -26,15 +26,15 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIdentityV3UserDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3User_basic(projectName, userName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3UserExists("openstack_identity_user_v3.user_1", &user),
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_user_v3.user_1", "name", userName),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_user_v3.user_1", "description", "A user"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_user_v3.user_1", "name", &user.Name),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_user_v3.user_1", "description", &user.Description),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_user_v3.user_1", "enabled", "true"),
 					resource.TestCheckResourceAttr(
@@ -55,14 +55,14 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 						"openstack_identity_user_v3.user_1", "extra.email", "jdoe@example.com"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3User_update(projectName, userName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3UserExists("openstack_identity_user_v3.user_1", &user),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_user_v3.user_1", "name", userName),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_user_v3.user_1", "description", "Some user"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_user_v3.user_1", "name", &user.Name),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_user_v3.user_1", "description", &user.Description),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_user_v3.user_1", "enabled", "false"),
 					resource.TestCheckResourceAttr(
@@ -83,7 +83,7 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 
 func testAccCheckIdentityV3UserDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.identityV3Client(OS_REGION_NAME)
+	identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -114,13 +114,13 @@ func testAccCheckIdentityV3UserExists(n string, user *users.User) resource.TestC
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.identityV3Client(OS_REGION_NAME)
+		identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
 
 		found, err := users.Get(identityClient, rs.Primary.ID).Extract()
-		if err == nil {
+		if err != nil {
 			return err
 		}
 
@@ -156,7 +156,7 @@ func testAccIdentityV3User_basic(projectName, userName string) string {
         rule = ["password", "custom-auth-method"]
       }
 
-      extra {
+      extra = {
         email = "jdoe@example.com"
       }
     }
@@ -182,7 +182,7 @@ func testAccIdentityV3User_update(projectName, userName string) string {
         rule = ["password", "totp"]
       }
 
-      extra {
+      extra = {
         email = "jdoe@foobar.com"
       }
     }

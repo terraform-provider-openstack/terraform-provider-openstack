@@ -1,0 +1,36 @@
+- project:
+    name: terraform-providers/terraform-provider-openstack
+    check:
+      jobs:
+        - terraform-provider-openstack-unittest
+        - terraform-provider-openstack-acceptance-test
+    recheck-newton:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-newton
+    recheck-ocata:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-ocata
+    recheck-pike:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-pike
+    recheck-queens:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-queens
+    recheck-rocky:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-rocky
+    recheck-stein:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-stein
+    recheck-trove:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-trove
+    recheck-designate:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-designate
+    recheck-lbaas:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-lbaas
+    recheck-fwaas:
+      jobs:
+        - terraform-provider-openstack-acceptance-test-fwaas

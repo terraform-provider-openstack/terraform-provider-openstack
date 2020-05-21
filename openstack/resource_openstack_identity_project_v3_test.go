@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
 )
@@ -23,14 +23,14 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIdentityV3ProjectDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3Project_basic(projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "name", projectName),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "description", "A project"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_project_v3.project_1", "name", &project.Name),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_project_v3.project_1", "description", &project.Description),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_project_v3.project_1", "domain_id", "default"),
 					resource.TestCheckResourceAttr(
@@ -39,20 +39,26 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 						"openstack_identity_project_v3.project_1", "is_domain", "false"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3Project_update(projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "name", projectName),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "description", "Some project"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_project_v3.project_1", "name", &project.Name),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_project_v3.project_1", "description", &project.Description),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_project_v3.project_1", "domain_id", "default"),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_project_v3.project_1", "enabled", "false"),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_project_v3.project_1", "is_domain", "false"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_project_v3.project_1", "tags.#", "2"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_project_v3.project_1", "tags.1", "tag1"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_project_v3.project_1", "tags.2", "tag2"),
 				),
 			},
 		},
@@ -61,7 +67,7 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 
 func testAccCheckIdentityV3ProjectDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.identityV3Client(OS_REGION_NAME)
+	identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -92,13 +98,13 @@ func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) re
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.identityV3Client(OS_REGION_NAME)
+		identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
 
 		found, err := projects.Get(identityClient, rs.Primary.ID).Extract()
-		if err == nil {
+		if err != nil {
 			return err
 		}
 
@@ -126,7 +132,8 @@ func testAccIdentityV3Project_update(projectName string) string {
     resource "openstack_identity_project_v3" "project_1" {
       name = "%s"
       description = "Some project"
-      enabled = false
+	  enabled = false
+	  tags = ["tag1","tag2"]
     }
   `, projectName)
 }

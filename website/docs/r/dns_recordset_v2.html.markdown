@@ -16,20 +16,20 @@ Manages a DNS record set in the OpenStack DNS Service.
 
 ```hcl
 resource "openstack_dns_zone_v2" "example_zone" {
-  name = "example.com."
-  email = "email2@example.com"
+  name        = "example.com."
+  email       = "email2@example.com"
   description = "a zone"
-  ttl = 6000
-  type = "PRIMARY"
+  ttl         = 6000
+  type        = "PRIMARY"
 }
 
 resource "openstack_dns_recordset_v2" "rs_example_com" {
-  zone_id = "${openstack_dns_zone_v2.example_zone.id}"
-  name = "rs.example.com."
+  zone_id     = "${openstack_dns_zone_v2.example_zone.id}"
+  name        = "rs.example.com."
   description = "An example record set"
-  ttl = 3000
-  type = "A"
-  records = ["10.0.0.1"]
+  ttl         = 3000
+  type        = "A"
+  records     = ["10.0.0.1"]
 }
 ```
 
@@ -54,7 +54,9 @@ The following arguments are supported:
 
 * `description` - (Optional) A description of the  record set.
 
-* `records` - (Optional) An array of DNS records.
+* `records` - (Optional) An array of DNS records. _Note:_ if an IPv6 address
+  contains brackets (`[ ]`), the brackets will be stripped and the modified
+  address will be recorded in the state.
 
 * `value_specs` - (Optional) Map of additional options. Changing this creates a
   new record set.

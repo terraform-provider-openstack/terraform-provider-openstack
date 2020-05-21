@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas/monitors"
@@ -29,54 +29,54 @@ func resourceLBMonitorV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"type": &schema.Schema{
+			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"delay": &schema.Schema{
+			"delay": {
 				Type:     schema.TypeInt,
 				Required: true,
 				ForceNew: false,
 			},
-			"timeout": &schema.Schema{
+			"timeout": {
 				Type:     schema.TypeInt,
 				Required: true,
 				ForceNew: false,
 			},
-			"max_retries": &schema.Schema{
+			"max_retries": {
 				Type:     schema.TypeInt,
 				Required: true,
 				ForceNew: false,
 			},
-			"url_path": &schema.Schema{
+			"url_path": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
-			"http_method": &schema.Schema{
+			"http_method": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
-			"expected_codes": &schema.Schema{
+			"expected_codes": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
-			"admin_state_up": &schema.Schema{
+			"admin_state_up": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
@@ -88,7 +88,7 @@ func resourceLBMonitorV1() *schema.Resource {
 
 func resourceLBMonitorV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -147,7 +147,7 @@ func resourceLBMonitorV1Create(d *schema.ResourceData, meta interface{}) error {
 
 func resourceLBMonitorV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -175,7 +175,7 @@ func resourceLBMonitorV1Read(d *schema.ResourceData, meta interface{}) error {
 
 func resourceLBMonitorV1Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -212,7 +212,7 @@ func resourceLBMonitorV1Update(d *schema.ResourceData, meta interface{}) error {
 
 func resourceLBMonitorV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -275,11 +275,9 @@ func waitForLBMonitorDelete(networkingClient *gophercloud.ServiceClient, monitor
 				return m, "DELETED", nil
 			}
 
-			if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 409 {
-					log.Printf("[DEBUG] OpenStack LB Monitor (%s) is waiting for Pool to delete.", monitorId)
-					return m, "PENDING", nil
-				}
+			if _, ok := err.(gophercloud.ErrDefault409); ok {
+				log.Printf("[DEBUG] OpenStack LB Monitor (%s) is waiting for Pool to delete.", monitorId)
+				return m, "PENDING", nil
 			}
 
 			return m, "ACTIVE", err
@@ -293,11 +291,9 @@ func waitForLBMonitorDelete(networkingClient *gophercloud.ServiceClient, monitor
 				return m, "DELETED", nil
 			}
 
-			if errCode, ok := err.(gophercloud.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 409 {
-					log.Printf("[DEBUG] OpenStack LB Monitor (%s) is waiting for Pool to delete.", monitorId)
-					return m, "PENDING", nil
-				}
+			if _, ok := err.(gophercloud.ErrDefault409); ok {
+				log.Printf("[DEBUG] OpenStack LB Monitor (%s) is waiting for Pool to delete.", monitorId)
+				return m, "PENDING", nil
 			}
 
 			return m, "ACTIVE", err

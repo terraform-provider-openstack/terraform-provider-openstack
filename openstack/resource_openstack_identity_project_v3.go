@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceIdentityProjectV3() *schema.Resource {
@@ -19,44 +19,51 @@ func resourceIdentityProjectV3() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"description": &schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"domain_id": &schema.Schema{
+			"domain_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"enabled": &schema.Schema{
+			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
 
-			"is_domain": &schema.Schema{
+			"is_domain": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"parent_id": &schema.Schema{
+			"parent_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"region": &schema.Schema{
-				Type:     schema.TypeString,
+			"tags": {
+				Type:     schema.TypeSet,
 				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
 			},
 		},
 	}
@@ -64,7 +71,7 @@ func resourceIdentityProjectV3() *schema.Resource {
 
 func resourceIdentityProjectV3Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	identityClient, err := config.identityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -80,10 +87,15 @@ func resourceIdentityProjectV3Create(d *schema.ResourceData, meta interface{}) e
 		ParentID:    d.Get("parent_id").(string),
 	}
 
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
+	if v, ok := d.GetOk("tags"); ok {
+		tags := v.(*schema.Set).List()
+		createOpts.Tags = expandToStringSlice(tags)
+	}
+
+	log.Printf("[DEBUG] openstack_identity_project_v3 create options: %#v", createOpts)
 	project, err := projects.Create(identityClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack project: %s", err)
+		return fmt.Errorf("Error creating openstack_identity_project_v3: %s", err)
 	}
 
 	d.SetId(project.ID)
@@ -93,17 +105,17 @@ func resourceIdentityProjectV3Create(d *schema.ResourceData, meta interface{}) e
 
 func resourceIdentityProjectV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	identityClient, err := config.identityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	project, err := projects.Get(identityClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "project")
+		return CheckDeleted(d, err, "Error retrieving openstack_identity_project_v3")
 	}
 
-	log.Printf("[DEBUG] Retrieved OpenStack project: %#v", project)
+	log.Printf("[DEBUG] Retrieved openstack_identity_project_v3 %s: %#v", d.Id(), project)
 
 	d.Set("description", project.Description)
 	d.Set("domain_id", project.DomainID)
@@ -112,13 +124,14 @@ func resourceIdentityProjectV3Read(d *schema.ResourceData, meta interface{}) err
 	d.Set("name", project.Name)
 	d.Set("parent_id", project.ParentID)
 	d.Set("region", GetRegion(d, config))
+	d.Set("tags", project.Tags)
 
 	return nil
 }
 
 func resourceIdentityProjectV3Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	identityClient, err := config.identityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -155,13 +168,25 @@ func resourceIdentityProjectV3Update(d *schema.ResourceData, meta interface{}) e
 
 	if d.HasChange("description") {
 		hasChange = true
-		updateOpts.Description = d.Get("description").(string)
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
+	}
+
+	if d.HasChange("tags") {
+		hasChange = true
+		if v, ok := d.GetOk("tags"); ok {
+			tags := v.(*schema.Set).List()
+			tagsToUpdate := expandToStringSlice(tags)
+			updateOpts.Tags = &tagsToUpdate
+		} else {
+			updateOpts.Tags = &[]string{}
+		}
 	}
 
 	if hasChange {
 		_, err := projects.Update(identityClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenStack project: %s", err)
+			return fmt.Errorf("Error updating openstack_identity_project_v3 %s: %s", d.Id(), err)
 		}
 	}
 
@@ -170,14 +195,14 @@ func resourceIdentityProjectV3Update(d *schema.ResourceData, meta interface{}) e
 
 func resourceIdentityProjectV3Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	identityClient, err := config.identityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	err = projects.Delete(identityClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack project: %s", err)
+		return CheckDeleted(d, err, "Error deleting openstack_identity_project_v3")
 	}
 
 	return nil

@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
 )
@@ -21,7 +21,7 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDNSV2Zone_basic(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2ZoneExists("openstack_dns_zone_v2.zone_1", &zone),
@@ -29,7 +29,7 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 						"openstack_dns_zone_v2.zone_1", "description", "a zone"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccDNSV2Zone_update(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_dns_zone_v2.zone_1", "name", zoneName),
@@ -53,7 +53,7 @@ func TestAccDNSV2Zone_readTTL(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDNSV2Zone_readTTL(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2ZoneExists("openstack_dns_zone_v2.zone_1", &zone),
@@ -66,28 +66,9 @@ func TestAccDNSV2Zone_readTTL(t *testing.T) {
 	})
 }
 
-func TestAccDNSV2Zone_timeout(t *testing.T) {
-	var zone zones.Zone
-	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDNS(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccDNSV2Zone_timeout(zoneName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2ZoneExists("openstack_dns_zone_v2.zone_1", &zone),
-				),
-			},
-		},
-	})
-}
-
 func testAccCheckDNSV2ZoneDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	dnsClient, err := config.dnsV2Client(OS_REGION_NAME)
+	dnsClient, err := config.DNSV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
@@ -118,7 +99,7 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		dnsClient, err := config.dnsV2Client(OS_REGION_NAME)
+		dnsClient, err := config.DNSV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 		}
@@ -167,22 +148,6 @@ func testAccDNSV2Zone_readTTL(zoneName string) string {
 		resource "openstack_dns_zone_v2" "zone_1" {
 			name = "%s"
 			email = "email1@example.com"
-		}
-	`, zoneName)
-}
-
-func testAccDNSV2Zone_timeout(zoneName string) string {
-	return fmt.Sprintf(`
-		resource "openstack_dns_zone_v2" "zone_1" {
-			name = "%s"
-			email = "email@example.com"
-			ttl = 3000
-
-			timeouts {
-				create = "5m"
-				update = "5m"
-				delete = "5m"
-			}
 		}
 	`, zoneName)
 }

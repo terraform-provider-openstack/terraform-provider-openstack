@@ -42,6 +42,8 @@ The following arguments are supported:
     egress security rules. This is `false` by default. See the below note
     for more information.
 
+* `tags` - (Optional) A set of string tags for the security group.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -50,6 +52,9 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
+* `tags` - See Argument Reference above.
+* `all_tags` - The collection of tags assigned on the security group, which have
+  been explicitly and implicitly added.
 
 ## Default Security Group Rules
 
@@ -61,14 +66,14 @@ separate security group rules such as the following:
 
 ```hcl
 resource "openstack_networking_secgroup_rule_v2" "secgroup_rule_v4" {
-  direction = "egress"
-  ethertype = "IPv4"
+  direction         = "egress"
+  ethertype         = "IPv4"
   security_group_id = "${openstack_networking_secgroup_v2.secgroup.id}"
 }
 
 resource "openstack_networking_secgroup_rule_v2" "secgroup_rule_v6" {
-  direction = "egress"
-  ethertype = "IPv6"
+  direction         = "egress"
+  ethertype         = "IPv6"
   security_group_id = "${openstack_networking_secgroup_v2.secgroup.id}"
 }
 ```
