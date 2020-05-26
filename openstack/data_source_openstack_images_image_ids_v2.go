@@ -3,7 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
-	"regexp"
+	"strings"
 
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 
@@ -79,16 +79,26 @@ func dataSourceImagesImageIdsV2() *schema.Resource {
 				Default:  "name:asc",
 			},
 
-			"tag": {
+			"sort_key": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Default:  "name",
 			},
 
-			"most_recent": {
-				Type:     schema.TypeBool,
+			"sort_direction": {
+				Type:     schema.TypeString,
 				Optional: true,
-				Default:  false,
+				ForceNew: true,
+				Default:  "asc",
+				ValidateFunc: validation.StringInSlice([]string{
+					"asc", "desc",
+				}, false),
+			},
+
+			"tag": {
+				Type:     schema.TypeString,
+				Optional: true,
 				ForceNew: true,
 			},
 
@@ -124,26 +134,33 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
-	_, nameOk := d.GetOk("name")
+	_, nameOk      := d.GetOk("name")
         _, nameRegexOk := d.GetOk("name_regex")
 
         if nameOk && nameRegexOk {
                 return fmt.Errorf("Attributes name and name_regexp can not be used at the same time")
         }
 
+	_, sortOk          := d.GetOk("sort")
+	_, sortKeyOk       := d.GetOk("sort_key")
+	_, sortDirectionOk := d.GetOk("sort_direction")
+
+	if sortOk && (sortKeyOk || sortDirectionOk) {
+		return fmt.Errorf("Attributes sort and sort_key or sort_direction can not be used at the same time")
+	}
+
 	visibility := resourceImagesImageV2VisibilityFromString(
 		d.Get("visibility").(string))
 	member_status := resourceImagesImageV2MemberStatusFromString(
 		d.Get("member_status").(string))
-	properties := resourceImagesImageV2ExpandProperties(
-		d.Get("properties").(map[string]interface{}))
+	properties := d.Get("properties").(map[string]interface{})
 
 	var tags []string
 	if tag := d.Get("tag").(string); tag != "" {
 		tags = append(tags, tag)
 	}
 
-	listOpts := image.ListOpts{
+	listOpts := images.ListOpts{
 		Name:         d.Get("name").(string),
 		Visibility:   visibility,
 		Owner:        d.Get("owner").(string),
@@ -151,6 +168,8 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 		SizeMin:      int64(d.Get("size_min").(int)),
 		SizeMax:      int64(d.Get("size_max").(int)),
 		Sort:         d.Get("sort").(string),
+		SortKey:      d.Get("sort_key").(string),
+                SortDir:      d.Get("sort_direction").(string),
 		Tags:         tags,
 		MemberStatus: member_status,
 	}
@@ -169,12 +188,12 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 
 	log.Printf("[DEBUG] Retrieved %d images in openstack_images_image_ids_v2: %+v", len(allImages), allImages)
 
-	allImages = filterImagesByProperties(allImages, properties)
+	allImages = imagesFilterByProperties(allImages, properties)
 
 	log.Printf("[DEBUG] Image list filtered by properties: %#v", properties)
 
 	if nameRegexOk {
-		allImages = filterImagesByRegex(allImages, d.Get("name_regex").(string))
+		allImages = imagesFilterByRegex(allImages, d.Get("name_regex").(string))
 		log.Printf("[DEBUG] Image list filtered by regex: %s", d.Get("name_regex"))
 	}
 
@@ -183,33 +202,11 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 	imageIDs := make([]string, 0)
 	for _, image := range allImages {
 
-		imageIDs = append(imageIds, image.ID)
+		imageIDs = append(imageIDs, image.ID)
 	}
 
 	d.SetId(fmt.Sprintf("%d", hashcode.String(strings.Join(imageIDs, ","))))
 	d.Set("ids", imageIDs)
 
 	return nil
-}
-
-func filterImagesByRegex(images []images.Image, name_regex string) images []images.Image {
-
-	var filteredImages []images.Image
-	r := regexp.MustCompile(name_regex)
-	for _, image := range allImages {
-		// Check for a very rare case where the response would include no
-		// image name. No name means nothing to attempt a match against,
-		// therefore we are skipping such image.
-		if image.Name == "" {
-			log.Printf("[WARN] Unable to find image name to match against "+
-				"for image ID %q owned by %q, nothing to do.",
-				image.ID, image.Owner)
-			continue
-		}
-		if r.MatchString(image.Name) {
-			filteredImages = append(filteredImages, image)
-		}
-	}
-
-	return filteredImages
 }

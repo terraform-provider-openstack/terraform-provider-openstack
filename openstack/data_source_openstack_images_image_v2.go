@@ -223,7 +223,7 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 	}
 
 	properties := d.Get("properties").(map[string]interface{})
-	allImages = filterImagesByProperties(allImages, properties)
+	allImages = imagesFilterByProperties(allImages, properties)
 
 	if len(allImages) < 1 {
 		return fmt.Errorf("Your query returned no results. " +
@@ -284,51 +284,4 @@ func mostRecentImage(images []images.Image) images.Image {
 	sortedImages := images
 	sort.Sort(imageSort(sortedImages))
 	return sortedImages[len(sortedImages)-1]
-}
-
-// 
-func filterImagesByProperties(images []images.Image, properties interface{}) []images.Image {
-
-	var result []images.Image
-	var imageProperties map[string]string
-
-	switch properties.(type) {
-	case map[string]interface{}:
-		imageProperties = resourceImagesImageV2ExpandProperties(properties)
-
-	case map[string]string:
-		imageProperties = properties
-
-	default:
-		return fmt.Errorf("Unsupported type %T for argument properties. "+
-			"Expected map[string]interface{} or map[string]string")
-	}
-
-	if len(images) > 1 && len(imageProperties) > 0 {
-		for _, image := range images {
-			if len(image.Properties) > 0 {
-				match := true
-				for searchKey, searchValue := range imageProperties {
-					imageValue, ok := image.Properties[searchKey]
-					if !ok {
-						match = false
-						break
-					}
-
-					if searchValue != imageValue {
-						match = false
-						break
-					}
-				}
-
-				if match {
-					result = append(result, image)
-				}
-			}
-		}
-	} else {
-		result = images
-	}
-
-	return result
 }
