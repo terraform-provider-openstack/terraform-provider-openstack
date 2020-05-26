@@ -8,8 +8,8 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-        "github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-        "github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func dataSourceImagesImageIdsV2() *schema.Resource {
@@ -134,15 +134,15 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
-	_, nameOk      := d.GetOk("name")
-        _, nameRegexOk := d.GetOk("name_regex")
+	_, nameOk := d.GetOk("name")
+	_, nameRegexOk := d.GetOk("name_regex")
 
-        if nameOk && nameRegexOk {
-                return fmt.Errorf("Attributes name and name_regexp can not be used at the same time")
-        }
+	if nameOk && nameRegexOk {
+		return fmt.Errorf("Attributes name and name_regexp can not be used at the same time")
+	}
 
-	_, sortOk          := d.GetOk("sort")
-	_, sortKeyOk       := d.GetOk("sort_key")
+	_, sortOk := d.GetOk("sort")
+	_, sortKeyOk := d.GetOk("sort_key")
 	_, sortDirectionOk := d.GetOk("sort_direction")
 
 	if sortOk && (sortKeyOk || sortDirectionOk) {
@@ -169,7 +169,7 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 		SizeMax:      int64(d.Get("size_max").(int)),
 		Sort:         d.Get("sort").(string),
 		SortKey:      d.Get("sort_key").(string),
-                SortDir:      d.Get("sort_direction").(string),
+		SortDir:      d.Get("sort_direction").(string),
 		Tags:         tags,
 		MemberStatus: member_status,
 	}
