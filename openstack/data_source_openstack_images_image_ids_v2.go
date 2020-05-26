@@ -124,15 +124,18 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
-	name, nameOk := d.GetOk("name")
-        nameRegex, nameRegexOk := d.GetOk("name_regex")
+	_, nameOk := d.GetOk("name")
+        _, nameRegexOk := d.GetOk("name_regex")
 
         if nameOk && nameRegexOk {
-                return fmt.Errorf("Attributes name and name_regexp can not "+
-			"be used at the same time")
+                return fmt.Errorf("Attributes name and name_regexp can not be used at the same time")
         }
 
-        properties := resourceImagesImageV2ExpandProperties(
+	visibility := resourceImagesImageV2VisibilityFromString(
+		d.Get("visibility").(string))
+	member_status := resourceImagesImageV2MemberStatusFromString(
+		d.Get("member_status").(string))
+	properties := resourceImagesImageV2ExpandProperties(
 		d.Get("properties").(map[string]interface{}))
 
 	var tags []string
@@ -140,113 +143,73 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 		tags = append(tags, tag)
 	}
 
-	filter := imageIdsV2FilterRequest{
-		Name:         name.(string),
-		NameRegex:    nameRegex.(string),
-		Visibility:   d.Get("visibility").(string),
+	listOpts := image.ListOpts{
+		Name:         d.Get("name").(string),
+		Visibility:   visibility,
 		Owner:        d.Get("owner").(string),
 		Status:       images.ImageStatusActive,
 		SizeMin:      int64(d.Get("size_min").(int)),
 		SizeMax:      int64(d.Get("size_max").(int)),
 		Sort:         d.Get("sort").(string),
 		Tags:         tags,
-		MemberStatus: d.Get("member_status").(string),
-		Properties:   properties,
+		MemberStatus: member_status,
 	}
 
-	listOpts := filter.toListOpts()
+	log.Printf("[DEBUG] List Options in openstack_images_image_ids_v2: %#v", listOpts)
 
-	log.Printf("[DEBUG] List Options: %#v", listOpts)
-
-	var image images.Image
 	allPages, err := images.List(imageClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query images: %s", err)
+		return fmt.Errorf("Unable to list images in openstack_images_image_ids_v2: %s", err)
 	}
 
 	allImages, err := images.ExtractImages(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve images: %s", err)
+		return fmt.Errorf("Unable to retrieve images in openstack_images_image_ids_v2: %s", err)
 	}
+
+	log.Printf("[DEBUG] Retrieved %d images in openstack_images_image_ids_v2: %+v", len(allImages), allImages)
 
 	allImages = filterImagesByProperties(allImages, properties)
 
-	log.Printf("[DEBUG] Single Image found: %s", image.ID)           // TODO
-
-	log.Printf("[DEBUG] openstack_images_image details: %#v", image) // TODO
+	log.Printf("[DEBUG] Image list filtered by properties: %#v", properties)
 
 	if nameRegexOk {
-		var filteredImages []images.Image
-		r := regexp.MustCompile(nameRegex)
-		for _, image := range allImages {
-			// Check for a very rare case where the response would include no
-			// image name. No name means nothing to attempt a match against,
-			// therefore we are skipping such image.
-			if image.Name == "" {
-				log.Printf("[WARN] Unable to find image name to match against "+
-					"for image ID %q owned by %q, nothing to do.",
-					image.ID, image.Owner)
-				continue
-			}
-			if r.MatchString(image.Name) {
-				filteredImages = append(filteredImages, image)
-			}
-		}
-
-		allImages = filteredImages
+		allImages = filterImagesByRegex(allImages, d.Get("name_regex").(string))
+		log.Printf("[DEBUG] Image list filtered by regex: %s", d.Get("name_regex"))
 	}
 
-	imageIds := make([]string, 0)
+	log.Printf("[DEBUG] Got %d images after filtering in openstack_images_image_ids_v2: %+v", len(allImages), allImages)
+
+	imageIDs := make([]string, 0)
 	for _, image := range allImages {
 
-		imageIds = append(imageIds, image.ID)
+		imageIDs = append(imageIds, image.ID)
 	}
 
-	d.SetId(fmt.Sprintf("%d", hashcode.String(filter.toJson())))
-	d.Set("ids", imageIds)
+	d.SetId(fmt.Sprintf("%d", hashcode.String(strings.Join(imageIDs, ","))))
+	d.Set("ids", imageIDs)
 
 	return nil
 }
 
-type imageIdsV2FilterRequest struct{
-	Region       string `json:"region"`
-	Name         string `json:"name"`
-	Visibility   string `json:"visibility"`
-	Owner        string `json:"owner"`
-	Status       string `json:"status"`
-	SizeMin      int64 `json:"size_min"`
-	SizeMax      int64 `json:"size_max"`
-	Sort         string `json:"sort"`
-	Tags         []string `json:"tag"`
-	MemberStatus string `json:"member_status"`
-	Properties   map[string]string `json:"properties"`
-	NameRegex    string `json:"name_regex"`
-}
+func filterImagesByRegex(images []images.Image, name_regex string) images []images.Image {
 
-func (f *imageIdsV2FilterRequest) toListOpts() image.ListOpts {
-
-	result := image.ListOpts{
-		Name:         f.Name,
-		Visibility:   resourceImagesImageV2VisibilityFromString(f.Visibility),
-		Owner:        f.Owner,
-		Status:       f.Status,
-		SizeMin:      f.SizeMin,
-		SizeMax:      f.SizeMax,
-		Sort:         f.Sort,
-		Tags:         f.Tags,
-		MemberStatus: resourceImagesImageV2MemberStatusFromString(f.MemberStatus),
+	var filteredImages []images.Image
+	r := regexp.MustCompile(name_regex)
+	for _, image := range allImages {
+		// Check for a very rare case where the response would include no
+		// image name. No name means nothing to attempt a match against,
+		// therefore we are skipping such image.
+		if image.Name == "" {
+			log.Printf("[WARN] Unable to find image name to match against "+
+				"for image ID %q owned by %q, nothing to do.",
+				image.ID, image.Owner)
+			continue
+		}
+		if r.MatchString(image.Name) {
+			filteredImages = append(filteredImages, image)
+		}
 	}
 
-	return result
-}
-
-func (f *imageIdsV2FilterRequest) toJson() string {
-	result, err := json.Marshal(true)
-
-	if err != nil {
-		log.Printf("[WARN] Unable to convert imageIdsV2FilterRequest to json")
-		return ""
-	}
-
-	return string(result)
+	return filteredImages
 }
