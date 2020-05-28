@@ -76,7 +76,6 @@ func dataSourceImagesImageIdsV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "name:asc",
 			},
 
 			"sort_key": {
@@ -142,11 +141,14 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 	}
 
 	_, sortOk := d.GetOk("sort")
-	_, sortKeyOk := d.GetOk("sort_key")
-	_, sortDirectionOk := d.GetOk("sort_direction")
+	sortKeyValue := d.Get("sort_key")
+	sortDirectionValue := d.Get("sort_direction")
 
-	if sortOk && (sortKeyOk || sortDirectionOk) {
-		return fmt.Errorf("Attributes sort and sort_key or sort_direction can not be used at the same time")
+	if sortOk {
+		// Attribute "sort" cannot be used simultaneously with
+		// "sort_key". If both are present, only "sort" will be used.
+		sortKeyValue = ""
+		sortDirectionValue = ""
 	}
 
 	visibility := resourceImagesImageV2VisibilityFromString(
@@ -168,8 +170,8 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 		SizeMin:      int64(d.Get("size_min").(int)),
 		SizeMax:      int64(d.Get("size_max").(int)),
 		Sort:         d.Get("sort").(string),
-		SortKey:      d.Get("sort_key").(string),
-		SortDir:      d.Get("sort_direction").(string),
+		SortKey:      sortKeyValue.(string),
+		SortDir:      sortDirectionValue.(string),
 		Tags:         tags,
 		MemberStatus: member_status,
 	}
@@ -210,3 +212,5 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 
 	return nil
 }
+
+
