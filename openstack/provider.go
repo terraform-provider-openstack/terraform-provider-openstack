@@ -270,7 +270,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_identity_service_v3":                      dataSourceIdentityServiceV3(),
 			"openstack_identity_group_v3":                        dataSourceIdentityGroupV3(),
 			"openstack_images_image_v2":                          dataSourceImagesImageV2(),
-			"openstack_images_image_ids_v2":                      dataSourceImagesImageIdsV2(),
+			"openstack_images_image_ids_v2":                      dataSourceImagesImageIDsV2(),
 			"openstack_networking_addressscope_v2":               dataSourceNetworkingAddressScopeV2(),
 			"openstack_networking_network_v2":                    dataSourceNetworkingNetworkV2(),
 			"openstack_networking_qos_bandwidth_limit_rule_v2":   dataSourceNetworkingQoSBandwidthLimitRuleV2(),

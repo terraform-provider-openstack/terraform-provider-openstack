@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
-func dataSourceImagesImageIdsV2() *schema.Resource {
+func dataSourceImagesImageIDsV2() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceImagesImageIdsV2Read,
 
@@ -212,5 +212,3 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 
 	return nil
 }
-
-
