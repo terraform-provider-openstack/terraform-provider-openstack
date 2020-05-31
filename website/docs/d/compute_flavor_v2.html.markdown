@@ -45,6 +45,8 @@ data "openstack_compute_flavor_v2" "small" {
 
 * `rx_tx_factor` - (Optional) The `rx_tx_factor` of the flavor.
 
+* `is_public` - (Optional) The flavor visibility.
+
 
 ## Attributes Reference
 
@@ -52,5 +54,3 @@ data "openstack_compute_flavor_v2" "small" {
 are exported:
 
 * `extra_specs` - Key/Value pairs of metadata for the flavor.
-
-* `is_public` - Whether the flavor is public or private.
