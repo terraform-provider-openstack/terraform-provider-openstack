@@ -7,6 +7,7 @@ FEATURES
 IMPROVEMENTS
 
 * Added `vip_network_id` argument to `openstack_lb_loadbalancer_v2` resource. It can be used only with Octavia [GH-948]
+* Allowed to use `is_public` as argument in `compute_flavor_v2` datasource [GH-1017]
 
 BUG FIXES
 
