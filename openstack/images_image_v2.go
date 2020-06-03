@@ -245,18 +245,18 @@ func imagesFilterByRegex(imageArr []images.Image, name_regex string) []images.Im
 	return result
 }
 
-// This function accepts argument p as it gets from schema.Resource object
-// i.e. d.Get("properties").(map[string]interface{})
-func imagesFilterByProperties(v []images.Image, p map[string]interface{}) []images.Image {
-
+// v - slice of images to filter
+// p - field "properties" of schema.Resource from dataSourceImagesImageIDsV2
+//	or dataSourceImagesImageV2. If p is empty no filtering applies and the
+//	function returns the v.
+func imagesFilterByProperties(v []images.Image, p map[string]string) []images.Image {
 	var result []images.Image
-	properties := resourceImagesImageV2ExpandProperties(p)
 
-	if len(v) > 0 && len(properties) > 0 {
+	if len(p) > 0 {
 		for _, image := range v {
 			if len(image.Properties) > 0 {
 				match := true
-				for searchKey, searchValue := range properties {
+				for searchKey, searchValue := range p {
 					imageValue, ok := image.Properties[searchKey]
 					if !ok {
 						match = false

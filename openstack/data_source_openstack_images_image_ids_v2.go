@@ -155,7 +155,8 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 		d.Get("visibility").(string))
 	member_status := resourceImagesImageV2MemberStatusFromString(
 		d.Get("member_status").(string))
-	properties := d.Get("properties").(map[string]interface{})
+	properties := resourceImagesImageV2ExpandProperties(
+		d.Get("properties").(map[string]interface{}))
 
 	var tags []string
 	if tag := d.Get("tag").(string); tag != "" {

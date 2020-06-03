@@ -222,8 +222,14 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Unable to retrieve images: %s", err)
 	}
 
-	properties := d.Get("properties").(map[string]interface{})
-	allImages = imagesFilterByProperties(allImages, properties)
+	properties := resourceImagesImageV2ExpandProperties(
+		d.Get("properties").(map[string]interface{}))
+
+	if len(allImages) > 1 {
+		allImages = imagesFilterByProperties(allImages, properties)
+
+		log.Printf("[DEBUG] Image list filtered by properties: %#v", properties)
+	}
 
 	if len(allImages) < 1 {
 		return fmt.Errorf("Your query returned no results. " +

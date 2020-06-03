@@ -53,7 +53,7 @@ func TestAccOpenStackImagesV2ImageIDsDataSource_basic(t *testing.T) {
 				Config: testAccOpenStackImagesV2ImageIDsDataSource_min,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"data.openstack_images_image_ids_v2.images_by_size_min", "ids.#", "2"),
+						"data.openstack_images_image_ids_v2.images_by_size_min", "ids.#", "1"),
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_images_image_ids_v2.images_by_size_min", "ids.0",
 						"openstack_images_image_v2.image_2", "id"),

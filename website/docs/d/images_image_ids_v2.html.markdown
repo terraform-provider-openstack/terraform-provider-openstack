@@ -38,12 +38,15 @@ data "openstack_images_image_ids_v2" "images" {
     with `name_regex`.
 
 * `name_regex` - (Optional) The regular expressian of the name of the image.
-    Cannot be used simultaneously with `name`.
+    Cannot be used simultaneously with `name`. Unlike filtering by `name` the    
+    `name_regex` filtering does by client on the result of OpenStack search
+    query.
 
 * `owner` - (Optional) The owner (UUID) of the image.
 
 * `properties` - (Optional) a map of key/value pairs to match an image with.
-    All specified properties must be matched.
+    All specified properties must be matched. Unlike other options filtering    
+    by `properties` does by client on the result of OpenStack search query.
 
 * `size_min` - (Optional) The minimum size (in bytes) of the image to return.
 
