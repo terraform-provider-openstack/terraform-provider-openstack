@@ -25,9 +25,10 @@ func dataSourceImagesImageIDsV2() *schema.Resource {
 			},
 
 			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"name_regex"},
 			},
 
 			"visibility": {
@@ -73,23 +74,27 @@ func dataSourceImagesImageIDsV2() *schema.Resource {
 			},
 
 			"sort": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				Default:       "name:asc",
+				ConflictsWith: []string{"sort_key"},
 			},
 
 			"sort_key": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "name",
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"sort"},
+				Deprecated:    "Use option 'sort' instead.",
 			},
 
 			"sort_direction": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "asc",
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Deprecated:   "Use option 'sort' instead.",
+				RequiredWith: []string{"sort_key"},
 				ValidateFunc: validation.StringInSlice([]string{
 					"asc", "desc",
 				}, false),
@@ -108,10 +113,11 @@ func dataSourceImagesImageIDsV2() *schema.Resource {
 			},
 
 			"name_regex": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringIsValidRegExp,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ValidateFunc:  validation.StringIsValidRegExp,
+				ConflictsWith: []string{"name"},
 			},
 
 			// Computed values
@@ -133,22 +139,17 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
-	_, nameOk := d.GetOk("name")
-	_, nameRegexOk := d.GetOk("name_regex")
+	sortValue := d.Get("sort")
+	sortKeyValue, sortKeyOk := d.GetOk("sort_key")
 
-	if nameOk && nameRegexOk {
-		return fmt.Errorf("Attributes name and name_regexp can not be used at the same time")
-	}
+	if sortKeyOk {
+		direction, ok := d.GetOk("sort_direction")
 
-	_, sortOk := d.GetOk("sort")
-	sortKeyValue := d.Get("sort_key")
-	sortDirectionValue := d.Get("sort_direction")
+		if !ok {
+			direction = "asc"
+		}
 
-	if sortOk {
-		// Attribute "sort" cannot be used simultaneously with
-		// "sort_key". If both are present, only "sort" will be used.
-		sortKeyValue = ""
-		sortDirectionValue = ""
+		sortValue = fmt.Sprintf("%s:%s", sortKeyValue, direction)
 	}
 
 	visibility := resourceImagesImageV2VisibilityFromString(
@@ -170,9 +171,7 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 		Status:       images.ImageStatusActive,
 		SizeMin:      int64(d.Get("size_min").(int)),
 		SizeMax:      int64(d.Get("size_max").(int)),
-		Sort:         d.Get("sort").(string),
-		SortKey:      sortKeyValue.(string),
-		SortDir:      sortDirectionValue.(string),
+		Sort:         sortValue.(string),
 		Tags:         tags,
 		MemberStatus: member_status,
 	}
@@ -195,17 +194,17 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 
 	log.Printf("[DEBUG] Image list filtered by properties: %#v", properties)
 
+	nameRegex, nameRegexOk := d.GetOk("name_regex")
 	if nameRegexOk {
-		allImages = imagesFilterByRegex(allImages, d.Get("name_regex").(string))
+		allImages = imagesFilterByRegex(allImages, nameRegex.(string))
 		log.Printf("[DEBUG] Image list filtered by regex: %s", d.Get("name_regex"))
 	}
 
 	log.Printf("[DEBUG] Got %d images after filtering in openstack_images_image_ids_v2: %+v", len(allImages), allImages)
 
-	imageIDs := make([]string, 0)
-	for _, image := range allImages {
-
-		imageIDs = append(imageIDs, image.ID)
+	imageIDs := make([]string, len(allImages))
+	for i, image := range allImages {
+		imageIDs[i] = image.ID
 	}
 
 	d.SetId(fmt.Sprintf("%d", hashcode.String(strings.Join(imageIDs, ","))))
