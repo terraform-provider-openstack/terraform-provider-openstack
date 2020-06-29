@@ -1,20 +1,20 @@
-## 1.29.0 (Unreleased)
+## 1.29.0 (June 29, 2020)
 
 FEATURES
 
-* __New Data Source__: `compute_instance_v2` [GH-984]
+* __New Data Source__: `compute_instance_v2` ([#984](https://github.com/terraform-providers/terraform-provider-openstack/issues/984))
 
 IMPROVEMENTS
 
-* Added `vip_network_id` argument to `openstack_lb_loadbalancer_v2` resource. It can be used only with Octavia [GH-948]
-* Allowed to use `is_public` as argument in `compute_flavor_v2` datasource [GH-1017]
-* Updated `gophercloud` to `v0.12.0` to fix goroutine leaks during reauthentication [GH-1020]
-* Updated `terraform-plugin-sdk` to `v1.14.0` [GH-1021]
-* Updated Go version to `1.14.4` [GH-1022]
+* Added `vip_network_id` argument to `openstack_lb_loadbalancer_v2` resource. It can be used only with Octavia ([#948](https://github.com/terraform-providers/terraform-provider-openstack/issues/948))
+* Allowed to use `is_public` as argument in `compute_flavor_v2` datasource ([#1017](https://github.com/terraform-providers/terraform-provider-openstack/issues/1017))
+* Updated `gophercloud` to `v0.12.0` to fix goroutine leaks during reauthentication ([#1020](https://github.com/terraform-providers/terraform-provider-openstack/issues/1020))
+* Updated `terraform-plugin-sdk` to `v1.14.0` ([#1021](https://github.com/terraform-providers/terraform-provider-openstack/issues/1021))
+* Updated Go version to `1.14.4` ([#1022](https://github.com/terraform-providers/terraform-provider-openstack/issues/1022))
 
 BUG FIXES
 
-* Fixed documentation bug for the `binding` argument of the `networking_port_v2` resource [GH-1009]
+* Fixed documentation bug for the `binding` argument of the `networking_port_v2` resource ([#1009](https://github.com/terraform-providers/terraform-provider-openstack/issues/1009))
 
 ## 1.28.0 (May 04, 2020)
 
