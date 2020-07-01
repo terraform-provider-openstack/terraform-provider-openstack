@@ -706,7 +706,7 @@ resource "openstack_compute_instance_v2" "boot-from-volume" {
     name = "<network1>"
   }
   network {
-    name = "<netowork2>"
+    name = "<network2>"
   }
   network {
     name = "<network1>"
