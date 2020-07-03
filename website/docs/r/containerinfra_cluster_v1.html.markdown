@@ -70,6 +70,9 @@ The following arguments are supported:
 * `labels` - (Optional) The list of key value pairs representing additional
     properties of the cluster. Changing this creates a new cluster.
 
+* `merge_labels` - (Optional) Indicates whether the provided labels should be
+    merged with cluster template labels. Changing this creates a new cluster.
+
 * `master_count` - (Optional) The number of master nodes for the cluster.
     Changing this creates a new cluster.
 
@@ -81,6 +84,9 @@ The following arguments are supported:
 
 * `fixed_subnet` - (Optional) The fixed subnet that will be attached to the
     cluster. Changing this creates a new cluster.
+
+* `floating_ip_enabled` - (Optional) Indicates whether floating IP should be
+    created for every cluster node. Changing this creates a new cluster.
 
 ## Attributes reference
 
@@ -102,10 +108,12 @@ The following attributes are exported:
 * `master_flavor` - See Argument Reference above.
 * `keypair` - See Argument Reference above.
 * `labels` - See Argument Reference above.
+* `merge_labels` - See Argument Reference above.
 * `master_count` - See Argument Reference above.
 * `node_count` - See Argument Reference above.
 * `fixed_network` - See Argument Reference above.
 * `fixed_subnet` - See Argument Reference above.
+* `floating_ip_enabled` - See Argument Reference above.
 * `master_addresses` - IP addresses of the master node of the cluster.
 * `node_addresses` - IP addresses of the node of the cluster.
 * `stack_id` - UUID of the Orchestration service stack.
