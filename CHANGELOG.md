@@ -1,4 +1,9 @@
 ## 1.30.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Added `floating_ip_enabled` argument/attribute and `merge_labels` argument for `openstack_containerinfra_cluster_v1` resource [GH-1024]
+
 ## 1.29.0 (June 29, 2020)
 
 FEATURES
