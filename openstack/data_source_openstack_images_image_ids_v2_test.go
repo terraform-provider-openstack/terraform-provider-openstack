@@ -49,26 +49,6 @@ func TestAccOpenStackImagesV2ImageIDsDataSource_basic(t *testing.T) {
 						"openstack_images_image_v2.image_1", "id"),
 				),
 			},
-			/*{
-				Config: testAccOpenStackImagesV2ImageIDsDataSource_min,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"data.openstack_images_image_ids_v2.images_by_size_min", "ids.#", "1"),
-					resource.TestCheckResourceAttrPair(
-						"data.openstack_images_image_ids_v2.images_by_size_min", "ids.0",
-						"openstack_images_image_v2.image_2", "id"),
-				),
-			},
-			{
-				Config: testAccOpenStackImagesV2ImageIDsDataSource_max,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"data.openstack_images_image_ids_v2.images_by_size_max", "ids.#", "1"),
-					resource.TestCheckResourceAttrPair(
-						"data.openstack_images_image_ids_v2.images_by_size_max", "ids.0",
-						"openstack_images_image_v2.image_1", "id"),
-				),
-			},*/
 			{
 				Config: testAccOpenStackImagesV2ImageIDsDataSource_properties,
 				Check: resource.ComposeTestCheckFunc(
