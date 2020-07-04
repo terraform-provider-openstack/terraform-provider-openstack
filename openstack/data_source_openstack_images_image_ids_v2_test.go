@@ -127,24 +127,6 @@ data "openstack_images_image_ids_v2" "images_by_tag" {
 }
 `, testAccOpenStackImagesV2ImageIDsDataSource_cirros)
 
-var testAccOpenStackImagesV2ImageIDsDataSource_min = fmt.Sprintf(`
-%s
-
-data "openstack_images_image_ids_v2" "images_by_size_min" {
-	size_min = "15000000"
-	visibility = "private"
-}
-`, testAccOpenStackImagesV2ImageIDsDataSource_cirros)
-
-var testAccOpenStackImagesV2ImageIDsDataSource_max = fmt.Sprintf(`
-%s
-
-data "openstack_images_image_ids_v2" "images_by_size_max" {
-	size_max = "15000000"
-	visibility = "private"
-}
-`, testAccOpenStackImagesV2ImageIDsDataSource_cirros)
-
 var testAccOpenStackImagesV2ImageIDsDataSource_properties = fmt.Sprintf(`
 %s
 
