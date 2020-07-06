@@ -2,7 +2,7 @@
 
 FEATURES
 
-* * __New Data Source__: `openstack_images_image_ids_v2` [GH-139]
+* __New Data Source__: `openstack_images_image_ids_v2` [GH-139]
 
 IMPROVEMENTS
 
