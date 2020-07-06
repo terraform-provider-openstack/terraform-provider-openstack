@@ -1,5 +1,9 @@
 ## 1.30.0 (Unreleased)
 
+FEATURES
+
+* * __New Data Source__: `openstack_images_image_ids_v2` [GH-139]
+
 IMPROVEMENTS
 
 * Added `floating_ip_enabled` argument/attribute and `merge_labels` argument for `openstack_containerinfra_cluster_v1` resource [GH-1024]
