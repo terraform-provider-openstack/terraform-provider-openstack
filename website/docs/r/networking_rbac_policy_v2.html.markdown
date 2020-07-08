@@ -36,6 +36,15 @@ resource "openstack_networking_rbac_policy_v2" "rbac_policy_1" {
   object_type   = "network"
   target_tenant = "20415a973c9e45d3917f078950644697"
 }
+
+resource "openstack_networking_rbac_policy_v2" "rbac_policy_1" {
+  action        = "access_as_shared"
+  object_search {
+    name_glob   = "netowrk*"
+  }
+  object_type   = "network"
+  target_tenant = "31526ba84daf56e4a280189a617557a8"
+}
 ```
 
 ## Argument Reference
@@ -50,9 +59,25 @@ The following arguments are supported:
 * `action` - (Required) Action for the RBAC policy. Can either be
   `access_as_external` or `access_as_shared`.
 
-* `object_id` - (Required) The ID of the `object_type` resource. An
+* `object_id` - (Optional) The ID of the `object_type` resource. An
   `object_type` of `network` returns a network ID and an `object_type` of
-   `qos_policy` returns a QoS ID.
+   `qos_policy` returns a QoS ID. One of `object_id` or `object_search`
+   must be set.
+
+* `object_search` - (Optional) A search criteria to find for the object to
+  share. The searched for object is of the `object_type` resource. An
+  `object_type` of `network` returns a network ID and an `object_type` of
+   `qos_policy` returns a QoS ID. One of `object_id` or `object_search`
+   must be set. This filed includes the following arguments:
+  * `name_glob` - (Required) The glob expression that will be used to
+    search for objects. The search will return all the `object_type`
+    resources whose name matches the glob, ordered lèhabetically. The
+    first one returned will be shared.
+  * `owning_tenant_id` - (Optional) The search will be limited to resources
+    owned by this tenant.
+  * `unshared` - (Optional) The search will be limited to resources
+    that are not shared with any project, i.e. that have no associated RBAC.
+    The default value is `true`.
 
 * `object_type` - (Required) The type of the object that the RBAC policy
   affects. Can either be `qos-policy` or `network`.
