@@ -107,6 +107,12 @@ func resourceIdentityGroupV3Update(d *schema.ResourceData, meta interface{}) err
 		updateOpts.Name = d.Get("name").(string)
 	}
 
+	if d.HasChange("description") {
+		hasChange = true
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
+	}
+
 	if hasChange {
 		_, err := groups.Update(identityClient, d.Id(), updateOpts).Extract()
 		if err != nil {
