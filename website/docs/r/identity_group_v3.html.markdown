@@ -18,6 +18,7 @@ this resource.
 ```hcl
 resource "openstack_identity_group_v3" "group_1" {
   name = "group_1"
+  description = "group 1"
 }
 ```
 
@@ -26,6 +27,8 @@ resource "openstack_identity_group_v3" "group_1" {
 The following arguments are supported:
 
 * `name` - The name of the group.
+
+* `description` - (Optional) A description of the group.
 
 * `domain_id` - (Optional) The domain the group belongs to.
 
@@ -38,6 +41,7 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `name` - See Argument Reference above.
+* `description` - See Argument Reference above.
 * `domain_id` - See Argument Reference above.
 * `region` - See Argument Reference above.
 
