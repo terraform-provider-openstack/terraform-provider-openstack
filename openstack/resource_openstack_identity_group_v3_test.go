@@ -25,6 +25,8 @@ func TestAccIdentityV3Group_basic(t *testing.T) {
 					testAccCheckIdentityV3GroupExists("openstack_identity_group_v3.group_1", &group),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_group_v3.group_1", "name", &group.Name),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_group_v3.group_1", "description", &group.Description),
 				),
 			},
 			{
@@ -33,6 +35,8 @@ func TestAccIdentityV3Group_basic(t *testing.T) {
 					testAccCheckIdentityV3GroupExists("openstack_identity_group_v3.group_1", &group),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_group_v3.group_1", "name", &group.Name),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_group_v3.group_1", "description", &group.Description),
 				),
 			},
 		},
@@ -94,12 +98,14 @@ func testAccCheckIdentityV3GroupExists(n string, group *groups.Group) resource.T
 
 const testAccIdentityV3Group_basic = `
 resource "openstack_identity_group_v3" "group_1" {
-  name = "group_1"
+	name = "group_1"
+	description = "Terraform accept test"
 }
 `
 
 const testAccIdentityV3Group_update = `
 resource "openstack_identity_group_v3" "group_1" {
-  name = "group_2"
+	name = "group_2"
+	description = "Terraform accept test"
 }
 `

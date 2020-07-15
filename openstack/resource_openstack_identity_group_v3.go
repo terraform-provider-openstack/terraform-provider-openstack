@@ -30,11 +30,17 @@ func resourceIdentityGroupV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 		},
 	}
@@ -48,8 +54,9 @@ func resourceIdentityGroupV3Create(d *schema.ResourceData, meta interface{}) err
 	}
 
 	createOpts := groups.CreateOpts{
-		DomainID: d.Get("domain_id").(string),
-		Name:     d.Get("name").(string),
+		DomainID:    d.Get("domain_id").(string),
+		Name:        d.Get("name").(string),
+		Description: d.Get("description").(string),
 	}
 
 	log.Printf("[DEBUG] openstack_identity_group_v3 create options: %#v", createOpts)
@@ -79,6 +86,7 @@ func resourceIdentityGroupV3Read(d *schema.ResourceData, meta interface{}) error
 
 	d.Set("domain_id", group.DomainID)
 	d.Set("name", group.Name)
+	d.Set("description", group.Description)
 	d.Set("region", GetRegion(d, config))
 
 	return nil
