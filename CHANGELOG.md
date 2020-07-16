@@ -2,6 +2,7 @@
 
 FEATURES
 
+* __New Resource__: `openstack_identity_group_v3` [GH-1028]
 * __New Data Source__: `openstack_images_image_ids_v2` [GH-139]
 
 IMPROVEMENTS
