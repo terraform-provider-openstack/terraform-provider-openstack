@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccOpenStackObjectStorageTempurlV1_basic(t *testing.T) {
-	objectName := "object"
+	objectName := "object/with/slashes"
 	containerName := "container"
 	ttl := 60
 
