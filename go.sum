@@ -77,6 +77,7 @@ github.com/gophercloud/gophercloud v0.12.0 h1:mZrie07npp6ODiwHZolTicr5jV8Ogn43Av
 github.com/gophercloud/gophercloud v0.12.0/go.mod h1:gmC5oQqMDOMO1t1gq5DquX/yAU808e/4mzjjDA76+Ss=
 github.com/gophercloud/utils v0.0.0-20200423144003-7c72efc7435d h1:fduaPzWwIfvOMLuHk2Al3GZH0XbUqG8MbElPop+Igzs=
 github.com/gophercloud/utils v0.0.0-20200423144003-7c72efc7435d/go.mod h1:ehWUbLQJPqS0Ep+CxeD559hsm9pthPXadJNKwZkp43w=
+github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c h1:iawx2ojEQA7c+GmkaVO5sN+k8YONibXyDO8RlsC+1bs=
 github.com/hashicorp/errwrap v1.0.0 h1:hLrqtEDnRye3+sgx6z4qVLNuviH3MR5aQ0ykNJa/UYA=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-cleanhttp v0.5.0/go.mod h1:JpRdi6/HCYpAwUzNwuwqhbovhLtngrth3wmdIIUrZ80=
