@@ -117,6 +117,14 @@ func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config) (neutr
 
 		opts.InsertHeaders = headers
 
+		if raw, ok := d.GetOk("allowed_cidrs"); ok {
+			allowedCidrs := make([]string, len(raw.([]interface{})))
+			for i, v := range raw.([]interface{}) {
+				allowedCidrs[i] = v.(string)
+			}
+			opts.AllowedCIDRs = allowedCidrs
+		}
+
 		createOpts = opts
 
 		return createOpts, nil
@@ -236,6 +244,17 @@ func chooseLBV2ListenerUpdateOpts(d *schema.ResourceData, config *Config) (neutr
 			}
 
 			opts.InsertHeaders = &headers
+		}
+
+		if d.HasChange("allowed_cidrs") {
+			hasChange = true
+			var allowedCidrs []string
+			if raw, ok := d.GetOk("allowed_cidrs"); ok {
+				for _, v := range raw.([]interface{}) {
+					allowedCidrs = append(allowedCidrs, v.(string))
+				}
+			}
+			opts.AllowedCIDRs = &allowedCidrs
 		}
 
 		if hasChange {

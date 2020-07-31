@@ -80,10 +80,13 @@ The following arguments are supported:
 
 * `admin_state_up` - (Optional) The administrative state of the Listener.
     A valid value is true (UP) or false (DOWN).
-    
+
 * `insert_headers` - (Optional) The list of key value pairs representing headers to insert
     into the request before it is sent to the backend members. Changing this updates the headers of the
     existing listener.
+
+* `allowed_cidrs` - (Optional) A list of CIDR blocks that are permitted to connect to this listener, denying
+    all other source addresses. If not present, defaults to allow all.
 
 ## Attributes Reference
 
@@ -105,6 +108,7 @@ The following attributes are exported:
 * `sni_container_refs` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
 * `insert_headers` - See Argument Reference above.
+* `allowed_cidrs` - See Argument Reference above.
 
 ## Import
 
