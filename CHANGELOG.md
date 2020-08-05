@@ -7,7 +7,8 @@ FEATURES
 
 IMPROVEMENTS
 
-* Added `floating_ip_enabled` argument/attribute and `merge_labels` argument for `openstack_containerinfra_cluster_v1` resource [GH-1024]
+* Added `floating_ip_enabled` argument/attribute and `merge_labels` argument for `containerinfra_cluster_v1` resource [GH-1024]
+* Added `allowed_cidrs` argument/attribute for `lb_listener_v2` resource [GH-1034]
 
 ## 1.29.0 (June 29, 2020)
 
