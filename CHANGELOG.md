@@ -1,14 +1,14 @@
-## 1.30.0 (Unreleased)
+## 1.30.0 (August 05, 2020)
 
 FEATURES
 
-* __New Resource__: `openstack_identity_group_v3` [GH-1028]
-* __New Data Source__: `openstack_images_image_ids_v2` [GH-139]
+* __New Resource__: `openstack_identity_group_v3` ([#1028](https://github.com/terraform-providers/terraform-provider-openstack/issues/1028))
+* __New Data Source__: `openstack_images_image_ids_v2` ([#139](https://github.com/terraform-providers/terraform-provider-openstack/issues/139))
 
 IMPROVEMENTS
 
-* Added `floating_ip_enabled` argument/attribute and `merge_labels` argument for `containerinfra_cluster_v1` resource [GH-1024]
-* Added `allowed_cidrs` argument/attribute for `lb_listener_v2` resource [GH-1034]
+* Added `floating_ip_enabled` argument/attribute and `merge_labels` argument for `containerinfra_cluster_v1` resource ([#1024](https://github.com/terraform-providers/terraform-provider-openstack/issues/1024))
+* Added `allowed_cidrs` argument/attribute for `lb_listener_v2` resource ([#1034](https://github.com/terraform-providers/terraform-provider-openstack/issues/1034))
 
 ## 1.29.0 (June 29, 2020)
 
