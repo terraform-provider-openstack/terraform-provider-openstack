@@ -268,7 +268,6 @@ func resourceContainerInfraClusterV1Create(d *schema.ResourceData, meta interfac
 
 	// Get boolean parameters that will be passed by reference.
 	floatingIPEnabled := d.Get("floating_ip_enabled").(bool)
-	mergeLabels := d.Get("merge_labels").(bool)
 
 	createOpts := clusters.CreateOpts{
 		ClusterTemplateID: d.Get("cluster_template_id").(string),
@@ -276,7 +275,6 @@ func resourceContainerInfraClusterV1Create(d *schema.ResourceData, meta interfac
 		FlavorID:          flavor,
 		Keypair:           d.Get("keypair").(string),
 		Labels:            labels,
-		MergeLabels:       &mergeLabels,
 		MasterFlavorID:    masterFlavor,
 		Name:              d.Get("name").(string),
 		FixedNetwork:      d.Get("fixed_network").(string),
@@ -303,6 +301,11 @@ func resourceContainerInfraClusterV1Create(d *schema.ResourceData, meta interfac
 	nodeCount := d.Get("node_count").(int)
 	if nodeCount > 0 {
 		createOpts.NodeCount = &nodeCount
+	}
+
+	mergeLabels := d.Get("merge_labels").(bool)
+	if mergeLabels {
+		createOpts.MergeLabels = &mergeLabels
 	}
 
 	s, err := clusters.Create(containerInfraClient, createOpts).Extract()
