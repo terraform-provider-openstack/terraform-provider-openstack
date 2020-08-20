@@ -1,4 +1,7 @@
 ## 1.31.0 (Unreleased)
+
+* __New Resource__: `identity_ec2_credential_v3` [GH-1033]
+
 ## 1.30.0 (August 05, 2020)
 
 FEATURES
