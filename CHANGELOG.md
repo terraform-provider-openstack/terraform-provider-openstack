@@ -1,6 +1,12 @@
 ## 1.31.0 (Unreleased)
 
+FEATURES
+
 * __New Resource__: `identity_ec2_credential_v3` [GH-1033]
+
+BUG FIXES
+
+* Fixed backward compatibility issue with empty value in `merge_labels` argument of `containerinfra_cluster_v1` [GH-1039]
 
 ## 1.30.0 (August 05, 2020)
 
