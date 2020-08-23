@@ -5,10 +5,7 @@ import (
 	"log"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/identity/v2/tenants"
-	tokens2 "github.com/gophercloud/gophercloud/openstack/identity/v2/tokens"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/extensions/ec2credentials"
-	tokens3 "github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -184,55 +181,4 @@ func resourceIdentityEc2CredentialV3Delete(d *schema.ResourceData, meta interfac
 		}
 	}
 	return nil
-}
-
-func GetTokenInfo(sc *gophercloud.ServiceClient) (string, string, error) {
-	r := sc.ProviderClient.GetAuthResult()
-	switch r := r.(type) {
-	case tokens2.CreateResult:
-		user, project, err := GetTokenInfoV2(r)
-		if err != nil {
-			return "", "", err
-		}
-		return user, project, nil
-	case tokens3.CreateResult:
-		user, project, err := GetTokenInfoV3(r)
-		if err != nil {
-			return "", "", err
-		}
-		return user, project, nil
-	default:
-		return "", "", fmt.Errorf("got unexpected AuthResult type %t", r)
-	}
-}
-
-func GetTokenInfoV3(t tokens3.CreateResult) (string, string, error) {
-	user, err := t.ExtractUser()
-	if err != nil {
-		return "", "", err
-	}
-	project, err := t.ExtractProject()
-	if err != nil {
-		return "", "", err
-	}
-	return user.ID, project.ID, nil
-}
-
-func GetTokenInfoV2(t tokens2.CreateResult) (string, string, error) {
-	var tokeninfo struct {
-		Access struct {
-			Token struct {
-				Expires string         `json:"expires"`
-				ID      string         `json:"id"`
-				Tenant  tenants.Tenant `json:"tenant"`
-			} `json:"token"`
-			User tokens2.User `json:"user"`
-		} `json:"access"`
-	}
-
-	err := t.ExtractInto(&tokeninfo)
-	if err != nil {
-		return "", "", err
-	}
-	return tokeninfo.Access.User.ID, tokeninfo.Access.Token.ID, nil
 }
