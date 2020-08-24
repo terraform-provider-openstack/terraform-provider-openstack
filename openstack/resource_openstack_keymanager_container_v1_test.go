@@ -84,6 +84,27 @@ func TestAccKeyManagerContainerV1_acls(t *testing.T) {
 	})
 }
 
+func TestAccKeyManagerContainerV1_certificate_type(t *testing.T) {
+	var container containers.Container
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckSecretV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKeyManagerContainerV1_certificate_type,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckContainerV1Exists(
+						"openstack_keymanager_container_v1.container_1", &container),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "name", &container.Name),
+					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "type", &container.Type),
+					resource.TestCheckResourceAttr("openstack_keymanager_container_v1.container_1", "secret_refs.#", "3"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
 	var container containers.Container
 	resource.Test(t, resource.TestCase{
@@ -210,7 +231,7 @@ resource "openstack_keymanager_container_v1" "container_1" {
   }
 
   secret_refs {
-    name       = "intermediate"
+    name       = "intermediates"
     secret_ref = "${openstack_keymanager_secret_v1.intermediate_1.secret_ref}"
   }
 }
@@ -264,7 +285,7 @@ var testAccKeyManagerContainerV1_update2 = fmt.Sprintf(`
 
 resource "openstack_keymanager_container_v1" "container_1" {
   name = "generic"
-  type = "generic"
+  type = "certificate"
 }
 `, testAccKeyManagerContainerV1)
 
@@ -286,7 +307,7 @@ resource "openstack_keymanager_container_v1" "container_1" {
   }
 
   secret_refs {
-    name       = "intermediate"
+    name       = "intermediates"
     secret_ref = "${openstack_keymanager_secret_v1.intermediate_1.secret_ref}"
   }
 
@@ -320,12 +341,36 @@ resource "openstack_keymanager_container_v1" "container_1" {
   }
 
   secret_refs {
-    name       = "intermediate"
+    name       = "intermediates"
     secret_ref = "${openstack_keymanager_secret_v1.intermediate_1.secret_ref}"
   }
 
   acl {
     read {}
+  }
+}
+`, testAccKeyManagerContainerV1)
+
+var testAccKeyManagerContainerV1_certificate_type = fmt.Sprintf(`
+%s
+
+resource "openstack_keymanager_container_v1" "container_1" {
+  name = "generic"
+  type = "certificate"
+
+  secret_refs {
+    name       = "certificate"
+    secret_ref = "${openstack_keymanager_secret_v1.certificate_1.secret_ref}"
+  }
+
+  secret_refs {
+    name       = "private_key"
+    secret_ref = "${openstack_keymanager_secret_v1.private_key_1.secret_ref}"
+  }
+
+  secret_refs {
+    name       = "intermediates"
+    secret_ref = "${openstack_keymanager_secret_v1.intermediate_1.secret_ref}"
   }
 }
 `, testAccKeyManagerContainerV1)
