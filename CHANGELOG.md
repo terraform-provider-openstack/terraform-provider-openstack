@@ -4,6 +4,10 @@ FEATURES
 
 * __New Resource__: `identity_ec2_credential_v3` [GH-1033]
 
+IMPROVEMENTS
+
+* Reduced Identity requests across some `identity` resources and data sources by reusing functions to get the current token scope details [GH-1044]
+
 BUG FIXES
 
 * Fixed backward compatibility issue with empty value in `merge_labels` argument of `containerinfra_cluster_v1` [GH-1039]
