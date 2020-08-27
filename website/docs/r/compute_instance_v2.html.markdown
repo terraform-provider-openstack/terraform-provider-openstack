@@ -453,6 +453,8 @@ The `scheduler_hints` block supports:
 
 * `target_cell` - (Optional) The name of a cell to host the instance.
 
+* `different_cell` - (Optional) The names of cells where not to build the instance.
+
 * `build_near_host_ip` - (Optional) An IP Address in CIDR form. The instance
     will be placed on a compute node that is in the same subnet.
 

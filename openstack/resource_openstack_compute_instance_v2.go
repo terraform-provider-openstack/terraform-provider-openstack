@@ -340,6 +340,12 @@ func resourceComputeInstanceV2() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 						},
+						"different_cell": {
+							Type:     schema.TypeList,
+							Optional: true,
+							ForceNew: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
 						"build_near_host_ip": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -1256,12 +1262,20 @@ func resourceInstanceSchedulerHintsV2(d *schema.ResourceData, schedulerHintsRaw 
 		}
 	}
 
+	differentCell := []string{}
+	if v, ok := schedulerHintsRaw["different_cell"].([]interface{}); ok {
+		for _, dh := range v {
+			differentCell = append(differentCell, dh.(string))
+		}
+	}
+
 	schedulerHints := schedulerhints.SchedulerHints{
 		Group:                schedulerHintsRaw["group"].(string),
 		DifferentHost:        differentHost,
 		SameHost:             sameHost,
 		Query:                query,
 		TargetCell:           schedulerHintsRaw["target_cell"].(string),
+		DifferentCell:        differentCell,
 		BuildNearHostIP:      schedulerHintsRaw["build_near_host_ip"].(string),
 		AdditionalProperties: schedulerHintsRaw["additional_properties"].(map[string]interface{}),
 	}
@@ -1404,6 +1418,7 @@ func resourceComputeSchedulerHintsHash(v interface{}) int {
 	buf.WriteString(fmt.Sprintf("%s-", m["different_host"].([]interface{})))
 	buf.WriteString(fmt.Sprintf("%s-", m["same_host"].([]interface{})))
 	buf.WriteString(fmt.Sprintf("%s-", m["query"].([]interface{})))
+	buf.WriteString(fmt.Sprintf("%s-", m["different_cell"].([]interface{})))
 
 	return hashcode.String(buf.String())
 }
