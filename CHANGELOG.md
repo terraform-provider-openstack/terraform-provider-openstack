@@ -7,6 +7,7 @@ FEATURES
 IMPROVEMENTS
 
 * Reduced Identity requests across some `identity` resources and data sources by reusing functions to get the current token scope details [GH-1044]
+* Added `floating_ip_enabled` argument into `containerinfra_cluster_v1` datasource [GH-1043]
 
 BUG FIXES
 
