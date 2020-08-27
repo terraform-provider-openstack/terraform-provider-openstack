@@ -11,6 +11,7 @@ IMPROVEMENTS
 BUG FIXES
 
 * Fixed backward compatibility issue with empty value in `merge_labels` argument of `containerinfra_cluster_v1` [GH-1039]
+* Fixed errors while creating `keymanager_container_v1` resource with the `certificate` type [GH-1046]
 
 ## 1.30.0 (August 05, 2020)
 
