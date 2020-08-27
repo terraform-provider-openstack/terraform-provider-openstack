@@ -232,10 +232,25 @@ Using this OpenStack provider with Rackspace is not supported and not
 guaranteed to work; however, users have reported success with the
 following notes in mind:
 
-* Interacting with instances has been seen to work. Interacting with
-all other resources is either untested or known to not work.
+* Interacting with instances and networks has been seen to work. Interacting
+with all other resources is either untested or known to not work.
 
 * Use your _password_ instead of your Rackspace API KEY.
+
+* To use networks, override the endpoint in your provider configuration
+
+```
+provider "openstack" {
+  user_name = "your-username"
+  password  = "your-password"
+  tenant_id = "your-tenant-id"
+  region    = "IAD"
+  auth_url  = "https://identity.api.rackspacecloud.com/v2.0/"
+  endpoint_overrides = {
+    "network" = "https://iad.networks.api.rackspacecloud.com/v2.0/"
+  }
+}
+```
 
 * Explicitly define the public and private networks in your
 instances as shown below:
