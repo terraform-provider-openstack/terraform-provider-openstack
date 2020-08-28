@@ -6,10 +6,11 @@ description: |-
   Manages a V3 EC2 Credential resource within OpenStack Keystone.
 ---
 
-# openstack\_identity\_ec2_\_credential\_v3
+# openstack\_identity\_ec2\_credential\_v3
 
 Manages a V3 EC2 Credential resource within OpenStack Keystone.
-EC2 credentials in Openstack are used to access S3 compatible Swift/RadosGW endpoints
+EC2 credentials in OpenStack are used to access S3 compatible Swift/RadosGW
+endpoints or to authenticate against Keystone.
 
 ~> **Note:** All arguments including the EC2 credential access key and secret
 will be stored in the raw state as plain-text. [Read more about sensitive data
@@ -24,6 +25,7 @@ resource "openstack_identity_ec2_credential_v3" "ec2_key1" {}
 ```
 
 ### EC2 credential in pre-defined project scope
+
 ```hcl
 resource "openstack_identity_ec2_credential_v3" "ec2_key1" {
     project_id = "f7ac731cc11f40efbc03a9f9e1d1d21f"
@@ -31,15 +33,22 @@ resource "openstack_identity_ec2_credential_v3" "ec2_key1" {
 ```
 
 ## Arguments Reference
+
+The following arguments are supported:
+
+* `region` - (Optional) The region in which to obtain the V3 Keystone client.
+   If omitted, the `region` argument of the provider is used. Changing this
+   creates a new EC2 credential.
 * `project_id` - (Optional) The ID of the project the EC2 credential is created
-    for and that authentication requests using this EC2 credential will
-    be scoped to.
+   for and that authentication requests using this EC2 credential will
+   be scoped to.
 * `user_id` - (Optional) The ID of the user the EC2 credential is created for.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
+* `region` - See Argument Reference above.
 * `access` - contains an EC2 credential access UUID
 * `secret` - contains an EC2 credential secret UUID
 * `user_id` - contains a User ID of the EC2 credential owner
