@@ -9,6 +9,8 @@ IMPROVEMENTS
 * Reduced Identity requests across some `identity` resources and data sources by reusing functions to get the current token scope details [GH-1044]
 * Added `floating_ip_enabled` argument into `containerinfra_cluster_v1` datasource [GH-1043]
 * Updated Rackspace compatibility notes in documentation [GH-1049]
+* Updated `terraform-plugin-sdk` to `v1.15.0` [GH-1051]
+* Updated Go version to `1.14.7` [GH-1051]
 
 BUG FIXES
 
