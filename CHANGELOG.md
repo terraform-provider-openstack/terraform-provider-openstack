@@ -1,21 +1,21 @@
-## 1.31.0 (Unreleased)
+## 1.31.0 (August 28, 2020)
 
 FEATURES
 
-* __New Resource__: `identity_ec2_credential_v3` [GH-1033]
+* __New Resource__: `identity_ec2_credential_v3` ([#1033](https://github.com/terraform-providers/terraform-provider-openstack/issues/1033))
 
 IMPROVEMENTS
 
-* Reduced Identity requests across some `identity` resources and data sources by reusing functions to get the current token scope details [GH-1044]
-* Added `floating_ip_enabled` argument into `containerinfra_cluster_v1` datasource [GH-1043]
-* Updated Rackspace compatibility notes in documentation [GH-1049]
-* Updated `terraform-plugin-sdk` to `v1.15.0` [GH-1051]
-* Updated Go version to `1.14.7` [GH-1051]
+* Reduced Identity requests across some `identity` resources and data sources by reusing functions to get the current token scope details ([#1044](https://github.com/terraform-providers/terraform-provider-openstack/issues/1044))
+* Added `floating_ip_enabled` argument into `containerinfra_cluster_v1` datasource ([#1043](https://github.com/terraform-providers/terraform-provider-openstack/issues/1043))
+* Updated Rackspace compatibility notes in documentation ([#1049](https://github.com/terraform-providers/terraform-provider-openstack/issues/1049))
+* Updated `terraform-plugin-sdk` to `v1.15.0` ([#1051](https://github.com/terraform-providers/terraform-provider-openstack/issues/1051))
+* Updated Go version to `1.14.7` ([#1051](https://github.com/terraform-providers/terraform-provider-openstack/issues/1051))
 
 BUG FIXES
 
-* Fixed backward compatibility issue with empty value in `merge_labels` argument of `containerinfra_cluster_v1` [GH-1039]
-* Fixed errors while creating `keymanager_container_v1` resource with the `certificate` type [GH-1046]
+* Fixed backward compatibility issue with empty value in `merge_labels` argument of `containerinfra_cluster_v1` ([#1039](https://github.com/terraform-providers/terraform-provider-openstack/issues/1039))
+* Fixed errors while creating `keymanager_container_v1` resource with the `certificate` type ([#1046](https://github.com/terraform-providers/terraform-provider-openstack/issues/1046))
 
 ## 1.30.0 (August 05, 2020)
 
