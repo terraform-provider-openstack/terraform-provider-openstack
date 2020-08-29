@@ -1,4 +1,9 @@
 ## 1.32.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Fixed documentation for `identity_ec2_credential_v3` resource [GH-1052]
+
 ## 1.31.0 (August 28, 2020)
 
 FEATURES
