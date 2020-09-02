@@ -327,6 +327,10 @@ The following arguments are supported:
     instance. The network object structure is documented below. Changing this
     creates a new server.
 
+* `network_mode` - (Optional) Special string for `network` option to create
+  the server. `network_mode` can be `"auto"` or `"none"`.
+  Please see the following [reference](https://docs.openstack.org/api-ref/compute/?expanded=create-server-detail#id11) for more information. Conflicts with `network`.
+
 * `metadata` - (Optional) Metadata key/value pairs to make available from
     within the instance. Changing this updates the existing server metadata.
 
