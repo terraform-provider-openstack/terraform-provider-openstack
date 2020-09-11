@@ -3,6 +3,7 @@
 IMPROVEMENTS
 
 * Fixed documentation for `identity_ec2_credential_v3` resource [GH-1052]
+* Added `network_mode` argument for `compute_instance_v2` resource [GH-1054]
 
 ## 1.31.0 (August 28, 2020)
 
