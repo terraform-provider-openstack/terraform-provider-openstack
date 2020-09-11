@@ -475,6 +475,42 @@ func TestAccComputeV2Instance_timeout(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2Instance_networkModeAuto(t *testing.T) {
+	var instance servers.Server
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2Instance_networkModeAuto,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2InstanceNetworkExists("openstack_compute_instance_v2.instance_1", &instance),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_networkModeNone(t *testing.T) {
+	var instance servers.Server
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2Instance_networkModeNone,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2InstanceNetworkDoesNotExist("openstack_compute_instance_v2.instance_1", &instance),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeV2Instance_networkNameToID(t *testing.T) {
 	var instance servers.Server
 	var network networks.Network
@@ -817,6 +853,54 @@ func testAccCheckComputeV2InstanceTags(name string, tags []string) resource.Test
 			return fmt.Errorf(
 				"%s.tags: expected: %#v, got %#v", name, tags, rtags)
 		}
+		return nil
+	}
+}
+
+func testAccCheckComputeV2InstanceNetworkExists(
+	n string, instance *servers.Server) resource.TestCheckFunc {
+
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+
+		if !ok {
+			return fmt.Errorf("resource not found: %s", n)
+		}
+
+		networkCount, ok := rs.Primary.Attributes["network.#"]
+
+		if !ok {
+			return fmt.Errorf("network attributes not found: %s", n)
+		}
+
+		if networkCount != "1" {
+			return fmt.Errorf("network should be exists when network mode 'auto': %s", n)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckComputeV2InstanceNetworkDoesNotExist(
+	n string, instance *servers.Server) resource.TestCheckFunc {
+
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+
+		if !ok {
+			return fmt.Errorf("resource not found: %s", n)
+		}
+
+		networkCount, ok := rs.Primary.Attributes["network.#"]
+
+		if !ok {
+			return fmt.Errorf("network attributes not found: %s", n)
+		}
+
+		if networkCount != "0" {
+			return fmt.Errorf("network should not exists when network mode 'none': %s", n)
+		}
+
 		return nil
 	}
 }
@@ -1264,6 +1348,22 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_networkModeAuto = fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+
+  network_mode = "auto"
+}
+`)
+
+var testAccComputeV2Instance_networkModeNone = fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "test-instance-1"
+
+  network_mode = "none"
+}
+`)
 
 var testAccComputeV2Instance_networkNameToID = fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
