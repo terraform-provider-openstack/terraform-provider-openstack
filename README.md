@@ -25,17 +25,17 @@ Requirements
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/terraform-providers/terraform-provider-openstack`
+Clone repository to: `$GOPATH/src/github.com/terraform-provider-openstack/terraform-provider-openstack`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/terraform-providers; cd $GOPATH/src/github.com/terraform-providers
-$ git clone https://github.com/terraform-providers/terraform-provider-openstack
+$ mkdir -p $GOPATH/src/github.com/terraform-provider-openstack; cd $GOPATH/src/github.com/terraform-provider-openstack
+$ git clone https://github.com/terraform-provider-openstack/terraform-provider-openstack
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/terraform-providers/terraform-provider-openstack
+$ cd $GOPATH/src/github.com/terraform-provider-openstack/terraform-provider-openstack
 $ make build
 ```
 
@@ -43,7 +43,7 @@ Using the provider
 ----------------------
 Please see the documentation at [terraform.io](https://www.terraform.io/docs/providers/openstack/index.html).
 
-Or you can browse the documentation within this repo [here](https://github.com/terraform-providers/terraform-provider-openstack/tree/master/website/docs).
+Or you can browse the documentation within this repo [here](https://github.com/terraform-provider-openstack/terraform-provider-openstack/tree/master/website/docs).
 
 Developing the Provider
 ---------------------------

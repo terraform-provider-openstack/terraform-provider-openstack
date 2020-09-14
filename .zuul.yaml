@@ -1,5 +1,5 @@
 - project:
-    name: terraform-providers/terraform-provider-openstack
+    name: terraform-provider-openstack/terraform-provider-openstack
     check:
       jobs:
         - terraform-provider-openstack-unittest
