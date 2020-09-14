@@ -1,4 +1,4 @@
-module github.com/terraform-providers/terraform-provider-openstack
+module github.com/terraform-provider-openstack/terraform-provider-openstack
 
 go 1.14
 
