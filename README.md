@@ -25,17 +25,16 @@ Requirements
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/terraform-provider-openstack/terraform-provider-openstack`
+Clone the repository
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/terraform-provider-openstack; cd $GOPATH/src/github.com/terraform-provider-openstack
-$ git clone https://github.com/terraform-provider-openstack/terraform-provider-openstack
+$ git clone git@github.com:terraform-provider-openstack/terraform-provider-openstack.git
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/terraform-provider-openstack/terraform-provider-openstack
+$ cd terraform-provider-openstack
 $ make build
 ```
 
@@ -48,15 +47,12 @@ Or you can browse the documentation within this repo [here](https://github.com/t
 Developing the Provider
 ---------------------------
 
-If you wish to work on the provider, you'll first need [Go](https://golang.org) installed on your machine (version 1.14+ is *required*). You'll also need to correctly setup a [GOPATH](https://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
+If you wish to work on the provider, you'll first need [Go](https://golang.org) installed on your machine (version 1.14+ is *required*).
 
-To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
+To compile the provider, run `make build`. This will build the provider and put the provider binary in the current directory.
 
 ```sh
 $ make build
-...
-$ $GOPATH/bin/terraform-provider-openstack
-...
 ```
 
 For further details on how to work on this provider, please see the [Testing and Development](https://www.terraform.io/docs/providers/openstack/index.html#testing-and-development) documentation.
