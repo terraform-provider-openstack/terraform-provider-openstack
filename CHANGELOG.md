@@ -1,9 +1,13 @@
-## 1.32.0 (Unreleased)
+## 1.32.0 (September 15, 2020)
+
+NOTES
+
+* This is the first release that is available from [registry.terraform.io](https://registry.terraform.io)
 
 IMPROVEMENTS
 
-* Fixed documentation for `identity_ec2_credential_v3` resource [GH-1052]
-* Added `network_mode` argument for `compute_instance_v2` resource [GH-1054]
+* Fixed documentation for `identity_ec2_credential_v3` resource ([#1052](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/1052))
+* Added `network_mode` argument for `compute_instance_v2` resource ([#1054](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/1054))
 
 ## 1.31.0 (August 28, 2020)
 
