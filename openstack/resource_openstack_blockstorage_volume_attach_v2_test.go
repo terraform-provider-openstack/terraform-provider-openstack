@@ -15,7 +15,10 @@ func TestAccBlockStorageVolumeAttachV2_basic(t *testing.T) {
 	var va volumes.Attachment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageVolumeAttachV2Destroy,
 		Steps: []resource.TestStep{
@@ -33,7 +36,10 @@ func TestAccBlockStorageVolumeAttachV2_timeout(t *testing.T) {
 	var va volumes.Attachment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageVolumeAttachV2Destroy,
 		Steps: []resource.TestStep{
