@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
@@ -138,28 +137,6 @@ func testAccCheckNetworkingV2FloatingIPBoundToCorrectIP(fip *floatingips.Floatin
 		}
 
 		return nil
-	}
-}
-
-func testAccCheckNetworkingV2InstanceFloatingIPAttach(
-	instance *servers.Server, fip *floatingips.FloatingIP) resource.TestCheckFunc {
-
-	// When Neutron is used, the Instance sometimes does not know its floating IP until some time
-	// after the attachment happened. This can be anywhere from 2-20 seconds. Because of that delay,
-	// the test usually completes with failure.
-	// However, the Fixed IP is known on both sides immediately, so that can be used as a bridge
-	// to ensure the two are now related.
-	// I think a better option is to introduce some state changing config in the actual resource.
-	return func(s *terraform.State) error {
-		for _, networkAddresses := range instance.Addresses {
-			for _, element := range networkAddresses.([]interface{}) {
-				address := element.(map[string]interface{})
-				if address["OS-EXT-IPS:type"] == "fixed" && address["addr"] == fip.FixedIP {
-					return nil
-				}
-			}
-		}
-		return fmt.Errorf("Floating IP %+v was not attached to instance %+v", fip, instance)
 	}
 }
 

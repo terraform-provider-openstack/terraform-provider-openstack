@@ -116,9 +116,10 @@ func testAccCheckIdentityV3EndpointExists(n string, endpoint *endpoints.Endpoint
 			if endpointList, err := endpoints.ExtractEndpoints(page); err != nil {
 				return false, err
 			} else {
-				for _, v := range endpointList {
-					if v.ID == rs.Primary.ID {
-						found = &v
+				for _, ep := range endpointList {
+					e := ep
+					if e.ID == rs.Primary.ID {
+						found = &e
 						break
 					}
 				}

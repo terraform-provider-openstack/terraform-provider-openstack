@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
@@ -706,26 +705,6 @@ func testAccCheckComputeV2InstanceExists(n string, instance *servers.Server) res
 		*instance = *found
 
 		return nil
-	}
-}
-
-func testAccCheckComputeV2InstanceDoesNotExist(n string, instance *servers.Server) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
-		}
-
-		_, err = servers.Get(computeClient, instance.ID).Extract()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				return nil
-			}
-			return err
-		}
-
-		return fmt.Errorf("Instance still exists")
 	}
 }
 

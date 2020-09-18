@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 )
 
@@ -179,26 +178,6 @@ func testAccCheckBlockStorageV3VolumeExists(n string, volume *volumes.Volume) re
 		*volume = *found
 
 		return nil
-	}
-}
-
-func testAccCheckBlockStorageV3VolumeDoesNotExist(t *testing.T, n string, volume *volumes.Volume) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.BlockStorageV3Client(OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
-		}
-
-		_, err = volumes.Get(blockStorageClient, volume.ID).Extract()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				return nil
-			}
-			return err
-		}
-
-		return fmt.Errorf("Volume still exists")
 	}
 }
 

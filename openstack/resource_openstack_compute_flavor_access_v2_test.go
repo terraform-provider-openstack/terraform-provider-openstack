@@ -119,7 +119,8 @@ func testAccCheckComputeV2FlavorAccessExists(n string, access *flavors.FlavorAcc
 				return false, err
 			}
 
-			for _, a := range accessList {
+			for _, acc := range accessList {
+				a := acc
 				if a.TenantID == tid {
 					access = &a
 					return false, nil

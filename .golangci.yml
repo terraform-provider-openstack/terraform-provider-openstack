@@ -1,0 +1,59 @@
+run:
+  deadline: 5m
+  modules-download-mode: vendor
+
+linters:
+  fast: false
+  disable-all: true
+  enable:
+    - asciicheck
+    - bodyclose
+    - deadcode
+    - depguard
+    - dogsled
+#    - errcheck
+    - exhaustive
+    - exportloopref
+#    - goconst
+#    - gocritic
+#    - godot
+#    - godox
+#    - gofmt
+#    - gofumpt
+#    - goheader
+#    - goimports
+#    - golint
+#    - gomodguard
+#    - goprintffuncname
+#    - gosec
+#    - gosimple
+#    - govet
+#    - ineffassign
+#    - interfacer
+#    - maligned
+#    - misspell
+#    - nakedret
+#    - noctx
+#    - nolintlint
+#    - prealloc
+#    - rowserrcheck
+#    - scopelint
+#    - sqlclosecheck
+#    - staticcheck
+#    - structcheck
+#    - stylecheck
+#    - typecheck
+#    - unconvert
+#    - unused
+#    - varcheck
+#    - whitespace
+
+issues:
+  exclude-rules:
+    - linters:
+        - staticcheck
+      text: "SA1019:"
+
+    - linters:
+        - errcheck
+      text: "Error return value of `d.Set` is not checked"

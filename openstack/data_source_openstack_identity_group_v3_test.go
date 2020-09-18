@@ -19,7 +19,7 @@ func TestAccOpenStackIdentityV3GroupDataSource_basic(t *testing.T) {
 			{
 				Config: testAccOpenStackIdentityV3GroupDataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3DataSourceID("data.openstack_identity_group_v3.group_1"),
+					testAccCheckIdentityV3GroupDataSourceID("data.openstack_identity_group_v3.group_1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_identity_group_v3.group_1", "name", "admins"),
 				),
