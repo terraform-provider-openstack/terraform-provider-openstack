@@ -770,6 +770,9 @@ func testAccCheckComputeV2InstanceBootVolumeAttachment(
 				attachments = actual
 				return true, nil
 			})
+		if err != nil {
+			return fmt.Errorf("Unable to list volume attachments")
+		}
 
 		if len(attachments) == 1 {
 			return nil

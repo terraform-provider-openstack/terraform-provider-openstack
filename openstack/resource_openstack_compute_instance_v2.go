@@ -1147,8 +1147,14 @@ func resourceOpenStackComputeInstanceV2ImportState(d *schema.ResourceData, meta 
 
 		d.Set("block_device", bds)
 	}
+
 	metadata, err := servers.Metadata(computeClient, d.Id()).Extract()
+	if err != nil {
+		return nil, fmt.Errorf("Unable to read metadata for openstack_compute_instance_v2 %s: %s", d.Id(), err)
+	}
+
 	d.Set("metadata", metadata)
+
 	results[0] = d
 
 	return results, nil

@@ -145,6 +145,10 @@ func resourceIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) error
 		MinTimeout: 2 * time.Second,
 	}
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf(
+			"Error waiting for openstack_vpnaas_ipsec_policy_v2 %s to become active: %s", policy.ID, err)
+	}
 
 	log.Printf("[DEBUG] IPSec policy created: %#v", policy)
 

@@ -115,7 +115,7 @@ func resourceLBMemberV1Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] OpenStack LB Member Update Options: %#v", createOpts)
-	m, err = members.Update(networkingClient, m.ID, updateOpts).Extract()
+	_, err = members.Update(networkingClient, m.ID, updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error updating OpenStack LB member: %s", err)
 	}

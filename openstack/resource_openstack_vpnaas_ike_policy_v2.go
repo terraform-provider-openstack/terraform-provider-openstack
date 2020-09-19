@@ -143,6 +143,10 @@ func resourceIKEPolicyV2Create(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 2 * time.Second,
 	}
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf(
+			"Error waiting for openstack_vpnaas_ike_policy_v2 %s to become active: %s", policy.ID, err)
+	}
 
 	log.Printf("[DEBUG] IKE policy created: %#v", policy)
 
