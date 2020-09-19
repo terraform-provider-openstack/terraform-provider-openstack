@@ -31,38 +31,41 @@ func TestExpandToStringSlice(t *testing.T) {
 func TestCompatibleMicroversion(t *testing.T) {
 	actual, err := compatibleMicroversion("min", "2.1.0", "2.5")
 	assert.NotNil(t, err)
+	assert.False(t, actual)
 
 	actual, err = compatibleMicroversion("min", "2.1", "2.5.0")
 	assert.NotNil(t, err)
+	assert.False(t, actual)
 
 	actual, err = compatibleMicroversion("minn", "2.1", "2.5")
 	assert.NotNil(t, err)
+	assert.False(t, actual)
 
 	actual, err = compatibleMicroversion("min", "", "2.5")
 	assert.Nil(t, err)
-	assert.Equal(t, false, actual)
+	assert.False(t, actual)
 
 	actual, err = compatibleMicroversion("min", "2.1", "")
 	assert.Nil(t, err)
-	assert.Equal(t, false, actual)
+	assert.False(t, actual)
 
 	actual, err = compatibleMicroversion("min", "2.1", "2.5")
 	assert.Nil(t, err)
-	assert.Equal(t, true, actual)
+	assert.True(t, actual)
 
 	actual, err = compatibleMicroversion("min", "2.1", "3.5")
 	assert.Nil(t, err)
-	assert.Equal(t, false, actual)
+	assert.False(t, actual)
 
 	actual, err = compatibleMicroversion("min", "2.5", "2.1")
 	assert.Nil(t, err)
-	assert.Equal(t, false, actual)
+	assert.False(t, actual)
 
 	actual, err = compatibleMicroversion("max", "2.5", "2.1")
 	assert.Nil(t, err)
-	assert.Equal(t, true, actual)
+	assert.True(t, actual)
 
 	actual, err = compatibleMicroversion("min", "2.10", "2.17")
 	assert.Nil(t, err)
-	assert.Equal(t, true, actual)
+	assert.True(t, actual)
 }

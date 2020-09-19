@@ -101,38 +101,6 @@ func testAccCheckNetworkingV2FloatingIPAssociateDestroy(s *terraform.State) erro
 	return nil
 }
 
-func testAccCheckNetworkingV2FloatingIPAssociateExists(n string, fip *floatingips.FloatingIP) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-
-		config := testAccProvider.Meta().(*Config)
-		networkClient, err := config.NetworkingV2Client(OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
-		}
-
-		found, err := floatingips.Get(networkClient, rs.Primary.ID).Extract()
-		if err != nil {
-			return err
-		}
-
-		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Floating IP not found")
-		}
-
-		*fip = *found
-
-		return nil
-	}
-}
-
 var testAccNetworkingV2FloatingIPAssociate_basic = fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"

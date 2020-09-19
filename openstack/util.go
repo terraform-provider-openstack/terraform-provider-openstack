@@ -13,7 +13,7 @@ import (
 )
 
 // BuildRequest takes an opts struct and builds a request body for
-// Gophercloud to execute
+// Gophercloud to execute.
 func BuildRequest(opts interface{}, parent string) (map[string]interface{}, error) {
 	b, err := gophercloud.BuildRequestBody(opts, "")
 	if err != nil {
@@ -60,7 +60,7 @@ func AddValueSpecs(body map[string]interface{}) map[string]interface{} {
 	return body
 }
 
-// MapValueSpecs converts ResourceData into a map
+// MapValueSpecs converts ResourceData into a map.
 func MapValueSpecs(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
 	for key, val := range d.Get("value_specs").(map[string]interface{}) {

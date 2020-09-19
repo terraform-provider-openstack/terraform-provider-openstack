@@ -177,16 +177,20 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 	if listenerID != "" {
 		listener, err := listeners.Get(lbClient, listenerID).Extract()
 		if err != nil {
-			return err
+			return fmt.Errorf("Unable to get openstack_lb_listener_v2 %s: %s", listenerID, err)
 		}
 
-		err = waitForLBV2Listener(lbClient, listener, "ACTIVE", lbPendingStatuses, timeout)
+		waitErr := waitForLBV2Listener(lbClient, listener, "ACTIVE", lbPendingStatuses, timeout)
+		if waitErr != nil {
+			return fmt.Errorf(
+				"Error waiting for openstack_lb_listener_v2 %s to become active: %s", listenerID, err)
+		}
 	} else {
-		err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", lbPendingStatuses, timeout)
-	}
-
-	if err != nil {
-		return err
+		waitErr := waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", lbPendingStatuses, timeout)
+		if waitErr != nil {
+			return fmt.Errorf(
+				"Error waiting for openstack_lb_loadbalancer_v2 %s to become active: %s", lbID, err)
+		}
 	}
 
 	log.Printf("[DEBUG] Attempting to create pool")

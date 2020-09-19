@@ -2,13 +2,14 @@ package openstack
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/siteconnections"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"strconv"
 )
 
 func TestAccSiteConnectionV2_basic(t *testing.T) {

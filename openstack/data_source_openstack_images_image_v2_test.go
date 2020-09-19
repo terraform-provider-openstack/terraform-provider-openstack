@@ -94,7 +94,7 @@ func testAccCheckImagesV2DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-// Standard CirrOS image
+// Standard CirrOS image.
 const testAccOpenStackImagesV2ImageDataSource_cirros = `
 resource "openstack_images_image_v2" "image_1" {
   name = "CirrOS-tf_1"

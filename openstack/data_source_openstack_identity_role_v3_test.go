@@ -19,7 +19,7 @@ func TestAccOpenStackIdentityV3RoleDataSource_basic(t *testing.T) {
 			{
 				Config: testAccOpenStackIdentityV3RoleDataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3DataSourceID("data.openstack_identity_role_v3.role_1"),
+					testAccCheckIdentityV3RoleDataSourceID("data.openstack_identity_role_v3.role_1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_identity_role_v3.role_1", "name", "admin"),
 				),
@@ -28,7 +28,7 @@ func TestAccOpenStackIdentityV3RoleDataSource_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckIdentityV3DataSourceID(n string) resource.TestCheckFunc {
+func testAccCheckIdentityV3RoleDataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {

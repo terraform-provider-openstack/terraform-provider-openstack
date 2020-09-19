@@ -29,7 +29,7 @@ const octaviaLBClientType = "load-balancer"
 // it's updating.
 var lbPendingStatuses = []string{"PENDING_CREATE", "PENDING_UPDATE"}
 
-// lbPendingDeleteStatuses are the valid statuses a LoadBalancer will be before delete
+// lbPendingDeleteStatuses are the valid statuses a LoadBalancer will be before delete.
 var lbPendingDeleteStatuses = []string{"ERROR", "PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"}
 
 var lbSkipLBStatuses = []string{"ERROR", "ACTIVE"}

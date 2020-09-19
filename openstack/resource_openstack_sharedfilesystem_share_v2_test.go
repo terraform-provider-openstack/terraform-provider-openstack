@@ -230,14 +230,14 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
 }
 `
 
-const testAccSFSV2ShareConfig_shrink = `
-resource "openstack_sharedfilesystem_share_v2" "share_1" {
-  name             = "nfs_share_shrinked"
-  share_proto      = "NFS"
-  share_type       = "dhss_false"
-  size             = 1
-}
-`
+//const testAccSFSV2ShareConfig_shrink = `
+//resource "openstack_sharedfilesystem_share_v2" "share_1" {
+//  name             = "nfs_share_shrinked"
+//  share_proto      = "NFS"
+//  share_type       = "dhss_false"
+//  size             = 1
+//}
+//`
 
 const testAccSFSV2ShareConfig_metadata_update = `
 resource "openstack_sharedfilesystem_share_v2" "share_1" {

@@ -309,6 +309,9 @@ func resourceBlockStorageVolumeAttachV3Delete(d *schema.ResourceData, meta inter
 	}
 
 	volumeId, attachmentId, err := blockStorageVolumeAttachV3ParseID(d.Id())
+	if err != nil {
+		return fmt.Errorf("Error parsing openstack_blockstorage_volume_attach_v3: %s", err)
+	}
 
 	// Terminate the connection
 	termOpts := &volumeactions.TerminateConnectionOpts{}
