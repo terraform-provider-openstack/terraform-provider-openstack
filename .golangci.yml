@@ -16,7 +16,7 @@ linters:
     - exportloopref
 #    - goconst
 #    - gocritic
-#    - godot
+    - godot
 #    - godox
 #    - gofmt
 #    - gofumpt

@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	// export_location_path filter appeared in 2.35
+	// export_location_path filter appeared in 2.35.
 	minManilaShareListExportLocationPath = "2.35"
 )
 

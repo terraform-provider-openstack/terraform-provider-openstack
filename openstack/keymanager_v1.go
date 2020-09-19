@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
-// so far only "read" is supported
+// So far only "read" is supported.
 var aclOperations = []string{"read"}
 
 var aclSchema = &schema.Schema{

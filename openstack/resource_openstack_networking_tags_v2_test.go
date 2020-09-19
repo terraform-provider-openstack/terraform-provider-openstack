@@ -73,7 +73,7 @@ func TestAccNetworkingV2_tags(t *testing.T) {
 	})
 }
 
-// Shared acceptance test for network tags
+// Shared acceptance test for network tags.
 func testAccCheckNetworkingV2Tags(name string, tags []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[name]
