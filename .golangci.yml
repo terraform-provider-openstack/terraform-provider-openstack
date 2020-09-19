@@ -17,11 +17,10 @@ linters:
 #    - goconst
 #    - gocritic
     - godot
-#    - godox
 #    - gofmt
 #    - gofumpt
-#    - goheader
-#    - goimports
+    - goheader
+    - goimports
 #    - golint
 #    - gomodguard
 #    - goprintffuncname
