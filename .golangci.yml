@@ -43,7 +43,7 @@ linters:
 #    - unconvert
 #    - unused
 #    - varcheck
-#    - whitespace
+    - whitespace
 
 issues:
   exclude-rules:

@@ -171,7 +171,6 @@ func TestAccObjectStorageV1Object_copyFrom(t *testing.T) {
 }
 
 func TestAccObjectStorageV1Object_objectManifest(t *testing.T) {
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckSwift(t) },
 		Providers: testAccProviders,
@@ -207,7 +206,6 @@ func testAccCheckObjectStorageV1ObjectDestroy(s *terraform.State, objectname str
 	config := testAccProvider.Meta().(*Config)
 	objectStorageClient, err := config.ObjectStorageV1Client(OS_REGION_NAME)
 	if err != nil {
-
 		return fmt.Errorf("Error creating OpenStack object storage client: %s", err)
 	}
 

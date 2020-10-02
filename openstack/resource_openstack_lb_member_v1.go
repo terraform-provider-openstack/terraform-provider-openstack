@@ -232,5 +232,4 @@ func waitForLBMemberDelete(networkingClient *gophercloud.ServiceClient, memberId
 		log.Printf("[DEBUG] OpenStack LB member %s still active.", memberId)
 		return m, "ACTIVE", nil
 	}
-
 }

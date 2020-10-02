@@ -112,7 +112,6 @@ func expandVendorOptions(vendOptsRaw []interface{}) map[string]interface{} {
 		for optKey, optValue := range option.(map[string]interface{}) {
 			vendorOptions[optKey] = optValue
 		}
-
 	}
 
 	return vendorOptions

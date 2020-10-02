@@ -134,7 +134,6 @@ func networkingSubnetV2AllocationPoolsCustomizeDiff(diff *schema.ResourceDiff) e
 			log.Printf("[DEBUG] allocation_pools have not changed. clearing diff")
 			return diff.Clear("allocation_pools")
 		}
-
 	}
 
 	return nil

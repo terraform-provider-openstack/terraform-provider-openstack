@@ -586,9 +586,7 @@ func testAccCheckNetworkingV2NetworkWithExtensionsExists(n string, network *test
 	}
 }
 
-func testAccCheckNetworkingV2NetworkAdminStateUp(
-	network *networks.Network, expected bool) resource.TestCheckFunc {
-
+func testAccCheckNetworkingV2NetworkAdminStateUp(network *networks.Network, expected bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if network.AdminStateUp != expected {
 			return fmt.Errorf("Network has wrong admin_state_up. Expected %t, got %t", expected, network.AdminStateUp)
@@ -598,9 +596,7 @@ func testAccCheckNetworkingV2NetworkAdminStateUp(
 	}
 }
 
-func testAccCheckNetworkingV2NetworkPortSecurityEnabled(
-	network *testNetworkWithExtensions, expected bool) resource.TestCheckFunc {
-
+func testAccCheckNetworkingV2NetworkPortSecurityEnabled(network *testNetworkWithExtensions, expected bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if network.PortSecurityEnabled != expected {
 			return fmt.Errorf("Network has wrong port_security_enabled. Expected %t, got %t", expected, network.PortSecurityEnabled)

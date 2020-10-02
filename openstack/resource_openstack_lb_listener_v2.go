@@ -312,7 +312,6 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	return resourceListenerV2Read(d, meta)
-
 }
 
 func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {

@@ -302,5 +302,4 @@ func waitForLBMonitorDelete(networkingClient *gophercloud.ServiceClient, monitor
 		log.Printf("[DEBUG] OpenStack LB Monitor %s still active.", monitorId)
 		return m, "ACTIVE", nil
 	}
-
 }

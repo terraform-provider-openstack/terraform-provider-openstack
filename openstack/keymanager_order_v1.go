@@ -123,7 +123,6 @@ func flattenKeyManagerOrderV1Meta(m orders.Meta) []map[string]interface{} {
 
 	if m.PayloadContentType != "" {
 		s["payload_content_type"] = m.PayloadContentType
-
 	}
 
 	return append(meta, s)

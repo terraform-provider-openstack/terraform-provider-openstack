@@ -84,7 +84,6 @@ func testAccCheckDatabaseV1ConfigurationDestroy(s *terraform.State) error {
 		if err.Error() != "Resource not found" {
 			return fmt.Errorf("Destroy check failed: %s", err)
 		}
-
 	}
 
 	return nil

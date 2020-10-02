@@ -40,7 +40,6 @@ func TestExpandContainerInfraV1LabelsString(t *testing.T) {
 		t.Fatalf("Unexpected labels. Got %s, expected %s or %s",
 			actualLabels, expectedLabels_1, expectedLabels_2)
 	}
-
 }
 
 func TestContainerInfraClusterTemplateV1AppendUpdateOpts(t *testing.T) {

@@ -31,6 +31,5 @@ func TestResourceNetworkingQoSRuleV2ParseID(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, expected[0], actualQoSPolicy)
 		assert.Equal(t, expected[1], actualQoSRule)
-
 	}
 }

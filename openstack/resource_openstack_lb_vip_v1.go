@@ -397,5 +397,4 @@ func waitForLBVIPDelete(networkingClient *gophercloud.ServiceClient, vipId strin
 		log.Printf("[DEBUG] OpenStack LB VIP %s still active.", vipId)
 		return p, "ACTIVE", nil
 	}
-
 }

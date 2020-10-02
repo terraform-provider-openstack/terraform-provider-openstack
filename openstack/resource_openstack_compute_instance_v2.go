@@ -1028,7 +1028,6 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 		if err != nil {
 			log.Printf("[WARN] Unable to get openstack_compute_instance_v2 ports: %s", err)
 		} else {
-
 			for _, network := range allInstanceNetworks {
 				if network.Port != "" {
 					stateConf := &resource.StateChangeConf{
@@ -1083,7 +1082,6 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceOpenStackComputeInstanceV2ImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-
 	var serverWithAttachments struct {
 		VolumesAttached []map[string]interface{} `json:"os-extended-volumes:volumes_attached"`
 	}
