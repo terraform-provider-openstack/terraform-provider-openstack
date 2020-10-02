@@ -32,7 +32,7 @@ linters:
 #    - maligned
     - misspell
     - nakedret
-#    - nolintlint
+    - nolintlint
 #    - prealloc
     - rowserrcheck
 #    - scopelint
