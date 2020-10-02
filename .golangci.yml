@@ -30,7 +30,7 @@ linters:
 #    - ineffassign
 #    - interfacer
 #    - maligned
-#    - misspell
+    - misspell
     - nakedret
 #    - nolintlint
 #    - prealloc

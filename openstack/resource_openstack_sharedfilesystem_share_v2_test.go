@@ -51,7 +51,7 @@ func TestAccSFSV2Share_basic(t *testing.T) {
 						Config: testAccSFSV2ShareConfig_shrink,
 						Check: resource.ComposeTestCheckFunc(
 							testAccCheckSFSV2ShareExists("openstack_sharedfilesystem_share_v2.share_1", &share),
-							resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "name", "nfs_share_shrinked"),
+							resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "name", "nfs_share_shrunk"),
 							resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "is_public", "false"),
 							resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "share_proto", "NFS"),
 							resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "size", "1"),
@@ -232,7 +232,7 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
 
 //const testAccSFSV2ShareConfig_shrink = `
 //resource "openstack_sharedfilesystem_share_v2" "share_1" {
-//  name             = "nfs_share_shrinked"
+//  name             = "nfs_share_shrunk"
 //  share_proto      = "NFS"
 //  share_type       = "dhss_false"
 //  size             = 1
