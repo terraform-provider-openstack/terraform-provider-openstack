@@ -121,7 +121,7 @@ func dataSourceImagesImageIDsV2() *schema.Resource {
 			},
 
 			// Computed values
-			"ids": &schema.Schema{
+			"ids": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
