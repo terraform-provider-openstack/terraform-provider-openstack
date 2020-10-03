@@ -30,9 +30,9 @@ linters:
 #    - ineffassign
 #    - interfacer
 #    - maligned
-#    - misspell
+    - misspell
     - nakedret
-#    - nolintlint
+    - nolintlint
 #    - prealloc
     - rowserrcheck
 #    - scopelint
@@ -43,7 +43,7 @@ linters:
 #    - unconvert
 #    - unused
 #    - varcheck
-#    - whitespace
+    - whitespace
 
 issues:
   exclude-rules:

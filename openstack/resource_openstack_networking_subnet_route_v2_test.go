@@ -140,10 +140,8 @@ func testAccCheckNetworkingV2SubnetRouteDestroy(s *terraform.State) error {
 
 		subnet, err := subnets.Get(networkingClient, rs.Primary.Attributes["subnet_id"]).Extract()
 		if err == nil {
-
 			var rts = subnet.HostRoutes
 			for _, r := range rts {
-
 				if r.DestinationCIDR == rs.Primary.Attributes["destination_cidr"] && r.NextHop == rs.Primary.Attributes["next_hop"] {
 					routeExists = true
 					break

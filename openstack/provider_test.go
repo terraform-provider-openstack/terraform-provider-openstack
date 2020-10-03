@@ -76,7 +76,6 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 	if OS_EXTGW_ID == "" {
 		t.Fatal("OS_EXTGW_ID must be set for acceptance tests")
 	}
-
 }
 
 func testAccPreCheck(t *testing.T) {
@@ -216,7 +215,6 @@ func testAccPreCheckAdminOnly(t *testing.T) {
 }
 
 func testAccPreCheckGlanceImport(t *testing.T) {
-
 	if OS_GLANCEIMPORT_ENVIRONMENT == "" {
 		t.Skip("This environment does not support Glance import tests")
 	}

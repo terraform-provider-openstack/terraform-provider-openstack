@@ -120,7 +120,6 @@ func testAccCheckComputeV2InterfaceAttachIP(
 			}
 		}
 		return fmt.Errorf("Requested ip (%s) does not exist on port", ip)
-
 	}
 }
 

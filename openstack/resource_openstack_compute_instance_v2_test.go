@@ -761,7 +761,6 @@ func testAccCheckComputeV2InstanceBootVolumeAttachment(
 
 		err = volumeattach.List(computeClient, instance.ID).EachPage(
 			func(page pagination.Page) (bool, error) {
-
 				actual, err := volumeattach.ExtractVolumeAttachments(page)
 				if err != nil {
 					return false, fmt.Errorf("Unable to lookup attachment: %s", err)
@@ -839,9 +838,7 @@ func testAccCheckComputeV2InstanceTags(name string, tags []string) resource.Test
 	}
 }
 
-func testAccCheckComputeV2InstanceNetworkExists(
-	n string, instance *servers.Server) resource.TestCheckFunc {
-
+func testAccCheckComputeV2InstanceNetworkExists(n string, instance *servers.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 
@@ -863,9 +860,7 @@ func testAccCheckComputeV2InstanceNetworkExists(
 	}
 }
 
-func testAccCheckComputeV2InstanceNetworkDoesNotExist(
-	n string, instance *servers.Server) resource.TestCheckFunc {
-
+func testAccCheckComputeV2InstanceNetworkDoesNotExist(n string, instance *servers.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 

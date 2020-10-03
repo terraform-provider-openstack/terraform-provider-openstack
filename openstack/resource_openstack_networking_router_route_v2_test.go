@@ -141,10 +141,8 @@ func testAccCheckNetworkingV2RouterRouteDestroy(s *terraform.State) error {
 
 		router, err := routers.Get(networkingClient, rs.Primary.Attributes["router_id"]).Extract()
 		if err == nil {
-
 			var rts = router.Routes
 			for _, r := range rts {
-
 				if r.DestinationCIDR == rs.Primary.Attributes["destination_cidr"] && r.NextHop == rs.Primary.Attributes["next_hop"] {
 					routeExists = true
 					break

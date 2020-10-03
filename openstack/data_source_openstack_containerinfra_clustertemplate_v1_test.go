@@ -10,7 +10,6 @@ import (
 )
 
 func TestAccContainerInfraV1ClusterTemplateDataSource_basic(t *testing.T) {
-
 	resourceName := "data.openstack_containerinfra_clustertemplate_v1.clustertemplate_1"
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
 	imageName := acctest.RandomWithPrefix("tf-acc-image")

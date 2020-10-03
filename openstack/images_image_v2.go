@@ -65,7 +65,6 @@ func resourceImagesImageV2FileProps(filename string) (int64, string, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return -1, "", fmt.Errorf("Error opening file for Image: %s", err)
-
 	}
 	defer file.Close()
 

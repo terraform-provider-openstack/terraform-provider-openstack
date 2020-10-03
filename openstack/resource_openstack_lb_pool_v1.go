@@ -340,5 +340,4 @@ func waitForLBPoolDelete(networkingClient *gophercloud.ServiceClient, poolId str
 		log.Printf("[DEBUG] OpenStack LB Pool %s still active.", poolId)
 		return p, "ACTIVE", nil
 	}
-
 }

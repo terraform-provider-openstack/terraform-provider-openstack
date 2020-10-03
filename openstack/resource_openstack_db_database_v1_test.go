@@ -36,9 +36,7 @@ func TestAccDatabaseV1Database_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckDatabaseV1DatabaseExists(
-	n string, instance *instances.Instance, db *databases.Database) resource.TestCheckFunc {
-
+func testAccCheckDatabaseV1DatabaseExists(n string, instance *instances.Instance, db *databases.Database) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {

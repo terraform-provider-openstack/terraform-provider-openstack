@@ -128,7 +128,6 @@ func dataSourceImagesImageIDsV2() *schema.Resource {
 			},
 		},
 	}
-
 }
 
 // dataSourceImagesImageIdsV2Read performs the image lookup.

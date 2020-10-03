@@ -48,7 +48,6 @@ func TestAccContainerInfraV1ClusterTemplate_basic(t *testing.T) {
 }
 
 func TestAccContainerInfraV1ClusterTemplate_labels(t *testing.T) {
-
 	resourceName := "openstack_containerinfra_clustertemplate_v1.clustertemplate_1"
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
 	imageName := acctest.RandomWithPrefix("tf-acc-image")

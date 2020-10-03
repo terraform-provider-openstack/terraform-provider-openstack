@@ -196,7 +196,7 @@ func resourceOrchestrationStackV1Create(d *schema.ResourceData, meta interface{}
 	log.Printf("[DEBUG] Creating openstack_orchestration_stack_v1")
 	stack, err := stacks.Create(orchestrationClient, createOpts).Extract()
 	if err != nil {
-		log.Printf("[DEBUG] openstack_orchestration_stack_v1 error occured during create: %s", err)
+		log.Printf("[DEBUG] openstack_orchestration_stack_v1 error occurred during create: %s", err)
 		return fmt.Errorf("Error creating openstack_orchestration_stack_v1: %s", err)
 	}
 

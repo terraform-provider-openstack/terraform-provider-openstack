@@ -412,7 +412,6 @@ func resourceIKEPolicyV2LifetimeCreateOpts(d *schema.Set) ikepolicies.LifetimeCr
 		lifetimeCreateOpts.Value = value
 	}
 	return lifetimeCreateOpts
-
 }
 
 func resourceIKEPolicyV2LifetimeUpdateOpts(d *schema.Set) ikepolicies.LifetimeUpdateOpts {
@@ -427,5 +426,4 @@ func resourceIKEPolicyV2LifetimeUpdateOpts(d *schema.Set) ikepolicies.LifetimeUp
 		lifetimeUpdateOpts.Value = value
 	}
 	return lifetimeUpdateOpts
-
 }

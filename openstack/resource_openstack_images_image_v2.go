@@ -251,7 +251,6 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 		imgFilePath, err = resourceImagesImageV2File(d)
 		if err != nil {
 			return fmt.Errorf("Error opening file for Image: %s", err)
-
 		}
 		fileSize, fileChecksum, err = resourceImagesImageV2FileProps(imgFilePath)
 		if err != nil {

@@ -156,9 +156,7 @@ func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]Instanc
 //
 // If OS_NOVA_NETWORK is set, query nova-network even if Neutron is available.
 // This is to be able to explicitly test the nova-network API.
-func getInstanceNetworkInfo(
-	d *schema.ResourceData, meta interface{}, queryType, queryTerm string) (map[string]interface{}, error) {
-
+func getInstanceNetworkInfo(d *schema.ResourceData, meta interface{}, queryType, queryTerm string) (map[string]interface{}, error) {
 	config := meta.(*Config)
 
 	if _, ok := os.LookupEnv("OS_NOVA_NETWORK"); !ok {
@@ -190,9 +188,7 @@ func getInstanceNetworkInfo(
 
 // getInstanceNetworkInfoNovaNet will query the os-tenant-networks API for
 // the network information.
-func getInstanceNetworkInfoNovaNet(
-	client *gophercloud.ServiceClient, queryType, queryTerm string) (map[string]interface{}, error) {
-
+func getInstanceNetworkInfoNovaNet(client *gophercloud.ServiceClient, queryType, queryTerm string) (map[string]interface{}, error) {
 	// If somehow a port ended up here, we should just error out.
 	if queryType == "port" {
 		return nil, fmt.Errorf(
@@ -263,9 +259,7 @@ func getInstanceNetworkInfoNovaNet(
 
 // getInstanceNetworkInfoNeutron will query the neutron API for the network
 // information.
-func getInstanceNetworkInfoNeutron(
-	client *gophercloud.ServiceClient, queryType, queryTerm string) (map[string]interface{}, error) {
-
+func getInstanceNetworkInfoNeutron(client *gophercloud.ServiceClient, queryType, queryTerm string) (map[string]interface{}, error) {
 	// If a port was specified, use it to look up the network ID
 	// and then query the network as if a network ID was originally used.
 	if queryType == "port" {
@@ -410,9 +404,7 @@ func expandInstanceNetworks(allInstanceNetworks []InstanceNetwork) []servers.Net
 
 // flattenInstanceNetworks collects instance network information from different
 // sources and aggregates it all together into a map array.
-func flattenInstanceNetworks(
-	d *schema.ResourceData, meta interface{}) ([]map[string]interface{}, error) {
-
+func flattenInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]map[string]interface{}, error) {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
@@ -502,9 +494,7 @@ func flattenInstanceNetworks(
 // with the instance. It does this by looping through all networks and looking
 // for a valid IP address. Priority is given to a network that was flagged as
 // an access_network.
-func getInstanceAccessAddresses(
-	d *schema.ResourceData, networks []map[string]interface{}) (string, string) {
-
+func getInstanceAccessAddresses(d *schema.ResourceData, networks []map[string]interface{}) (string, string) {
 	var hostv4, hostv6 string
 
 	// Loop through all networks
