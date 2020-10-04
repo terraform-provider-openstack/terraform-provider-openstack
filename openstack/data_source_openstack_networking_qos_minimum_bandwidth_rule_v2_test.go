@@ -17,10 +17,10 @@ func TestAccNetworkingV2QoSMinimumBandwidthRuleDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2QoSMinimumBandwidthRule_dataSource,
+				Config: testAccNetworkingV2QoSMinimumBandwidthRuleDataSource,
 			},
 			{
-				Config: testAccOpenStackNetworkingQoSMinimumBandwidthRuleV2DataSource_basic,
+				Config: testAccOpenStackNetworkingQoSMinimumBandwidthRuleV2DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingQoSMinimumBandwidthRuleV2DataSourceID("data.openstack_networking_qos_minimum_bandwidth_rule_v2.min_bw_rule_1"),
 					resource.TestCheckResourceAttr(
@@ -46,7 +46,7 @@ func testAccCheckNetworkingQoSMinimumBandwidthRuleV2DataSourceID(n string) resou
 	}
 }
 
-const testAccNetworkingV2QoSMinimumBandwidthRule_dataSource = `
+const testAccNetworkingV2QoSMinimumBandwidthRuleDataSource = `
 resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
   name = "qos_policy_1"
 }
@@ -56,10 +56,10 @@ resource "openstack_networking_qos_minimum_bandwidth_rule_v2" "min_bw_rule_1" {
 }
 `
 
-var testAccOpenStackNetworkingQoSMinimumBandwidthRuleV2DataSource_basic = fmt.Sprintf(`
+var testAccOpenStackNetworkingQoSMinimumBandwidthRuleV2DataSourceBasic = fmt.Sprintf(`
 %s
 data "openstack_networking_qos_minimum_bandwidth_rule_v2" "min_bw_rule_1" {
   qos_policy_id = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
   min_bw        = "${openstack_networking_qos_minimum_bandwidth_rule_v2.min_bw_rule_1.min_bw}"
 }
-`, testAccNetworkingV2QoSMinimumBandwidthRule_dataSource)
+`, testAccNetworkingV2QoSMinimumBandwidthRuleDataSource)

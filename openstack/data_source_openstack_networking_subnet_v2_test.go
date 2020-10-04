@@ -14,10 +14,10 @@ func TestAccNetworkingV2SubnetDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSource_subnet,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceSubnet,
 			},
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSource_basic,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					testAccCheckNetworkingSubnetV2DataSourceGoodNetwork("data.openstack_networking_subnet_v2.subnet_1", "openstack_networking_network_v2.network_1"),
@@ -37,10 +37,10 @@ func TestAccNetworkingV2SubnetDataSource_testQueries(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSource_subnet,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceSubnet,
 			},
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSource_cidr,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceCidr,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					resource.TestCheckResourceAttr(
@@ -50,7 +50,7 @@ func TestAccNetworkingV2SubnetDataSource_testQueries(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSource_dhcpEnabled,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceDhcpEnabled,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					resource.TestCheckResourceAttr(
@@ -60,7 +60,7 @@ func TestAccNetworkingV2SubnetDataSource_testQueries(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSource_ipVersion,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceIPVersion,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					resource.TestCheckResourceAttr(
@@ -68,7 +68,7 @@ func TestAccNetworkingV2SubnetDataSource_testQueries(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSource_gatewayIP,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceGatewayIP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					resource.TestCheckResourceAttr(
@@ -85,7 +85,7 @@ func TestAccNetworkingV2SubnetDataSource_networkIdAttribute(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSource_networkIdAttribute,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceNetworkIDAttribute,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					testAccCheckNetworkingSubnetV2DataSourceGoodNetwork("data.openstack_networking_subnet_v2.subnet_1", "openstack_networking_network_v2.network_1"),
@@ -106,7 +106,7 @@ func TestAccNetworkingV2SubnetDataSource_subnetPoolIdAttribute(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSource_subnetPoolIdAttribute,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceSubnetPoolIDAttribute,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					resource.TestCheckResourceAttr(
@@ -177,7 +177,7 @@ func testAccCheckNetworkingSubnetV2DataSourceGoodNetwork(n1, n2 string) resource
 	}
 }
 
-const testAccOpenStackNetworkingSubnetV2DataSource_subnet = `
+const testAccOpenStackNetworkingSubnetV2DataSourceSubnet = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -195,7 +195,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccOpenStackNetworkingSubnetV2DataSource_subnetWithSubnetPool = `
+const testAccOpenStackNetworkingSubnetV2DataSourceSubnetWithSubnetPool = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -218,24 +218,24 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-var testAccOpenStackNetworkingSubnetV2DataSource_basic = fmt.Sprintf(`
+var testAccOpenStackNetworkingSubnetV2DataSourceBasic = fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
   name = "${openstack_networking_subnet_v2.subnet_1.name}"
 }
-`, testAccOpenStackNetworkingSubnetV2DataSource_subnet)
+`, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
 
-var testAccOpenStackNetworkingSubnetV2DataSource_cidr = fmt.Sprintf(`
+var testAccOpenStackNetworkingSubnetV2DataSourceCidr = fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
   tags = []
 }
-`, testAccOpenStackNetworkingSubnetV2DataSource_subnet)
+`, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
 
-var testAccOpenStackNetworkingSubnetV2DataSource_dhcpEnabled = fmt.Sprintf(`
+var testAccOpenStackNetworkingSubnetV2DataSourceDhcpEnabled = fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
@@ -245,26 +245,26 @@ data "openstack_networking_subnet_v2" "subnet_1" {
     "bar",
   ]
 }
-`, testAccOpenStackNetworkingSubnetV2DataSource_subnet)
+`, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
 
-var testAccOpenStackNetworkingSubnetV2DataSource_ipVersion = fmt.Sprintf(`
+var testAccOpenStackNetworkingSubnetV2DataSourceIPVersion = fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
   network_id = "${openstack_networking_network_v2.network_1.id}"
   ip_version = 4
 }
-`, testAccOpenStackNetworkingSubnetV2DataSource_subnet)
+`, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
 
-var testAccOpenStackNetworkingSubnetV2DataSource_gatewayIP = fmt.Sprintf(`
+var testAccOpenStackNetworkingSubnetV2DataSourceGatewayIP = fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
   gateway_ip = "${openstack_networking_subnet_v2.subnet_1.gateway_ip}"
 }
-`, testAccOpenStackNetworkingSubnetV2DataSource_subnet)
+`, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
 
-var testAccOpenStackNetworkingSubnetV2DataSource_networkIdAttribute = fmt.Sprintf(`
+var testAccOpenStackNetworkingSubnetV2DataSourceNetworkIDAttribute = fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
@@ -280,9 +280,9 @@ resource "openstack_networking_port_v2" "port_1" {
   admin_state_up  = "true"
 }
 
-`, testAccOpenStackNetworkingSubnetV2DataSource_subnet)
+`, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
 
-var testAccOpenStackNetworkingSubnetV2DataSource_subnetPoolIdAttribute = fmt.Sprintf(`
+var testAccOpenStackNetworkingSubnetV2DataSourceSubnetPoolIDAttribute = fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
@@ -292,4 +292,4 @@ data "openstack_networking_subnet_v2" "subnet_1" {
     "bar",
   ]
 }
-`, testAccOpenStackNetworkingSubnetV2DataSource_subnetWithSubnetPool)
+`, testAccOpenStackNetworkingSubnetV2DataSourceSubnetWithSubnetPool)

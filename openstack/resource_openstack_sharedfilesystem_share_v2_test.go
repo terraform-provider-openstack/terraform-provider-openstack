@@ -19,7 +19,7 @@ func TestAccSFSV2Share_basic(t *testing.T) {
 		CheckDestroy: testAccCheckSFSV2ShareDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2ShareConfig_basic,
+				Config: testAccSFSV2ShareConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareExists("openstack_sharedfilesystem_share_v2.share_1", &share),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "name", "nfs_share"),
@@ -28,7 +28,7 @@ func TestAccSFSV2Share_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareConfig_update,
+				Config: testAccSFSV2ShareConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareExists("openstack_sharedfilesystem_share_v2.share_1", &share),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "name", "nfs_share_updated"),
@@ -38,7 +38,7 @@ func TestAccSFSV2Share_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareConfig_extend,
+				Config: testAccSFSV2ShareConfigExtend,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareExists("openstack_sharedfilesystem_share_v2.share_1", &share),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "name", "nfs_share_extended"),
@@ -70,7 +70,7 @@ func TestAccSFSV2Share_update(t *testing.T) {
 		CheckDestroy: testAccCheckSFSV2ShareDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2ShareConfig_metadata_update,
+				Config: testAccSFSV2ShareConfigMetadataUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareExists("openstack_sharedfilesystem_share_v2.share_1", &share),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "name", "nfs_share"),
@@ -80,7 +80,7 @@ func TestAccSFSV2Share_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareConfig_metadata_update1,
+				Config: testAccSFSV2ShareConfigMetadataUpdate1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareExists("openstack_sharedfilesystem_share_v2.share_1", &share),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "name", "nfs_share"),
@@ -89,7 +89,7 @@ func TestAccSFSV2Share_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareConfig_metadata_update2,
+				Config: testAccSFSV2ShareConfigMetadataUpdate2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareExists("openstack_sharedfilesystem_share_v2.share_1", &share),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "name", "nfs_share"),
@@ -98,7 +98,7 @@ func TestAccSFSV2Share_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareConfig_metadata_update3,
+				Config: testAccSFSV2ShareConfigMetadataUpdate3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareExists("openstack_sharedfilesystem_share_v2.share_1", &share),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "name", "nfs_share"),
@@ -112,7 +112,7 @@ func TestAccSFSV2Share_update(t *testing.T) {
 
 func testAccCheckSFSV2ShareDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
+	sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
@@ -143,7 +143,7 @@ func testAccCheckSFSV2ShareExists(n string, share *shares.Share) resource.TestCh
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
+		sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
@@ -166,7 +166,7 @@ func testAccCheckSFSV2ShareExists(n string, share *shares.Share) resource.TestCh
 func testAccCheckSFSV2ShareMetadataEquals(key string, value string, share *shares.Share) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
+		sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
@@ -187,7 +187,7 @@ func testAccCheckSFSV2ShareMetadataEquals(key string, value string, share *share
 func testAccCheckSFSV2ShareMetadataAbsent(key string, share *shares.Share) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
+		sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
@@ -201,7 +201,7 @@ func testAccCheckSFSV2ShareMetadataAbsent(key string, share *shares.Share) resou
 	}
 }
 
-const testAccSFSV2ShareConfig_basic = `
+const testAccSFSV2ShareConfigBasic = `
 resource "openstack_sharedfilesystem_share_v2" "share_1" {
   name             = "nfs_share"
   description      = "test share description"
@@ -211,7 +211,7 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
 }
 `
 
-const testAccSFSV2ShareConfig_update = `
+const testAccSFSV2ShareConfigUpdate = `
 resource "openstack_sharedfilesystem_share_v2" "share_1" {
   name             = "nfs_share_updated"
   is_public        = true
@@ -221,7 +221,7 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
 }
 `
 
-const testAccSFSV2ShareConfig_extend = `
+const testAccSFSV2ShareConfigExtend = `
 resource "openstack_sharedfilesystem_share_v2" "share_1" {
   name             = "nfs_share_extended"
   share_proto      = "NFS"
@@ -230,7 +230,7 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
 }
 `
 
-//const testAccSFSV2ShareConfig_shrink = `
+//const testAccSFSV2ShareConfigShrink = `
 //resource "openstack_sharedfilesystem_share_v2" "share_1" {
 //  name             = "nfs_share_shrunk"
 //  share_proto      = "NFS"
@@ -239,7 +239,7 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
 //}
 //`
 
-const testAccSFSV2ShareConfig_metadata_update = `
+const testAccSFSV2ShareConfigMetadataUpdate = `
 resource "openstack_sharedfilesystem_share_v2" "share_1" {
   name             = "nfs_share"
   description      = "test share description"
@@ -253,7 +253,7 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
 }
 `
 
-const testAccSFSV2ShareConfig_metadata_update1 = `
+const testAccSFSV2ShareConfigMetadataUpdate1 = `
 resource "openstack_sharedfilesystem_share_v2" "share_1" {
   name             = "nfs_share"
   description      = "test share description"
@@ -268,7 +268,7 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
 }
 `
 
-const testAccSFSV2ShareConfig_metadata_update2 = `
+const testAccSFSV2ShareConfigMetadataUpdate2 = `
 resource "openstack_sharedfilesystem_share_v2" "share_1" {
   name             = "nfs_share"
   description      = "test share description"
@@ -282,7 +282,7 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
 }
 `
 
-const testAccSFSV2ShareConfig_metadata_update3 = `
+const testAccSFSV2ShareConfigMetadataUpdate3 = `
 resource "openstack_sharedfilesystem_share_v2" "share_1" {
   name             = "nfs_share"
   description      = "test share description"

@@ -23,7 +23,7 @@ func TestAccComputeV2FlavorAccess_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2FlavorAccessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FlavorAccess_basic(flavorName, projectName),
+				Config: testAccComputeV2FlavorAccessBasic(flavorName, projectName),
 			},
 
 			{

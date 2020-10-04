@@ -15,7 +15,7 @@ func TestAccSiteConnectionV2_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckSiteConnectionV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSiteConnectionV2_basic,
+				Config: testAccSiteConnectionV2Basic,
 			},
 			{
 				ResourceName:      resourceName,

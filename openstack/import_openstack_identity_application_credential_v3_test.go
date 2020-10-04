@@ -15,7 +15,7 @@ func TestAccIdentityV3ApplicationCredential_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3ApplicationCredentialDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3ApplicationCredential_basic,
+				Config: testAccIdentityV3ApplicationCredentialBasic,
 			},
 
 			{
@@ -37,7 +37,7 @@ func TestAccIdentityV3ApplicationCredential_importCustomSecret(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3ApplicationCredentialDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3ApplicationCredential_custom_secret,
+				Config: testAccIdentityV3ApplicationCredentialCustomSecret,
 			},
 
 			{

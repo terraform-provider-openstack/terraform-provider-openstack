@@ -18,7 +18,7 @@ func TestAccNetworkingV2_tags(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2_config_create,
+				Config: testAccNetworkingV2ConfigCreate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2Tags(
 						"openstack_networking_network_v2.network_1",
@@ -44,7 +44,7 @@ func TestAccNetworkingV2_tags(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2_config_update,
+				Config: testAccNetworkingV2ConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2Tags(
 						"openstack_networking_network_v2.network_1",
@@ -109,7 +109,7 @@ func testAccCheckNetworkingV2Tags(name string, tags []string) resource.TestCheck
 	}
 }
 
-const testAccNetworkingV2_config = `
+const testAccNetworkingV2Config = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -175,12 +175,12 @@ resource "openstack_networking_router_v2" "router_1" {
 }
 `
 
-const testAccNetworkingV2_tags_create = `["a", "b", "c"]`
+const testAccNetworkingV2TagsCreate = `["a", "b", "c"]`
 
-const testAccNetworkingV2_tags_update = `["a", "b", "c", "d"]`
+const testAccNetworkingV2TagsUpdate = `["a", "b", "c", "d"]`
 
-var testAccNetworkingV2_config_create = fmt.Sprintf(
-	testAccNetworkingV2_config, testAccNetworkingV2_tags_create)
+var testAccNetworkingV2ConfigCreate = fmt.Sprintf(
+	testAccNetworkingV2Config, testAccNetworkingV2TagsCreate)
 
-var testAccNetworkingV2_config_update = fmt.Sprintf(
-	testAccNetworkingV2_config, testAccNetworkingV2_tags_update)
+var testAccNetworkingV2ConfigUpdate = fmt.Sprintf(
+	testAccNetworkingV2Config, testAccNetworkingV2TagsUpdate)

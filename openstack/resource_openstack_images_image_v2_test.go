@@ -19,7 +19,7 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageV2_basic,
+				Config: testAccImagesImageV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
@@ -45,7 +45,7 @@ func TestAccImagesImageV2_name(t *testing.T) {
 		CheckDestroy: testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageV2_name_1,
+				Config: testAccImagesImageV2Name1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
@@ -53,7 +53,7 @@ func TestAccImagesImageV2_name(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccImagesImageV2_name_2,
+				Config: testAccImagesImageV2Name2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
@@ -73,7 +73,7 @@ func TestAccImagesImageV2_tags(t *testing.T) {
 		CheckDestroy: testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageV2_tags_1,
+				Config: testAccImagesImageV2Tags1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
 					testAccCheckImagesImageV2HasTag("openstack_images_image_v2.image_1", "foo"),
@@ -82,7 +82,7 @@ func TestAccImagesImageV2_tags(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccImagesImageV2_tags_2,
+				Config: testAccImagesImageV2Tags2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
 					testAccCheckImagesImageV2HasTag("openstack_images_image_v2.image_1", "foo"),
@@ -92,7 +92,7 @@ func TestAccImagesImageV2_tags(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccImagesImageV2_tags_3,
+				Config: testAccImagesImageV2Tags3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
 					testAccCheckImagesImageV2HasTag("openstack_images_image_v2.image_1", "foo"),
@@ -116,7 +116,7 @@ func TestAccImagesImageV2_visibility(t *testing.T) {
 		CheckDestroy: testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageV2_visibility_1,
+				Config: testAccImagesImageV2Visibility1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
@@ -124,7 +124,7 @@ func TestAccImagesImageV2_visibility(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccImagesImageV2_visibility_2,
+				Config: testAccImagesImageV2Visibility2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
@@ -136,11 +136,11 @@ func TestAccImagesImageV2_visibility(t *testing.T) {
 }
 
 func TestAccImagesImageV2_properties(t *testing.T) {
-	var image_1 images.Image
-	var image_2 images.Image
-	var image_3 images.Image
-	var image_4 images.Image
-	var image_5 images.Image
+	var image1 images.Image
+	var image2 images.Image
+	var image3 images.Image
+	var image4 images.Image
+	var image5 images.Image
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -148,17 +148,17 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 		CheckDestroy: testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageV2_basic,
+				Config: testAccImagesImageV2Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image_1),
+					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image1),
 					resource.TestCheckResourceAttrSet(
 						"openstack_images_image_v2.image_1", "properties.os_hash_value"),
 				),
 			},
 			{
-				Config: testAccImagesImageV2_properties_1,
+				Config: testAccImagesImageV2Properties1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image_2),
+					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image2),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "properties.foo", "bar"),
 					resource.TestCheckResourceAttr(
@@ -168,9 +168,9 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccImagesImageV2_properties_2,
+				Config: testAccImagesImageV2Properties2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image_3),
+					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image3),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "properties.foo", "bar"),
 					resource.TestCheckResourceAttrSet(
@@ -178,9 +178,9 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccImagesImageV2_properties_3,
+				Config: testAccImagesImageV2Properties3,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image_4),
+					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image4),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "properties.foo", "baz"),
 					resource.TestCheckResourceAttrSet(
@@ -188,9 +188,9 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccImagesImageV2_properties_4,
+				Config: testAccImagesImageV2Properties4,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image_5),
+					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image5),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "properties.foo", "baz"),
 					resource.TestCheckResourceAttr(
@@ -215,7 +215,7 @@ func TestAccImagesImageV2_webdownload(t *testing.T) {
 		CheckDestroy: testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageV2_webdownload,
+				Config: testAccImagesImageV2Webdownload,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
@@ -234,7 +234,7 @@ func TestAccImagesImageV2_webdownload(t *testing.T) {
 
 func testAccCheckImagesImageV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	imageClient, err := config.ImageV2Client(OS_REGION_NAME)
+	imageClient, err := config.ImageV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack Image: %s", err)
 	}
@@ -265,7 +265,7 @@ func testAccCheckImagesImageV2Exists(n string, image *images.Image) resource.Tes
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		imageClient, err := config.ImageV2Client(OS_REGION_NAME)
+		imageClient, err := config.ImageV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack Image: %s", err)
 		}
@@ -297,7 +297,7 @@ func testAccCheckImagesImageV2HasTag(n, tag string) resource.TestCheckFunc {
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		imageClient, err := config.ImageV2Client(OS_REGION_NAME)
+		imageClient, err := config.ImageV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack Image: %s", err)
 		}
@@ -333,7 +333,7 @@ func testAccCheckImagesImageV2TagCount(n string, expected int) resource.TestChec
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		imageClient, err := config.ImageV2Client(OS_REGION_NAME)
+		imageClient, err := config.ImageV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack Image: %s", err)
 		}
@@ -355,7 +355,7 @@ func testAccCheckImagesImageV2TagCount(n string, expected int) resource.TestChec
 	}
 }
 
-const testAccImagesImageV2_basic = `
+const testAccImagesImageV2Basic = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
@@ -367,7 +367,7 @@ const testAccImagesImageV2_basic = `
       }
   }`
 
-const testAccImagesImageV2_name_1 = `
+const testAccImagesImageV2Name1 = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
@@ -375,7 +375,7 @@ const testAccImagesImageV2_name_1 = `
       disk_format = "qcow2"
   }`
 
-const testAccImagesImageV2_name_2 = `
+const testAccImagesImageV2Name2 = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "TerraformAccTest Rancher"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
@@ -383,7 +383,7 @@ const testAccImagesImageV2_name_2 = `
       disk_format = "qcow2"
   }`
 
-const testAccImagesImageV2_tags_1 = `
+const testAccImagesImageV2Tags1 = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
@@ -392,7 +392,7 @@ const testAccImagesImageV2_tags_1 = `
       tags = ["foo","bar"]
   }`
 
-const testAccImagesImageV2_tags_2 = `
+const testAccImagesImageV2Tags2 = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
@@ -401,7 +401,7 @@ const testAccImagesImageV2_tags_2 = `
       tags = ["foo","bar","baz"]
   }`
 
-const testAccImagesImageV2_tags_3 = `
+const testAccImagesImageV2Tags3 = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
@@ -410,7 +410,7 @@ const testAccImagesImageV2_tags_3 = `
       tags = ["foo","baz"]
   }`
 
-const testAccImagesImageV2_visibility_1 = `
+const testAccImagesImageV2Visibility1 = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
@@ -419,7 +419,7 @@ const testAccImagesImageV2_visibility_1 = `
       visibility = "private"
   }`
 
-const testAccImagesImageV2_visibility_2 = `
+const testAccImagesImageV2Visibility2 = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
@@ -428,7 +428,7 @@ const testAccImagesImageV2_visibility_2 = `
       visibility = "public"
   }`
 
-const testAccImagesImageV2_properties_1 = `
+const testAccImagesImageV2Properties1 = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
@@ -441,7 +441,7 @@ const testAccImagesImageV2_properties_1 = `
       }
   }`
 
-const testAccImagesImageV2_properties_2 = `
+const testAccImagesImageV2Properties2 = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
@@ -453,7 +453,7 @@ const testAccImagesImageV2_properties_2 = `
       }
   }`
 
-const testAccImagesImageV2_properties_3 = `
+const testAccImagesImageV2Properties3 = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
@@ -465,7 +465,7 @@ const testAccImagesImageV2_properties_3 = `
       }
   }`
 
-const testAccImagesImageV2_properties_4 = `
+const testAccImagesImageV2Properties4 = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
@@ -478,7 +478,7 @@ const testAccImagesImageV2_properties_4 = `
       }
   }`
 
-const testAccImagesImageV2_webdownload = `
+const testAccImagesImageV2Webdownload = `
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"

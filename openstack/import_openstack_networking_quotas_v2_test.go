@@ -18,7 +18,7 @@ func TestAccNetworkingQuotaV2_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3ProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingQuotaV2_basic,
+				Config: testAccNetworkingQuotaV2Basic,
 			},
 			{
 				ResourceName:      resourceName,

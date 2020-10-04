@@ -23,7 +23,7 @@ func TestAccBlockStorageVolumeAttachV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckBlockStorageVolumeAttachV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageVolumeAttachV2_basic,
+				Config: testAccBlockStorageVolumeAttachV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageVolumeAttachV2Exists("openstack_blockstorage_volume_attach_v2.va_1", &va),
 				),
@@ -44,7 +44,7 @@ func TestAccBlockStorageVolumeAttachV2_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckBlockStorageVolumeAttachV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageVolumeAttachV2_timeout,
+				Config: testAccBlockStorageVolumeAttachV2Timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageVolumeAttachV2Exists("openstack_blockstorage_volume_attach_v2.va_1", &va),
 				),
@@ -55,7 +55,7 @@ func TestAccBlockStorageVolumeAttachV2_timeout(t *testing.T) {
 
 func testAccCheckBlockStorageVolumeAttachV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	client, err := config.BlockStorageV2Client(OS_REGION_NAME)
+	client, err := config.BlockStorageV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
@@ -65,12 +65,12 @@ func testAccCheckBlockStorageVolumeAttachV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		volumeId, attachmentId, err := blockStorageVolumeAttachV2ParseID(rs.Primary.ID)
+		volumeID, attachmentID, err := blockStorageVolumeAttachV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		volume, err := volumes.Get(client, volumeId).Extract()
+		volume, err := volumes.Get(client, volumeID).Extract()
 		if err != nil {
 			if _, ok := err.(gophercloud.ErrDefault404); ok {
 				return nil
@@ -79,7 +79,7 @@ func testAccCheckBlockStorageVolumeAttachV2Destroy(s *terraform.State) error {
 		}
 
 		for _, v := range volume.Attachments {
-			if attachmentId == v.AttachmentID {
+			if attachmentID == v.AttachmentID {
 				return fmt.Errorf("Volume attachment still exists")
 			}
 		}
@@ -100,24 +100,24 @@ func testAccCheckBlockStorageVolumeAttachV2Exists(n string, va *volumes.Attachme
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		client, err := config.BlockStorageV2Client(OS_REGION_NAME)
+		client, err := config.BlockStorageV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
 
-		volumeId, attachmentId, err := blockStorageVolumeAttachV2ParseID(rs.Primary.ID)
+		volumeID, attachmentID, err := blockStorageVolumeAttachV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		volume, err := volumes.Get(client, volumeId).Extract()
+		volume, err := volumes.Get(client, volumeID).Extract()
 		if err != nil {
 			return err
 		}
 
 		var found bool
 		for _, v := range volume.Attachments {
-			if attachmentId == v.AttachmentID {
+			if attachmentID == v.AttachmentID {
 				found = true
 				*va = v
 			}
@@ -131,7 +131,7 @@ func testAccCheckBlockStorageVolumeAttachV2Exists(n string, va *volumes.Attachme
 	}
 }
 
-const testAccBlockStorageVolumeAttachV2_basic = `
+const testAccBlockStorageVolumeAttachV2Basic = `
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -149,7 +149,7 @@ resource "openstack_blockstorage_volume_attach_v2" "va_1" {
 }
 `
 
-const testAccBlockStorageVolumeAttachV2_timeout = `
+const testAccBlockStorageVolumeAttachV2Timeout = `
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1

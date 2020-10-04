@@ -24,7 +24,7 @@ func TestAccComputeV2Flavor_basic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2FlavorDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2Flavor_basic(flavorName),
+				Config: testAccComputeV2FlavorBasic(flavorName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorExists("openstack_compute_flavor_v2.flavor_1", &flavor),
 					resource.TestCheckResourceAttr(
@@ -52,7 +52,7 @@ func TestAccComputeV2Flavor_extraSpecs(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2FlavorDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2Flavor_extraSpecs_1(flavorName),
+				Config: testAccComputeV2FlavorExtraSpecs1(flavorName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorExists("openstack_compute_flavor_v2.flavor_1", &flavor),
 					resource.TestCheckResourceAttr(
@@ -64,7 +64,7 @@ func TestAccComputeV2Flavor_extraSpecs(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeV2Flavor_extraSpecs_2(flavorName),
+				Config: testAccComputeV2FlavorExtraSpecs2(flavorName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorExists("openstack_compute_flavor_v2.flavor_1", &flavor),
 					resource.TestCheckResourceAttr(
@@ -79,7 +79,7 @@ func TestAccComputeV2Flavor_extraSpecs(t *testing.T) {
 
 func testAccCheckComputeV2FlavorDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
+	computeClient, err := config.ComputeV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -110,7 +110,7 @@ func testAccCheckComputeV2FlavorExists(n string, flavor *flavors.Flavor) resourc
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
@@ -130,7 +130,7 @@ func testAccCheckComputeV2FlavorExists(n string, flavor *flavors.Flavor) resourc
 	}
 }
 
-func testAccComputeV2Flavor_basic(flavorName string) string {
+func testAccComputeV2FlavorBasic(flavorName string) string {
 	return fmt.Sprintf(`
     resource "openstack_compute_flavor_v2" "flavor_1" {
       name = "%s"
@@ -143,7 +143,7 @@ func testAccComputeV2Flavor_basic(flavorName string) string {
     `, flavorName)
 }
 
-func testAccComputeV2Flavor_extraSpecs_1(flavorName string) string {
+func testAccComputeV2FlavorExtraSpecs1(flavorName string) string {
 	return fmt.Sprintf(`
     resource "openstack_compute_flavor_v2" "flavor_1" {
       name = "%s"
@@ -161,7 +161,7 @@ func testAccComputeV2Flavor_extraSpecs_1(flavorName string) string {
     `, flavorName)
 }
 
-func testAccComputeV2Flavor_extraSpecs_2(flavorName string) string {
+func testAccComputeV2FlavorExtraSpecs2(flavorName string) string {
 	return fmt.Sprintf(`
     resource "openstack_compute_flavor_v2" "flavor_1" {
       name = "%s"

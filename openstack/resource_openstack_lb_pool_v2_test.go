@@ -18,13 +18,13 @@ func TestAccLBV2Pool_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2PoolDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2PoolConfig_basic,
+				Config: TestAccLbV2PoolConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2PoolExists("openstack_lb_pool_v2.pool_1", &pool),
 				),
 			},
 			{
-				Config: TestAccLBV2PoolConfig_update,
+				Config: TestAccLbV2PoolConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "name", "pool_1_updated"),
 				),
@@ -45,7 +45,7 @@ func TestAccLBV2Pool_octavia_udp(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2PoolDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2PoolConfig_octavia_udp,
+				Config: TestAccLbV2PoolConfigOctaviaUDP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2PoolExists("openstack_lb_pool_v2.pool_1", &pool),
 					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "protocol", "UDP"),
@@ -57,7 +57,7 @@ func TestAccLBV2Pool_octavia_udp(t *testing.T) {
 
 func testAccCheckLBV2PoolDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+	lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -88,7 +88,7 @@ func testAccCheckLBV2PoolExists(n string, pool *pools.Pool) resource.TestCheckFu
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
@@ -108,7 +108,7 @@ func testAccCheckLBV2PoolExists(n string, pool *pools.Pool) resource.TestCheckFu
 	}
 }
 
-const TestAccLBV2PoolConfig_basic = `
+const TestAccLbV2PoolConfigBasic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -153,7 +153,7 @@ resource "openstack_lb_pool_v2" "pool_1" {
 }
 `
 
-const TestAccLBV2PoolConfig_update = `
+const TestAccLbV2PoolConfigUpdate = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -199,7 +199,7 @@ resource "openstack_lb_pool_v2" "pool_1" {
 }
 `
 
-const TestAccLBV2PoolConfig_octavia_udp = `
+const TestAccLbV2PoolConfigOctaviaUDP = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

@@ -15,7 +15,7 @@ func TestAccOrchestrationStackV1_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOrchestrationV1Stack_basic,
+				Config: testAccOrchestrationV1StackBasic,
 			},
 			{
 				ResourceName:      resourceName,

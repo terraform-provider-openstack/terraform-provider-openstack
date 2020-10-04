@@ -14,12 +14,12 @@ func TestAccComputeV2InstanceDataSource(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceDataSource_basic,
+				Config: testAccComputeV2InstanceDataSourceBasic,
 			},
 			{
-				Config: testAccComputeV2InstanceDataSource_source,
+				Config: testAccComputeV2InstanceDataSourceSource,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceV2DataSourceId("data.openstack_compute_instance_v2.source_1"),
+					testAccCheckComputeInstanceV2DataSourceID("data.openstack_compute_instance_v2.source_1"),
 					resource.TestCheckResourceAttr("data.openstack_compute_instance_v2.source_1", "name", "instance_1"),
 					resource.TestCheckResourceAttrPair("data.openstack_compute_instance_v2.source_1", "metadata", "openstack_compute_instance_v2.instance_1", "metadata"),
 					resource.TestCheckResourceAttrSet("data.openstack_compute_instance_v2.source_1", "network.0.name"),
@@ -29,7 +29,7 @@ func TestAccComputeV2InstanceDataSource(t *testing.T) {
 	})
 }
 
-func testAccCheckComputeInstanceV2DataSourceId(n string) resource.TestCheckFunc {
+func testAccCheckComputeInstanceV2DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -44,7 +44,7 @@ func testAccCheckComputeInstanceV2DataSourceId(n string) resource.TestCheckFunc 
 	}
 }
 
-var testAccComputeV2InstanceDataSource_basic = fmt.Sprintf(`
+var testAccComputeV2InstanceDataSourceBasic = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -55,12 +55,12 @@ resource "openstack_compute_instance_v2" "instance_1" {
     uuid = "%s"
   }
 }
-`, OS_NETWORK_ID)
+`, osNetworkID)
 
-var testAccComputeV2InstanceDataSource_source = fmt.Sprintf(`
+var testAccComputeV2InstanceDataSourceSource = fmt.Sprintf(`
 %s
 
 data "openstack_compute_instance_v2" "source_1" {
   id = "${openstack_compute_instance_v2.instance_1.id}"
 }
-`, testAccComputeV2InstanceDataSource_basic)
+`, testAccComputeV2InstanceDataSourceBasic)

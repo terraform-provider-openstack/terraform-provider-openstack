@@ -19,7 +19,7 @@ func TestAccLBV2Members_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2MembersDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2MembersConfig_basic,
+				Config: TestAccLbV2MembersConfigBasic,
 			},
 
 			{

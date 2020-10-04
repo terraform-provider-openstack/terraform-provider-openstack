@@ -87,7 +87,7 @@ func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]Instanc
 
 		if networkID == "" && networkName == "" && portID == "" {
 			return nil, fmt.Errorf(
-				"At least one of network.uuid, network.name, or network.port must be set.")
+				"At least one of network.uuid, network.name, or network.port must be set")
 		}
 
 		// If a user specified both an ID and name, that makes things easy

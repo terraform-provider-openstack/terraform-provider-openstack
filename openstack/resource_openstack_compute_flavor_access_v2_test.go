@@ -31,7 +31,7 @@ func TestAccComputeV2FlavorAccess_basic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2FlavorAccessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FlavorAccess_basic(flavorName, projectName),
+				Config: testAccComputeV2FlavorAccessBasic(flavorName, projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
 					testAccCheckComputeV2FlavorExists("openstack_compute_flavor_v2.flavor_1", &flavor),
@@ -48,7 +48,7 @@ func TestAccComputeV2FlavorAccess_basic(t *testing.T) {
 
 func testAccCheckComputeV2FlavorAccessDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
+	computeClient, err := config.ComputeV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -58,7 +58,7 @@ func testAccCheckComputeV2FlavorAccessDestroy(s *terraform.State) error {
 			continue
 		}
 
-		fid, tid, err := parseComputeFlavorAccessId(rs.Primary.ID)
+		fid, tid, err := parseComputeFlavorAccessID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -102,12 +102,12 @@ func testAccCheckComputeV2FlavorAccessExists(n string, access *flavors.FlavorAcc
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		fid, tid, err := parseComputeFlavorAccessId(rs.Primary.ID)
+		fid, tid, err := parseComputeFlavorAccessID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -134,7 +134,7 @@ func testAccCheckComputeV2FlavorAccessExists(n string, access *flavors.FlavorAcc
 	}
 }
 
-func testAccComputeV2FlavorAccess_basic(flavorName, tenantName string) string {
+func testAccComputeV2FlavorAccessBasic(flavorName, tenantName string) string {
 	return fmt.Sprintf(`
     resource "openstack_compute_flavor_v2" "flavor_1" {
       name = "%s"

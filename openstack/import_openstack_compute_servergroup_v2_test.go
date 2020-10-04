@@ -15,7 +15,7 @@ func TestAccComputeV2ServerGroup_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2ServerGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2ServerGroup_basic,
+				Config: testAccComputeV2ServerGroupBasic,
 			},
 
 			{

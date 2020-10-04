@@ -19,7 +19,7 @@ func TestAccBlockStorageV3Volume_basic(t *testing.T) {
 		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV3Volume_basic,
+				Config: testAccBlockStorageV3VolumeBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
 					testAccCheckBlockStorageV3VolumeMetadata(&volume, "foo", "bar"),
@@ -30,7 +30,7 @@ func TestAccBlockStorageV3Volume_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccBlockStorageV3Volume_update,
+				Config: testAccBlockStorageV3VolumeUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
 					testAccCheckBlockStorageV3VolumeMetadata(&volume, "foo", "bar"),
@@ -51,14 +51,14 @@ func TestAccBlockStorageV3Volume_online_resize(t *testing.T) {
 		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV3Volume_online_resize,
+				Config: testAccBlockStorageV3VolumeOnlineResize,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "size", "1"),
 				),
 			},
 			{
-				Config: testAccBlockStorageV3Volume_online_resize_update,
+				Config: testAccBlockStorageV3VolumeOnlineResizeUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "size", "2"),
@@ -77,7 +77,7 @@ func TestAccBlockStorageV3Volume_image(t *testing.T) {
 		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV3Volume_image,
+				Config: testAccBlockStorageV3VolumeImage,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
 					resource.TestCheckResourceAttr(
@@ -97,7 +97,7 @@ func TestAccBlockStorageV3Volume_image_multiattach(t *testing.T) {
 		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV3Volume_image_multiattach,
+				Config: testAccBlockStorageV3VolumeImageMultiattach,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
 					resource.TestCheckResourceAttr(
@@ -119,7 +119,7 @@ func TestAccBlockStorageV3Volume_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV3Volume_timeout,
+				Config: testAccBlockStorageV3VolumeTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
 				),
@@ -130,7 +130,7 @@ func TestAccBlockStorageV3Volume_timeout(t *testing.T) {
 
 func testAccCheckBlockStorageV3VolumeDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	blockStorageClient, err := config.BlockStorageV3Client(OS_REGION_NAME)
+	blockStorageClient, err := config.BlockStorageV3Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
@@ -161,7 +161,7 @@ func testAccCheckBlockStorageV3VolumeExists(n string, volume *volumes.Volume) re
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.BlockStorageV3Client(OS_REGION_NAME)
+		blockStorageClient, err := config.BlockStorageV3Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
@@ -204,7 +204,7 @@ func testAccCheckBlockStorageV3VolumeMetadata(
 	}
 }
 
-const testAccBlockStorageV3Volume_basic = `
+const testAccBlockStorageV3VolumeBasic = `
 resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   description = "first test volume"
@@ -215,7 +215,7 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
 }
 `
 
-var testAccBlockStorageV3Volume_online_resize = fmt.Sprintf(`
+var testAccBlockStorageV3VolumeOnlineResize = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "basic" {
   name            = "instance_1"
   flavor_name     = "%s"
@@ -233,9 +233,9 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
   instance_id = "${openstack_compute_instance_v2.basic.id}"
   volume_id   = "${openstack_blockstorage_volume_v3.volume_1.id}"
 }
-`, OS_FLAVOR_NAME, OS_IMAGE_ID)
+`, osFlavorName, osImageID)
 
-var testAccBlockStorageV3Volume_online_resize_update = fmt.Sprintf(`
+var testAccBlockStorageV3VolumeOnlineResizeUpdate = fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "basic" {
   name            = "instance_1"
   flavor_name     = "%s"
@@ -253,9 +253,9 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
   instance_id = "${openstack_compute_instance_v2.basic.id}"
   volume_id   = "${openstack_blockstorage_volume_v3.volume_1.id}"
 }
-`, OS_FLAVOR_NAME, OS_IMAGE_ID)
+`, osFlavorName, osImageID)
 
-const testAccBlockStorageV3Volume_update = `
+const testAccBlockStorageV3VolumeUpdate = `
 resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1-updated"
   description = "first test volume"
@@ -266,24 +266,24 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
 }
 `
 
-var testAccBlockStorageV3Volume_image = fmt.Sprintf(`
+var testAccBlockStorageV3VolumeImage = fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   size = 5
   image_id = "%s"
 }
-`, OS_IMAGE_ID)
+`, osImageID)
 
-var testAccBlockStorageV3Volume_image_multiattach = fmt.Sprintf(`
+var testAccBlockStorageV3VolumeImageMultiattach = fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   size = 5
   image_id = "%s"
   multiattach = true
 }
-`, OS_IMAGE_ID)
+`, osImageID)
 
-const testAccBlockStorageV3Volume_timeout = `
+const testAccBlockStorageV3VolumeTimeout = `
 resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   description = "first test volume"

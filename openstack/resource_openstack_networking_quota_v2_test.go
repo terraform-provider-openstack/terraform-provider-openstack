@@ -19,7 +19,7 @@ func TestAccNetworkingQuotaV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3ProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingQuotaV2_basic,
+				Config: testAccNetworkingQuotaV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttr(
@@ -43,7 +43,7 @@ func TestAccNetworkingQuotaV2_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingQuotaV2_update_1,
+				Config: testAccNetworkingQuotaV2Update1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttr(
@@ -67,7 +67,7 @@ func TestAccNetworkingQuotaV2_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingQuotaV2_update_2,
+				Config: testAccNetworkingQuotaV2Update2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttr(
@@ -94,7 +94,7 @@ func TestAccNetworkingQuotaV2_basic(t *testing.T) {
 	})
 }
 
-const testAccNetworkingQuotaV2_basic = `
+const testAccNetworkingQuotaV2Basic = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"
 }
@@ -113,7 +113,7 @@ resource "openstack_networking_quota_v2" "quota_1" {
 }
 `
 
-const testAccNetworkingQuotaV2_update_1 = `
+const testAccNetworkingQuotaV2Update1 = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"
 }
@@ -132,7 +132,7 @@ resource "openstack_networking_quota_v2" "quota_1" {
 }
 `
 
-const testAccNetworkingQuotaV2_update_2 = `
+const testAccNetworkingQuotaV2Update2 = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"
 }

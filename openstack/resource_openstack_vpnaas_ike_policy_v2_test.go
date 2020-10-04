@@ -18,7 +18,7 @@ func TestAccIKEPolicyV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIKEPolicyV2_basic,
+				Config: testAccIKEPolicyV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists(
 						"openstack_vpnaas_ike_policy_v2.policy_1", &policy),
@@ -39,7 +39,7 @@ func TestAccIKEPolicyV2_withLifetime(t *testing.T) {
 		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIKEPolicyV2_withLifetime,
+				Config: testAccIKEPolicyV2WithLifetime,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists(
 						"openstack_vpnaas_ike_policy_v2.policy_1", &policy),
@@ -58,7 +58,7 @@ func TestAccIKEPolicyV2_Update(t *testing.T) {
 		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIKEPolicyV2_basic,
+				Config: testAccIKEPolicyV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists(
 						"openstack_vpnaas_ike_policy_v2.policy_1", &policy),
@@ -66,7 +66,7 @@ func TestAccIKEPolicyV2_Update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIKEPolicyV2_Update,
+				Config: testAccIKEPolicyV2Update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists(
 						"openstack_vpnaas_ike_policy_v2.policy_1", &policy),
@@ -85,7 +85,7 @@ func TestAccIKEPolicyV2_withLifetimeUpdate(t *testing.T) {
 		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIKEPolicyV2_withLifetime,
+				Config: testAccIKEPolicyV2WithLifetime,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists(
 						"openstack_vpnaas_ike_policy_v2.policy_1", &policy),
@@ -95,7 +95,7 @@ func TestAccIKEPolicyV2_withLifetimeUpdate(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIKEPolicyV2_withLifetimeUpdate,
+				Config: testAccIKEPolicyV2WithLifetimeUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists(
 						"openstack_vpnaas_ike_policy_v2.policy_1", &policy),
@@ -108,7 +108,7 @@ func TestAccIKEPolicyV2_withLifetimeUpdate(t *testing.T) {
 
 func testAccCheckIKEPolicyV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -118,7 +118,7 @@ func testAccCheckIKEPolicyV2Destroy(s *terraform.State) error {
 		}
 		_, err = ikepolicies.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("IKE policy (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("IKE policy (%s) still exists", rs.Primary.ID)
 		}
 		if _, ok := err.(gophercloud.ErrDefault404); !ok {
 			return err
@@ -139,7 +139,7 @@ func testAccCheckIKEPolicyV2Exists(n string, policy *ikepolicies.Policy) resourc
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -154,18 +154,18 @@ func testAccCheckIKEPolicyV2Exists(n string, policy *ikepolicies.Policy) resourc
 	}
 }
 
-const testAccIKEPolicyV2_basic = `
+const testAccIKEPolicyV2Basic = `
 resource "openstack_vpnaas_ike_policy_v2" "policy_1" {
 }
 `
 
-const testAccIKEPolicyV2_Update = `
+const testAccIKEPolicyV2Update = `
 resource "openstack_vpnaas_ike_policy_v2" "policy_1" {
 	name = "updatedname"
 }
 `
 
-const testAccIKEPolicyV2_withLifetime = `
+const testAccIKEPolicyV2WithLifetime = `
 resource "openstack_vpnaas_ike_policy_v2" "policy_1" {
 	auth_algorithm = "sha256"
 	pfs = "group14"
@@ -176,7 +176,7 @@ resource "openstack_vpnaas_ike_policy_v2" "policy_1" {
 }
 `
 
-const testAccIKEPolicyV2_withLifetimeUpdate = `
+const testAccIKEPolicyV2WithLifetimeUpdate = `
 resource "openstack_vpnaas_ike_policy_v2" "policy_1" {
 	auth_algorithm = "sha256"
 	pfs = "group14"

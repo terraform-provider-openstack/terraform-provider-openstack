@@ -15,7 +15,7 @@ func TestAccSFSV2ShareDataSource_basic(t *testing.T) {
 		CheckDestroy: testAccCheckSFSV2ShareDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2ShareDataSource_basic,
+				Config: testAccSFSV2ShareDataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareDataSourceID("data.openstack_sharedfilesystem_share_v2.share_1"),
 					resource.TestCheckResourceAttr(
@@ -49,7 +49,7 @@ func testAccCheckSFSV2ShareDataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-const testAccSFSV2ShareDataSource_basic = `
+const testAccSFSV2ShareDataSourceBasic = `
 resource "openstack_sharedfilesystem_share_v2" "share_1" {
   name        = "nfs_share"
   description = "test share description"

@@ -23,10 +23,10 @@ func TestAccOpenStackIdentityV3ProjectDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackIdentityProjectV3DataSource_project(projectName, projectDescription, projectTag1, projectTag2),
+				Config: testAccOpenStackIdentityProjectV3DataSourceProject(projectName, projectDescription, projectTag1, projectTag2),
 			},
 			{
-				Config: testAccOpenStackIdentityProjectV3DataSource_basic(projectName, projectDescription, projectTag1, projectTag2),
+				Config: testAccOpenStackIdentityProjectV3DataSourceBasic(projectName, projectDescription, projectTag1, projectTag2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectDataSourceID("data.openstack_identity_project_v3.project_1"),
 					resource.TestCheckResourceAttr(
@@ -60,7 +60,7 @@ func testAccCheckIdentityV3ProjectDataSourceID(n string) resource.TestCheckFunc 
 	}
 }
 
-func testAccOpenStackIdentityProjectV3DataSource_project(name, description, tag1, tag2 string) string {
+func testAccOpenStackIdentityProjectV3DataSourceProject(name, description, tag1, tag2 string) string {
 	return fmt.Sprintf(`
 	resource "openstack_identity_project_v3" "project_1" {
 	  name = "%s"
@@ -70,12 +70,12 @@ func testAccOpenStackIdentityProjectV3DataSource_project(name, description, tag1
 `, name, description, tag1, tag2)
 }
 
-func testAccOpenStackIdentityProjectV3DataSource_basic(name, description, tag1, tag2 string) string {
+func testAccOpenStackIdentityProjectV3DataSourceBasic(name, description, tag1, tag2 string) string {
 	return fmt.Sprintf(`
 	%s
 
 	data "openstack_identity_project_v3" "project_1" {
       name = "${openstack_identity_project_v3.project_1.name}"
 	}
-`, testAccOpenStackIdentityProjectV3DataSource_project(name, description, tag1, tag2))
+`, testAccOpenStackIdentityProjectV3DataSourceProject(name, description, tag1, tag2))
 }

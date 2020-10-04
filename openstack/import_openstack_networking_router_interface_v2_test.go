@@ -15,7 +15,7 @@ func TestAccNetworkingV2RouterInterface_importBasic_port(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterInterfaceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2RouterInterface_basic_port,
+				Config: testAccNetworkingV2RouterInterfaceBasicPort,
 			},
 
 			{
@@ -36,7 +36,7 @@ func TestAccNetworkingV2RouterInterface_importBasic_subnet(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterInterfaceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2RouterInterface_basic_subnet,
+				Config: testAccNetworkingV2RouterInterfaceBasicSubnet,
 			},
 
 			{

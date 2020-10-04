@@ -15,7 +15,7 @@ func TestAccEndpointGroup_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckEndpointGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEndpointGroupV2_basic,
+				Config: testAccEndpointGroupV2Basic,
 			},
 
 			{

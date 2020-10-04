@@ -19,7 +19,7 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Router_basic,
+				Config: testAccNetworkingV2RouterBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
 					resource.TestCheckResourceAttr(
@@ -27,7 +27,7 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Router_update,
+				Config: testAccNetworkingV2RouterUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_router_v2.router_1", "name", "router_2"),
@@ -48,16 +48,16 @@ func TestAccNetworkingV2Router_updateExternalGateway(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Router_updateExternalGateway1,
+				Config: testAccNetworkingV2RouterUpdateExternalGateway1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Router_updateExternalGateway2,
+				Config: testAccNetworkingV2RouterUpdateExternalGateway2,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"openstack_networking_router_v2.router_1", "external_network_id", OS_EXTGW_ID),
+						"openstack_networking_router_v2.router_1", "external_network_id", osExtGwID),
 				),
 			},
 		},
@@ -73,11 +73,11 @@ func TestAccNetworkingV2Router_vendor_opts(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Router_vendor_opts,
+				Config: testAccNetworkingV2RouterVendorOpts,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_router_v2.router_1", "external_gateway", OS_EXTGW_ID),
+						"openstack_networking_router_v2.router_1", "external_gateway", osExtGwID),
 				),
 			},
 		},
@@ -96,11 +96,11 @@ func TestAccNetworkingV2Router_vendor_opts_no_snat(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Router_vendor_opts_no_snat,
+				Config: testAccNetworkingV2RouterVendorOptsNoSnat,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_router_v2.router_1", "external_gateway", OS_EXTGW_ID),
+						"openstack_networking_router_v2.router_1", "external_gateway", osExtGwID),
 				),
 			},
 		},
@@ -117,7 +117,7 @@ func TestAccNetworkingV2Router_extFixedIPs(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Router_extFixedIPs,
+				Config: testAccNetworkingV2RouterExtFixedIPs,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_router_v2.router_2", "name", "router_2"),
@@ -133,7 +133,7 @@ func TestAccNetworkingV2Router_extFixedIPs(t *testing.T) {
 
 func testAccCheckNetworkingV2RouterDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -164,7 +164,7 @@ func testAccCheckNetworkingV2RouterExists(n string, router *routers.Router) reso
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -184,7 +184,7 @@ func testAccCheckNetworkingV2RouterExists(n string, router *routers.Router) reso
 	}
 }
 
-const testAccNetworkingV2Router_basic = `
+const testAccNetworkingV2RouterBasic = `
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   description = "router description"
@@ -197,7 +197,7 @@ resource "openstack_networking_router_v2" "router_1" {
 }
 `
 
-const testAccNetworkingV2Router_update = `
+const testAccNetworkingV2RouterUpdate = `
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_2"
   admin_state_up = "true"
@@ -209,7 +209,7 @@ resource "openstack_networking_router_v2" "router_1" {
 }
 `
 
-var testAccNetworkingV2Router_vendor_opts = fmt.Sprintf(`
+var testAccNetworkingV2RouterVendorOpts = fmt.Sprintf(`
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
@@ -218,9 +218,9 @@ resource "openstack_networking_router_v2" "router_1" {
     set_router_gateway_after_create = true
   }
 }
-`, OS_EXTGW_ID)
+`, osExtGwID)
 
-var testAccNetworkingV2Router_vendor_opts_no_snat = fmt.Sprintf(`
+var testAccNetworkingV2RouterVendorOptsNoSnat = fmt.Sprintf(`
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
@@ -231,24 +231,24 @@ resource "openstack_networking_router_v2" "router_1" {
     set_router_gateway_after_create = true
   }
 }
-`, OS_EXTGW_ID)
+`, osExtGwID)
 
-const testAccNetworkingV2Router_updateExternalGateway1 = `
+const testAccNetworkingV2RouterUpdateExternalGateway1 = `
 resource "openstack_networking_router_v2" "router_1" {
   name = "router"
   admin_state_up = "true"
 }
 `
 
-var testAccNetworkingV2Router_updateExternalGateway2 = fmt.Sprintf(`
+var testAccNetworkingV2RouterUpdateExternalGateway2 = fmt.Sprintf(`
 resource "openstack_networking_router_v2" "router_1" {
   name = "router"
   admin_state_up = "true"
   external_network_id = "%s"
 }
-`, OS_EXTGW_ID)
+`, osExtGwID)
 
-var testAccNetworkingV2Router_extFixedIPs = fmt.Sprintf(`
+var testAccNetworkingV2RouterExtFixedIPs = fmt.Sprintf(`
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
@@ -278,4 +278,4 @@ resource "openstack_networking_router_v2" "router_2" {
     delete = "5m"
   }
 }
-`, OS_EXTGW_ID, OS_EXTGW_ID)
+`, osExtGwID, osExtGwID)

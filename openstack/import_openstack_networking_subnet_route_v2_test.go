@@ -15,7 +15,7 @@ func TestAccNetworkingV2SubnetRoute_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SubnetRouteDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2SubnetRoute_create,
+				Config: testAccNetworkingV2SubnetRouteCreate,
 			},
 
 			{

@@ -15,7 +15,7 @@ func TestAccComputeV2FlavorDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FlavorDataSource_basic,
+				Config: testAccComputeV2FlavorDataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
@@ -42,7 +42,7 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FlavorDataSource_queryDisk,
+				Config: testAccComputeV2FlavorDataSourceQueryDisk,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
@@ -60,7 +60,7 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeV2FlavorDataSource_queryMinDisk,
+				Config: testAccComputeV2FlavorDataSourceQueryMinDisk,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
@@ -78,7 +78,7 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeV2FlavorDataSource_queryMinRAM,
+				Config: testAccComputeV2FlavorDataSourceQueryMinRAM,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
@@ -96,7 +96,7 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeV2FlavorDataSource_queryVCPUs,
+				Config: testAccComputeV2FlavorDataSourceQueryVCPUs,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
@@ -128,10 +128,10 @@ func TestAccComputeV2FlavorDataSource_extraSpecs(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2Flavor_extraSpecs_1(flavorName),
+				Config: testAccComputeV2FlavorExtraSpecs1(flavorName),
 			},
 			{
-				Config: testAccComputeV2FlavorDataSource_extraSpecs(flavorName),
+				Config: testAccComputeV2FlavorDataSourceExtraSpecs(flavorName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
@@ -159,10 +159,10 @@ func TestAccComputeV2FlavorDataSource_flavorID(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2Flavor_extraSpecs_1(flavorName),
+				Config: testAccComputeV2FlavorExtraSpecs1(flavorName),
 			},
 			{
-				Config: testAccComputeV2FlavorDataSource_flavorID(flavorName),
+				Config: testAccComputeV2FlavorDataSourceFlavorID(flavorName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
@@ -194,41 +194,41 @@ func testAccCheckComputeV2FlavorDataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-const testAccComputeV2FlavorDataSource_basic = `
+const testAccComputeV2FlavorDataSourceBasic = `
 data "openstack_compute_flavor_v2" "flavor_1" {
   name = "m1.acctest"
 }
 `
 
-const testAccComputeV2FlavorDataSource_queryDisk = `
+const testAccComputeV2FlavorDataSourceQueryDisk = `
 data "openstack_compute_flavor_v2" "flavor_1" {
   disk = 6
 }
 `
 
-const testAccComputeV2FlavorDataSource_queryMinDisk = `
+const testAccComputeV2FlavorDataSourceQueryMinDisk = `
 data "openstack_compute_flavor_v2" "flavor_1" {
   name = "m1.acctest"
   min_disk = 5
 }
 `
 
-const testAccComputeV2FlavorDataSource_queryMinRAM = `
+const testAccComputeV2FlavorDataSourceQueryMinRAM = `
 data "openstack_compute_flavor_v2" "flavor_1" {
   name = "m1.acctest"
   min_ram = 512
 }
 `
 
-const testAccComputeV2FlavorDataSource_queryVCPUs = `
+const testAccComputeV2FlavorDataSourceQueryVCPUs = `
 data "openstack_compute_flavor_v2" "flavor_1" {
   name = "m1.acctest"
   vcpus = 1
 }
 `
 
-func testAccComputeV2FlavorDataSource_extraSpecs(flavorName string) string {
-	flavorResource := testAccComputeV2Flavor_extraSpecs_1(flavorName)
+func testAccComputeV2FlavorDataSourceExtraSpecs(flavorName string) string {
+	flavorResource := testAccComputeV2FlavorExtraSpecs1(flavorName)
 
 	return fmt.Sprintf(`
           %s
@@ -239,8 +239,8 @@ func testAccComputeV2FlavorDataSource_extraSpecs(flavorName string) string {
           `, flavorResource)
 }
 
-func testAccComputeV2FlavorDataSource_flavorID(flavorName string) string {
-	flavorResource := testAccComputeV2Flavor_extraSpecs_1(flavorName)
+func testAccComputeV2FlavorDataSourceFlavorID(flavorName string) string {
+	flavorResource := testAccComputeV2FlavorExtraSpecs1(flavorName)
 
 	return fmt.Sprintf(`
           %s

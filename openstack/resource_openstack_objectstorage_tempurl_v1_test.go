@@ -22,7 +22,7 @@ func TestAccOpenStackObjectStorageTempurlV1_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackObjectstorageTempurlV1Resource_basic(containerName, objectName, "get", ttl),
+				Config: testAccOpenStackObjectstorageTempurlV1ResourceBasic(containerName, objectName, "get", ttl),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObjectstorageTempurlV1ResourceID("openstack_objectstorage_tempurl_v1.tempurl_1"),
 					testAccCheckObjectstorageTempurlV1Get("openstack_objectstorage_tempurl_v1.tempurl_1"),
@@ -35,7 +35,7 @@ func TestAccOpenStackObjectStorageTempurlV1_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackObjectstorageTempurlV1Resource_basic(containerName, objectName, "post", ttl),
+				Config: testAccOpenStackObjectstorageTempurlV1ResourceBasic(containerName, objectName, "post", ttl),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObjectstorageTempurlV1ResourceID("openstack_objectstorage_tempurl_v1.tempurl_1"),
 					resource.TestCheckResourceAttr(
@@ -44,7 +44,7 @@ func TestAccOpenStackObjectStorageTempurlV1_basic(t *testing.T) {
 			},
 			/* TODO(flaper87): Find a good way to test the ttl expiration
 			            resource.TestStep{
-							Config: testAccOpenStackObjectstorageTempurlV1Resource_basic(containerName, objectName, "get", ),
+							Config: testAccOpenStackObjectstorageTempurlV1ResourceBasic(containerName, objectName, "get", ),
 							Check: resource.ComposeTestCheckFunc(
 								resource.TestCheckResourceAttr(
 									"openstack_objectstorage_tempurl_v1.tempurl_1", "method", "get"),
@@ -115,7 +115,7 @@ func testAccCheckObjectstorageTempurlV1Get(n string) resource.TestCheckFunc {
 	}
 }*/
 
-func testAccOpenStackObjectstorageTempurlV1Resource_basic(container, object string, method string, ttl int) string {
+func testAccOpenStackObjectstorageTempurlV1ResourceBasic(container, object string, method string, ttl int) string {
 	return fmt.Sprintf(`
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "%s"

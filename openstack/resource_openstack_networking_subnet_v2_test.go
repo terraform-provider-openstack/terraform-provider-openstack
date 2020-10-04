@@ -19,10 +19,10 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_basic,
+				Config: testAccNetworkingV2SubnetBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
-					testAccCheckNetworkingV2SubnetDnsConsistency("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2SubnetDNSConsistency("openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "allocation_pools.0.start", "192.168.199.100"),
 					resource.TestCheckResourceAttr(
@@ -30,7 +30,7 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Subnet_update,
+				Config: testAccNetworkingV2SubnetUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "name", "subnet_1"),
@@ -57,7 +57,7 @@ func TestAccNetworkingV2Subnet_enableDHCP(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_enableDHCP,
+				Config: testAccNetworkingV2SubnetEnableDhcp,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
@@ -77,7 +77,7 @@ func TestAccNetworkingV2Subnet_disableDHCP(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_disableDHCP,
+				Config: testAccNetworkingV2SubnetDisableDhcp,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
@@ -97,7 +97,7 @@ func TestAccNetworkingV2Subnet_noGateway(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_noGateway,
+				Config: testAccNetworkingV2SubnetNoGateway,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
@@ -117,7 +117,7 @@ func TestAccNetworkingV2Subnet_impliedGateway(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_impliedGateway,
+				Config: testAccNetworkingV2SubnetImpliedGateway,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
@@ -137,7 +137,7 @@ func TestAccNetworkingV2Subnet_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_timeout,
+				Config: testAccNetworkingV2SubnetTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 				),
@@ -155,7 +155,7 @@ func TestAccNetworkingV2Subnet_subnetPool(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_subnetPool,
+				Config: testAccNetworkingV2SubnetPool,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 				),
@@ -173,7 +173,7 @@ func TestAccNetworkingV2Subnet_subnetPoolNoCIDR(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_subnetPoolNoCIDR,
+				Config: testAccNetworkingV2SubnetPoolNoCIDR,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 				),
@@ -191,7 +191,7 @@ func TestAccNetworkingV2Subnet_subnetPrefixLength(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_subnetPrefixLength,
+				Config: testAccNetworkingV2SubnetPrefixLength,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet[0]),
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_2", &subnet[1]),
@@ -212,21 +212,21 @@ func TestAccNetworkingV2Subnet_multipleAllocationPools(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_multipleAllocationPools_1,
+				Config: testAccNetworkingV2SubnetMultipleAllocationPools1,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "allocation_pools.#", "2"),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Subnet_multipleAllocationPools_2,
+				Config: testAccNetworkingV2SubnetMultipleAllocationPools2,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "allocation_pools.#", "2"),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Subnet_multipleAllocationPools_3,
+				Config: testAccNetworkingV2SubnetMultipleAllocationPools3,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "allocation_pools.#", "2"),
@@ -243,7 +243,7 @@ func TestAccNetworkingV2Subnet_allocationPool(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_allocationPool_1,
+				Config: testAccNetworkingV2SubnetAllocationPool1,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.1804036869.start", "10.3.0.2"),
@@ -256,7 +256,7 @@ func TestAccNetworkingV2Subnet_allocationPool(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Subnet_allocationPool_2,
+				Config: testAccNetworkingV2SubnetAllocationPool2,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.1804036869.start", "10.3.0.2"),
@@ -281,16 +281,16 @@ func TestAccNetworkingV2Subnet_clearDNSNameservers(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_clearDNSNameservers_1,
+				Config: testAccNetworkingV2SubnetClearDNSNameservers1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
-					testAccCheckNetworkingV2SubnetDnsConsistency("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2SubnetDNSConsistency("openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "dns_nameservers.#", "2"),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Subnet_clearDNSNameservers_2,
+				Config: testAccNetworkingV2SubnetClearDNSNameservers2,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "dns_nameservers.#", "0"),
@@ -302,7 +302,7 @@ func TestAccNetworkingV2Subnet_clearDNSNameservers(t *testing.T) {
 
 func testAccCheckNetworkingV2SubnetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -333,7 +333,7 @@ func testAccCheckNetworkingV2SubnetExists(n string, subnet *subnets.Subnet) reso
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -353,7 +353,7 @@ func testAccCheckNetworkingV2SubnetExists(n string, subnet *subnets.Subnet) reso
 	}
 }
 
-func testAccCheckNetworkingV2SubnetDnsConsistency(n string, subnet *subnets.Subnet) resource.TestCheckFunc {
+func testAccCheckNetworkingV2SubnetDNSConsistency(n string, subnet *subnets.Subnet) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -374,7 +374,7 @@ func testAccCheckNetworkingV2SubnetDnsConsistency(n string, subnet *subnets.Subn
 	}
 }
 
-const testAccNetworkingV2Subnet_basic = `
+const testAccNetworkingV2SubnetBasic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -394,7 +394,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_update = `
+const testAccNetworkingV2SubnetUpdate = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -415,7 +415,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_enableDHCP = `
+const testAccNetworkingV2SubnetEnableDhcp = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -430,7 +430,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_disableDHCP = `
+const testAccNetworkingV2SubnetDisableDhcp = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -444,7 +444,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_noGateway = `
+const testAccNetworkingV2SubnetNoGateway = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -458,7 +458,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_impliedGateway = `
+const testAccNetworkingV2SubnetImpliedGateway = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -470,7 +470,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_timeout = `
+const testAccNetworkingV2SubnetTimeout = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -492,7 +492,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_subnetPool = `
+const testAccNetworkingV2SubnetPool = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -512,7 +512,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_subnetPoolNoCIDR = `
+const testAccNetworkingV2SubnetPoolNoCIDR = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -531,7 +531,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_subnetPrefixLength = `
+const testAccNetworkingV2SubnetPrefixLength = `
 resource "openstack_networking_network_v2" "network_1" {
   name           = "network_1"
   admin_state_up = "true"
@@ -559,7 +559,7 @@ resource "openstack_networking_subnet_v2" "subnet_2" {
 }
 `
 
-const testAccNetworkingV2Subnet_multipleAllocationPools_1 = `
+const testAccNetworkingV2SubnetMultipleAllocationPools1 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -582,7 +582,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_multipleAllocationPools_2 = `
+const testAccNetworkingV2SubnetMultipleAllocationPools2 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -605,7 +605,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_multipleAllocationPools_3 = `
+const testAccNetworkingV2SubnetMultipleAllocationPools3 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -628,7 +628,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_allocationPool_1 = `
+const testAccNetworkingV2SubnetAllocationPool1 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -651,7 +651,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_allocationPool_2 = `
+const testAccNetworkingV2SubnetAllocationPool2 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -674,7 +674,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_clearDNSNameservers_1 = `
+const testAccNetworkingV2SubnetClearDNSNameservers1 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -693,7 +693,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_clearDNSNameservers_2 = `
+const testAccNetworkingV2SubnetClearDNSNameservers2 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

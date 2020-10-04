@@ -13,7 +13,7 @@ func TestAccKeyManagerSecretV1DataSource_basic(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerSecretV1DataSource_basic,
+				Config: testAccKeyManagerSecretV1DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_keymanager_secret_v1.secret_1", "id",
@@ -42,7 +42,7 @@ func TestAccKeyManagerSecretV1DataSource_acls(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerSecretV1DataSource_acls,
+				Config: testAccKeyManagerSecretV1DataSourceAcls,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_keymanager_secret_v1.secret_1", "id",
@@ -68,7 +68,7 @@ func TestAccKeyManagerSecretV1DataSource_acls(t *testing.T) {
 	})
 }
 
-const testAccKeyManagerSecretV1DataSource_basic = `
+const testAccKeyManagerSecretV1DataSourceBasic = `
 resource "openstack_keymanager_secret_v1" "secret_1" {
   algorithm   = "aes"
   bit_length  = 192
@@ -105,7 +105,7 @@ data "openstack_keymanager_secret_v1" "secret_2" {
 }
 `
 
-const testAccKeyManagerSecretV1DataSource_acls = `
+const testAccKeyManagerSecretV1DataSourceAcls = `
 resource "openstack_keymanager_secret_v1" "secret_1" {
   algorithm   = "aes"
   bit_length  = 192

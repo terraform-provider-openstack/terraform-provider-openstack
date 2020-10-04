@@ -17,10 +17,10 @@ func TestAccOpenStackDNSZoneV2DataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackDNSZoneV2DataSource_zone,
+				Config: testAccOpenStackDNSZoneV2DataSourceZone,
 			},
 			{
-				Config: testAccOpenStackDNSZoneV2DataSource_basic,
+				Config: testAccOpenStackDNSZoneV2DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSZoneV2DataSourceID("data.openstack_dns_zone_v2.z1"),
 					resource.TestCheckResourceAttr(
@@ -50,7 +50,7 @@ func testAccCheckDNSZoneV2DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-var testAccOpenStackDNSZoneV2DataSource_zone = fmt.Sprintf(`
+var testAccOpenStackDNSZoneV2DataSourceZone = fmt.Sprintf(`
 resource "openstack_dns_zone_v2" "z1" {
   name = "%s"
   email = "terraform-dns-zone-v2-test-name@example.com"
@@ -58,9 +58,9 @@ resource "openstack_dns_zone_v2" "z1" {
   ttl = 7200
 }`, zoneName)
 
-var testAccOpenStackDNSZoneV2DataSource_basic = fmt.Sprintf(`
+var testAccOpenStackDNSZoneV2DataSourceBasic = fmt.Sprintf(`
 %s
 data "openstack_dns_zone_v2" "z1" {
 	name = "${openstack_dns_zone_v2.z1.name}"
 }
-`, testAccOpenStackDNSZoneV2DataSource_zone)
+`, testAccOpenStackDNSZoneV2DataSourceZone)

@@ -14,10 +14,10 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingNetworkV2DataSource_network,
+				Config: testAccOpenStackNetworkingNetworkV2DataSourceNetwork,
 			},
 			{
-				Config: testAccOpenStackNetworkingNetworkV2DataSource_basic,
+				Config: testAccOpenStackNetworkingNetworkV2DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.network_1"),
 					resource.TestCheckResourceAttr(
@@ -40,10 +40,10 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_subnet(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingNetworkV2DataSource_network,
+				Config: testAccOpenStackNetworkingNetworkV2DataSourceNetwork,
 			},
 			{
-				Config: testAccOpenStackNetworkingNetworkV2DataSource_subnet,
+				Config: testAccOpenStackNetworkingNetworkV2DataSourceSubnet,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.network_1"),
 					resource.TestCheckResourceAttr(
@@ -66,10 +66,10 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_networkID(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingNetworkV2DataSource_network,
+				Config: testAccOpenStackNetworkingNetworkV2DataSourceNetwork,
 			},
 			{
-				Config: testAccOpenStackNetworkingNetworkV2DataSource_networkID,
+				Config: testAccOpenStackNetworkingNetworkV2DataSourceNetworkID,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.network_1"),
 					resource.TestCheckResourceAttr(
@@ -92,11 +92,11 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_externalExplicit(t *testing.T
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingNetworkV2DataSource_externalExplicit,
+				Config: testAccOpenStackNetworkingNetworkV2DataSourceExternalExplicit,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.network_1"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_networking_network_v2.network_1", "name", OS_POOL_NAME),
+						"data.openstack_networking_network_v2.network_1", "name", osPoolName),
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_network_v2.network_1", "admin_state_up", "true"),
 					resource.TestCheckResourceAttr(
@@ -117,11 +117,11 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_externalImplicit(t *testing.T
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingNetworkV2DataSource_externalImplicit,
+				Config: testAccOpenStackNetworkingNetworkV2DataSourceExternalImplicit,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.network_1"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_networking_network_v2.network_1", "name", OS_POOL_NAME),
+						"data.openstack_networking_network_v2.network_1", "name", osPoolName),
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_network_v2.network_1", "admin_state_up", "true"),
 					resource.TestCheckResourceAttr(
@@ -143,10 +143,10 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan(t *testing.T
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Network_transparent_vlan,
+				Config: testAccNetworkingV2NetworkTransparentVlan,
 			},
 			{
-				Config: testAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan,
+				Config: testAccOpenStackNetworkingNetworkV2DataSourceTransparentVlan,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_network_v2.network_1"),
 					resource.TestCheckResourceAttr(
@@ -180,7 +180,7 @@ func testAccCheckNetworkingNetworkV2DataSourceID(n string) resource.TestCheckFun
 	}
 }
 
-const testAccOpenStackNetworkingNetworkV2DataSource_network = `
+const testAccOpenStackNetworkingNetworkV2DataSourceNetwork = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "tf_test_network"
   description = "my network description"
@@ -199,16 +199,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-var testAccOpenStackNetworkingNetworkV2DataSource_basic = fmt.Sprintf(`
+var testAccOpenStackNetworkingNetworkV2DataSourceBasic = fmt.Sprintf(`
 %s
 
 data "openstack_networking_network_v2" "network_1" {
   name = "${openstack_networking_network_v2.network_1.name}"
   description = "${openstack_networking_network_v2.network_1.description}"
 }
-`, testAccOpenStackNetworkingNetworkV2DataSource_network)
+`, testAccOpenStackNetworkingNetworkV2DataSourceNetwork)
 
-var testAccOpenStackNetworkingNetworkV2DataSource_subnet = fmt.Sprintf(`
+var testAccOpenStackNetworkingNetworkV2DataSourceSubnet = fmt.Sprintf(`
 %s
 
 data "openstack_networking_network_v2" "network_1" {
@@ -218,30 +218,30 @@ data "openstack_networking_network_v2" "network_1" {
     "bar",
   ]
 }
-`, testAccOpenStackNetworkingNetworkV2DataSource_network)
+`, testAccOpenStackNetworkingNetworkV2DataSourceNetwork)
 
-var testAccOpenStackNetworkingNetworkV2DataSource_networkID = fmt.Sprintf(`
+var testAccOpenStackNetworkingNetworkV2DataSourceNetworkID = fmt.Sprintf(`
 %s
 
 data "openstack_networking_network_v2" "network_1" {
   network_id = "${openstack_networking_network_v2.network_1.id}"
 }
-`, testAccOpenStackNetworkingNetworkV2DataSource_network)
+`, testAccOpenStackNetworkingNetworkV2DataSourceNetwork)
 
-var testAccOpenStackNetworkingNetworkV2DataSource_externalExplicit = fmt.Sprintf(`
+var testAccOpenStackNetworkingNetworkV2DataSourceExternalExplicit = fmt.Sprintf(`
 data "openstack_networking_network_v2" "network_1" {
   name = "%s"
   external = "true"
 }
-`, OS_POOL_NAME)
+`, osPoolName)
 
-var testAccOpenStackNetworkingNetworkV2DataSource_externalImplicit = fmt.Sprintf(`
+var testAccOpenStackNetworkingNetworkV2DataSourceExternalImplicit = fmt.Sprintf(`
 data "openstack_networking_network_v2" "network_1" {
   name = "%s"
 }
-`, OS_POOL_NAME)
+`, osPoolName)
 
-var testAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan = fmt.Sprintf(`
+var testAccOpenStackNetworkingNetworkV2DataSourceTransparentVlan = fmt.Sprintf(`
 %s
 
 data "openstack_networking_network_v2" "network_1" {
@@ -250,4 +250,4 @@ data "openstack_networking_network_v2" "network_1" {
     "bar",
   ]
 }
-`, testAccNetworkingV2Network_transparent_vlan)
+`, testAccNetworkingV2NetworkTransparentVlan)

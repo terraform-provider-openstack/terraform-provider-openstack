@@ -26,7 +26,7 @@ func TestAccNetworkingV2QoSBandwidthLimitRule_basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2QoSBandwidthLimitRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2QoSBandwidthLimitRule_basic,
+				Config: testAccNetworkingV2QoSBandwidthLimitRuleBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2QoSPolicyExists(
 						"openstack_networking_qos_policy_v2.qos_policy_1", &policy),
@@ -43,7 +43,7 @@ func TestAccNetworkingV2QoSBandwidthLimitRule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2QoSBandwidthLimitRule_update,
+				Config: testAccNetworkingV2QoSBandwidthLimitRuleUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2QoSPolicyExists(
 						"openstack_networking_qos_policy_v2.qos_policy_1", &policy),
@@ -75,7 +75,7 @@ func testAccCheckNetworkingV2QoSBandwidthLimitRuleExists(n string, rule *rules.B
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -104,7 +104,7 @@ func testAccCheckNetworkingV2QoSBandwidthLimitRuleExists(n string, rule *rules.B
 
 func testAccCheckNetworkingV2QoSBandwidthLimitRuleDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -128,7 +128,7 @@ func testAccCheckNetworkingV2QoSBandwidthLimitRuleDestroy(s *terraform.State) er
 	return nil
 }
 
-const testAccNetworkingV2QoSBandwidthLimitRule_basic = `
+const testAccNetworkingV2QoSBandwidthLimitRuleBasic = `
 resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
   name = "qos_policy_1"
 }
@@ -140,7 +140,7 @@ resource "openstack_networking_qos_bandwidth_limit_rule_v2" "bw_limit_rule_1" {
 }
 `
 
-const testAccNetworkingV2QoSBandwidthLimitRule_update = `
+const testAccNetworkingV2QoSBandwidthLimitRuleUpdate = `
 resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
   name = "qos_policy_1"
 }

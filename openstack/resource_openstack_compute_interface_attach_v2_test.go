@@ -19,7 +19,7 @@ func TestAccComputeV2InterfaceAttach_basic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InterfaceAttachDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InterfaceAttach_basic,
+				Config: testAccComputeV2InterfaceAttachBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InterfaceAttachExists("openstack_compute_interface_attach_v2.ai_1", &ai),
 				),
@@ -37,7 +37,7 @@ func TestAccComputeV2InterfaceAttach_IP(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InterfaceAttachDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InterfaceAttach_IP,
+				Config: testAccComputeV2InterfaceAttachIP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InterfaceAttachExists("openstack_compute_interface_attach_v2.ai_1", &ai),
 					testAccCheckComputeV2InterfaceAttachIP(&ai, "192.168.1.100"),
@@ -49,7 +49,7 @@ func TestAccComputeV2InterfaceAttach_IP(t *testing.T) {
 
 func testAccCheckComputeV2InterfaceAttachDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
+	computeClient, err := config.ComputeV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -59,12 +59,12 @@ func testAccCheckComputeV2InterfaceAttachDestroy(s *terraform.State) error {
 			continue
 		}
 
-		instanceId, portId, err := computeInterfaceAttachV2ParseID(rs.Primary.ID)
+		instanceID, portID, err := computeInterfaceAttachV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		_, err = attachinterfaces.Get(computeClient, instanceId, portId).Extract()
+		_, err = attachinterfaces.Get(computeClient, instanceID, portID).Extract()
 		if err == nil {
 			return fmt.Errorf("Volume attachment still exists")
 		}
@@ -85,23 +85,23 @@ func testAccCheckComputeV2InterfaceAttachExists(n string, ai *attachinterfaces.I
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		instanceId, portId, err := computeInterfaceAttachV2ParseID(rs.Primary.ID)
+		instanceID, portID, err := computeInterfaceAttachV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		found, err := attachinterfaces.Get(computeClient, instanceId, portId).Extract()
+		found, err := attachinterfaces.Get(computeClient, instanceID, portID).Extract()
 		if err != nil {
 			return err
 		}
 
-		//if found.instanceID != instanceID || found.PortID != portId {
-		if found.PortID != portId {
+		//if found.instanceID != instanceID || found.PortID != portID {
+		if found.PortID != portID {
 			return fmt.Errorf("InterfaceAttach not found")
 		}
 
@@ -123,7 +123,7 @@ func testAccCheckComputeV2InterfaceAttachIP(
 	}
 }
 
-var testAccComputeV2InterfaceAttach_basic = fmt.Sprintf(`
+var testAccComputeV2InterfaceAttachBasic = fmt.Sprintf(`
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   network_id = "%s"
@@ -142,9 +142,9 @@ resource "openstack_compute_interface_attach_v2" "ai_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   port_id = "${openstack_networking_port_v2.port_1.id}"
 }
-`, OS_NETWORK_ID, OS_NETWORK_ID)
+`, osNetworkID, osNetworkID)
 
-var testAccComputeV2InterfaceAttach_IP = fmt.Sprintf(`
+var testAccComputeV2InterfaceAttachIP = fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -171,4 +171,4 @@ resource "openstack_compute_interface_attach_v2" "ai_1" {
   network_id = "${openstack_networking_network_v2.network_1.id}"
   fixed_ip = "192.168.1.100"
 }
-`, OS_NETWORK_ID)
+`, osNetworkID)

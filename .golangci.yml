@@ -14,6 +14,7 @@ linters:
 #    - errcheck
     - exhaustive
     - exportloopref
+#    - gochecknoglobals
 #    - goconst
 #    - gocritic
     - godot
@@ -21,7 +22,7 @@ linters:
 #    - gofumpt
     - goheader
     - goimports
-#    - golint
+    - golint
 #    - gomodguard
 #    - goprintffuncname
 #    - gosec

@@ -18,7 +18,7 @@ func TestAccNetworkingV2QoSBandwidthLimitRule_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2QoSBandwidthLimitRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2QoSBandwidthLimitRule_basic,
+				Config: testAccNetworkingV2QoSBandwidthLimitRuleBasic,
 			},
 
 			{

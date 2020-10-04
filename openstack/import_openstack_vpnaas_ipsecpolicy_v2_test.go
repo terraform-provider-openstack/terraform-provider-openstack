@@ -15,7 +15,7 @@ func TestAccIPSecPolicy_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIPSecPolicyV2_basic,
+				Config: testAccIPSecPolicyV2Basic,
 			},
 
 			{

@@ -18,7 +18,7 @@ func TestAccComputeQuotasetV2_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3ProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeQuotasetV2_basic,
+				Config: testAccComputeQuotasetV2Basic,
 			},
 			{
 				ResourceName:      resourceName,

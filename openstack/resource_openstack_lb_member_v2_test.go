@@ -10,8 +10,8 @@ import (
 )
 
 func TestAccLBV2Member_basic(t *testing.T) {
-	var member_1 pools.Member
-	var member_2 pools.Member
+	var member1 pools.Member
+	var member2 pools.Member
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckLB(t) },
@@ -19,14 +19,14 @@ func TestAccLBV2Member_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2MemberDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2MemberConfig_basic,
+				Config: TestAccLbV2MemberConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2MemberExists("openstack_lb_member_v2.member_1", &member_1),
-					testAccCheckLBV2MemberExists("openstack_lb_member_v2.member_2", &member_2),
+					testAccCheckLBV2MemberExists("openstack_lb_member_v2.member_1", &member1),
+					testAccCheckLBV2MemberExists("openstack_lb_member_v2.member_2", &member2),
 				),
 			},
 			{
-				Config: TestAccLBV2MemberConfig_update,
+				Config: TestAccLbV2MemberConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "weight", "10"),
 					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_2", "weight", "15"),
@@ -38,7 +38,7 @@ func TestAccLBV2Member_basic(t *testing.T) {
 
 func testAccCheckLBV2MemberDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+	lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -48,8 +48,8 @@ func testAccCheckLBV2MemberDestroy(s *terraform.State) error {
 			continue
 		}
 
-		poolId := rs.Primary.Attributes["pool_id"]
-		_, err := pools.GetMember(lbClient, poolId, rs.Primary.ID).Extract()
+		poolID := rs.Primary.Attributes["pool_id"]
+		_, err := pools.GetMember(lbClient, poolID, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Member still exists: %s", rs.Primary.ID)
 		}
@@ -70,13 +70,13 @@ func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestC
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
 
-		poolId := rs.Primary.Attributes["pool_id"]
-		found, err := pools.GetMember(lbClient, poolId, rs.Primary.ID).Extract()
+		poolID := rs.Primary.Attributes["pool_id"]
+		found, err := pools.GetMember(lbClient, poolID, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -91,7 +91,7 @@ func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestC
 	}
 }
 
-const TestAccLBV2MemberConfig_basic = `
+const TestAccLbV2MemberConfigBasic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -158,7 +158,7 @@ resource "openstack_lb_member_v2" "member_2" {
 }
 `
 
-const TestAccLBV2MemberConfig_update = `
+const TestAccLbV2MemberConfigUpdate = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

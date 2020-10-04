@@ -19,7 +19,7 @@ func TestAccSFSV2SecurityService_basic(t *testing.T) {
 		CheckDestroy: testAccCheckSFSV2SecurityServiceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2SecurityServiceConfig_basic,
+				Config: testAccSFSV2SecurityServiceConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2SecurityServiceExists("openstack_sharedfilesystem_securityservice_v2.securityservice_1", &securityservice),
 					resource.TestCheckResourceAttr(
@@ -43,7 +43,7 @@ func TestAccSFSV2SecurityService_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2SecurityServiceConfig_update,
+				Config: testAccSFSV2SecurityServiceConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2SecurityServiceExists("openstack_sharedfilesystem_securityservice_v2.securityservice_1", &securityservice),
 					resource.TestCheckResourceAttr(
@@ -72,7 +72,7 @@ func TestAccSFSV2SecurityService_basic(t *testing.T) {
 
 func testAccCheckSFSV2SecurityServiceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
+	sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
@@ -103,7 +103,7 @@ func testAccCheckSFSV2SecurityServiceExists(n string, securityservice *securitys
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
+		sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
@@ -123,7 +123,7 @@ func testAccCheckSFSV2SecurityServiceExists(n string, securityservice *securitys
 	}
 }
 
-const testAccSFSV2SecurityServiceConfig_basic = `
+const testAccSFSV2SecurityServiceConfigBasic = `
 resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
   name        = "security"
   description = "created by terraform"
@@ -137,7 +137,7 @@ resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
 }
 `
 
-const testAccSFSV2SecurityServiceConfig_update = `
+const testAccSFSV2SecurityServiceConfigUpdate = `
 resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
   name        = "security_through_obscurity"
   description = ""

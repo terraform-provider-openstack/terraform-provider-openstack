@@ -20,7 +20,7 @@ func TestAccComputeV2ServerGroup_basic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2ServerGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2ServerGroup_basic,
+				Config: testAccComputeV2ServerGroupBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
 					resource.TestCheckResourceAttr(
@@ -43,7 +43,7 @@ func TestAccComputeV2ServerGroup_affinity(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2ServerGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2ServerGroup_affinity,
+				Config: testAccComputeV2ServerGroupAffinity,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -68,7 +68,7 @@ func TestAccComputeV2ServerGroup_soft_affinity(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2ServerGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2ServerGroup_soft_affinity,
+				Config: testAccComputeV2ServerGroupSoftAffinity,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -85,7 +85,7 @@ func TestAccComputeV2ServerGroup_soft_affinity(t *testing.T) {
 
 func testAccCheckComputeV2ServerGroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
+	computeClient, err := config.ComputeV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -116,7 +116,7 @@ func testAccCheckComputeV2ServerGroupExists(n string, kp *servergroups.ServerGro
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
@@ -150,14 +150,14 @@ func testAccCheckComputeV2InstanceInServerGroup(instance *servers.Server, sg *se
 	}
 }
 
-const testAccComputeV2ServerGroup_basic = `
+const testAccComputeV2ServerGroupBasic = `
 resource "openstack_compute_servergroup_v2" "sg_1" {
   name = "sg_1"
   policies = ["affinity"]
 }
 `
 
-var testAccComputeV2ServerGroup_affinity = fmt.Sprintf(`
+var testAccComputeV2ServerGroupAffinity = fmt.Sprintf(`
 resource "openstack_compute_servergroup_v2" "sg_1" {
   name = "sg_1"
   policies = ["affinity"]
@@ -173,9 +173,9 @@ resource "openstack_compute_instance_v2" "instance_1" {
     uuid = "%s"
   }
 }
-`, OS_NETWORK_ID)
+`, osNetworkID)
 
-var testAccComputeV2ServerGroup_soft_affinity = fmt.Sprintf(`
+var testAccComputeV2ServerGroupSoftAffinity = fmt.Sprintf(`
 resource "openstack_compute_servergroup_v2" "sg_1" {
   name = "sg_1"
   policies = ["soft-affinity"]
@@ -191,4 +191,4 @@ resource "openstack_compute_instance_v2" "instance_1" {
     uuid = "%s"
   }
 }
-`, OS_NETWORK_ID)
+`, osNetworkID)

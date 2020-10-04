@@ -15,7 +15,7 @@ func TestAccComputeV2Instance_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2Instance_basic,
+				Config: testAccComputeV2InstanceBasic,
 			},
 
 			{
@@ -40,7 +40,7 @@ func TestAccComputeV2Instance_DetachPortsBeforeDelete(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2Instance_detachPortsBeforeDestroy,
+				Config: testAccComputeV2InstanceDetachPortsBeforeDestroy,
 			},
 
 			{
@@ -61,7 +61,7 @@ func TestAccComputeV2Instance_importbootFromVolumeForceNew_1(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2Instance_bootFromVolumeForceNew_1,
+				Config: testAccComputeV2InstanceBootFromVolumeForceNew1,
 			},
 			{
 				ResourceName:      resourceName,
@@ -84,7 +84,7 @@ func TestAccComputeV2Instance_importbootFromVolumeImage(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2Instance_bootFromVolumeImage,
+				Config: testAccComputeV2InstanceBootFromVolumeImage,
 			},
 			{
 				ResourceName:      resourceName,

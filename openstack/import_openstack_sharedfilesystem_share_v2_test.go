@@ -15,7 +15,7 @@ func TestAccSFSV2Share_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckSFSV2ShareDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2ShareConfig_basic,
+				Config: testAccSFSV2ShareConfigBasic,
 			},
 
 			{

@@ -12,7 +12,7 @@ func TestAccNetworkingV2PortIDsDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2PortIDsDataSource_basic,
+				Config: testAccNetworkingV2PortIDsDataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.openstack_networking_port_ids_v2.ports", "ids.#", "2"),
 					resource.TestCheckResourceAttrPair(
@@ -35,7 +35,7 @@ func TestAccNetworkingV2PortIDsDataSource_basic(t *testing.T) {
 	})
 }
 
-const testAccNetworkingV2PortIDsDataSource_basic = `
+const testAccNetworkingV2PortIDsDataSourceBasic = `
 resource "openstack_networking_network_v2" "network_1" {
   name           = "network_1"
   admin_state_up = "true"

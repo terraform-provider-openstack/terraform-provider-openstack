@@ -20,7 +20,7 @@ func TestAccIdentityV3Ec2Credential_basic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3Ec2CredentialDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3Ec2Credential_basic,
+				Config: testAccIdentityV3Ec2CredentialBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3Ec2CredentialExists("openstack_identity_ec2_credential_v3.ec2_cred_1", &Ec2Credential),
 					resource.TestCheckResourceAttrSet(
@@ -39,7 +39,7 @@ func TestAccIdentityV3Ec2Credential_basic(t *testing.T) {
 
 func testAccCheckIdentityV3Ec2CredentialDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
+	identityClient, err := config.IdentityV3Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -80,7 +80,7 @@ func testAccCheckIdentityV3Ec2CredentialExists(n string, Ec2Credential *ec2crede
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
+		identityClient, err := config.IdentityV3Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
@@ -110,6 +110,6 @@ func testAccCheckIdentityV3Ec2CredentialExists(n string, Ec2Credential *ec2crede
 	}
 }
 
-const testAccIdentityV3Ec2Credential_basic = `
+const testAccIdentityV3Ec2CredentialBasic = `
 resource "openstack_identity_ec2_credential_v3" "ec2_cred_1" {}
 `

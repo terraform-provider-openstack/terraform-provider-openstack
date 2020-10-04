@@ -19,13 +19,13 @@ func TestAccLBV1VIP_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV1VIPDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV1VIP_basic,
+				Config: testAccLbV1VIPBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1VIPExists("openstack_lb_vip_v1.vip_1", &vip),
 				),
 			},
 			{
-				Config: testAccLBV1VIP_update,
+				Config: testAccLbV1VIPUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_lb_vip_v1.vip_1", "name", "vip_1_updated"),
 				),
@@ -43,7 +43,7 @@ func TestAccLBV1VIP_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckLBV1VIPDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV1VIP_timeout,
+				Config: testAccLbV1VIPTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1VIPExists("openstack_lb_vip_v1.vip_1", &vip),
 				),
@@ -54,7 +54,7 @@ func TestAccLBV1VIP_timeout(t *testing.T) {
 
 func testAccCheckLBV1VIPDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -85,7 +85,7 @@ func testAccCheckLBV1VIPExists(n string, vip *vips.VirtualIP) resource.TestCheck
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -105,7 +105,7 @@ func testAccCheckLBV1VIPExists(n string, vip *vips.VirtualIP) resource.TestCheck
 	}
 }
 
-const testAccLBV1VIP_basic = `
+const testAccLbV1VIPBasic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -138,7 +138,7 @@ resource "openstack_lb_vip_v1" "vip_1" {
 }
 `
 
-const testAccLBV1VIP_update = `
+const testAccLbV1VIPUpdate = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -171,7 +171,7 @@ resource "openstack_lb_vip_v1" "vip_1" {
 }
 `
 
-const testAccLBV1VIP_timeout = `
+const testAccLbV1VIPTimeout = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

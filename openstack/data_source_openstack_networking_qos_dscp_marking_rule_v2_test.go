@@ -17,10 +17,10 @@ func TestAccNetworkingV2QoSDSCPMarkingRuleDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2QoSDSCPMarkingRule_dataSource,
+				Config: testAccNetworkingV2QoSDSCPMarkingRuleDataSource,
 			},
 			{
-				Config: testAccOpenStackNetworkingQoSDSCPMarkingRuleV2DataSource_basic,
+				Config: testAccOpenStackNetworkingQoSDSCPMarkingRuleV2DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingQoSDSCPMarkingRuleV2DataSourceID("data.openstack_networking_qos_dscp_marking_rule_v2.dscp_mark_rule_1"),
 					resource.TestCheckResourceAttr(
@@ -46,7 +46,7 @@ func testAccCheckNetworkingQoSDSCPMarkingRuleV2DataSourceID(n string) resource.T
 	}
 }
 
-const testAccNetworkingV2QoSDSCPMarkingRule_dataSource = `
+const testAccNetworkingV2QoSDSCPMarkingRuleDataSource = `
 resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
   name = "qos_policy_1"
 }
@@ -56,10 +56,10 @@ resource "openstack_networking_qos_dscp_marking_rule_v2" "dscp_mark_rule_1" {
 }
 `
 
-var testAccOpenStackNetworkingQoSDSCPMarkingRuleV2DataSource_basic = fmt.Sprintf(`
+var testAccOpenStackNetworkingQoSDSCPMarkingRuleV2DataSourceBasic = fmt.Sprintf(`
 %s
 data "openstack_networking_qos_dscp_marking_rule_v2" "dscp_mark_rule_1" {
   qos_policy_id = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
   dscp_mark     = "${openstack_networking_qos_dscp_marking_rule_v2.dscp_mark_rule_1.dscp_mark}"
 }
-`, testAccNetworkingV2QoSDSCPMarkingRule_dataSource)
+`, testAccNetworkingV2QoSDSCPMarkingRuleDataSource)

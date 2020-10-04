@@ -12,7 +12,7 @@ func TestAccSFSV2ShareNetworkDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2ShareNetworkDataSource_basic,
+				Config: testAccSFSV2ShareNetworkDataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", "id",
@@ -42,7 +42,7 @@ func TestAccSFSV2ShareNetworkDataSource_basic(t *testing.T) {
 	})
 }
 
-const testAccSFSV2ShareNetworkDataSource_basic = `
+const testAccSFSV2ShareNetworkDataSourceBasic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

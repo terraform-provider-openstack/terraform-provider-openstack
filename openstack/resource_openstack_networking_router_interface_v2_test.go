@@ -24,7 +24,7 @@ func TestAccNetworkingV2RouterInterface_basic_subnet(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterInterfaceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2RouterInterface_basic_subnet,
+				Config: testAccNetworkingV2RouterInterfaceBasicSubnet,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -48,7 +48,7 @@ func TestAccNetworkingV2RouterInterface_basic_port(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterInterfaceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2RouterInterface_basic_port,
+				Config: testAccNetworkingV2RouterInterfaceBasicPort,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -72,7 +72,7 @@ func TestAccNetworkingV2RouterInterface_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterInterfaceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2RouterInterface_timeout,
+				Config: testAccNetworkingV2RouterInterfaceTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -86,7 +86,7 @@ func TestAccNetworkingV2RouterInterface_timeout(t *testing.T) {
 
 func testAccCheckNetworkingV2RouterInterfaceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -117,7 +117,7 @@ func testAccCheckNetworkingV2RouterInterfaceExists(n string) resource.TestCheckF
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -135,7 +135,7 @@ func testAccCheckNetworkingV2RouterInterfaceExists(n string) resource.TestCheckF
 	}
 }
 
-const testAccNetworkingV2RouterInterface_basic_subnet = `
+const testAccNetworkingV2RouterInterfaceBasicSubnet = `
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
@@ -158,7 +158,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2RouterInterface_basic_port = `
+const testAccNetworkingV2RouterInterfaceBasicPort = `
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
@@ -192,7 +192,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2RouterInterface_timeout = `
+const testAccNetworkingV2RouterInterfaceTimeout = `
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"

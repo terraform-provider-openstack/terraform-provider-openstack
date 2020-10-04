@@ -212,8 +212,8 @@ func chooseLBV2ListenerUpdateOpts(d *schema.ResourceData, config *Config) (neutr
 
 		if d.HasChange("default_tls_container_ref") {
 			hasChange = true
-			defaultTlsContainerRef := d.Get("default_tls_container_ref").(string)
-			opts.DefaultTlsContainerRef = &defaultTlsContainerRef
+			defaultTLSContainerRef := d.Get("default_tls_container_ref").(string)
+			opts.DefaultTlsContainerRef = &defaultTLSContainerRef
 		}
 
 		if d.HasChange("sni_container_refs") {
@@ -290,8 +290,8 @@ func chooseLBV2ListenerUpdateOpts(d *schema.ResourceData, config *Config) (neutr
 
 	if d.HasChange("default_tls_container_ref") {
 		hasChange = true
-		defaultTlsContainerRef := d.Get("default_tls_container_ref").(string)
-		opts.DefaultTlsContainerRef = &defaultTlsContainerRef
+		defaultTLSContainerRef := d.Get("default_tls_container_ref").(string)
+		opts.DefaultTlsContainerRef = &defaultTLSContainerRef
 	}
 
 	if d.HasChange("sni_container_refs") {

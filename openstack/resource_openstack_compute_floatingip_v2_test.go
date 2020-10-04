@@ -19,7 +19,7 @@ func TestAccComputeV2FloatingIP_basic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2FloatingIPDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FloatingIP_basic,
+				Config: testAccComputeV2FloatingIPBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FloatingIPExists("openstack_compute_floatingip_v2.fip_1", &fip),
 				),
@@ -30,7 +30,7 @@ func TestAccComputeV2FloatingIP_basic(t *testing.T) {
 
 func testAccCheckComputeV2FloatingIPDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
+	computeClient, err := config.ComputeV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -61,7 +61,7 @@ func testAccCheckComputeV2FloatingIPExists(n string, kp *floatingips.FloatingIP)
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
@@ -81,7 +81,7 @@ func testAccCheckComputeV2FloatingIPExists(n string, kp *floatingips.FloatingIP)
 	}
 }
 
-const testAccComputeV2FloatingIP_basic = `
+const testAccComputeV2FloatingIPBasic = `
 resource "openstack_compute_floatingip_v2" "fip_1" {
 }
 `

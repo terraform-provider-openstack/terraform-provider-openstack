@@ -18,7 +18,7 @@ func TestAccGroupV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckEndpointGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEndpointGroupV2_basic,
+				Config: testAccEndpointGroupV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEndpointGroupV2Exists(
 						"openstack_vpnaas_endpoint_group_v2.group_1", &group),
@@ -39,7 +39,7 @@ func TestAccGroupV2_update(t *testing.T) {
 		CheckDestroy: testAccCheckEndpointGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEndpointGroupV2_basic,
+				Config: testAccEndpointGroupV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEndpointGroupV2Exists(
 						"openstack_vpnaas_endpoint_group_v2.group_1", &group),
@@ -49,7 +49,7 @@ func TestAccGroupV2_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEndpointGroupV2_update,
+				Config: testAccEndpointGroupV2Update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEndpointGroupV2Exists(
 						"openstack_vpnaas_endpoint_group_v2.group_1", &group),
@@ -64,7 +64,7 @@ func TestAccGroupV2_update(t *testing.T) {
 
 func testAccCheckEndpointGroupV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -74,7 +74,7 @@ func testAccCheckEndpointGroupV2Destroy(s *terraform.State) error {
 		}
 		_, err = endpointgroups.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("EndpointGroup (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("EndpointGroup (%s) still exists", rs.Primary.ID)
 		}
 		if _, ok := err.(gophercloud.ErrDefault404); !ok {
 			return err
@@ -95,7 +95,7 @@ func testAccCheckEndpointGroupV2Exists(n string, group *endpointgroups.EndpointG
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -141,7 +141,7 @@ func testAccCheckEndpoints(n string, actual *[]string) resource.TestCheckFunc {
 }
 */
 
-var testAccEndpointGroupV2_basic = `
+var testAccEndpointGroupV2Basic = `
 	resource "openstack_vpnaas_endpoint_group_v2" "group_1" {
 		name = "Group 1"
 		type = "cidr"
@@ -150,7 +150,7 @@ var testAccEndpointGroupV2_basic = `
 	}
 `
 
-var testAccEndpointGroupV2_update = `
+var testAccEndpointGroupV2Update = `
 	resource "openstack_vpnaas_endpoint_group_v2" "group_1" {
 		name = "Updated Group 1"
 		type = "cidr"

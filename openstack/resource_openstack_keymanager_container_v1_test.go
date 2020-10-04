@@ -18,7 +18,7 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 		CheckDestroy: testAccCheckContainerV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerContainerV1_basic,
+				Config: testAccKeyManagerContainerV1Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -28,7 +28,7 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccKeyManagerContainerV1_update,
+				Config: testAccKeyManagerContainerV1Update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -38,7 +38,7 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccKeyManagerContainerV1_update1,
+				Config: testAccKeyManagerContainerV1Update1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -48,7 +48,7 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccKeyManagerContainerV1_update2,
+				Config: testAccKeyManagerContainerV1Update2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -69,7 +69,7 @@ func TestAccKeyManagerContainerV1_acls(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerContainerV1_acls,
+				Config: testAccKeyManagerContainerV1Acls,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -92,7 +92,7 @@ func TestAccKeyManagerContainerV1_certificate_type(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerContainerV1_certificate_type,
+				Config: testAccKeyManagerContainerV1CertificateType,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -113,7 +113,7 @@ func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerContainerV1_acls,
+				Config: testAccKeyManagerContainerV1Acls,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -125,7 +125,7 @@ func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccKeyManagerContainerV1_acls_update,
+				Config: testAccKeyManagerContainerV1AclsUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -142,7 +142,7 @@ func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
 
 func testAccCheckContainerV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	kmClient, err := config.KeyManagerV1Client(OS_REGION_NAME)
+	kmClient, err := config.KeyManagerV1Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 	}
@@ -152,7 +152,7 @@ func testAccCheckContainerV1Destroy(s *terraform.State) error {
 		}
 		_, err = containers.Get(kmClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Container (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("Container (%s) still exists", rs.Primary.ID)
 		}
 		if _, ok := err.(gophercloud.ErrDefault404); !ok {
 			return err
@@ -173,7 +173,7 @@ func testAccCheckContainerV1Exists(n string, container *containers.Container) re
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		kmClient, err := config.KeyManagerV1Client(OS_REGION_NAME)
+		kmClient, err := config.KeyManagerV1Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 		}
@@ -213,7 +213,7 @@ resource "openstack_keymanager_secret_v1" "intermediate_1" {
 }
 `
 
-var testAccKeyManagerContainerV1_basic = fmt.Sprintf(`
+var testAccKeyManagerContainerV1Basic = fmt.Sprintf(`
 %s
 
 resource "openstack_keymanager_container_v1" "container_1" {
@@ -237,7 +237,7 @@ resource "openstack_keymanager_container_v1" "container_1" {
 }
 `, testAccKeyManagerContainerV1)
 
-var testAccKeyManagerContainerV1_update = fmt.Sprintf(`
+var testAccKeyManagerContainerV1Update = fmt.Sprintf(`
 %s
 
 resource "openstack_keymanager_container_v1" "container_1" {
@@ -256,7 +256,7 @@ resource "openstack_keymanager_container_v1" "container_1" {
 }
 `, testAccKeyManagerContainerV1)
 
-var testAccKeyManagerContainerV1_update1 = fmt.Sprintf(`
+var testAccKeyManagerContainerV1Update1 = fmt.Sprintf(`
 %s
 
 resource "openstack_keymanager_container_v1" "container_1" {
@@ -280,7 +280,7 @@ resource "openstack_keymanager_container_v1" "container_1" {
 }
 `, testAccKeyManagerContainerV1)
 
-var testAccKeyManagerContainerV1_update2 = fmt.Sprintf(`
+var testAccKeyManagerContainerV1Update2 = fmt.Sprintf(`
 %s
 
 resource "openstack_keymanager_container_v1" "container_1" {
@@ -289,7 +289,7 @@ resource "openstack_keymanager_container_v1" "container_1" {
 }
 `, testAccKeyManagerContainerV1)
 
-var testAccKeyManagerContainerV1_acls = fmt.Sprintf(`
+var testAccKeyManagerContainerV1Acls = fmt.Sprintf(`
 %s
 
 resource "openstack_keymanager_container_v1" "container_1" {
@@ -323,7 +323,7 @@ resource "openstack_keymanager_container_v1" "container_1" {
 }
 `, testAccKeyManagerContainerV1)
 
-var testAccKeyManagerContainerV1_acls_update = fmt.Sprintf(`
+var testAccKeyManagerContainerV1AclsUpdate = fmt.Sprintf(`
 %s
 
 resource "openstack_keymanager_container_v1" "container_1" {
@@ -351,7 +351,7 @@ resource "openstack_keymanager_container_v1" "container_1" {
 }
 `, testAccKeyManagerContainerV1)
 
-var testAccKeyManagerContainerV1_certificate_type = fmt.Sprintf(`
+var testAccKeyManagerContainerV1CertificateType = fmt.Sprintf(`
 %s
 
 resource "openstack_keymanager_container_v1" "container_1" {

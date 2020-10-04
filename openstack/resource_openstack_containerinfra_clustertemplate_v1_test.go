@@ -82,7 +82,7 @@ func testAccCheckContainerInfraV1ClusterTemplateExists(n string, clustertemplate
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		containerInfraClient, err := config.ContainerInfraV1Client(OS_REGION_NAME)
+		containerInfraClient, err := config.ContainerInfraV1Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
 		}
@@ -104,7 +104,7 @@ func testAccCheckContainerInfraV1ClusterTemplateExists(n string, clustertemplate
 
 func testAccCheckContainerInfraV1ClusterTemplateDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	containerInfraClient, err := config.ContainerInfraV1Client(OS_REGION_NAME)
+	containerInfraClient, err := config.ContainerInfraV1Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
 	}

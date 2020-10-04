@@ -25,14 +25,14 @@ func TestAccLBV1Pool_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV1Pool_basic,
+				Config: testAccLbV1PoolBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1PoolExists("openstack_lb_pool_v1.pool_1", &pool),
 					resource.TestCheckResourceAttr("openstack_lb_pool_v1.pool_1", "lb_provider", "haproxy"),
 				),
 			},
 			{
-				Config: testAccLBV1Pool_update,
+				Config: testAccLbV1PoolUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_lb_pool_v1.pool_1", "name", "pool_1"),
 				),
@@ -56,7 +56,7 @@ func TestAccLBV1Pool_fullstack(t *testing.T) {
 		CheckDestroy: testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV1Pool_fullstack_1,
+				Config: testAccLbV1PoolFullstack1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -69,7 +69,7 @@ func TestAccLBV1Pool_fullstack(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccLBV1Pool_fullstack_2,
+				Config: testAccLbV1PoolFullstack2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -94,7 +94,7 @@ func TestAccLBV1Pool_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV1Pool_timeout,
+				Config: testAccLbV1PoolTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1PoolExists("openstack_lb_pool_v1.pool_1", &pool),
 					resource.TestCheckResourceAttr("openstack_lb_pool_v1.pool_1", "lb_provider", "haproxy"),
@@ -105,8 +105,8 @@ func TestAccLBV1Pool_timeout(t *testing.T) {
 }
 
 func TestAccLBV1Pool_updateMonitor(t *testing.T) {
-	var monitor_1 monitors.Monitor
-	var monitor_2 monitors.Monitor
+	var monitor1 monitors.Monitor
+	var monitor2 monitors.Monitor
 	var network networks.Network
 	var pool pools.Pool
 	var subnet subnets.Subnet
@@ -117,23 +117,23 @@ func TestAccLBV1Pool_updateMonitor(t *testing.T) {
 		CheckDestroy: testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV1Pool_updateMonitor_1,
+				Config: testAccLbV1PoolUpdateMonitor1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckLBV1PoolExists("openstack_lb_pool_v1.pool_1", &pool),
-					testAccCheckLBV1MonitorExists("openstack_lb_monitor_v1.monitor_1", &monitor_1),
-					testAccCheckLBV1MonitorExists("openstack_lb_monitor_v1.monitor_2", &monitor_2),
+					testAccCheckLBV1MonitorExists("openstack_lb_monitor_v1.monitor_1", &monitor1),
+					testAccCheckLBV1MonitorExists("openstack_lb_monitor_v1.monitor_2", &monitor2),
 				),
 			},
 			{
-				Config: testAccLBV1Pool_updateMonitor_2,
+				Config: testAccLbV1PoolUpdateMonitor2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckLBV1PoolExists("openstack_lb_pool_v1.pool_1", &pool),
-					testAccCheckLBV1MonitorExists("openstack_lb_monitor_v1.monitor_1", &monitor_1),
-					testAccCheckLBV1MonitorExists("openstack_lb_monitor_v1.monitor_2", &monitor_2),
+					testAccCheckLBV1MonitorExists("openstack_lb_monitor_v1.monitor_1", &monitor1),
+					testAccCheckLBV1MonitorExists("openstack_lb_monitor_v1.monitor_2", &monitor2),
 				),
 			},
 		},
@@ -142,7 +142,7 @@ func TestAccLBV1Pool_updateMonitor(t *testing.T) {
 
 func testAccCheckLBV1PoolDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -173,7 +173,7 @@ func testAccCheckLBV1PoolExists(n string, pool *pools.Pool) resource.TestCheckFu
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -193,7 +193,7 @@ func testAccCheckLBV1PoolExists(n string, pool *pools.Pool) resource.TestCheckFu
 	}
 }
 
-const testAccLBV1Pool_basic = `
+const testAccLbV1PoolBasic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -214,7 +214,7 @@ resource "openstack_lb_pool_v1" "pool_1" {
 }
 `
 
-const testAccLBV1Pool_update = `
+const testAccLbV1PoolUpdate = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -234,7 +234,7 @@ resource "openstack_lb_pool_v1" "pool_1" {
 }
 `
 
-const testAccLBV1Pool_fullstack_1 = `
+const testAccLbV1PoolFullstack1 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -323,7 +323,7 @@ resource "openstack_lb_vip_v1" "vip_1" {
 }
 `
 
-const testAccLBV1Pool_fullstack_2 = `
+const testAccLbV1PoolFullstack2 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -413,7 +413,7 @@ resource "openstack_lb_vip_v1" "vip_1" {
 }
 `
 
-const testAccLBV1Pool_timeout = `
+const testAccLbV1PoolTimeout = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -439,7 +439,7 @@ resource "openstack_lb_pool_v1" "pool_1" {
 }
 `
 
-const testAccLBV1Pool_updateMonitor_1 = `
+const testAccLbV1PoolUpdateMonitor1 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -476,7 +476,7 @@ resource "openstack_lb_pool_v1" "pool_1" {
 }
 `
 
-const testAccLBV1Pool_updateMonitor_2 = `
+const testAccLbV1PoolUpdateMonitor2 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

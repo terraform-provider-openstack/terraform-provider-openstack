@@ -18,13 +18,13 @@ func TestAccLBV2Monitor_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2MonitorDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2MonitorConfig_basic,
+				Config: TestAccLbV2MonitorConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MonitorExists(t, "openstack_lb_monitor_v2.monitor_1", &monitor),
 				),
 			},
 			{
-				Config: TestAccLBV2MonitorConfig_update,
+				Config: TestAccLbV2MonitorConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_lb_monitor_v2.monitor_1", "name", "monitor_1_updated"),
@@ -48,14 +48,14 @@ func TestAccLBV2Monitor_octavia(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2MonitorDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2MonitorConfig_octavia,
+				Config: TestAccLbV2MonitorConfigOctavia,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MonitorExists(t, "openstack_lb_monitor_v2.monitor_1", &monitor),
 					resource.TestCheckResourceAttr("openstack_lb_monitor_v2.monitor_1", "max_retries_down", "8"),
 				),
 			},
 			{
-				Config: TestAccLBV2MonitorConfig_octavia_update,
+				Config: TestAccLbV2MonitorConfigOctaviaUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_lb_monitor_v2.monitor_1", "name", "monitor_1_updated"),
@@ -78,7 +78,7 @@ func TestAccLBV2Monitor_octavia_udp(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2MonitorDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2MonitorConfig_octavia_udp,
+				Config: TestAccLbV2MonitorConfigOctaviaUDP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MonitorExists(t, "openstack_lb_monitor_v2.monitor_1", &monitor),
 					resource.TestCheckResourceAttr("openstack_lb_monitor_v2.monitor_1", "type", "UDP-CONNECT"),
@@ -90,7 +90,7 @@ func TestAccLBV2Monitor_octavia_udp(t *testing.T) {
 
 func testAccCheckLBV2MonitorDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+	lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -121,7 +121,7 @@ func testAccCheckLBV2MonitorExists(t *testing.T, n string, monitor *monitors.Mon
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
@@ -141,7 +141,7 @@ func testAccCheckLBV2MonitorExists(t *testing.T, n string, monitor *monitors.Mon
 	}
 }
 
-const TestAccLBV2MonitorConfig_basic = `
+const TestAccLbV2MonitorConfigBasic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -195,7 +195,7 @@ resource "openstack_lb_monitor_v2" "monitor_1" {
 }
 `
 
-const TestAccLBV2MonitorConfig_update = `
+const TestAccLbV2MonitorConfigUpdate = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -250,7 +250,7 @@ resource "openstack_lb_monitor_v2" "monitor_1" {
 }
 `
 
-const TestAccLBV2MonitorConfig_octavia = `
+const TestAccLbV2MonitorConfigOctavia = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -305,7 +305,7 @@ resource "openstack_lb_monitor_v2" "monitor_1" {
 }
 `
 
-const TestAccLBV2MonitorConfig_octavia_update = `
+const TestAccLbV2MonitorConfigOctaviaUpdate = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -361,7 +361,7 @@ resource "openstack_lb_monitor_v2" "monitor_1" {
 }
 `
 
-const TestAccLBV2MonitorConfig_octavia_udp = `
+const TestAccLbV2MonitorConfigOctaviaUDP = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

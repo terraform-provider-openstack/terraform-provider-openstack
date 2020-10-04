@@ -14,10 +14,10 @@ func TestAccOpenStackNetworkingFWPolicyV1DataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingFWPolicyV1DataSource_group,
+				Config: testAccOpenStackNetworkingFWPolicyV1DataSourceGroup,
 			},
 			{
-				Config: testAccOpenStackNetworkingFWPolicyV1DataSource_basic,
+				Config: testAccOpenStackNetworkingFWPolicyV1DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingFWPolicyV1DataSourceID("data.openstack_fw_policy_v1.policy_1"),
 					resource.TestCheckResourceAttr(
@@ -33,10 +33,10 @@ func TestAccOpenStackNetworkingFWPolicyV1DataSource_FWPolicyID(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingFWPolicyV1DataSource_group,
+				Config: testAccOpenStackNetworkingFWPolicyV1DataSourceGroup,
 			},
 			{
-				Config: testAccOpenStackNetworkingFWPolicyV1DataSource_policyID,
+				Config: testAccOpenStackNetworkingFWPolicyV1DataSourcePolicyID,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingFWPolicyV1DataSourceID("data.openstack_fw_policy_v1.policy_1"),
 					resource.TestCheckResourceAttr(
@@ -62,25 +62,25 @@ func testAccCheckNetworkingFWPolicyV1DataSourceID(n string) resource.TestCheckFu
 	}
 }
 
-const testAccOpenStackNetworkingFWPolicyV1DataSource_group = `
+const testAccOpenStackNetworkingFWPolicyV1DataSourceGroup = `
 resource "openstack_fw_policy_v1" "policy_1" {
         name        = "policy_1"
 	description = "My firewall policy"
 }
 `
 
-var testAccOpenStackNetworkingFWPolicyV1DataSource_basic = fmt.Sprintf(`
+var testAccOpenStackNetworkingFWPolicyV1DataSourceBasic = fmt.Sprintf(`
 %s
 
 data "openstack_fw_policy_v1" "policy_1" {
 	name = "${openstack_fw_policy_v1.policy_1.name}"
 }
-`, testAccOpenStackNetworkingFWPolicyV1DataSource_group)
+`, testAccOpenStackNetworkingFWPolicyV1DataSourceGroup)
 
-var testAccOpenStackNetworkingFWPolicyV1DataSource_policyID = fmt.Sprintf(`
+var testAccOpenStackNetworkingFWPolicyV1DataSourcePolicyID = fmt.Sprintf(`
 %s
 
 data "openstack_fw_policy_v1" "policy_1" {
 	policy_id = "${openstack_fw_policy_v1.policy_1.id}"
 }
-`, testAccOpenStackNetworkingFWPolicyV1DataSource_group)
+`, testAccOpenStackNetworkingFWPolicyV1DataSourceGroup)

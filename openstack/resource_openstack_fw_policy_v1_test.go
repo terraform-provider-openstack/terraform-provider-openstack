@@ -18,7 +18,7 @@ func TestAccFWPolicyV1_basic(t *testing.T) {
 		CheckDestroy: testAccCheckFWPolicyV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWPolicyV1_basic,
+				Config: testAccFWPolicyV1Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWPolicyV1Exists(
 						"openstack_fw_policy_v1.policy_1", "", "", 0),
@@ -35,7 +35,7 @@ func TestAccFWPolicyV1_addRules(t *testing.T) {
 		CheckDestroy: testAccCheckFWPolicyV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWPolicyV1_addRules,
+				Config: testAccFWPolicyV1AddRules,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWPolicyV1Exists(
 						"openstack_fw_policy_v1.policy_1", "policy_1", "terraform acceptance test", 2),
@@ -52,7 +52,7 @@ func TestAccFWPolicyV1_deleteRules(t *testing.T) {
 		CheckDestroy: testAccCheckFWPolicyV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWPolicyV1_deleteRules,
+				Config: testAccFWPolicyV1DeleteRules,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWPolicyV1Exists(
 						"openstack_fw_policy_v1.policy_1", "policy_1", "terraform acceptance test", 1),
@@ -64,7 +64,7 @@ func TestAccFWPolicyV1_deleteRules(t *testing.T) {
 
 func testAccCheckFWPolicyV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -74,7 +74,7 @@ func testAccCheckFWPolicyV1Destroy(s *terraform.State) error {
 		}
 		_, err = policies.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Firewall policy (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("Firewall policy (%s) still exists", rs.Primary.ID)
 		}
 		if _, ok := err.(gophercloud.ErrDefault404); !ok {
 			return err
@@ -95,7 +95,7 @@ func testAccCheckFWPolicyV1Exists(n, name, description string, ruleCount int) re
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -132,12 +132,12 @@ func testAccCheckFWPolicyV1Exists(n, name, description string, ruleCount int) re
 	}
 }
 
-const testAccFWPolicyV1_basic = `
+const testAccFWPolicyV1Basic = `
 resource "openstack_fw_policy_v1" "policy_1" {
 }
 `
 
-const testAccFWPolicyV1_addRules = `
+const testAccFWPolicyV1AddRules = `
 resource "openstack_fw_policy_v1" "policy_1" {
   name = "policy_1"
   description =  "terraform acceptance test"
@@ -158,7 +158,7 @@ resource "openstack_fw_rule_v1" "udp_deny" {
 }
 `
 
-const testAccFWPolicyV1_deleteRules = `
+const testAccFWPolicyV1DeleteRules = `
 resource "openstack_fw_policy_v1" "policy_1" {
   name = "policy_1"
   description =  "terraform acceptance test"

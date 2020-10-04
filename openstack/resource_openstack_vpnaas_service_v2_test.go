@@ -20,7 +20,7 @@ func TestAccServiceV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckServiceV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServiceV2_basic,
+				Config: testAccServiceV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceV2Exists(
 						"openstack_vpnaas_service_v2.service_1", &service),
@@ -34,7 +34,7 @@ func TestAccServiceV2_basic(t *testing.T) {
 
 func testAccCheckServiceV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -44,7 +44,7 @@ func testAccCheckServiceV2Destroy(s *terraform.State) error {
 		}
 		_, err = services.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Service (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("Service (%s) still exists", rs.Primary.ID)
 		}
 		if _, ok := err.(gophercloud.ErrDefault404); !ok {
 			return err
@@ -65,7 +65,7 @@ func testAccCheckServiceV2Exists(n string, serv *services.Service) resource.Test
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -82,7 +82,7 @@ func testAccCheckServiceV2Exists(n string, serv *services.Service) resource.Test
 	}
 }
 
-var testAccServiceV2_basic = fmt.Sprintf(`
+var testAccServiceV2Basic = fmt.Sprintf(`
 	resource "openstack_networking_router_v2" "router_1" {
 	  name = "router_1"
 	  admin_state_up = "true"
@@ -93,4 +93,4 @@ var testAccServiceV2_basic = fmt.Sprintf(`
 		router_id = "${openstack_networking_router_v2.router_1.id}",
 		admin_state_up = "false"
 	}
-	`, OS_EXTGW_ID)
+	`, osExtGwID)

@@ -35,9 +35,9 @@ func (opts ZoneCreateOpts) ToZoneCreateMap() (map[string]interface{}, error) {
 	return nil, fmt.Errorf("Expected map but got %T", b[""])
 }
 
-func dnsZoneV2RefreshFunc(dnsClient *gophercloud.ServiceClient, zoneId string) resource.StateRefreshFunc {
+func dnsZoneV2RefreshFunc(dnsClient *gophercloud.ServiceClient, zoneID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		zone, err := zones.Get(dnsClient, zoneId).Extract()
+		zone, err := zones.Get(dnsClient, zoneID).Extract()
 		if err != nil {
 			if _, ok := err.(gophercloud.ErrDefault404); ok {
 				return zone, "DELETED", nil

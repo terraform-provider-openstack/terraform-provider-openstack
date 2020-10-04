@@ -15,7 +15,7 @@ func TestAccKeyManagerOrderV1_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckOrderV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerOrderV1_symmetric,
+				Config: testAccKeyManagerOrderV1Symmetric,
 			},
 			{
 				ResourceName:      resourceName,

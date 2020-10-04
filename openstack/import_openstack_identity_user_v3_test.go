@@ -22,7 +22,7 @@ func TestAccIdentityV3User_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3UserDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3User_basic(projectName, userName),
+				Config: testAccIdentityV3UserBasic(projectName, userName),
 			},
 
 			{

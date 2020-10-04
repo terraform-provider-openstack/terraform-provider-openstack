@@ -15,7 +15,7 @@ func TestAccLBV2Pool_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2PoolDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2PoolConfig_basic,
+				Config: TestAccLbV2PoolConfigBasic,
 			},
 
 			{

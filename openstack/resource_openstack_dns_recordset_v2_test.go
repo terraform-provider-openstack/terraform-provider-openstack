@@ -26,7 +26,7 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSV2RecordSet_basic(zoneName),
+				Config: testAccDNSV2RecordSetBasic(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
 					resource.TestCheckResourceAttr(
@@ -36,7 +36,7 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDNSV2RecordSet_update(zoneName),
+				Config: testAccDNSV2RecordSetUpdate(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_dns_recordset_v2.recordset_1", "name", zoneName),
 					resource.TestCheckResourceAttr("openstack_dns_recordset_v2.recordset_1", "ttl", "6000"),
@@ -61,7 +61,7 @@ func TestAccDNSV2RecordSet_ipv6(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSV2RecordSet_ipv6(zoneName),
+				Config: testAccDNSV2RecordSetIPv6(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
 					resource.TestCheckResourceAttr(
@@ -86,7 +86,7 @@ func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSV2RecordSet_readTTL(zoneName),
+				Config: testAccDNSV2RecordSetReadTTL(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
 					resource.TestMatchResourceAttr(
@@ -107,7 +107,7 @@ func TestAccDNSV2RecordSet_ensureSameTTL(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSV2RecordSet_ensureSameTTL_1(zoneName),
+				Config: testAccDNSV2RecordSetEnsureSameTTL1(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
 					resource.TestCheckResourceAttr(
@@ -117,7 +117,7 @@ func TestAccDNSV2RecordSet_ensureSameTTL(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDNSV2RecordSet_ensureSameTTL_2(zoneName),
+				Config: testAccDNSV2RecordSetEnsureSameTTL2(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_dns_recordset_v2.recordset_1", "records.0", "10.1.0.2"),
@@ -131,7 +131,7 @@ func TestAccDNSV2RecordSet_ensureSameTTL(t *testing.T) {
 
 func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	dnsClient, err := config.DNSV2Client(OS_REGION_NAME)
+	dnsClient, err := config.DNSV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
@@ -167,7 +167,7 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		dnsClient, err := config.DNSV2Client(OS_REGION_NAME)
+		dnsClient, err := config.DNSV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 		}
@@ -192,7 +192,7 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 	}
 }
 
-func testAccDNSV2RecordSet_basic(zoneName string) string {
+func testAccDNSV2RecordSetBasic(zoneName string) string {
 	return fmt.Sprintf(`
 		resource "openstack_dns_zone_v2" "zone_1" {
 			name = "%s"
@@ -213,7 +213,7 @@ func testAccDNSV2RecordSet_basic(zoneName string) string {
 	`, zoneName, zoneName)
 }
 
-func testAccDNSV2RecordSet_update(zoneName string) string {
+func testAccDNSV2RecordSetUpdate(zoneName string) string {
 	return fmt.Sprintf(`
 		resource "openstack_dns_zone_v2" "zone_1" {
 			name = "%s"
@@ -234,7 +234,7 @@ func testAccDNSV2RecordSet_update(zoneName string) string {
 	`, zoneName, zoneName)
 }
 
-func testAccDNSV2RecordSet_readTTL(zoneName string) string {
+func testAccDNSV2RecordSetReadTTL(zoneName string) string {
 	return fmt.Sprintf(`
 		resource "openstack_dns_zone_v2" "zone_1" {
 			name = "%s"
@@ -253,7 +253,7 @@ func testAccDNSV2RecordSet_readTTL(zoneName string) string {
 	`, zoneName, zoneName)
 }
 
-func testAccDNSV2RecordSet_ipv6(zoneName string) string {
+func testAccDNSV2RecordSetIPv6(zoneName string) string {
 	return fmt.Sprintf(`
 		resource "openstack_dns_zone_v2" "zone_1" {
 			name = "%s"
@@ -277,7 +277,7 @@ func testAccDNSV2RecordSet_ipv6(zoneName string) string {
 	`, zoneName, zoneName)
 }
 
-func testAccDNSV2RecordSet_ensureSameTTL_1(zoneName string) string {
+func testAccDNSV2RecordSetEnsureSameTTL1(zoneName string) string {
 	return fmt.Sprintf(`
 		resource "openstack_dns_zone_v2" "zone_1" {
 			name = "%s"
@@ -296,7 +296,7 @@ func testAccDNSV2RecordSet_ensureSameTTL_1(zoneName string) string {
 	`, zoneName, zoneName)
 }
 
-func testAccDNSV2RecordSet_ensureSameTTL_2(zoneName string) string {
+func testAccDNSV2RecordSetEnsureSameTTL2(zoneName string) string {
 	return fmt.Sprintf(`
 		resource "openstack_dns_zone_v2" "zone_1" {
 			name = "%s"

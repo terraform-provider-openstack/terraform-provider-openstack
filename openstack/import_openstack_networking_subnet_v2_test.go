@@ -15,7 +15,7 @@ func TestAccNetworkingV2Subnet_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_basic,
+				Config: testAccNetworkingV2SubnetBasic,
 			},
 
 			{

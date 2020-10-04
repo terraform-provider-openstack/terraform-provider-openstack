@@ -15,7 +15,7 @@ func TestAccIKEPolicy_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIKEPolicyV2_basic,
+				Config: testAccIKEPolicyV2Basic,
 			},
 
 			{

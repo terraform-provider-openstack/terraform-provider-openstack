@@ -20,13 +20,13 @@ func TestAccFWFirewallV1_basic(t *testing.T) {
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWFirewallV1_basic_1,
+				Config: testAccFWFirewallV1Basic1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1("openstack_fw_firewall_v1.fw_1", "", "", policyID),
 				),
 			},
 			{
-				Config: testAccFWFirewallV1_basic_2,
+				Config: testAccFWFirewallV1Basic2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1(
 						"openstack_fw_firewall_v1.fw_1", "fw_1", "terraform acceptance test", policyID),
@@ -45,7 +45,7 @@ func TestAccFWFirewallV1_router(t *testing.T) {
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWFirewallV1_router,
+				Config: testAccFWFirewallV1Router,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1Exists("openstack_fw_firewall_v1.fw_1", &firewall),
 					testAccCheckFWFirewallRouterCount(&firewall, 1),
@@ -64,7 +64,7 @@ func TestAccFWFirewallV1_no_router(t *testing.T) {
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWFirewallV1_no_router,
+				Config: testAccFWFirewallV1NoRouter,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1Exists("openstack_fw_firewall_v1.fw_1", &firewall),
 					resource.TestCheckResourceAttr("openstack_fw_firewall_v1.fw_1", "description", "firewall router test"),
@@ -84,14 +84,14 @@ func TestAccFWFirewallV1_router_update(t *testing.T) {
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWFirewallV1_router,
+				Config: testAccFWFirewallV1Router,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1Exists("openstack_fw_firewall_v1.fw_1", &firewall),
 					testAccCheckFWFirewallRouterCount(&firewall, 1),
 				),
 			},
 			{
-				Config: testAccFWFirewallV1_router_add,
+				Config: testAccFWFirewallV1RouterAdd,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1Exists("openstack_fw_firewall_v1.fw_1", &firewall),
 					testAccCheckFWFirewallRouterCount(&firewall, 2),
@@ -110,14 +110,14 @@ func TestAccFWFirewallV1_router_remove(t *testing.T) {
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWFirewallV1_router,
+				Config: testAccFWFirewallV1Router,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1Exists("openstack_fw_firewall_v1.fw_1", &firewall),
 					testAccCheckFWFirewallRouterCount(&firewall, 1),
 				),
 			},
 			{
-				Config: testAccFWFirewallV1_router_remove,
+				Config: testAccFWFirewallV1RouterRemove,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallV1Exists("openstack_fw_firewall_v1.fw_1", &firewall),
 					testAccCheckFWFirewallRouterCount(&firewall, 0),
@@ -129,7 +129,7 @@ func TestAccFWFirewallV1_router_remove(t *testing.T) {
 
 func testAccCheckFWFirewallV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -140,7 +140,7 @@ func testAccCheckFWFirewallV1Destroy(s *terraform.State) error {
 
 		_, err = firewalls.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Firewall (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("Firewall (%s) still exists", rs.Primary.ID)
 		}
 		if _, ok := err.(gophercloud.ErrDefault404); !ok {
 			return err
@@ -161,7 +161,7 @@ func testAccCheckFWFirewallV1Exists(n string, firewall *Firewall) resource.TestC
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Exists) Error creating OpenStack networking client: %s", err)
 		}
@@ -204,7 +204,7 @@ func testAccCheckFWFirewallV1(n, expectedName, expectedDescription string, polic
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Exists) Error creating OpenStack networking client: %s", err)
 		}
@@ -247,7 +247,7 @@ func testAccCheckFWFirewallV1(n, expectedName, expectedDescription string, polic
 	}
 }
 
-const testAccFWFirewallV1_basic_1 = `
+const testAccFWFirewallV1Basic1 = `
 resource "openstack_fw_firewall_v1" "fw_1" {
   policy_id = "${openstack_fw_policy_v1.policy_1.id}"
 
@@ -263,7 +263,7 @@ resource "openstack_fw_policy_v1" "policy_1" {
 }
 `
 
-const testAccFWFirewallV1_basic_2 = `
+const testAccFWFirewallV1Basic2 = `
 resource "openstack_fw_firewall_v1" "fw_1" {
   name = "fw_1"
   description = "terraform acceptance test"
@@ -282,7 +282,7 @@ resource "openstack_fw_policy_v1" "policy_2" {
 }
 `
 
-const testAccFWFirewallV1_router = `
+const testAccFWFirewallV1Router = `
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
@@ -300,7 +300,7 @@ resource "openstack_fw_firewall_v1" "fw_1" {
 }
 `
 
-const testAccFWFirewallV1_router_add = `
+const testAccFWFirewallV1RouterAdd = `
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
@@ -326,7 +326,7 @@ resource "openstack_fw_firewall_v1" "fw_1" {
 }
 `
 
-const testAccFWFirewallV1_router_remove = `
+const testAccFWFirewallV1RouterRemove = `
 resource "openstack_fw_policy_v1" "policy_1" {
   name = "policy_1"
 }
@@ -339,7 +339,7 @@ resource "openstack_fw_firewall_v1" "fw_1" {
 }
 `
 
-const testAccFWFirewallV1_no_router = `
+const testAccFWFirewallV1NoRouter = `
 resource "openstack_fw_policy_v1" "policy_1" {
   name = "policy_1"
 }

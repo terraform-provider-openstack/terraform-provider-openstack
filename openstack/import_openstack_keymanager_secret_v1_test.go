@@ -15,7 +15,7 @@ func TestAccKeyManagerSecretV1_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerSecretV1_basic,
+				Config: testAccKeyManagerSecretV1Basic,
 			},
 			{
 				ResourceName:      resourceName,
@@ -35,7 +35,7 @@ func TestAccKeyManagerSecretV1_importACLs(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerSecretV1_acls,
+				Config: testAccKeyManagerSecretV1Acls,
 			},
 			{
 				ResourceName:            resourceName,

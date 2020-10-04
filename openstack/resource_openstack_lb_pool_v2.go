@@ -141,14 +141,13 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 		if persistence.Type == "APP_COOKIE" {
 			if pV["cookie_name"].(string) == "" {
 				return fmt.Errorf(
-					"Persistence cookie_name needs to be set if using 'APP_COOKIE' persistence type.")
-			} else {
-				persistence.CookieName = pV["cookie_name"].(string)
+					"Persistence cookie_name needs to be set if using 'APP_COOKIE' persistence type")
 			}
+			persistence.CookieName = pV["cookie_name"].(string)
 		} else {
 			if pV["cookie_name"].(string) != "" {
 				return fmt.Errorf(
-					"Persistence cookie_name can only be set if using 'APP_COOKIE' persistence type.")
+					"Persistence cookie_name can only be set if using 'APP_COOKIE' persistence type")
 			}
 		}
 	}

@@ -21,10 +21,10 @@ func TestAccOpenStackIdentityV3UserDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackIdentityUserV3DataSource_user(userName, userPassword),
+				Config: testAccOpenStackIdentityUserV3DataSourceUser(userName, userPassword),
 			},
 			{
-				Config: testAccOpenStackIdentityUserV3DataSource_basic(userName, userPassword),
+				Config: testAccOpenStackIdentityUserV3DataSourceBasic(userName, userPassword),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityUserV3DataSourceID("data.openstack_identity_user_v3.user_1"),
 					resource.TestCheckResourceAttr(
@@ -84,7 +84,7 @@ func testAccCheckIdentityUserV3DataSourceDefaultProjectID(n1, n2 string) resourc
 	}
 }
 
-func testAccOpenStackIdentityUserV3DataSource_user(name, password string) string {
+func testAccOpenStackIdentityUserV3DataSourceUser(name, password string) string {
 	return fmt.Sprintf(`
 	%s
 
@@ -93,15 +93,15 @@ func testAccOpenStackIdentityUserV3DataSource_user(name, password string) string
 	  password = "%s"
 	  default_project_id = "${openstack_identity_project_v3.project_1.id}"
 	}
-`, testAccOpenStackIdentityProjectV3DataSource_project(fmt.Sprintf("%s_project", name), acctest.RandString(20), "tag1", "tag2"), name, password)
+`, testAccOpenStackIdentityProjectV3DataSourceProject(fmt.Sprintf("%s_project", name), acctest.RandString(20), "tag1", "tag2"), name, password)
 }
 
-func testAccOpenStackIdentityUserV3DataSource_basic(name, password string) string {
+func testAccOpenStackIdentityUserV3DataSourceBasic(name, password string) string {
 	return fmt.Sprintf(`
 	%s
 
 	data "openstack_identity_user_v3" "user_1" {
       name = "${openstack_identity_user_v3.user_1.name}"
 	}
-`, testAccOpenStackIdentityUserV3DataSource_user(name, password))
+`, testAccOpenStackIdentityUserV3DataSourceUser(name, password))
 }

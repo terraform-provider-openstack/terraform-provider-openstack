@@ -19,7 +19,7 @@ func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2Volume_basic,
+				Config: testAccBlockStorageV2VolumeBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV2VolumeExists("openstack_blockstorage_volume_v2.volume_1", &volume),
 					testAccCheckBlockStorageV2VolumeMetadata(&volume, "foo", "bar"),
@@ -28,7 +28,7 @@ func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccBlockStorageV2Volume_update,
+				Config: testAccBlockStorageV2VolumeUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV2VolumeExists("openstack_blockstorage_volume_v2.volume_1", &volume),
 					testAccCheckBlockStorageV2VolumeMetadata(&volume, "foo", "bar"),
@@ -49,7 +49,7 @@ func TestAccBlockStorageV2Volume_image(t *testing.T) {
 		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2Volume_image,
+				Config: testAccBlockStorageV2VolumeImage,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV2VolumeExists("openstack_blockstorage_volume_v2.volume_1", &volume),
 					resource.TestCheckResourceAttr(
@@ -69,7 +69,7 @@ func TestAccBlockStorageV2Volume_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2Volume_timeout,
+				Config: testAccBlockStorageV2VolumeTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV2VolumeExists("openstack_blockstorage_volume_v2.volume_1", &volume),
 				),
@@ -80,7 +80,7 @@ func TestAccBlockStorageV2Volume_timeout(t *testing.T) {
 
 func testAccCheckBlockStorageV2VolumeDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	blockStorageClient, err := config.BlockStorageV2Client(OS_REGION_NAME)
+	blockStorageClient, err := config.BlockStorageV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
@@ -111,7 +111,7 @@ func testAccCheckBlockStorageV2VolumeExists(n string, volume *volumes.Volume) re
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.BlockStorageV2Client(OS_REGION_NAME)
+		blockStorageClient, err := config.BlockStorageV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
@@ -154,7 +154,7 @@ func testAccCheckBlockStorageV2VolumeMetadata(
 	}
 }
 
-const testAccBlockStorageV2Volume_basic = `
+const testAccBlockStorageV2VolumeBasic = `
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   description = "first test volume"
@@ -165,7 +165,7 @@ resource "openstack_blockstorage_volume_v2" "volume_1" {
 }
 `
 
-const testAccBlockStorageV2Volume_update = `
+const testAccBlockStorageV2VolumeUpdate = `
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1-updated"
   description = "first test volume"
@@ -176,15 +176,15 @@ resource "openstack_blockstorage_volume_v2" "volume_1" {
 }
 `
 
-var testAccBlockStorageV2Volume_image = fmt.Sprintf(`
+var testAccBlockStorageV2VolumeImage = fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 5
   image_id = "%s"
 }
-`, OS_IMAGE_ID)
+`, osImageID)
 
-const testAccBlockStorageV2Volume_timeout = `
+const testAccBlockStorageV2VolumeTimeout = `
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   description = "first test volume"

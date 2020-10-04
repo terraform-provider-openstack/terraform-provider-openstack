@@ -24,7 +24,7 @@ func TestAccNetworkingV2SubnetRoute_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2SubnetRoute_create,
+				Config: testAccNetworkingV2SubnetRouteCreate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -34,14 +34,14 @@ func TestAccNetworkingV2SubnetRoute_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2SubnetRoute_update,
+				Config: testAccNetworkingV2SubnetRouteUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetRouteExists("openstack_networking_subnet_route_v2.subnet_route_1"),
 					testAccCheckNetworkingV2SubnetRouteExists("openstack_networking_subnet_route_v2.subnet_route_2"),
 				),
 			},
 			{
-				Config: testAccNetworkingV2SubnetRoute_destroy,
+				Config: testAccNetworkingV2SubnetRouteDestroy,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetRouteEmpty("openstack_networking_subnet_v2.subnet_1"),
 				),
@@ -62,7 +62,7 @@ func testAccCheckNetworkingV2SubnetRouteEmpty(n string) resource.TestCheckFunc {
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -96,7 +96,7 @@ func testAccCheckNetworkingV2SubnetRouteExists(n string) resource.TestCheckFunc 
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -126,7 +126,7 @@ func testAccCheckNetworkingV2SubnetRouteExists(n string) resource.TestCheckFunc 
 
 func testAccCheckNetworkingV2SubnetRouteDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -157,7 +157,7 @@ func testAccCheckNetworkingV2SubnetRouteDestroy(s *terraform.State) error {
 	return nil
 }
 
-const testAccNetworkingV2SubnetRoute_create = `
+const testAccNetworkingV2SubnetRouteCreate = `
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
@@ -198,7 +198,7 @@ resource "openstack_networking_subnet_route_v2" "subnet_route_1" {
 }
 `
 
-const testAccNetworkingV2SubnetRoute_update = `
+const testAccNetworkingV2SubnetRouteUpdate = `
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
@@ -246,7 +246,7 @@ resource "openstack_networking_subnet_route_v2" "subnet_route_2" {
 }
 `
 
-const testAccNetworkingV2SubnetRoute_destroy = `
+const testAccNetworkingV2SubnetRouteDestroy = `
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"

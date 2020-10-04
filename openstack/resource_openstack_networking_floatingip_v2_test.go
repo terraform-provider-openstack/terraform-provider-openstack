@@ -19,7 +19,7 @@ func TestAccNetworkingV2FloatingIP_basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2FloatingIPDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2FloatingIP_basic,
+				Config: testAccNetworkingV2FloatingIPBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
 					resource.TestCheckResourceAttr("openstack_networking_floatingip_v2.fip_1", "description", "test floating IP"),
@@ -38,7 +38,7 @@ func TestAccNetworkingV2FloatingIP_fixedip_bind(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2FloatingIPDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2FloatingIP_fixedip_bind1,
+				Config: testAccNetworkingV2FloatingIPFixedIPBind1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
 					testAccCheckNetworkingV2FloatingIPBoundToCorrectIP(&fip, "192.168.199.20"),
@@ -47,7 +47,7 @@ func TestAccNetworkingV2FloatingIP_fixedip_bind(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2FloatingIP_fixedip_bind2,
+				Config: testAccNetworkingV2FloatingIPFixedipBind2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
 					testAccCheckNetworkingV2FloatingIPBoundToCorrectIP(&fip, "192.168.199.10"),
@@ -68,7 +68,7 @@ func TestAccNetworkingV2FloatingIP_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2FloatingIPDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2FloatingIP_timeout,
+				Config: testAccNetworkingV2FloatingIPTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
 				),
@@ -79,7 +79,7 @@ func TestAccNetworkingV2FloatingIP_timeout(t *testing.T) {
 
 func testAccCheckNetworkingV2FloatingIPDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack floating IP: %s", err)
 	}
@@ -110,7 +110,7 @@ func testAccCheckNetworkingV2FloatingIPExists(n string, kp *floatingips.Floating
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -130,9 +130,9 @@ func testAccCheckNetworkingV2FloatingIPExists(n string, kp *floatingips.Floating
 	}
 }
 
-func testAccCheckNetworkingV2FloatingIPBoundToCorrectIP(fip *floatingips.FloatingIP, fixed_ip string) resource.TestCheckFunc {
+func testAccCheckNetworkingV2FloatingIPBoundToCorrectIP(fip *floatingips.FloatingIP, fixedIP string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if fip.FixedIP != fixed_ip {
+		if fip.FixedIP != fixedIP {
 			return fmt.Errorf("Floating IP associated with wrong fixed ip")
 		}
 
@@ -140,13 +140,13 @@ func testAccCheckNetworkingV2FloatingIPBoundToCorrectIP(fip *floatingips.Floatin
 	}
 }
 
-const testAccNetworkingV2FloatingIP_basic = `
+const testAccNetworkingV2FloatingIPBasic = `
 resource "openstack_networking_floatingip_v2" "fip_1" {
   description = "test floating IP"
 }
 `
 
-var testAccNetworkingV2FloatingIP_fixedip_bind1 = fmt.Sprintf(`
+var testAccNetworkingV2FloatingIPFixedIPBind1 = fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -190,9 +190,9 @@ resource "openstack_networking_floatingip_v2" "fip_1" {
   port_id = "${openstack_networking_port_v2.port_1.id}"
   fixed_ip = "${openstack_networking_port_v2.port_1.fixed_ip.1.ip_address}"
 }
-`, OS_EXTGW_ID, OS_POOL_NAME)
+`, osExtGwID, osPoolName)
 
-var testAccNetworkingV2FloatingIP_fixedip_bind2 = fmt.Sprintf(`
+var testAccNetworkingV2FloatingIPFixedipBind2 = fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -235,9 +235,9 @@ resource "openstack_networking_floatingip_v2" "fip_1" {
   port_id = "${openstack_networking_port_v2.port_1.id}"
   fixed_ip = "${openstack_networking_port_v2.port_1.fixed_ip.0.ip_address}"
 }
-`, OS_EXTGW_ID, OS_POOL_NAME)
+`, osExtGwID, osPoolName)
 
-const testAccNetworkingV2FloatingIP_timeout = `
+const testAccNetworkingV2FloatingIPTimeout = `
 resource "openstack_networking_floatingip_v2" "fip_1" {
   timeouts {
     create = "5m"

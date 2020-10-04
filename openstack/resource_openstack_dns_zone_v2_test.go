@@ -22,7 +22,7 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSV2Zone_basic(zoneName),
+				Config: testAccDNSV2ZoneBasic(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2ZoneExists("openstack_dns_zone_v2.zone_1", &zone),
 					resource.TestCheckResourceAttr(
@@ -30,7 +30,7 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDNSV2Zone_update(zoneName),
+				Config: testAccDNSV2ZoneUpdate(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_dns_zone_v2.zone_1", "name", zoneName),
 					resource.TestCheckResourceAttr("openstack_dns_zone_v2.zone_1", "email", "email2@example.com"),
@@ -54,7 +54,7 @@ func TestAccDNSV2Zone_readTTL(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSV2Zone_readTTL(zoneName),
+				Config: testAccDNSV2ZoneReadTTL(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2ZoneExists("openstack_dns_zone_v2.zone_1", &zone),
 					resource.TestCheckResourceAttr("openstack_dns_zone_v2.zone_1", "type", "PRIMARY"),
@@ -68,7 +68,7 @@ func TestAccDNSV2Zone_readTTL(t *testing.T) {
 
 func testAccCheckDNSV2ZoneDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	dnsClient, err := config.DNSV2Client(OS_REGION_NAME)
+	dnsClient, err := config.DNSV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
@@ -99,7 +99,7 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		dnsClient, err := config.DNSV2Client(OS_REGION_NAME)
+		dnsClient, err := config.DNSV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 		}
@@ -119,7 +119,7 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 	}
 }
 
-func testAccDNSV2Zone_basic(zoneName string) string {
+func testAccDNSV2ZoneBasic(zoneName string) string {
 	return fmt.Sprintf(`
 		resource "openstack_dns_zone_v2" "zone_1" {
 			name = "%s"
@@ -131,7 +131,7 @@ func testAccDNSV2Zone_basic(zoneName string) string {
 	`, zoneName)
 }
 
-func testAccDNSV2Zone_update(zoneName string) string {
+func testAccDNSV2ZoneUpdate(zoneName string) string {
 	return fmt.Sprintf(`
 		resource "openstack_dns_zone_v2" "zone_1" {
 			name = "%s"
@@ -143,7 +143,7 @@ func testAccDNSV2Zone_update(zoneName string) string {
 	`, zoneName)
 }
 
-func testAccDNSV2Zone_readTTL(zoneName string) string {
+func testAccDNSV2ZoneReadTTL(zoneName string) string {
 	return fmt.Sprintf(`
 		resource "openstack_dns_zone_v2" "zone_1" {
 			name = "%s"

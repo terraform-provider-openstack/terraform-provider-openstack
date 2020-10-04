@@ -15,7 +15,7 @@ func TestAccComputeV2FloatingIPAssociate_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FloatingIPAssociate_basic,
+				Config: testAccComputeV2FloatingIPAssociateBasic,
 			},
 
 			{

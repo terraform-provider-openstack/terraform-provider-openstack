@@ -15,7 +15,7 @@ func TestAccComputeV2FloatingIP_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2FloatingIPDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FloatingIP_basic,
+				Config: testAccComputeV2FloatingIPBasic,
 			},
 
 			{

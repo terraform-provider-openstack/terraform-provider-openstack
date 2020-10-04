@@ -24,7 +24,7 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3ProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3Project_basic(projectName),
+				Config: testAccIdentityV3ProjectBasic(projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttrPtr(
@@ -40,7 +40,7 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIdentityV3Project_update(projectName),
+				Config: testAccIdentityV3ProjectUpdate(projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttrPtr(
@@ -67,7 +67,7 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 
 func testAccCheckIdentityV3ProjectDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
+	identityClient, err := config.IdentityV3Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -98,7 +98,7 @@ func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) re
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
+		identityClient, err := config.IdentityV3Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
@@ -118,7 +118,7 @@ func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) re
 	}
 }
 
-func testAccIdentityV3Project_basic(projectName string) string {
+func testAccIdentityV3ProjectBasic(projectName string) string {
 	return fmt.Sprintf(`
     resource "openstack_identity_project_v3" "project_1" {
       name = "%s"
@@ -127,7 +127,7 @@ func testAccIdentityV3Project_basic(projectName string) string {
   `, projectName)
 }
 
-func testAccIdentityV3Project_update(projectName string) string {
+func testAccIdentityV3ProjectUpdate(projectName string) string {
 	return fmt.Sprintf(`
     resource "openstack_identity_project_v3" "project_1" {
       name = "%s"
