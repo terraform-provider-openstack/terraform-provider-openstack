@@ -19,14 +19,14 @@ func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2SecGroup_basic,
+				Config: testAccNetworkingV2SecGroupBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists("openstack_networking_secgroup_v2.secgroup_1", &securityGroup),
 					testAccCheckNetworkingV2SecGroupRuleCount(&securityGroup, 2),
 				),
 			},
 			{
-				Config: testAccNetworkingV2SecGroup_update,
+				Config: testAccNetworkingV2SecGroupUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPtr("openstack_networking_secgroup_v2.secgroup_1", "id", &securityGroup.ID),
 					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "name", "security_group_2"),
@@ -45,7 +45,7 @@ func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2SecGroup_noDefaultRules,
+				Config: testAccNetworkingV2SecGroupNoDefaultRules,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists(
 						"openstack_networking_secgroup_v2.secgroup_1", &securityGroup),
@@ -65,7 +65,7 @@ func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2SecGroup_timeout,
+				Config: testAccNetworkingV2SecGroupTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists(
 						"openstack_networking_secgroup_v2.secgroup_1", &securityGroup),
@@ -77,7 +77,7 @@ func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 
 func testAccCheckNetworkingV2SecGroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -96,7 +96,7 @@ func testAccCheckNetworkingV2SecGroupDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckNetworkingV2SecGroupExists(n string, security_group *groups.SecGroup) resource.TestCheckFunc {
+func testAccCheckNetworkingV2SecGroupExists(n string, sg *groups.SecGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -108,7 +108,7 @@ func testAccCheckNetworkingV2SecGroupExists(n string, security_group *groups.Sec
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -122,14 +122,13 @@ func testAccCheckNetworkingV2SecGroupExists(n string, security_group *groups.Sec
 			return fmt.Errorf("Security group not found")
 		}
 
-		*security_group = *found
+		*sg = *found
 
 		return nil
 	}
 }
 
-func testAccCheckNetworkingV2SecGroupRuleCount(
-	sg *groups.SecGroup, count int) resource.TestCheckFunc {
+func testAccCheckNetworkingV2SecGroupRuleCount(sg *groups.SecGroup, count int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if len(sg.Rules) == count {
 			return nil
@@ -140,21 +139,21 @@ func testAccCheckNetworkingV2SecGroupRuleCount(
 	}
 }
 
-const testAccNetworkingV2SecGroup_basic = `
+const testAccNetworkingV2SecGroupBasic = `
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
   name = "security_group"
   description = "terraform security group acceptance test"
 }
 `
 
-const testAccNetworkingV2SecGroup_update = `
+const testAccNetworkingV2SecGroupUpdate = `
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
   name = "security_group_2"
   description = "terraform security group acceptance test"
 }
 `
 
-const testAccNetworkingV2SecGroup_noDefaultRules = `
+const testAccNetworkingV2SecGroupNoDefaultRules = `
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
 	name = "security_group_1"
 	description = "terraform security group acceptance test"
@@ -162,7 +161,7 @@ resource "openstack_networking_secgroup_v2" "secgroup_1" {
 }
 `
 
-const testAccNetworkingV2SecGroup_timeout = `
+const testAccNetworkingV2SecGroupTimeout = `
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
   name = "security_group"
   description = "terraform security group acceptance test"

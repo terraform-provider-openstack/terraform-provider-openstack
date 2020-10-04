@@ -23,7 +23,7 @@ func TestAccContainerInfraV1ClusterTemplateDataSource_basic(t *testing.T) {
 				Config: testAccContainerInfraV1ClusterTemplateDataSource(clusterTemplateName, imageName),
 			},
 			{
-				Config: testAccContainerInfraV1ClusterTemplateDataSource_basic(
+				Config: testAccContainerInfraV1ClusterTemplateDataSourceBasic(
 					testAccContainerInfraV1ClusterTemplateDataSource(clusterTemplateName, imageName),
 				),
 				Check: resource.ComposeTestCheckFunc(
@@ -91,7 +91,7 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
 `, imageName, clusterTemplateName)
 }
 
-func testAccContainerInfraV1ClusterTemplateDataSource_basic(clusterTemplateResource string) string {
+func testAccContainerInfraV1ClusterTemplateDataSourceBasic(clusterTemplateResource string) string {
 	return fmt.Sprintf(`
 %s
 

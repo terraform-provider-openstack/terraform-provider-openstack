@@ -20,7 +20,7 @@ func TestAccOpenStackIdentityV3ServiceDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackIdentityServiceV3DataSource_basic(serviceName),
+				Config: testAccOpenStackIdentityServiceV3DataSourceBasic(serviceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityServiceV3DataSourceID("data.openstack_identity_service_v3.service_1"),
 					resource.TestCheckResourceAttr(
@@ -48,7 +48,7 @@ func testAccCheckIdentityServiceV3DataSourceID(n string) resource.TestCheckFunc 
 	}
 }
 
-func testAccOpenStackIdentityServiceV3DataSource_basic(name string) string {
+func testAccOpenStackIdentityServiceV3DataSourceBasic(name string) string {
 	return fmt.Sprintf(`
 data "openstack_identity_service_v3" "service_1" {
   name = "%s"

@@ -28,7 +28,7 @@ func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3RoleAssignmentDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3RoleAssignment_basic,
+				Config: testAccIdentityV3RoleAssignmentBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3RoleAssignmentExists("openstack_identity_role_assignment_v3.role_assignment_1", &role, &user, &project),
 					resource.TestCheckResourceAttrPtr(
@@ -45,7 +45,7 @@ func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 
 func testAccCheckIdentityV3RoleAssignmentDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
+	identityClient, err := config.IdentityV3Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -76,7 +76,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
+		identityClient, err := config.IdentityV3Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
@@ -136,7 +136,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 	}
 }
 
-const testAccIdentityV3RoleAssignment_basic = `
+const testAccIdentityV3RoleAssignmentBasic = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"
 }

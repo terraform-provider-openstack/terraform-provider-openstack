@@ -171,8 +171,8 @@ func resourceOrchestrationStackV1Create(d *schema.ResourceData, meta interface{}
 		TemplateOpts: buildTemplateOpts(d),
 	}
 	if d.Get("disable_rollback") != nil {
-		disable_rollback := d.Get("disable_rollback").(bool)
-		createOpts.DisableRollback = &disable_rollback
+		disableRollback := d.Get("disable_rollback").(bool)
+		createOpts.DisableRollback = &disableRollback
 	}
 	env := buildEnvironmentOpts(d)
 	if env != nil {
@@ -259,8 +259,8 @@ func resourceOrchestrationStackV1Read(d *schema.ResourceData, meta interface{}) 
 
 	params := stack.Parameters
 	if stack.Parameters != nil {
-		remove_list := []string{"OS::project_id", "OS::stack_id", "OS::stack_name"}
-		for _, v := range remove_list {
+		removeList := []string{"OS::project_id", "OS::stack_id", "OS::stack_name"}
+		for _, v := range removeList {
 			_, ok := params[v]
 			if ok {
 				delete(params, v)

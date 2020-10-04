@@ -18,7 +18,7 @@ func TestAccIPSecPolicyV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIPSecPolicyV2_basic,
+				Config: testAccIPSecPolicyV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(
 						"openstack_vpnaas_ipsec_policy_v2.policy_1", &policy),
@@ -44,7 +44,7 @@ func TestAccIPSecPolicyV2_withLifetime(t *testing.T) {
 		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIPSecPolicyV2_withLifetime,
+				Config: testAccIPSecPolicyV2WithLifetime,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(
 						"openstack_vpnaas_ipsec_policy_v2.policy_1", &policy),
@@ -63,7 +63,7 @@ func TestAccIPSecPolicyV2_Update(t *testing.T) {
 		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIPSecPolicyV2_basic,
+				Config: testAccIPSecPolicyV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(
 						"openstack_vpnaas_ipsec_policy_v2.policy_1", &policy),
@@ -71,7 +71,7 @@ func TestAccIPSecPolicyV2_Update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIPSecPolicyV2_Update,
+				Config: testAccIPSecPolicyV2Update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(
 						"openstack_vpnaas_ipsec_policy_v2.policy_1", &policy),
@@ -90,7 +90,7 @@ func TestAccIPSecPolicyV2_withLifetimeUpdate(t *testing.T) {
 		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIPSecPolicyV2_withLifetime,
+				Config: testAccIPSecPolicyV2WithLifetime,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(
 						"openstack_vpnaas_ipsec_policy_v2.policy_1", &policy),
@@ -100,7 +100,7 @@ func TestAccIPSecPolicyV2_withLifetimeUpdate(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIPSecPolicyV2_withLifetimeUpdate,
+				Config: testAccIPSecPolicyV2WithLifetimeUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(
 						"openstack_vpnaas_ipsec_policy_v2.policy_1", &policy),
@@ -113,7 +113,7 @@ func TestAccIPSecPolicyV2_withLifetimeUpdate(t *testing.T) {
 
 func testAccCheckIPSecPolicyV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -123,7 +123,7 @@ func testAccCheckIPSecPolicyV2Destroy(s *terraform.State) error {
 		}
 		_, err = ipsecpolicies.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("IPSec policy (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("IPSec policy (%s) still exists", rs.Primary.ID)
 		}
 		if _, ok := err.(gophercloud.ErrDefault404); !ok {
 			return err
@@ -144,7 +144,7 @@ func testAccCheckIPSecPolicyV2Exists(n string, policy *ipsecpolicies.Policy) res
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -188,18 +188,18 @@ func testAccCheckLifetime(n string, unit *string, value *int) resource.TestCheck
 }
 */
 
-const testAccIPSecPolicyV2_basic = `
+const testAccIPSecPolicyV2Basic = `
 resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
 }
 `
 
-const testAccIPSecPolicyV2_Update = `
+const testAccIPSecPolicyV2Update = `
 resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
 	name = "updatedname"
 }
 `
 
-const testAccIPSecPolicyV2_withLifetime = `
+const testAccIPSecPolicyV2WithLifetime = `
 resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
 	auth_algorithm = "sha256"
 	pfs = "group14"
@@ -210,7 +210,7 @@ resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
 }
 `
 
-const testAccIPSecPolicyV2_withLifetimeUpdate = `
+const testAccIPSecPolicyV2WithLifetimeUpdate = `
 resource "openstack_vpnaas_ipsec_policy_v2" "policy_1" {
 	auth_algorithm = "sha256"
 	pfs = "group14"

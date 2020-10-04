@@ -20,7 +20,7 @@ func TestAccComputeV2Flavor_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2FlavorDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2Flavor_basic(flavorName),
+				Config: testAccComputeV2FlavorBasic(flavorName),
 			},
 
 			{

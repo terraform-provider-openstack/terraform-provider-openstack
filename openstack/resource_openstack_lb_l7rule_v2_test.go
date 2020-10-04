@@ -20,7 +20,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2L7RuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckLBV2L7RuleConfig_basic,
+				Config: testAccCheckLbV2L7RuleConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
 					resource.TestCheckResourceAttr(
@@ -38,7 +38,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLBV2L7RuleConfig_update1,
+				Config: testAccCheckLbV2L7RuleConfigUpdate1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
 					resource.TestCheckResourceAttr(
@@ -58,7 +58,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLBV2L7RuleConfig_update2,
+				Config: testAccCheckLbV2L7RuleConfigUpdate2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
 					resource.TestCheckResourceAttr(
@@ -72,7 +72,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLBV2L7RuleConfig_update3,
+				Config: testAccCheckLbV2L7RuleConfigUpdate3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
 					resource.TestCheckResourceAttr(
@@ -88,7 +88,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLBV2L7RuleConfig_update4,
+				Config: testAccCheckLbV2L7RuleConfigUpdate4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
 					resource.TestCheckResourceAttr(
@@ -104,7 +104,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLBV2L7RuleConfig_update5,
+				Config: testAccCheckLbV2L7RuleConfigUpdate5,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
 					resource.TestCheckResourceAttr(
@@ -120,7 +120,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLBV2L7RuleConfig_update6,
+				Config: testAccCheckLbV2L7RuleConfigUpdate6,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
 					resource.TestCheckResourceAttr(
@@ -139,7 +139,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 
 func testAccCheckLBV2L7RuleDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+	lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -182,7 +182,7 @@ func testAccCheckLBV2L7RuleExists(n string, l7rule *l7rules.Rule) resource.TestC
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
@@ -214,7 +214,7 @@ func testAccCheckLBV2L7RuleExists(n string, l7rule *l7rules.Rule) resource.TestC
 	}
 }
 
-const testAccCheckLBV2L7RuleConfig = `
+const testAccCheckLbV2L7RuleConfig = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -255,7 +255,7 @@ resource "openstack_lb_l7policy_v2" "l7policy_1" {
 }
 `
 
-var testAccCheckLBV2L7RuleConfig_basic = fmt.Sprintf(`
+var testAccCheckLbV2L7RuleConfigBasic = fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7rule_v2" "l7rule_1" {
@@ -264,9 +264,9 @@ resource "openstack_lb_l7rule_v2" "l7rule_1" {
   compare_type = "EQUAL_TO"
   value        = "/api"
 }
-`, testAccCheckLBV2L7RuleConfig)
+`, testAccCheckLbV2L7RuleConfig)
 
-var testAccCheckLBV2L7RuleConfig_update1 = fmt.Sprintf(`
+var testAccCheckLbV2L7RuleConfigUpdate1 = fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7rule_v2" "l7rule_1" {
@@ -276,9 +276,9 @@ resource "openstack_lb_l7rule_v2" "l7rule_1" {
   value        = "www.example.com"
   invert       = true
 }
-`, testAccCheckLBV2L7RuleConfig)
+`, testAccCheckLbV2L7RuleConfig)
 
-var testAccCheckLBV2L7RuleConfig_update2 = fmt.Sprintf(`
+var testAccCheckLbV2L7RuleConfigUpdate2 = fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7rule_v2" "l7rule_1" {
@@ -288,9 +288,9 @@ resource "openstack_lb_l7rule_v2" "l7rule_1" {
   value        = "www.example.com"
   invert       = true
 }
-`, testAccCheckLBV2L7RuleConfig)
+`, testAccCheckLbV2L7RuleConfig)
 
-var testAccCheckLBV2L7RuleConfig_update3 = fmt.Sprintf(`
+var testAccCheckLbV2L7RuleConfigUpdate3 = fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7rule_v2" "l7rule_1" {
@@ -300,9 +300,9 @@ resource "openstack_lb_l7rule_v2" "l7rule_1" {
   key          = "Host"
   value        = "www.example.com"
 }
-`, testAccCheckLBV2L7RuleConfig)
+`, testAccCheckLbV2L7RuleConfig)
 
-var testAccCheckLBV2L7RuleConfig_update4 = fmt.Sprintf(`
+var testAccCheckLbV2L7RuleConfigUpdate4 = fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7rule_v2" "l7rule_1" {
@@ -311,9 +311,9 @@ resource "openstack_lb_l7rule_v2" "l7rule_1" {
   compare_type = "EQUAL_TO"
   value        = "www.example.com"
 }
-`, testAccCheckLBV2L7RuleConfig)
+`, testAccCheckLbV2L7RuleConfig)
 
-var testAccCheckLBV2L7RuleConfig_update5 = fmt.Sprintf(`
+var testAccCheckLbV2L7RuleConfigUpdate5 = fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7rule_v2" "l7rule_1" {
@@ -323,9 +323,9 @@ resource "openstack_lb_l7rule_v2" "l7rule_1" {
   key          = "X-Ref"
   value        = "foo"
 }
-`, testAccCheckLBV2L7RuleConfig)
+`, testAccCheckLbV2L7RuleConfig)
 
-var testAccCheckLBV2L7RuleConfig_update6 = fmt.Sprintf(`
+var testAccCheckLbV2L7RuleConfigUpdate6 = fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7rule_v2" "l7rule_1" {
@@ -334,4 +334,4 @@ resource "openstack_lb_l7rule_v2" "l7rule_1" {
   compare_type = "STARTS_WITH"
   value        = "/images"
 }
-`, testAccCheckLBV2L7RuleConfig)
+`, testAccCheckLbV2L7RuleConfig)

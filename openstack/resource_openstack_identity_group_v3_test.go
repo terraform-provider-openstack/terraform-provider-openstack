@@ -20,7 +20,7 @@ func TestAccIdentityV3Group_basic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3GroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3Group_basic,
+				Config: testAccIdentityV3GroupBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3GroupExists("openstack_identity_group_v3.group_1", &group),
 					resource.TestCheckResourceAttrPtr(
@@ -30,7 +30,7 @@ func TestAccIdentityV3Group_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIdentityV3Group_update,
+				Config: testAccIdentityV3GroupUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3GroupExists("openstack_identity_group_v3.group_1", &group),
 					resource.TestCheckResourceAttrPtr(
@@ -45,7 +45,7 @@ func TestAccIdentityV3Group_basic(t *testing.T) {
 
 func testAccCheckIdentityV3GroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
+	identityClient, err := config.IdentityV3Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -76,7 +76,7 @@ func testAccCheckIdentityV3GroupExists(n string, group *groups.Group) resource.T
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
+		identityClient, err := config.IdentityV3Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
@@ -96,14 +96,14 @@ func testAccCheckIdentityV3GroupExists(n string, group *groups.Group) resource.T
 	}
 }
 
-const testAccIdentityV3Group_basic = `
+const testAccIdentityV3GroupBasic = `
 resource "openstack_identity_group_v3" "group_1" {
 	name = "group_1"
 	description = "Terraform accept test 1"
 }
 `
 
-const testAccIdentityV3Group_update = `
+const testAccIdentityV3GroupUpdate = `
 resource "openstack_identity_group_v3" "group_1" {
 	name = "group_2"
 	description = "Terraform accept test 2"

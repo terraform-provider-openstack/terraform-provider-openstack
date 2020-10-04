@@ -17,7 +17,7 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
 
 	lbProvider := "haproxy"
-	if OS_USE_OCTAVIA != "" {
+	if osUseOctavia != "" {
 		lbProvider = "octavia"
 	}
 
@@ -27,13 +27,13 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV2LoadBalancerConfig_basic(lbProvider),
+				Config: testAccLbV2LoadBalancerConfigBasic(lbProvider),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2LoadBalancerExists("openstack_lb_loadbalancer_v2.loadbalancer_1", &lb),
 				),
 			},
 			{
-				Config: testAccLBV2LoadBalancerConfig_update(lbProvider),
+				Config: testAccLbV2LoadBalancerConfigUpdate(lbProvider),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_lb_loadbalancer_v2.loadbalancer_1", "name", "loadbalancer_1_updated"),
@@ -48,7 +48,7 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 
 func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
-	var sg_1, sg_2 groups.SecGroup
+	var sg1, sg2 groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckLB(t) },
@@ -56,46 +56,46 @@ func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV2LoadBalancer_secGroup,
+				Config: testAccLbV2LoadBalancerSecGroup,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2LoadBalancerExists(
 						"openstack_lb_loadbalancer_v2.loadbalancer_1", &lb),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &sg_1),
+						"openstack_networking_secgroup_v2.secgroup_1", &sg1),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &sg_2),
+						"openstack_networking_secgroup_v2.secgroup_1", &sg2),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_loadbalancer_v2.loadbalancer_1", "security_group_ids.#", "1"),
-					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg_1),
+					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg1),
 				),
 			},
 			{
-				Config: testAccLBV2LoadBalancer_secGroup_update1,
+				Config: testAccLbV2LoadBalancerSecGroupUpdate1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2LoadBalancerExists(
 						"openstack_lb_loadbalancer_v2.loadbalancer_1", &lb),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_2", &sg_1),
+						"openstack_networking_secgroup_v2.secgroup_2", &sg1),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_2", &sg_2),
+						"openstack_networking_secgroup_v2.secgroup_2", &sg2),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_loadbalancer_v2.loadbalancer_1", "security_group_ids.#", "2"),
-					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg_1),
-					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg_2),
+					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg1),
+					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg2),
 				),
 			},
 			{
-				Config: testAccLBV2LoadBalancer_secGroup_update2,
+				Config: testAccLbV2LoadBalancerSecGroupUpdate2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2LoadBalancerExists(
 						"openstack_lb_loadbalancer_v2.loadbalancer_1", &lb),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_2", &sg_1),
+						"openstack_networking_secgroup_v2.secgroup_2", &sg1),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_2", &sg_2),
+						"openstack_networking_secgroup_v2.secgroup_2", &sg2),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_loadbalancer_v2.loadbalancer_1", "security_group_ids.#", "1"),
-					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg_2),
+					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg2),
 				),
 			},
 		},
@@ -114,7 +114,7 @@ func TestAccLBV2LoadBalancer_vip_network(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV2LoadBalancerConfig_vip_network,
+				Config: testAccLbV2LoadBalancerConfigVIPNetwork,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2LoadBalancerExists("openstack_lb_loadbalancer_v2.loadbalancer_1", &lb),
 				),
@@ -125,7 +125,7 @@ func TestAccLBV2LoadBalancer_vip_network(t *testing.T) {
 
 func testAccCheckLBV2LoadBalancerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+	lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -157,7 +157,7 @@ func testAccCheckLBV2LoadBalancerExists(
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
@@ -181,7 +181,7 @@ func testAccCheckLBV2LoadBalancerHasSecGroup(
 	lb *loadbalancers.LoadBalancer, sg *groups.SecGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -201,7 +201,7 @@ func testAccCheckLBV2LoadBalancerHasSecGroup(
 	}
 }
 
-func testAccLBV2LoadBalancerConfig_basic(lbProvider string) string {
+func testAccLbV2LoadBalancerConfigBasic(lbProvider string) string {
 	return fmt.Sprintf(`
     resource "openstack_networking_network_v2" "network_1" {
       name = "network_1"
@@ -228,7 +228,7 @@ func testAccLBV2LoadBalancerConfig_basic(lbProvider string) string {
     }`, lbProvider)
 }
 
-func testAccLBV2LoadBalancerConfig_update(lbProvider string) string {
+func testAccLbV2LoadBalancerConfigUpdate(lbProvider string) string {
 	return fmt.Sprintf(`
     resource "openstack_networking_network_v2" "network_1" {
       name = "network_1"
@@ -256,7 +256,7 @@ func testAccLBV2LoadBalancerConfig_update(lbProvider string) string {
     }`, lbProvider)
 }
 
-const testAccLBV2LoadBalancer_secGroup = `
+const testAccLbV2LoadBalancerSecGroup = `
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
   name = "secgroup_1"
   description = "secgroup_1"
@@ -293,7 +293,7 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
 }
 `
 
-const testAccLBV2LoadBalancer_secGroup_update1 = `
+const testAccLbV2LoadBalancerSecGroupUpdate1 = `
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
   name = "secgroup_1"
   description = "secgroup_1"
@@ -331,7 +331,7 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
 }
 `
 
-const testAccLBV2LoadBalancer_secGroup_update2 = `
+const testAccLbV2LoadBalancerSecGroupUpdate2 = `
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
   name = "secgroup_1"
   description = "secgroup_1"
@@ -369,7 +369,7 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
 }
 `
 
-const testAccLBV2LoadBalancerConfig_vip_network = `
+const testAccLbV2LoadBalancerConfigVIPNetwork = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

@@ -15,7 +15,7 @@ func TestAccLBV1VIP_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV1VIPDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV1VIP_basic,
+				Config: testAccLbV1VIPBasic,
 			},
 
 			{

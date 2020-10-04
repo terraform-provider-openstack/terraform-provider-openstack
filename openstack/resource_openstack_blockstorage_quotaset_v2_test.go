@@ -25,7 +25,7 @@ func TestAccBlockStorageQuotasetV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3ProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageQuotasetV2_basic,
+				Config: testAccBlockStorageQuotasetV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
 					testAccCheckBlockStorageQuotasetV2Exists("openstack_blockstorage_quotaset_v2.quotaset_1", &quotaset),
@@ -46,7 +46,7 @@ func TestAccBlockStorageQuotasetV2_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccBlockStorageQuotasetV2_update_1,
+				Config: testAccBlockStorageQuotasetV2Update1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
 					testAccCheckBlockStorageQuotasetV2Exists("openstack_blockstorage_quotaset_v2.quotaset_1", &quotaset),
@@ -67,7 +67,7 @@ func TestAccBlockStorageQuotasetV2_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccBlockStorageQuotasetV2_update_2,
+				Config: testAccBlockStorageQuotasetV2Update2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
 					testAccCheckBlockStorageQuotasetV2Exists("openstack_blockstorage_quotaset_v2.quotaset_1", &quotaset),
@@ -103,7 +103,7 @@ func testAccCheckBlockStorageQuotasetV2Exists(n string, quotaset *quotasets.Quot
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.BlockStorageV2Client(OS_REGION_NAME)
+		blockStorageClient, err := config.BlockStorageV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
@@ -123,7 +123,7 @@ func testAccCheckBlockStorageQuotasetV2Exists(n string, quotaset *quotasets.Quot
 	}
 }
 
-const testAccBlockStorageQuotasetV2_basic = `
+const testAccBlockStorageQuotasetV2Basic = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"
 }
@@ -140,7 +140,7 @@ resource "openstack_blockstorage_quotaset_v2" "quotaset_1" {
 }
 `
 
-const testAccBlockStorageQuotasetV2_update_1 = `
+const testAccBlockStorageQuotasetV2Update1 = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"
 }
@@ -157,7 +157,7 @@ resource "openstack_blockstorage_quotaset_v2" "quotaset_1" {
 }
 `
 
-const testAccBlockStorageQuotasetV2_update_2 = `
+const testAccBlockStorageQuotasetV2Update2 = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"
 }

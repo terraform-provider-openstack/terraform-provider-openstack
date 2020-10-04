@@ -15,7 +15,7 @@ func TestAccLBV2Monitor_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2MonitorDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2MonitorConfig_basic,
+				Config: TestAccLbV2MonitorConfigBasic,
 			},
 
 			{

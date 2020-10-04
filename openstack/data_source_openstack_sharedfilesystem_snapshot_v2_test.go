@@ -31,7 +31,7 @@ func TestAccSFSV2SnapshotDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2SnapshotDataSource_basic,
+				Config: testAccSFSV2SnapshotDataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2SnapshotDataSourceID("data.openstack_sharedfilesystem_snapshot_v2.snapshot_1"),
 					resource.TestCheckResourceAttr(
@@ -110,7 +110,7 @@ func testAccSFSV2SnapshotCreate(t *testing.T, snapshotName string) (*snapshots.S
 		return nil, err
 	}
 
-	client, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
+	client, err := config.SharedfilesystemV2Client(osRegionName)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +165,7 @@ func testAccSFSV2SnapshotDelete(t *testing.T, snapshot *snapshots.Snapshot) erro
 		return err
 	}
 
-	client, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
+	client, err := config.SharedfilesystemV2Client(osRegionName)
 	if err != nil {
 		return err
 	}
@@ -206,7 +206,7 @@ func testAccCheckSFSV2SnapshotDataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-const testAccSFSV2SnapshotDataSource_basic = `
+const testAccSFSV2SnapshotDataSourceBasic = `
 data "openstack_sharedfilesystem_snapshot_v2" "snapshot_1" {
   name = "test_snapshot"
 }

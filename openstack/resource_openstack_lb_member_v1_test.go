@@ -18,13 +18,13 @@ func TestAccLBV1Member_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV1MemberDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV1Member_basic,
+				Config: testAccLbV1MemberBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1MemberExists("openstack_lb_member_v1.member_1", &member),
 				),
 			},
 			{
-				Config: testAccLBV1Member_update,
+				Config: testAccLbV1MemberUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_lb_member_v1.member_1", "admin_state_up", "false"),
 				),
@@ -42,7 +42,7 @@ func TestAccLBV1Member_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckLBV1MemberDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV1Member_timeout,
+				Config: testAccLbV1MemberTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1MemberExists("openstack_lb_member_v1.member_1", &member),
 				),
@@ -53,7 +53,7 @@ func TestAccLBV1Member_timeout(t *testing.T) {
 
 func testAccCheckLBV1MemberDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -84,7 +84,7 @@ func testAccCheckLBV1MemberExists(n string, member *members.Member) resource.Tes
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -104,7 +104,7 @@ func testAccCheckLBV1MemberExists(n string, member *members.Member) resource.Tes
 	}
 }
 
-const testAccLBV1Member_basic = `
+const testAccLbV1MemberBasic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -131,7 +131,7 @@ resource "openstack_lb_member_v1" "member_1" {
 }
 `
 
-const testAccLBV1Member_update = `
+const testAccLbV1MemberUpdate = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -158,7 +158,7 @@ resource "openstack_lb_member_v1" "member_1" {
 }
 `
 
-const testAccLBV1Member_timeout = `
+const testAccLbV1MemberTimeout = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

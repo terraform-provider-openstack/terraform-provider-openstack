@@ -32,7 +32,7 @@ func TestAccNetworkingV2Port_basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_basic,
+				Config: testAccNetworkingV2PortBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -43,7 +43,7 @@ func TestAccNetworkingV2Port_basic(t *testing.T) {
 	})
 }
 
-func TestAccNetworkingV2Port_noip(t *testing.T) {
+func TestAccNetworkingV2Port_noIP(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
 	var subnet subnets.Subnet
@@ -54,7 +54,7 @@ func TestAccNetworkingV2Port_noip(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_noip,
+				Config: testAccNetworkingV2PortNoIP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -63,7 +63,7 @@ func TestAccNetworkingV2Port_noip(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_noip_empty_update,
+				Config: testAccNetworkingV2PortNoIPEmptyUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -86,7 +86,7 @@ func TestAccNetworkingV2Port_multipleNoIP(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_multipleNoIP,
+				Config: testAccNetworkingV2PortMultipleNoIP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -101,7 +101,7 @@ func TestAccNetworkingV2Port_multipleNoIP(t *testing.T) {
 func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 	var network networks.Network
 	var subnet subnets.Subnet
-	var vrrp_port_1, vrrp_port_2, instance_port ports.Port
+	var vrrpPort1, vrrpPort2, instancePort ports.Port
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -109,60 +109,60 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_allowedAddressPairs_1,
+				Config: testAccNetworkingV2PortAllowedAddressPairs1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.vrrp_subnet", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.vrrp_network", &network),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_1", &vrrp_port_1),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_2", &vrrp_port_2),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.instance_port", &instance_port),
-					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instance_port, 2),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_1", &vrrpPort1),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_2", &vrrpPort2),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.instance_port", &instancePort),
+					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instancePort, 2),
 					resource.TestCheckResourceAttr("openstack_networking_port_v2.vrrp_port_1", "description", "test vrrp port"),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_allowedAddressPairs_2,
+				Config: testAccNetworkingV2PortAllowedAddressPairs2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.vrrp_subnet", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.vrrp_network", &network),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_1", &vrrp_port_1),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_2", &vrrp_port_2),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.instance_port", &instance_port),
-					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instance_port, 2),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_1", &vrrpPort1),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_2", &vrrpPort2),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.instance_port", &instancePort),
+					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instancePort, 2),
 					resource.TestCheckResourceAttr("openstack_networking_port_v2.vrrp_port_1", "description", ""),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_allowedAddressPairs_3,
+				Config: testAccNetworkingV2PortAllowedAddressPairs3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.vrrp_subnet", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.vrrp_network", &network),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_1", &vrrp_port_1),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_2", &vrrp_port_2),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.instance_port", &instance_port),
-					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instance_port, 2),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_1", &vrrpPort1),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_2", &vrrpPort2),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.instance_port", &instancePort),
+					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instancePort, 2),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_allowedAddressPairs_4,
+				Config: testAccNetworkingV2PortAllowedAddressPairs4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.vrrp_subnet", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.vrrp_network", &network),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_1", &vrrp_port_1),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_2", &vrrp_port_2),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.instance_port", &instance_port),
-					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instance_port, 1),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_1", &vrrpPort1),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_2", &vrrpPort2),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.instance_port", &instancePort),
+					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instancePort, 1),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_allowedAddressPairs_5,
+				Config: testAccNetworkingV2PortAllowedAddressPairs5,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.vrrp_subnet", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.vrrp_network", &network),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_1", &vrrp_port_1),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_2", &vrrp_port_2),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.instance_port", &instance_port),
-					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instance_port, 0),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_1", &vrrpPort1),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_2", &vrrpPort2),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.instance_port", &instancePort),
+					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instancePort, 0),
 				),
 			},
 		},
@@ -172,7 +172,7 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 func TestAccNetworkingV2Port_allowedAddressPairsNoMAC(t *testing.T) {
 	var network networks.Network
 	var subnet subnets.Subnet
-	var vrrp_port_1, vrrp_port_2, instance_port ports.Port
+	var vrrpPort1, vrrpPort2, instancePort ports.Port
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -180,14 +180,14 @@ func TestAccNetworkingV2Port_allowedAddressPairsNoMAC(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_allowedAddressPairsNoMAC,
+				Config: testAccNetworkingV2PortAllowedAddressPairsNoMAC,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.vrrp_subnet", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.vrrp_network", &network),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_1", &vrrp_port_1),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_2", &vrrp_port_2),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.instance_port", &instance_port),
-					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instance_port, 2),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_1", &vrrpPort1),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.vrrp_port_2", &vrrpPort2),
+					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.instance_port", &instancePort),
+					testAccCheckNetworkingV2PortCountAllowedAddressPairs(&instancePort, 2),
 				),
 			},
 		},
@@ -205,7 +205,7 @@ func TestAccNetworkingV2Port_multipleFixedIPs(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_multipleFixedIPs,
+				Config: testAccNetworkingV2PortMultipleFixedIPs,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -228,7 +228,7 @@ func TestAccNetworkingV2Port_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_timeout,
+				Config: testAccNetworkingV2PortTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -246,7 +246,7 @@ func TestAccNetworkingV2Port_fixedIPs(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_fixedIPs,
+				Config: testAccNetworkingV2PortFixedIPs,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_port_v2.port_1", "all_fixed_ips.0", "192.168.199.23"),
@@ -261,7 +261,7 @@ func TestAccNetworkingV2Port_fixedIPs(t *testing.T) {
 func TestAccNetworkingV2Port_updateSecurityGroups(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
-	var secgroup_1, secgroup_2 groups.SecGroup
+	var secgroup1, secgroup2 groups.SecGroup
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -270,67 +270,67 @@ func TestAccNetworkingV2Port_updateSecurityGroups(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_updateSecurityGroups_1,
+				Config: testAccNetworkingV2PortUpdateSecurityGroups1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &secgroup_1),
+						"openstack_networking_secgroup_v2.secgroup_1", &secgroup1),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_2", &secgroup_2),
+						"openstack_networking_secgroup_v2.secgroup_2", &secgroup2),
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 1),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_updateSecurityGroups_2,
+				Config: testAccNetworkingV2PortUpdateSecurityGroups2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &secgroup_1),
+						"openstack_networking_secgroup_v2.secgroup_1", &secgroup1),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_2", &secgroup_2),
+						"openstack_networking_secgroup_v2.secgroup_2", &secgroup2),
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 1),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_updateSecurityGroups_3,
+				Config: testAccNetworkingV2PortUpdateSecurityGroups3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &secgroup_1),
+						"openstack_networking_secgroup_v2.secgroup_1", &secgroup1),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_2", &secgroup_2),
+						"openstack_networking_secgroup_v2.secgroup_2", &secgroup2),
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 2),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_updateSecurityGroups_4,
+				Config: testAccNetworkingV2PortUpdateSecurityGroups4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &secgroup_1),
+						"openstack_networking_secgroup_v2.secgroup_1", &secgroup1),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_2", &secgroup_2),
+						"openstack_networking_secgroup_v2.secgroup_2", &secgroup2),
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 1),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_updateSecurityGroups_5,
+				Config: testAccNetworkingV2PortUpdateSecurityGroups5,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &secgroup_1),
+						"openstack_networking_secgroup_v2.secgroup_1", &secgroup1),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_2", &secgroup_2),
+						"openstack_networking_secgroup_v2.secgroup_2", &secgroup2),
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 0),
 				),
 			},
@@ -341,7 +341,7 @@ func TestAccNetworkingV2Port_updateSecurityGroups(t *testing.T) {
 func TestAccNetworkingV2Port_noSecurityGroups(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
-	var secgroup_1, secgroup_2 groups.SecGroup
+	var secgroup1, secgroup2 groups.SecGroup
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -350,54 +350,54 @@ func TestAccNetworkingV2Port_noSecurityGroups(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_noSecurityGroups_1,
+				Config: testAccNetworkingV2PortNoSecurityGroups1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &secgroup_1),
+						"openstack_networking_secgroup_v2.secgroup_1", &secgroup1),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_2", &secgroup_2),
+						"openstack_networking_secgroup_v2.secgroup_2", &secgroup2),
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 0),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_noSecurityGroups_2,
+				Config: testAccNetworkingV2PortNoSecurityGroups2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &secgroup_1),
+						"openstack_networking_secgroup_v2.secgroup_1", &secgroup1),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_2", &secgroup_2),
+						"openstack_networking_secgroup_v2.secgroup_2", &secgroup2),
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 1),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_noSecurityGroups_3,
+				Config: testAccNetworkingV2PortNoSecurityGroups3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &secgroup_1),
+						"openstack_networking_secgroup_v2.secgroup_1", &secgroup1),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_2", &secgroup_2),
+						"openstack_networking_secgroup_v2.secgroup_2", &secgroup2),
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 2),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_noSecurityGroups_4,
+				Config: testAccNetworkingV2PortNoSecurityGroups4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_1", &secgroup_1),
+						"openstack_networking_secgroup_v2.secgroup_1", &secgroup1),
 					testAccCheckNetworkingV2SecGroupExists(
-						"openstack_networking_secgroup_v2.secgroup_2", &secgroup_2),
+						"openstack_networking_secgroup_v2.secgroup_2", &secgroup2),
 					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 0),
 				),
 			},
@@ -414,7 +414,7 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_noFixedIP_1,
+				Config: testAccNetworkingV2PortNoFixedIP1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -422,7 +422,7 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_noFixedIP_2,
+				Config: testAccNetworkingV2PortNoFixedIP2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -430,7 +430,7 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_noFixedIP_1,
+				Config: testAccNetworkingV2PortNoFixedIP1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -438,7 +438,7 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_noFixedIP_3,
+				Config: testAccNetworkingV2PortNoFixedIP3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -446,7 +446,7 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_noFixedIP_1,
+				Config: testAccNetworkingV2PortNoFixedIP1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -468,7 +468,7 @@ func TestAccNetworkingV2Port_createExtraDHCPOpts(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_createExtraDHCPOpts,
+				Config: testAccNetworkingV2PortCreateExtraDhcpOpts,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -492,7 +492,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_basic,
+				Config: testAccNetworkingV2PortBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -500,7 +500,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_updateExtraDHCPOpts_1,
+				Config: testAccNetworkingV2PortUpdateExtraDhcpOpts1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -510,7 +510,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_updateExtraDHCPOpts_2,
+				Config: testAccNetworkingV2PortUpdateExtraDhcpOpts2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -520,7 +520,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_updateExtraDHCPOpts_3,
+				Config: testAccNetworkingV2PortUpdateExtraDhcpOpts3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -530,7 +530,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_updateExtraDHCPOpts_4,
+				Config: testAccNetworkingV2PortUpdateExtraDhcpOpts4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -540,7 +540,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_updateExtraDHCPOpts_5,
+				Config: testAccNetworkingV2PortUpdateExtraDhcpOpts5,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -550,7 +550,7 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_updateExtraDHCPOpts_6,
+				Config: testAccNetworkingV2PortUpdateExtraDhcpOpts6,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -572,7 +572,7 @@ func TestAccNetworkingV2Port_adminStateUp_omit(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_adminStateUp_omit,
+				Config: testAccNetworkingV2PortAdminStateUpOmit,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -593,7 +593,7 @@ func TestAccNetworkingV2Port_adminStateUp_true(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_adminStateUp_true,
+				Config: testAccNetworkingV2PortAdminStateUpTrue,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -614,7 +614,7 @@ func TestAccNetworkingV2Port_adminStateUp_false(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_adminStateUp_false,
+				Config: testAccNetworkingV2PortAdminStateUpFalse,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -635,7 +635,7 @@ func TestAccNetworkingV2Port_adminStateUp_update(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_adminStateUp_omit,
+				Config: testAccNetworkingV2PortAdminStateUpOmit,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -644,7 +644,7 @@ func TestAccNetworkingV2Port_adminStateUp_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_adminStateUp_false,
+				Config: testAccNetworkingV2PortAdminStateUpFalse,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -665,7 +665,7 @@ func TestAccNetworkingV2Port_portSecurity_omit(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_portSecurity_omit,
+				Config: testAccNetworkingV2PortSecurityOmit,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortWithExtensionsExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -674,7 +674,7 @@ func TestAccNetworkingV2Port_portSecurity_omit(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_portSecurity_disabled,
+				Config: testAccNetworkingV2PortSecurityDisabled,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortWithExtensionsExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -683,7 +683,7 @@ func TestAccNetworkingV2Port_portSecurity_omit(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_portSecurity_enabled,
+				Config: testAccNetworkingV2PortSecurityEnabled,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortWithExtensionsExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -704,7 +704,7 @@ func TestAccNetworkingV2Port_portSecurity_disabled(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_portSecurity_disabled,
+				Config: testAccNetworkingV2PortSecurityDisabled,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortWithExtensionsExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -713,7 +713,7 @@ func TestAccNetworkingV2Port_portSecurity_disabled(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_portSecurity_enabled,
+				Config: testAccNetworkingV2PortSecurityEnabled,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortWithExtensionsExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -734,7 +734,7 @@ func TestAccNetworkingV2Port_portSecurity_enabled(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_portSecurity_enabled,
+				Config: testAccNetworkingV2PortSecurityEnabled,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortWithExtensionsExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -743,7 +743,7 @@ func TestAccNetworkingV2Port_portSecurity_enabled(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_portSecurity_disabled,
+				Config: testAccNetworkingV2PortSecurityDisabled,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortWithExtensionsExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -767,7 +767,7 @@ func TestAccNetworkingV2Port_portBinding_create(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_createPortBinding,
+				Config: testAccNetworkingV2PortCreatePortBinding,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -794,7 +794,7 @@ func TestAccNetworkingV2Port_portBinding_update(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_basic,
+				Config: testAccNetworkingV2PortBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -803,7 +803,7 @@ func TestAccNetworkingV2Port_portBinding_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_createPortBinding,
+				Config: testAccNetworkingV2PortCreatePortBinding,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -815,7 +815,7 @@ func TestAccNetworkingV2Port_portBinding_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_updatePortBinding_1,
+				Config: testAccNetworkingV2PortUpdatePortBinding1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -831,7 +831,7 @@ func TestAccNetworkingV2Port_portBinding_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_updatePortBinding_2,
+				Config: testAccNetworkingV2PortUpdatePortBinding2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -847,7 +847,7 @@ func TestAccNetworkingV2Port_portBinding_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_updatePortBinding_3,
+				Config: testAccNetworkingV2PortUpdatePortBinding3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -861,7 +861,7 @@ func TestAccNetworkingV2Port_portBinding_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_updatePortBinding_4,
+				Config: testAccNetworkingV2PortUpdatePortBinding4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
@@ -892,7 +892,7 @@ func TestAccNetworkingV2Port_qos_policy_create(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_qos_policy,
+				Config: testAccNetworkingV2PortQosPolicy,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortWithExtensionsExists(
 						"openstack_networking_port_v2.port_1", &port),
@@ -921,13 +921,13 @@ func TestAccNetworkingV2Port_qos_policy_update(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_basic,
+				Config: testAccNetworkingV2PortBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortWithExtensionsExists("openstack_networking_port_v2.port_1", &port),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Port_qos_policy,
+				Config: testAccNetworkingV2PortQosPolicy,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortWithExtensionsExists(
 						"openstack_networking_port_v2.port_1", &port),
@@ -943,7 +943,7 @@ func TestAccNetworkingV2Port_qos_policy_update(t *testing.T) {
 
 func testAccCheckNetworkingV2PortDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -974,7 +974,7 @@ func testAccCheckNetworkingV2PortExists(n string, port *ports.Port) resource.Tes
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -1007,7 +1007,7 @@ func testAccCheckNetworkingV2PortWithExtensionsExists(
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -1080,7 +1080,7 @@ func testAccCheckNetworkingV2PortPortSecurityEnabled(
 	}
 }
 
-const testAccNetworkingV2Port_basic = `
+const testAccNetworkingV2PortBasic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1105,7 +1105,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_noip = `
+const testAccNetworkingV2PortNoIP = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1129,7 +1129,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_noip_empty_update = `
+const testAccNetworkingV2PortNoIPEmptyUpdate = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1149,7 +1149,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_multipleNoIP = `
+const testAccNetworkingV2PortMultipleNoIP = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1181,7 +1181,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_allowedAddressPairs_1 = `
+const testAccNetworkingV2PortAllowedAddressPairs1 = `
 resource "openstack_networking_network_v2" "vrrp_network" {
   name = "vrrp_network"
   admin_state_up = "true"
@@ -1253,7 +1253,7 @@ resource "openstack_networking_port_v2" "instance_port" {
 }
 `
 
-const testAccNetworkingV2Port_allowedAddressPairs_2 = `
+const testAccNetworkingV2PortAllowedAddressPairs2 = `
 resource "openstack_networking_network_v2" "vrrp_network" {
   name = "vrrp_network"
   admin_state_up = "true"
@@ -1324,7 +1324,7 @@ resource "openstack_networking_port_v2" "instance_port" {
 }
 `
 
-const testAccNetworkingV2Port_allowedAddressPairs_3 = `
+const testAccNetworkingV2PortAllowedAddressPairs3 = `
 resource "openstack_networking_network_v2" "vrrp_network" {
   name = "vrrp_network"
   admin_state_up = "true"
@@ -1396,7 +1396,7 @@ resource "openstack_networking_port_v2" "instance_port" {
 }
 `
 
-const testAccNetworkingV2Port_allowedAddressPairs_4 = `
+const testAccNetworkingV2PortAllowedAddressPairs4 = `
 resource "openstack_networking_network_v2" "vrrp_network" {
   name = "vrrp_network"
   admin_state_up = "true"
@@ -1463,7 +1463,7 @@ resource "openstack_networking_port_v2" "instance_port" {
 }
 `
 
-const testAccNetworkingV2Port_allowedAddressPairs_5 = `
+const testAccNetworkingV2PortAllowedAddressPairs5 = `
 resource "openstack_networking_network_v2" "vrrp_network" {
   name = "vrrp_network"
   admin_state_up = "true"
@@ -1524,7 +1524,7 @@ resource "openstack_networking_port_v2" "instance_port" {
 }
 `
 
-const testAccNetworkingV2Port_multipleFixedIPs = `
+const testAccNetworkingV2PortMultipleFixedIPs = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1559,7 +1559,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_timeout = `
+const testAccNetworkingV2PortTimeout = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1589,7 +1589,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_fixedIPs = `
+const testAccNetworkingV2PortFixedIPs = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1619,7 +1619,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_updateSecurityGroups_1 = `
+const testAccNetworkingV2PortUpdateSecurityGroups1 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1654,7 +1654,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_updateSecurityGroups_2 = `
+const testAccNetworkingV2PortUpdateSecurityGroups2 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1690,7 +1690,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_updateSecurityGroups_3 = `
+const testAccNetworkingV2PortUpdateSecurityGroups3 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1729,7 +1729,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_updateSecurityGroups_4 = `
+const testAccNetworkingV2PortUpdateSecurityGroups4 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1765,7 +1765,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_updateSecurityGroups_5 = `
+const testAccNetworkingV2PortUpdateSecurityGroups5 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1801,7 +1801,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_noSecurityGroups_1 = `
+const testAccNetworkingV2PortNoSecurityGroups1 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1837,7 +1837,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_noSecurityGroups_2 = `
+const testAccNetworkingV2PortNoSecurityGroups2 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1874,7 +1874,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_noSecurityGroups_3 = `
+const testAccNetworkingV2PortNoSecurityGroups3 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1914,7 +1914,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_noSecurityGroups_4 = `
+const testAccNetworkingV2PortNoSecurityGroups4 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -1950,7 +1950,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_allowedAddressPairsNoMAC = `
+const testAccNetworkingV2PortAllowedAddressPairsNoMAC = `
 resource "openstack_networking_network_v2" "vrrp_network" {
   name = "vrrp_network"
   admin_state_up = "true"
@@ -2019,7 +2019,7 @@ resource "openstack_networking_port_v2" "instance_port" {
 }
 `
 
-const testAccNetworkingV2Port_noFixedIP_1 = `
+const testAccNetworkingV2PortNoFixedIP1 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -2040,7 +2040,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_noFixedIP_2 = `
+const testAccNetworkingV2PortNoFixedIP2 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -2065,7 +2065,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_noFixedIP_3 = `
+const testAccNetworkingV2PortNoFixedIP3 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -2095,7 +2095,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_createExtraDHCPOpts = `
+const testAccNetworkingV2PortCreateExtraDhcpOpts = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -2130,7 +2130,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_updateExtraDHCPOpts_1 = `
+const testAccNetworkingV2PortUpdateExtraDhcpOpts1 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -2160,7 +2160,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_updateExtraDHCPOpts_2 = `
+const testAccNetworkingV2PortUpdateExtraDhcpOpts2 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -2195,7 +2195,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_updateExtraDHCPOpts_3 = `
+const testAccNetworkingV2PortUpdateExtraDhcpOpts3 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -2230,7 +2230,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_updateExtraDHCPOpts_4 = `
+const testAccNetworkingV2PortUpdateExtraDhcpOpts4 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -2265,7 +2265,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_updateExtraDHCPOpts_5 = `
+const testAccNetworkingV2PortUpdateExtraDhcpOpts5 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -2300,7 +2300,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_updateExtraDHCPOpts_6 = `
+const testAccNetworkingV2PortUpdateExtraDhcpOpts6 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -2325,7 +2325,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_adminStateUp_omit = `
+const testAccNetworkingV2PortAdminStateUpOmit = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -2348,7 +2348,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_adminStateUp_true = `
+const testAccNetworkingV2PortAdminStateUpTrue = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -2372,7 +2372,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_adminStateUp_false = `
+const testAccNetworkingV2PortAdminStateUpFalse = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -2396,7 +2396,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_portSecurity_omit = `
+const testAccNetworkingV2PortSecurityOmit = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -2420,7 +2420,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_portSecurity_disabled = `
+const testAccNetworkingV2PortSecurityDisabled = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -2445,7 +2445,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_portSecurity_enabled = `
+const testAccNetworkingV2PortSecurityEnabled = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -2470,7 +2470,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_createPortBinding = `
+const testAccNetworkingV2PortCreatePortBinding = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -2508,7 +2508,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_updatePortBinding_1 = `
+const testAccNetworkingV2PortUpdatePortBinding1 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -2558,7 +2558,7 @@ EOF
 }
 `
 
-const testAccNetworkingV2Port_updatePortBinding_2 = `
+const testAccNetworkingV2PortUpdatePortBinding2 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -2587,7 +2587,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_updatePortBinding_3 = `
+const testAccNetworkingV2PortUpdatePortBinding3 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -2615,7 +2615,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_updatePortBinding_4 = `
+const testAccNetworkingV2PortUpdatePortBinding4 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -2644,7 +2644,7 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_qos_policy = `
+const testAccNetworkingV2PortQosPolicy = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

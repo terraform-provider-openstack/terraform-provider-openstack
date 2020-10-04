@@ -271,17 +271,17 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 		}
 	} else {
 		// import
-		imgUrl := d.Get("image_source_url").(string)
+		imgURL := d.Get("image_source_url").(string)
 
 		importOpts := &imageimport.CreateOpts{
 			Name: imageimport.WebDownloadMethod,
-			URI:  imgUrl,
+			URI:  imgURL,
 		}
 
 		log.Printf("[DEBUG] Import Options: %#v", importOpts)
 		res := imageimport.Create(imageClient, d.Id(), importOpts)
 		if res.Err != nil {
-			return fmt.Errorf("Error while importing url %q: %s", imgUrl, res.Err)
+			return fmt.Errorf("Error while importing url %q: %s", imgURL, res.Err)
 		}
 	}
 

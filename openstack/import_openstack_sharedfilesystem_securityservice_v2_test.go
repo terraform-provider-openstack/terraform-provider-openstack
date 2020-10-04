@@ -15,7 +15,7 @@ func TestAccSFSV2SecurityService_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckSFSV2SecurityServiceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2SecurityServiceConfig_basic,
+				Config: testAccSFSV2SecurityServiceConfigBasic,
 			},
 
 			{

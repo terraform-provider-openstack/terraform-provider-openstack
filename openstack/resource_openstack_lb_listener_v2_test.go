@@ -18,7 +18,7 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV2ListenerConfig_basic,
+				Config: testAccLbV2ListenerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
@@ -26,7 +26,7 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccLBV2ListenerConfig_update,
+				Config: testAccLbV2ListenerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "name", "listener_1_updated"),
@@ -50,7 +50,7 @@ func TestAccLBV2Listener_octavia(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV2ListenerConfig_octavia,
+				Config: testAccLbV2ListenerConfigOctavia,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
@@ -66,7 +66,7 @@ func TestAccLBV2Listener_octavia(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccLBV2ListenerConfig_octavia_update,
+				Config: testAccLbV2ListenerConfigOctaviaUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "name", "listener_1_updated"),
@@ -98,7 +98,7 @@ func TestAccLBV2Listener_octavia_udp(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV2ListenerConfig_octavia_udp,
+				Config: testAccLbV2ListenerConfigOctaviaUDP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
@@ -121,7 +121,7 @@ func TestAccLBV2ListenerConfig_octavia_insert_headers(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV2ListenerConfig_octavia_insert_headers_1,
+				Config: testAccLbV2ListenerConfigOctaviaInsertHeaders1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
@@ -131,7 +131,7 @@ func TestAccLBV2ListenerConfig_octavia_insert_headers(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccLBV2ListenerConfig_octavia_insert_headers_2,
+				Config: testAccLbV2ListenerConfigOctaviaInsertHeaders2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
@@ -141,7 +141,7 @@ func TestAccLBV2ListenerConfig_octavia_insert_headers(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccLBV2ListenerConfig_octavia,
+				Config: testAccLbV2ListenerConfigOctavia,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckNoResourceAttr(
@@ -156,7 +156,7 @@ func TestAccLBV2ListenerConfig_octavia_insert_headers(t *testing.T) {
 
 func testAccCheckLBV2ListenerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+	lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -187,7 +187,7 @@ func testAccCheckLBV2ListenerExists(n string, listener *listeners.Listener) reso
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
@@ -207,7 +207,7 @@ func testAccCheckLBV2ListenerExists(n string, listener *listeners.Listener) reso
 	}
 }
 
-const testAccLBV2ListenerConfig_basic = `
+const testAccLbV2ListenerConfigBasic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -253,7 +253,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
 }
 `
 
-const testAccLBV2ListenerConfig_update = `
+const testAccLbV2ListenerConfigUpdate = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -293,7 +293,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
 }
 `
 
-const testAccLBV2ListenerConfig_octavia = `
+const testAccLbV2ListenerConfigOctavia = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -344,7 +344,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
 }
 `
 
-const testAccLBV2ListenerConfig_octavia_update = `
+const testAccLbV2ListenerConfigOctaviaUpdate = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -396,7 +396,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
 }
 `
 
-const testAccLBV2ListenerConfig_octavia_udp = `
+const testAccLbV2ListenerConfigOctaviaUDP = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -442,7 +442,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
 }
 `
 
-const testAccLBV2ListenerConfig_octavia_insert_headers_1 = `
+const testAccLbV2ListenerConfigOctaviaInsertHeaders1 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -493,7 +493,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
 }
 `
 
-const testAccLBV2ListenerConfig_octavia_insert_headers_2 = `
+const testAccLbV2ListenerConfigOctaviaInsertHeaders2 = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

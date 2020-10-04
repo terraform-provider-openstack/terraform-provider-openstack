@@ -10,7 +10,7 @@ func TestAccLBV2LoadBalancer_importBasic(t *testing.T) {
 	resourceName := "openstack_lb_loadbalancer_v2.loadbalancer_1"
 
 	lbProvider := "haproxy"
-	if OS_USE_OCTAVIA != "" {
+	if osUseOctavia != "" {
 		lbProvider = "octavia"
 	}
 
@@ -20,7 +20,7 @@ func TestAccLBV2LoadBalancer_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV2LoadBalancerConfig_basic(lbProvider),
+				Config: testAccLbV2LoadBalancerConfigBasic(lbProvider),
 			},
 
 			{

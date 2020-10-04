@@ -21,7 +21,7 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 		CheckDestroy: testAccCheckSFSV2ShareAccessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2ShareAccessConfig_basic,
+				Config: testAccSFSV2ShareAccessConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareAccessExists("openstack_sharedfilesystem_share_access_v2.share_access_1", &shareAccess1),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_type", "ip"),
@@ -39,7 +39,7 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareAccessConfig_update,
+				Config: testAccSFSV2ShareAccessConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareAccessExists("openstack_sharedfilesystem_share_access_v2.share_access_1", &shareAccess1),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_type", "ip"),
@@ -62,7 +62,7 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 
 func testAccCheckSFSV2ShareAccessDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
+	sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
@@ -105,7 +105,7 @@ func testAccCheckSFSV2ShareAccessExists(n string, share *shares.AccessRight) res
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
+		sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
@@ -163,7 +163,7 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
 }
 `
 
-var testAccSFSV2ShareAccessConfig_basic = fmt.Sprintf(`
+var testAccSFSV2ShareAccessConfigBasic = fmt.Sprintf(`
 %s
 
 resource "openstack_sharedfilesystem_share_access_v2" "share_access_1" {
@@ -181,7 +181,7 @@ resource "openstack_sharedfilesystem_share_access_v2" "share_access_2" {
 }
 `, testAccSFSV2ShareAccessConfig)
 
-var testAccSFSV2ShareAccessConfig_update = fmt.Sprintf(`
+var testAccSFSV2ShareAccessConfigUpdate = fmt.Sprintf(`
 %s
 
 resource "openstack_sharedfilesystem_share_access_v2" "share_access_1" {

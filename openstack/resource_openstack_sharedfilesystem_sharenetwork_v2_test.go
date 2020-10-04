@@ -25,7 +25,7 @@ func TestAccSFSV2ShareNetwork_basic(t *testing.T) {
 		CheckDestroy: testAccCheckSFSV2ShareNetworkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2ShareNetworkConfig_basic,
+				Config: testAccSFSV2ShareNetworkConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork1),
 					resource.TestCheckResourceAttr(
@@ -41,7 +41,7 @@ func TestAccSFSV2ShareNetwork_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareNetworkConfig_update,
+				Config: testAccSFSV2ShareNetworkConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork2),
 					resource.TestCheckResourceAttr(
@@ -70,7 +70,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 		CheckDestroy: testAccCheckSFSV2ShareNetworkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2ShareNetworkConfig_secservice_1,
+				Config: testAccSFSV2ShareNetworkConfigSecService1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
@@ -83,7 +83,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareNetworkConfig_secservice_2,
+				Config: testAccSFSV2ShareNetworkConfigSecService2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
@@ -96,7 +96,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareNetworkConfig_secservice_3,
+				Config: testAccSFSV2ShareNetworkConfigSecService3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
@@ -109,7 +109,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareNetworkConfig_secservice_4,
+				Config: testAccSFSV2ShareNetworkConfigSecService4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
@@ -127,7 +127,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 
 func testAccCheckSFSV2ShareNetworkDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
+	sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
@@ -158,7 +158,7 @@ func testAccCheckSFSV2ShareNetworkExists(n string, sharenetwork *sharenetworks.S
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
+		sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
@@ -190,7 +190,7 @@ func testAccCheckSFSV2ShareNetworkSecSvcExists(n string) resource.TestCheckFunc 
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.SharedfilesystemV2Client(OS_REGION_NAME)
+		sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
@@ -205,23 +205,23 @@ func testAccCheckSFSV2ShareNetworkSecSvcExists(n string) resource.TestCheckFunc 
 			return err
 		}
 
-		api_security_service_ids := resourceSharedFilesystemShareNetworkV2SecSvcToArray(&securityServiceList)
+		apiSecurityServiceIDs := resourceSharedFilesystemShareNetworkV2SecSvcToArray(&securityServiceList)
 
-		var tf_security_service_ids []string
+		var tfSecurityServiceIDs []string
 		for k, v := range rs.Primary.Attributes {
 			if strings.HasPrefix(k, "security_service_ids.#") {
 				continue
 			}
 			if strings.HasPrefix(k, "security_service_ids.") {
-				tf_security_service_ids = append(tf_security_service_ids, v)
+				tfSecurityServiceIDs = append(tfSecurityServiceIDs, v)
 			}
 		}
 
-		sort.Strings(api_security_service_ids)
-		sort.Strings(tf_security_service_ids)
+		sort.Strings(apiSecurityServiceIDs)
+		sort.Strings(tfSecurityServiceIDs)
 
-		if !reflect.DeepEqual(api_security_service_ids, tf_security_service_ids) {
-			return fmt.Errorf("API and Terraform security service IDs don't correspond: %#v != %#v", api_security_service_ids, tf_security_service_ids)
+		if !reflect.DeepEqual(apiSecurityServiceIDs, tfSecurityServiceIDs) {
+			return fmt.Errorf("API and Terraform security service IDs don't correspond: %#v != %#v", apiSecurityServiceIDs, tfSecurityServiceIDs)
 		}
 
 		return nil
@@ -251,7 +251,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-var testAccSFSV2ShareNetworkConfig_basic = fmt.Sprintf(`
+var testAccSFSV2ShareNetworkConfigBasic = fmt.Sprintf(`
 %s
 
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
@@ -262,7 +262,7 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
 }
 `, testAccSFSV2ShareNetworkConfig)
 
-var testAccSFSV2ShareNetworkConfig_update = fmt.Sprintf(`
+var testAccSFSV2ShareNetworkConfigUpdate = fmt.Sprintf(`
 %s
 
 resource "openstack_networking_network_v2" "network_2" {
@@ -285,7 +285,7 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
 }
 `, testAccSFSV2ShareNetworkConfig)
 
-const testAccSFSV2ShareNetworkConfig_secservice = `
+const testAccSFSV2ShareNetworkConfigSecService = `
 resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
   name        = "security"
   description = "created by terraform"
@@ -307,7 +307,7 @@ resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_2" {
 }
 `
 
-var testAccSFSV2ShareNetworkConfig_secservice_1 = fmt.Sprintf(`
+var testAccSFSV2ShareNetworkConfigSecService1 = fmt.Sprintf(`
 %s
 
 %s
@@ -321,9 +321,9 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
     "${openstack_sharedfilesystem_securityservice_v2.securityservice_1.id}",
   ]
 }
-`, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfig_secservice)
+`, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfigSecService)
 
-var testAccSFSV2ShareNetworkConfig_secservice_2 = fmt.Sprintf(`
+var testAccSFSV2ShareNetworkConfigSecService2 = fmt.Sprintf(`
 %s
 
 %s
@@ -338,9 +338,9 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
     "${openstack_sharedfilesystem_securityservice_v2.securityservice_2.id}",
   ]
 }
-`, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfig_secservice)
+`, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfigSecService)
 
-var testAccSFSV2ShareNetworkConfig_secservice_3 = fmt.Sprintf(`
+var testAccSFSV2ShareNetworkConfigSecService3 = fmt.Sprintf(`
 %s
 
 %s
@@ -354,9 +354,9 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
     "${openstack_sharedfilesystem_securityservice_v2.securityservice_2.id}",
   ]
 }
-`, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfig_secservice)
+`, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfigSecService)
 
-var testAccSFSV2ShareNetworkConfig_secservice_4 = fmt.Sprintf(`
+var testAccSFSV2ShareNetworkConfigSecService4 = fmt.Sprintf(`
 %s
 
 %s
@@ -367,4 +367,4 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   neutron_net_id      = "${openstack_networking_network_v2.network_1.id}"
   neutron_subnet_id   = "${openstack_networking_subnet_v2.subnet_1.id}"
 }
-`, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfig_secservice)
+`, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfigSecService)

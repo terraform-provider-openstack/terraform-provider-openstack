@@ -19,7 +19,7 @@ func TestAccImagesImageAccessV2_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckImagesImageAccessV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageAccessV2_basic,
+				Config: testAccImagesImageAccessV2Basic,
 			},
 
 			{

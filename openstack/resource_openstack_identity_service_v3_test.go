@@ -25,7 +25,7 @@ func TestAccIdentityV3Service_basic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3ServiceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3Service_basic(serviceName),
+				Config: testAccIdentityV3ServiceBasic(serviceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ServiceExists("openstack_identity_service_v3.service_1", &service, &name, &description),
 					resource.TestCheckResourceAttrPtr(
@@ -39,7 +39,7 @@ func TestAccIdentityV3Service_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIdentityV3Service_update(serviceName),
+				Config: testAccIdentityV3ServiceUpdate(serviceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ServiceExists("openstack_identity_service_v3.service_1", &service, &name, &description),
 					resource.TestCheckResourceAttrPtr(
@@ -58,7 +58,7 @@ func TestAccIdentityV3Service_basic(t *testing.T) {
 
 func testAccCheckIdentityV3ServiceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
+	identityClient, err := config.IdentityV3Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -89,7 +89,7 @@ func testAccCheckIdentityV3ServiceExists(n string, service *services.Service, na
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
+		identityClient, err := config.IdentityV3Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
@@ -117,7 +117,7 @@ func testAccCheckIdentityV3ServiceExists(n string, service *services.Service, na
 	}
 }
 
-func testAccIdentityV3Service_basic(serviceName string) string {
+func testAccIdentityV3ServiceBasic(serviceName string) string {
 	return fmt.Sprintf(`
 resource "openstack_identity_service_v3" "service_1" {
   name = "%s"
@@ -127,7 +127,7 @@ resource "openstack_identity_service_v3" "service_1" {
   `, serviceName)
 }
 
-func testAccIdentityV3Service_update(serviceName string) string {
+func testAccIdentityV3ServiceUpdate(serviceName string) string {
 	return fmt.Sprintf(`
 resource "openstack_identity_service_v3" "service_1" {
   name = "%s"

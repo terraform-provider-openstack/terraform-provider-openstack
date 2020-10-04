@@ -19,7 +19,7 @@ func TestAccObjectStorageV1Container_basic(t *testing.T) {
 		CheckDestroy: testAccCheckObjectStorageV1ContainerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccObjectStorageV1Container_basic,
+				Config: testAccObjectStorageV1ContainerBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_container_v1.container_1", "name", "container_1"),
@@ -32,7 +32,7 @@ func TestAccObjectStorageV1Container_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccObjectStorageV1Container_update,
+				Config: testAccObjectStorageV1ContainerUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_container_v1.container_1", "content_type", "text/plain"),
@@ -44,7 +44,7 @@ func TestAccObjectStorageV1Container_basic(t *testing.T) {
 
 func testAccCheckObjectStorageV1ContainerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	objectStorageClient, err := config.ObjectStorageV1Client(OS_REGION_NAME)
+	objectStorageClient, err := config.ObjectStorageV1Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack object storage client: %s", err)
 	}
@@ -63,7 +63,7 @@ func testAccCheckObjectStorageV1ContainerDestroy(s *terraform.State) error {
 	return nil
 }
 
-const testAccObjectStorageV1Container_basic = `
+const testAccObjectStorageV1ContainerBasic = `
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "container_1"
   metadata = {
@@ -74,7 +74,7 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 }
 `
 
-const testAccObjectStorageV1Container_complete = `
+const testAccObjectStorageV1ContainerComplete = `
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "container_1"
   metadata = {
@@ -91,7 +91,7 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 }
 `
 
-const testAccObjectStorageV1Container_update = `
+const testAccObjectStorageV1ContainerUpdate = `
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "container_1"
   metadata = {

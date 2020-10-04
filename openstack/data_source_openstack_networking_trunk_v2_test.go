@@ -16,7 +16,7 @@ func TestAccNetworkingV2TrunkDataSource_nosubports(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2TrunkDataSource_noSubports,
+				Config: testAccNetworkingV2TrunkDataSourceNoSubports,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_networking_trunk_v2.trunk_1", "id",
@@ -42,7 +42,7 @@ func TestAccNetworkingV2TrunkDataSource_subports(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2TrunkDataSource_subports,
+				Config: testAccNetworkingV2TrunkDataSourceSubports,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_networking_trunk_v2.trunk_1", "id",
@@ -70,7 +70,7 @@ func TestAccNetworkingV2TrunkDataSource_tags(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2TrunkDataSource_tags,
+				Config: testAccNetworkingV2TrunkDataSourceTags,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_networking_trunk_v2.trunk_1", "id",
@@ -111,7 +111,7 @@ resource "openstack_networking_port_v2" "parent_port_1" {
 }
 `
 
-var testAccNetworkingV2TrunkDataSource_noSubports = fmt.Sprintf(`
+var testAccNetworkingV2TrunkDataSourceNoSubports = fmt.Sprintf(`
 %s
 
 resource "openstack_networking_trunk_v2" "trunk_1" {
@@ -125,7 +125,7 @@ data "openstack_networking_trunk_v2" "trunk_1" {
 }
 `, testAccNetworkingV2TrunkDataSource)
 
-var testAccNetworkingV2TrunkDataSource_subports = fmt.Sprintf(`
+var testAccNetworkingV2TrunkDataSourceSubports = fmt.Sprintf(`
 %s
 
 resource "openstack_networking_port_v2" "subport_1" {
@@ -163,7 +163,7 @@ data "openstack_networking_trunk_v2" "trunk_1" {
 }
 `, testAccNetworkingV2TrunkDataSource)
 
-var testAccNetworkingV2TrunkDataSource_tags = fmt.Sprintf(`
+var testAccNetworkingV2TrunkDataSourceTags = fmt.Sprintf(`
 %s
 
 resource "openstack_networking_trunk_v2" "trunk_1" {

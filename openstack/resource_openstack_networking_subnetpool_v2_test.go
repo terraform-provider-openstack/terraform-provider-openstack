@@ -75,7 +75,7 @@ func testAccCheckNetworkingV2SubnetPoolExists(n string, subnetPool *subnetpools.
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -97,7 +97,7 @@ func testAccCheckNetworkingV2SubnetPoolExists(n string, subnetPool *subnetpools.
 
 func testAccCheckNetworkingV2SubnetPoolDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}

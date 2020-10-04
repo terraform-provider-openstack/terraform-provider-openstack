@@ -19,13 +19,13 @@ func TestAccLBV1Monitor_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV1MonitorDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV1Monitor_basic,
+				Config: testAccLbV1MonitorBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1MonitorExists("openstack_lb_monitor_v1.monitor_1", &monitor),
 				),
 			},
 			{
-				Config: testAccLBV1Monitor_update,
+				Config: testAccLbV1MonitorUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_lb_monitor_v1.monitor_1", "delay", "20"),
 				),
@@ -43,7 +43,7 @@ func TestAccLBV1Monitor_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckLBV1MonitorDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV1Monitor_timeout,
+				Config: testAccLbV1MonitorTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV1MonitorExists("openstack_lb_monitor_v1.monitor_1", &monitor),
 				),
@@ -54,7 +54,7 @@ func TestAccLBV1Monitor_timeout(t *testing.T) {
 
 func testAccCheckLBV1MonitorDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -85,7 +85,7 @@ func testAccCheckLBV1MonitorExists(n string, monitor *monitors.Monitor) resource
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -105,7 +105,7 @@ func testAccCheckLBV1MonitorExists(n string, monitor *monitors.Monitor) resource
 	}
 }
 
-const testAccLBV1Monitor_basic = `
+const testAccLbV1MonitorBasic = `
 resource "openstack_lb_monitor_v1" "monitor_1" {
   type = "PING"
   delay = 30
@@ -115,7 +115,7 @@ resource "openstack_lb_monitor_v1" "monitor_1" {
 }
 `
 
-const testAccLBV1Monitor_update = `
+const testAccLbV1MonitorUpdate = `
 resource "openstack_lb_monitor_v1" "monitor_1" {
   type = "PING"
   delay = 20
@@ -125,7 +125,7 @@ resource "openstack_lb_monitor_v1" "monitor_1" {
 }
 `
 
-const testAccLBV1Monitor_timeout = `
+const testAccLbV1MonitorTimeout = `
 resource "openstack_lb_monitor_v1" "monitor_1" {
   type = "PING"
   delay = 30

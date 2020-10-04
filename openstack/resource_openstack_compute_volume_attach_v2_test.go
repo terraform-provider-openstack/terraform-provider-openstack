@@ -19,7 +19,7 @@ func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2VolumeAttach_basic,
+				Config: testAccComputeV2VolumeAttachBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2VolumeAttachExists("openstack_compute_volume_attach_v2.va_1", &va),
 				),
@@ -37,7 +37,7 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2VolumeAttach_device,
+				Config: testAccComputeV2VolumeAttachDevice,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2VolumeAttachExists("openstack_compute_volume_attach_v2.va_1", &va),
 					testAccCheckComputeV2VolumeAttachDevice(&va, "/dev/vdc"),
@@ -49,7 +49,7 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 
 func testAccCheckComputeV2VolumeAttachDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
+	computeClient, err := config.ComputeV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -59,12 +59,12 @@ func testAccCheckComputeV2VolumeAttachDestroy(s *terraform.State) error {
 			continue
 		}
 
-		instanceId, volumeId, err := computeVolumeAttachV2ParseID(rs.Primary.ID)
+		instanceID, volumeID, err := computeVolumeAttachV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		_, err = volumeattach.Get(computeClient, instanceId, volumeId).Extract()
+		_, err = volumeattach.Get(computeClient, instanceID, volumeID).Extract()
 		if err == nil {
 			return fmt.Errorf("Volume attachment still exists")
 		}
@@ -85,22 +85,22 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		instanceId, volumeId, err := computeVolumeAttachV2ParseID(rs.Primary.ID)
+		instanceID, volumeID, err := computeVolumeAttachV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		found, err := volumeattach.Get(computeClient, instanceId, volumeId).Extract()
+		found, err := volumeattach.Get(computeClient, instanceID, volumeID).Extract()
 		if err != nil {
 			return err
 		}
 
-		if found.ServerID != instanceId || found.VolumeID != volumeId {
+		if found.ServerID != instanceID || found.VolumeID != volumeID {
 			return fmt.Errorf("VolumeAttach not found")
 		}
 
@@ -122,7 +122,7 @@ func testAccCheckComputeV2VolumeAttachDevice(
 	}
 }
 
-var testAccComputeV2VolumeAttach_basic = fmt.Sprintf(`
+var testAccComputeV2VolumeAttachBasic = fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -140,9 +140,9 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   volume_id = "${openstack_blockstorage_volume_v2.volume_1.id}"
 }
-`, OS_NETWORK_ID)
+`, osNetworkID)
 
-var testAccComputeV2VolumeAttach_device = fmt.Sprintf(`
+var testAccComputeV2VolumeAttachDevice = fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -161,4 +161,4 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
   volume_id = "${openstack_blockstorage_volume_v2.volume_1.id}"
   device = "/dev/vdc"
 }
-`, OS_NETWORK_ID)
+`, osNetworkID)

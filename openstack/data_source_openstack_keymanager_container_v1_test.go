@@ -13,7 +13,7 @@ func TestAccKeyManagerContainerV1DataSource_basic(t *testing.T) {
 		CheckDestroy: testAccCheckContainerV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerContainerV1DataSource_basic,
+				Config: testAccKeyManagerContainerV1DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_keymanager_container_v1.container_1", "id",
@@ -36,7 +36,7 @@ func TestAccKeyManagerContainerV1DataSource_acls(t *testing.T) {
 		CheckDestroy: testAccCheckContainerV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerContainerV1DataSource_acls,
+				Config: testAccKeyManagerContainerV1DataSourceAcls,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_keymanager_container_v1.container_1", "id",
@@ -54,7 +54,7 @@ func TestAccKeyManagerContainerV1DataSource_acls(t *testing.T) {
 	})
 }
 
-const testAccKeyManagerContainerV1DataSource_basic = `
+const testAccKeyManagerContainerV1DataSourceBasic = `
 resource "openstack_keymanager_secret_v1" "certificate_1" {
   name                 = "certificate"
   payload              = "certificate"
@@ -101,7 +101,7 @@ data "openstack_keymanager_container_v1" "container_1" {
 }
 `
 
-const testAccKeyManagerContainerV1DataSource_acls = `
+const testAccKeyManagerContainerV1DataSourceAcls = `
 resource "openstack_keymanager_secret_v1" "certificate_1" {
   name                 = "certificate"
   payload              = "certificate"

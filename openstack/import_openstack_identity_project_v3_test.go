@@ -21,7 +21,7 @@ func TestAccIdentityV3Project_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3ProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3Project_basic(projectName),
+				Config: testAccIdentityV3ProjectBasic(projectName),
 			},
 
 			{

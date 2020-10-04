@@ -18,7 +18,7 @@ func TestAccOrchestrationV1Stack_basic(t *testing.T) {
 		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOrchestrationV1Stack_basic,
+				Config: testAccOrchestrationV1StackBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOrchestrationV1StackExists("openstack_orchestration_stack_v1.stack_1", &stack),
 					resource.TestCheckResourceAttr("openstack_orchestration_stack_v1.stack_1", "name", "stack_1"),
@@ -39,7 +39,7 @@ func TestAccOrchestrationV1Stack_tags(t *testing.T) {
 		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOrchestrationV1Stack_tags,
+				Config: testAccOrchestrationV1StackTags,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOrchestrationV1StackExists("openstack_orchestration_stack_v1.stack_4", &stack),
 					resource.TestCheckResourceAttr("openstack_orchestration_stack_v1.stack_4", "name", "stack_4"),
@@ -60,7 +60,7 @@ func TestAccOrchestrationV1Stack_update(t *testing.T) {
 		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOrchestrationV1Stack_preupdate,
+				Config: testAccOrchestrationV1StackPreUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOrchestrationV1StackExists("openstack_orchestration_stack_v1.stack_3", &stack),
 					resource.TestCheckResourceAttr("openstack_orchestration_stack_v1.stack_3", "name", "stack_3"),
@@ -68,7 +68,7 @@ func TestAccOrchestrationV1Stack_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOrchestrationV1Stack_update,
+				Config: testAccOrchestrationV1StackUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOrchestrationV1StackExists("openstack_orchestration_stack_v1.stack_3", &stack),
 					resource.TestCheckResourceAttr("openstack_orchestration_stack_v1.stack_3", "name", "stack_3"),
@@ -89,7 +89,7 @@ func TestAccOrchestrationV1Stack_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOrchestrationV1Stack_timeout,
+				Config: testAccOrchestrationV1StackTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOrchestrationV1StackExists("openstack_orchestration_stack_v1.stack_2", &stack),
 				),
@@ -107,7 +107,7 @@ func TestAccOrchestrationV1Stack_outputs(t *testing.T) {
 		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOrchestrationV1Stack_outputs,
+				Config: testAccOrchestrationV1StackOutputs,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOrchestrationV1StackExists("openstack_orchestration_stack_v1.stack_5", &stack),
 					resource.TestCheckResourceAttr("openstack_orchestration_stack_v1.stack_5", "name", "stack_5"),
@@ -122,7 +122,7 @@ func TestAccOrchestrationV1Stack_outputs(t *testing.T) {
 
 func testAccCheckOrchestrationV1StackDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	orchestrationClient, err := config.OrchestrationV1Client(OS_REGION_NAME)
+	orchestrationClient, err := config.OrchestrationV1Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack Orchestration client: %s", err)
 	}
@@ -155,7 +155,7 @@ func testAccCheckOrchestrationV1StackExists(n string, stack *stacks.RetrievedSta
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		orchestrationClient, err := config.OrchestrationV1Client(OS_REGION_NAME)
+		orchestrationClient, err := config.OrchestrationV1Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack orchestration client: %s", err)
 		}
@@ -175,7 +175,7 @@ func testAccCheckOrchestrationV1StackExists(n string, stack *stacks.RetrievedSta
 	}
 }
 
-const testAccOrchestrationV1Stack_basic = `
+const testAccOrchestrationV1StackBasic = `
 resource "openstack_orchestration_stack_v1" "stack_1" {
   name = "stack_1"
   parameters = {
@@ -192,7 +192,7 @@ resource "openstack_orchestration_stack_v1" "stack_1" {
 }
 `
 
-const testAccOrchestrationV1Stack_preupdate = `
+const testAccOrchestrationV1StackPreUpdate = `
 resource "openstack_orchestration_stack_v1" "stack_3" {
   name = "stack_3"
   parameters = {
@@ -208,7 +208,7 @@ resource "openstack_orchestration_stack_v1" "stack_3" {
 }
 `
 
-const testAccOrchestrationV1Stack_update = `
+const testAccOrchestrationV1StackUpdate = `
 resource "openstack_orchestration_stack_v1" "stack_3" {
   name = "stack_3"
   parameters = {
@@ -224,7 +224,7 @@ resource "openstack_orchestration_stack_v1" "stack_3" {
 }
 `
 
-const testAccOrchestrationV1Stack_timeout = `
+const testAccOrchestrationV1StackTimeout = `
 resource "openstack_orchestration_stack_v1" "stack_2" {
   name = "stack_2"
   parameters = {
@@ -245,7 +245,7 @@ resource "openstack_orchestration_stack_v1" "stack_2" {
 }
 `
 
-const testAccOrchestrationV1Stack_tags = `
+const testAccOrchestrationV1StackTags = `
 resource "openstack_orchestration_stack_v1" "stack_4" {
   name = "stack_4"
   parameters = {
@@ -265,7 +265,7 @@ resource "openstack_orchestration_stack_v1" "stack_4" {
 }
 `
 
-const testAccOrchestrationV1Stack_outputs = `
+const testAccOrchestrationV1StackOutputs = `
 resource "openstack_orchestration_stack_v1" "stack_5" {
   name = "stack_5"
   parameters = {

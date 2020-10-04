@@ -25,7 +25,7 @@ func TestAccIdentityV3Endpoint_basic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3EndpointDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3Endpoint_basic(endpointName),
+				Config: testAccIdentityV3EndpointBasic(endpointName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3EndpointExists("openstack_identity_endpoint_v3.endpoint_1", &endpoint),
 					resource.TestCheckResourceAttrPtr(
@@ -41,7 +41,7 @@ func TestAccIdentityV3Endpoint_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIdentityV3Endpoint_update(endpointName),
+				Config: testAccIdentityV3EndpointUpdate(endpointName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3EndpointExists("openstack_identity_endpoint_v3.endpoint_1", &endpoint),
 					resource.TestCheckResourceAttrPtr(
@@ -61,7 +61,7 @@ func TestAccIdentityV3Endpoint_basic(t *testing.T) {
 
 func testAccCheckIdentityV3EndpointDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
+	identityClient, err := config.IdentityV3Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -73,14 +73,14 @@ func testAccCheckIdentityV3EndpointDestroy(s *terraform.State) error {
 
 		var endpoint endpoints.Endpoint
 		endpoints.List(identityClient, nil).EachPage(func(page pagination.Page) (bool, error) {
-			if endpointList, err := endpoints.ExtractEndpoints(page); err != nil {
+			endpointList, err := endpoints.ExtractEndpoints(page)
+			if err != nil {
 				return false, err
-			} else {
-				for _, v := range endpointList {
-					if v.ID == rs.Primary.ID {
-						endpoint = v
-						break
-					}
+			}
+			for _, v := range endpointList {
+				if v.ID == rs.Primary.ID {
+					endpoint = v
+					break
 				}
 			}
 			return true, nil
@@ -106,22 +106,22 @@ func testAccCheckIdentityV3EndpointExists(n string, endpoint *endpoints.Endpoint
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
+		identityClient, err := config.IdentityV3Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
 
 		var found *endpoints.Endpoint
 		err = endpoints.List(identityClient, nil).EachPage(func(page pagination.Page) (bool, error) {
-			if endpointList, err := endpoints.ExtractEndpoints(page); err != nil {
+			endpointList, err := endpoints.ExtractEndpoints(page)
+			if err != nil {
 				return false, err
-			} else {
-				for _, ep := range endpointList {
-					e := ep
-					if e.ID == rs.Primary.ID {
-						found = &e
-						break
-					}
+			}
+			for _, ep := range endpointList {
+				e := ep
+				if e.ID == rs.Primary.ID {
+					found = &e
+					break
 				}
 			}
 			return true, nil
@@ -141,7 +141,7 @@ func testAccCheckIdentityV3EndpointExists(n string, endpoint *endpoints.Endpoint
 	}
 }
 
-func testAccIdentityV3Endpoint_basic(endpointName string) string {
+func testAccIdentityV3EndpointBasic(endpointName string) string {
 	return fmt.Sprintf(`
 resource "openstack_identity_service_v3" "service_1" {
   name = "foo"
@@ -157,7 +157,7 @@ resource "openstack_identity_endpoint_v3" "endpoint_1" {
   `, endpointName)
 }
 
-func testAccIdentityV3Endpoint_update(endpointName string) string {
+func testAccIdentityV3EndpointUpdate(endpointName string) string {
 	return fmt.Sprintf(`
 resource "openstack_identity_service_v3" "service_1" {
   name = "baz"

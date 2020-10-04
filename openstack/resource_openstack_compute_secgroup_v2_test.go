@@ -19,7 +19,7 @@ func TestAccComputeV2SecGroup_basic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2SecGroup_basic_orig,
+				Config: testAccComputeV2SecGroupBasicOrig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup),
 				),
@@ -37,13 +37,13 @@ func TestAccComputeV2SecGroup_update(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2SecGroup_basic_orig,
+				Config: testAccComputeV2SecGroupBasicOrig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup),
 				),
 			},
 			{
-				Config: testAccComputeV2SecGroup_basic_update,
+				Config: testAccComputeV2SecGroupBasicUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup),
 					testAccCheckComputeV2SecGroupRuleCount(&secgroup, 2),
@@ -62,7 +62,7 @@ func TestAccComputeV2SecGroup_groupID(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2SecGroup_groupID_orig,
+				Config: testAccComputeV2SecGroupIDOrig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup1),
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_2", &secgroup2),
@@ -71,7 +71,7 @@ func TestAccComputeV2SecGroup_groupID(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeV2SecGroup_groupID_update,
+				Config: testAccComputeV2SecGroupIDUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup1),
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_2", &secgroup2),
@@ -92,7 +92,7 @@ func TestAccComputeV2SecGroup_self(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2SecGroup_self,
+				Config: testAccComputeV2SecGroupSelf,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup),
 					testAccCheckComputeV2SecGroupGroupIDMatch(&secgroup, &secgroup),
@@ -115,7 +115,7 @@ func TestAccComputeV2SecGroup_icmpZero(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2SecGroup_icmpZero,
+				Config: testAccComputeV2SecGroupIcmpZero,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup),
 				),
@@ -133,7 +133,7 @@ func TestAccComputeV2SecGroup_lowerCaseCIDR(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2SecGroup_lowerCaseCIDR,
+				Config: testAccComputeV2SecGroupLowerCaseCIDR,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("openstack_compute_secgroup_v2.sg_1", &secgroup),
 					resource.TestCheckResourceAttr(
@@ -146,7 +146,7 @@ func TestAccComputeV2SecGroup_lowerCaseCIDR(t *testing.T) {
 
 func testAccCheckComputeV2SecGroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
+	computeClient, err := config.ComputeV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -177,7 +177,7 @@ func testAccCheckComputeV2SecGroupExists(n string, secgroup *secgroups.SecurityG
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
@@ -221,7 +221,7 @@ func testAccCheckComputeV2SecGroupGroupIDMatch(sg1, sg2 *secgroups.SecurityGroup
 	}
 }
 
-const testAccComputeV2SecGroup_basic_orig = `
+const testAccComputeV2SecGroupBasicOrig = `
 resource "openstack_compute_secgroup_v2" "sg_1" {
   name = "sg_1"
   description = "first test security group"
@@ -246,7 +246,7 @@ resource "openstack_compute_secgroup_v2" "sg_1" {
 }
 `
 
-const testAccComputeV2SecGroup_basic_update = `
+const testAccComputeV2SecGroupBasicUpdate = `
 resource "openstack_compute_secgroup_v2" "sg_1" {
   name = "sg_1"
   description = "first test security group"
@@ -265,7 +265,7 @@ resource "openstack_compute_secgroup_v2" "sg_1" {
 }
 `
 
-const testAccComputeV2SecGroup_groupID_orig = `
+const testAccComputeV2SecGroupIDOrig = `
 resource "openstack_compute_secgroup_v2" "sg_1" {
   name = "sg_1"
   description = "first test security group"
@@ -300,7 +300,7 @@ resource "openstack_compute_secgroup_v2" "sg_3" {
 }
 `
 
-const testAccComputeV2SecGroup_groupID_update = `
+const testAccComputeV2SecGroupIDUpdate = `
 resource "openstack_compute_secgroup_v2" "sg_1" {
   name = "sg_1"
   description = "first test security group"
@@ -335,7 +335,7 @@ resource "openstack_compute_secgroup_v2" "sg_3" {
 }
 `
 
-const testAccComputeV2SecGroup_self = `
+const testAccComputeV2SecGroupSelf = `
 resource "openstack_compute_secgroup_v2" "sg_1" {
   name = "sg_1"
   description = "first test security group"
@@ -348,7 +348,7 @@ resource "openstack_compute_secgroup_v2" "sg_1" {
 }
 `
 
-const testAccComputeV2SecGroup_icmpZero = `
+const testAccComputeV2SecGroupIcmpZero = `
 resource "openstack_compute_secgroup_v2" "sg_1" {
   name = "sg_1"
   description = "first test security group"
@@ -361,7 +361,7 @@ resource "openstack_compute_secgroup_v2" "sg_1" {
 }
 `
 
-const testAccComputeV2SecGroup_lowerCaseCIDR = `
+const testAccComputeV2SecGroupLowerCaseCIDR = `
 resource "openstack_compute_secgroup_v2" "sg_1" {
   name = "sg_1"
   description = "first test security group"

@@ -32,7 +32,7 @@ func TestAccBlockStorageV3VolumeDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV3VolumeDataSource_basic(volumeName),
+				Config: testAccBlockStorageV3VolumeDataSourceBasic(volumeName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3VolumeDataSourceID(resourceName, volumeID),
 					resource.TestCheckResourceAttr(resourceName, "name", volumeName),
@@ -50,7 +50,7 @@ func testAccBlockStorageV3CreateVolume(volumeName string) (string, error) {
 		return "", err
 	}
 
-	bsClient, err := config.BlockStorageV3Client(OS_REGION_NAME)
+	bsClient, err := config.BlockStorageV3Client(osRegionName)
 	if err != nil {
 		return "", err
 	}
@@ -79,7 +79,7 @@ func testAccBlockStorageV3DeleteVolume(t *testing.T, volumeID string) {
 		t.Fatal(err)
 	}
 
-	bsClient, err := config.BlockStorageV3Client(OS_REGION_NAME)
+	bsClient, err := config.BlockStorageV3Client(osRegionName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func testAccCheckBlockStorageV3VolumeDataSourceID(n, id string) resource.TestChe
 	}
 }
 
-func testAccBlockStorageV3VolumeDataSource_basic(snapshotName string) string {
+func testAccBlockStorageV3VolumeDataSourceBasic(snapshotName string) string {
 	return fmt.Sprintf(`
     data "openstack_blockstorage_volume_v3" "volume_1" {
       name = "%s"

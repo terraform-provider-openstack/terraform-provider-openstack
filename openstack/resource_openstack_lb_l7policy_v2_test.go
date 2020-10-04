@@ -20,7 +20,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2L7PolicyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckLBV2L7PolicyConfig_basic,
+				Config: testAccCheckLbV2L7PolicyConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
 					resource.TestCheckResourceAttr(
@@ -37,7 +37,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLBV2L7PolicyConfig_update1,
+				Config: testAccCheckLbV2L7PolicyConfigUpdate1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
 					resource.TestCheckResourceAttr(
@@ -56,7 +56,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLBV2L7PolicyConfig_update2,
+				Config: testAccCheckLbV2L7PolicyConfigUpdate2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
 					resource.TestCheckResourceAttr(
@@ -76,7 +76,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLBV2L7PolicyConfig_update3,
+				Config: testAccCheckLbV2L7PolicyConfigUpdate3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
 					resource.TestCheckResourceAttr(
@@ -98,7 +98,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 
 func testAccCheckLBV2L7PolicyDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+	lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -129,7 +129,7 @@ func testAccCheckLBV2L7PolicyExists(n string, l7Policy *l7policies.L7Policy) res
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
@@ -149,7 +149,7 @@ func testAccCheckLBV2L7PolicyExists(n string, l7Policy *l7policies.L7Policy) res
 	}
 }
 
-const testAccCheckLBV2L7PolicyConfig = `
+const testAccCheckLbV2L7PolicyConfig = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -181,7 +181,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
 }
 `
 
-var testAccCheckLBV2L7PolicyConfig_basic = fmt.Sprintf(`
+var testAccCheckLbV2L7PolicyConfigBasic = fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7policy_v2" "l7policy_1" {
@@ -191,9 +191,9 @@ resource "openstack_lb_l7policy_v2" "l7policy_1" {
   position     = 1
   listener_id  = "${openstack_lb_listener_v2.listener_1.id}"
 }
-`, testAccCheckLBV2L7PolicyConfig)
+`, testAccCheckLbV2L7PolicyConfig)
 
-var testAccCheckLBV2L7PolicyConfig_update1 = fmt.Sprintf(`
+var testAccCheckLbV2L7PolicyConfigUpdate1 = fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7policy_v2" "l7policy_1" {
@@ -204,9 +204,9 @@ resource "openstack_lb_l7policy_v2" "l7policy_1" {
   listener_id  = "${openstack_lb_listener_v2.listener_1.id}"
   redirect_url = "http://www.example.com"
 }
-`, testAccCheckLBV2L7PolicyConfig)
+`, testAccCheckLbV2L7PolicyConfig)
 
-var testAccCheckLBV2L7PolicyConfig_update2 = fmt.Sprintf(`
+var testAccCheckLbV2L7PolicyConfigUpdate2 = fmt.Sprintf(`
 %s
 
 resource "openstack_lb_pool_v2" "pool_1" {
@@ -223,9 +223,9 @@ resource "openstack_lb_l7policy_v2" "l7policy_1" {
   listener_id      = "${openstack_lb_listener_v2.listener_1.id}"
   redirect_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
 }
-`, testAccCheckLBV2L7PolicyConfig)
+`, testAccCheckLbV2L7PolicyConfig)
 
-var testAccCheckLBV2L7PolicyConfig_update3 = fmt.Sprintf(`
+var testAccCheckLbV2L7PolicyConfigUpdate3 = fmt.Sprintf(`
 %s
 
 resource "openstack_lb_pool_v2" "pool_1" {
@@ -241,4 +241,4 @@ resource "openstack_lb_l7policy_v2" "l7policy_1" {
   position         = 1
   listener_id      = "${openstack_lb_listener_v2.listener_1.id}"
 }
-`, testAccCheckLBV2L7PolicyConfig)
+`, testAccCheckLbV2L7PolicyConfig)

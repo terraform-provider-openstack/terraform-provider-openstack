@@ -20,7 +20,7 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 		CheckDestroy: testAccCheckFWRuleV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWRuleV1_basic_1,
+				Config: testAccFWRuleV1Basic1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
 					resource.TestCheckResourceAttr(
@@ -37,7 +37,7 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 			},
 
 			{
-				Config: testAccFWRuleV1_basic_2,
+				Config: testAccFWRuleV1Basic2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
 					resource.TestCheckResourceAttr(
@@ -64,7 +64,7 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 			},
 
 			{
-				Config: testAccFWRuleV1_basic_3,
+				Config: testAccFWRuleV1Basic3,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
 					resource.TestCheckResourceAttr(
@@ -91,7 +91,7 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 			},
 
 			{
-				Config: testAccFWRuleV1_basic_4,
+				Config: testAccFWRuleV1Basic4,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
 					resource.TestCheckResourceAttr(
@@ -118,7 +118,7 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 			},
 
 			{
-				Config: testAccFWRuleV1_basic_5,
+				Config: testAccFWRuleV1Basic5,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
 					resource.TestCheckResourceAttr(
@@ -154,7 +154,7 @@ func TestAccFWRuleV1_anyProtocol(t *testing.T) {
 		CheckDestroy: testAccCheckFWRuleV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWRuleV1_anyProtocol,
+				Config: testAccFWRuleV1AnyProtocol,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
 					resource.TestCheckResourceAttr(
@@ -186,7 +186,7 @@ func TestAccFWRuleV1_updateName(t *testing.T) {
 		CheckDestroy: testAccCheckFWRuleV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWRuleV1_updateName_1,
+				Config: testAccFWRuleV1UpdateName1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
 					resource.TestCheckResourceAttr(
@@ -213,7 +213,7 @@ func TestAccFWRuleV1_updateName(t *testing.T) {
 			},
 
 			{
-				Config: testAccFWRuleV1_updateName_2,
+				Config: testAccFWRuleV1UpdateName2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWRuleV1Exists("openstack_fw_rule_v1.rule_1", &rule),
 					resource.TestCheckResourceAttr(
@@ -244,7 +244,7 @@ func TestAccFWRuleV1_updateName(t *testing.T) {
 
 func testAccCheckFWRuleV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -255,7 +255,7 @@ func testAccCheckFWRuleV1Destroy(s *terraform.State) error {
 		}
 		_, err = rules.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Firewall rule (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("Firewall rule (%s) still exists", rs.Primary.ID)
 		}
 		if _, ok := err.(gophercloud.ErrDefault404); !ok {
 			return err
@@ -276,7 +276,7 @@ func testAccCheckFWRuleV1Exists(n string, rule *rules.Rule) resource.TestCheckFu
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -302,7 +302,7 @@ func testAccCheckFWRuleV1Exists(n string, rule *rules.Rule) resource.TestCheckFu
 	}
 }
 
-const testAccFWRuleV1_basic_1 = `
+const testAccFWRuleV1Basic1 = `
 resource "openstack_fw_rule_v1" "rule_1" {
 	name = "rule_1"
 	protocol = "udp"
@@ -310,7 +310,7 @@ resource "openstack_fw_rule_v1" "rule_1" {
 }
 `
 
-const testAccFWRuleV1_basic_2 = `
+const testAccFWRuleV1Basic2 = `
 resource "openstack_fw_rule_v1" "rule_1" {
 	name = "rule_1"
 	description = "Terraform accept test"
@@ -325,7 +325,7 @@ resource "openstack_fw_rule_v1" "rule_1" {
 }
 `
 
-const testAccFWRuleV1_basic_3 = `
+const testAccFWRuleV1Basic3 = `
 resource "openstack_fw_rule_v1" "rule_1" {
 	name = "rule_1"
 	description = "Terraform accept test updated"
@@ -340,7 +340,7 @@ resource "openstack_fw_rule_v1" "rule_1" {
 }
 `
 
-const testAccFWRuleV1_basic_4 = `
+const testAccFWRuleV1Basic4 = `
 resource "openstack_fw_rule_v1" "rule_1" {
 	name = "rule_1"
 	description = "Terraform accept test updated"
@@ -355,7 +355,7 @@ resource "openstack_fw_rule_v1" "rule_1" {
 }
 `
 
-const testAccFWRuleV1_basic_5 = `
+const testAccFWRuleV1Basic5 = `
 resource "openstack_fw_rule_v1" "rule_1" {
 	name = "rule_1"
 	description = "Terraform accept test updated"
@@ -369,7 +369,7 @@ resource "openstack_fw_rule_v1" "rule_1" {
 }
 `
 
-const testAccFWRuleV1_anyProtocol = `
+const testAccFWRuleV1AnyProtocol = `
 resource "openstack_fw_rule_v1" "rule_1" {
 	name = "rule_1"
 	description = "Allow any protocol"
@@ -381,7 +381,7 @@ resource "openstack_fw_rule_v1" "rule_1" {
 }
 `
 
-const testAccFWRuleV1_updateName_1 = `
+const testAccFWRuleV1UpdateName1 = `
 resource "openstack_fw_rule_v1" "rule_1" {
 	name = "rule_1"
 	description = "Terraform accept test"
@@ -396,7 +396,7 @@ resource "openstack_fw_rule_v1" "rule_1" {
 }
 `
 
-const testAccFWRuleV1_updateName_2 = `
+const testAccFWRuleV1UpdateName2 = `
 resource "openstack_fw_rule_v1" "rule_1" {
 	name = "updated_rule_1"
 	description = "Terraform accept test"

@@ -17,7 +17,7 @@ func TestAccOpenStackIdentityV3RoleDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackIdentityV3RoleDataSource_basic,
+				Config: testAccOpenStackIdentityV3RoleDataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3RoleDataSourceID("data.openstack_identity_role_v3.role_1"),
 					resource.TestCheckResourceAttr(
@@ -43,7 +43,7 @@ func testAccCheckIdentityV3RoleDataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-const testAccOpenStackIdentityV3RoleDataSource_basic = `
+const testAccOpenStackIdentityV3RoleDataSourceBasic = `
 data "openstack_identity_role_v3" "role_1" {
     name = "admin"
 }

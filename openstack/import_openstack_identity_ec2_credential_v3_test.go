@@ -15,7 +15,7 @@ func TestAccIdentityV3Ec2Credential_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3Ec2CredentialDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3Ec2Credential_basic,
+				Config: testAccIdentityV3Ec2CredentialBasic,
 			},
 
 			{

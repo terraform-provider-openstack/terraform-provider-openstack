@@ -18,7 +18,7 @@ func TestAccBlockStorageV2Quotaset_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3ProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageQuotasetV2_basic,
+				Config: testAccBlockStorageQuotasetV2Basic,
 			},
 			{
 				ResourceName:      resourceName,

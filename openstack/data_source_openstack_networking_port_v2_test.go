@@ -13,7 +13,7 @@ func TestAccNetworkingV2PortDataSource_basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2PortDataSource_basic,
+				Config: testAccNetworkingV2PortDataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_networking_port_v2.port_1", "id",
@@ -34,7 +34,7 @@ func TestAccNetworkingV2PortDataSource_basic(t *testing.T) {
 	})
 }
 
-const testAccNetworkingV2PortDataSource_basic = `
+const testAccNetworkingV2PortDataSourceBasic = `
 resource "openstack_networking_network_v2" "network_1" {
   name           = "network_1"
   admin_state_up = "true"

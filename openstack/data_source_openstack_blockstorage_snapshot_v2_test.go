@@ -34,7 +34,7 @@ func TestAccBlockStorageV2SnapshotDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2SnapshotDataSource_basic(snapshotName),
+				Config: testAccBlockStorageV2SnapshotDataSourceBasic(snapshotName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV2SnapshotDataSourceID(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", snapshotName),
@@ -51,7 +51,7 @@ func testAccBlockStorageV2CreateVolumeAndSnapshot(volumeName, snapshotName strin
 		return "", "", err
 	}
 
-	bsClient, err := config.BlockStorageV2Client(OS_REGION_NAME)
+	bsClient, err := config.BlockStorageV2Client(osRegionName)
 	if err != nil {
 		return "", "", err
 	}
@@ -95,7 +95,7 @@ func testAccBlockStorageV2DeleteVolumeAndSnapshot(t *testing.T, volumeID, snapsh
 		t.Fatal(err)
 	}
 
-	bsClient, err := config.BlockStorageV2Client(OS_REGION_NAME)
+	bsClient, err := config.BlockStorageV2Client(osRegionName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -140,7 +140,7 @@ func testAccCheckBlockStorageV2SnapshotDataSourceID(n string) resource.TestCheck
 	}
 }
 
-func testAccBlockStorageV2SnapshotDataSource_basic(snapshotName string) string {
+func testAccBlockStorageV2SnapshotDataSourceBasic(snapshotName string) string {
 	return fmt.Sprintf(`
     data "openstack_blockstorage_snapshot_v2" "snapshot_1" {
       name = "%s"

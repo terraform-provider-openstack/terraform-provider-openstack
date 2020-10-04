@@ -22,7 +22,7 @@ func TestAccIdentityV3ApplicationCredential_basic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3ApplicationCredentialDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3ApplicationCredential_basic,
+				Config: testAccIdentityV3ApplicationCredentialBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ApplicationCredentialExists("openstack_identity_application_credential_v3.app_cred_1", &applicationCredential),
 					resource.TestCheckResourceAttrPtr(
@@ -43,7 +43,7 @@ func TestAccIdentityV3ApplicationCredential_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIdentityV3ApplicationCredential_custom_secret,
+				Config: testAccIdentityV3ApplicationCredentialCustomSecret,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ApplicationCredentialExists("openstack_identity_application_credential_v3.app_cred_1", &applicationCredential),
 					resource.TestCheckResourceAttrPtr(
@@ -75,7 +75,7 @@ func TestAccIdentityV3ApplicationCredential_access_rules(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3ApplicationCredentialDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3ApplicationCredential_access_rules,
+				Config: testAccIdentityV3ApplicationCredentialAccessRules,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ApplicationCredentialExists("openstack_identity_application_credential_v3.app_cred_1", &ac1),
 					testAccCheckIdentityV3ApplicationCredentialExists("openstack_identity_application_credential_v3.app_cred_1", &ac2),
@@ -104,7 +104,7 @@ func TestAccIdentityV3ApplicationCredential_access_rules(t *testing.T) {
 
 func testAccCheckIdentityV3ApplicationCredentialDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
+	identityClient, err := config.IdentityV3Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -145,7 +145,7 @@ func testAccCheckIdentityV3ApplicationCredentialExists(n string, applicationCred
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.IdentityV3Client(OS_REGION_NAME)
+		identityClient, err := config.IdentityV3Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
@@ -195,7 +195,7 @@ func testAccCheckIdentityV3ApplicationCredentialAccessRulesEqual(ac1, ac2 *appli
 	}
 }
 
-const testAccIdentityV3ApplicationCredential_basic = `
+const testAccIdentityV3ApplicationCredentialBasic = `
 resource "openstack_identity_application_credential_v3" "app_cred_1" {
   name        = "monitoring"
   description = "read-only technical user"
@@ -204,7 +204,7 @@ resource "openstack_identity_application_credential_v3" "app_cred_1" {
 }
 `
 
-const testAccIdentityV3ApplicationCredential_custom_secret = `
+const testAccIdentityV3ApplicationCredentialCustomSecret = `
 resource "openstack_identity_application_credential_v3" "app_cred_1" {
   name         = "super-admin"
   description  = "wheel technical user"
@@ -213,7 +213,7 @@ resource "openstack_identity_application_credential_v3" "app_cred_1" {
 }
 `
 
-const testAccIdentityV3ApplicationCredential_access_rules = `
+const testAccIdentityV3ApplicationCredentialAccessRules = `
 resource "openstack_identity_application_credential_v3" "app_cred_1" {
   name        = "monitoring"
   roles       = ["reader"]

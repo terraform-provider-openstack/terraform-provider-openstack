@@ -52,7 +52,7 @@ func testAccCheckDatabaseV1UserExists(n string, instance *instances.Instance, us
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		DatabaseV1Client, err := config.DatabaseV1Client(OS_REGION_NAME)
+		DatabaseV1Client, err := config.DatabaseV1Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating cloud database client: %s", err)
 		}
@@ -81,7 +81,7 @@ func testAccCheckDatabaseV1UserExists(n string, instance *instances.Instance, us
 func testAccCheckDatabaseV1UserDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
-	DatabaseV1Client, err := config.DatabaseV1Client(OS_REGION_NAME)
+	DatabaseV1Client, err := config.DatabaseV1Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
@@ -143,4 +143,4 @@ resource "openstack_db_user_v1" "basic" {
   password    = "password"
   databases   = ["testdb"]
 }
-`, OS_DB_DATASTORE_VERSION, OS_DB_DATASTORE_TYPE, OS_NETWORK_ID)
+`, osDbDatastoreVersion, osDbDatastoreType, osNetworkID)

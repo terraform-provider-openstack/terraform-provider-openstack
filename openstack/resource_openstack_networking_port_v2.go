@@ -228,8 +228,8 @@ func resourceNetworkingPortV2() *schema.Resource {
 						"profile": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							ValidateFunc:     validateJsonObject,
-							DiffSuppressFunc: diffSuppressJsonObject,
+							ValidateFunc:     validateJSONObject,
+							DiffSuppressFunc: diffSuppressJSONObject,
 							StateFunc: func(v interface{}) string {
 								json, _ := structure.NormalizeJsonString(v)
 								return json
@@ -538,8 +538,8 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("device_id") {
 		hasChange = true
-		deviceId := d.Get("device_id").(string)
-		updateOpts.DeviceID = &deviceId
+		deviceID := d.Get("device_id").(string)
+		updateOpts.DeviceID = &deviceID
 	}
 
 	if d.HasChange("fixed_ip") || d.HasChange("no_fixed_ip") {

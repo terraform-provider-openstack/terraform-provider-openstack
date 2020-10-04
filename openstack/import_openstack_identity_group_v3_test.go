@@ -18,7 +18,7 @@ func TestAccIdentityV3Group_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3GroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3Group_basic,
+				Config: testAccIdentityV3GroupBasic,
 			},
 
 			{

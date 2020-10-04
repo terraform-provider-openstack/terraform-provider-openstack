@@ -15,7 +15,7 @@ func TestAccFWRuleV1_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckFWRuleV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWRuleV1_basic_2,
+				Config: testAccFWRuleV1Basic2,
 			},
 
 			{

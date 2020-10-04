@@ -20,7 +20,7 @@ func TestAccSiteConnectionV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckSiteConnectionV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSiteConnectionV2_basic,
+				Config: testAccSiteConnectionV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSiteConnectionV2Exists(
 						"openstack_vpnaas_site_connection_v2.conn_1", &conn),
@@ -41,7 +41,7 @@ func TestAccSiteConnectionV2_basic(t *testing.T) {
 
 func testAccCheckSiteConnectionV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -51,7 +51,7 @@ func testAccCheckSiteConnectionV2Destroy(s *terraform.State) error {
 		}
 		_, err = siteconnections.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Site connection (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("Site connection (%s) still exists", rs.Primary.ID)
 		}
 		if _, ok := err.(gophercloud.ErrDefault404); !ok {
 			return err
@@ -72,7 +72,7 @@ func testAccCheckSiteConnectionV2Exists(n string, conn *siteconnections.Connecti
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -89,7 +89,7 @@ func testAccCheckSiteConnectionV2Exists(n string, conn *siteconnections.Connecti
 	}
 }
 
-var testAccSiteConnectionV2_basic = fmt.Sprintf(`
+var testAccSiteConnectionV2Basic = fmt.Sprintf(`
 	resource "openstack_networking_network_v2" "network_1" {
 		name           = "tf_test_network"
   		admin_state_up = "true"
@@ -143,4 +143,4 @@ var testAccSiteConnectionV2_basic = fmt.Sprintf(`
 		peer_ep_group_id = "${openstack_vpnaas_endpoint_group_v2.group_1.id}"
 		depends_on = ["openstack_networking_router_interface_v2.router_interface_1"]
 	}
-	`, OS_EXTGW_ID)
+	`, osExtGwID)

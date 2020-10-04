@@ -14,31 +14,33 @@ import (
 )
 
 var (
-	OS_DB_ENVIRONMENT                    = os.Getenv("OS_DB_ENVIRONMENT")
-	OS_DB_DATASTORE_VERSION              = os.Getenv("OS_DB_DATASTORE_VERSION")
-	OS_DB_DATASTORE_TYPE                 = os.Getenv("OS_DB_DATASTORE_TYPE")
-	OS_DEPRECATED_ENVIRONMENT            = os.Getenv("OS_DEPRECATED_ENVIRONMENT")
-	OS_DNS_ENVIRONMENT                   = os.Getenv("OS_DNS_ENVIRONMENT")
-	OS_EXTGW_ID                          = os.Getenv("OS_EXTGW_ID")
-	OS_FLAVOR_ID                         = os.Getenv("OS_FLAVOR_ID")
-	OS_FLAVOR_NAME                       = os.Getenv("OS_FLAVOR_NAME")
-	OS_IMAGE_ID                          = os.Getenv("OS_IMAGE_ID")
-	OS_IMAGE_NAME                        = os.Getenv("OS_IMAGE_NAME")
-	OS_MAGNUM_FLAVOR                     = os.Getenv("OS_MAGNUM_FLAVOR")
-	OS_NETWORK_ID                        = os.Getenv("OS_NETWORK_ID")
-	OS_POOL_NAME                         = os.Getenv("OS_POOL_NAME")
-	OS_REGION_NAME                       = os.Getenv("OS_REGION_NAME")
-	OS_SWIFT_ENVIRONMENT                 = os.Getenv("OS_SWIFT_ENVIRONMENT")
-	OS_LB_ENVIRONMENT                    = os.Getenv("OS_LB_ENVIRONMENT")
-	OS_FW_ENVIRONMENT                    = os.Getenv("OS_FW_ENVIRONMENT")
-	OS_VPN_ENVIRONMENT                   = os.Getenv("OS_VPN_ENVIRONMENT")
-	OS_USE_OCTAVIA                       = os.Getenv("OS_USE_OCTAVIA")
-	OS_OCTAVIA_BATCH_MEMBERS_ENVIRONMENT = os.Getenv("OS_OCTAVIA_BATCH_MEMBERS_ENVIRONMENT")
-	OS_CONTAINER_INFRA_ENVIRONMENT       = os.Getenv("OS_CONTAINER_INFRA_ENVIRONMENT")
-	OS_SFS_ENVIRONMENT                   = os.Getenv("OS_SFS_ENVIRONMENT")
-	OS_TRANSPARENT_VLAN_ENVIRONMENT      = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
-	OS_KEYMANAGER_ENVIRONMENT            = os.Getenv("OS_KEYMANAGER_ENVIRONMENT")
-	OS_GLANCEIMPORT_ENVIRONMENT          = os.Getenv("OS_GLANCEIMPORT_ENVIRONMENT")
+	osDbEnvironment                  = os.Getenv("OS_DB_ENVIRONMENT")
+	osDbDatastoreVersion             = os.Getenv("OS_DB_DATASTORE_VERSION")
+	osDbDatastoreType                = os.Getenv("OS_DB_DATASTORE_TYPE")
+	osDeprecatedEnvironment          = os.Getenv("OS_DEPRECATED_ENVIRONMENT")
+	osDNSEnvironment                 = os.Getenv("OS_DNS_ENVIRONMENT")
+	osExtGwID                        = os.Getenv("OS_EXTGW_ID")
+	osFlavorID                       = os.Getenv("OS_FLAVOR_ID")
+	osFlavorName                     = os.Getenv("OS_FLAVOR_NAME")
+	osImageID                        = os.Getenv("OS_IMAGE_ID")
+	osImageName                      = os.Getenv("OS_IMAGE_NAME")
+	osMagnumFlavor                   = os.Getenv("OS_MAGNUM_FLAVOR")
+	osNetworkID                      = os.Getenv("OS_NETWORK_ID")
+	osPoolName                       = os.Getenv("OS_POOL_NAME")
+	osRegionName                     = os.Getenv("OS_REGION_NAME")
+	osSwiftEnvironment               = os.Getenv("OS_SWIFT_ENVIRONMENT")
+	osLbEnvironment                  = os.Getenv("OS_LB_ENVIRONMENT")
+	osFwEnvironment                  = os.Getenv("OS_FW_ENVIRONMENT")
+	osVpnEnvironment                 = os.Getenv("OS_VPN_ENVIRONMENT")
+	osUseOctavia                     = os.Getenv("OS_USE_OCTAVIA")
+	osOctaviaBatchMembersEnvironment = os.Getenv("OS_OCTAVIA_BATCH_MEMBERS_ENVIRONMENT")
+	osContainerInfraEnvironment      = os.Getenv("OS_CONTAINER_INFRA_ENVIRONMENT")
+	/* TODO: enable when ready in OpenLab
+	osSfsEnvironment                 = os.Getenv("OS_SFS_ENVIRONMENT")
+	*/
+	osTransparentVlanEnvironment = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
+	osKeymanagerEnvironment      = os.Getenv("OS_KEYMANAGER_ENVIRONMENT")
+	osGlanceimportEnvironment    = os.Getenv("OS_GLANCEIMPORT_ENVIRONMENT")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -57,23 +59,23 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 		t.Fatal("OS_AUTH_URL must be set for acceptance tests")
 	}
 
-	if OS_IMAGE_ID == "" && OS_IMAGE_NAME == "" {
+	if osImageID == "" && osImageName == "" {
 		t.Fatal("OS_IMAGE_ID or OS_IMAGE_NAME must be set for acceptance tests")
 	}
 
-	if OS_POOL_NAME == "" {
+	if osPoolName == "" {
 		t.Fatal("OS_POOL_NAME must be set for acceptance tests")
 	}
 
-	if OS_FLAVOR_ID == "" && OS_FLAVOR_NAME == "" {
+	if osFlavorID == "" && osFlavorName == "" {
 		t.Fatal("OS_FLAVOR_ID or OS_FLAVOR_NAME must be set for acceptance tests")
 	}
 
-	if OS_NETWORK_ID == "" {
+	if osNetworkID == "" {
 		t.Fatal("OS_NETWORK_ID must be set for acceptance tests")
 	}
 
-	if OS_EXTGW_ID == "" {
+	if osExtGwID == "" {
 		t.Fatal("OS_EXTGW_ID must be set for acceptance tests")
 	}
 }
@@ -82,7 +84,7 @@ func testAccPreCheck(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
 	// Do not run the test if this is a deprecated testing environment.
-	if OS_DEPRECATED_ENVIRONMENT != "" {
+	if osDeprecatedEnvironment != "" {
 		t.Skip("This environment only runs deprecated tests")
 	}
 }
@@ -90,7 +92,7 @@ func testAccPreCheck(t *testing.T) {
 func testAccPreCheckDeprecated(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	if OS_DEPRECATED_ENVIRONMENT == "" {
+	if osDeprecatedEnvironment == "" {
 		t.Skip("This environment does not support deprecated tests")
 	}
 }
@@ -98,7 +100,7 @@ func testAccPreCheckDeprecated(t *testing.T) {
 func testAccPreCheckDNS(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	if OS_DNS_ENVIRONMENT == "" {
+	if osDNSEnvironment == "" {
 		t.Skip("This environment does not support DNS tests")
 	}
 }
@@ -106,7 +108,7 @@ func testAccPreCheckDNS(t *testing.T) {
 func testAccPreCheckSwift(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	if OS_SWIFT_ENVIRONMENT == "" {
+	if osSwiftEnvironment == "" {
 		t.Skip("This environment does not support Swift tests")
 	}
 }
@@ -114,7 +116,7 @@ func testAccPreCheckSwift(t *testing.T) {
 func testAccPreCheckDatabase(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	if OS_DB_ENVIRONMENT == "" {
+	if osDbEnvironment == "" {
 		t.Skip("This environment does not support Database tests")
 	}
 }
@@ -122,7 +124,7 @@ func testAccPreCheckDatabase(t *testing.T) {
 func testAccPreCheckLB(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	if OS_LB_ENVIRONMENT == "" {
+	if osLbEnvironment == "" {
 		t.Skip("This environment does not support LB tests")
 	}
 }
@@ -130,7 +132,7 @@ func testAccPreCheckLB(t *testing.T) {
 func testAccPreCheckUseOctavia(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	if OS_USE_OCTAVIA == "" {
+	if osUseOctavia == "" {
 		t.Skip("This environment does not support Octavia tests")
 	}
 }
@@ -138,7 +140,7 @@ func testAccPreCheckUseOctavia(t *testing.T) {
 func testAccPreCheckOctaviaBatchMembersEnv(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	if OS_OCTAVIA_BATCH_MEMBERS_ENVIRONMENT == "" {
+	if osOctaviaBatchMembersEnvironment == "" {
 		t.Skip("This environment does not support Octavia batch member update tests")
 	}
 }
@@ -146,7 +148,7 @@ func testAccPreCheckOctaviaBatchMembersEnv(t *testing.T) {
 func testAccPreCheckFW(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	if OS_FW_ENVIRONMENT == "" {
+	if osFwEnvironment == "" {
 		t.Skip("This environment does not support FW tests")
 	}
 }
@@ -154,7 +156,7 @@ func testAccPreCheckFW(t *testing.T) {
 func testAccPreCheckVPN(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	if OS_VPN_ENVIRONMENT == "" {
+	if osVpnEnvironment == "" {
 		t.Skip("This environment does not support VPN tests")
 	}
 }
@@ -162,7 +164,7 @@ func testAccPreCheckVPN(t *testing.T) {
 func testAccPreCheckKeyManager(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	if OS_KEYMANAGER_ENVIRONMENT == "" {
+	if osKeymanagerEnvironment == "" {
 		t.Skip("This environment does not support Barbican Keymanager tests")
 	}
 }
@@ -170,7 +172,7 @@ func testAccPreCheckKeyManager(t *testing.T) {
 func testAccPreCheckContainerInfra(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	if OS_CONTAINER_INFRA_ENVIRONMENT == "" {
+	if osContainerInfraEnvironment == "" {
 		t.Skip("This environment does not support Container Infra tests")
 	}
 }
@@ -179,7 +181,7 @@ func testAccPreCheckSFS(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
 	/* TODO: enable when ready in OpenLab
-	if OS_SFS_ENVIRONMENT == "" {
+	if osSfsEnvironment == "" {
 		t.Skip("This environment does not support Shared File Systems tests")
 	}
 	*/
@@ -202,7 +204,7 @@ func testAccPreOnlineResize(t *testing.T) {
 func testAccPreCheckTransparentVLAN(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	if OS_TRANSPARENT_VLAN_ENVIRONMENT == "" {
+	if osTransparentVlanEnvironment == "" {
 		t.Skip("This environment does not support 'transparent-vlan' extension tests")
 	}
 }
@@ -215,7 +217,7 @@ func testAccPreCheckAdminOnly(t *testing.T) {
 }
 
 func testAccPreCheckGlanceImport(t *testing.T) {
-	if OS_GLANCEIMPORT_ENVIRONMENT == "" {
+	if osGlanceimportEnvironment == "" {
 		t.Skip("This environment does not support Glance import tests")
 	}
 }

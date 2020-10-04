@@ -14,10 +14,10 @@ func TestAccOpenStackNetworkingRouterV2DataSource_name(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingRouterV2DataSource_router,
+				Config: testAccOpenStackNetworkingRouterV2DataSourceRouter,
 			},
 			{
-				Config: testAccOpenStackNetworkingRouterV2DataSource_name,
+				Config: testAccOpenStackNetworkingRouterV2DataSourceName,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingRouterV2DataSourceID("data.openstack_networking_router_v2.router"),
 					resource.TestCheckResourceAttrSet(
@@ -53,7 +53,7 @@ func testAccCheckNetworkingRouterV2DataSourceID(n string) resource.TestCheckFunc
 	}
 }
 
-const testAccOpenStackNetworkingRouterV2DataSource_router = `
+const testAccOpenStackNetworkingRouterV2DataSourceRouter = `
 resource "openstack_networking_router_v2" "router" {
   name           = "router_tf"
   description    = "description"
@@ -65,7 +65,7 @@ resource "openstack_networking_router_v2" "router" {
 }
 `
 
-var testAccOpenStackNetworkingRouterV2DataSource_name = fmt.Sprintf(`
+var testAccOpenStackNetworkingRouterV2DataSourceName = fmt.Sprintf(`
 %s
 
 data "openstack_networking_router_v2" "router" {
@@ -76,4 +76,4 @@ data "openstack_networking_router_v2" "router" {
     "foo",
   ]
 }
-`, testAccOpenStackNetworkingRouterV2DataSource_router)
+`, testAccOpenStackNetworkingRouterV2DataSourceRouter)

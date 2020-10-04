@@ -21,7 +21,7 @@ func TestAccIdentityV3Service_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3ServiceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3Service_basic(serviceName),
+				Config: testAccIdentityV3ServiceBasic(serviceName),
 			},
 
 			{

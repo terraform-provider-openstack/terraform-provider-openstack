@@ -21,7 +21,7 @@ func TestAccIdentityV3Endpoint_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3EndpointDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3Endpoint_basic(endpointName),
+				Config: testAccIdentityV3EndpointBasic(endpointName),
 			},
 
 			{

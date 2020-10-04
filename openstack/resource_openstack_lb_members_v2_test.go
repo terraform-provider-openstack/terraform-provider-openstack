@@ -54,7 +54,7 @@ func TestAccLBV2Members_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2MembersDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2MembersConfig_basic,
+				Config: TestAccLbV2MembersConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MembersExists("openstack_lb_members_v2.members_1", &members),
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.#", "2"),
@@ -67,7 +67,7 @@ func TestAccLBV2Members_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: TestAccLBV2MembersConfig_update,
+				Config: TestAccLbV2MembersConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MembersExists("openstack_lb_members_v2.members_1", &members),
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.#", "2"),
@@ -80,7 +80,7 @@ func TestAccLBV2Members_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: TestAccLBV2MembersConfig_unset_subnet,
+				Config: TestAccLbV2MembersConfigUnsetSubnet,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MembersExists("openstack_lb_members_v2.members_1", &members),
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.#", "2"),
@@ -93,7 +93,7 @@ func TestAccLBV2Members_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: TestAccLBV2MembersConfig_delete_members,
+				Config: TestAccLbV2MembersConfigDeleteMembers,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MembersExists("openstack_lb_members_v2.members_1", &members),
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.#", "0"),
@@ -105,7 +105,7 @@ func TestAccLBV2Members_basic(t *testing.T) {
 
 func testAccCheckLBV2MembersDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+	lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -150,7 +150,7 @@ func testAccCheckLBV2MembersExists(n string, members *[]pools.Member) resource.T
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := chooseLBV2AccTestClient(config, OS_REGION_NAME)
+		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
@@ -172,7 +172,7 @@ func testAccCheckLBV2MembersExists(n string, members *[]pools.Member) resource.T
 	}
 }
 
-const TestAccLBV2MembersConfig_basic = `
+const TestAccLbV2MembersConfigBasic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -229,7 +229,7 @@ resource "openstack_lb_members_v2" "members_1" {
 }
 `
 
-const TestAccLBV2MembersConfig_update = `
+const TestAccLbV2MembersConfigUpdate = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -288,7 +288,7 @@ resource "openstack_lb_members_v2" "members_1" {
 }
 `
 
-const TestAccLBV2MembersConfig_unset_subnet = `
+const TestAccLbV2MembersConfigUnsetSubnet = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -345,7 +345,7 @@ resource "openstack_lb_members_v2" "members_1" {
 }
 `
 
-const TestAccLBV2MembersConfig_delete_members = `
+const TestAccLbV2MembersConfigDeleteMembers = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

@@ -20,7 +20,7 @@ func TestAccKeyManagerOrderV1_basic(t *testing.T) {
 		CheckDestroy: testAccCheckOrderV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerOrderV1_symmetric,
+				Config: testAccKeyManagerOrderV1Symmetric,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOrderV1Exists(
 						"openstack_keymanager_order_v1.test-acc-basic", &order),
@@ -37,7 +37,7 @@ func TestAccKeyManagerOrderV1_basic(t *testing.T) {
 
 func testAccCheckOrderV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	kmClient, err := config.KeyManagerV1Client(OS_REGION_NAME)
+	kmClient, err := config.KeyManagerV1Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 	}
@@ -47,16 +47,16 @@ func testAccCheckOrderV1Destroy(s *terraform.State) error {
 		}
 		_, err = orders.Get(kmClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Order (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("Order (%s) still exists", rs.Primary.ID)
 		}
 		if _, ok := err.(gophercloud.ErrDefault404); !ok {
 			return err
 		}
-		secret_ref_split := strings.Split(rs.Primary.Attributes["secret_ref"], "/")
-		uuid := secret_ref_split[len(secret_ref_split)-1]
+		secretRefSplit := strings.Split(rs.Primary.Attributes["secret_ref"], "/")
+		uuid := secretRefSplit[len(secretRefSplit)-1]
 		result := secrets.Delete(kmClient, uuid)
 		if result.ExtractErr() != nil {
-			return fmt.Errorf("Secret (%s) still exists.", uuid)
+			return fmt.Errorf("Secret (%s) still exists", uuid)
 		}
 	}
 	return nil
@@ -74,7 +74,7 @@ func testAccCheckOrderV1Exists(n string, order *orders.Order) resource.TestCheck
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		kmClient, err := config.KeyManagerV1Client(OS_REGION_NAME)
+		kmClient, err := config.KeyManagerV1Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 		}
@@ -91,7 +91,7 @@ func testAccCheckOrderV1Exists(n string, order *orders.Order) resource.TestCheck
 	}
 }
 
-const testAccKeyManagerOrderV1_symmetric = `
+const testAccKeyManagerOrderV1Symmetric = `
 resource "openstack_keymanager_order_v1" "test-acc-basic" {
   type = "key"
   meta {

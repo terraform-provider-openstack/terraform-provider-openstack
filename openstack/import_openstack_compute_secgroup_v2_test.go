@@ -15,7 +15,7 @@ func TestAccComputeV2SecGroup_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2SecGroup_basic_orig,
+				Config: testAccComputeV2SecGroupBasicOrig,
 			},
 
 			{

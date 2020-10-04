@@ -26,7 +26,7 @@ func TestAccNetworkingV2QoSMinimumBandwidthRule_basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2QoSMinimumBandwidthRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2QoSMinimumBandwidthRule_basic,
+				Config: testAccNetworkingV2QoSMinimumBandwidthRuleBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2QoSPolicyExists(
 						"openstack_networking_qos_policy_v2.qos_policy_1", &policy),
@@ -39,7 +39,7 @@ func TestAccNetworkingV2QoSMinimumBandwidthRule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2QoSMinimumBandwidthRule_update,
+				Config: testAccNetworkingV2QoSMinimumBandwidthRuleUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2QoSPolicyExists(
 						"openstack_networking_qos_policy_v2.qos_policy_1", &policy),
@@ -67,7 +67,7 @@ func testAccCheckNetworkingV2QoSMinimumBandwidthRuleExists(n string, rule *rules
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -96,7 +96,7 @@ func testAccCheckNetworkingV2QoSMinimumBandwidthRuleExists(n string, rule *rules
 
 func testAccCheckNetworkingV2QoSMinimumBandwidthRuleDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -120,7 +120,7 @@ func testAccCheckNetworkingV2QoSMinimumBandwidthRuleDestroy(s *terraform.State) 
 	return nil
 }
 
-const testAccNetworkingV2QoSMinimumBandwidthRule_basic = `
+const testAccNetworkingV2QoSMinimumBandwidthRuleBasic = `
 resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
   name = "qos_policy_1"
 }
@@ -131,7 +131,7 @@ resource "openstack_networking_qos_minimum_bandwidth_rule_v2" "minimum_bandwidth
 }
 `
 
-const testAccNetworkingV2QoSMinimumBandwidthRule_update = `
+const testAccNetworkingV2QoSMinimumBandwidthRuleUpdate = `
 resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
   name = "qos_policy_1"
 }

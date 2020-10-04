@@ -82,7 +82,7 @@ func checkForRetryableError(err error) *resource.RetryError {
 	}
 }
 
-func suppressEquivilentTimeDiffs(k, old, new string, d *schema.ResourceData) bool {
+func suppressEquivalentTimeDiffs(k, old, new string, d *schema.ResourceData) bool {
 	oldTime, err := time.Parse(time.RFC3339, old)
 	if err != nil {
 		return false
@@ -259,7 +259,7 @@ func compatibleMicroversion(direction, required, given string) (bool, error) {
 	return false, nil
 }
 
-func validateJsonObject(v interface{}, k string) ([]string, []error) {
+func validateJSONObject(v interface{}, k string) ([]string, []error) {
 	if v == nil || v.(string) == "" {
 		return nil, []error{fmt.Errorf("%q value must not be empty", k)}
 	}
@@ -275,7 +275,7 @@ func validateJsonObject(v interface{}, k string) ([]string, []error) {
 	return nil, nil
 }
 
-func diffSuppressJsonObject(k, old, new string, d *schema.ResourceData) bool {
+func diffSuppressJSONObject(k, old, new string, d *schema.ResourceData) bool {
 	if strSliceContains([]string{"{}", ""}, old) &&
 		strSliceContains([]string{"{}", ""}, new) {
 		return true

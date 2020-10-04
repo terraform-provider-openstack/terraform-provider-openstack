@@ -13,14 +13,14 @@ func TestAccOpenStackImagesV2ImageIDsDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackImagesV2ImageIDsDataSource_empty,
+				Config: testAccOpenStackImagesV2ImageIDsDataSourceEmpty,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"data.openstack_images_image_ids_v2.images_empty", "ids.#", "0"),
 				),
 			},
 			{
-				Config: testAccOpenStackImagesV2ImageIDsDataSource_name,
+				Config: testAccOpenStackImagesV2ImageIDsDataSourceName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"data.openstack_images_image_ids_v2.images_by_name", "ids.#", "1"),
@@ -30,7 +30,7 @@ func TestAccOpenStackImagesV2ImageIDsDataSource_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackImagesV2ImageIDsDataSource_regex,
+				Config: testAccOpenStackImagesV2ImageIDsDataSourceRegex,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"data.openstack_images_image_ids_v2.images_by_name_regex", "ids.#", "1"),
@@ -40,7 +40,7 @@ func TestAccOpenStackImagesV2ImageIDsDataSource_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackImagesV2ImageIDsDataSource_tag,
+				Config: testAccOpenStackImagesV2ImageIDsDataSourceTag,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"data.openstack_images_image_ids_v2.images_by_tag", "ids.#", "1"),
@@ -50,7 +50,7 @@ func TestAccOpenStackImagesV2ImageIDsDataSource_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackImagesV2ImageIDsDataSource_properties,
+				Config: testAccOpenStackImagesV2ImageIDsDataSourceProperties,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"data.openstack_images_image_ids_v2.images_by_properties", "ids.#", "1"),
@@ -64,7 +64,7 @@ func TestAccOpenStackImagesV2ImageIDsDataSource_basic(t *testing.T) {
 }
 
 // Standard CirrOS image.
-const testAccOpenStackImagesV2ImageIDsDataSource_cirros = `
+const testAccOpenStackImagesV2ImageIDsDataSourceCirros = `
 resource "openstack_images_image_v2" "image_1" {
   name = "CirrOS-tf_1"
   container_format = "bare"
@@ -91,43 +91,43 @@ resource "openstack_images_image_v2" "image_2" {
 }
 `
 
-var testAccOpenStackImagesV2ImageIDsDataSource_empty = fmt.Sprintf(`
+var testAccOpenStackImagesV2ImageIDsDataSourceEmpty = fmt.Sprintf(`
 %s
 
 data "openstack_images_image_ids_v2" "images_empty" {
         name = "non-existed-image"
 	visibility = "private"
 }
-`, testAccOpenStackImagesV2ImageIDsDataSource_cirros)
+`, testAccOpenStackImagesV2ImageIDsDataSourceCirros)
 
-var testAccOpenStackImagesV2ImageIDsDataSource_name = fmt.Sprintf(`
+var testAccOpenStackImagesV2ImageIDsDataSourceName = fmt.Sprintf(`
 %s
 
 data "openstack_images_image_ids_v2" "images_by_name" {
 	name = "${openstack_images_image_v2.image_1.name}"
 	visibility = "private"
 }
-`, testAccOpenStackImagesV2ImageIDsDataSource_cirros)
+`, testAccOpenStackImagesV2ImageIDsDataSourceCirros)
 
-var testAccOpenStackImagesV2ImageIDsDataSource_regex = fmt.Sprintf(`
+var testAccOpenStackImagesV2ImageIDsDataSourceRegex = fmt.Sprintf(`
 %s
 
 data "openstack_images_image_ids_v2" "images_by_name_regex" {
 	name_regex = "^.+tf_2$"
 	visibility = "private"
 }
-`, testAccOpenStackImagesV2ImageIDsDataSource_cirros)
+`, testAccOpenStackImagesV2ImageIDsDataSourceCirros)
 
-var testAccOpenStackImagesV2ImageIDsDataSource_tag = fmt.Sprintf(`
+var testAccOpenStackImagesV2ImageIDsDataSourceTag = fmt.Sprintf(`
 %s
 
 data "openstack_images_image_ids_v2" "images_by_tag" {
 	tag = "cirros-tf_1"
 	visibility = "private"
 }
-`, testAccOpenStackImagesV2ImageIDsDataSource_cirros)
+`, testAccOpenStackImagesV2ImageIDsDataSourceCirros)
 
-var testAccOpenStackImagesV2ImageIDsDataSource_properties = fmt.Sprintf(`
+var testAccOpenStackImagesV2ImageIDsDataSourceProperties = fmt.Sprintf(`
 %s
 
 data "openstack_images_image_ids_v2" "images_by_properties" {
@@ -137,4 +137,4 @@ data "openstack_images_image_ids_v2" "images_by_properties" {
 	}
 	visibility = "private"
 }
-`, testAccOpenStackImagesV2ImageIDsDataSource_cirros)
+`, testAccOpenStackImagesV2ImageIDsDataSourceCirros)

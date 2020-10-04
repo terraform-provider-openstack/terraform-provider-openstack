@@ -14,14 +14,15 @@ linters:
 #    - errcheck
     - exhaustive
     - exportloopref
+#    - gochecknoglobals
 #    - goconst
 #    - gocritic
     - godot
-#    - gofmt
+    - gofmt
 #    - gofumpt
     - goheader
     - goimports
-#    - golint
+    - golint
 #    - gomodguard
 #    - goprintffuncname
 #    - gosec

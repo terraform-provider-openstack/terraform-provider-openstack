@@ -18,7 +18,7 @@ func TestAccNetworkingV2QoSDSCPMarkingRule_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2QoSDSCPMarkingRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2QoSDSCPMarkingRule_basic,
+				Config: testAccNetworkingV2QoSDSCPMarkingRuleBasic,
 			},
 
 			{

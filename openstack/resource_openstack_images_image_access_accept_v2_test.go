@@ -19,7 +19,7 @@ func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckImagesImageAccessAcceptV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageAccessAcceptV2_basic,
+				Config: testAccImagesImageAccessAcceptV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_accept_v2.image_access_accept_1", &member),
 					resource.TestCheckResourceAttrPtr(
@@ -29,7 +29,7 @@ func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccImagesImageAccessAcceptV2_update,
+				Config: testAccImagesImageAccessAcceptV2Update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_accept_v2.image_access_accept_1", &member),
 					resource.TestCheckResourceAttrPtr(
@@ -44,7 +44,7 @@ func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 
 func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	imageClient, err := config.ImageV2Client(OS_REGION_NAME)
+	imageClient, err := config.ImageV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack Image: %s", err)
 	}
@@ -91,7 +91,7 @@ resource "openstack_images_image_access_v2" "image_access_1" {
 }
 `
 
-var testAccImagesImageAccessAcceptV2_basic = fmt.Sprintf(`
+var testAccImagesImageAccessAcceptV2Basic = fmt.Sprintf(`
 %s
 
 resource "openstack_images_image_access_accept_v2" "image_access_accept_1" {
@@ -100,7 +100,7 @@ resource "openstack_images_image_access_accept_v2" "image_access_accept_1" {
 }
 `, testAccImagesImageAccessAcceptV2)
 
-var testAccImagesImageAccessAcceptV2_update = fmt.Sprintf(`
+var testAccImagesImageAccessAcceptV2Update = fmt.Sprintf(`
 %s
 
 resource "openstack_images_image_access_accept_v2" "image_access_accept_1" {

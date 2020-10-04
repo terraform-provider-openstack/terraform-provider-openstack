@@ -13,10 +13,10 @@ func TestAccOpenStackNetworkingAddressScopeV2DataSource_name(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingAddressScopeV2DataSource_addressscope,
+				Config: testAccOpenStackNetworkingAddressScopeV2DataSourceAddressscope,
 			},
 			{
-				Config: testAccOpenStackNetworkingAddressScopeV2DataSource_name,
+				Config: testAccOpenStackNetworkingAddressScopeV2DataSourceName,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_addressscope_v2.addressscope_1"),
 					resource.TestCheckResourceAttr("openstack_networking_addressscope_v2.addressscope_1", "name", "addressscope_1"),
@@ -34,10 +34,10 @@ func TestAccOpenStackNetworkingAddressScopeV2DataSource_ipversion(t *testing.T) 
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingAddressScopeV2DataSource_addressscope,
+				Config: testAccOpenStackNetworkingAddressScopeV2DataSourceAddressscope,
 			},
 			{
-				Config: testAccOpenStackNetworkingAddressScopeV2DataSource_ipversion,
+				Config: testAccOpenStackNetworkingAddressScopeV2DataSourceIPVersion,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_addressscope_v2.addressscope_1"),
 					resource.TestCheckResourceAttr("openstack_networking_addressscope_v2.addressscope_1", "name", "addressscope_1"),
@@ -55,10 +55,10 @@ func TestAccOpenStackNetworkingAddressScopeV2DataSource_shared(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingAddressScopeV2DataSource_addressscope,
+				Config: testAccOpenStackNetworkingAddressScopeV2DataSourceAddressscope,
 			},
 			{
-				Config: testAccOpenStackNetworkingAddressScopeV2DataSource_shared,
+				Config: testAccOpenStackNetworkingAddressScopeV2DataSourceShared,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.openstack_networking_addressscope_v2.addressscope_1"),
 					resource.TestCheckResourceAttr("openstack_networking_addressscope_v2.addressscope_1", "name", "addressscope_1"),
@@ -70,33 +70,33 @@ func TestAccOpenStackNetworkingAddressScopeV2DataSource_shared(t *testing.T) {
 	})
 }
 
-const testAccOpenStackNetworkingAddressScopeV2DataSource_addressscope = `
+const testAccOpenStackNetworkingAddressScopeV2DataSourceAddressscope = `
 resource "openstack_networking_addressscope_v2" "addressscope_1" {
   name       = "addressscope_1"
   ip_version = 4
   shared     = false
 }`
 
-var testAccOpenStackNetworkingAddressScopeV2DataSource_name = fmt.Sprintf(`
+var testAccOpenStackNetworkingAddressScopeV2DataSourceName = fmt.Sprintf(`
 %s
 
 data "openstack_networking_addressscope_v2" "addressscope_1" {
   name = "${openstack_networking_addressscope_v2.addressscope_1.name}"
 }
-`, testAccOpenStackNetworkingAddressScopeV2DataSource_addressscope)
+`, testAccOpenStackNetworkingAddressScopeV2DataSourceAddressscope)
 
-var testAccOpenStackNetworkingAddressScopeV2DataSource_ipversion = fmt.Sprintf(`
+var testAccOpenStackNetworkingAddressScopeV2DataSourceIPVersion = fmt.Sprintf(`
 %s
 
 data "openstack_networking_addressscope_v2" "addressscope_1" {
   ip_version = "${openstack_networking_addressscope_v2.addressscope_1.ip_version}"
 }
-`, testAccOpenStackNetworkingAddressScopeV2DataSource_addressscope)
+`, testAccOpenStackNetworkingAddressScopeV2DataSourceAddressscope)
 
-var testAccOpenStackNetworkingAddressScopeV2DataSource_shared = fmt.Sprintf(`
+var testAccOpenStackNetworkingAddressScopeV2DataSourceShared = fmt.Sprintf(`
 %s
 
 data "openstack_networking_addressscope_v2" "addressscope_1" {
   shared = "${openstack_networking_addressscope_v2.addressscope_1.shared}"
 }
-`, testAccOpenStackNetworkingAddressScopeV2DataSource_addressscope)
+`, testAccOpenStackNetworkingAddressScopeV2DataSourceAddressscope)

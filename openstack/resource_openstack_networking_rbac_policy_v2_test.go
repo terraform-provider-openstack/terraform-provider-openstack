@@ -29,7 +29,7 @@ func TestAccNetworkingV2RBACPolicy_basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RBACPolicyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2RBACPolicy_basic(projectOneName),
+				Config: testAccNetworkingV2RBACPolicyBasic(projectOneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -49,7 +49,7 @@ func TestAccNetworkingV2RBACPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2RBACPolicy_update(projectTwoName),
+				Config: testAccNetworkingV2RBACPolicyUpdate(projectTwoName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_2", &project),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -74,7 +74,7 @@ func TestAccNetworkingV2RBACPolicy_basic(t *testing.T) {
 
 func testAccCheckNetworkingV2RBACPolicyDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -105,7 +105,7 @@ func testAccCheckNetworkingV2RBACPolicyExists(n string, rbac *rbacpolicies.RBACP
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -125,7 +125,7 @@ func testAccCheckNetworkingV2RBACPolicyExists(n string, rbac *rbacpolicies.RBACP
 	}
 }
 
-func testAccNetworkingV2RBACPolicy_basic(projectName string) string {
+func testAccNetworkingV2RBACPolicyBasic(projectName string) string {
 	return fmt.Sprintf(`
     resource "openstack_identity_project_v3" "project_1" {
       name        = "%s"
@@ -146,7 +146,7 @@ func testAccNetworkingV2RBACPolicy_basic(projectName string) string {
   `, projectName)
 }
 
-func testAccNetworkingV2RBACPolicy_update(projectName string) string {
+func testAccNetworkingV2RBACPolicyUpdate(projectName string) string {
 	return fmt.Sprintf(`
     resource "openstack_identity_project_v3" "project_2" {
       name        = "%s"

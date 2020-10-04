@@ -18,7 +18,7 @@ func TestAccIdentityV3Role_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3UserDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3Role_basic,
+				Config: testAccIdentityV3RoleBasic,
 			},
 
 			{

@@ -26,7 +26,7 @@ func TestAccNetworkingV2QoSDSCPMarkingRule_basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2QoSDSCPMarkingRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2QoSDSCPMarkingRule_basic,
+				Config: testAccNetworkingV2QoSDSCPMarkingRuleBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2QoSPolicyExists(
 						"openstack_networking_qos_policy_v2.qos_policy_1", &policy),
@@ -39,7 +39,7 @@ func TestAccNetworkingV2QoSDSCPMarkingRule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2QoSDSCPMarkingRule_update,
+				Config: testAccNetworkingV2QoSDSCPMarkingRuleUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2QoSPolicyExists(
 						"openstack_networking_qos_policy_v2.qos_policy_1", &policy),
@@ -67,7 +67,7 @@ func testAccCheckNetworkingV2QoSDSCPMarkingRuleExists(n string, rule *rules.DSCP
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -96,7 +96,7 @@ func testAccCheckNetworkingV2QoSDSCPMarkingRuleExists(n string, rule *rules.DSCP
 
 func testAccCheckNetworkingV2QoSDSCPMarkingRuleDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -120,7 +120,7 @@ func testAccCheckNetworkingV2QoSDSCPMarkingRuleDestroy(s *terraform.State) error
 	return nil
 }
 
-const testAccNetworkingV2QoSDSCPMarkingRule_basic = `
+const testAccNetworkingV2QoSDSCPMarkingRuleBasic = `
 resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
   name = "qos_policy_1"
 }
@@ -131,7 +131,7 @@ resource "openstack_networking_qos_dscp_marking_rule_v2" "dscp_marking_rule_1" {
 }
 `
 
-const testAccNetworkingV2QoSDSCPMarkingRule_update = `
+const testAccNetworkingV2QoSDSCPMarkingRuleUpdate = `
 resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
   name = "qos_policy_1"
 }

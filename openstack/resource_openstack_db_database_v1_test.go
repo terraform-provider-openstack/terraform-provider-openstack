@@ -53,7 +53,7 @@ func testAccCheckDatabaseV1DatabaseExists(n string, instance *instances.Instance
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		DatabaseV1Client, err := config.DatabaseV1Client(OS_REGION_NAME)
+		DatabaseV1Client, err := config.DatabaseV1Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
@@ -82,7 +82,7 @@ func testAccCheckDatabaseV1DatabaseExists(n string, instance *instances.Instance
 func testAccCheckDatabaseV1DatabaseDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
-	DatabaseV1Client, err := config.DatabaseV1Client(OS_REGION_NAME)
+	DatabaseV1Client, err := config.DatabaseV1Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -141,4 +141,4 @@ resource "openstack_db_database_v1" "basic" {
   name        = "basic"
   instance_id = "${openstack_db_instance_v1.basic.id}"
 }
-`, OS_DB_DATASTORE_VERSION, OS_DB_DATASTORE_TYPE, OS_NETWORK_ID)
+`, osDbDatastoreVersion, osDbDatastoreType, osNetworkID)

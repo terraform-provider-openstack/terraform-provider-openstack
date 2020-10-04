@@ -15,7 +15,7 @@ func TestAccNetworkingV2SecGroup_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2SecGroup_basic,
+				Config: testAccNetworkingV2SecGroupBasic,
 			},
 
 			{

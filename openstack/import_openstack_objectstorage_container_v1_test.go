@@ -15,7 +15,7 @@ func TestAccObjectStorageV1Container_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckObjectStorageV1ContainerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccObjectStorageV1Container_complete,
+				Config: testAccObjectStorageV1ContainerComplete,
 			},
 			{
 				ResourceName:      resourceName,

@@ -19,7 +19,7 @@ func TestAccImagesImageAccessV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckImagesImageAccessV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageAccessV2_basic,
+				Config: testAccImagesImageAccessV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_v2.image_access_1", &member),
 					resource.TestCheckResourceAttrPtr(
@@ -29,7 +29,7 @@ func TestAccImagesImageAccessV2_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccImagesImageAccessV2_update,
+				Config: testAccImagesImageAccessV2Update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_v2.image_access_1", &member),
 					resource.TestCheckResourceAttrPtr(
@@ -44,7 +44,7 @@ func TestAccImagesImageAccessV2_basic(t *testing.T) {
 
 func testAccCheckImagesImageAccessV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	imageClient, err := config.ImageV2Client(OS_REGION_NAME)
+	imageClient, err := config.ImageV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack Image: %s", err)
 	}
@@ -80,7 +80,7 @@ func testAccCheckImagesImageAccessV2Exists(n string, member *members.Member) res
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		imageClient, err := config.ImageV2Client(OS_REGION_NAME)
+		imageClient, err := config.ImageV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack Image: %s", err)
 		}
@@ -123,7 +123,7 @@ resource "openstack_images_image_v2" "image_1" {
   }
 }`
 
-var testAccImagesImageAccessV2_basic = fmt.Sprintf(`
+var testAccImagesImageAccessV2Basic = fmt.Sprintf(`
 %s
 
 resource "openstack_images_image_access_v2" "image_access_1" {
@@ -132,7 +132,7 @@ resource "openstack_images_image_access_v2" "image_access_1" {
 }
 `, testAccImagesImageAccessV2)
 
-var testAccImagesImageAccessV2_update = fmt.Sprintf(`
+var testAccImagesImageAccessV2Update = fmt.Sprintf(`
 %s
 
 resource "openstack_images_image_access_v2" "image_access_1" {

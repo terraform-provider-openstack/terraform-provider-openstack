@@ -14,10 +14,10 @@ func TestAccOpenStackNetworkingSecGroupV2DataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingSecGroupV2DataSource_group,
+				Config: testAccOpenStackNetworkingSecGroupV2DataSourceGroup,
 			},
 			{
-				Config: testAccOpenStackNetworkingSecGroupV2DataSource_basic,
+				Config: testAccOpenStackNetworkingSecGroupV2DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSecGroupV2DataSourceID("data.openstack_networking_secgroup_v2.secgroup_1"),
 					resource.TestCheckResourceAttr(
@@ -40,10 +40,10 @@ func TestAccOpenStackNetworkingSecGroupV2DataSource_secGroupID(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingSecGroupV2DataSource_group,
+				Config: testAccOpenStackNetworkingSecGroupV2DataSourceGroup,
 			},
 			{
-				Config: testAccOpenStackNetworkingSecGroupV2DataSource_secGroupID,
+				Config: testAccOpenStackNetworkingSecGroupV2DataSourceSecGroupID,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSecGroupV2DataSourceID("data.openstack_networking_secgroup_v2.secgroup_1"),
 					resource.TestCheckResourceAttr(
@@ -73,7 +73,7 @@ func testAccCheckNetworkingSecGroupV2DataSourceID(n string) resource.TestCheckFu
 	}
 }
 
-const testAccOpenStackNetworkingSecGroupV2DataSource_group = `
+const testAccOpenStackNetworkingSecGroupV2DataSourceGroup = `
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
   name        = "secgroup_1"
   description = "My neutron security group"
@@ -84,7 +84,7 @@ resource "openstack_networking_secgroup_v2" "secgroup_1" {
 }
 `
 
-var testAccOpenStackNetworkingSecGroupV2DataSource_basic = fmt.Sprintf(`
+var testAccOpenStackNetworkingSecGroupV2DataSourceBasic = fmt.Sprintf(`
 %s
 
 data "openstack_networking_secgroup_v2" "secgroup_1" {
@@ -93,9 +93,9 @@ data "openstack_networking_secgroup_v2" "secgroup_1" {
     "bar",
   ]
 }
-`, testAccOpenStackNetworkingSecGroupV2DataSource_group)
+`, testAccOpenStackNetworkingSecGroupV2DataSourceGroup)
 
-var testAccOpenStackNetworkingSecGroupV2DataSource_secGroupID = fmt.Sprintf(`
+var testAccOpenStackNetworkingSecGroupV2DataSourceSecGroupID = fmt.Sprintf(`
 %s
 
 data "openstack_networking_secgroup_v2" "secgroup_1" {
@@ -104,4 +104,4 @@ data "openstack_networking_secgroup_v2" "secgroup_1" {
     "foo",
   ]
 }
-`, testAccOpenStackNetworkingSecGroupV2DataSource_group)
+`, testAccOpenStackNetworkingSecGroupV2DataSourceGroup)

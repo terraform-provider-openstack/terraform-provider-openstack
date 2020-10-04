@@ -21,7 +21,7 @@ func TestAccNetworkingV2RBACPolicy_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RBACPolicyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2RBACPolicy_basic(projectName),
+				Config: testAccNetworkingV2RBACPolicyBasic(projectName),
 			},
 
 			{

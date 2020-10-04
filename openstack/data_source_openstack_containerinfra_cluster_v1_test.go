@@ -25,7 +25,7 @@ func TestAccContainerInfraV1ClusterDataSource_basic(t *testing.T) {
 				Config: testAccContainerInfraV1ClusterBasic(imageName, keypairName, clusterTemplateName, clusterName),
 			},
 			{
-				Config: testAccContainerInfraV1ClusterDataSource_basic(
+				Config: testAccContainerInfraV1ClusterDataSourceBasic(
 					testAccContainerInfraV1ClusterBasic(imageName, keypairName, clusterTemplateName, clusterName),
 				),
 				Check: resource.ComposeTestCheckFunc(
@@ -54,7 +54,7 @@ func testAccCheckContainerInfraV1ClusterDataSourceID(n string) resource.TestChec
 	}
 }
 
-func testAccContainerInfraV1ClusterDataSource_basic(clusterResource string) string {
+func testAccContainerInfraV1ClusterDataSourceBasic(clusterResource string) string {
 	return fmt.Sprintf(`
 %s
 
