@@ -179,13 +179,13 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("Unable to get openstack_lb_listener_v2 %s: %s", listenerID, err)
 		}
 
-		waitErr := waitForLBV2Listener(lbClient, listener, "ACTIVE", lbPendingStatuses, timeout)
+		waitErr := waitForLBV2Listener(lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
 		if waitErr != nil {
 			return fmt.Errorf(
 				"Error waiting for openstack_lb_listener_v2 %s to become active: %s", listenerID, err)
 		}
 	} else {
-		waitErr := waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", lbPendingStatuses, timeout)
+		waitErr := waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", getLbPendingStatuses(), timeout)
 		if waitErr != nil {
 			return fmt.Errorf(
 				"Error waiting for openstack_lb_loadbalancer_v2 %s to become active: %s", lbID, err)
@@ -208,7 +208,7 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	// Pool was successfully created
 	// Wait for pool to become active before continuing
-	err = waitForLBV2Pool(lbClient, pool, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2Pool(lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return err
 	}
@@ -277,7 +277,7 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for pool to become active before continuing
-	err = waitForLBV2Pool(lbClient, pool, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2Pool(lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return err
 	}
@@ -296,7 +296,7 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for pool to become active before continuing
-	err = waitForLBV2Pool(lbClient, pool, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2Pool(lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return err
 	}
@@ -333,7 +333,7 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for Pool to delete
-	err = waitForLBV2Pool(lbClient, pool, "DELETED", lbPendingDeleteStatuses, timeout)
+	err = waitForLBV2Pool(lbClient, pool, "DELETED", getLbPendingDeleteStatuses(), timeout)
 	if err != nil {
 		return err
 	}
