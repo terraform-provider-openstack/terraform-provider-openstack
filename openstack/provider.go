@@ -9,13 +9,11 @@ import (
 	"github.com/gophercloud/utils/terraform/auth"
 )
 
-// This is a global MutexKV for use within this plugin.
-var osMutexKV = mutexkv.NewMutexKV()
-
 // Use openstackbase.Config as the base/foundation of this provider's
-// Config struct.
+// Config struct and contains a global MutexKV.
 type Config struct {
 	auth.Config
+	*mutexkv.MutexKV
 }
 
 // Provider returns a schema.Provider for OpenStack.
@@ -511,6 +509,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 			TerraformVersion:            terraformVersion,
 			SDKVersion:                  meta.SDKVersionString(),
 		},
+		mutexkv.NewMutexKV(),
 	}
 
 	v, ok := d.GetOkExists("insecure")
