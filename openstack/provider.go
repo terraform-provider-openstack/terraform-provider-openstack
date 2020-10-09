@@ -9,8 +9,7 @@ import (
 	"github.com/gophercloud/utils/terraform/auth"
 )
 
-// Use openstackbase.Config as the base/foundation of this provider's
-// Config struct and contains a global MutexKV.
+// Config contains auth parameters and also provides an instance of MutexKV.
 type Config struct {
 	auth.Config
 	*mutexkv.MutexKV
