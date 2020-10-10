@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/mutexkv"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -409,6 +410,7 @@ func testAccAuthFromEnv() (*Config, error) {
 			Username:          os.Getenv("OS_USERNAME"),
 			UserID:            os.Getenv("OS_USER_ID"),
 		},
+		mutexkv.NewMutexKV(),
 	}
 
 	if err := config.LoadAndValidate(); err != nil {
