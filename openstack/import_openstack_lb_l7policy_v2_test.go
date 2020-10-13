@@ -15,7 +15,7 @@ func TestAccLBV2L7Policy_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2L7PolicyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckLbV2L7PolicyConfigBasic,
+				Config: testAccCheckLbV2L7PolicyConfigBasic(),
 			},
 
 			{

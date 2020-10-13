@@ -20,7 +20,7 @@ func TestAccSiteConnectionV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckSiteConnectionV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSiteConnectionV2Basic,
+				Config: testAccSiteConnectionV2Basic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSiteConnectionV2Exists(
 						"openstack_vpnaas_site_connection_v2.conn_1", &conn),
@@ -89,7 +89,8 @@ func testAccCheckSiteConnectionV2Exists(n string, conn *siteconnections.Connecti
 	}
 }
 
-var testAccSiteConnectionV2Basic = fmt.Sprintf(`
+func testAccSiteConnectionV2Basic() string {
+	return fmt.Sprintf(`
 	resource "openstack_networking_network_v2" "network_1" {
 		name           = "tf_test_network"
   		admin_state_up = "true"
@@ -144,3 +145,4 @@ var testAccSiteConnectionV2Basic = fmt.Sprintf(`
 		depends_on = ["openstack_networking_router_interface_v2.router_interface_1"]
 	}
 	`, osExtGwID)
+}

@@ -49,7 +49,7 @@ func TestAccBlockStorageV2Volume_image(t *testing.T) {
 		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2VolumeImage,
+				Config: testAccBlockStorageV2VolumeImage(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV2VolumeExists("openstack_blockstorage_volume_v2.volume_1", &volume),
 					resource.TestCheckResourceAttr(
@@ -176,13 +176,15 @@ resource "openstack_blockstorage_volume_v2" "volume_1" {
 }
 `
 
-var testAccBlockStorageV2VolumeImage = fmt.Sprintf(`
+func testAccBlockStorageV2VolumeImage() string {
+	return fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 5
   image_id = "%s"
 }
 `, osImageID)
+}
 
 const testAccBlockStorageV2VolumeTimeout = `
 resource "openstack_blockstorage_volume_v2" "volume_1" {

@@ -17,7 +17,7 @@ func TestAccOpenStackNetworkingFWPolicyV1DataSource_basic(t *testing.T) {
 				Config: testAccOpenStackNetworkingFWPolicyV1DataSourceGroup,
 			},
 			{
-				Config: testAccOpenStackNetworkingFWPolicyV1DataSourceBasic,
+				Config: testAccOpenStackNetworkingFWPolicyV1DataSourceBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingFWPolicyV1DataSourceID("data.openstack_fw_policy_v1.policy_1"),
 					resource.TestCheckResourceAttr(
@@ -36,7 +36,7 @@ func TestAccOpenStackNetworkingFWPolicyV1DataSource_FWPolicyID(t *testing.T) {
 				Config: testAccOpenStackNetworkingFWPolicyV1DataSourceGroup,
 			},
 			{
-				Config: testAccOpenStackNetworkingFWPolicyV1DataSourcePolicyID,
+				Config: testAccOpenStackNetworkingFWPolicyV1DataSourcePolicyID(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingFWPolicyV1DataSourceID("data.openstack_fw_policy_v1.policy_1"),
 					resource.TestCheckResourceAttr(
@@ -69,18 +69,22 @@ resource "openstack_fw_policy_v1" "policy_1" {
 }
 `
 
-var testAccOpenStackNetworkingFWPolicyV1DataSourceBasic = fmt.Sprintf(`
+func testAccOpenStackNetworkingFWPolicyV1DataSourceBasic() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_fw_policy_v1" "policy_1" {
 	name = "${openstack_fw_policy_v1.policy_1.name}"
 }
 `, testAccOpenStackNetworkingFWPolicyV1DataSourceGroup)
+}
 
-var testAccOpenStackNetworkingFWPolicyV1DataSourcePolicyID = fmt.Sprintf(`
+func testAccOpenStackNetworkingFWPolicyV1DataSourcePolicyID() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_fw_policy_v1" "policy_1" {
 	policy_id = "${openstack_fw_policy_v1.policy_1.id}"
 }
 `, testAccOpenStackNetworkingFWPolicyV1DataSourceGroup)
+}

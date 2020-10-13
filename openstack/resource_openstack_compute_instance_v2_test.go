@@ -28,7 +28,7 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceBasic,
+				Config: testAccComputeV2InstanceBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckComputeV2InstanceMetadata(&instance, "foo", "bar"),
@@ -51,7 +51,7 @@ func TestAccComputeV2Instance_initialStateActive(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceStateActive,
+				Config: testAccComputeV2InstanceStateActive(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					resource.TestCheckResourceAttr(
@@ -60,7 +60,7 @@ func TestAccComputeV2Instance_initialStateActive(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeV2InstanceStateShutoff,
+				Config: testAccComputeV2InstanceStateShutoff(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					resource.TestCheckResourceAttr(
@@ -69,7 +69,7 @@ func TestAccComputeV2Instance_initialStateActive(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeV2InstanceStateActive,
+				Config: testAccComputeV2InstanceStateActive(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					resource.TestCheckResourceAttr(
@@ -90,7 +90,7 @@ func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceStateShutoff,
+				Config: testAccComputeV2InstanceStateShutoff(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					resource.TestCheckResourceAttr(
@@ -99,7 +99,7 @@ func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeV2InstanceStateActive,
+				Config: testAccComputeV2InstanceStateActive(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					resource.TestCheckResourceAttr(
@@ -108,7 +108,7 @@ func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeV2InstanceStateShutoff,
+				Config: testAccComputeV2InstanceStateShutoff(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					resource.TestCheckResourceAttr(
@@ -130,7 +130,7 @@ func TestAccComputeV2Instance_secgroupMulti(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceSecgroupMulti,
+				Config: testAccComputeV2InstanceSecgroupMulti(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists(
 						"openstack_compute_secgroup_v2.secgroup_1", &secgroup1),
@@ -152,7 +152,7 @@ func TestAccComputeV2Instance_secgroupMultiUpdate(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceSecgroupMultiUpdate1,
+				Config: testAccComputeV2InstanceSecgroupMultiUpdate1(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists(
 						"openstack_compute_secgroup_v2.secgroup_1", &secgroup1),
@@ -163,7 +163,7 @@ func TestAccComputeV2Instance_secgroupMultiUpdate(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeV2InstanceSecgroupMultiUpdate2,
+				Config: testAccComputeV2InstanceSecgroupMultiUpdate2(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists(
 						"openstack_compute_secgroup_v2.secgroup_1", &secgroup1),
@@ -186,7 +186,7 @@ func TestAccComputeV2Instance_bootFromVolumeImage(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceBootFromVolumeImage,
+				Config: testAccComputeV2InstanceBootFromVolumeImage(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckComputeV2InstanceBootVolumeAttachment(&instance),
@@ -205,7 +205,7 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceBootFromVolumeVolume,
+				Config: testAccComputeV2InstanceBootFromVolumeVolume(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckComputeV2InstanceBootVolumeAttachment(&instance),
@@ -225,14 +225,14 @@ func TestAccComputeV2Instance_bootFromVolumeForceNew(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceBootFromVolumeForceNew1,
+				Config: testAccComputeV2InstanceBootFromVolumeForceNew1(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(
 						"openstack_compute_instance_v2.instance_1", &instance1),
 				),
 			},
 			{
-				Config: testAccComputeV2InstanceBootFromVolumeForceNew2,
+				Config: testAccComputeV2InstanceBootFromVolumeForceNew2(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(
 						"openstack_compute_instance_v2.instance_1", &instance2),
@@ -252,7 +252,7 @@ func TestAccComputeV2Instance_blockDeviceNewVolume(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceBlockDeviceNewVolume,
+				Config: testAccComputeV2InstanceBlockDeviceNewVolume(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 				),
@@ -270,7 +270,7 @@ func TestAccComputeV2Instance_blockDeviceNewVolumeTypeAndBus(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceBlockDeviceNewVolumeTypeAndBus,
+				Config: testAccComputeV2InstanceBlockDeviceNewVolumeTypeAndBus(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 				),
@@ -289,7 +289,7 @@ func TestAccComputeV2Instance_blockDeviceExistingVolume(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceBlockDeviceExistingVolume,
+				Config: testAccComputeV2InstanceBlockDeviceExistingVolume(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckBlockStorageV2VolumeExists(
@@ -310,7 +310,7 @@ func TestAccComputeV2Instance_personality(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstancePersonality,
+				Config: testAccComputeV2InstancePersonality(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 				),
@@ -328,7 +328,7 @@ func TestAccComputeV2Instance_multiEphemeral(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceMultiEphemeral,
+				Config: testAccComputeV2InstanceMultiEphemeral(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(
 						"openstack_compute_instance_v2.instance_1", &instance),
@@ -347,7 +347,7 @@ func TestAccComputeV2Instance_accessIPv4(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceAccessIPv4,
+				Config: testAccComputeV2InstanceAccessIPv4(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					resource.TestCheckResourceAttr(
@@ -368,14 +368,14 @@ func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceChangeFixedIP1,
+				Config: testAccComputeV2InstanceChangeFixedIP1(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(
 						"openstack_compute_instance_v2.instance_1", &instance1),
 				),
 			},
 			{
-				Config: testAccComputeV2InstanceChangeFixedIP2,
+				Config: testAccComputeV2InstanceChangeFixedIP2(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(
 						"openstack_compute_instance_v2.instance_1", &instance2),
@@ -394,7 +394,7 @@ func TestAccComputeV2Instance_stopBeforeDestroy(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceStopBeforeDestroy,
+				Config: testAccComputeV2InstanceStopBeforeDestroy(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 				),
@@ -412,7 +412,7 @@ func TestAccComputeV2Instance_metadataRemove(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceMetadataRemove1,
+				Config: testAccComputeV2InstanceMetadataRemove1(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckComputeV2InstanceMetadata(&instance, "foo", "bar"),
@@ -424,7 +424,7 @@ func TestAccComputeV2Instance_metadataRemove(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeV2InstanceMetadataRemove2,
+				Config: testAccComputeV2InstanceMetadataRemove2(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckComputeV2InstanceMetadata(&instance, "foo", "bar"),
@@ -448,7 +448,7 @@ func TestAccComputeV2Instance_forceDelete(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceForceDelete,
+				Config: testAccComputeV2InstanceForceDelete(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 				),
@@ -465,7 +465,7 @@ func TestAccComputeV2Instance_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceTimeout,
+				Config: testAccComputeV2InstanceTimeout(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 				),
@@ -482,7 +482,7 @@ func TestAccComputeV2Instance_networkModeAuto(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceNetworkModeAuto,
+				Config: testAccComputeV2InstanceNetworkModeAuto(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckComputeV2InstanceNetworkExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -500,7 +500,7 @@ func TestAccComputeV2Instance_networkModeNone(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceNetworkModeNone,
+				Config: testAccComputeV2InstanceNetworkModeNone(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckComputeV2InstanceNetworkDoesNotExist("openstack_compute_instance_v2.instance_1", &instance),
@@ -519,7 +519,7 @@ func TestAccComputeV2Instance_networkNameToID(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceNetworkNameToID,
+				Config: testAccComputeV2InstanceNetworkNameToID(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
@@ -546,7 +546,7 @@ func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceCrazyNICs,
+				Config: testAccComputeV2InstanceCrazyNICs(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckNetworkingV2NetworkExists(
@@ -622,28 +622,28 @@ func TestAccComputeV2Instance_tags(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceTagsCreate,
+				Config: testAccComputeV2InstanceTagsCreate(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceName, &instance),
 					testAccCheckComputeV2InstanceTags(resourceName, []string{"tag1", "tag2", "tag3"}),
 				),
 			},
 			{
-				Config: testAccComputeV2InstanceTagsAdd,
+				Config: testAccComputeV2InstanceTagsAdd(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceName, &instance),
 					testAccCheckComputeV2InstanceTags(resourceName, []string{"tag1", "tag2", "tag3", "tag4"}),
 				),
 			},
 			{
-				Config: testAccComputeV2InstanceTagsDelete,
+				Config: testAccComputeV2InstanceTagsDelete(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceName, &instance),
 					testAccCheckComputeV2InstanceTags(resourceName, []string{"tag2", "tag3"}),
 				),
 			},
 			{
-				Config: testAccComputeV2InstanceTagsClear,
+				Config: testAccComputeV2InstanceTagsClear(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceName, &instance),
 					testAccCheckComputeV2InstanceTags(resourceName, nil),
@@ -882,7 +882,8 @@ func testAccCheckComputeV2InstanceNetworkDoesNotExist(n string, instance *server
 	}
 }
 
-var testAccComputeV2InstanceBasic = fmt.Sprintf(`
+func testAccComputeV2InstanceBasic() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -894,8 +895,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceSecgroupMulti = fmt.Sprintf(`
+func testAccComputeV2InstanceSecgroupMulti() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_secgroup_v2" "secgroup_1" {
   name = "secgroup_1"
   description = "a security group"
@@ -915,8 +918,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceSecgroupMultiUpdate1 = fmt.Sprintf(`
+func testAccComputeV2InstanceSecgroupMultiUpdate1() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_secgroup_v2" "secgroup_1" {
   name = "secgroup_1"
   description = "a security group"
@@ -947,8 +952,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceSecgroupMultiUpdate2 = fmt.Sprintf(`
+func testAccComputeV2InstanceSecgroupMultiUpdate2() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_secgroup_v2" "secgroup_1" {
   name = "secgroup_1"
   description = "a security group"
@@ -979,8 +986,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceBootFromVolumeImage = fmt.Sprintf(`
+func testAccComputeV2InstanceBootFromVolumeImage() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -997,8 +1006,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osImageID, osNetworkID)
+}
 
-var testAccComputeV2InstanceBootFromVolumeVolume = fmt.Sprintf(`
+func testAccComputeV2InstanceBootFromVolumeVolume() string {
+	return fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v2" "vol_1" {
   name = "vol_1"
   size = 5
@@ -1020,8 +1031,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osImageID, osNetworkID)
+}
 
-var testAccComputeV2InstanceBootFromVolumeForceNew1 = fmt.Sprintf(`
+func testAccComputeV2InstanceBootFromVolumeForceNew1() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1038,8 +1051,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osImageID, osNetworkID)
+}
 
-var testAccComputeV2InstanceBootFromVolumeForceNew2 = fmt.Sprintf(`
+func testAccComputeV2InstanceBootFromVolumeForceNew2() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1056,8 +1071,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osImageID, osNetworkID)
+}
 
-var testAccComputeV2InstanceBlockDeviceNewVolume = fmt.Sprintf(`
+func testAccComputeV2InstanceBlockDeviceNewVolume() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1080,8 +1097,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osImageID, osNetworkID)
+}
 
-var testAccComputeV2InstanceBlockDeviceNewVolumeTypeAndBus = fmt.Sprintf(`
+func testAccComputeV2InstanceBlockDeviceNewVolumeTypeAndBus() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1108,8 +1127,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osImageID, osNetworkID)
+}
 
-var testAccComputeV2InstanceBlockDeviceExistingVolume = fmt.Sprintf(`
+func testAccComputeV2InstanceBlockDeviceExistingVolume() string {
+	return fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -1137,8 +1158,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osImageID, osNetworkID)
+}
 
-var testAccComputeV2InstancePersonality = fmt.Sprintf(`
+func testAccComputeV2InstancePersonality() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1155,8 +1178,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceMultiEphemeral = fmt.Sprintf(`
+func testAccComputeV2InstanceMultiEphemeral() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "terraform-test"
   security_groups = ["default"]
@@ -1186,8 +1211,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osImageID, osNetworkID)
+}
 
-var testAccComputeV2InstanceAccessIPv4 = fmt.Sprintf(`
+func testAccComputeV2InstanceAccessIPv4() string {
+	return fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -1218,8 +1245,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceChangeFixedIP1 = fmt.Sprintf(`
+func testAccComputeV2InstanceChangeFixedIP1() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1229,8 +1258,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceChangeFixedIP2 = fmt.Sprintf(`
+func testAccComputeV2InstanceChangeFixedIP2() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1240,8 +1271,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceStopBeforeDestroy = fmt.Sprintf(`
+func testAccComputeV2InstanceStopBeforeDestroy() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1251,8 +1284,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceDetachPortsBeforeDestroy = fmt.Sprintf(`
+func testAccComputeV2InstanceDetachPortsBeforeDestroy() string {
+	return fmt.Sprintf(`
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
@@ -1272,8 +1307,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceMetadataRemove1 = fmt.Sprintf(`
+func testAccComputeV2InstanceMetadataRemove1() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1286,8 +1323,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceMetadataRemove2 = fmt.Sprintf(`
+func testAccComputeV2InstanceMetadataRemove2() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1300,8 +1339,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceForceDelete = fmt.Sprintf(`
+func testAccComputeV2InstanceForceDelete() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1311,8 +1352,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceTimeout = fmt.Sprintf(`
+func testAccComputeV2InstanceTimeout() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1325,24 +1368,30 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceNetworkModeAuto = fmt.Sprintf(`
+func testAccComputeV2InstanceNetworkModeAuto() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
 
   network_mode = "auto"
 }
 `)
+}
 
-var testAccComputeV2InstanceNetworkModeNone = fmt.Sprintf(`
+func testAccComputeV2InstanceNetworkModeNone() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "test-instance-1"
 
   network_mode = "none"
 }
 `)
+}
 
-var testAccComputeV2InstanceNetworkNameToID = fmt.Sprintf(`
+func testAccComputeV2InstanceNetworkNameToID() string {
+	return fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -1372,8 +1421,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
 
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceCrazyNICs = fmt.Sprintf(`
+func testAccComputeV2InstanceCrazyNICs() string {
+	return fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -1496,8 +1547,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceStateActive = fmt.Sprintf(`
+func testAccComputeV2InstanceStateActive() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1507,8 +1560,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceStateShutoff = fmt.Sprintf(`
+func testAccComputeV2InstanceStateShutoff() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1518,8 +1573,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceTagsCreate = fmt.Sprintf(`
+func testAccComputeV2InstanceTagsCreate() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1529,8 +1586,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   tags = ["tag1", "tag2", "tag3"]
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceTagsAdd = fmt.Sprintf(`
+func testAccComputeV2InstanceTagsAdd() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1540,8 +1599,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   tags = ["tag1", "tag2", "tag3", "tag4"]
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceTagsDelete = fmt.Sprintf(`
+func testAccComputeV2InstanceTagsDelete() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1551,8 +1612,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   tags = ["tag2", "tag3"]
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceTagsClear = fmt.Sprintf(`
+func testAccComputeV2InstanceTagsClear() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -1561,3 +1624,4 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}

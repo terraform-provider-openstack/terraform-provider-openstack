@@ -20,7 +20,7 @@ func TestAccServiceV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckServiceV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServiceV2Basic,
+				Config: testAccServiceV2Basic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceV2Exists(
 						"openstack_vpnaas_service_v2.service_1", &service),
@@ -82,7 +82,8 @@ func testAccCheckServiceV2Exists(n string, serv *services.Service) resource.Test
 	}
 }
 
-var testAccServiceV2Basic = fmt.Sprintf(`
+func testAccServiceV2Basic() string {
+	return fmt.Sprintf(`
 	resource "openstack_networking_router_v2" "router_1" {
 	  name = "router_1"
 	  admin_state_up = "true"
@@ -94,3 +95,4 @@ var testAccServiceV2Basic = fmt.Sprintf(`
 		admin_state_up = "false"
 	}
 	`, osExtGwID)
+}

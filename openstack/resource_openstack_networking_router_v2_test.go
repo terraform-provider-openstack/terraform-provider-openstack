@@ -54,7 +54,7 @@ func TestAccNetworkingV2Router_updateExternalGateway(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2RouterUpdateExternalGateway2,
+				Config: testAccNetworkingV2RouterUpdateExternalGateway2(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_router_v2.router_1", "external_network_id", osExtGwID),
@@ -73,7 +73,7 @@ func TestAccNetworkingV2Router_vendor_opts(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2RouterVendorOpts,
+				Config: testAccNetworkingV2RouterVendorOpts(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
 					resource.TestCheckResourceAttr(
@@ -96,7 +96,7 @@ func TestAccNetworkingV2Router_vendor_opts_no_snat(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2RouterVendorOptsNoSnat,
+				Config: testAccNetworkingV2RouterVendorOptsNoSnat(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
 					resource.TestCheckResourceAttr(
@@ -117,7 +117,7 @@ func TestAccNetworkingV2Router_extFixedIPs(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2RouterExtFixedIPs,
+				Config: testAccNetworkingV2RouterExtFixedIPs(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_networking_router_v2.router_2", "name", "router_2"),
@@ -209,7 +209,8 @@ resource "openstack_networking_router_v2" "router_1" {
 }
 `
 
-var testAccNetworkingV2RouterVendorOpts = fmt.Sprintf(`
+func testAccNetworkingV2RouterVendorOpts() string {
+	return fmt.Sprintf(`
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
@@ -219,8 +220,10 @@ resource "openstack_networking_router_v2" "router_1" {
   }
 }
 `, osExtGwID)
+}
 
-var testAccNetworkingV2RouterVendorOptsNoSnat = fmt.Sprintf(`
+func testAccNetworkingV2RouterVendorOptsNoSnat() string {
+	return fmt.Sprintf(`
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
@@ -232,6 +235,7 @@ resource "openstack_networking_router_v2" "router_1" {
   }
 }
 `, osExtGwID)
+}
 
 const testAccNetworkingV2RouterUpdateExternalGateway1 = `
 resource "openstack_networking_router_v2" "router_1" {
@@ -240,15 +244,18 @@ resource "openstack_networking_router_v2" "router_1" {
 }
 `
 
-var testAccNetworkingV2RouterUpdateExternalGateway2 = fmt.Sprintf(`
+func testAccNetworkingV2RouterUpdateExternalGateway2() string {
+	return fmt.Sprintf(`
 resource "openstack_networking_router_v2" "router_1" {
   name = "router"
   admin_state_up = "true"
   external_network_id = "%s"
 }
 `, osExtGwID)
+}
 
-var testAccNetworkingV2RouterExtFixedIPs = fmt.Sprintf(`
+func testAccNetworkingV2RouterExtFixedIPs() string {
+	return fmt.Sprintf(`
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
@@ -279,3 +286,4 @@ resource "openstack_networking_router_v2" "router_2" {
   }
 }
 `, osExtGwID, osExtGwID)
+}

@@ -22,7 +22,7 @@ func TestAccDatabaseV1Database_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDatabaseV1DatabaseDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDatabaseV1DatabaseBasic,
+				Config: testAccDatabaseV1DatabaseBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatabaseV1InstanceExists(
 						"openstack_db_instance_v1.basic", &instance),
@@ -122,7 +122,8 @@ func testAccCheckDatabaseV1DatabaseDestroy(s *terraform.State) error {
 	return nil
 }
 
-var testAccDatabaseV1DatabaseBasic = fmt.Sprintf(`
+func testAccDatabaseV1DatabaseBasic() string {
+	return fmt.Sprintf(`
 resource "openstack_db_instance_v1" "basic" {
   name = "basic"
   size = 10
@@ -142,3 +143,4 @@ resource "openstack_db_database_v1" "basic" {
   instance_id = "${openstack_db_instance_v1.basic.id}"
 }
 `, osDbDatastoreVersion, osDbDatastoreType, osNetworkID)
+}

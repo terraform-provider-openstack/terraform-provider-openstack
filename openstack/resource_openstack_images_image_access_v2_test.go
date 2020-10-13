@@ -19,7 +19,7 @@ func TestAccImagesImageAccessV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckImagesImageAccessV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageAccessV2Basic,
+				Config: testAccImagesImageAccessV2Basic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_v2.image_access_1", &member),
 					resource.TestCheckResourceAttrPtr(
@@ -29,7 +29,7 @@ func TestAccImagesImageAccessV2_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccImagesImageAccessV2Update,
+				Config: testAccImagesImageAccessV2Update(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_v2.image_access_1", &member),
 					resource.TestCheckResourceAttrPtr(
@@ -123,7 +123,8 @@ resource "openstack_images_image_v2" "image_1" {
   }
 }`
 
-var testAccImagesImageAccessV2Basic = fmt.Sprintf(`
+func testAccImagesImageAccessV2Basic() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_images_image_access_v2" "image_access_1" {
@@ -131,8 +132,10 @@ resource "openstack_images_image_access_v2" "image_access_1" {
   member_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
 }
 `, testAccImagesImageAccessV2)
+}
 
-var testAccImagesImageAccessV2Update = fmt.Sprintf(`
+func testAccImagesImageAccessV2Update() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_images_image_access_v2" "image_access_1" {
@@ -141,3 +144,4 @@ resource "openstack_images_image_access_v2" "image_access_1" {
   status    = "accepted"
 }
 `, testAccImagesImageAccessV2)
+}

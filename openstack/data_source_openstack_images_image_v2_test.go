@@ -17,7 +17,7 @@ func TestAccOpenStackImagesV2ImageDataSource_basic(t *testing.T) {
 				Config: testAccOpenStackImagesV2ImageDataSourceCirros,
 			},
 			{
-				Config: testAccOpenStackImagesV2ImageDataSourceBasic,
+				Config: testAccOpenStackImagesV2ImageDataSourceBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
 					resource.TestCheckResourceAttr(
@@ -49,25 +49,25 @@ func TestAccOpenStackImagesV2ImageDataSource_testQueries(t *testing.T) {
 				Config: testAccOpenStackImagesV2ImageDataSourceCirros,
 			},
 			{
-				Config: testAccOpenStackImagesV2ImageDataSourceQueryTag,
+				Config: testAccOpenStackImagesV2ImageDataSourceQueryTag(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
 				),
 			},
 			{
-				Config: testAccOpenStackImagesV2ImageDataSourceQuerySizeMin,
+				Config: testAccOpenStackImagesV2ImageDataSourceQuerySizeMin(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
 				),
 			},
 			{
-				Config: testAccOpenStackImagesV2ImageDataSourceQuerySizeMax,
+				Config: testAccOpenStackImagesV2ImageDataSourceQuerySizeMax(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
 				),
 			},
 			{
-				Config: testAccOpenStackImagesV2ImageDataSourceProperty,
+				Config: testAccOpenStackImagesV2ImageDataSourceProperty(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
 				),
@@ -120,7 +120,8 @@ resource "openstack_images_image_v2" "image_2" {
 }
 `
 
-var testAccOpenStackImagesV2ImageDataSourceBasic = fmt.Sprintf(`
+func testAccOpenStackImagesV2ImageDataSourceBasic() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_images_image_v2" "image_1" {
@@ -128,8 +129,10 @@ data "openstack_images_image_v2" "image_1" {
 	name = "${openstack_images_image_v2.image_1.name}"
 }
 `, testAccOpenStackImagesV2ImageDataSourceCirros)
+}
 
-var testAccOpenStackImagesV2ImageDataSourceQueryTag = fmt.Sprintf(`
+func testAccOpenStackImagesV2ImageDataSourceQueryTag() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_images_image_v2" "image_1" {
@@ -138,8 +141,10 @@ data "openstack_images_image_v2" "image_1" {
 	tag = "cirros-tf_1"
 }
 `, testAccOpenStackImagesV2ImageDataSourceCirros)
+}
 
-var testAccOpenStackImagesV2ImageDataSourceQuerySizeMin = fmt.Sprintf(`
+func testAccOpenStackImagesV2ImageDataSourceQuerySizeMin() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_images_image_v2" "image_1" {
@@ -148,8 +153,10 @@ data "openstack_images_image_v2" "image_1" {
 	size_min = "13000000"
 }
 `, testAccOpenStackImagesV2ImageDataSourceCirros)
+}
 
-var testAccOpenStackImagesV2ImageDataSourceQuerySizeMax = fmt.Sprintf(`
+func testAccOpenStackImagesV2ImageDataSourceQuerySizeMax() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_images_image_v2" "image_1" {
@@ -158,8 +165,10 @@ data "openstack_images_image_v2" "image_1" {
 	size_max = "23000000"
 }
 `, testAccOpenStackImagesV2ImageDataSourceCirros)
+}
 
-var testAccOpenStackImagesV2ImageDataSourceProperty = fmt.Sprintf(`
+func testAccOpenStackImagesV2ImageDataSourceProperty() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_images_image_v2" "image_1" {
@@ -169,3 +178,4 @@ data "openstack_images_image_v2" "image_1" {
   }
 }
 `, testAccOpenStackImagesV2ImageDataSourceCirros)
+}

@@ -17,7 +17,7 @@ func TestAccOpenStackNetworkingSecGroupV2DataSource_basic(t *testing.T) {
 				Config: testAccOpenStackNetworkingSecGroupV2DataSourceGroup,
 			},
 			{
-				Config: testAccOpenStackNetworkingSecGroupV2DataSourceBasic,
+				Config: testAccOpenStackNetworkingSecGroupV2DataSourceBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSecGroupV2DataSourceID("data.openstack_networking_secgroup_v2.secgroup_1"),
 					resource.TestCheckResourceAttr(
@@ -43,7 +43,7 @@ func TestAccOpenStackNetworkingSecGroupV2DataSource_secGroupID(t *testing.T) {
 				Config: testAccOpenStackNetworkingSecGroupV2DataSourceGroup,
 			},
 			{
-				Config: testAccOpenStackNetworkingSecGroupV2DataSourceSecGroupID,
+				Config: testAccOpenStackNetworkingSecGroupV2DataSourceSecGroupID(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSecGroupV2DataSourceID("data.openstack_networking_secgroup_v2.secgroup_1"),
 					resource.TestCheckResourceAttr(
@@ -84,7 +84,8 @@ resource "openstack_networking_secgroup_v2" "secgroup_1" {
 }
 `
 
-var testAccOpenStackNetworkingSecGroupV2DataSourceBasic = fmt.Sprintf(`
+func testAccOpenStackNetworkingSecGroupV2DataSourceBasic() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_secgroup_v2" "secgroup_1" {
@@ -94,8 +95,10 @@ data "openstack_networking_secgroup_v2" "secgroup_1" {
   ]
 }
 `, testAccOpenStackNetworkingSecGroupV2DataSourceGroup)
+}
 
-var testAccOpenStackNetworkingSecGroupV2DataSourceSecGroupID = fmt.Sprintf(`
+func testAccOpenStackNetworkingSecGroupV2DataSourceSecGroupID() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_secgroup_v2" "secgroup_1" {
@@ -105,3 +108,4 @@ data "openstack_networking_secgroup_v2" "secgroup_1" {
   ]
 }
 `, testAccOpenStackNetworkingSecGroupV2DataSourceGroup)
+}

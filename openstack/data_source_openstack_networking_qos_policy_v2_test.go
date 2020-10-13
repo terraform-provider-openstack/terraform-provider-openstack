@@ -20,7 +20,7 @@ func TestAccNetworkingV2QoSPolicyDataSource_basic(t *testing.T) {
 				Config: testAccNetworkingV2QoSPolicyDataSource,
 			},
 			{
-				Config: testAccOpenStackNetworkingQoSPolicyV2DataSourceBasic,
+				Config: testAccOpenStackNetworkingQoSPolicyV2DataSourceBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingQoSPolicyV2DataSourceID("data.openstack_networking_qos_policy_v2.qos_policy_1"),
 					resource.TestCheckResourceAttr(
@@ -45,7 +45,7 @@ func TestAccNetworkingV2QoSPolicyDataSource_description(t *testing.T) {
 				Config: testAccNetworkingV2QoSPolicyDataSource,
 			},
 			{
-				Config: testAccOpenStackNetworkingQoSPolicyV2DataSourceDescription,
+				Config: testAccOpenStackNetworkingQoSPolicyV2DataSourceDescription(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingQoSPolicyV2DataSourceID("data.openstack_networking_qos_policy_v2.qos_policy_1"),
 					resource.TestCheckResourceAttr(
@@ -80,18 +80,22 @@ resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
 }
 `
 
-var testAccOpenStackNetworkingQoSPolicyV2DataSourceBasic = fmt.Sprintf(`
+func testAccOpenStackNetworkingQoSPolicyV2DataSourceBasic() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_qos_policy_v2" "qos_policy_1" {
   name = "${openstack_networking_qos_policy_v2.qos_policy_1.name}"
 }
 `, testAccNetworkingV2QoSPolicyDataSource)
+}
 
-var testAccOpenStackNetworkingQoSPolicyV2DataSourceDescription = fmt.Sprintf(`
+func testAccOpenStackNetworkingQoSPolicyV2DataSourceDescription() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_qos_policy_v2" "qos_policy_1" {
   description = "${openstack_networking_qos_policy_v2.qos_policy_1.description}"
 }
 `, testAccNetworkingV2QoSPolicyDataSource)
+}

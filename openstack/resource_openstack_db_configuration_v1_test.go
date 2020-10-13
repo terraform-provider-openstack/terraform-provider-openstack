@@ -19,7 +19,7 @@ func TestAccDatabaseV1Configuration_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDatabaseV1ConfigurationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDatabaseV1ConfigurationBasic,
+				Config: testAccDatabaseV1ConfigurationBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatabaseV1ConfigurationExists(
 						"openstack_db_configuration_v1.basic", &configuration),
@@ -89,7 +89,8 @@ func testAccCheckDatabaseV1ConfigurationDestroy(s *terraform.State) error {
 	return nil
 }
 
-var testAccDatabaseV1ConfigurationBasic = fmt.Sprintf(`
+func testAccDatabaseV1ConfigurationBasic() string {
+	return fmt.Sprintf(`
 resource "openstack_db_configuration_v1" "basic" {
   name        = "basic"
   description = "test"
@@ -115,3 +116,4 @@ resource "openstack_db_configuration_v1" "basic" {
   }
 }
 `, osDbDatastoreVersion, osDbDatastoreType)
+}

@@ -19,7 +19,7 @@ func TestAccComputeV2InterfaceAttach_basic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InterfaceAttachDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InterfaceAttachBasic,
+				Config: testAccComputeV2InterfaceAttachBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InterfaceAttachExists("openstack_compute_interface_attach_v2.ai_1", &ai),
 				),
@@ -37,7 +37,7 @@ func TestAccComputeV2InterfaceAttach_IP(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2InterfaceAttachDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InterfaceAttachIP,
+				Config: testAccComputeV2InterfaceAttachIP(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InterfaceAttachExists("openstack_compute_interface_attach_v2.ai_1", &ai),
 					testAccCheckComputeV2InterfaceAttachIP(&ai, "192.168.1.100"),
@@ -123,7 +123,8 @@ func testAccCheckComputeV2InterfaceAttachIP(
 	}
 }
 
-var testAccComputeV2InterfaceAttachBasic = fmt.Sprintf(`
+func testAccComputeV2InterfaceAttachBasic() string {
+	return fmt.Sprintf(`
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   network_id = "%s"
@@ -143,8 +144,10 @@ resource "openstack_compute_interface_attach_v2" "ai_1" {
   port_id = "${openstack_networking_port_v2.port_1.id}"
 }
 `, osNetworkID, osNetworkID)
+}
 
-var testAccComputeV2InterfaceAttachIP = fmt.Sprintf(`
+func testAccComputeV2InterfaceAttachIP() string {
+	return fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -172,3 +175,4 @@ resource "openstack_compute_interface_attach_v2" "ai_1" {
   fixed_ip = "192.168.1.100"
 }
 `, osNetworkID)
+}

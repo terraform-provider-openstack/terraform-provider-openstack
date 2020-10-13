@@ -25,7 +25,7 @@ func TestAccSFSV2ShareNetwork_basic(t *testing.T) {
 		CheckDestroy: testAccCheckSFSV2ShareNetworkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2ShareNetworkConfigBasic,
+				Config: testAccSFSV2ShareNetworkConfigBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork1),
 					resource.TestCheckResourceAttr(
@@ -41,7 +41,7 @@ func TestAccSFSV2ShareNetwork_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareNetworkConfigUpdate,
+				Config: testAccSFSV2ShareNetworkConfigUpdate(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork2),
 					resource.TestCheckResourceAttr(
@@ -70,7 +70,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 		CheckDestroy: testAccCheckSFSV2ShareNetworkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2ShareNetworkConfigSecService1,
+				Config: testAccSFSV2ShareNetworkConfigSecService1(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
@@ -83,7 +83,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareNetworkConfigSecService2,
+				Config: testAccSFSV2ShareNetworkConfigSecService2(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
@@ -96,7 +96,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareNetworkConfigSecService3,
+				Config: testAccSFSV2ShareNetworkConfigSecService3(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
@@ -109,7 +109,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareNetworkConfigSecService4,
+				Config: testAccSFSV2ShareNetworkConfigSecService4(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareNetworkExists("openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1", &sharenetwork),
 					resource.TestCheckResourceAttr(
@@ -251,7 +251,8 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-var testAccSFSV2ShareNetworkConfigBasic = fmt.Sprintf(`
+func testAccSFSV2ShareNetworkConfigBasic() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
@@ -261,8 +262,10 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   neutron_subnet_id   = "${openstack_networking_subnet_v2.subnet_1.id}"
 }
 `, testAccSFSV2ShareNetworkConfig)
+}
 
-var testAccSFSV2ShareNetworkConfigUpdate = fmt.Sprintf(`
+func testAccSFSV2ShareNetworkConfigUpdate() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_networking_network_v2" "network_2" {
@@ -284,6 +287,7 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   neutron_subnet_id   = "${openstack_networking_subnet_v2.subnet_2.id}"
 }
 `, testAccSFSV2ShareNetworkConfig)
+}
 
 const testAccSFSV2ShareNetworkConfigSecService = `
 resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
@@ -307,7 +311,8 @@ resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_2" {
 }
 `
 
-var testAccSFSV2ShareNetworkConfigSecService1 = fmt.Sprintf(`
+func testAccSFSV2ShareNetworkConfigSecService1() string {
+	return fmt.Sprintf(`
 %s
 
 %s
@@ -322,8 +327,10 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   ]
 }
 `, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfigSecService)
+}
 
-var testAccSFSV2ShareNetworkConfigSecService2 = fmt.Sprintf(`
+func testAccSFSV2ShareNetworkConfigSecService2() string {
+	return fmt.Sprintf(`
 %s
 
 %s
@@ -339,8 +346,10 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   ]
 }
 `, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfigSecService)
+}
 
-var testAccSFSV2ShareNetworkConfigSecService3 = fmt.Sprintf(`
+func testAccSFSV2ShareNetworkConfigSecService3() string {
+	return fmt.Sprintf(`
 %s
 
 %s
@@ -355,8 +364,10 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   ]
 }
 `, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfigSecService)
+}
 
-var testAccSFSV2ShareNetworkConfigSecService4 = fmt.Sprintf(`
+func testAccSFSV2ShareNetworkConfigSecService4() string {
+	return fmt.Sprintf(`
 %s
 
 %s
@@ -368,3 +379,4 @@ resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   neutron_subnet_id   = "${openstack_networking_subnet_v2.subnet_1.id}"
 }
 `, testAccSFSV2ShareNetworkConfig, testAccSFSV2ShareNetworkConfigSecService)
+}

@@ -19,7 +19,7 @@ func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2VolumeAttachBasic,
+				Config: testAccComputeV2VolumeAttachBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2VolumeAttachExists("openstack_compute_volume_attach_v2.va_1", &va),
 				),
@@ -37,7 +37,7 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2VolumeAttachDevice,
+				Config: testAccComputeV2VolumeAttachDevice(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2VolumeAttachExists("openstack_compute_volume_attach_v2.va_1", &va),
 					testAccCheckComputeV2VolumeAttachDevice(&va, "/dev/vdc"),
@@ -122,7 +122,8 @@ func testAccCheckComputeV2VolumeAttachDevice(
 	}
 }
 
-var testAccComputeV2VolumeAttachBasic = fmt.Sprintf(`
+func testAccComputeV2VolumeAttachBasic() string {
+	return fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -141,8 +142,10 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
   volume_id = "${openstack_blockstorage_volume_v2.volume_1.id}"
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2VolumeAttachDevice = fmt.Sprintf(`
+func testAccComputeV2VolumeAttachDevice() string {
+	return fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -162,3 +165,4 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
   device = "/dev/vdc"
 }
 `, osNetworkID)
+}

@@ -18,7 +18,7 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 		CheckDestroy: testAccCheckContainerV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerContainerV1Basic,
+				Config: testAccKeyManagerContainerV1Basic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -28,7 +28,7 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccKeyManagerContainerV1Update,
+				Config: testAccKeyManagerContainerV1Update(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -38,7 +38,7 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccKeyManagerContainerV1Update1,
+				Config: testAccKeyManagerContainerV1Update1(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -48,7 +48,7 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccKeyManagerContainerV1Update2,
+				Config: testAccKeyManagerContainerV1Update2(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -69,7 +69,7 @@ func TestAccKeyManagerContainerV1_acls(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerContainerV1Acls,
+				Config: testAccKeyManagerContainerV1Acls(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -92,7 +92,7 @@ func TestAccKeyManagerContainerV1_certificate_type(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerContainerV1CertificateType,
+				Config: testAccKeyManagerContainerV1CertificateType(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -113,7 +113,7 @@ func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerContainerV1Acls,
+				Config: testAccKeyManagerContainerV1Acls(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -125,7 +125,7 @@ func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccKeyManagerContainerV1AclsUpdate,
+				Config: testAccKeyManagerContainerV1AclsUpdate(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerV1Exists(
 						"openstack_keymanager_container_v1.container_1", &container),
@@ -213,7 +213,8 @@ resource "openstack_keymanager_secret_v1" "intermediate_1" {
 }
 `
 
-var testAccKeyManagerContainerV1Basic = fmt.Sprintf(`
+func testAccKeyManagerContainerV1Basic() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_keymanager_container_v1" "container_1" {
@@ -236,8 +237,10 @@ resource "openstack_keymanager_container_v1" "container_1" {
   }
 }
 `, testAccKeyManagerContainerV1)
+}
 
-var testAccKeyManagerContainerV1Update = fmt.Sprintf(`
+func testAccKeyManagerContainerV1Update() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_keymanager_container_v1" "container_1" {
@@ -255,8 +258,10 @@ resource "openstack_keymanager_container_v1" "container_1" {
   }
 }
 `, testAccKeyManagerContainerV1)
+}
 
-var testAccKeyManagerContainerV1Update1 = fmt.Sprintf(`
+func testAccKeyManagerContainerV1Update1() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_keymanager_container_v1" "container_1" {
@@ -279,8 +284,10 @@ resource "openstack_keymanager_container_v1" "container_1" {
   }
 }
 `, testAccKeyManagerContainerV1)
+}
 
-var testAccKeyManagerContainerV1Update2 = fmt.Sprintf(`
+func testAccKeyManagerContainerV1Update2() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_keymanager_container_v1" "container_1" {
@@ -288,8 +295,10 @@ resource "openstack_keymanager_container_v1" "container_1" {
   type = "certificate"
 }
 `, testAccKeyManagerContainerV1)
+}
 
-var testAccKeyManagerContainerV1Acls = fmt.Sprintf(`
+func testAccKeyManagerContainerV1Acls() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_keymanager_container_v1" "container_1" {
@@ -322,8 +331,10 @@ resource "openstack_keymanager_container_v1" "container_1" {
   }
 }
 `, testAccKeyManagerContainerV1)
+}
 
-var testAccKeyManagerContainerV1AclsUpdate = fmt.Sprintf(`
+func testAccKeyManagerContainerV1AclsUpdate() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_keymanager_container_v1" "container_1" {
@@ -350,8 +361,10 @@ resource "openstack_keymanager_container_v1" "container_1" {
   }
 }
 `, testAccKeyManagerContainerV1)
+}
 
-var testAccKeyManagerContainerV1CertificateType = fmt.Sprintf(`
+func testAccKeyManagerContainerV1CertificateType() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_keymanager_container_v1" "container_1" {
@@ -374,3 +387,4 @@ resource "openstack_keymanager_container_v1" "container_1" {
   }
 }
 `, testAccKeyManagerContainerV1)
+}

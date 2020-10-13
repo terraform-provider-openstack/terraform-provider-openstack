@@ -13,14 +13,14 @@ func TestAccOpenStackImagesV2ImageIDsDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackImagesV2ImageIDsDataSourceEmpty,
+				Config: testAccOpenStackImagesV2ImageIDsDataSourceEmpty(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"data.openstack_images_image_ids_v2.images_empty", "ids.#", "0"),
 				),
 			},
 			{
-				Config: testAccOpenStackImagesV2ImageIDsDataSourceName,
+				Config: testAccOpenStackImagesV2ImageIDsDataSourceName(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"data.openstack_images_image_ids_v2.images_by_name", "ids.#", "1"),
@@ -30,7 +30,7 @@ func TestAccOpenStackImagesV2ImageIDsDataSource_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackImagesV2ImageIDsDataSourceRegex,
+				Config: testAccOpenStackImagesV2ImageIDsDataSourceRegex(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"data.openstack_images_image_ids_v2.images_by_name_regex", "ids.#", "1"),
@@ -40,7 +40,7 @@ func TestAccOpenStackImagesV2ImageIDsDataSource_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackImagesV2ImageIDsDataSourceTag,
+				Config: testAccOpenStackImagesV2ImageIDsDataSourceTag(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"data.openstack_images_image_ids_v2.images_by_tag", "ids.#", "1"),
@@ -50,7 +50,7 @@ func TestAccOpenStackImagesV2ImageIDsDataSource_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackImagesV2ImageIDsDataSourceProperties,
+				Config: testAccOpenStackImagesV2ImageIDsDataSourceProperties(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"data.openstack_images_image_ids_v2.images_by_properties", "ids.#", "1"),
@@ -91,7 +91,8 @@ resource "openstack_images_image_v2" "image_2" {
 }
 `
 
-var testAccOpenStackImagesV2ImageIDsDataSourceEmpty = fmt.Sprintf(`
+func testAccOpenStackImagesV2ImageIDsDataSourceEmpty() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_images_image_ids_v2" "images_empty" {
@@ -99,8 +100,10 @@ data "openstack_images_image_ids_v2" "images_empty" {
 	visibility = "private"
 }
 `, testAccOpenStackImagesV2ImageIDsDataSourceCirros)
+}
 
-var testAccOpenStackImagesV2ImageIDsDataSourceName = fmt.Sprintf(`
+func testAccOpenStackImagesV2ImageIDsDataSourceName() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_images_image_ids_v2" "images_by_name" {
@@ -108,8 +111,10 @@ data "openstack_images_image_ids_v2" "images_by_name" {
 	visibility = "private"
 }
 `, testAccOpenStackImagesV2ImageIDsDataSourceCirros)
+}
 
-var testAccOpenStackImagesV2ImageIDsDataSourceRegex = fmt.Sprintf(`
+func testAccOpenStackImagesV2ImageIDsDataSourceRegex() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_images_image_ids_v2" "images_by_name_regex" {
@@ -117,8 +122,10 @@ data "openstack_images_image_ids_v2" "images_by_name_regex" {
 	visibility = "private"
 }
 `, testAccOpenStackImagesV2ImageIDsDataSourceCirros)
+}
 
-var testAccOpenStackImagesV2ImageIDsDataSourceTag = fmt.Sprintf(`
+func testAccOpenStackImagesV2ImageIDsDataSourceTag() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_images_image_ids_v2" "images_by_tag" {
@@ -126,8 +133,10 @@ data "openstack_images_image_ids_v2" "images_by_tag" {
 	visibility = "private"
 }
 `, testAccOpenStackImagesV2ImageIDsDataSourceCirros)
+}
 
-var testAccOpenStackImagesV2ImageIDsDataSourceProperties = fmt.Sprintf(`
+func testAccOpenStackImagesV2ImageIDsDataSourceProperties() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_images_image_ids_v2" "images_by_properties" {
@@ -138,3 +147,4 @@ data "openstack_images_image_ids_v2" "images_by_properties" {
 	visibility = "private"
 }
 `, testAccOpenStackImagesV2ImageIDsDataSourceCirros)
+}

@@ -20,7 +20,7 @@ func TestAccNetworkingV2QoSBandwidthLimitRuleDataSource_basic(t *testing.T) {
 				Config: testAccNetworkingV2QoSBandwidthLimitRuleDataSource,
 			},
 			{
-				Config: testAccOpenStackNetworkingQoSBandwidthLimitRuleV2DataSourceMaxKbps,
+				Config: testAccOpenStackNetworkingQoSBandwidthLimitRuleV2DataSourceMaxKbps(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingQoSBandwidthLimitRuleV2DataSourceID("data.openstack_networking_qos_bandwidth_limit_rule_v2.bw_limit_rule_1"),
 					resource.TestCheckResourceAttr(
@@ -32,7 +32,7 @@ func TestAccNetworkingV2QoSBandwidthLimitRuleDataSource_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackNetworkingQoSBandwidthLimitRuleV2DataSourceMaxBurstKbps,
+				Config: testAccOpenStackNetworkingQoSBandwidthLimitRuleV2DataSourceMaxBurstKbps(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingQoSBandwidthLimitRuleV2DataSourceID("data.openstack_networking_qos_bandwidth_limit_rule_v2.bw_limit_rule_1"),
 					resource.TestCheckResourceAttr(
@@ -75,7 +75,8 @@ resource "openstack_networking_qos_bandwidth_limit_rule_v2" "bw_limit_rule_1" {
 }
 `
 
-var testAccOpenStackNetworkingQoSBandwidthLimitRuleV2DataSourceMaxKbps = fmt.Sprintf(`
+func testAccOpenStackNetworkingQoSBandwidthLimitRuleV2DataSourceMaxKbps() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_qos_bandwidth_limit_rule_v2" "bw_limit_rule_1" {
@@ -83,8 +84,10 @@ data "openstack_networking_qos_bandwidth_limit_rule_v2" "bw_limit_rule_1" {
   max_kbps      = "${openstack_networking_qos_bandwidth_limit_rule_v2.bw_limit_rule_1.max_kbps}"
 }
 `, testAccNetworkingV2QoSBandwidthLimitRuleDataSource)
+}
 
-var testAccOpenStackNetworkingQoSBandwidthLimitRuleV2DataSourceMaxBurstKbps = fmt.Sprintf(`
+func testAccOpenStackNetworkingQoSBandwidthLimitRuleV2DataSourceMaxBurstKbps() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_qos_bandwidth_limit_rule_v2" "bw_limit_rule_1" {
@@ -92,3 +95,4 @@ data "openstack_networking_qos_bandwidth_limit_rule_v2" "bw_limit_rule_1" {
   max_burst_kbps = "${openstack_networking_qos_bandwidth_limit_rule_v2.bw_limit_rule_1.max_burst_kbps}"
 }
 `, testAccNetworkingV2QoSBandwidthLimitRuleDataSource)
+}

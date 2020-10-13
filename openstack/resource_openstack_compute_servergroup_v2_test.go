@@ -43,7 +43,7 @@ func TestAccComputeV2ServerGroup_affinity(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2ServerGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2ServerGroupAffinity,
+				Config: testAccComputeV2ServerGroupAffinity(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -68,7 +68,7 @@ func TestAccComputeV2ServerGroup_soft_affinity(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2ServerGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2ServerGroupSoftAffinity,
+				Config: testAccComputeV2ServerGroupSoftAffinity(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
@@ -157,7 +157,8 @@ resource "openstack_compute_servergroup_v2" "sg_1" {
 }
 `
 
-var testAccComputeV2ServerGroupAffinity = fmt.Sprintf(`
+func testAccComputeV2ServerGroupAffinity() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_servergroup_v2" "sg_1" {
   name = "sg_1"
   policies = ["affinity"]
@@ -174,8 +175,10 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2ServerGroupSoftAffinity = fmt.Sprintf(`
+func testAccComputeV2ServerGroupSoftAffinity() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_servergroup_v2" "sg_1" {
   name = "sg_1"
   policies = ["soft-affinity"]
@@ -192,3 +195,4 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
