@@ -224,6 +224,7 @@ func resourceNetworkingPortV2() *schema.Resource {
 						"host_id": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"profile": {
 							Type:             schema.TypeString,
