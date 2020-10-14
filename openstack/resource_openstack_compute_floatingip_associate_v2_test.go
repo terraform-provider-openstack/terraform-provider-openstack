@@ -22,7 +22,7 @@ func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FloatingIPAssociateBasic,
+				Config: testAccComputeV2FloatingIPAssociateBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
@@ -30,7 +30,7 @@ func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeV2FloatingIPAssociateUpdate,
+				Config: testAccComputeV2FloatingIPAssociateUpdate(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
@@ -51,7 +51,7 @@ func TestAccComputeV2FloatingIPAssociate_fixedIP(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FloatingIPAssociateFixedIP,
+				Config: testAccComputeV2FloatingIPAssociateFixedIP(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
@@ -72,7 +72,7 @@ func TestAccComputeV2FloatingIPAssociate_attachToFirstNetwork(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FloatingIPAssociateAttachToFirstNetwork,
+				Config: testAccComputeV2FloatingIPAssociateAttachToFirstNetwork(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
@@ -94,7 +94,7 @@ func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FloatingIPAssociateAttachNew1,
+				Config: testAccComputeV2FloatingIPAssociateAttachNew1(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &floatingIP1),
@@ -103,7 +103,7 @@ func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeV2FloatingIPAssociateAttachNew2,
+				Config: testAccComputeV2FloatingIPAssociateAttachNew2(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &floatingIP1),
@@ -125,7 +125,7 @@ func TestAccComputeV2FloatingIPAssociate_waitUntilAssociated(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FloatingIPAssociateWaitUntilAssociated,
+				Config: testAccComputeV2FloatingIPAssociateWaitUntilAssociated(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckNetworkingV2FloatingIPExists("openstack_networking_floatingip_v2.fip_1", &fip),
@@ -210,7 +210,8 @@ func testAccCheckComputeV2FloatingIPAssociateAssociated(
 	}
 }
 
-var testAccComputeV2FloatingIPAssociateBasic = fmt.Sprintf(`
+func testAccComputeV2FloatingIPAssociateBasic() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -227,8 +228,10 @@ resource "openstack_compute_floatingip_associate_v2" "fip_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2FloatingIPAssociateUpdate = fmt.Sprintf(`
+func testAccComputeV2FloatingIPAssociateUpdate() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -246,8 +249,10 @@ resource "openstack_compute_floatingip_associate_v2" "fip_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2FloatingIPAssociateFixedIP = fmt.Sprintf(`
+func testAccComputeV2FloatingIPAssociateFixedIP() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -265,8 +270,10 @@ resource "openstack_compute_floatingip_associate_v2" "fip_1" {
   fixed_ip = "${openstack_compute_instance_v2.instance_1.access_ip_v4}"
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2FloatingIPAssociateAttachToFirstNetwork = fmt.Sprintf(`
+func testAccComputeV2FloatingIPAssociateAttachToFirstNetwork() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -285,8 +292,10 @@ resource "openstack_compute_floatingip_associate_v2" "fip_1" {
   fixed_ip = "${openstack_compute_instance_v2.instance_1.network.0.fixed_ip_v4}"
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2FloatingIPAssociateAttachNew1 = fmt.Sprintf(`
+func testAccComputeV2FloatingIPAssociateAttachNew1() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -306,8 +315,10 @@ resource "openstack_compute_floatingip_associate_v2" "fip_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2FloatingIPAssociateAttachNew2 = fmt.Sprintf(`
+func testAccComputeV2FloatingIPAssociateAttachNew2() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -327,8 +338,10 @@ resource "openstack_compute_floatingip_associate_v2" "fip_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2FloatingIPAssociateWaitUntilAssociated = fmt.Sprintf(`
+func testAccComputeV2FloatingIPAssociateWaitUntilAssociated() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -347,3 +360,4 @@ resource "openstack_compute_floatingip_associate_v2" "fip_1" {
   wait_until_associated = true
 }
 `, osNetworkID)
+}

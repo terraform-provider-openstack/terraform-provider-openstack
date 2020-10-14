@@ -19,12 +19,21 @@ const (
 	deleteAt = "2100-12-31T14:30:59+01:00"
 )
 
-var (
-	fooMD5      = fmt.Sprintf("%x", md5.Sum([]byte("foo")))
-	barMD5      = fmt.Sprintf("%x", md5.Sum([]byte("bar")))
-	foobarMD5   = fmt.Sprintf("%x", md5.Sum([]byte("foobar")))
-	manifestMD5 = fmt.Sprintf("\"%x\"", md5.Sum([]byte(fmt.Sprintf("%s%s", fooMD5, barMD5))))
-)
+func fooMD5() string {
+	return fmt.Sprintf("%x", md5.Sum([]byte("foo")))
+}
+
+func barMD5() string {
+	return fmt.Sprintf("%x", md5.Sum([]byte("bar")))
+}
+
+func foobarMD5() string {
+	return fmt.Sprintf("%x", md5.Sum([]byte("foobar")))
+}
+
+func manifestMD5() string {
+	return fmt.Sprintf("\"%x\"", md5.Sum([]byte(fmt.Sprintf("%s%s", fooMD5(), barMD5()))))
+}
 
 func TestAccObjectStorageV1Object_basic(t *testing.T) {
 	var object objects.GetHeader
@@ -37,7 +46,7 @@ func TestAccObjectStorageV1Object_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccObjectStorageV1ObjectBasic,
+				Config: testAccObjectStorageV1ObjectBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObjectStorageV1ObjectExists(
 						"openstack_objectstorage_object_v1.myfile", &object),
@@ -53,11 +62,11 @@ func TestAccObjectStorageV1Object_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_object_v1.myfile", "content_encoding", "utf8"),
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfile", "etag", fooMD5),
+						"openstack_objectstorage_object_v1.myfile", "etag", fooMD5()),
 				),
 			},
 			{
-				Config: testAccObjectStorageV1ObjectUpdateContentType,
+				Config: testAccObjectStorageV1ObjectUpdateContentType(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_object_v1.myfile", "content_type", "application/octet-stream"),
@@ -69,7 +78,7 @@ func TestAccObjectStorageV1Object_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_object_v1.myfile", "content_type", "application/octet-stream"),
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfile", "etag", foobarMD5),
+						"openstack_objectstorage_object_v1.myfile", "etag", foobarMD5()),
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_object_v1.myfile", "content_length", "6"),
 				),
@@ -116,7 +125,7 @@ func TestAccObjectStorageV1Object_fromSource(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_object_v1.myfile", "content_length", fmt.Sprintf("%v", len(content))),
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfile", "etag", fooMD5),
+						"openstack_objectstorage_object_v1.myfile", "etag", fooMD5()),
 				),
 			},
 		},
@@ -132,14 +141,14 @@ func TestAccObjectStorageV1Object_detectContentType(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccObjectStorageV1ObjectDetectContentType,
+				Config: testAccObjectStorageV1ObjectDetectContentType(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_container_v1.container_1", "name", "tf_test_container_1"),
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_object_v1.myfile", "content_type", "text/csv"),
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfile", "etag", fooMD5),
+						"openstack_objectstorage_object_v1.myfile", "etag", fooMD5()),
 				),
 			},
 		},
@@ -161,9 +170,9 @@ func TestAccObjectStorageV1Object_copyFrom(t *testing.T) {
 				Config: testAccObjectStorageV1ObjectCopyFrom,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfilesource", "etag", fooMD5),
+						"openstack_objectstorage_object_v1.myfilesource", "etag", fooMD5()),
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfilecopied", "etag", fooMD5),
+						"openstack_objectstorage_object_v1.myfilecopied", "etag", fooMD5()),
 				),
 			},
 		},
@@ -191,11 +200,11 @@ func TestAccObjectStorageV1Object_objectManifest(t *testing.T) {
 				Config: testAccObjectStorageV1ObjectManifest,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfile_part1", "etag", fooMD5),
+						"openstack_objectstorage_object_v1.myfile_part1", "etag", fooMD5()),
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfile_part2", "etag", barMD5),
+						"openstack_objectstorage_object_v1.myfile_part2", "etag", barMD5()),
 					resource.TestCheckResourceAttr(
-						"openstack_objectstorage_object_v1.myfile", "etag", manifestMD5),
+						"openstack_objectstorage_object_v1.myfile", "etag", manifestMD5()),
 				),
 			},
 		},
@@ -271,7 +280,8 @@ func testAccCheckObjectStorageV1ObjectDeleteAtMatches(expected string, object *o
 	}
 }
 
-var testAccObjectStorageV1ObjectBasic = fmt.Sprintf(`
+func testAccObjectStorageV1ObjectBasic() string {
+	return fmt.Sprintf(`
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "tf_test_container_1"
   content_type = "text/plain"
@@ -287,8 +297,10 @@ resource "openstack_objectstorage_object_v1" "myfile" {
   delete_at = "%s"
 }
 `, deleteAt)
+}
 
-var testAccObjectStorageV1ObjectDetectContentType = fmt.Sprintf(`
+func testAccObjectStorageV1ObjectDetectContentType() string {
+	return fmt.Sprintf(`
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "tf_test_container_1"
   content_type = "text/plain"
@@ -304,8 +316,10 @@ resource "openstack_objectstorage_object_v1" "myfile" {
   delete_at = "%s"
 }
 `, deleteAt)
+}
 
-var testAccObjectStorageV1ObjectUpdateContentType = fmt.Sprintf(`
+func testAccObjectStorageV1ObjectUpdateContentType() string {
+	return fmt.Sprintf(`
 resource "openstack_objectstorage_container_v1" "container_1" {
   name = "tf_test_container_1"
   content_type = "text/plain"
@@ -321,6 +335,7 @@ resource "openstack_objectstorage_object_v1" "myfile" {
   delete_at = "%s"
 }
 `, deleteAt)
+}
 
 const testAccObjectStorageV1ObjectUpdateDeleteAfter = `
 resource "openstack_objectstorage_container_v1" "container_1" {

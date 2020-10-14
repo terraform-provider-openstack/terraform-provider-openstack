@@ -51,14 +51,14 @@ func TestAccBlockStorageV3Volume_online_resize(t *testing.T) {
 		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV3VolumeOnlineResize,
+				Config: testAccBlockStorageV3VolumeOnlineResize(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "size", "1"),
 				),
 			},
 			{
-				Config: testAccBlockStorageV3VolumeOnlineResizeUpdate,
+				Config: testAccBlockStorageV3VolumeOnlineResizeUpdate(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "size", "2"),
@@ -77,7 +77,7 @@ func TestAccBlockStorageV3Volume_image(t *testing.T) {
 		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV3VolumeImage,
+				Config: testAccBlockStorageV3VolumeImage(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
 					resource.TestCheckResourceAttr(
@@ -97,7 +97,7 @@ func TestAccBlockStorageV3Volume_image_multiattach(t *testing.T) {
 		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV3VolumeImageMultiattach,
+				Config: testAccBlockStorageV3VolumeImageMultiattach(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
 					resource.TestCheckResourceAttr(
@@ -215,7 +215,8 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
 }
 `
 
-var testAccBlockStorageV3VolumeOnlineResize = fmt.Sprintf(`
+func testAccBlockStorageV3VolumeOnlineResize() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "basic" {
   name            = "instance_1"
   flavor_name     = "%s"
@@ -234,8 +235,10 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
   volume_id   = "${openstack_blockstorage_volume_v3.volume_1.id}"
 }
 `, osFlavorName, osImageID)
+}
 
-var testAccBlockStorageV3VolumeOnlineResizeUpdate = fmt.Sprintf(`
+func testAccBlockStorageV3VolumeOnlineResizeUpdate() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "basic" {
   name            = "instance_1"
   flavor_name     = "%s"
@@ -254,6 +257,7 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
   volume_id   = "${openstack_blockstorage_volume_v3.volume_1.id}"
 }
 `, osFlavorName, osImageID)
+}
 
 const testAccBlockStorageV3VolumeUpdate = `
 resource "openstack_blockstorage_volume_v3" "volume_1" {
@@ -266,15 +270,18 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
 }
 `
 
-var testAccBlockStorageV3VolumeImage = fmt.Sprintf(`
+func testAccBlockStorageV3VolumeImage() string {
+	return fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   size = 5
   image_id = "%s"
 }
 `, osImageID)
+}
 
-var testAccBlockStorageV3VolumeImageMultiattach = fmt.Sprintf(`
+func testAccBlockStorageV3VolumeImageMultiattach() string {
+	return fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   size = 5
@@ -282,6 +289,7 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   multiattach = true
 }
 `, osImageID)
+}
 
 const testAccBlockStorageV3VolumeTimeout = `
 resource "openstack_blockstorage_volume_v3" "volume_1" {

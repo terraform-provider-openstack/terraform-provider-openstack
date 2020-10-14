@@ -141,7 +141,7 @@ func testAccCheckEndpoints(n string, actual *[]string) resource.TestCheckFunc {
 }
 */
 
-var testAccEndpointGroupV2Basic = `
+const testAccEndpointGroupV2Basic = `
 	resource "openstack_vpnaas_endpoint_group_v2" "group_1" {
 		name = "Group 1"
 		type = "cidr"
@@ -150,7 +150,7 @@ var testAccEndpointGroupV2Basic = `
 	}
 `
 
-var testAccEndpointGroupV2Update = `
+const testAccEndpointGroupV2Update = `
 	resource "openstack_vpnaas_endpoint_group_v2" "group_1" {
 		name = "Updated Group 1"
 		type = "cidr"

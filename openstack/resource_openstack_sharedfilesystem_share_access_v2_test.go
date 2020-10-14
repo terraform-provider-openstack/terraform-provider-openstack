@@ -21,7 +21,7 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 		CheckDestroy: testAccCheckSFSV2ShareAccessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSV2ShareAccessConfigBasic,
+				Config: testAccSFSV2ShareAccessConfigBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareAccessExists("openstack_sharedfilesystem_share_access_v2.share_access_1", &shareAccess1),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_type", "ip"),
@@ -39,7 +39,7 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSV2ShareAccessConfigUpdate,
+				Config: testAccSFSV2ShareAccessConfigUpdate(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareAccessExists("openstack_sharedfilesystem_share_access_v2.share_access_1", &shareAccess1),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_type", "ip"),
@@ -163,7 +163,8 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
 }
 `
 
-var testAccSFSV2ShareAccessConfigBasic = fmt.Sprintf(`
+func testAccSFSV2ShareAccessConfigBasic() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_sharedfilesystem_share_access_v2" "share_access_1" {
@@ -180,8 +181,10 @@ resource "openstack_sharedfilesystem_share_access_v2" "share_access_2" {
   access_level = "rw"
 }
 `, testAccSFSV2ShareAccessConfig)
+}
 
-var testAccSFSV2ShareAccessConfigUpdate = fmt.Sprintf(`
+func testAccSFSV2ShareAccessConfigUpdate() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_sharedfilesystem_share_access_v2" "share_access_1" {
@@ -198,3 +201,4 @@ resource "openstack_sharedfilesystem_share_access_v2" "share_access_2" {
   access_level = "ro"
 }
 `, testAccSFSV2ShareAccessConfig)
+}

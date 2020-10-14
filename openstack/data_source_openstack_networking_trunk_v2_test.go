@@ -16,7 +16,7 @@ func TestAccNetworkingV2TrunkDataSource_nosubports(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2TrunkDataSourceNoSubports,
+				Config: testAccNetworkingV2TrunkDataSourceNoSubports(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_networking_trunk_v2.trunk_1", "id",
@@ -42,7 +42,7 @@ func TestAccNetworkingV2TrunkDataSource_subports(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2TrunkDataSourceSubports,
+				Config: testAccNetworkingV2TrunkDataSourceSubports(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_networking_trunk_v2.trunk_1", "id",
@@ -70,7 +70,7 @@ func TestAccNetworkingV2TrunkDataSource_tags(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2TrunkDataSourceTags,
+				Config: testAccNetworkingV2TrunkDataSourceTags(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_networking_trunk_v2.trunk_1", "id",
@@ -111,7 +111,8 @@ resource "openstack_networking_port_v2" "parent_port_1" {
 }
 `
 
-var testAccNetworkingV2TrunkDataSourceNoSubports = fmt.Sprintf(`
+func testAccNetworkingV2TrunkDataSourceNoSubports() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_networking_trunk_v2" "trunk_1" {
@@ -124,8 +125,10 @@ data "openstack_networking_trunk_v2" "trunk_1" {
   name = "${openstack_networking_trunk_v2.trunk_1.name}"
 }
 `, testAccNetworkingV2TrunkDataSource)
+}
 
-var testAccNetworkingV2TrunkDataSourceSubports = fmt.Sprintf(`
+func testAccNetworkingV2TrunkDataSourceSubports() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_networking_port_v2" "subport_1" {
@@ -162,8 +165,10 @@ data "openstack_networking_trunk_v2" "trunk_1" {
   port_id = "${openstack_networking_trunk_v2.trunk_1.port_id}"
 }
 `, testAccNetworkingV2TrunkDataSource)
+}
 
-var testAccNetworkingV2TrunkDataSourceTags = fmt.Sprintf(`
+func testAccNetworkingV2TrunkDataSourceTags() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_networking_trunk_v2" "trunk_1" {
@@ -185,3 +190,4 @@ data "openstack_networking_trunk_v2" "trunk_1" {
   ]
 }
 `, testAccNetworkingV2TrunkDataSource)
+}

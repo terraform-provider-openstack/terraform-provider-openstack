@@ -17,7 +17,7 @@ func TestAccNetworkingV2SubnetPoolDataSourceBasic(t *testing.T) {
 				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool,
 			},
 			{
-				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceBasic,
+				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
 					resource.TestCheckResourceAttr(
@@ -39,7 +39,7 @@ func TestAccNetworkingV2SubnetPoolDataSourceTestQueries(t *testing.T) {
 				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool,
 			},
 			{
-				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceDefaultQuota,
+				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceDefaultQuota(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
 					resource.TestCheckResourceAttr(
@@ -47,7 +47,7 @@ func TestAccNetworkingV2SubnetPoolDataSourceTestQueries(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourcePrefixLenghts,
+				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourcePrefixLengths(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
 					resource.TestCheckResourceAttr(
@@ -57,7 +57,7 @@ func TestAccNetworkingV2SubnetPoolDataSourceTestQueries(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceDescription,
+				Config: testAccOpenStackNetworkingSubnetPoolV2DataSourceDescription(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetPoolV2DataSourceID("data.openstack_networking_subnetpool_v2.subnetpool_1"),
 					resource.TestCheckResourceAttr(
@@ -105,23 +105,28 @@ resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
 }
 `
 
-var testAccOpenStackNetworkingSubnetPoolV2DataSourceBasic = fmt.Sprintf(`
+func testAccOpenStackNetworkingSubnetPoolV2DataSourceBasic() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnetpool_v2" "subnetpool_1" {
   name = "${openstack_networking_subnetpool_v2.subnetpool_1.name}"
 }
 `, testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool)
+}
 
-var testAccOpenStackNetworkingSubnetPoolV2DataSourceDefaultQuota = fmt.Sprintf(`
+func testAccOpenStackNetworkingSubnetPoolV2DataSourceDefaultQuota() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnetpool_v2" "subnetpool_1" {
   default_quota = 4
 }
 `, testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool)
+}
 
-var testAccOpenStackNetworkingSubnetPoolV2DataSourcePrefixLenghts = fmt.Sprintf(`
+func testAccOpenStackNetworkingSubnetPoolV2DataSourcePrefixLengths() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnetpool_v2" "subnetpool_1" {
@@ -133,8 +138,10 @@ data "openstack_networking_subnetpool_v2" "subnetpool_1" {
   ]
 }
 `, testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool)
+}
 
-var testAccOpenStackNetworkingSubnetPoolV2DataSourceDescription = fmt.Sprintf(`
+func testAccOpenStackNetworkingSubnetPoolV2DataSourceDescription() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnetpool_v2" "subnetpool_1" {
@@ -144,3 +151,4 @@ data "openstack_networking_subnetpool_v2" "subnetpool_1" {
   ]
 }
 `, testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool)
+}

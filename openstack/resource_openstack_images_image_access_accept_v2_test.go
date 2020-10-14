@@ -19,7 +19,7 @@ func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 		CheckDestroy: testAccCheckImagesImageAccessAcceptV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageAccessAcceptV2Basic,
+				Config: testAccImagesImageAccessAcceptV2Basic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_accept_v2.image_access_accept_1", &member),
 					resource.TestCheckResourceAttrPtr(
@@ -29,7 +29,7 @@ func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccImagesImageAccessAcceptV2Update,
+				Config: testAccImagesImageAccessAcceptV2Update(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_accept_v2.image_access_accept_1", &member),
 					resource.TestCheckResourceAttrPtr(
@@ -91,7 +91,8 @@ resource "openstack_images_image_access_v2" "image_access_1" {
 }
 `
 
-var testAccImagesImageAccessAcceptV2Basic = fmt.Sprintf(`
+func testAccImagesImageAccessAcceptV2Basic() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_images_image_access_accept_v2" "image_access_accept_1" {
@@ -99,8 +100,10 @@ resource "openstack_images_image_access_accept_v2" "image_access_accept_1" {
   status    = "accepted"
 }
 `, testAccImagesImageAccessAcceptV2)
+}
 
-var testAccImagesImageAccessAcceptV2Update = fmt.Sprintf(`
+func testAccImagesImageAccessAcceptV2Update() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_images_image_access_accept_v2" "image_access_accept_1" {
@@ -108,3 +111,4 @@ resource "openstack_images_image_access_accept_v2" "image_access_accept_1" {
   status    = "rejected"
 }
 `, testAccImagesImageAccessAcceptV2)
+}

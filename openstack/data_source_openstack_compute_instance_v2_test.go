@@ -14,10 +14,10 @@ func TestAccComputeV2InstanceDataSource(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2InstanceDataSourceBasic,
+				Config: testAccComputeV2InstanceDataSourceBasic(),
 			},
 			{
-				Config: testAccComputeV2InstanceDataSourceSource,
+				Config: testAccComputeV2InstanceDataSourceSource(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceV2DataSourceID("data.openstack_compute_instance_v2.source_1"),
 					resource.TestCheckResourceAttr("data.openstack_compute_instance_v2.source_1", "name", "instance_1"),
@@ -44,7 +44,8 @@ func testAccCheckComputeInstanceV2DataSourceID(n string) resource.TestCheckFunc 
 	}
 }
 
-var testAccComputeV2InstanceDataSourceBasic = fmt.Sprintf(`
+func testAccComputeV2InstanceDataSourceBasic() string {
+	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -56,11 +57,14 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
 
-var testAccComputeV2InstanceDataSourceSource = fmt.Sprintf(`
+func testAccComputeV2InstanceDataSourceSource() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_compute_instance_v2" "source_1" {
   id = "${openstack_compute_instance_v2.instance_1.id}"
 }
-`, testAccComputeV2InstanceDataSourceBasic)
+`, testAccComputeV2InstanceDataSourceBasic())
+}

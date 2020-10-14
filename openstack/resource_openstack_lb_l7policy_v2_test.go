@@ -20,7 +20,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2L7PolicyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckLbV2L7PolicyConfigBasic,
+				Config: testAccCheckLbV2L7PolicyConfigBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
 					resource.TestCheckResourceAttr(
@@ -37,7 +37,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLbV2L7PolicyConfigUpdate1,
+				Config: testAccCheckLbV2L7PolicyConfigUpdate1(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
 					resource.TestCheckResourceAttr(
@@ -56,7 +56,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLbV2L7PolicyConfigUpdate2,
+				Config: testAccCheckLbV2L7PolicyConfigUpdate2(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
 					resource.TestCheckResourceAttr(
@@ -76,7 +76,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLbV2L7PolicyConfigUpdate3,
+				Config: testAccCheckLbV2L7PolicyConfigUpdate3(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
 					resource.TestCheckResourceAttr(
@@ -181,7 +181,8 @@ resource "openstack_lb_listener_v2" "listener_1" {
 }
 `
 
-var testAccCheckLbV2L7PolicyConfigBasic = fmt.Sprintf(`
+func testAccCheckLbV2L7PolicyConfigBasic() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7policy_v2" "l7policy_1" {
@@ -192,8 +193,10 @@ resource "openstack_lb_l7policy_v2" "l7policy_1" {
   listener_id  = "${openstack_lb_listener_v2.listener_1.id}"
 }
 `, testAccCheckLbV2L7PolicyConfig)
+}
 
-var testAccCheckLbV2L7PolicyConfigUpdate1 = fmt.Sprintf(`
+func testAccCheckLbV2L7PolicyConfigUpdate1() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7policy_v2" "l7policy_1" {
@@ -205,8 +208,10 @@ resource "openstack_lb_l7policy_v2" "l7policy_1" {
   redirect_url = "http://www.example.com"
 }
 `, testAccCheckLbV2L7PolicyConfig)
+}
 
-var testAccCheckLbV2L7PolicyConfigUpdate2 = fmt.Sprintf(`
+func testAccCheckLbV2L7PolicyConfigUpdate2() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_lb_pool_v2" "pool_1" {
@@ -224,8 +229,10 @@ resource "openstack_lb_l7policy_v2" "l7policy_1" {
   redirect_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
 }
 `, testAccCheckLbV2L7PolicyConfig)
+}
 
-var testAccCheckLbV2L7PolicyConfigUpdate3 = fmt.Sprintf(`
+func testAccCheckLbV2L7PolicyConfigUpdate3() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_lb_pool_v2" "pool_1" {
@@ -242,3 +249,4 @@ resource "openstack_lb_l7policy_v2" "l7policy_1" {
   listener_id      = "${openstack_lb_listener_v2.listener_1.id}"
 }
 `, testAccCheckLbV2L7PolicyConfig)
+}

@@ -7,12 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var blockStorageExtensionsSchedulerHints = schedulerhints.SchedulerHints{
-	SameHost:             []string{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
-	DifferentHost:        []string{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
-	LocalToInstance:      "83ec2e3b-4321-422b-8706-a84185f52a0a",
-	Query:                "[“=”, “$backend_id”, “rbd:vol@ceph#cloud”]",
-	AdditionalProperties: map[string]interface{}{},
+func blockStorageExtensionsSchedulerHints() schedulerhints.SchedulerHints {
+	return schedulerhints.SchedulerHints{
+		SameHost:             []string{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
+		DifferentHost:        []string{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
+		LocalToInstance:      "83ec2e3b-4321-422b-8706-a84185f52a0a",
+		Query:                "[“=”, “$backend_id”, “rbd:vol@ceph#cloud”]",
+		AdditionalProperties: map[string]interface{}{},
+	}
 }
 
 func TestFlattenBlockStorageExtensionsSchedulerHints(t *testing.T) {
@@ -24,12 +26,12 @@ func TestFlattenBlockStorageExtensionsSchedulerHints(t *testing.T) {
 		"additional_properties": map[string]interface{}{},
 	}
 
-	actualSchedulerHints := expandBlockStorageExtensionsSchedulerHints(blockStorageExtensionsSchedulerHints)
+	actualSchedulerHints := expandBlockStorageExtensionsSchedulerHints(blockStorageExtensionsSchedulerHints())
 	assert.Equal(t, expectedSchedulerHints, actualSchedulerHints)
 }
 
 func TestBlockStorageExtensionsSchedulerHintsHash(t *testing.T) {
-	s := expandBlockStorageExtensionsSchedulerHints(blockStorageExtensionsSchedulerHints)
+	s := expandBlockStorageExtensionsSchedulerHints(blockStorageExtensionsSchedulerHints())
 
 	expectedHashcode := 1530836638
 	actualHashcode := blockStorageExtensionsSchedulerHintsHash(s)

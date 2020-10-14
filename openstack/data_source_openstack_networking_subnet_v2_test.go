@@ -17,7 +17,7 @@ func TestAccNetworkingV2SubnetDataSource_basic(t *testing.T) {
 				Config: testAccOpenStackNetworkingSubnetV2DataSourceSubnet,
 			},
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSourceBasic,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					testAccCheckNetworkingSubnetV2DataSourceGoodNetwork("data.openstack_networking_subnet_v2.subnet_1", "openstack_networking_network_v2.network_1"),
@@ -40,7 +40,7 @@ func TestAccNetworkingV2SubnetDataSource_testQueries(t *testing.T) {
 				Config: testAccOpenStackNetworkingSubnetV2DataSourceSubnet,
 			},
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSourceCidr,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceCidr(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					resource.TestCheckResourceAttr(
@@ -50,7 +50,7 @@ func TestAccNetworkingV2SubnetDataSource_testQueries(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSourceDhcpEnabled,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceDhcpEnabled(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					resource.TestCheckResourceAttr(
@@ -60,7 +60,7 @@ func TestAccNetworkingV2SubnetDataSource_testQueries(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSourceIPVersion,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceIPVersion(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					resource.TestCheckResourceAttr(
@@ -68,7 +68,7 @@ func TestAccNetworkingV2SubnetDataSource_testQueries(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSourceGatewayIP,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceGatewayIP(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					resource.TestCheckResourceAttr(
@@ -85,7 +85,7 @@ func TestAccNetworkingV2SubnetDataSource_networkIdAttribute(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSourceNetworkIDAttribute,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceNetworkIDAttribute(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					testAccCheckNetworkingSubnetV2DataSourceGoodNetwork("data.openstack_networking_subnet_v2.subnet_1", "openstack_networking_network_v2.network_1"),
@@ -106,7 +106,7 @@ func TestAccNetworkingV2SubnetDataSource_subnetPoolIdAttribute(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingSubnetV2DataSourceSubnetPoolIDAttribute,
+				Config: testAccOpenStackNetworkingSubnetV2DataSourceSubnetPoolIDAttribute(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSubnetV2DataSourceID("data.openstack_networking_subnet_v2.subnet_1"),
 					resource.TestCheckResourceAttr(
@@ -218,15 +218,18 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-var testAccOpenStackNetworkingSubnetV2DataSourceBasic = fmt.Sprintf(`
+func testAccOpenStackNetworkingSubnetV2DataSourceBasic() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
   name = "${openstack_networking_subnet_v2.subnet_1.name}"
 }
 `, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
+}
 
-var testAccOpenStackNetworkingSubnetV2DataSourceCidr = fmt.Sprintf(`
+func testAccOpenStackNetworkingSubnetV2DataSourceCidr() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
@@ -234,8 +237,10 @@ data "openstack_networking_subnet_v2" "subnet_1" {
   tags = []
 }
 `, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
+}
 
-var testAccOpenStackNetworkingSubnetV2DataSourceDhcpEnabled = fmt.Sprintf(`
+func testAccOpenStackNetworkingSubnetV2DataSourceDhcpEnabled() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
@@ -246,8 +251,10 @@ data "openstack_networking_subnet_v2" "subnet_1" {
   ]
 }
 `, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
+}
 
-var testAccOpenStackNetworkingSubnetV2DataSourceIPVersion = fmt.Sprintf(`
+func testAccOpenStackNetworkingSubnetV2DataSourceIPVersion() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
@@ -255,16 +262,20 @@ data "openstack_networking_subnet_v2" "subnet_1" {
   ip_version = 4
 }
 `, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
+}
 
-var testAccOpenStackNetworkingSubnetV2DataSourceGatewayIP = fmt.Sprintf(`
+func testAccOpenStackNetworkingSubnetV2DataSourceGatewayIP() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
   gateway_ip = "${openstack_networking_subnet_v2.subnet_1.gateway_ip}"
 }
 `, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
+}
 
-var testAccOpenStackNetworkingSubnetV2DataSourceNetworkIDAttribute = fmt.Sprintf(`
+func testAccOpenStackNetworkingSubnetV2DataSourceNetworkIDAttribute() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
@@ -281,8 +292,10 @@ resource "openstack_networking_port_v2" "port_1" {
 }
 
 `, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
+}
 
-var testAccOpenStackNetworkingSubnetV2DataSourceSubnetPoolIDAttribute = fmt.Sprintf(`
+func testAccOpenStackNetworkingSubnetV2DataSourceSubnetPoolIDAttribute() string {
+	return fmt.Sprintf(`
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
@@ -293,3 +306,4 @@ data "openstack_networking_subnet_v2" "subnet_1" {
   ]
 }
 `, testAccOpenStackNetworkingSubnetV2DataSourceSubnetWithSubnetPool)
+}

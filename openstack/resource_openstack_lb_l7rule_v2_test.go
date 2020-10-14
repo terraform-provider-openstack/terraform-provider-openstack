@@ -20,7 +20,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2L7RuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckLbV2L7RuleConfigBasic,
+				Config: testAccCheckLbV2L7RuleConfigBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
 					resource.TestCheckResourceAttr(
@@ -38,7 +38,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLbV2L7RuleConfigUpdate1,
+				Config: testAccCheckLbV2L7RuleConfigUpdate1(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
 					resource.TestCheckResourceAttr(
@@ -58,7 +58,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLbV2L7RuleConfigUpdate2,
+				Config: testAccCheckLbV2L7RuleConfigUpdate2(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
 					resource.TestCheckResourceAttr(
@@ -72,7 +72,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLbV2L7RuleConfigUpdate3,
+				Config: testAccCheckLbV2L7RuleConfigUpdate3(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
 					resource.TestCheckResourceAttr(
@@ -88,7 +88,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLbV2L7RuleConfigUpdate4,
+				Config: testAccCheckLbV2L7RuleConfigUpdate4(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
 					resource.TestCheckResourceAttr(
@@ -104,7 +104,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLbV2L7RuleConfigUpdate5,
+				Config: testAccCheckLbV2L7RuleConfigUpdate5(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
 					resource.TestCheckResourceAttr(
@@ -120,7 +120,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLbV2L7RuleConfigUpdate6,
+				Config: testAccCheckLbV2L7RuleConfigUpdate6(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7rule),
 					resource.TestCheckResourceAttr(
@@ -255,7 +255,8 @@ resource "openstack_lb_l7policy_v2" "l7policy_1" {
 }
 `
 
-var testAccCheckLbV2L7RuleConfigBasic = fmt.Sprintf(`
+func testAccCheckLbV2L7RuleConfigBasic() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7rule_v2" "l7rule_1" {
@@ -265,8 +266,10 @@ resource "openstack_lb_l7rule_v2" "l7rule_1" {
   value        = "/api"
 }
 `, testAccCheckLbV2L7RuleConfig)
+}
 
-var testAccCheckLbV2L7RuleConfigUpdate1 = fmt.Sprintf(`
+func testAccCheckLbV2L7RuleConfigUpdate1() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7rule_v2" "l7rule_1" {
@@ -277,8 +280,10 @@ resource "openstack_lb_l7rule_v2" "l7rule_1" {
   invert       = true
 }
 `, testAccCheckLbV2L7RuleConfig)
+}
 
-var testAccCheckLbV2L7RuleConfigUpdate2 = fmt.Sprintf(`
+func testAccCheckLbV2L7RuleConfigUpdate2() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7rule_v2" "l7rule_1" {
@@ -289,8 +294,10 @@ resource "openstack_lb_l7rule_v2" "l7rule_1" {
   invert       = true
 }
 `, testAccCheckLbV2L7RuleConfig)
+}
 
-var testAccCheckLbV2L7RuleConfigUpdate3 = fmt.Sprintf(`
+func testAccCheckLbV2L7RuleConfigUpdate3() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7rule_v2" "l7rule_1" {
@@ -301,8 +308,10 @@ resource "openstack_lb_l7rule_v2" "l7rule_1" {
   value        = "www.example.com"
 }
 `, testAccCheckLbV2L7RuleConfig)
+}
 
-var testAccCheckLbV2L7RuleConfigUpdate4 = fmt.Sprintf(`
+func testAccCheckLbV2L7RuleConfigUpdate4() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7rule_v2" "l7rule_1" {
@@ -312,8 +321,10 @@ resource "openstack_lb_l7rule_v2" "l7rule_1" {
   value        = "www.example.com"
 }
 `, testAccCheckLbV2L7RuleConfig)
+}
 
-var testAccCheckLbV2L7RuleConfigUpdate5 = fmt.Sprintf(`
+func testAccCheckLbV2L7RuleConfigUpdate5() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7rule_v2" "l7rule_1" {
@@ -324,8 +335,10 @@ resource "openstack_lb_l7rule_v2" "l7rule_1" {
   value        = "foo"
 }
 `, testAccCheckLbV2L7RuleConfig)
+}
 
-var testAccCheckLbV2L7RuleConfigUpdate6 = fmt.Sprintf(`
+func testAccCheckLbV2L7RuleConfigUpdate6() string {
+	return fmt.Sprintf(`
 %s
 
 resource "openstack_lb_l7rule_v2" "l7rule_1" {
@@ -335,3 +348,4 @@ resource "openstack_lb_l7rule_v2" "l7rule_1" {
   value        = "/images"
 }
 `, testAccCheckLbV2L7RuleConfig)
+}

@@ -20,7 +20,7 @@ func TestAccNetworkingV2FloatingIPAssociate_basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2FloatingIPAssociateBasic,
+				Config: testAccNetworkingV2FloatingIPAssociateBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2FloatingIPExists(
 						"openstack_networking_floatingip_associate_v2.fip_1", &fip),
@@ -43,7 +43,7 @@ func TestAccNetworkingV2FloatingIPAssociate_twoFixedIPs(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2FloatingIPAssociateTwoFixedIPs1,
+				Config: testAccNetworkingV2FloatingIPAssociateTwoFixedIPs1(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2FloatingIPExists(
 						"openstack_networking_floatingip_associate_v2.fip_1", &fip),
@@ -56,7 +56,7 @@ func TestAccNetworkingV2FloatingIPAssociate_twoFixedIPs(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2FloatingIPAssociateTwoFixedIPs2,
+				Config: testAccNetworkingV2FloatingIPAssociateTwoFixedIPs2(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2FloatingIPExists(
 						"openstack_networking_floatingip_associate_v2.fip_1", &fip),
@@ -101,7 +101,8 @@ func testAccCheckNetworkingV2FloatingIPAssociateDestroy(s *terraform.State) erro
 	return nil
 }
 
-var testAccNetworkingV2FloatingIPAssociateBasic = fmt.Sprintf(`
+func testAccNetworkingV2FloatingIPAssociateBasic() string {
+	return fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -143,8 +144,10 @@ resource "openstack_networking_floatingip_associate_v2" "fip_1" {
   port_id = "${openstack_networking_port_v2.port_1.id}"
 }
 `, osExtGwID, osPoolName)
+}
 
-var testAccNetworkingV2FloatingIPAssociateTwoFixedIPs1 = fmt.Sprintf(`
+func testAccNetworkingV2FloatingIPAssociateTwoFixedIPs1() string {
+	return fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -192,8 +195,10 @@ resource "openstack_networking_floatingip_associate_v2" "fip_1" {
   fixed_ip = "192.168.199.20"
 }
 `, osExtGwID, osPoolName)
+}
 
-var testAccNetworkingV2FloatingIPAssociateTwoFixedIPs2 = fmt.Sprintf(`
+func testAccNetworkingV2FloatingIPAssociateTwoFixedIPs2() string {
+	return fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -241,3 +246,4 @@ resource "openstack_networking_floatingip_associate_v2" "fip_1" {
   fixed_ip = "192.168.199.21"
 }
 `, osExtGwID, osPoolName)
+}
