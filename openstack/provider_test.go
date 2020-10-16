@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/terraform-provider-openstack/terraform-provider-openstack/openstack/internal/mutexkv"
 
 	"github.com/gophercloud/utils/terraform/auth"
+	"github.com/gophercloud/utils/terraform/mutexkv"
 )
 
 var (
