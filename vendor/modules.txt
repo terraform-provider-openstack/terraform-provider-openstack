@@ -204,14 +204,16 @@ github.com/gophercloud/gophercloud/openstack/utils
 github.com/gophercloud/gophercloud/pagination
 github.com/gophercloud/gophercloud/testhelper
 github.com/gophercloud/gophercloud/testhelper/client
-# github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c
+# github.com/gophercloud/utils v0.0.0-20201016024308-5fc12d2a573d
 ## explicit
 github.com/gophercloud/utils/client
 github.com/gophercloud/utils/env
+github.com/gophercloud/utils/gnocchi
 github.com/gophercloud/utils/openstack/clientconfig
 github.com/gophercloud/utils/openstack/compute/v2/flavors
 github.com/gophercloud/utils/openstack/compute/v2/images
 github.com/gophercloud/utils/terraform/auth
+github.com/gophercloud/utils/terraform/mutexkv
 # github.com/hashicorp/errwrap v1.0.0
 github.com/hashicorp/errwrap
 # github.com/hashicorp/go-checkpoint v0.5.0
@@ -272,7 +274,6 @@ github.com/hashicorp/terraform-plugin-sdk/helper/acctest
 github.com/hashicorp/terraform-plugin-sdk/helper/customdiff
 github.com/hashicorp/terraform-plugin-sdk/helper/hashcode
 github.com/hashicorp/terraform-plugin-sdk/helper/logging
-github.com/hashicorp/terraform-plugin-sdk/helper/mutexkv
 github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents
 github.com/hashicorp/terraform-plugin-sdk/helper/resource
 github.com/hashicorp/terraform-plugin-sdk/helper/schema

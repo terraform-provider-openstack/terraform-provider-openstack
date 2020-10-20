@@ -13,10 +13,11 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/swauth"
 	osClient "github.com/gophercloud/utils/client"
 	"github.com/gophercloud/utils/openstack/clientconfig"
+	"github.com/gophercloud/utils/terraform/mutexkv"
 )
 
 // This is a global MutexKV for use within this package.
-var osMutexKV = newMutexKV()
+var osMutexKV = mutexkv.NewMutexKV()
 
 type Config struct {
 	CACertFile                  string
@@ -430,6 +431,26 @@ func (c *Config) ImageV2Client(region string) (*gophercloud.ServiceClient, error
 
 	// Check if an endpoint override was specified for the image service.
 	client = c.determineEndpoint(client, "image")
+
+	return client, nil
+}
+
+func (c *Config) MessagingV2Client(region string) (*gophercloud.ServiceClient, error) {
+	if err := c.authenticate(); err != nil {
+		return nil, err
+	}
+
+	client, err := openstack.NewMessagingV2(c.OsClient, "", gophercloud.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: clientconfig.GetEndpointType(c.EndpointType),
+	})
+
+	if err != nil {
+		return client, err
+	}
+
+	// Check if an endpoint override was specified for the messaging service.
+	client = c.determineEndpoint(client, "message")
 
 	return client, nil
 }
