@@ -36,6 +36,10 @@ The following arguments are supported:
 * `name` - (Required) The name of the zone. Note the `.` at the end of the name.
   Changing this creates a new DNS zone.
 
+* `project_id` - (Optional) The ID of the project DNS zone is created
+  for, sets `X-Auth-Sudo-Tenant-ID` header (requires an assigned 
+  user role in target project)
+
 * `email` - (Optional) The email contact for the zone record.
 
 * `type` - (Optional) The type of zone. Can either be `PRIMARY` or `SECONDARY`.
@@ -60,6 +64,7 @@ The following attributes are exported:
 
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
+* `project_id` - See Argument Reference above.
 * `email` - See Argument Reference above.
 * `type` - See Argument Reference above.
 * `attributes` - See Argument Reference above.
@@ -70,8 +75,9 @@ The following attributes are exported:
 
 ## Import
 
-This resource can be imported by specifying the zone ID:
+This resource can be imported by specifying the zone ID with optional project ID:
 
 ```
 $ terraform import openstack_dns_zone_v2.zone_1 <zone_id>
+$ terraform import openstack_dns_zone_v2.zone_1 <zone_id>:<project_id>
 ```

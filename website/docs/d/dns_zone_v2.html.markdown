@@ -26,6 +26,9 @@ data "openstack_dns_zone_v2" "zone_1" {
 
 * `name` - (Optional) The name of the zone.
 
+* `project_id` - (Optional) The ID of the project the DNS zone is obtained from,
+  sets `X-Auth-Sudo-Tenant-ID` header (requires an assigned user role in target project)
+
 * `description` - (Optional) A description of the zone.
 
 * `email` - (Optional) The email contact for the zone record.
@@ -35,6 +38,9 @@ data "openstack_dns_zone_v2" "zone_1" {
 * `ttl` - (Optional) The time to live (TTL) of the zone.
 
 * `type` - (Optional) The type of the zone. Can either be `PRIMARY` or `SECONDARY`.
+
+* `all_projects` - (Optional) Try to obtain zone ID by listing all projects
+  (requires admin role by default, depends on your policy configuration)
 
 ## Attributes Reference
 
