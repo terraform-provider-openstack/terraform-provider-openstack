@@ -1,3 +1,9 @@
+## 1.33.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Add `address_scope`, `security_group` and `subnetpool` RBAC types to `networking_rbac_policy_v2.go` resource ([#1086](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1086))
+
 ## 1.32.0 (September 15, 2020)
 
 NOTES
