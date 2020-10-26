@@ -335,7 +335,35 @@ func getInstanceNetworkInfoNeutron(client *gophercloud.ServiceClient, queryType,
 func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses {
 	var allInstanceAddresses []InstanceAddresses
 
-	for networkName, v := range addresses {
+	// Addresses includes a list of all IP addresses assigned to the server,
+	// keyed by pool. This unfortunately causes problems because addresses are a
+	// JSON object which means that they are unordered because gophercloud
+	// uses a map[string]interface{} to hold them and maps are unordered.
+	// However OpenStack uses OrderedDict to return this data and this
+	// provider uses a List type for the networks which is an ordered type,
+	// this means that importing resources into terraform will result in
+	// networks import out of order which causes terraform to say it has to
+	// rebuild the instance. Unfortunately there is no way to ensure the
+	// ordering is correct, lastly this issue occurs only when there's
+	// "public" and "private" as the only networks so account for that
+	// case specially. Create a list of the network names and if it's
+	// the special case override it.
+	networkNames := make([]string, len(addresses))
+	i := 0
+	for k := range addresses {
+		networkNames[i] = k
+		i++
+	}
+
+	if len(networkNames) == 2 {
+		if networkNames[0] == "private" && networkNames[1] == "public" {
+			networkNames[0] = "public"
+			networkNames[1] = "private"
+		}
+	}
+
+	for _, networkName := range networkNames {
+		v, _ := addresses[networkName]
 		instanceAddresses := InstanceAddresses{
 			NetworkName: networkName,
 		}
