@@ -55,7 +55,7 @@ func resourceEndpointGroupV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"endpoints": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
