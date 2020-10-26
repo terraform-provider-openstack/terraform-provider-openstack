@@ -7,6 +7,7 @@ IMPROVEMENTS
 BUG FIXES
 
 * Fixed an issue when `binding.host_id` was set to `null` in case of using any other `binding` parameters in `networking_port_v2` resource ([#1084](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1084))
+* Fixed an issue with unnecessary server rebuild while using two default networks in `compute_instance_v2` resource ([#1073](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1073))
 
 ## 1.32.0 (September 15, 2020)
 
