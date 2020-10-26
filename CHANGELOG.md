@@ -4,6 +4,10 @@ IMPROVEMENTS
 
 * Add `address_scope`, `security_group` and `subnetpool` RBAC types to `networking_rbac_policy_v2.go` resource ([#1086](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1086))
 
+BUG FIXES
+
+* Fixed an issue when `binding.host_id` was set to `null` in case of using any other `binding` parameters in `networking_port_v2` resource ([#1084](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1084))
+
 ## 1.32.0 (September 15, 2020)
 
 NOTES
