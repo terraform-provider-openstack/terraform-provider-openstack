@@ -409,8 +409,8 @@ func testAccAuthFromEnv() (*Config, error) {
 			UserDomainName:    os.Getenv("OS_USER_DOMAIN_NAME"),
 			Username:          os.Getenv("OS_USERNAME"),
 			UserID:            os.Getenv("OS_USER_ID"),
+			MutexKV:           *(mutexkv.NewMutexKV()),
 		},
-		mutexkv.NewMutexKV(),
 	}
 
 	if err := config.LoadAndValidate(); err != nil {
