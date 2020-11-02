@@ -12,18 +12,21 @@ Manages a V2 networking quota resource within OpenStack.
 
 ~> **Note:** This usually requires admin privileges.
 
-~> **Note:** This resource has a no-op deletion so no actual actions will be done against the OpenStack API 
+~> **Note:** This resource has a no-op deletion so no actual actions will be done against the OpenStack API
     in case of delete call.
+
+~> **Note:** This resource has all-in creation so all optional quota arguments that were not specified are
+    created with zero value.
 
 ## Example Usage
 
 ```hcl
-resource "openstack_identity_project_v2" "project_1" {
+resource "openstack_identity_project_v3" "project_1" {
   name = project_1
 }
 
 resource "openstack_networking_quota_v2" "quota_1" {
-  project_id          = "${openstack_identity_project_v2.project_1.id}"
+  project_id          = "${openstack_identity_project_v3.project_1.id}"
   floatingip          = 10
   network             = 4
   port                = 100
@@ -67,7 +70,7 @@ The following arguments are supported:
 
 * `security_group_rule` - (Optional) Quota value for security group rules.
     Changing this updates the existing quota.
-    
+
 * `subnet` - (Optional) Quota value for subnets. Changing
     this updates the existing quota.
 
