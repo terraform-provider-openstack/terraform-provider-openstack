@@ -12,8 +12,11 @@ Manages a V2 compute quotaset resource within OpenStack.
 
 ~> **Note:** This usually requires admin privileges.
 
-~> **Note:** This resource has a no-op deletion so no actual actions will be done against the OpenStack API 
+~> **Note:** This resource has a no-op deletion so no actual actions will be done against the OpenStack API
     in case of delete call.
+
+~> **Note:** This resource has all-in creation so all optional quota arguments that were not specified are
+    created with zero value.
 
 ## Example Usage
 
@@ -64,7 +67,7 @@ The following arguments are supported:
 
 * `metadata_items` - (Optional) Quota value for metadata items.
     Changing this updates the existing quotaset.
-    
+
 * `ram` - (Optional) Quota value for RAM.
     Changing this updates the existing quotaset.
 
