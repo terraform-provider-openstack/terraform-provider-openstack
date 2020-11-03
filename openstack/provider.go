@@ -9,10 +9,10 @@ import (
 	"github.com/gophercloud/utils/terraform/mutexkv"
 )
 
-// Config contains auth parameters and also provides an instance of MutexKV.
+// Use openstackbase.Config as the base/foundation of this provider's
+// Config struct.
 type Config struct {
 	auth.Config
-	*mutexkv.MutexKV
 }
 
 // Provider returns a schema.Provider for OpenStack.
@@ -507,8 +507,8 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 			DisableNoCacheHeader:        d.Get("disable_no_cache_header").(bool),
 			TerraformVersion:            terraformVersion,
 			SDKVersion:                  meta.SDKVersionString(),
+			MutexKV:                     *(mutexkv.NewMutexKV()),
 		},
-		mutexkv.NewMutexKV(),
 	}
 
 	v, ok := d.GetOkExists("insecure")

@@ -73,14 +73,10 @@ github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+
 github.com/googleapis/gax-go/v2 v2.0.5 h1:sjZBwGj9Jlw33ImPtvFviGYvseOtDM7hkSKB7+Tv3SM=
 github.com/googleapis/gax-go/v2 v2.0.5/go.mod h1:DWXyrwAJ9X0FpwwEdw+IPEYBICEFu5mhpdKc/us6bOk=
 github.com/gophercloud/gophercloud v0.6.1-0.20191122030953-d8ac278c1c9d/go.mod h1:ozGNgr9KYOVATV5jsgHl/ceCDXGuguqOZAzoQ/2vcNM=
-github.com/gophercloud/gophercloud v0.12.1-0.20200821143728-362eb785d617 h1:8Kj1KcL5PXrH3CIC+U5LnbyfueWr/Fh/4CdM5yP+XKM=
-github.com/gophercloud/gophercloud v0.12.1-0.20200821143728-362eb785d617/go.mod h1:w2NJEd88d4igNL1KUHzBsKMvS/ByJTzgltTGWKT7AC8=
 github.com/gophercloud/gophercloud v0.12.1-0.20200827191144-bb4781e9de45 h1:qvMqZxf8hx1Udiv1dXTp9rmGflhBYvgoVva+AQBJ4XM=
 github.com/gophercloud/gophercloud v0.12.1-0.20200827191144-bb4781e9de45/go.mod h1:w2NJEd88d4igNL1KUHzBsKMvS/ByJTzgltTGWKT7AC8=
-github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c h1:iawx2ojEQA7c+GmkaVO5sN+k8YONibXyDO8RlsC+1bs=
-github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c/go.mod h1:ehWUbLQJPqS0Ep+CxeD559hsm9pthPXadJNKwZkp43w=
-github.com/gophercloud/utils v0.0.0-20201016024308-5fc12d2a573d h1:8jNzDhxbZwbIJDSoLX0+6J5Ehi2jMdJQNS1rKJPVlH4=
-github.com/gophercloud/utils v0.0.0-20201016024308-5fc12d2a573d/go.mod h1:ehWUbLQJPqS0Ep+CxeD559hsm9pthPXadJNKwZkp43w=
+github.com/gophercloud/utils v0.0.0-20201101202656-8677e053dcf1 h1:W9579vuRvR1tBzjDMn4E2HwYx4OZUWxH/7SQwWnKwbM=
+github.com/gophercloud/utils v0.0.0-20201101202656-8677e053dcf1/go.mod h1:ehWUbLQJPqS0Ep+CxeD559hsm9pthPXadJNKwZkp43w=
 github.com/hashicorp/errwrap v1.0.0 h1:hLrqtEDnRye3+sgx6z4qVLNuviH3MR5aQ0ykNJa/UYA=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-checkpoint v0.5.0 h1:MFYpPZCnQqQTE18jFwSII6eUQrD/oxMFp3mlgcqk5mU=
