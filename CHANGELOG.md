@@ -6,6 +6,7 @@ IMPROVEMENTS
 * Add `project_id` for `dns_zone_v2` resource, `project_id`, `all_projects` arguments for `dns_zone_v2` datasource, allow importing resource by `<zone_uuid>:<project_id>` value ([#1087](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1087))
 * Add `different_cell` scheduler hint for `compute_instance_v2` resource ([#1070](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1070))
 * Update and cleanup `blockstorage_quotaset_v2`, `blockstorage_quotaset_v3`, `compute_quotaset_v2`, `networking_quota_v2` resource docs ([#1095](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1095)), ([#1096](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1096))
+* Updated `terraform-plugin-sdk` to `v1.16.0` ([#1092](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1092))
 
 BUG FIXES
 
