@@ -31,14 +31,16 @@ The following arguments are supported:
 * `domain_id` - (Optional) The domain this project belongs to.
 
 * `enabled` - (Optional) Whether the project is enabled or disabled. Valid
-  values are `true` and `false`.
+  values are `true` and `false`. Default is `true`.
 
 * `is_domain` - (Optional) Whether this project is a domain. Valid values
-  are `true` and `false`.
+  are `true` and `false`. Default is `false`. Changing this creates a new
+  project/domain.
 
 * `name` - (Optional) The name of the project.
 
-* `parent_id` - (Optional) The parent of this project.
+* `parent_id` - (Optional) The parent of this project. Changing this creates
+  a new project.
 
 * `region` - (Optional) The region in which to obtain the V3 Keystone client.
     If omitted, the `region` argument of the provider is used. Changing this
