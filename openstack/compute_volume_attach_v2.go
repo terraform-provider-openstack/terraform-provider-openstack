@@ -7,6 +7,7 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
@@ -24,7 +25,7 @@ func computeVolumeAttachV2ParseID(id string) (string, string, error) {
 }
 
 func computeVolumeAttachV2AttachFunc(
-	computeClient *gophercloud.ServiceClient, instanceId, attachmentId string) resource.StateRefreshFunc {
+	computeClient *gophercloud.ServiceClient, blockStorageClient *gophercloud.ServiceClient, instanceId, attachmentId string, volumeID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		va, err := volumeattach.Get(computeClient, instanceId, attachmentId).Extract()
 		if err != nil {
@@ -32,6 +33,14 @@ func computeVolumeAttachV2AttachFunc(
 				return va, "ATTACHING", nil
 			}
 			return va, "", err
+		}
+
+		v, err := volumes.Get(blockStorageClient, volumeID).Extract()
+	        if err != nil {
+        	        return va, "", err
+	        }
+		if v.Status != 'in-use' {
+			return va, "ATTACHING", nil
 		}
 
 		return va, "ATTACHED", nil
