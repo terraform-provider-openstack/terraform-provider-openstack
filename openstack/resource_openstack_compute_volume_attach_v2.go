@@ -68,6 +68,11 @@ func resourceComputeVolumeAttachV2Create(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
+	blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+	}
+
 	instanceID := d.Get("instance_id").(string)
 	volumeID := d.Get("volume_id").(string)
 
@@ -110,7 +115,7 @@ func resourceComputeVolumeAttachV2Create(d *schema.ResourceData, meta interface{
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ATTACHING"},
 		Target:     []string{"ATTACHED"},
-		Refresh:    computeVolumeAttachV2AttachFunc(computeClient, instanceID, attachment.ID),
+		Refresh:    computeVolumeAttachV2AttachFunc(computeClient, blockStorageClient, instanceID, attachment.ID, volumeID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
