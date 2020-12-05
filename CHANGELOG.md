@@ -1,3 +1,13 @@
+## 1.34.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Added `flavor_id` to `openstack_compute_flavor_v2` resource creation options ([#1107](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1107))
+
+BUG FIXES
+
+* Fixed an issue when updating a `openstack_networking_router_v2` resource deleted extra routes on the router by upgrading Gophercloud to `1.14.0` ([#1109](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1109))
+
 ## 1.33.0 (November 11, 2020)
 
 IMPROVEMENTS
