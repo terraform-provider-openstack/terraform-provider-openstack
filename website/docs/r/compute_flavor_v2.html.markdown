@@ -41,6 +41,9 @@ The following arguments are supported:
 * `ram` - (Required) The amount of RAM to use, in megabytes. Changing this
     creates a new flavor.
 
+* `flavor_id` - (Optional) Unique ID (integer or UUID) of flavor to create. Changing 
+    this creates a new flavor.
+
 * `vcpus` - (Required) The number of virtual CPUs to use. Changing this creates
     a new flavor.
 

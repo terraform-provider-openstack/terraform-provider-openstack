@@ -35,6 +35,20 @@ func TestAccComputeV2Flavor_basic(t *testing.T) {
 						"openstack_compute_flavor_v2.flavor_1", "disk", "5"),
 				),
 			},
+			{
+				Config: testAccComputeV2FlavorBasicWithID(flavorName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2FlavorExists("openstack_compute_flavor_v2.flavor_1", &flavor),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_flavor_v2.flavor_1", "ram", "2048"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_flavor_v2.flavor_1", "vcpus", "2"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_flavor_v2.flavor_1", "disk", "5"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_flavor_v2.flavor_1", "flavor_id", "b50e603d-29d0-461a-88f7-bd6750d4ce3d"),
+				),
+			},
 		},
 	})
 }
@@ -143,6 +157,19 @@ func testAccComputeV2FlavorBasic(flavorName string) string {
     `, flavorName)
 }
 
+func testAccComputeV2FlavorBasicWithID(flavorName string) string {
+	return fmt.Sprintf(`
+    resource "openstack_compute_flavor_v2" "flavor_1" {
+      name = "%s"
+      flavor_id = "b50e603d-29d0-461a-88f7-bd6750d4ce3d"
+      ram = 2048
+      vcpus = 2
+      disk = 5
+
+      is_public = true
+    }
+    `, flavorName)
+}
 func testAccComputeV2FlavorExtraSpecs1(flavorName string) string {
 	return fmt.Sprintf(`
     resource "openstack_compute_flavor_v2" "flavor_1" {
