@@ -7,6 +7,7 @@ IMPROVEMENTS
 BUG FIXES
 
 * Fixed an issue when updating a `openstack_networking_router_v2` resource deleted extra routes on the router by upgrading Gophercloud to `1.14.0` ([#1109](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1109))
+* Fixed an issue when changing `domain_id`, `is_domain` or `parent_id` arguments of `openstack_identity_project_v3` resource caused errors ([#1101](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1101))
 
 ## 1.33.0 (November 11, 2020)
 
