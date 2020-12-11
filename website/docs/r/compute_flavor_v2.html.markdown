@@ -41,14 +41,17 @@ The following arguments are supported:
 * `ram` - (Required) The amount of RAM to use, in megabytes. Changing this
     creates a new flavor.
 
-* `flavor_id` - (Optional) Unique ID (integer or UUID) of flavor to create. Changing 
+* `flavor_id` - (Optional) Unique ID (integer or UUID) of flavor to create. Changing
     this creates a new flavor.
 
 * `vcpus` - (Required) The number of virtual CPUs to use. Changing this creates
     a new flavor.
 
-* `disk` - (Required) The amount of disk space in gigabytes to use for the root
+* `disk` - (Required) The amount of disk space in GiB to use for the root
     (/) partition. Changing this creates a new flavor.
+
+* `ephemeral` - (Optional) The amount of ephemeral in GiB. If unspecified,
+    the default is 0. Changing this creates a new flavor.
 
 * `swap` - (Optional) The amount of disk space in megabytes to use. If
     unspecified, the default is 0. Changing this creates a new flavor.
@@ -70,6 +73,7 @@ The following attributes are exported:
 * `ram` - See Argument Reference above.
 * `vcpus` - See Argument Reference above.
 * `disk` - See Argument Reference above.
+* `ephemeral` - See Argument Reference above.
 * `swap` - See Argument Reference above.
 * `rx_tx_factor` - See Argument Reference above.
 * `is_public` - See Argument Reference above.

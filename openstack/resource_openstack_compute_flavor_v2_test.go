@@ -33,6 +33,8 @@ func TestAccComputeV2Flavor_basic(t *testing.T) {
 						"openstack_compute_flavor_v2.flavor_1", "vcpus", "2"),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_flavor_v2.flavor_1", "disk", "5"),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_flavor_v2.flavor_1", "ephemeral", "64"),
 				),
 			},
 			{
@@ -151,6 +153,7 @@ func testAccComputeV2FlavorBasic(flavorName string) string {
       ram = 2048
       vcpus = 2
       disk = 5
+      ephemeral = 64
 
       is_public = true
     }
