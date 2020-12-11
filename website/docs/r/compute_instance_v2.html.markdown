@@ -247,6 +247,7 @@ resource "openstack_compute_instance_v2" "multi-eph" {
     destination_type      = "local"
     source_type           = "blank"
     volume_size           = 1
+    guest_format          = "ext4"
   }
 
   block_device {
@@ -255,6 +256,42 @@ resource "openstack_compute_instance_v2" "multi-eph" {
     destination_type      = "local"
     source_type           = "blank"
     volume_size           = 1
+  }
+}
+```
+
+### Instance with Boot Disk and Swap Disk
+
+```hcl
+resource "openstack_compute_flavor_v2" "flavor-with-swap" {
+  name  = "flavor-with-swap"
+  ram   = "8096"
+  vcpus = "2"
+  disk  = "20"
+  swap  = "4096"
+}
+
+resource "openstack_compute_instance_v2" "vm-swap" {
+  name            = "vm_swap"
+  flavor_id       = "${openstack_compute_flavor_v2.flavor-with-swap.id}"
+  key_pair        = "my_key_pair_name"
+  security_groups = ["default"]
+
+  block_device {
+    boot_index            = 0
+    delete_on_termination = true
+    destination_type      = "local"
+    source_type           = "image"
+    uuid                  = "<image-id>"
+  }
+
+  block_device {
+    boot_index            = -1
+    delete_on_termination = true
+    destination_type      = "local"
+    source_type           = "blank"
+    guest_format          = "swap"
+    volume_size           = 4
   }
 }
 ```
@@ -407,6 +444,13 @@ The `block_device` block supports:
     in the following combinations: source=image and destination=volume,
     source=blank and destination=local, and source=blank and destination=volume.
     Changing this creates a new server.
+
+* `guest_format` - (Optional) Specifies the guest server disk file system format,
+    such as `ext2`, `ext3`, `ext4`, `xfs` or `swap`. Swap block device mappings
+    have the following restrictions: source_type must be blank and destination_type
+    must be local and only one swap disk per server and the size of the swap disk
+    must be less than or equal to the swap size of the flavor. Changing this
+    creates a new server.
 
 * `boot_index` - (Optional) The boot index of the volume. It defaults to 0.
     Changing this creates a new server.
