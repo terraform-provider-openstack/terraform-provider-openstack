@@ -25,6 +25,9 @@ func TestAccDNSV2Zone_importBasic(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"disable_status_check",
+				},
 			},
 		},
 	})

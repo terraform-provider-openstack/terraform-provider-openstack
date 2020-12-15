@@ -58,6 +58,10 @@ The following arguments are supported:
 * `value_specs` - (Optional) Map of additional options. Changing this creates a
   new zone.
 
+* `disable_status_check` - (Optional) Disable wait for zone to reach ACTIVE
+  status. The check is enabled by default. If this argument is true, zone
+  will be considered as created/updated if OpenStack request returned success.
+
 ## Attributes Reference
 
 The following attributes are exported:
