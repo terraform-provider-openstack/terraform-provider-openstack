@@ -5,6 +5,7 @@ IMPROVEMENTS
 * Added `flavor_id` to `openstack_compute_flavor_v2` resource creation options ([#1107](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1107))
 * Updated `compute_flavor_v2` resource docs with `ephemeral` argument ([#1113](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1113))
 * Updated `compute_instance_v2` resource docs with `guest_format` argument and added example with `swap` ([#1113](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1113))
+* Added volume status check in `openstack_compute_volume_attach_v2` resource create function ([#1106](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1106))
 
 BUG FIXES
 
