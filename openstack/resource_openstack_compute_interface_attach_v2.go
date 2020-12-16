@@ -148,6 +148,10 @@ func resourceComputeInterfaceAttachV2Read(d *schema.ResourceData, meta interface
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_interface_attach_v2 %s: %#v", d.Id(), attachment)
 
+	if len(attachment.FixedIPs) > 0 {
+		d.Set("fixed_ip", attachment.FixedIPs[0].IPAddress)
+	}
+
 	d.Set("instance_id", instanceID)
 	d.Set("port_id", attachment.PortID)
 	d.Set("network_id", attachment.NetID)
