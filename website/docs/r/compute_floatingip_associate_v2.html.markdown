@@ -8,8 +8,7 @@ description: |-
 
 # openstack\_compute\_floatingip_associate_v2
 
-Associate a floating IP to an instance. This can be used instead of the
-`floating_ip` options in `openstack_compute_instance_v2`.
+Associate a floating IP to an instance.
 
 ## Example Usage
 
