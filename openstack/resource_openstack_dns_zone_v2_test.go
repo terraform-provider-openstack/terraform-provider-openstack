@@ -44,6 +44,35 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 	})
 }
 
+func TestAccDNSV2Zone_ignoreStatusCheck(t *testing.T) {
+	var zone zones.Zone
+	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckDNS(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDNSV2ZoneDisableCheck(zoneName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDNSV2ZoneExists("openstack_dns_zone_v2.zone_1", &zone),
+					resource.TestCheckResourceAttr(
+						"openstack_dns_zone_v2.zone_1", "disable_status_check", "true"),
+				),
+			},
+			{
+				Config: testAccDNSV2ZoneBasic(zoneName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDNSV2ZoneExists("openstack_dns_zone_v2.zone_1", &zone),
+					resource.TestCheckResourceAttr(
+						"openstack_dns_zone_v2.zone_1", "disable_status_check", "false"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDNSV2Zone_readTTL(t *testing.T) {
 	var zone zones.Zone
 	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
@@ -148,6 +177,19 @@ func testAccDNSV2ZoneReadTTL(zoneName string) string {
 		resource "openstack_dns_zone_v2" "zone_1" {
 			name = "%s"
 			email = "email1@example.com"
+		}
+	`, zoneName)
+}
+
+func testAccDNSV2ZoneDisableCheck(zoneName string) string {
+	return fmt.Sprintf(`
+		resource "openstack_dns_zone_v2" "zone_1" {
+			name = "%s"
+			email = "email1@example.com"
+			description = "a zone"
+			ttl = 3000
+			type = "PRIMARY"
+			disable_status_check = true
 		}
 	`, zoneName)
 }
