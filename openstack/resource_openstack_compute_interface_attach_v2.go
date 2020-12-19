@@ -56,9 +56,11 @@ func resourceComputeInterfaceAttachV2() *schema.Resource {
 			},
 
 			"fixed_ip": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"port_id"},
 			},
 		},
 	}
