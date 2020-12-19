@@ -2,17 +2,18 @@
 
 IMPROVEMENTS
 
-* Added `flavor_id` to `openstack_compute_flavor_v2` resource creation options ([#1107](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1107))
+* Added `flavor_id` to `compute_flavor_v2` resource creation options ([#1107](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1107))
 * Updated `compute_flavor_v2` resource docs with `ephemeral` argument ([#1113](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1113))
 * Updated `compute_instance_v2` resource docs with `guest_format` argument and added example with `swap` ([#1113](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1113))
-* Added volume status check in `openstack_compute_volume_attach_v2` resource create function ([#1106](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1106))
-* Added `disable_status_check` argument for `openstack_dns_zone_v2` resource ([#1114](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1114))
-* Removed mention of `floating_ip` argument in `openstack_compute_instance_v2` from the documentation of `openstack_compute_floatingip_associate_v2` resource ([#1117](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1117))
+* Added volume status check in `compute_volume_attach_v2` resource create function ([#1106](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1106))
+* Added `disable_status_check` argument for `dns_zone_v2` resource ([#1114](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1114))
+* Removed mention of `floating_ip` argument in `compute_instance_v2` from the documentation of `compute_floatingip_associate_v2` resource ([#1117](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1117))
 
 BUG FIXES
 
-* Fixed an issue when updating a `openstack_networking_router_v2` resource deleted extra routes on the router by upgrading Gophercloud to `1.14.0` ([#1109](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1109))
-* Fixed an issue when changing `domain_id`, `is_domain` or `parent_id` arguments of `openstack_identity_project_v3` resource caused errors ([#1101](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1101))
+* Fixed an issue when updating a `networking_router_v2` resource deleted extra routes on the router by upgrading Gophercloud to `1.14.0` ([#1109](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1109))
+* Fixed an issue when changing `domain_id`, `is_domain` or `parent_id` arguments of `identity_project_v3` resource caused errors ([#1101](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1101))
+* Fixed an issue when `fixed_ip` wasn't updated on read of `compute_interface_attach_v2` resource ([#1118](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1118))
 
 ## 1.33.0 (November 11, 2020)
 
