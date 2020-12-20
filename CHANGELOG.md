@@ -1,4 +1,4 @@
-## 1.34.0 (Unreleased)
+## 1.34.0 (December 20, 2020)
 
 IMPROVEMENTS
 
