@@ -1,3 +1,9 @@
+## 1.34.1 (December 21, 2020)
+
+BUG FIXES
+
+* Fixed an issue when empty a `flavor_id` argument in `compute_flavor_v2` resource could create plan changes ([#1120](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1120))
+
 ## 1.34.0 (December 20, 2020)
 
 IMPROVEMENTS
