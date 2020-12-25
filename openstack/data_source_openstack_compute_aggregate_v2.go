@@ -38,7 +38,6 @@ func dataSourceComputeAggregateV2() *schema.Resource {
 }
 
 func dataSourceComputeAggregateV2Read(d *schema.ResourceData, meta interface{}) error {
-
 	config := meta.(*Config)
 	region := GetRegion(d, config)
 	computeClient, err := config.ComputeV2Client(region)
@@ -81,8 +80,8 @@ func dataSourceComputeAggregateV2Read(d *schema.ResourceData, meta interface{}) 
 		delete(metadata, "availability_zone")
 	}
 
-	id_str := strconv.Itoa(aggr.ID)
-	d.SetId(id_str)
+	idStr := strconv.Itoa(aggr.ID)
+	d.SetId(idStr)
 	d.Set("name", aggr.Name)
 	d.Set("zone", aggr.AvailabilityZone)
 	d.Set("hosts", aggr.Hosts)

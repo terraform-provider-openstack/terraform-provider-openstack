@@ -70,6 +70,5 @@ func testAccCheckAggregateExists(n string, aggregate *aggregates.Aggregate) reso
 		*aggregate = *found
 
 		return nil
-
 	}
 }

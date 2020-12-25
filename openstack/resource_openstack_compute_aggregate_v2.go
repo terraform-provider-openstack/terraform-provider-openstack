@@ -2,10 +2,11 @@ package openstack
 
 import (
 	"fmt"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/aggregates"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"strconv"
 	"time"
+
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/aggregates"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceComputeAggregateV2() *schema.Resource {
@@ -47,7 +48,6 @@ func resourceComputeAggregateV2() *schema.Resource {
 }
 
 func resourceComputeAggregateV2Create(d *schema.ResourceData, meta interface{}) error {
-
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
@@ -61,8 +61,8 @@ func resourceComputeAggregateV2Create(d *schema.ResourceData, meta interface{}) 
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack aggregate: %s", err)
 	}
-	id_str := strconv.Itoa(aggregate.ID)
-	d.SetId(id_str)
+	idStr := strconv.Itoa(aggregate.ID)
+	d.SetId(idStr)
 
 	hosts, ok := d.GetOk("hosts")
 	if ok {
@@ -80,11 +80,9 @@ func resourceComputeAggregateV2Create(d *schema.ResourceData, meta interface{}) 
 	}
 
 	return nil
-
 }
 
 func resourceComputeAggregateV2Read(d *schema.ResourceData, meta interface{}) error {
-
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
@@ -117,7 +115,6 @@ func resourceComputeAggregateV2Read(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceComputeAggregateV2Update(d *schema.ResourceData, meta interface{}) error {
-
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
@@ -145,16 +142,16 @@ func resourceComputeAggregateV2Update(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if d.HasChange("hosts") {
-		old_hosts, new_hosts := d.GetChange("hosts")
-		hosts_to_delete := arrayDifference(old_hosts, new_hosts)
-		hosts_to_add := arrayDifference(new_hosts, old_hosts)
-		for _, host := range hosts_to_delete {
+		oldHosts, newHosts := d.GetChange("hosts")
+		hostsToDelete := arrayDifference(oldHosts, newHosts)
+		hostsToAdd := arrayDifference(newHosts, oldHosts)
+		for _, host := range hostsToDelete {
 			_, err = aggregates.RemoveHost(computeClient, id, aggregates.RemoveHostOpts{Host: host}).Extract()
 			if err != nil {
 				return fmt.Errorf("Error adding host %s to Openstack aggregate: %s", host, err)
 			}
 		}
-		for _, host := range hosts_to_add {
+		for _, host := range hostsToAdd {
 			_, err = aggregates.AddHost(computeClient, id, aggregates.AddHostOpts{Host: host}).Extract()
 			if err != nil {
 				return fmt.Errorf("Error adding host %s to Openstack aggregate: %s", host, err)
@@ -170,11 +167,9 @@ func resourceComputeAggregateV2Update(d *schema.ResourceData, meta interface{}) 
 	}
 
 	return nil
-
 }
 
 func resourceComputeAggregateV2Delete(d *schema.ResourceData, meta interface{}) error {
-
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
@@ -192,7 +187,6 @@ func resourceComputeAggregateV2Delete(d *schema.ResourceData, meta interface{}) 
 	}
 
 	return nil
-
 }
 
 func arrayDifference(a, b interface{}) (diff []string) {
