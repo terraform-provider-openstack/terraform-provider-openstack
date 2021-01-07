@@ -411,6 +411,14 @@ func resourceImagesImageV2Update(d *schema.ResourceData, meta interface{}) error
 				changed = false
 			}
 
+			// stores is provided by the OpenStack Image service.
+			// This is a read-only property that cannot be modified.
+			// Ignore it here and let CustomizeDiff handle it.
+			if newKey == "stores" {
+				found = true
+				changed = false
+			}
+
 			// direct_url is provided by some storage drivers.
 			// This is a read-only property that cannot be modified.
 			// Ignore it here and let CustomizeDiff handle it.

@@ -128,7 +128,7 @@ These properties start with the prefix `os_`. If these properties are detected,
 this resource will automatically reconcile these with the user-provided
 properties.
 
-In addition, the `direct_url` property is also automatically reconciled if the
+In addition, the `direct_url` and `stores` properties are also automatically reconciled if the
 Image Service set it.
 
 ## Import
