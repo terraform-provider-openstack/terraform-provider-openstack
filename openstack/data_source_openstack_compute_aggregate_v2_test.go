@@ -34,6 +34,7 @@ resource "openstack_compute_aggregate_v2" "test2" {
 
 func TestAccAggregateDataSource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheckAdminOnly(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

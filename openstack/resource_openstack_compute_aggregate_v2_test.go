@@ -22,6 +22,7 @@ func TestAccComputeV2Aggregate(t *testing.T) {
 	var aggregate aggregates.Aggregate
 
 	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheckAdminOnly(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
