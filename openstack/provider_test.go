@@ -42,6 +42,7 @@ var (
 	osTransparentVlanEnvironment = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
 	osKeymanagerEnvironment      = os.Getenv("OS_KEYMANAGER_ENVIRONMENT")
 	osGlanceimportEnvironment    = os.Getenv("OS_GLANCEIMPORT_ENVIRONMENT")
+	osHypervisorEnvironment      = os.Getenv("OS_HYPERVISOR_HOSTNAME")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -220,6 +221,12 @@ func testAccPreCheckAdminOnly(t *testing.T) {
 func testAccPreCheckGlanceImport(t *testing.T) {
 	if osGlanceimportEnvironment == "" {
 		t.Skip("This environment does not support Glance import tests")
+	}
+}
+
+func testAccPreCheckHypervisor(t *testing.T) {
+	if osHypervisorEnvironment == "" {
+		t.Skip("This environment does not support Hypervisor data source tests")
 	}
 }
 

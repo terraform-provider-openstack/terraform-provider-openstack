@@ -407,6 +407,9 @@ the feature or bug you're testing:
 * `OS_SFS_ENVIRONMENT` - Required if your'e working on the `openstack_openstack_sharedfilesystem_*`
   resources. Set this value to "1" to enable testing these resources.
 
+* `OS_HYPERVISOR_HOSTNAME` - Required if you're working on the `openstack_compute_hypervisor_v2`
+  data source. Set this value to one valid hypervisor hostname to test this data source.
+
 We recommend only running the acceptance tests related to the feature or bug
 you're working on. To do this, run:
 
