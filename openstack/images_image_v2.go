@@ -171,6 +171,13 @@ func resourceImagesImageV2UpdateComputedAttributes(diff *schema.ResourceDiff, me
 					}
 				}
 
+				// stores is provided by the OpenStack Image service.
+				if oldKey == "stores" {
+					if v, ok := oldValue.(string); ok {
+						newProperties[oldKey] = v
+					}
+				}
+
 				// direct_url is provided by some storage drivers.
 				if oldKey == "direct_url" {
 					if v, ok := oldValue.(string); ok {
