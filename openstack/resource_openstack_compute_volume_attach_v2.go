@@ -61,6 +61,7 @@ func resourceComputeVolumeAttachV2() *schema.Resource {
 			"vendor_options": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				ForceNew: true,
 				MinItems: 1,
 				MaxItems: 1,
 				Elem: &schema.Resource{
