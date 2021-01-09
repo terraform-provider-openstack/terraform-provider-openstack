@@ -34,14 +34,18 @@ func computeVolumeAttachV2AttachFunc(computeClient *gophercloud.ServiceClient, b
 			return va, "", err
 		}
 
+		// Block Storage client will be empty if "ignore_volume_confirmation" == true.
+		if blockStorageClient == nil {
+			return va, "ATTACHED", nil
+		}
+
 		v, err := volumes.Get(blockStorageClient, volumeID).Extract()
 		if err != nil {
 			return va, "", err
 		}
 		if v.Status == "error" {
-			return va, "", fmt.Errorf("volume enter unexpected error status")
+			return va, "", fmt.Errorf("volume entered unexpected error status")
 		}
-
 		if v.Status != "in-use" {
 			return va, "ATTACHING", nil
 		}
