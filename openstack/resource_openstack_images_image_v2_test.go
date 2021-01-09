@@ -385,15 +385,15 @@ const testAccImagesImageV2Basic = `
 
 const testAccImagesImageV2BasicWithID = `
   resource "openstack_images_image_v2" "image_1" {
-	name             = "Rancher TerraformAccTest"
-	image_id         = "c1efdf94-9a1a-4401-88b8-d616029d2551"
-    image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-    container_format = "bare"
-    disk_format      = "qcow2"
+      name = "Rancher TerraformAccTest"
+      image_id = "c1efdf94-9a1a-4401-88b8-d616029d2551"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      container_format = "bare"
+      disk_format = "qcow2"
 
-    timeouts {
-      create = "10m"
-    }
+      timeouts {
+        create = "10m"
+      }
   }`
 
 const testAccImagesImageV2Name1 = `
