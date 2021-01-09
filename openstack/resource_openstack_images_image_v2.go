@@ -63,6 +63,14 @@ func resourceImagesImageV2() *schema.Resource {
 				Computed: true,
 			},
 
+			"image_id": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IsUUID,
+			},
+
 			"image_cache_path": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -218,6 +226,7 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 		DiskFormat:      d.Get("disk_format").(string),
 		MinDisk:         d.Get("min_disk_gb").(int),
 		MinRAM:          d.Get("min_ram_mb").(int),
+		ID:              d.Get("image_id").(string),
 		Protected:       &protected,
 		Visibility:      &visibility,
 		Properties:      imageProperties,
@@ -342,6 +351,7 @@ func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("disk_format", img.DiskFormat)
 	d.Set("min_disk_gb", img.MinDiskGigabytes)
 	d.Set("min_ram_mb", img.MinRAMMegabytes)
+	d.Set("image_id", img.ID)
 	d.Set("file", img.File)
 	d.Set("name", img.Name)
 	d.Set("protected", img.Protected)

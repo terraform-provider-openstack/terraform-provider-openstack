@@ -56,6 +56,9 @@ The following arguments are supported:
 
 * `name` - (Required) The name of the image.
 
+* `image_id` - (Optional) Unique ID (valid UUID) of image to create. Changing 
+    this creates a new image.
+
 * `properties` - (Optional) A map of key/value pairs to set freeform
     information about an image. See the "Notes" section for further
     information about properties.
