@@ -3,6 +3,7 @@
 IMPROVEMENTS
 
 * Added valid handling of the read-only `stores` property of the `images_image_v2` resource ([#1124](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1124))
+* Added `image_id` argument for the `images_image_v2` resource ([#1125](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1125))
 
 ## 1.34.1 (December 21, 2020)
 
