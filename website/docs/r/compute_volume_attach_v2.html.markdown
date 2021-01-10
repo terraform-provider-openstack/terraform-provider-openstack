@@ -155,6 +155,15 @@ The following arguments are supported:
 
 * `multiattach` - (Optional) Enable attachment of multiattach-capable volumes.
 
+* `vendor_options` - (Optional) Map of additional vendor-specific options.
+  Supported options are described below.
+
+The `vendor_options` block supports:
+
+* `ignore_volume_confirmation` - (Optional) Boolean to control whether
+  to ignore volume status confirmation of the attached volume. This can be helpful
+  to work with some OpenStack clouds which don't have the Block Storage V3 API available.
+
 ## Attributes Reference
 
 The following attributes are exported:
