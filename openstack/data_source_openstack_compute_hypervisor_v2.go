@@ -15,30 +15,37 @@ func dataSourceComputeHypervisorV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+
 			"host_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"state": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"vcpus": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+
 			"memory": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+
 			"disk": {
 				Type:     schema.TypeInt,
 				Computed: true,
