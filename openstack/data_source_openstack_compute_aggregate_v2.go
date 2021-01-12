@@ -2,11 +2,10 @@ package openstack
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/aggregates"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-
-	"strconv"
 )
 
 func dataSourceComputeAggregateV2() *schema.Resource {
@@ -17,6 +16,7 @@ func dataSourceComputeAggregateV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+
 			"zone": {
 				Type:     schema.TypeString,
 				Computed: true,

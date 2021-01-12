@@ -2,13 +2,12 @@ package openstack
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/aggregates"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-
-	"strconv"
 )
 
 var testAccAggregateConfig = `
