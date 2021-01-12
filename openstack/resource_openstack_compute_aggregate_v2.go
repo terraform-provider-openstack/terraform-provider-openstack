@@ -33,15 +33,18 @@ func resourceComputeAggregateV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+
 			"metadata": {
 				Type:     schema.TypeMap,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
+				Computed: true,
 			},
 			"hosts": {
 				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
+				Computed: true,
 			},
 		},
 	}
