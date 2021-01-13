@@ -29,6 +29,7 @@ func resourceComputeAggregateV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+
 			"zone": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -40,6 +41,7 @@ func resourceComputeAggregateV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+
 			"hosts": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},

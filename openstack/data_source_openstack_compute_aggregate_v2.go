@@ -21,12 +21,14 @@ func dataSourceComputeAggregateV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"metadata": {
 				Type:     schema.TypeMap,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 				Optional: true,
 			},
+
 			"hosts": {
 				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
