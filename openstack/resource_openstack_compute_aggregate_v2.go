@@ -145,9 +145,10 @@ func resourceComputeAggregateV2Update(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if d.HasChange("hosts") {
-		oldHosts, newHosts := d.GetChange("hosts")
-		hostsToDelete := arrayDifference(oldHosts, newHosts)
-		hostsToAdd := arrayDifference(newHosts, oldHosts)
+		o, n := d.GetChange("hosts")
+        oldHosts, newHosts := o.(*schema.Set), n.(*schema.Set)
+		hostsToDelete := oldHosts.Difference(newHosts)
+		hostsToAdd := newHosts.Difference(oldHosts)
 		for _, host := range hostsToDelete {
 			_, err = aggregates.RemoveHost(computeClient, id, aggregates.RemoveHostOpts{Host: host}).Extract()
 			if err != nil {
@@ -190,19 +191,4 @@ func resourceComputeAggregateV2Delete(d *schema.ResourceData, meta interface{}) 
 	}
 
 	return nil
-}
-
-func arrayDifference(a, b interface{}) (diff []string) {
-	m := make(map[string]bool)
-
-	for _, item := range b.([]string) {
-		m[item] = true
-	}
-	for _, item := range a.([]string) {
-		_, ok := m[item]
-		if !ok {
-			diff = append(diff, item)
-		}
-	}
-	return
 }
