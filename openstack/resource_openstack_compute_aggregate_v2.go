@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -43,10 +44,10 @@ func resourceComputeAggregateV2() *schema.Resource {
 			},
 
 			"hosts": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeSet,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				DefaultFunc: func() (interface{}, error) { return []string{}, nil },
 			},
 		},
 	}
@@ -148,16 +149,20 @@ func resourceComputeAggregateV2Update(d *schema.ResourceData, meta interface{}) 
 
 	if d.HasChange("hosts") {
 		o, n := d.GetChange("hosts")
-        oldHosts, newHosts := o.(*schema.Set), n.(*schema.Set)
+		oldHosts, newHosts := o.(*schema.Set), n.(*schema.Set)
 		hostsToDelete := oldHosts.Difference(newHosts)
 		hostsToAdd := newHosts.Difference(oldHosts)
-		for _, host := range hostsToDelete {
+		for _, h := range hostsToDelete.List() {
+			host := h.(string)
+			log.Printf("[DEBUG] Removing host '%s' from aggregate '%s'", host, d.Get("name"))
 			_, err = aggregates.RemoveHost(computeClient, id, aggregates.RemoveHostOpts{Host: host}).Extract()
 			if err != nil {
-				return fmt.Errorf("Error adding host %s to Openstack aggregate: %s", host, err)
+				return fmt.Errorf("Error deleting host %s from Openstack aggregate: %s", host, err)
 			}
 		}
-		for _, host := range hostsToAdd {
+		for _, h := range hostsToAdd.List() {
+			host := h.(string)
+			log.Printf("[DEBUG] Adding host '%s' to aggregate '%s'", host, d.Get("name"))
 			_, err = aggregates.AddHost(computeClient, id, aggregates.AddHostOpts{Host: host}).Extract()
 			if err != nil {
 				return fmt.Errorf("Error adding host %s to Openstack aggregate: %s", host, err)
@@ -185,6 +190,17 @@ func resourceComputeAggregateV2Delete(d *schema.ResourceData, meta interface{}) 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
 		return fmt.Errorf("Can't convert ID to integer: %s", err)
+	}
+
+	// Openstack do not delete the host aggregate if it's not empty
+	hostsToDelete := d.Get("hosts").(*schema.Set)
+	for _, h := range hostsToDelete.List() {
+		host := h.(string)
+		log.Printf("[DEBUG] Removing host '%s' from aggregate '%s'", host, d.Get("name"))
+		_, err = aggregates.RemoveHost(computeClient, id, aggregates.RemoveHostOpts{Host: host}).Extract()
+		if err != nil {
+			return fmt.Errorf("Error deleting host %s from Openstack aggregate: %s", host, err)
+		}
 	}
 
 	err = aggregates.Delete(computeClient, id).ExtractErr()
