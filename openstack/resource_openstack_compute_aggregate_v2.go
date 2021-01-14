@@ -216,7 +216,7 @@ func resourceComputeAggregateV2Delete(d *schema.ResourceData, meta interface{}) 
 
 // Metadata in openstack are not fully replaced with a "set"
 // operation, instead, it's only additive, and the existing
-// metadata are only removed when set to `null` value in json
+// metadata are only removed when set to `null` value in json.
 func mapNullFix(oldMap, newMap map[string]interface{}) (output map[string]interface{}) {
 	output = make(map[string]interface{})
 
@@ -224,7 +224,7 @@ func mapNullFix(oldMap, newMap map[string]interface{}) (output map[string]interf
 		output[k] = v
 	}
 
-	for key, _ := range oldMap {
+	for key := range oldMap {
 		_, ok := newMap[key]
 		if !ok {
 			output[key] = nil
