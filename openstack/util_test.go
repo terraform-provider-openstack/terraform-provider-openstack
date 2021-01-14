@@ -69,3 +69,15 @@ func TestCompatibleMicroversion(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, actual)
 }
+
+func TestMapDiffWithNilValues(t *testing.T) {
+	oldData := map[string]interface{}{"a": "1", "b": "2"}
+	newData := map[string]interface{}{"a": "1", "c": "3"}
+
+	result := mapDiffWithNilValues(oldData, newData)
+
+	assert.Equal(t, result["a"], "1")
+	assert.Equal(t, result["b"], nil)
+	assert.Equal(t, result["c"], "3")
+	assert.Equal(t, len(result), 3)
+}

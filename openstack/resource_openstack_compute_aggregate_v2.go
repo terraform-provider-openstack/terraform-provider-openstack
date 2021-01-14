@@ -173,7 +173,7 @@ func resourceComputeAggregateV2Update(d *schema.ResourceData, meta interface{}) 
 
 	if d.HasChange("metadata") {
 		oldMetadata, newMetadata := d.GetChange("metadata")
-		metadata := mapNullFix(oldMetadata.(map[string]interface{}), newMetadata.(map[string]interface{}))
+		metadata := mapDiffWithNilValues(oldMetadata.(map[string]interface{}), newMetadata.(map[string]interface{}))
 		_, err = aggregates.SetMetadata(computeClient, id, aggregates.SetMetadataOpts{Metadata: metadata}).Extract()
 		if err != nil {
 			return fmt.Errorf("Error setting metadata: %s", err)
@@ -212,24 +212,4 @@ func resourceComputeAggregateV2Delete(d *schema.ResourceData, meta interface{}) 
 	}
 
 	return nil
-}
-
-// Metadata in openstack are not fully replaced with a "set"
-// operation, instead, it's only additive, and the existing
-// metadata are only removed when set to `null` value in json.
-func mapNullFix(oldMap, newMap map[string]interface{}) (output map[string]interface{}) {
-	output = make(map[string]interface{})
-
-	for k, v := range newMap {
-		output[k] = v
-	}
-
-	for key := range oldMap {
-		_, ok := newMap[key]
-		if !ok {
-			output[key] = nil
-		}
-	}
-
-	return
 }
