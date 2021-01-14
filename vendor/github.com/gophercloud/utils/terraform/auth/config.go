@@ -1,8 +1,6 @@
 package auth
 
 import (
-	"crypto/tls"
-	"crypto/x509"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,6 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/swauth"
 	osClient "github.com/gophercloud/utils/client"
+	"github.com/gophercloud/utils/internal"
 	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/gophercloud/utils/terraform/mutexkv"
 )
@@ -161,41 +160,9 @@ func (c *Config) LoadAndValidate() error {
 	// Set UserAgent
 	client.UserAgent.Prepend(terraformUserAgent(c.TerraformVersion, c.SDKVersion))
 
-	config := &tls.Config{}
-	if c.CACertFile != "" {
-		caCert, _, err := pathOrContents(c.CACertFile)
-		if err != nil {
-			return fmt.Errorf("Error reading CA Cert: %s", err)
-		}
-
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM([]byte(caCert))
-		config.RootCAs = caCertPool
-	}
-
-	if c.Insecure == nil {
-		config.InsecureSkipVerify = false
-	} else {
-		config.InsecureSkipVerify = *c.Insecure
-	}
-
-	if c.ClientCertFile != "" && c.ClientKeyFile != "" {
-		clientCert, _, err := pathOrContents(c.ClientCertFile)
-		if err != nil {
-			return fmt.Errorf("Error reading Client Cert: %s", err)
-		}
-		clientKey, _, err := pathOrContents(c.ClientKeyFile)
-		if err != nil {
-			return fmt.Errorf("Error reading Client Key: %s", err)
-		}
-
-		cert, err := tls.X509KeyPair([]byte(clientCert), []byte(clientKey))
-		if err != nil {
-			return err
-		}
-
-		config.Certificates = []tls.Certificate{cert}
-		config.BuildNameToCertificate()
+	config, err := internal.PrepareTLSConfig(c.CACertFile, c.ClientCertFile, c.ClientKeyFile, c.Insecure)
+	if err != nil {
+		return err
 	}
 
 	var logger osClient.Logger
