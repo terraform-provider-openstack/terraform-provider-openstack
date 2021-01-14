@@ -17,6 +17,19 @@ resource "openstack_compute_aggregate_v2" "test" {
 }
 `
 
+func testAccAggregateHypervisorConfig() string {
+	return fmt.Sprintf(`
+resource "openstack_compute_aggregate_v2" "test" {
+  name = "test-aggregate"
+  zone = "nova"
+  hosts = [ "%s" ]
+  metadata = {
+    test = "123"
+  }
+}
+    `, osHypervisorEnvironment)
+}
+
 func TestAccComputeV2Aggregate(t *testing.T) {
 	var aggregate aggregates.Aggregate
 
@@ -31,6 +44,40 @@ func TestAccComputeV2Aggregate(t *testing.T) {
 			{
 				ResourceName: "openstack_compute_aggregate_v2.test",
 				ImportState:  true,
+			},
+		},
+	})
+}
+
+func TestAccComputeV2AggregateWithHypervisor(t *testing.T) {
+	var aggregate aggregates.Aggregate
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckAdminOnly(t)
+			testAccPreCheckHypervisor(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAggregateConfig,
+				Check:  testAccCheckAggregateExists("openstack_compute_aggregate_v2.test", &aggregate),
+			},
+			{
+				Config: testAccAggregateHypervisorConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAggregateExists("openstack_compute_aggregate_v2.test", &aggregate),
+					resource.TestCheckResourceAttr("openstack_compute_aggregate_v2.test", "hosts.#", "1"),
+					resource.TestCheckResourceAttr("openstack_compute_aggregate_v2.test", "metadata.test", "123"),
+				),
+			},
+			{
+				Config: testAccAggregateConfig,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAggregateExists("openstack_compute_aggregate_v2.test", &aggregate),
+					resource.TestCheckResourceAttr("openstack_compute_aggregate_v2.test", "hosts.#", "0"),
+					resource.TestCheckNoResourceAttr("openstack_compute_aggregate_v2.test", "metadata.test"),
+				),
 			},
 		},
 	})
