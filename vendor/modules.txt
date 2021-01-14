@@ -164,6 +164,7 @@ github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/attachinterfa
 github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones
 github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume
 github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips
+github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/hypervisors
 github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs
 github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/quotasets
 github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/schedulerhints
