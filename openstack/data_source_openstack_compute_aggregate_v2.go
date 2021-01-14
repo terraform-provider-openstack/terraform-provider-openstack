@@ -30,7 +30,7 @@ func dataSourceComputeAggregateV2() *schema.Resource {
 			},
 
 			"hosts": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 				Optional: true,

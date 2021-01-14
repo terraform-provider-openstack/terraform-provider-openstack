@@ -70,12 +70,13 @@ func resourceComputeAggregateV2Create(d *schema.ResourceData, meta interface{}) 
 	idStr := strconv.Itoa(aggregate.ID)
 	d.SetId(idStr)
 
-	hosts, ok := d.GetOk("hosts")
+	h, ok := d.GetOk("hosts")
 	if ok {
-		for _, host := range hosts.([]string) {
-			_, err = aggregates.AddHost(computeClient, aggregate.ID, aggregates.AddHostOpts{Host: host}).Extract()
+		hosts := h.(*schema.Set)
+		for _, host := range hosts.List() {
+			_, err = aggregates.AddHost(computeClient, aggregate.ID, aggregates.AddHostOpts{Host: host.(string)}).Extract()
 			if err != nil {
-				return fmt.Errorf("Error adding host %s to Openstack aggregate: %s", host, err)
+				return fmt.Errorf("Error adding host %s to Openstack aggregate: %s", host.(string), err)
 			}
 		}
 	}
