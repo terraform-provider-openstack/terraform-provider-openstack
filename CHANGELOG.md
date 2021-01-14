@@ -1,10 +1,15 @@
 ## 1.35.0 (Unreleased)
 
+FEATURES
+
+* __New Data Source__: `openstack_compute_hypervisor_v2` ([#1126](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1126))
+
 IMPROVEMENTS
 
 * Added valid handling of the read-only `stores` property of the `images_image_v2` resource ([#1124](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1124))
 * Added `image_id` argument for the `images_image_v2` resource ([#1125](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1125))
 * Added `vendor_options.ignore_volume_confirmation` argument for the `compute_volume_attach_v2` resource to control whether to ignore volume status confirmation of the attached volume. ([#1127](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1127))
+* Updated Gophercloud to `1.15.0` with utils package that now uses `imageservice` instead of `compute` to resolve image IDs ([#1128](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1128))
 
 ## 1.34.1 (December 21, 2020)
 
