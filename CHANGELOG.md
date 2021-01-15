@@ -1,4 +1,4 @@
-## 1.35.0 (Unreleased)
+## 1.35.0 (January 15, 2021)
 
 FEATURES
 
