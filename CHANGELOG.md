@@ -2,6 +2,8 @@
 
 FEATURES
 
+* __New Resource__: `openstack_compute_aggregate_v2` ([#1121](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1121))
+* __New Data Source__: `openstack_compute_aggregate_v2` ([#1121](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1121))
 * __New Data Source__: `openstack_compute_hypervisor_v2` ([#1126](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1126))
 
 IMPROVEMENTS
