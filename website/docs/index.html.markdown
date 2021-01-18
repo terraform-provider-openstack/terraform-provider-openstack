@@ -346,7 +346,7 @@ in the OpenStack provider.
 Again, if you have any questions about whether the bug you're trying to fix is
 a Gophercloud but, please ask.
 
-### Vendoring
+### Dependencies
 
 If you require pulling in changes from an external package, such as Gophercloud,
 this provider uses [Go Modules](https://github.com/golang/go/wiki/Modules).
