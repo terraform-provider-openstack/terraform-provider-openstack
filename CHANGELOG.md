@@ -1,3 +1,9 @@
+## 1.36.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Updated `zone` argument to be `Optional` instead of `Required` in `compute_aggregate_v2` resource ([#1133](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1133))
+
 ## 1.35.0 (January 15, 2021)
 
 FEATURES
