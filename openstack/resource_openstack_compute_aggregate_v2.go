@@ -33,7 +33,7 @@ func resourceComputeAggregateV2() *schema.Resource {
 
 			"zone": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 
 			"metadata": {
