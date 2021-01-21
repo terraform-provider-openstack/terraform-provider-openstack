@@ -42,7 +42,7 @@ Using the provider
 ----------------------
 Please see the documentation at [terraform.io](https://www.terraform.io/docs/providers/openstack/index.html).
 
-Or you can browse the documentation within this repo [here](https://github.com/terraform-provider-openstack/terraform-provider-openstack/tree/master/website/docs).
+Or you can browse the documentation within this repo [here](https://github.com/terraform-provider-openstack/terraform-provider-openstack/tree/main/website/docs).
 
 Developing the Provider
 ---------------------------
