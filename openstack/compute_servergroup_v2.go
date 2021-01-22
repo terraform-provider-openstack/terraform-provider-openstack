@@ -6,6 +6,8 @@ import (
 )
 
 const (
+	antiAffinityPolicy = "anti-affinity"
+	affinityPolicy     = "affinity"
 	softAntiAffinityPolicy = "soft-anti-affinity"
 	softAffinityPolicy     = "soft-affinity"
 )
@@ -26,12 +28,14 @@ func (opts ComputeServerGroupV2CreateOpts) ToServerGroupCreateMap() (map[string]
 func expandComputeServerGroupV2Policies(client *gophercloud.ServiceClient, raw []interface{}) []string {
 	policies := make([]string, len(raw))
 	for i, v := range raw {
+		client.Microversion = "2.15"
+		
 		policy := v.(string)
 		policies[i] = policy
 
 		// Set microversion for new policies.
-		if policy == softAntiAffinityPolicy || policy == softAffinityPolicy {
-			client.Microversion = "2.15"
+		if policy == antiAffinityPolicy || policy == affinityPolicy {
+			client.Microversion = "2.1"
 		}
 	}
 
