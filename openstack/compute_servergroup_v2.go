@@ -8,8 +8,6 @@ import (
 const (
 	antiAffinityPolicy = "anti-affinity"
 	affinityPolicy     = "affinity"
-	softAntiAffinityPolicy = "soft-anti-affinity"
-	softAffinityPolicy     = "soft-affinity"
 )
 
 // ServerGroupCreateOpts is a custom ServerGroup struct to include the
