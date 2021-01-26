@@ -22,13 +22,13 @@ linters:
     - goheader
     - goimports
     - golint
-#    - gomodguard
-#    - goprintffuncname
+    - gomodguard
+    - goprintffuncname
 #    - gosec
 #    - gosimple
 #    - govet
-#    - ineffassign
-#    - interfacer
+    - ineffassign
+    - interfacer
 #    - maligned
     - misspell
     - nakedret
@@ -39,10 +39,10 @@ linters:
     - staticcheck
     - structcheck
 #    - stylecheck
-#    - typecheck
-#    - unconvert
-#    - unused
-#    - varcheck
+    - typecheck
+    - unconvert
+    - unused
+    - varcheck
     - whitespace
 
 issues:
