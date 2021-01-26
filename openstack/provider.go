@@ -510,7 +510,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 			DisableNoCacheHeader:        d.Get("disable_no_cache_header").(bool),
 			TerraformVersion:            terraformVersion,
 			SDKVersion:                  meta.SDKVersionString(),
-			MutexKV:                     *(mutexkv.NewMutexKV()),
+			MutexKV:                     mutexkv.NewMutexKV(),
 		},
 	}
 
