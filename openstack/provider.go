@@ -277,6 +277,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_networking_qos_minimum_bandwidth_rule_v2": dataSourceNetworkingQoSMinimumBandwidthRuleV2(),
 			"openstack_networking_qos_policy_v2":                 dataSourceNetworkingQoSPolicyV2(),
 			"openstack_networking_subnet_v2":                     dataSourceNetworkingSubnetV2(),
+			"openstack_networking_subnet_ids_v2":                 dataSourceNetworkingSubnetIDsV2(),
 			"openstack_networking_secgroup_v2":                   dataSourceNetworkingSecGroupV2(),
 			"openstack_networking_subnetpool_v2":                 dataSourceNetworkingSubnetPoolV2(),
 			"openstack_networking_floatingip_v2":                 dataSourceNetworkingFloatingIPV2(),

@@ -1,20 +1,24 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_networking_subnet_v2"
-sidebar_current: "docs-openstack-datasource-networking-subnet-v2"
+page_title: "OpenStack: openstack_networking_subnet_ids_v2"
+sidebar_current: "docs-openstack-datasource-networking-subnet-ids-v2"
 description: |-
-  Get information on an OpenStack Subnet.
+  Provides a list of Openstack Subnet IDs.
 ---
 
-# openstack\_networking\_subnet\_v2
+# openstack\_networking\_subnet\_ids\_v2
 
-Use this data source to get the ID of an available OpenStack subnet.
+Use this data source to get a list of Openstack Subnet IDs matching the
+specified criteria.
 
 ## Example Usage
 
 ```hcl
-data "openstack_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
+data "openstack_networking_subnet_ids_v2" "subnets" {
+  name_regex = "public"
+  tags = [
+    "public"
+  ]
 }
 ```
 
@@ -40,8 +44,6 @@ data "openstack_networking_subnet_v2" "subnet_1" {
 
 * `cidr` - (Optional) The CIDR of the subnet.
 
-* `subnet_id` - (Optional) The ID of the subnet.
-
 * `ipv6_address_mode` - (Optional) The IPv6 address mode. Valid values are
   `dhcpv6-stateful`, `dhcpv6-stateless`, or `slaac`.
 
@@ -52,14 +54,11 @@ data "openstack_networking_subnet_v2" "subnet_1" {
 
 * `tags` - (Optional) The list of subnet tags to filter.
 
+* `sort_key` - (Optional) Sort subnets based on a certain key. Defaults to none.
+
+* `sort_direction` - (Optional) Order the results in either `asc` or `desc`.
+  Defaults to none.
+
 ## Attributes Reference
 
-`id` is set to the ID of the found subnet. In addition, the following attributes
-are exported:
-
-* `allocation_pools` - Allocation pools of the subnet.
-* `enable_dhcp` - Whether the subnet has DHCP enabled or not.
-* `dns_nameservers` - DNS Nameservers of the subnet.
-* `host_routes` - Host Routes of the subnet.
-* `region` - See Argument Reference above.
-* `all_tags` - A set of string tags applied on the subnet.
+`ids` is set to the list of Openstack Subnet IDs.
