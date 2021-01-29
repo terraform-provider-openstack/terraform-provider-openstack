@@ -88,8 +88,8 @@ func resourceLoadBalancerV2() *schema.Resource {
 			"flavor_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 				Computed: true,
+				ForceNew: true,
 			},
 
 			"loadbalancer_provider": {
