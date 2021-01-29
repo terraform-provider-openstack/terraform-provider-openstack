@@ -88,10 +88,7 @@ func TestAccNetworkingV2Router_vendor_opts_no_snat(t *testing.T) {
 	var router routers.Router
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckAdminOnly(t)
-		},
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
@@ -109,10 +106,7 @@ func TestAccNetworkingV2Router_vendor_opts_no_snat(t *testing.T) {
 
 func TestAccNetworkingV2Router_extFixedIPs(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckAdminOnly(t)
-		},
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
@@ -123,6 +117,27 @@ func TestAccNetworkingV2Router_extFixedIPs(t *testing.T) {
 						"openstack_networking_router_v2.router_2", "name", "router_2"),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_router_v2.router_2", "external_fixed_ip.#", "2"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_2", "enable_snat", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Router_extSubnetIDs(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2RouterExtSubnetIDs(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_2", "name", "router_2"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_2", "external_fixed_ip.#", "1"),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_router_v2.router_2", "enable_snat", "true"),
 				),
@@ -286,4 +301,35 @@ resource "openstack_networking_router_v2" "router_2" {
   }
 }
 `, osExtGwID, osExtGwID)
+}
+
+func testAccNetworkingV2RouterExtSubnetIDs() string {
+	return fmt.Sprintf(`
+resource "openstack_networking_router_v2" "router_1" {
+  name = "router_1"
+  admin_state_up = "true"
+  external_network_id = "%s"
+
+  timeouts {
+    create = "5m"
+    delete = "5m"
+  }
+}
+
+resource "openstack_networking_router_v2" "router_2" {
+  name = "router_2"
+  admin_state_up = "true"
+  external_network_id = "%s"
+
+  external_subnet_ids = [
+    "%s", # wrong UUID
+    "${openstack_networking_router_v2.router_1.external_fixed_ip.0.subnet_id}",
+  ]
+
+  timeouts {
+    create = "5m"
+    delete = "5m"
+  }
+}
+`, osExtGwID, osExtGwID, osExtGwID)
 }
