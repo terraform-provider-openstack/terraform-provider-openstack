@@ -142,5 +142,5 @@ resource "openstack_db_database_v1" "basic" {
   name        = "basic"
   instance_id = "${openstack_db_instance_v1.basic.id}"
 }
-`, osDbDatastoreVersion, osDbDatastoreType, osNetworkID)
+`, osDBDatastoreVersion, osDBDatastoreType, osNetworkID)
 }
