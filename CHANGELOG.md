@@ -1,8 +1,22 @@
 ## 1.36.0 (Unreleased)
 
+FEATURES
+
+* __New Resource__: `openstack_identity_user_membership_v3` ([#1149](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1149))
+* __New Data Source__: `openstack_networking_subnet_ids_v2` ([#1153](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1121))
+
 IMPROVEMENTS
 
 * Updated `zone` argument to be `Optional` instead of `Required` in `compute_aggregate_v2` resource ([#1133](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1133))
+* Updated local provider block in docs ([#1135](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1135))
+* Updated Go version to `1.15` ([#1137](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1137))
+* Updated `networking_router_v2` resource to retry external subnets on router creation, when a subnet is exhausted ([#1151](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1151))
+* Added `subnets` to `networking_network_v2` datasource ([#1152](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1152))
+
+BUG FIXES
+
+* Fixed copying `sync.Locker` by updating `gophercloud/utils` with the fix ([#1144](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1144))
+* Fixed recreation of `lb_loadbalancer_v2` resource if `flavor_id` haven't been specified ([#1147](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1147))
 
 ## 1.35.0 (January 15, 2021)
 
