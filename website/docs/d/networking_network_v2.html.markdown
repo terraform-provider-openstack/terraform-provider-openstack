@@ -46,7 +46,7 @@ data "openstack_networking_network_v2" "network" {
 * `tags` - (Optional) The list of network tags to filter.
 
 * `mtu` - (Optional) The network MTU to filter. Available, when Neutron `net-mtu`
-    extension is enabled.
+  extension is enabled.
 
 ## Attributes Reference
 
@@ -62,7 +62,8 @@ are exported:
    tenant or not.
 * `availability_zone_hints` - The availability zone candidates for the network.
 * `transparent_vlan` - See Argument Reference above.
-* `all_tags` - The set of string tags applied on the network.
 * `mtu` - See Argument Reference above.
 * `dns_domain` - The network DNS domain. Available, when Neutron DNS extension
-   is enabled
+  is enabled
+* `subnets` - A list of subnet IDs belonging to the network.
+* `all_tags` - The set of string tags applied on the network.
