@@ -52,7 +52,7 @@ data "openstack_networking_port_ids_v2" "ports" {
 * `sort_key` - (Optional) Sort ports based on a certain key. Defaults to none.
 
 * `sort_direction` - (Optional) Order the results in either `asc` or `desc`.
-    Defaults to none.
+  Defaults to none.
 
 ## Attributes Reference
 
