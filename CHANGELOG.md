@@ -1,9 +1,13 @@
 ## 1.36.0 (Unreleased)
 
+NOTES
+
+* The `dhcp_disabled` argument in `networking_subnet_v2` data source is deprecated. Use the `dhcp_enabled = false` argument value instead. ([#1153](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1153))
+
 FEATURES
 
 * __New Resource__: `openstack_identity_user_membership_v3` ([#1149](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1149))
-* __New Data Source__: `openstack_networking_subnet_ids_v2` ([#1153](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1121))
+* __New Data Source__: `openstack_networking_subnet_ids_v2` ([#1153](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1153))
 
 IMPROVEMENTS
 
@@ -11,7 +15,7 @@ IMPROVEMENTS
 * Updated local provider block in docs ([#1135](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1135))
 * Updated Go version to `1.15` ([#1137](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1137))
 * Updated `networking_router_v2` resource to retry external subnets on router creation, when a subnet is exhausted ([#1151](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1151))
-* Added `subnets` to `networking_network_v2` datasource ([#1152](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1152))
+* Added `subnets` attribute to `networking_network_v2` data source ([#1152](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1152))
 
 BUG FIXES
 
