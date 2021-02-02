@@ -15,9 +15,9 @@ import (
 )
 
 var (
-	osDbEnvironment                  = os.Getenv("OS_DB_ENVIRONMENT")
-	osDbDatastoreVersion             = os.Getenv("OS_DB_DATASTORE_VERSION")
-	osDbDatastoreType                = os.Getenv("OS_DB_DATASTORE_TYPE")
+	osDBEnvironment                  = os.Getenv("OS_DB_ENVIRONMENT")
+	osDBDatastoreVersion             = os.Getenv("OS_DB_DATASTORE_VERSION")
+	osDBDatastoreType                = os.Getenv("OS_DB_DATASTORE_TYPE")
 	osDeprecatedEnvironment          = os.Getenv("OS_DEPRECATED_ENVIRONMENT")
 	osDNSEnvironment                 = os.Getenv("OS_DNS_ENVIRONMENT")
 	osExtGwID                        = os.Getenv("OS_EXTGW_ID")
@@ -118,7 +118,7 @@ func testAccPreCheckSwift(t *testing.T) {
 func testAccPreCheckDatabase(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	if osDbEnvironment == "" {
+	if osDBEnvironment == "" {
 		t.Skip("This environment does not support Database tests")
 	}
 }
