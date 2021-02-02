@@ -169,6 +169,10 @@ The following arguments are supported:
 * `allow_reauth` - (Optional) If set to `false`, OpenStack authorization won't be
   perfomed automatically, if the initial auth token get expired. Defaults to `true`.
 
+* `max_retries` - (Optional) If set to a value greater than 0, the OpenStack
+  client will retry failed HTTP connections and Too Many Requests (429 code)
+  HTTP responses with a `Retry-After` header within the specified value.
+
 ## Overriding Service API Endpoints
 
 There might be a situation in which you want or need to override an API endpoint
