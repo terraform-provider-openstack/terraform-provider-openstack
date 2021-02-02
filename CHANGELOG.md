@@ -3,6 +3,7 @@
 NOTES
 
 * The `dhcp_disabled` argument in `networking_subnet_v2` data source is deprecated. Use the `dhcp_enabled = false` argument value instead. ([#1153](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1153))
+* The `max_retries` provider parameter now honors the `429` code and uses the `Retry-After` header to extend the retry function ([#1159](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1159))
 
 FEATURES
 
@@ -16,11 +17,13 @@ IMPROVEMENTS
 * Updated Go version to `1.15` ([#1137](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1137))
 * Updated `networking_router_v2` resource to retry external subnets on router creation, when a subnet is exhausted ([#1151](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1151))
 * Added `subnets` attribute to `networking_network_v2` data source ([#1152](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1152))
+* Extended `max_retries` provider parameter to use the `Retry-After` header ([#1159](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1159))
 
 BUG FIXES
 
 * Fixed copying `sync.Locker` by updating `gophercloud/utils` with the fix ([#1144](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1144))
 * Fixed recreation of `lb_loadbalancer_v2` resource if `flavor_id` haven't been specified ([#1147](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1147))
+* Fixed `networking_port_v2` resource update if `binding.profile` is not set ([#1154](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1154))
 
 ## 1.35.0 (January 15, 2021)
 
