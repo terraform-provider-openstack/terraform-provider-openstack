@@ -10,7 +10,11 @@ description: |-
 
 Manages a V3 User resource within OpenStack Keystone.
 
-Note: You _must_ have admin privileges in your OpenStack cloud to use
+~> **Note:** All arguments including the user password will be stored in the
+raw state as plain-text. [Read more about sensitive data in
+state](https://www.terraform.io/docs/language/state/sensitive-data.html).
+
+~> **Note:** You _must_ have admin privileges in your OpenStack cloud to use
 this resource.
 
 ## Example Usage

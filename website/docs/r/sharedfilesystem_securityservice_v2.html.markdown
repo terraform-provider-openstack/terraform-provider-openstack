@@ -10,6 +10,10 @@ description: |-
 
 Use this resource to configure a security service.
 
+~> **Note:** All arguments including the security service password will be
+stored in the raw state as plain-text. [Read more about sensitive data in
+state](/docs/state/sensitive-data.html).
+
 A security service stores configuration information for clients for
 authentication and authorization (AuthN/AuthZ). For example, a share server
 will be the client for an existing service such as LDAP, Kerberos, or

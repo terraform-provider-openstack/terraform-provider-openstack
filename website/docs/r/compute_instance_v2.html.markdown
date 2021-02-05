@@ -6,9 +6,13 @@ description: |-
   Manages a V2 VM instance resource within OpenStack.
 ---
 
-# openstack\_compute\_instance_v2
+# openstack\_compute\_instance\_v2
 
 Manages a V2 VM instance resource within OpenStack.
+
+~> **Note:** All arguments including the instance admin password will be stored
+in the raw state as plain-text. [Read more about sensitive data in
+state](https://www.terraform.io/docs/language/state/sensitive-data.html).
 
 ## Example Usage
 
