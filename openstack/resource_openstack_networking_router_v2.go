@@ -273,14 +273,12 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 
 			r, err = routers.Create(networkingClient, createOpts).Extract()
 			if err != nil {
-				switch err.(type) {
-				case gophercloud.ErrDefault409:
-					continue
-				case gophercloud.ErrDefault404: // this case is handled mostly for functional tests
+				if retryOn409(err) {
 					continue
 				}
 				return fmt.Errorf("Error creating openstack_networking_router_v2: %s", err)
 			}
+			break
 		}
 		// handle the last error
 		if err != nil {

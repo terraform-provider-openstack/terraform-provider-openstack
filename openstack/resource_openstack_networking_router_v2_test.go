@@ -336,6 +336,7 @@ resource "openstack_networking_router_v2" "router_2" {
   external_subnet_ids = [
     "%s", # wrong UUID
     "${openstack_networking_router_v2.router_1.external_fixed_ip.0.subnet_id}",
+    "%s", # wrong UUID again
   ]
 
   timeouts {
@@ -343,5 +344,5 @@ resource "openstack_networking_router_v2" "router_2" {
     delete = "5m"
   }
 }
-`, osExtGwID, osExtGwID, osExtGwID)
+`, osExtGwID, osExtGwID, osExtGwID, osExtGwID)
 }

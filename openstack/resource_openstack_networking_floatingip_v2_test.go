@@ -59,6 +59,22 @@ func TestAccNetworkingV2FloatingIP_fixedip_bind(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2FloatingIP_subnetIDs(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2FloatingIPDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2FloatingIPSubnetIDs(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("openstack_networking_floatingip_v2.fip_1", "description", "test"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccNetworkingV2FloatingIP_timeout(t *testing.T) {
 	var fip floatingips.FloatingIP
 
@@ -249,3 +265,25 @@ resource "openstack_networking_floatingip_v2" "fip_1" {
   }
 }
 `
+
+func testAccNetworkingV2FloatingIPSubnetIDs() string {
+	return fmt.Sprintf(`
+data "openstack_networking_network_v2" "ext_network" {
+  name = "%s"
+}
+
+data "openstack_networking_subnet_ids_v2" "ext_subnets" {
+  network_id = data.openstack_networking_network_v2.ext_network.id
+}
+
+resource "openstack_networking_floatingip_v2" "fip_1" {
+  pool = data.openstack_networking_network_v2.ext_network.name
+  description = "test"
+  subnet_ids = [
+    data.openstack_networking_network_v2.ext_network.id, # wrong UUID
+    data.openstack_networking_subnet_ids_v2.ext_subnets.ids[0],
+    data.openstack_networking_network_v2.ext_network.id, # wrong UUID again
+  ]
+}
+`, osPoolName)
+}
