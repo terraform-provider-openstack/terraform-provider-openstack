@@ -6,7 +6,7 @@ description: |-
   Manages a V2 Neutron VPN service resource within OpenStack.
 ---
 
-# openstack\_vpnaas\_service_v2
+# openstack\_vpnaas\_service\_v2
 
 Manages a V2 Neutron VPN service resource within OpenStack.
 

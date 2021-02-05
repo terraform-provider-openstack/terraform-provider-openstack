@@ -6,7 +6,7 @@ description: |-
   Manages a V3 Role assignment within OpenStack Keystone.
 ---
 
-# openstack\_identity\_role\_assignment_v3
+# openstack\_identity\_role\_assignment\_v3
 
 Manages a V3 Role assignment within OpenStack Keystone.
 

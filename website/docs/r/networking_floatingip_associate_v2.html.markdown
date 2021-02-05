@@ -6,7 +6,7 @@ description: |-
   Associates a Floating IP to a Port
 ---
 
-# openstack\_networking\_floatingip\_associate_v2
+# openstack\_networking\_floatingip\_associate\_v2
 
 Associates a floating IP to a port. This is useful for situations
 where you have a pre-allocated floating IP or are unable to use the

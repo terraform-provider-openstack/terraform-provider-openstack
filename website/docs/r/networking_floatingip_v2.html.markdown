@@ -6,7 +6,7 @@ description: |-
   Manages a V2 floating IP resource within OpenStack Neutron (networking).
 ---
 
-# openstack\_networking\_floatingip_v2
+# openstack\_networking\_floatingip\_v2
 
 Manages a V2 floating IP resource within OpenStack Neutron (networking)
 that can be used for load balancers.

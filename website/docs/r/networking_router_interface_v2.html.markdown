@@ -6,7 +6,7 @@ description: |-
   Manages a V2 router interface resource within OpenStack.
 ---
 
-# openstack\_networking\_router_interface_v2
+# openstack\_networking\_router\_interface\_v2
 
 Manages a V2 router interface resource within OpenStack.
 

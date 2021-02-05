@@ -6,7 +6,7 @@ description: |-
   Manages a V1 DB instance resource within OpenStack.
 ---
 
-# openstack\_db\_instance_v1
+# openstack\_db\_instance\_v1
 
 Manages a V1 DB instance resource within OpenStack.
 

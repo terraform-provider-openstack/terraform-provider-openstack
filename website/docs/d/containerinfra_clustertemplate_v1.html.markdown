@@ -6,7 +6,7 @@ description: |-
   Get information on an OpenStack Magnum cluster template.
 ---
 
-# openstack\_containerinfra\_clustertemplate_v1
+# openstack\_containerinfra\_clustertemplate\_v1
 
 Use this data source to get the ID of an available OpenStack Magnum cluster
 template.

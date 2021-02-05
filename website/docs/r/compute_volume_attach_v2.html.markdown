@@ -6,7 +6,7 @@ description: |-
   Attaches a Block Storage Volume to an Instance.
 ---
 
-# openstack\_compute\_volume_attach_v2
+# openstack\_compute\_volume\_attach\_v2
 
 Attaches a Block Storage Volume to an Instance using the OpenStack
 Compute (Nova) v2 API.

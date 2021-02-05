@@ -6,7 +6,7 @@ description: |-
   Attaches a Network Interface to an Instance.
 ---
 
-# openstack\_compute\_interface\_attach_v2
+# openstack\_compute\_interface\_attach\_v2
 
 Attaches a Network Interface (a Port) to an Instance using the OpenStack
 Compute (Nova) v2 API.

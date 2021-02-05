@@ -6,7 +6,7 @@ description: |-
   Manages a V2 Neutron subnet resource within OpenStack.
 ---
 
-# openstack\_networking\_subnet_v2
+# openstack\_networking\_subnet\_v2
 
 Manages a V2 Neutron subnet resource within OpenStack.
 

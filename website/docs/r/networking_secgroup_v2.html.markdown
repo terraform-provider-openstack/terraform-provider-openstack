@@ -6,7 +6,7 @@ description: |-
   Manages a V2 Neutron security group resource within OpenStack.
 ---
 
-# openstack\_networking\_secgroup_v2
+# openstack\_networking\_secgroup\_v2
 
 Manages a V2 neutron security group resource within OpenStack.
 Unlike Nova security groups, neutron separates the group from the rules

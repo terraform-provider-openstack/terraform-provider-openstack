@@ -6,7 +6,7 @@ description: |-
   Manages a V3 volume resource within OpenStack.
 ---
 
-# openstack\_blockstorage\_volume_v3
+# openstack\_blockstorage\_volume\_v3
 
 Manages a V3 volume resource within OpenStack.
 

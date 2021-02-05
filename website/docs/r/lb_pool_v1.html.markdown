@@ -6,7 +6,7 @@ description: |-
   Manages a V1 load balancer pool resource within OpenStack.
 ---
 
-# openstack\_lb\_pool_v1
+# openstack\_lb\_pool\_v1
 
 Manages a V1 load balancer pool resource within OpenStack.
 

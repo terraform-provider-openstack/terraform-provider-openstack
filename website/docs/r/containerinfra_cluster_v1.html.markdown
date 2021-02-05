@@ -6,7 +6,7 @@ description: |-
   Manages a V1 Magnum cluster resource within OpenStack.
 ---
 
-# openstack\_containerinfra\_cluster_v1
+# openstack\_containerinfra\_cluster\_v1
 
 Manages a V1 Magnum cluster resource within OpenStack.
 

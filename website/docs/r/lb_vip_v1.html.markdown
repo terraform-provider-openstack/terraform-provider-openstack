@@ -6,7 +6,7 @@ description: |-
   Manages a V1 load balancer vip resource within OpenStack.
 ---
 
-# openstack\_lb\_vip_v1
+# openstack\_lb\_vip\_v1
 
 Manages a V1 load balancer vip resource within OpenStack.
 

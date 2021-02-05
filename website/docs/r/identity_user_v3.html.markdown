@@ -6,7 +6,7 @@ description: |-
   Manages a V3 User resource within OpenStack Keystone.
 ---
 
-# openstack\_identity\_user_v3
+# openstack\_identity\_user\_v3
 
 Manages a V3 User resource within OpenStack Keystone.
 

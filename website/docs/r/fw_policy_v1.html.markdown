@@ -6,7 +6,7 @@ description: |-
   Manages a v1 firewall policy resource within OpenStack.
 ---
 
-# openstack\_fw\_policy_v1
+# openstack\_fw\_policy\_v1
 
 Manages a v1 firewall policy resource within OpenStack.
 
