@@ -10,7 +10,7 @@ description: |-
 
 Manages a project access for flavor V2 resource within OpenStack.
 
-Note: You _must_ have admin privileges in your OpenStack cloud to use
+~> **Note:** You _must_ have admin privileges in your OpenStack cloud to use
 this resource.
 
 ---
