@@ -32,12 +32,15 @@ The following arguments are supported:
     authorized by policy (e.g. networks that belong to them or networks that
     are shared).  Changing this creates a new loadbalancer.
     It is required to Neutron LBaaS but optional for Octavia.
-    
+
 * `vip_network_id` - (Optional) The network on which to allocate the
     Loadbalancer's address. A tenant can only create Loadbalancers on networks
     authorized by policy (e.g. networks that belong to them or networks that
     are shared).  Changing this creates a new loadbalancer.
     It is available only for Octavia.
+
+* `vip_port_id` - (Optional) The port UUID that the loadbalancer will use.
+  Changing this creates a new loadbalancer. It is available only for Octavia.
 
 * `name` - (Optional) Human-readable name for the Loadbalancer. Does not have
     to be unique.
