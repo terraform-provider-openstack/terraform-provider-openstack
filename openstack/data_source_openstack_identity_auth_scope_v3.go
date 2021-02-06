@@ -92,6 +92,55 @@ func dataSourceIdentityAuthScopeV3() *schema.Resource {
 					},
 				},
 			},
+
+			"service_catalog": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"endpoints": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"region": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"region_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"interface": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"url": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -105,7 +154,7 @@ func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{})
 
 	d.SetId(d.Get("name").(string))
 
-	user, domain, project, roles, err := GetTokenDetails(identityClient)
+	user, domain, project, roles, catalog, err := GetTokenDetails(identityClient)
 	if err != nil {
 		return err
 	}
@@ -138,6 +187,13 @@ func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{})
 	allRoles := flattenIdentityAuthScopeV3Roles(roles)
 	if err := d.Set("roles", allRoles); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_identity_auth_scope_v3 roles: %s", err)
+	}
+
+	if catalog != nil {
+		flatCatalog := flattenIdentityAuthScopeV3ServiceCatalog(catalog)
+		if err := d.Set("service_catalog", flatCatalog); err != nil {
+			log.Printf("[DEBUG] Unable to set openstack_identity_auth_scope_v3 service_catalog: %s", err)
+		}
 	}
 
 	d.Set("region", GetRegion(d, config))
