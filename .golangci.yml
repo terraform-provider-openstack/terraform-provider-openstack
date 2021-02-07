@@ -26,7 +26,7 @@ linters:
     - goprintffuncname
 #    - gosec
 #    - gosimple
-#    - govet
+    - govet
     - ineffassign
     - interfacer
 #    - maligned

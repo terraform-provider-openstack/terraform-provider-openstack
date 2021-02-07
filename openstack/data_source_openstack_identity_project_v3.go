@@ -103,7 +103,6 @@ func dataSourceIdentityProjectV3Read(d *schema.ResourceData, meta interface{}) e
 			userID, _, err = GetTokenInfo(identityClient)
 			if err != nil {
 				return fmt.Errorf("Error when getting token info: %s", err)
-				return err
 			}
 		}
 		// Search for all the projects using the users.ListProjects API call and filter them
