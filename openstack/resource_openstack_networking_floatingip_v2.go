@@ -229,8 +229,10 @@ func resourceNetworkFloatingIPV2Create(d *schema.ResourceData, meta interface{})
 
 	d.SetId(fip.ID)
 
-	// resourceNetworkFloatingIPV2Read doesn't handle this, since FIP GET request doesn't provide this info.
-	d.Set("subnet_id", createOpts.SubnetID)
+	if createOpts.SubnetID != "" {
+		// resourceNetworkFloatingIPV2Read doesn't handle this, since FIP GET request doesn't provide this info.
+		d.Set("subnet_id", createOpts.SubnetID)
+	}
 
 	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
