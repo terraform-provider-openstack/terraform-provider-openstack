@@ -6,7 +6,7 @@ description: |-
   Manages a V1 load balancer member resource within OpenStack.
 ---
 
-# openstack\_lb\_member_v1
+# openstack\_lb\_member\_v1
 
 Manages a V1 load balancer member resource within OpenStack.
 

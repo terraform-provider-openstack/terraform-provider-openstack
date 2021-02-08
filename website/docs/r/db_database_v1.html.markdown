@@ -6,7 +6,7 @@ description: |-
   Manages a V1 database resource within OpenStack.
 ---
 
-# openstack\_db\_database_v1
+# openstack\_db\_database\_v1
 
 Manages a V1 DB database resource within OpenStack.
 

@@ -6,7 +6,7 @@ description: |-
   Get information on an OpenStack Service.
 ---
 
-# openstack\_identity\_service_v3
+# openstack\_identity\_service\_v3
 
 Use this data source to get the ID of an OpenStack service.
 

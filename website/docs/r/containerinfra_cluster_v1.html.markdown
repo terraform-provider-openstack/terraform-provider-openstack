@@ -6,9 +6,13 @@ description: |-
   Manages a V1 Magnum cluster resource within OpenStack.
 ---
 
-# openstack\_containerinfra\_cluster_v1
+# openstack\_containerinfra\_cluster\_v1
 
 Manages a V1 Magnum cluster resource within OpenStack.
+
+~> **Note:** All arguments including the `kubeconfig` computed attribute will be
+stored in the raw state as plain-text. [Read more about sensitive data in
+state](https://www.terraform.io/docs/language/state/sensitive-data.html).
 
 ## Example Usage
 

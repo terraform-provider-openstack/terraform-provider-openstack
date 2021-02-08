@@ -6,7 +6,7 @@ description: |-
   Creates a routing entry on a OpenStack V2 router.
 ---
 
-# openstack\_networking\_router_route_v2
+# openstack\_networking\_router\_route\_v2
 
 Creates a routing entry on a OpenStack V2 router.
 

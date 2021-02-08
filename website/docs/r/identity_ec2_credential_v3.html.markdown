@@ -14,7 +14,7 @@ endpoints or to authenticate against Keystone.
 
 ~> **Note:** All arguments including the EC2 credential access key and secret
 will be stored in the raw state as plain-text. [Read more about sensitive data
-in state](/docs/state/sensitive-data.html).
+in state](https://www.terraform.io/docs/language/state/sensitive-data.html).
 
 ## Example Usage
 

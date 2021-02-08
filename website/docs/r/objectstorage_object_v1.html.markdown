@@ -6,7 +6,7 @@ description: |-
   Manages a V1 container object resource within OpenStack.
 ---
 
-# openstack\_objectstorage\_object_v1
+# openstack\_objectstorage\_object\_v1
 
 Manages a V1 container object resource within OpenStack.
 

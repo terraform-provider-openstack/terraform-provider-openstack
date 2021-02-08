@@ -6,7 +6,7 @@ description: |-
   Manages a V2 volume resource within OpenStack.
 ---
 
-# openstack\_blockstorage\_volume_v2
+# openstack\_blockstorage\_volume\_v2
 
 Manages a V2 volume resource within OpenStack.
 

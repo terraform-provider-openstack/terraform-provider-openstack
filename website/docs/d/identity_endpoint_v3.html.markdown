@@ -6,7 +6,7 @@ description: |-
   Get information on an OpenStack Endpoint.
 ---
 
-# openstack\_identity\_endpoint_v3
+# openstack\_identity\_endpoint\_v3
 
 Use this data source to get the ID of an OpenStack endpoint.
 

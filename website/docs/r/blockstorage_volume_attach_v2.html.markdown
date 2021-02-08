@@ -10,8 +10,12 @@ description: |-
 
 ~> **Note:** This resource usually requires admin privileges.
 
-~> **Note:** This resource does not actually attach a volume to an instance. Please use
-the `openstack_compute_volume_attach_v2` resource for that.
+~> **Note:** This resource does not actually attach a volume to an instance.
+Please use the `openstack_compute_volume_attach_v2` resource for that.
+
+~> **Note:** All arguments including the `data` computed attribute will be
+stored in the raw state as plain-text. [Read more about sensitive data in
+state](https://www.terraform.io/docs/language/state/sensitive-data.html).
 
 Creates a general purpose attachment connection to a Block
 Storage volume using the OpenStack Block Storage (Cinder) v2 API.

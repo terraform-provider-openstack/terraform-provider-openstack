@@ -10,9 +10,11 @@ description: |-
 
 Use this resource to control the share access lists.
 
-~> **Important Security Notice** The access key retrieved by this resource will
+~> **Important Security Notice** The access key assigned by this resource will
 be stored *unencrypted* in your Terraform state file. If you use this resource
 in production, please make sure your state file is sufficiently protected.
+[Read more about sensitive data in
+state](https://www.terraform.io/docs/language/state/sensitive-data.html).
 
 ## Example Usage
 

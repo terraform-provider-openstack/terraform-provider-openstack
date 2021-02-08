@@ -13,7 +13,8 @@ secret
 
 ~> **Important Security Notice** The payload of this data source will be stored
 *unencrypted* in your Terraform state file. **Use of this resource for
-production deployments is *not* recommended**.
+production deployments is *not* recommended**. [Read more about sensitive data
+in state](https://www.terraform.io/docs/language/state/sensitive-data.html).
 
 ## Example Usage
 

@@ -6,11 +6,11 @@ description: |-
   Manages a user membership to group V3 resource within OpenStack.
 ---
 
-# openstack\_identity\_user\_membership_v3
+# openstack\_identity\_user\_membership\_v3
 
 Manages a user membership to group V3 resource within OpenStack.
 
-Note: You _must_ have admin privileges in your OpenStack cloud to use
+~> **Note:** You _must_ have admin privileges in your OpenStack cloud to use
 this resource.
 
 ---
