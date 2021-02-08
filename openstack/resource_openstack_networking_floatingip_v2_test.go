@@ -275,11 +275,11 @@ data "openstack_networking_network_v2" "ext_network" {
 resource "openstack_networking_floatingip_v2" "fip_1" {
   pool = data.openstack_networking_network_v2.ext_network.name
   description = "test"
-  subnet_ids = [
+  subnet_ids = flatten([
     data.openstack_networking_network_v2.ext_network.id, # wrong UUID
-    data.openstack_networking_network_v2.ext_network.subnets[0],
+    data.openstack_networking_network_v2.ext_network.subnets,
     data.openstack_networking_network_v2.ext_network.id, # wrong UUID again
-  ]
+  ])
 }
 `, osPoolName)
 }
