@@ -3,7 +3,7 @@
 FEATURES
 
 * Added `image_source_username`, `image_source_password` arguments to `images_image_v2` resource ([#1157](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1157))
-* Updated `networking_floatingip_v2` resource to retry subnets on router creation, when a subnet is exhausted ([#1163](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1163))
+* Updated `networking_floatingip_v2` resource to retry subnets on floating IP creation, when a subnet is exhausted ([#1163](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1163))
 * Updated security notices for sensitive arguments and attributes in documentation ([#1161](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1161))
 
 BUG FIXES
