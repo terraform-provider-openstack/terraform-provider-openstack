@@ -10,6 +10,10 @@ description: |-
 
 Manages a V2 Image resource within OpenStack Glance.
 
+~> **Note:** All arguments including the source image URL password will be
+stored in the raw state as plain-text. [Read more about sensitive data in
+state](https://www.terraform.io/docs/language/state/sensitive-data.html).
+
 ## Example Usage
 
 ```hcl
@@ -47,6 +51,10 @@ The following arguments are supported:
    is not used, then the image will be downloaded in the `image_cache_path` before
    being uploaded to Glance.
    Conflicts with `local_file_path`.
+
+* `image_source_username` - (Optional) The username of basic auth to download `image_source_url`.
+
+* `image_source_password` - (Optional) The password of basic auth to download `image_source_url`.
 
 * `min_disk_gb` - (Optional) Amount of disk space (in GB) required to boot image.
    Defaults to 0.

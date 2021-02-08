@@ -84,6 +84,19 @@ func resourceImagesImageV2() *schema.Resource {
 				ConflictsWith: []string{"local_file_path"},
 			},
 
+			"image_source_username": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"local_file_path"},
+			},
+
+			"image_source_password": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				ConflictsWith: []string{"local_file_path"},
+			},
+
 			"local_file_path": {
 				Type:          schema.TypeString,
 				Optional:      true,
@@ -257,7 +270,7 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 		var imgFile *os.File
 
 		// downloading/getting image file props
-		imgFilePath, err = resourceImagesImageV2File(d)
+		imgFilePath, err = resourceImagesImageV2File(imageClient, d)
 		if err != nil {
 			return fmt.Errorf("Error opening file for Image: %s", err)
 		}
