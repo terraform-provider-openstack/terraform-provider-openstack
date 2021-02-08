@@ -1,3 +1,9 @@
+## 1.37.0 (Unreleased)
+
+FEATURES
+
+* Added `image_source_username`, `image_source_password` arguments to `images_image_v2` resource ([#1157](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1157))
+
 ## 1.36.0 (February 2, 2021)
 
 NOTES
