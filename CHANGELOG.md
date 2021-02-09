@@ -1,3 +1,9 @@
+## 1.38.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Updated gophercloud/utils, which now recognizes `clouds.yml` in addition to `clouds.yaml` and correctly applies per-region value overrides
+
 ## 1.37.0 (February 8, 2021)
 
 FEATURES
