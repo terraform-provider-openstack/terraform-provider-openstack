@@ -123,6 +123,33 @@ func TestAccLBV2LoadBalancer_vip_network(t *testing.T) {
 	})
 }
 
+func TestAccLBV2LoadBalancer_vip_port_id(t *testing.T) {
+	var lb loadbalancers.LoadBalancer
+	var port ports.Port
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckLB(t)
+			testAccPreCheckUseOctavia(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLbV2LoadBalancerConfigVIPPortID,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV2LoadBalancerExists(
+						"openstack_lb_loadbalancer_v2.loadbalancer_1", &lb),
+					testAccCheckNetworkingV2PortExists(
+						"openstack_networking_port_v2.port_1", &port),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_lb_loadbalancer_v2.loadbalancer_1", "vip_port_id", &port.ID),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckLBV2LoadBalancerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
@@ -387,6 +414,39 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   loadbalancer_provider = "octavia"
   vip_network_id = "${openstack_networking_network_v2.network_1.id}"
   depends_on = ["openstack_networking_subnet_v2.subnet_1"]
+  timeouts {
+    create = "15m"
+    update = "15m"
+    delete = "15m"
+  }
+}
+`
+
+const testAccLbV2LoadBalancerConfigVIPPortID = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name           = "port_1"
+  network_id     = "${openstack_networking_network_v2.network_1.id}"
+  admin_state_up = "true"
+  depends_on = ["openstack_networking_subnet_v2.subnet_1"]
+}
+
+resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
+  name = "loadbalancer_1"
+  loadbalancer_provider = "octavia"
+  vip_port_id = "${openstack_networking_port_v2.port_1.id}"
+  depends_on = ["openstack_networking_port_v2.port_1"]
   timeouts {
     create = "15m"
     update = "15m"

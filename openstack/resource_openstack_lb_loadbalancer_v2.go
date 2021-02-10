@@ -76,6 +76,8 @@ func resourceLoadBalancerV2() *schema.Resource {
 
 			"vip_port_id": {
 				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 				Computed: true,
 			},
 

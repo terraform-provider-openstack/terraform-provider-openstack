@@ -1082,6 +1082,7 @@ func chooseLBV2LoadBalancerCreateOpts(d *schema.ResourceData, config *Config) ne
 			Description:  d.Get("description").(string),
 			VipNetworkID: d.Get("vip_network_id").(string),
 			VipSubnetID:  d.Get("vip_subnet_id").(string),
+			VipPortID:    d.Get("vip_port_id").(string),
 			ProjectID:    d.Get("tenant_id").(string),
 			VipAddress:   d.Get("vip_address").(string),
 			AdminStateUp: &adminStateUp,
