@@ -26,10 +26,10 @@ linters:
     - goprintffuncname
 #    - gosec
 #    - gosimple
-#    - govet
+    - govet
     - ineffassign
     - interfacer
-#    - maligned
+    - maligned
     - misspell
     - nakedret
     - nolintlint
