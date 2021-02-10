@@ -2,7 +2,8 @@
 
 IMPROVEMENTS
 
-* Updated gophercloud/utils, which now recognizes `clouds.yml` in addition to `clouds.yaml` and correctly applies per-region value overrides
+* Updated gophercloud/utils, which now recognizes `clouds.yml` in addition to `clouds.yaml` and correctly applies per-region value overrides ([#1172](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1172))
+* Added `vip_port_id` for `lb_loadbalancer_v2` resource. It can be used only with Octavia ([#1164](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1164))
 
 ## 1.37.0 (February 8, 2021)
 
