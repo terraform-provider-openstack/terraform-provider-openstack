@@ -27,7 +27,7 @@ func expandComputeServerGroupV2Policies(client *gophercloud.ServiceClient, raw [
 	policies := make([]string, len(raw))
 	for i, v := range raw {
 		client.Microversion = "2.15"
-		
+
 		policy := v.(string)
 		policies[i] = policy
 
