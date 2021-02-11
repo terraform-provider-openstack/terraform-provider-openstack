@@ -31,9 +31,9 @@ func expandComputeServerGroupV2Policies(client *gophercloud.ServiceClient, raw [
 		policy := v.(string)
 		policies[i] = policy
 
-		// Set microversion for new policies.
+		// Set microversion for legacy policies to empty to not change behaviour for those policies
 		if policy == antiAffinityPolicy || policy == affinityPolicy {
-			client.Microversion = "2.1"
+			client.Microversion = ""
 		}
 	}
 
