@@ -4,6 +4,8 @@ IMPROVEMENTS
 
 * Updated gophercloud/utils, which now recognizes `clouds.yml` in addition to `clouds.yaml` and correctly applies per-region value overrides ([#1172](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1172))
 * Added `vip_port_id` for `lb_loadbalancer_v2` resource. It can be used only with Octavia ([#1164](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1164))
+* Added `service_catalog` attribute for `identity_auth_scope_v3` data source ([#1167](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1167))
+* Set `2.15` microversion for any type of `server_group_v2` policy except `affinity` and `anti-affinity` since they don't need any microversion ([#1141](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1141))
 
 ## 1.37.0 (February 8, 2021)
 
