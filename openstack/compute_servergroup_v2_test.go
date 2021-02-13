@@ -34,18 +34,24 @@ func TestComputeServerGroupV2CreateOpts(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestExpandComputeServerGroupV2Policies(t *testing.T) {
+func TestExpandComputeServerGroupV2PoliciesMicroversions(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()
 	raw := []interface{}{
 		"affinity",
+		"soft-anti-affinity",
+		"soft-affinity",
+		"custom-policy",
 	}
 	client := thclient.ServiceClient()
 
 	expectedPolicies := []string{
 		"affinity",
+		"soft-anti-affinity",
+		"soft-affinity",
+		"custom-policy",
 	}
-	expectedMicroversion := ""
+	expectedMicroversion := "2.15"
 
 	actualPolicies := expandComputeServerGroupV2Policies(client, raw)
 	actualMicroversion := client.Microversion
@@ -54,22 +60,20 @@ func TestExpandComputeServerGroupV2Policies(t *testing.T) {
 	assert.Equal(t, expectedPolicies, actualPolicies)
 }
 
-func TestExpandComputeServerGroupV2PoliciesMicroversions(t *testing.T) {
+func TestExpandComputeServerGroupV2PoliciesMicroversionsLegacy(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()
 	raw := []interface{}{
+		"anti-affinity",
 		"affinity",
-		"soft-anti-affinity",
-		"soft-affinity",
 	}
 	client := thclient.ServiceClient()
 
 	expectedPolicies := []string{
+		"anti-affinity",
 		"affinity",
-		"soft-anti-affinity",
-		"soft-affinity",
 	}
-	expectedMicroversion := "2.15"
+	expectedMicroversion := ""
 
 	actualPolicies := expandComputeServerGroupV2Policies(client, raw)
 	actualMicroversion := client.Microversion
