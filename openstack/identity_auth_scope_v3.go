@@ -22,11 +22,37 @@ func flattenIdentityAuthScopeV3Roles(roles []tokens3.Role) []map[string]string {
 	return allRoles
 }
 
-func GetTokenDetails(sc *gophercloud.ServiceClient) (*tokens3.User, *tokens3.Domain, *tokens3.Project, []tokens3.Role, error) {
+func flattenIdentityAuthScopeV3ServiceCatalog(catalog *tokens3.ServiceCatalog) []map[string]interface{} {
+	ret := make([]map[string]interface{}, len(catalog.Entries))
+
+	for iEntry, entry := range catalog.Entries {
+		endpoints := make([]map[string]string, len(entry.Endpoints))
+		for iEndpoint, endpoint := range entry.Endpoints {
+			endpoints[iEndpoint] = map[string]string{
+				"id":        endpoint.ID,
+				"region":    endpoint.Region,
+				"region_id": endpoint.RegionID,
+				"interface": endpoint.Interface,
+				"url":       endpoint.URL,
+			}
+		}
+		ret[iEntry] = map[string]interface{}{
+			"id":        entry.ID,
+			"name":      entry.Name,
+			"type":      entry.Type,
+			"endpoints": endpoints,
+		}
+	}
+
+	return ret
+}
+
+func GetTokenDetails(sc *gophercloud.ServiceClient) (*tokens3.User, *tokens3.Domain, *tokens3.Project, []tokens3.Role, *tokens3.ServiceCatalog, error) {
 	var (
 		user    *tokens3.User
 		domain  *tokens3.Domain
 		project *tokens3.Project
+		catalog *tokens3.ServiceCatalog
 		roles   []tokens3.Role
 		err     error
 	)
@@ -36,61 +62,70 @@ func GetTokenDetails(sc *gophercloud.ServiceClient) (*tokens3.User, *tokens3.Dom
 	case tokens3.CreateResult:
 		user, err = result.ExtractUser()
 		if err != nil {
-			return nil, nil, nil, nil, err
+			return nil, nil, nil, nil, nil, err
 		}
 		domain, err = result.ExtractDomain()
 		if err != nil {
-			return nil, nil, nil, nil, err
+			return nil, nil, nil, nil, nil, err
 		}
 		project, err = result.ExtractProject()
 		if err != nil {
-			return nil, nil, nil, nil, err
+			return nil, nil, nil, nil, nil, err
 		}
 		roles, err = result.ExtractRoles()
 		if err != nil {
-			return nil, nil, nil, nil, err
+			return nil, nil, nil, nil, nil, err
+		}
+		catalog, err = result.ExtractServiceCatalog()
+		if err != nil {
+			return nil, nil, nil, nil, nil, err
 		}
 	case tokens3.GetResult:
 		user, err = result.ExtractUser()
 		if err != nil {
-			return nil, nil, nil, nil, err
+			return nil, nil, nil, nil, nil, err
 		}
 		domain, err = result.ExtractDomain()
 		if err != nil {
-			return nil, nil, nil, nil, err
+			return nil, nil, nil, nil, nil, err
 		}
 		project, err = result.ExtractProject()
 		if err != nil {
-			return nil, nil, nil, nil, err
+			return nil, nil, nil, nil, nil, err
 		}
 		roles, err = result.ExtractRoles()
 		if err != nil {
-			return nil, nil, nil, nil, err
+			return nil, nil, nil, nil, nil, err
+		}
+		catalog, err = result.ExtractServiceCatalog()
+		if err != nil {
+			return nil, nil, nil, nil, nil, err
 		}
 	default:
 		res := tokens3.Get(sc, sc.ProviderClient.TokenID)
 		if res.Err != nil {
-			return nil, nil, nil, nil, res.Err
+			return nil, nil, nil, nil, nil, res.Err
 		}
 		user, err = res.ExtractUser()
 		if err != nil {
-			return nil, nil, nil, nil, err
+			return nil, nil, nil, nil, nil, err
 		}
 		domain, err = res.ExtractDomain()
 		if err != nil {
-			return nil, nil, nil, nil, err
+			return nil, nil, nil, nil, nil, err
 		}
 		project, err = res.ExtractProject()
 		if err != nil {
-			return nil, nil, nil, nil, err
+			return nil, nil, nil, nil, nil, err
 		}
 		roles, err = res.ExtractRoles()
 		if err != nil {
-			return nil, nil, nil, nil, err
+			return nil, nil, nil, nil, nil, err
 		}
+		// AuthResult has no method ExtractServiceCatalog
 	}
 
-	return user, domain, project, roles, nil
+	return user, domain, project, roles, catalog, nil
 }
 
 func GetTokenInfo(sc *gophercloud.ServiceClient) (string, string, error) {
