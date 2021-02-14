@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/extensions/ec2credentials"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceIdentityEc2CredentialV3() *schema.Resource {
@@ -70,7 +71,7 @@ func resourceIdentityEc2CredentialV3Create(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
-	user, project, err := GetTokenInfo(identityClient)
+	tokenInfo, err := getTokenInfo(identityClient)
 	if err != nil {
 		return fmt.Errorf("Error getting token info: %s", err)
 	}
@@ -80,7 +81,7 @@ func resourceIdentityEc2CredentialV3Create(d *schema.ResourceData, meta interfac
 	if definedProject, ok := d.GetOk("project_id"); ok {
 		tenantID = definedProject.(string)
 	} else {
-		tenantID = project
+		tenantID = tokenInfo.projectID
 	}
 
 	createOpts := ec2credentials.CreateOpts{
@@ -92,7 +93,7 @@ func resourceIdentityEc2CredentialV3Create(d *schema.ResourceData, meta interfac
 	if definedUser, ok := d.GetOk("user_id"); ok {
 		userID = definedUser.(string)
 	} else {
-		userID = user
+		userID = tokenInfo.userID
 	}
 
 	log.Printf("[DEBUG] openstack_identity_ec2_credential_v3 create options: %#v", createOpts)
@@ -124,7 +125,7 @@ func resourceIdentityEc2CredentialV3Read(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
-	user, _, err := GetTokenInfo(identityClient)
+	tokenInfo, err := getTokenInfo(identityClient)
 	if err != nil {
 		return fmt.Errorf("Error getting token info: %s", err)
 	}
@@ -134,7 +135,7 @@ func resourceIdentityEc2CredentialV3Read(d *schema.ResourceData, meta interface{
 	if definedUser, ok := d.GetOk("user_id"); ok {
 		userID = definedUser.(string)
 	} else {
-		userID = user
+		userID = tokenInfo.userID
 	}
 
 	ec2Credential, err := ec2credentials.Get(identityClient, userID, d.Id()).Extract()
@@ -160,7 +161,7 @@ func resourceIdentityEc2CredentialV3Delete(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
-	user, _, err := GetTokenInfo(identityClient)
+	tokenInfo, err := getTokenInfo(identityClient)
 	if err != nil {
 		return fmt.Errorf("Error getting token info: %s", err)
 	}
@@ -170,7 +171,7 @@ func resourceIdentityEc2CredentialV3Delete(d *schema.ResourceData, meta interfac
 	if definedUser, ok := d.GetOk("user_id"); ok {
 		userID = definedUser.(string)
 	} else {
-		userID = user
+		userID = tokenInfo.userID
 	}
 
 	err = ec2credentials.Delete(identityClient, userID, d.Id()).ExtractErr()

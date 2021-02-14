@@ -47,132 +47,148 @@ func flattenIdentityAuthScopeV3ServiceCatalog(catalog *tokens3.ServiceCatalog) [
 	return ret
 }
 
-func GetTokenDetails(sc *gophercloud.ServiceClient) (*tokens3.User, *tokens3.Domain, *tokens3.Project, []tokens3.Role, *tokens3.ServiceCatalog, error) {
+type authScopeTokenDetails struct {
+	user    *tokens3.User
+	domain  *tokens3.Domain
+	project *tokens3.Project
+	catalog *tokens3.ServiceCatalog
+	roles   []tokens3.Role
+}
+
+func getTokenDetails(sc *gophercloud.ServiceClient) (authScopeTokenDetails, error) {
 	var (
-		user    *tokens3.User
-		domain  *tokens3.Domain
-		project *tokens3.Project
-		catalog *tokens3.ServiceCatalog
-		roles   []tokens3.Role
+		details authScopeTokenDetails
 		err     error
 	)
 
 	r := sc.ProviderClient.GetAuthResult()
 	switch result := r.(type) {
 	case tokens3.CreateResult:
-		user, err = result.ExtractUser()
+		details.user, err = result.ExtractUser()
 		if err != nil {
-			return nil, nil, nil, nil, nil, err
+			return details, err
 		}
-		domain, err = result.ExtractDomain()
+		details.domain, err = result.ExtractDomain()
 		if err != nil {
-			return nil, nil, nil, nil, nil, err
+			return details, err
 		}
-		project, err = result.ExtractProject()
+		details.project, err = result.ExtractProject()
 		if err != nil {
-			return nil, nil, nil, nil, nil, err
+			return details, err
 		}
-		roles, err = result.ExtractRoles()
+		details.roles, err = result.ExtractRoles()
 		if err != nil {
-			return nil, nil, nil, nil, nil, err
+			return details, err
 		}
-		catalog, err = result.ExtractServiceCatalog()
+		details.catalog, err = result.ExtractServiceCatalog()
 		if err != nil {
-			return nil, nil, nil, nil, nil, err
+			return details, err
 		}
 	case tokens3.GetResult:
-		user, err = result.ExtractUser()
+		details.user, err = result.ExtractUser()
 		if err != nil {
-			return nil, nil, nil, nil, nil, err
+			return details, err
 		}
-		domain, err = result.ExtractDomain()
+		details.domain, err = result.ExtractDomain()
 		if err != nil {
-			return nil, nil, nil, nil, nil, err
+			return details, err
 		}
-		project, err = result.ExtractProject()
+		details.project, err = result.ExtractProject()
 		if err != nil {
-			return nil, nil, nil, nil, nil, err
+			return details, err
 		}
-		roles, err = result.ExtractRoles()
+		details.roles, err = result.ExtractRoles()
 		if err != nil {
-			return nil, nil, nil, nil, nil, err
+			return details, err
 		}
-		catalog, err = result.ExtractServiceCatalog()
+		details.catalog, err = result.ExtractServiceCatalog()
 		if err != nil {
-			return nil, nil, nil, nil, nil, err
+			return details, err
 		}
 	default:
 		res := tokens3.Get(sc, sc.ProviderClient.TokenID)
 		if res.Err != nil {
-			return nil, nil, nil, nil, nil, res.Err
+			return details, res.Err
 		}
-		user, err = res.ExtractUser()
+		details.user, err = res.ExtractUser()
 		if err != nil {
-			return nil, nil, nil, nil, nil, err
+			return details, err
 		}
-		domain, err = res.ExtractDomain()
+		details.domain, err = res.ExtractDomain()
 		if err != nil {
-			return nil, nil, nil, nil, nil, err
+			return details, err
 		}
-		project, err = res.ExtractProject()
+		details.project, err = res.ExtractProject()
 		if err != nil {
-			return nil, nil, nil, nil, nil, err
+			return details, err
 		}
-		roles, err = res.ExtractRoles()
+		details.roles, err = res.ExtractRoles()
 		if err != nil {
-			return nil, nil, nil, nil, nil, err
+			return details, err
 		}
 		// AuthResult has no method ExtractServiceCatalog
 	}
 
-	return user, domain, project, roles, catalog, nil
+	return details, nil
 }
 
-func GetTokenInfo(sc *gophercloud.ServiceClient) (string, string, error) {
+type authScopeTokenInfo struct {
+	userID    string
+	projectID string
+	tokenID   string
+}
+
+func getTokenInfo(sc *gophercloud.ServiceClient) (authScopeTokenInfo, error) {
 	r := sc.ProviderClient.GetAuthResult()
 	switch r := r.(type) {
 	case tokens2.CreateResult:
-		return GetTokenInfoV2(r)
+		return getTokenInfoV2(r)
 	case tokens3.CreateResult, tokens3.GetResult:
-		return GetTokenInfoV3(r)
+		return getTokenInfoV3(r)
 	default:
 		token := tokens3.Get(sc, sc.ProviderClient.TokenID)
 		if token.Err != nil {
-			return "", "", token.Err
+			return authScopeTokenInfo{}, token.Err
 		}
-		return GetTokenInfoV3(token)
+		return getTokenInfoV3(token)
 	}
 }
 
-func GetTokenInfoV3(t interface{}) (string, string, error) {
+func getTokenInfoV3(t interface{}) (authScopeTokenInfo, error) {
+	var info authScopeTokenInfo
 	switch r := t.(type) {
 	case tokens3.CreateResult:
 		user, err := r.ExtractUser()
 		if err != nil {
-			return "", "", err
+			return info, err
 		}
 		project, err := r.ExtractProject()
 		if err != nil {
-			return "", "", err
+			return info, err
 		}
-		return user.ID, project.ID, nil
+		info.userID = user.ID
+		info.projectID = project.ID
+		return info, nil
 	case tokens3.GetResult:
 		user, err := r.ExtractUser()
 		if err != nil {
-			return "", "", err
+			return info, err
 		}
 		project, err := r.ExtractProject()
 		if err != nil {
-			return "", "", err
+			return info, err
 		}
-		return user.ID, project.ID, nil
+		info.userID = user.ID
+		info.projectID = project.ID
+		return info, nil
 	default:
-		return "", "", fmt.Errorf("got unexpected AuthResult type %t", r)
+		return info, fmt.Errorf("got unexpected AuthResult type %t", r)
 	}
 }
 
-func GetTokenInfoV2(t tokens2.CreateResult) (string, string, error) {
-	var tokeninfo struct {
+func getTokenInfoV2(t tokens2.CreateResult) (authScopeTokenInfo, error) {
+	var info authScopeTokenInfo
+	var s struct {
 		Access struct {
 			Token struct {
 				Expires string         `json:"expires"`
@@ -183,9 +199,11 @@ func GetTokenInfoV2(t tokens2.CreateResult) (string, string, error) {
 		} `json:"access"`
 	}
 
-	err := t.ExtractInto(&tokeninfo)
+	err := t.ExtractInto(&s)
 	if err != nil {
-		return "", "", err
+		return info, err
 	}
-	return tokeninfo.Access.User.ID, tokeninfo.Access.Token.ID, nil
+	info.userID = s.Access.User.ID
+	info.tokenID = s.Access.Token.ID
+	return info, nil
 }
