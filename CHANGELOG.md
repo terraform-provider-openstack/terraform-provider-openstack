@@ -1,5 +1,9 @@
 ## 1.38.0 (Unreleased)
 
+FEATURES
+
+* __New Resource__: `openstack_lb_quota_v2` ([#1169](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1169))
+
 IMPROVEMENTS
 
 * Updated gophercloud/utils, which now recognizes `clouds.yml` in addition to `clouds.yaml` and correctly applies per-region value overrides ([#1172](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1172))
@@ -9,7 +13,7 @@ IMPROVEMENTS
 
 ## 1.37.0 (February 8, 2021)
 
-FEATURES
+IMPROVEMENTS
 
 * Added `image_source_username`, `image_source_password` arguments to `images_image_v2` resource ([#1157](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1157))
 * Updated `networking_floatingip_v2` resource to retry subnets on floating IP creation, when a subnet is exhausted ([#1163](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1163))
