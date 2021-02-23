@@ -11,6 +11,7 @@ IMPROVEMENTS
 * Added `service_catalog` attribute for `identity_auth_scope_v3` data source ([#1167](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1167))
 * Set `2.15` microversion for any type of `server_group_v2` policy except `affinity` and `anti-affinity` since they don't need any microversion ([#1141](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1141))
 * Add a note about using names in `security_groups` in `compute_instance_v2` resource in docs ([#1178](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1178))
+* Added ability to manage `networking_quota_v2` for the same project across several regions with a single resource ([#1177](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1177))
 
 ## 1.37.0 (February 8, 2021)
 
