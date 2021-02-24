@@ -6,9 +6,13 @@ description: |-
   Manages a V2 VM instance resource within OpenStack.
 ---
 
-# openstack\_compute\_instance_v2
+# openstack\_compute\_instance\_v2
 
 Manages a V2 VM instance resource within OpenStack.
+
+~> **Note:** All arguments including the instance admin password will be stored
+in the raw state as plain-text. [Read more about sensitive data in
+state](https://www.terraform.io/docs/language/state/sensitive-data.html).
 
 ## Example Usage
 
@@ -344,10 +348,11 @@ The following arguments are supported:
     Changing this creates a new server.
 
 * `security_groups` - (Optional) An array of one or more security group names
-    or ids to associate with the server. Changing this results in adding/removing
+    to associate with the server. Changing this results in adding/removing
     security groups from the existing server. *Note*: When attaching the
     instance to networks using Ports, place the security groups on the Port
-    and not the instance.
+    and not the instance. *Note*: Names should be used and not ids, as ids
+    trigger unnecessary updates.
 
 * `availability_zone_hints` - (Optional) The availability zone in which to
     create the server. This argument is preferred to `availability_zone`, when

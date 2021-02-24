@@ -6,7 +6,7 @@ description: |-
   Manages a V1 DB configuration resource within OpenStack.
 ---
 
-# openstack\_db\_configuration_v1
+# openstack\_db\_configuration\_v1
 
 Manages a V1 DB configuration resource within OpenStack.
 

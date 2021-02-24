@@ -22,11 +22,11 @@ type networkExtended struct {
 	networks.Network
 	external.NetworkExternalExt
 	vlantransparent.TransparentExt
-	provider.NetworkProviderExt
 	portsecurity.PortSecurityExt
 	mtu.NetworkMTUExt
 	dns.NetworkDNSExt
 	policies.QoSPolicyExt
+	provider.NetworkProviderExt
 }
 
 // networkingNetworkV2ID retrieves network ID by the provided name.

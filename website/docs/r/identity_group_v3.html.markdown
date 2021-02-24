@@ -6,11 +6,11 @@ description: |-
   Manages a V3 group resource within OpenStack Keystone.
 ---
 
-# openstack\_identity\_group_v3
+# openstack\_identity\_group\_v3
 
 Manages a V3 group resource within OpenStack Keystone.
 
-Note: You _must_ have admin privileges in your OpenStack cloud to use
+~> **Note:** You _must_ have admin privileges in your OpenStack cloud to use
 this resource.
 
 ## Example Usage

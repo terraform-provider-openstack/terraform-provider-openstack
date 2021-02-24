@@ -15,9 +15,9 @@ import (
 )
 
 var (
-	osDbEnvironment                  = os.Getenv("OS_DB_ENVIRONMENT")
-	osDbDatastoreVersion             = os.Getenv("OS_DB_DATASTORE_VERSION")
-	osDbDatastoreType                = os.Getenv("OS_DB_DATASTORE_TYPE")
+	osDBEnvironment                  = os.Getenv("OS_DB_ENVIRONMENT")
+	osDBDatastoreVersion             = os.Getenv("OS_DB_DATASTORE_VERSION")
+	osDBDatastoreType                = os.Getenv("OS_DB_DATASTORE_TYPE")
 	osDeprecatedEnvironment          = os.Getenv("OS_DEPRECATED_ENVIRONMENT")
 	osDNSEnvironment                 = os.Getenv("OS_DNS_ENVIRONMENT")
 	osExtGwID                        = os.Getenv("OS_EXTGW_ID")
@@ -42,6 +42,7 @@ var (
 	osTransparentVlanEnvironment = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
 	osKeymanagerEnvironment      = os.Getenv("OS_KEYMANAGER_ENVIRONMENT")
 	osGlanceimportEnvironment    = os.Getenv("OS_GLANCEIMPORT_ENVIRONMENT")
+	osHypervisorEnvironment      = os.Getenv("OS_HYPERVISOR_HOSTNAME")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -117,7 +118,7 @@ func testAccPreCheckSwift(t *testing.T) {
 func testAccPreCheckDatabase(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	if osDbEnvironment == "" {
+	if osDBEnvironment == "" {
 		t.Skip("This environment does not support Database tests")
 	}
 }
@@ -220,6 +221,12 @@ func testAccPreCheckAdminOnly(t *testing.T) {
 func testAccPreCheckGlanceImport(t *testing.T) {
 	if osGlanceimportEnvironment == "" {
 		t.Skip("This environment does not support Glance import tests")
+	}
+}
+
+func testAccPreCheckHypervisor(t *testing.T) {
+	if osHypervisorEnvironment == "" {
+		t.Skip("This environment does not support Hypervisor data source tests")
 	}
 }
 
@@ -409,7 +416,7 @@ func testAccAuthFromEnv() (*Config, error) {
 			UserDomainName:    os.Getenv("OS_USER_DOMAIN_NAME"),
 			Username:          os.Getenv("OS_USERNAME"),
 			UserID:            os.Getenv("OS_USER_ID"),
-			MutexKV:           *(mutexkv.NewMutexKV()),
+			MutexKV:           mutexkv.NewMutexKV(),
 		},
 	}
 

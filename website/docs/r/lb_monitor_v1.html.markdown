@@ -6,7 +6,7 @@ description: |-
   Manages a V1 load balancer monitor resource within OpenStack.
 ---
 
-# openstack\_lb\_monitor_v1
+# openstack\_lb\_monitor\_v1
 
 Manages a V1 load balancer monitor resource within OpenStack.
 

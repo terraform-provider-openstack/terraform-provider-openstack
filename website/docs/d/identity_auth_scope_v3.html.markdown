@@ -10,13 +10,26 @@ description: |-
 
 Use this data source to get authentication information about the current
 auth scope in use. This can be used as self-discovery or introspection of
-the username or project name currently in use.
+the username or project name currently in use as well as the service catalog.
 
 ## Example Usage
 
 ```hcl
 data "openstack_identity_auth_scope_v3" "scope" {
   name = "my_scope"
+}
+```
+
+To find the the public object storage endpoint for "region1" as listed in the
+service catalog:
+
+```hcl
+locals {
+  object_store_service = [for entry in data.openstack_identity_auth_scope_v3.scope.service_catalog:
+                              entry if entry.type=="object-store"][0]
+  object_store_endpoint = [for endpoint in local.object_store_service.endpoints:
+                               endpoint if (endpoint.interface=="public" && endpoint.region=="region1")][0]
+  object_store_public_url = local.object_store_endpoint.url
 }
 ```
 
@@ -45,8 +58,24 @@ are exported:
 * `project_domain_name` - The domain name of the project.
 * `project_domain_id` - The domain ID of the project.
 * `roles` - A list of roles in the current scope. See reference below.
+* `service_catalog` - A list of service catalog entries returned with the token.
 
 The `roles` block contains:
 
 * `role_id` - The ID of the role.
 * `role_name` - The name of the role.
+
+The `service_catalog` block contains:
+
+* `id` - The ID of the service.
+* `name` - The name of the service.
+* `type` - The type of the service.
+* `endpoints` - A list of endpoints for the service.
+
+The `endpoints` block contains:
+
+* `id` - The ID of the endpoint.
+* `region` - The region of the endpoint.
+* `region_id` - The region ID of the endpoint.
+* `interface` - The interface of the endpoint.
+* `url` - The URL of the endpoint.

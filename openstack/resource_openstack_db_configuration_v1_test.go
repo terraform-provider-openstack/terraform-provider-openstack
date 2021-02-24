@@ -115,5 +115,5 @@ resource "openstack_db_configuration_v1" "basic" {
     value = 200
   }
 }
-`, osDbDatastoreVersion, osDbDatastoreType)
+`, osDBDatastoreVersion, osDBDatastoreType)
 }

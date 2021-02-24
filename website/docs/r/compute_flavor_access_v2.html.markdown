@@ -6,11 +6,11 @@ description: |-
   Manages a project access for flavor V2 resource within OpenStack.
 ---
 
-# openstack\_compute\_flavor\_access_v2
+# openstack\_compute\_flavor\_access\_v2
 
 Manages a project access for flavor V2 resource within OpenStack.
 
-Note: You _must_ have admin privileges in your OpenStack cloud to use
+~> **Note:** You _must_ have admin privileges in your OpenStack cloud to use
 this resource.
 
 ---

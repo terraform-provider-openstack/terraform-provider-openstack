@@ -6,7 +6,7 @@ description: |-
   Manages a V2 security group resource within OpenStack.
 ---
 
-# openstack\_compute\_secgroup_v2
+# openstack\_compute\_secgroup\_v2
 
 Manages a V2 security group resource within OpenStack.
 

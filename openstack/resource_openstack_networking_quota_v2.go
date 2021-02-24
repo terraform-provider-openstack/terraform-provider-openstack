@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/quotas"
@@ -98,7 +99,8 @@ func resourceNetworkingQuotaV2() *schema.Resource {
 
 func resourceNetworkingQuotaV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	region := GetRegion(d, config)
+	networkingClient, err := config.NetworkingV2Client(region)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -131,7 +133,8 @@ func resourceNetworkingQuotaV2Create(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error creating openstack_networking_quota_v2: %s", err)
 	}
 
-	d.SetId(projectID)
+	id := fmt.Sprintf("%s/%s", projectID, region)
+	d.SetId(id)
 
 	log.Printf("[DEBUG] Created openstack_networking_quota_v2 %#v", q)
 
@@ -140,19 +143,33 @@ func resourceNetworkingQuotaV2Create(d *schema.ResourceData, meta interface{}) e
 
 func resourceNetworkingQuotaV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	region := GetRegion(d, config)
+	networkingClient, err := config.NetworkingV2Client(region)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	q, err := quotas.Get(networkingClient, d.Id()).Extract()
+	// update resource ID with region to allow multi-region quota management
+	if !strings.Contains(d.Id(), region) {
+		id := fmt.Sprintf("%s/%s", d.Id(), region)
+		d.SetId(id)
+		log.Printf("[DEBUG] Updated ID of openstack_networking_quota_v2 to: %s", d.Id())
+	}
+
+	projectID, region, err := parseNetworkingQuotaID(d.Id())
+	if err != nil {
+		return CheckDeleted(d, err, "Error parsing ID of openstack_networking_quota_v2")
+	}
+
+	q, err := quotas.Get(networkingClient, projectID).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "Error retrieving openstack_networking_quota_v2")
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_quota_v2 %s: %#v", d.Id(), q)
 
-	d.Set("project_id", d.Id())
+	d.Set("project_id", projectID)
+	d.Set("region", region)
 	d.Set("floatingip", q.FloatingIP)
 	d.Set("network", q.Network)
 	d.Set("port", q.Port)
@@ -234,7 +251,11 @@ func resourceNetworkingQuotaV2Update(d *schema.ResourceData, meta interface{}) e
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_networking_quota_v2 %s update options: %#v", d.Id(), updateOpts)
-		_, err := quotas.Update(networkingClient, d.Id(), updateOpts).Extract()
+		projectID, _, err := parseNetworkingQuotaID(d.Id())
+		if err != nil {
+			return CheckDeleted(d, err, "Error parsing ID of openstack_networking_quota_v2")
+		}
+		_, err = quotas.Update(networkingClient, projectID, updateOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("Error updating openstack_networking_quota_v2: %s", err)
 		}

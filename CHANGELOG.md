@@ -1,3 +1,72 @@
+## 1.38.0 (February 24, 2021)
+
+FEATURES
+
+* __New Resource__: `openstack_lb_quota_v2` ([#1169](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1169))
+
+IMPROVEMENTS
+
+* Updated gophercloud/utils, which now recognizes `clouds.yml` in addition to `clouds.yaml` and correctly applies per-region value overrides ([#1172](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1172))
+* Added `vip_port_id` for `lb_loadbalancer_v2` resource. It can be used only with Octavia ([#1164](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1164))
+* Added `service_catalog` attribute for `identity_auth_scope_v3` data source ([#1167](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1167))
+* Set `2.15` microversion for any type of `server_group_v2` policy except `affinity` and `anti-affinity` since they don't need any microversion ([#1141](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1141))
+* Add a note about using names in `security_groups` in `compute_instance_v2` resource in docs ([#1178](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1178))
+* Added ability to manage `networking_quota_v2` for the same project across several regions with a single resource ([#1177](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1177))
+
+## 1.37.0 (February 8, 2021)
+
+IMPROVEMENTS
+
+* Added `image_source_username`, `image_source_password` arguments to `images_image_v2` resource ([#1157](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1157))
+* Updated `networking_floatingip_v2` resource to retry subnets on floating IP creation, when a subnet is exhausted ([#1163](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1163))
+* Updated security notices for sensitive arguments and attributes in documentation ([#1161](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1161))
+
+BUG FIXES
+
+* Fixed multiple `networking_router_v2` resource creation while using `external_subnet_ids` argument ([#1163](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1163))
+
+## 1.36.0 (February 2, 2021)
+
+NOTES
+
+* The `dhcp_disabled` argument in `networking_subnet_v2` data source is deprecated. Use the `dhcp_enabled = false` argument value instead. ([#1153](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1153))
+* The `max_retries` provider parameter now honors the `429` code and uses the `Retry-After` header to extend the retry function ([#1159](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1159))
+
+FEATURES
+
+* __New Resource__: `openstack_identity_user_membership_v3` ([#1149](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1149))
+* __New Data Source__: `openstack_networking_subnet_ids_v2` ([#1153](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1153))
+
+IMPROVEMENTS
+
+* Updated `zone` argument to be `Optional` instead of `Required` in `compute_aggregate_v2` resource ([#1133](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1133))
+* Updated local provider block in docs ([#1135](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1135))
+* Updated Go version to `1.15` ([#1137](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1137))
+* Updated `networking_router_v2` resource to retry external subnets on router creation, when a subnet is exhausted ([#1151](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1151))
+* Added `subnets` attribute to `networking_network_v2` data source ([#1152](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1152))
+* Extended `max_retries` provider parameter to use the `Retry-After` header ([#1159](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1159))
+
+BUG FIXES
+
+* Fixed copying `sync.Locker` by updating `gophercloud/utils` with the fix ([#1144](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1144))
+* Fixed recreation of `lb_loadbalancer_v2` resource if `flavor_id` haven't been specified ([#1147](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1147))
+* Fixed `networking_port_v2` resource update if `binding.profile` is not set ([#1154](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1154))
+
+## 1.35.0 (January 15, 2021)
+
+FEATURES
+
+* __New Resource__: `openstack_compute_aggregate_v2` ([#1121](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1121))
+* __New Data Source__: `openstack_compute_aggregate_v2` ([#1121](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1121))
+* __New Data Source__: `openstack_compute_hypervisor_v2` ([#1126](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1126))
+
+IMPROVEMENTS
+
+* Added valid handling of the read-only `stores` property of the `images_image_v2` resource ([#1124](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1124))
+* Added `image_id` argument for the `images_image_v2` resource ([#1125](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1125))
+* Added `vendor_options.ignore_volume_confirmation` argument for the `compute_volume_attach_v2` resource to control whether to ignore volume status confirmation of the attached volume. ([#1127](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1127))
+* Updated Gophercloud to `1.15.0` with utils package that now uses `imageservice` instead of `compute` to resolve image IDs ([#1128](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1128))
+
 ## 1.34.1 (December 21, 2020)
 
 BUG FIXES

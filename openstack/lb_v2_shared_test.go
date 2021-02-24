@@ -34,3 +34,25 @@ func TestExpandLBV2ListenerHeadersMap_err(t *testing.T) {
 	assert.Error(t, err)
 	assert.Empty(t, actual)
 }
+
+func TestParseLBQuotaID(t *testing.T) {
+	lbQuotaID := "ed498e81f0cc448bae0ad4f8f21bf67f/region/1"
+	expectedProjectID := "ed498e81f0cc448bae0ad4f8f21bf67f"
+	expectedRegion := "region/1"
+
+	actualProjectID, actualRegion, err := parseLBQuotaID(lbQuotaID)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedProjectID, actualProjectID)
+	assert.Equal(t, expectedRegion, actualRegion)
+}
+
+func TestParseLBQuotaID_err(t *testing.T) {
+	wrongLBQuotaID := "foo42"
+
+	actualProjectID, actualRegion, err := parseLBQuotaID(wrongLBQuotaID)
+
+	assert.Error(t, err)
+	assert.Empty(t, actualProjectID)
+	assert.Empty(t, actualRegion)
+}

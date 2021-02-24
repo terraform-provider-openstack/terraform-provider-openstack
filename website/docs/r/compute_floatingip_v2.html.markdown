@@ -6,7 +6,7 @@ description: |-
   Manages a V2 floating IP resource within OpenStack Nova (compute).
 ---
 
-# openstack\_compute\_floatingip_v2
+# openstack\_compute\_floatingip\_v2
 
 Manages a V2 floating IP resource within OpenStack Nova (compute)
 that can be used for compute instances.

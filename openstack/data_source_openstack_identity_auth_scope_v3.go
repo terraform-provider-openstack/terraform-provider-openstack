@@ -92,6 +92,55 @@ func dataSourceIdentityAuthScopeV3() *schema.Resource {
 					},
 				},
 			},
+
+			"service_catalog": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"endpoints": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"region": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"region_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"interface": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"url": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -105,29 +154,29 @@ func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{})
 
 	d.SetId(d.Get("name").(string))
 
-	user, domain, project, roles, err := GetTokenDetails(identityClient)
+	tokenDetails, err := getTokenDetails(identityClient)
 	if err != nil {
 		return err
 	}
 
-	d.Set("user_name", user.Name)
-	d.Set("user_id", user.ID)
-	d.Set("user_domain_name", user.Domain.Name)
-	d.Set("user_domain_id", user.Domain.ID)
+	d.Set("user_name", tokenDetails.user.Name)
+	d.Set("user_id", tokenDetails.user.ID)
+	d.Set("user_domain_name", tokenDetails.user.Domain.Name)
+	d.Set("user_domain_id", tokenDetails.user.Domain.ID)
 
-	if domain != nil {
-		d.Set("domain_name", domain.Name)
-		d.Set("domain_id", domain.ID)
+	if tokenDetails.domain != nil {
+		d.Set("domain_name", tokenDetails.domain.Name)
+		d.Set("domain_id", tokenDetails.domain.ID)
 	} else {
 		d.Set("domain_name", "")
 		d.Set("domain_id", "")
 	}
 
-	if project != nil {
-		d.Set("project_name", project.Name)
-		d.Set("project_id", project.ID)
-		d.Set("project_domain_name", project.Domain.Name)
-		d.Set("project_domain_id", project.Domain.ID)
+	if tokenDetails.project != nil {
+		d.Set("project_name", tokenDetails.project.Name)
+		d.Set("project_id", tokenDetails.project.ID)
+		d.Set("project_domain_name", tokenDetails.project.Domain.Name)
+		d.Set("project_domain_id", tokenDetails.project.Domain.ID)
 	} else {
 		d.Set("project_name", "")
 		d.Set("project_id", "")
@@ -135,9 +184,16 @@ func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{})
 		d.Set("project_domain_id", "")
 	}
 
-	allRoles := flattenIdentityAuthScopeV3Roles(roles)
+	allRoles := flattenIdentityAuthScopeV3Roles(tokenDetails.roles)
 	if err := d.Set("roles", allRoles); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_identity_auth_scope_v3 roles: %s", err)
+	}
+
+	if tokenDetails.catalog != nil {
+		flatCatalog := flattenIdentityAuthScopeV3ServiceCatalog(tokenDetails.catalog)
+		if err := d.Set("service_catalog", flatCatalog); err != nil {
+			log.Printf("[DEBUG] Unable to set openstack_identity_auth_scope_v3 service_catalog: %s", err)
+		}
 	}
 
 	d.Set("region", GetRegion(d, config))

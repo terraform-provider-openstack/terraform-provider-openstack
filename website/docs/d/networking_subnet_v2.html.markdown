@@ -26,19 +26,15 @@ data "openstack_networking_subnet_v2" "subnet_1" {
 
 * `name` - (Optional) The name of the subnet.
 
-* `description` - (Optional) Human-readable description for the subnet.
+* `description` - (Optional) Human-readable description of the subnet.
 
 * `dhcp_enabled` - (Optional) If the subnet has DHCP enabled.
 
-* `dhcp_disabled` - (Optional) If the subnet has DHCP disabled.
+* `network_id` - (Optional) The ID of the network the subnet belongs to.
+
+* `tenant_id` - (Optional) The owner of the subnet.
 
 * `ip_version` - (Optional) The IP version of the subnet (either 4 or 6).
-
-* `ipv6_address_mode` - (Optional) The IPv6 address mode. Valid values are
-  `dhcpv6-stateful`, `dhcpv6-stateless`, or `slaac`.
-
-* `ipv6_ra_mode` - (Optional) The IPv6 Router Advertisement mode. Valid values
-  are `dhcpv6-stateful`, `dhcpv6-stateless`, or `slaac`.
 
 * `gateway_ip` - (Optional) The IP of the subnet's gateway.
 
@@ -46,11 +42,13 @@ data "openstack_networking_subnet_v2" "subnet_1" {
 
 * `subnet_id` - (Optional) The ID of the subnet.
 
+* `ipv6_address_mode` - (Optional) The IPv6 address mode. Valid values are
+  `dhcpv6-stateful`, `dhcpv6-stateless`, or `slaac`.
+
+* `ipv6_ra_mode` - (Optional) The IPv6 Router Advertisement mode. Valid values
+  are `dhcpv6-stateful`, `dhcpv6-stateless`, or `slaac`.
+
 * `subnetpool_id` - (Optional) The ID of the subnetpool associated with the subnet.
-
-* `network_id` - (Optional) The ID of the network the subnet belongs to.
-
-* `tenant_id` - (Optional) The owner of the subnet.
 
 * `tags` - (Optional) The list of subnet tags to filter.
 

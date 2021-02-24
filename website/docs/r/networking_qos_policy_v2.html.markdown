@@ -6,7 +6,7 @@ description: |-
   Manages a V2 Neutron QoS policy resource within OpenStack.
 ---
 
-# openstack\_networking\_qos_policy_v2
+# openstack\_networking\_qos\_policy\_v2
 
 Manages a V2 Neutron QoS policy resource within OpenStack.
 

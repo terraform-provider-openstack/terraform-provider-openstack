@@ -6,7 +6,7 @@ description: |-
   Manages a V2 port resource within OpenStack.
 ---
 
-# openstack\_networking\_port_v2
+# openstack\_networking\_port\_v2
 
 Manages a V2 port resource within OpenStack.
 

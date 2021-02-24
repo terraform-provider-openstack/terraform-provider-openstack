@@ -6,7 +6,7 @@ description: |-
   Associate a floating IP to an instance
 ---
 
-# openstack\_compute\_floatingip_associate_v2
+# openstack\_compute\_floatingip\_associate\_v2
 
 Associate a floating IP to an instance.
 

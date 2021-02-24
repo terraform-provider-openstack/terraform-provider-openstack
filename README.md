@@ -20,7 +20,7 @@ Requirements
 ------------
 
 -	[Terraform](https://www.terraform.io/downloads.html) 0.12.x
--	[Go](https://golang.org/doc/install) 1.14 (to build the provider plugin)
+-	[Go](https://golang.org/doc/install) 1.15 (to build the provider plugin)
 
 Building The Provider
 ---------------------
@@ -42,12 +42,12 @@ Using the provider
 ----------------------
 Please see the documentation at [terraform.io](https://www.terraform.io/docs/providers/openstack/index.html).
 
-Or you can browse the documentation within this repo [here](https://github.com/terraform-provider-openstack/terraform-provider-openstack/tree/master/website/docs).
+Or you can browse the documentation within this repo [here](https://github.com/terraform-provider-openstack/terraform-provider-openstack/tree/main/website/docs).
 
 Developing the Provider
 ---------------------------
 
-If you wish to work on the provider, you'll first need [Go](https://golang.org) installed on your machine (version 1.14+ is *required*).
+If you wish to work on the provider, you'll first need [Go](https://golang.org) installed on your machine (version 1.15+ is *required*).
 
 To compile the provider, run `make build`. This will build the provider and put the provider binary in the current directory.
 

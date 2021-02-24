@@ -6,7 +6,7 @@ description: |-
   Get information on an OpenStack Project.
 ---
 
-# openstack\_identity\_project_v3
+# openstack\_identity\_project\_v3
 
 Use this data source to get the ID of an OpenStack project.
 

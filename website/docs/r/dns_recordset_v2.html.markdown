@@ -6,7 +6,7 @@ description: |-
   Manages a DNS record set in the OpenStack DNS Service
 ---
 
-# openstack\_dns\_recordset_v2
+# openstack\_dns\_recordset\_v2
 
 Manages a DNS record set in the OpenStack DNS Service.
 

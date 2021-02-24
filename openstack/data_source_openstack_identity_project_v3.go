@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/users"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceIdentityProjectV3() *schema.Resource {
@@ -100,11 +101,11 @@ func dataSourceIdentityProjectV3Read(d *schema.ResourceData, meta interface{}) e
 		userID := config.UserID
 		log.Printf("[DEBUG] Will try to find project with users.ListProjects as I am unable to query openstack_identity_project_v3: %s. Trying listing userprojects.", err)
 		if userID == "" {
-			userID, _, err = GetTokenInfo(identityClient)
-			if err != nil {
+			tokenInfo, tokenErr := getTokenInfo(identityClient)
+			if tokenErr != nil {
 				return fmt.Errorf("Error when getting token info: %s", err)
-				return err
 			}
+			userID = tokenInfo.userID
 		}
 		// Search for all the projects using the users.ListProjects API call and filter them
 		allPages, err = users.ListProjects(identityClient, userID).AllPages()

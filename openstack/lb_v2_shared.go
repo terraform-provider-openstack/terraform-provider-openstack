@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -24,6 +25,10 @@ import (
 )
 
 const octaviaLBClientType = "load-balancer"
+
+const (
+	octaviaLBQuotaRuleAndPolicyMicroversion = "2.19"
+)
 
 const (
 	lbPendingCreate = "PENDING_CREATE"
@@ -1082,6 +1087,7 @@ func chooseLBV2LoadBalancerCreateOpts(d *schema.ResourceData, config *Config) ne
 			Description:  d.Get("description").(string),
 			VipNetworkID: d.Get("vip_network_id").(string),
 			VipSubnetID:  d.Get("vip_subnet_id").(string),
+			VipPortID:    d.Get("vip_port_id").(string),
 			ProjectID:    d.Get("tenant_id").(string),
 			VipAddress:   d.Get("vip_address").(string),
 			AdminStateUp: &adminStateUp,
@@ -1135,4 +1141,17 @@ func resourceLoadBalancerV2GetSecurityGroups(networkingClient *gophercloud.Servi
 	d.Set("security_group_ids", port.SecurityGroups)
 
 	return nil
+}
+
+func parseLBQuotaID(id string) (string, string, error) {
+	// Use SplitN as it is possible for a region name to contain "/"
+	idParts := strings.SplitN(id, "/", 2)
+	if len(idParts) < 2 {
+		return "", "", fmt.Errorf("Unable to determine lb quota ID %s", id)
+	}
+
+	projectID := idParts[0]
+	region := idParts[1]
+
+	return projectID, region, nil
 }

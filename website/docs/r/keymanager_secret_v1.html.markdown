@@ -12,7 +12,8 @@ Manages a V1 Barbican secret resource within OpenStack.
 
 ~> **Important Security Notice** The payload of this resource will be stored
 *unencrypted* in your Terraform state file. **Use of this resource for production
-deployments is *not* recommended**.
+deployments is *not* recommended**. [Read more about sensitive data in
+state](https://www.terraform.io/docs/language/state/sensitive-data.html).
 
 ## Example Usage
 

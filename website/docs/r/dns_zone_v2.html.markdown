@@ -6,7 +6,7 @@ description: |-
   Manages a DNS zone in the OpenStack DNS Service
 ---
 
-# openstack\_dns\_zone_v2
+# openstack\_dns\_zone\_v2
 
 Manages a DNS zone in the OpenStack DNS Service.
 

@@ -6,9 +6,13 @@ description: |-
   Manages a V1 database user resource within OpenStack.
 ---
 
-# openstack\_db\_user_v1
+# openstack\_db\_user\_v1
 
 Manages a V1 DB user resource within OpenStack.
+
+~> **Note:** All arguments including the database password will be stored in the
+raw state as plain-text. [Read more about sensitive data in
+state](https://www.terraform.io/docs/language/state/sensitive-data.html).
 
 ## Example Usage
 

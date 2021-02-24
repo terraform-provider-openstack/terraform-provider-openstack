@@ -10,6 +10,10 @@ description: |-
 
 Manages a V2 Image resource within OpenStack Glance.
 
+~> **Note:** All arguments including the source image URL password will be
+stored in the raw state as plain-text. [Read more about sensitive data in
+state](https://www.terraform.io/docs/language/state/sensitive-data.html).
+
 ## Example Usage
 
 ```hcl
@@ -48,6 +52,10 @@ The following arguments are supported:
    being uploaded to Glance.
    Conflicts with `local_file_path`.
 
+* `image_source_username` - (Optional) The username of basic auth to download `image_source_url`.
+
+* `image_source_password` - (Optional) The password of basic auth to download `image_source_url`.
+
 * `min_disk_gb` - (Optional) Amount of disk space (in GB) required to boot image.
    Defaults to 0.
 
@@ -55,6 +63,9 @@ The following arguments are supported:
    Defauts to 0.
 
 * `name` - (Required) The name of the image.
+
+* `image_id` - (Optional) Unique ID (valid UUID) of image to create. Changing 
+    this creates a new image.
 
 * `properties` - (Optional) A map of key/value pairs to set freeform
     information about an image. See the "Notes" section for further
@@ -128,7 +139,7 @@ These properties start with the prefix `os_`. If these properties are detected,
 this resource will automatically reconcile these with the user-provided
 properties.
 
-In addition, the `direct_url` property is also automatically reconciled if the
+In addition, the `direct_url` and `stores` properties are also automatically reconciled if the
 Image Service set it.
 
 ## Import

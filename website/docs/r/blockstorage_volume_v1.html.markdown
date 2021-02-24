@@ -6,7 +6,7 @@ description: |-
   Manages a V1 volume resource within OpenStack.
 ---
 
-# openstack\_blockstorage\_volume_v1
+# openstack\_blockstorage\_volume\_v1
 
 Manages a V1 volume resource within OpenStack.
 

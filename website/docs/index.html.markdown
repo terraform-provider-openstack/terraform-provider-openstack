@@ -17,6 +17,17 @@ Use the navigation to the left to read about the available resources.
 ## Example Usage
 
 ```hcl
+# Define required providers
+terraform {
+required_version = ">= 0.14.0"
+  required_providers {
+    openstack = {
+      source  = "terraform-provider-openstack/openstack"
+      version = "~> 1.35.0"
+    }
+  }
+}
+
 # Configure the OpenStack Provider
 provider "openstack" {
   user_name   = "admin"
@@ -157,6 +168,10 @@ The following arguments are supported:
 
 * `allow_reauth` - (Optional) If set to `false`, OpenStack authorization won't be
   perfomed automatically, if the initial auth token get expired. Defaults to `true`.
+
+* `max_retries` - (Optional) If set to a value greater than 0, the OpenStack
+  client will retry failed HTTP connections and Too Many Requests (429 code)
+  HTTP responses with a `Retry-After` header within the specified value.
 
 ## Overriding Service API Endpoints
 
@@ -346,7 +361,7 @@ in the OpenStack provider.
 Again, if you have any questions about whether the bug you're trying to fix is
 a Gophercloud but, please ask.
 
-### Vendoring
+### Dependencies
 
 If you require pulling in changes from an external package, such as Gophercloud,
 this provider uses [Go Modules](https://github.com/golang/go/wiki/Modules).
@@ -406,6 +421,9 @@ the feature or bug you're testing:
 
 * `OS_SFS_ENVIRONMENT` - Required if your'e working on the `openstack_openstack_sharedfilesystem_*`
   resources. Set this value to "1" to enable testing these resources.
+
+* `OS_HYPERVISOR_HOSTNAME` - Required if you're working on the `openstack_compute_hypervisor_v2`
+  data source. Set this value to one valid hypervisor hostname to test this data source.
 
 We recommend only running the acceptance tests related to the feature or bug
 you're working on. To do this, run:

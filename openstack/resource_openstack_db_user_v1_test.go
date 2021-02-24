@@ -144,5 +144,5 @@ resource "openstack_db_user_v1" "basic" {
   password    = "password"
   databases   = ["testdb"]
 }
-`, osDbDatastoreVersion, osDbDatastoreType, osNetworkID)
+`, osDBDatastoreVersion, osDBDatastoreType, osNetworkID)
 }

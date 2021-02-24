@@ -1,6 +1,5 @@
 run:
   deadline: 5m
-  modules-download-mode: vendor
 
 linters:
   fast: false
@@ -23,14 +22,14 @@ linters:
     - goheader
     - goimports
     - golint
-#    - gomodguard
-#    - goprintffuncname
+    - gomodguard
+    - goprintffuncname
 #    - gosec
 #    - gosimple
-#    - govet
-#    - ineffassign
-#    - interfacer
-#    - maligned
+    - govet
+    - ineffassign
+    - interfacer
+    - maligned
     - misspell
     - nakedret
     - nolintlint
@@ -39,11 +38,11 @@ linters:
 #    - scopelint
     - staticcheck
     - structcheck
-#    - stylecheck
-#    - typecheck
-#    - unconvert
-#    - unused
-#    - varcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unused
+    - varcheck
     - whitespace
 
 issues:
@@ -51,6 +50,9 @@ issues:
     - linters:
         - staticcheck
       text: "SA1019:"
+    - linters:
+        - stylecheck
+      text: "ST1005:"
 
     - linters:
         - errcheck
