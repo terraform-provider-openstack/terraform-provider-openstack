@@ -56,6 +56,8 @@ data "openstack_images_image_v2" "ubuntu" {
 * `visibility` - (Optional) The visibility of the image. Must be one of
    "public", "private", "community", or "shared". Defaults to "private".
 
+* `hidden` - (Optional) Whether or not the image is hidden from public list.
+
 * `member_status` - (Optional) The status of the image. Must be one of
    "accepted", "pending", "rejected", or "all".
 

@@ -48,6 +48,22 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 						"openstack_images_image_v2.image_1", "image_id", "c1efdf94-9a1a-4401-88b8-d616029d2551"),
 				),
 			},
+			{
+				Config: testAccImagesImageV2BasicHidden,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "name", "Rancher TerraformAccTest"),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "container_format", "bare"),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "disk_format", "qcow2"),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "schema", "/v2/schemas/image"),
+					resource.TestCheckResourceAttr(
+						"openstack_images_image_v2.image_1", "hidden", "true"),
+				),
+			},
 		},
 	})
 }
@@ -387,6 +403,19 @@ const testAccImagesImageV2BasicWithID = `
   resource "openstack_images_image_v2" "image_1" {
       name = "Rancher TerraformAccTest"
       image_id = "c1efdf94-9a1a-4401-88b8-d616029d2551"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      container_format = "bare"
+      disk_format = "qcow2"
+
+      timeouts {
+        create = "10m"
+      }
+  }`
+
+const testAccImagesImageV2BasicHidden = `
+  resource "openstack_images_image_v2" "image_1" {
+      name = "Rancher TerraformAccTest"
+      hidden = true
       image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
