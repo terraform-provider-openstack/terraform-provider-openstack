@@ -2,9 +2,7 @@ package openstack
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
-	"strings"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -74,17 +72,4 @@ func decodeNeutronError(body []byte) (*neutronError, error) {
 	}
 
 	return &e.NeutronError, nil
-}
-
-func parseNetworkingQuotaID(id string) (string, string, error) {
-	// Use SplitN as it is possible for a region name to contain "/"
-	idParts := strings.SplitN(id, "/", 2)
-	if len(idParts) < 2 {
-		return "", "", fmt.Errorf("Unable to determine networking quota ID %s", id)
-	}
-
-	projectID := idParts[0]
-	region := idParts[1]
-
-	return projectID, region, nil
 }

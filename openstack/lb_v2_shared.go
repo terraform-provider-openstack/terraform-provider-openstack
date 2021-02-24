@@ -3,7 +3,6 @@ package openstack
 import (
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -1141,17 +1140,4 @@ func resourceLoadBalancerV2GetSecurityGroups(networkingClient *gophercloud.Servi
 	d.Set("security_group_ids", port.SecurityGroups)
 
 	return nil
-}
-
-func parseLBQuotaID(id string) (string, string, error) {
-	// Use SplitN as it is possible for a region name to contain "/"
-	idParts := strings.SplitN(id, "/", 2)
-	if len(idParts) < 2 {
-		return "", "", fmt.Errorf("Unable to determine lb quota ID %s", id)
-	}
-
-	projectID := idParts[0]
-	region := idParts[1]
-
-	return projectID, region, nil
 }
