@@ -1,4 +1,4 @@
-## 1.38.0 (Unreleased)
+## 1.38.0 (February 24, 2021)
 
 FEATURES
 
