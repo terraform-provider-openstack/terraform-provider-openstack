@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/quotas"
@@ -138,6 +139,7 @@ func resourceLoadBalancerQuotaV2Create(d *schema.ResourceData, meta interface{})
 
 func resourceLoadBalancerQuotaV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	region := GetRegion(d, config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack loadbalancing client: %s", err)
@@ -147,10 +149,8 @@ func resourceLoadBalancerQuotaV2Read(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error creating openstack_lb_quota_v2: Only available when using octavia")
 	}
 
-	projectID, region, err := parseLBQuotaID(d.Id())
-	if err != nil {
-		return CheckDeleted(d, err, "Error parsing ID of openstack_lb_quota_v2")
-	}
+	// Pase projectID from resource id that is <project_id>/<region>
+	projectID := strings.Split(d.Id(), "/")[0]
 
 	q, err := quotas.Get(lbClient, projectID).Extract()
 	if err != nil {
@@ -234,11 +234,8 @@ func resourceLoadBalancerQuotaV2Update(d *schema.ResourceData, meta interface{})
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_lb_quota_v2 %s update options: %#v", d.Id(), updateOpts)
-		projectID, _, err := parseLBQuotaID(d.Id())
-		if err != nil {
-			return CheckDeleted(d, err, "Error parsing ID of openstack_lb_quota_v2")
-		}
-		_, err = quotas.Update(lbClient, projectID, updateOpts).Extract()
+		projectID := d.Get("project_id").(string)
+		_, err := quotas.Update(lbClient, projectID, updateOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("Error updating openstack_lb_quota_v2: %s", err)
 		}
