@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/quotasets"
@@ -108,12 +109,14 @@ func testAccCheckBlockStorageQuotasetV3Exists(n string, quotaset *quotasets.Quot
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
 
-		found, err := quotasets.Get(blockStorageClient, rs.Primary.ID).Extract()
+		projectID := strings.Split(rs.Primary.ID, "/")[0]
+
+		found, err := quotasets.Get(blockStorageClient, projectID).Extract()
 		if err != nil {
 			return err
 		}
 
-		if found.ID != rs.Primary.ID {
+		if found.ID != projectID {
 			return fmt.Errorf("Quotaset not found")
 		}
 
