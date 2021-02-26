@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/quotasets"
@@ -145,17 +146,19 @@ func testAccCheckComputeQuotasetV2Exists(n string, quotaset *quotasets.QuotaSet)
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.BlockStorageV2Client(osRegionName)
+		computeClient, err := config.ComputeV2Client(osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		found, err := quotasets.Get(blockStorageClient, rs.Primary.ID).Extract()
+		projectID := strings.Split(rs.Primary.ID, "/")[0]
+
+		found, err := quotasets.Get(computeClient, projectID).Extract()
 		if err != nil {
 			return err
 		}
 
-		if found.ID != rs.Primary.ID {
+		if found.ID != projectID {
 			return fmt.Errorf("Quotaset not found")
 		}
 
