@@ -67,6 +67,12 @@ func TestAccOpenStackImagesV2ImageDataSource_testQueries(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccOpenStackImagesV2ImageDataSourceQueryHidden(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_3"),
+				),
+			},
+			{
 				Config: testAccOpenStackImagesV2ImageDataSourceProperty(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
@@ -118,6 +124,18 @@ resource "openstack_images_image_v2" "image_2" {
     foo = "bar"
   }
 }
+
+resource "openstack_images_image_v2" "image_3" {
+  name = "CirrOS-tf_3"
+  container_format = "bare"
+  hidden = true
+  disk_format = "qcow2"
+  image_source_url = "http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
+  tags = ["cirros-tf_3"]
+  properties = {
+	foo = "bar"
+  }
+}
 `
 
 func testAccOpenStackImagesV2ImageDataSourceBasic() string {
@@ -163,6 +181,18 @@ data "openstack_images_image_v2" "image_1" {
 	most_recent = true
 	visibility = "private"
 	size_max = "23000000"
+}
+`, testAccOpenStackImagesV2ImageDataSourceCirros)
+}
+
+func testAccOpenStackImagesV2ImageDataSourceQueryHidden() string {
+	return fmt.Sprintf(`
+%s
+
+data "openstack_images_image_v2" "image_3" {
+	most_recent = true
+	visibility = "private"
+	hidden = true
 }
 `, testAccOpenStackImagesV2ImageDataSourceCirros)
 }
