@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/portforwarding"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccNetworkingV2Portforwarding_basic(t *testing.T) {
@@ -45,7 +46,7 @@ func TestAccNetworkingV2Portforwarding_basic(t *testing.T) {
 
 func testAccCheckNetworkingV2PortForwardingDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	networkClient, err := config.NetworkingV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack portforwarding: %s", err)
 	}
@@ -79,7 +80,7 @@ func testAccCheckNetworkingV2PortForwardingExists(n string, fipID string, kp *po
 		fip, ok := s.RootModule().Resources[fipID]
 
 		config := testAccProvider.Meta().(*Config)
-		networkClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		networkClient, err := config.NetworkingV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -152,4 +153,4 @@ resource "openstack_networking_portforwarding_v2" "pf_1" {
   floatingip_id = "${openstack_networking_floatingip_v2.fip_1.id}"
   depends_on = [openstack_networking_port_v2.port_1, openstack_networking_floatingip_v2.fip_1]
 }
-`, OS_EXTGW_ID, OS_POOL_NAME)
+`, osExtGwID, osPoolName)
