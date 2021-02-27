@@ -29,7 +29,7 @@ func TestAccNetworkingV2Portforwarding_basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortForwardingDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2PortForwarding_basic,
+				Config: testAccNetworkingV2PortForwardingBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
@@ -55,9 +55,9 @@ func testAccCheckNetworkingV2PortForwardingDestroy(s *terraform.State) error {
 		if rs.Type != "openstack_networking_portforwarding_v2" {
 			continue
 		}
-		fipId := rs.Primary.Attributes["floatingip_id"]
-		primId := rs.Primary.ID
-		_, err := portforwarding.Get(networkClient, fipId, primId).Extract()
+		fipID := rs.Primary.Attributes["floatingip_id"]
+		primID := rs.Primary.ID
+		_, err := portforwarding.Get(networkClient, fipID, primID).Extract()
 		if err == nil {
 			return fmt.Errorf("Port Forwarding still exists")
 		}
@@ -78,6 +78,9 @@ func testAccCheckNetworkingV2PortForwardingExists(n string, fipID string, kp *po
 		}
 
 		fip, ok := s.RootModule().Resources[fipID]
+		if !ok {
+			return fmt.Errorf("Floating IP not found: %s", fipID)
+		}
 
 		config := testAccProvider.Meta().(*Config)
 		networkClient, err := config.NetworkingV2Client(osRegionName)
@@ -100,7 +103,7 @@ func testAccCheckNetworkingV2PortForwardingExists(n string, fipID string, kp *po
 	}
 }
 
-var testAccNetworkingV2PortForwarding_basic = fmt.Sprintf(`
+var testAccNetworkingV2PortForwardingBasic = fmt.Sprintf(`
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
   description = "Network"
