@@ -7,6 +7,7 @@ IMPROVEMENTS
 * Added ability to manage `openstack_compute_quotaset_v2` for the same project across several regions with a single resource ([#1181](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1181))
 * Added `volume_type_quota` argument for `blockstorage_quotaset_v2` resource ([#1187](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1187))
 * Added `volume_type_quota` argument for `blockstorage_quotaset_v3` resource ([#1185](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1185))
+* Added `hidden` argument for `openstack_images_image_v2` resource and datasource ([#1186](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1186))
 
 BUG FIXES
 
