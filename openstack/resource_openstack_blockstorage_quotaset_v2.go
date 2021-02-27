@@ -81,6 +81,11 @@ func resourceBlockStorageQuotasetV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+
+			"volume_type_quota": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -101,6 +106,7 @@ func resourceBlockStorageQuotasetV2Create(d *schema.ResourceData, meta interface
 	backups := d.Get("backups").(int)
 	backupGigabytes := d.Get("backup_gigabytes").(int)
 	groups := d.Get("groups").(int)
+	volumeTypeQuota := d.Get("volume_type_quota").(map[string]interface{})
 
 	updateOpts := quotasets.UpdateOpts{
 		Volumes:            &volumes,
@@ -110,6 +116,7 @@ func resourceBlockStorageQuotasetV2Create(d *schema.ResourceData, meta interface
 		Backups:            &backups,
 		BackupGigabytes:    &backupGigabytes,
 		Groups:             &groups,
+		Extra:              volumeTypeQuota,
 	}
 
 	q, err := quotasets.Update(blockStorageClient, projectID, updateOpts).Extract()
@@ -154,6 +161,7 @@ func resourceBlockStorageQuotasetV2Read(d *schema.ResourceData, meta interface{}
 	d.Set("backups", q.Backups)
 	d.Set("backup_gigabytes", q.BackupGigabytes)
 	d.Set("groups", q.Groups)
+	d.Set("volume_type_quota", q.Extra)
 
 	return nil
 }
@@ -210,6 +218,12 @@ func resourceBlockStorageQuotasetV2Update(d *schema.ResourceData, meta interface
 		hasChange = true
 		groups := d.Get("groups").(int)
 		updateOpts.Groups = &groups
+	}
+
+	if d.HasChange("volume_type_quota") {
+		hasChange = true
+		volumeTypeQuota := d.Get("volume_type_quota").(map[string]interface{})
+		updateOpts.Extra = volumeTypeQuota
 	}
 
 	if hasChange {
