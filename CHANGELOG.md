@@ -1,3 +1,17 @@
+## 1.39.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Added ability to manage `blockstorage_quotaset_v2` for the same project across several regions with a single resource ([#1182](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1182))
+* Added ability to manage `blockstorage_quotaset_v3` for the same project across several regions with a single resource ([#1183](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1183))
+* Added ability to manage `openstack_compute_quotaset_v2` for the same project across several regions with a single resource ([#1181](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1181))
+* Added `volume_type_quota` argument for `blockstorage_quotaset_v2` resource ([#1187](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1187))
+* Added `volume_type_quota` argument for `blockstorage_quotaset_v3` resource ([#1185](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1185))
+
+BUG FIXES
+
+* Fixed error updating `networking_quota_v2` when it was created with the version older than `1.38.0` ([#1180](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1180))
+
 ## 1.38.0 (February 24, 2021)
 
 FEATURES
