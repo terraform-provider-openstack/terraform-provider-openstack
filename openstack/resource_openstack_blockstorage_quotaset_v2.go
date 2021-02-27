@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/quotasets"
@@ -14,7 +15,7 @@ func resourceBlockStorageQuotasetV2() *schema.Resource {
 		Create: resourceBlockStorageQuotasetV2Create,
 		Read:   resourceBlockStorageQuotasetV2Read,
 		Update: resourceBlockStorageQuotasetV2Update,
-		Delete: resourceBlockStorageQuotasetV2Delete,
+		Delete: schema.RemoveFromState,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -86,7 +87,8 @@ func resourceBlockStorageQuotasetV2() *schema.Resource {
 
 func resourceBlockStorageQuotasetV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	blockStorageClient, err := config.BlockStorageV2Client(GetRegion(d, config))
+	region := GetRegion(d, config)
+	blockStorageClient, err := config.BlockStorageV2Client(region)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
@@ -115,7 +117,8 @@ func resourceBlockStorageQuotasetV2Create(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Error creating openstack_blockstorage_quotaset_v2: %s", err)
 	}
 
-	d.SetId(projectID)
+	id := fmt.Sprintf("%s/%s", projectID, region)
+	d.SetId(id)
 
 	log.Printf("[DEBUG] Created openstack_blockstorage_quotaset_v2 %#v", q)
 
@@ -124,19 +127,26 @@ func resourceBlockStorageQuotasetV2Create(d *schema.ResourceData, meta interface
 
 func resourceBlockStorageQuotasetV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	blockStorageClient, err := config.BlockStorageV2Client(GetRegion(d, config))
+	region := GetRegion(d, config)
+	blockStorageClient, err := config.BlockStorageV2Client(region)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
-	q, err := quotasets.Get(blockStorageClient, d.Id()).Extract()
+	// Depending on the provider version the resource was created, the resource id
+	// can be either <project_id> or <project_id>/<region>. This parses the project_id
+	// in both cases
+	projectID := strings.Split(d.Id(), "/")[0]
+
+	q, err := quotasets.Get(blockStorageClient, projectID).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "Error retrieving openstack_blockstorage_quotaset_v2")
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_blockstorage_quotaset_v2 %s: %#v", d.Id(), q)
 
-	d.Set("project_id", d.Id())
+	d.Set("project_id", projectID)
+	d.Set("region", region)
 	d.Set("volumes", q.Volumes)
 	d.Set("snapshots", q.Snapshots)
 	d.Set("gigabytes", q.Gigabytes)
@@ -204,17 +214,12 @@ func resourceBlockStorageQuotasetV2Update(d *schema.ResourceData, meta interface
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_blockstorage_quotaset_v2 %s update options: %#v", d.Id(), updateOpts)
-		_, err := quotasets.Update(blockStorageClient, d.Id(), updateOpts).Extract()
+		projectID := d.Get("project_id").(string)
+		_, err := quotasets.Update(blockStorageClient, projectID, updateOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("Error updating openstack_blockstorage_quotaset_v2: %s", err)
 		}
 	}
 
 	return resourceBlockStorageQuotasetV2Read(d, meta)
-}
-
-func resourceBlockStorageQuotasetV2Delete(_ *schema.ResourceData, _ interface{}) error {
-	log.Printf("[DEBUG] openstack_blockstorage_quotaset_v2 deletion is a no-op operation")
-
-	return nil
 }
