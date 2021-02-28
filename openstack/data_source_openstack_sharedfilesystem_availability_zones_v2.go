@@ -46,7 +46,7 @@ func dataSourceSharedFilesystemAvailabilityZonesV2Read(d *schema.ResourceData, m
 		return fmt.Errorf("Error extracting openstack_sharedfilesystem_availability_zones_v2 from response: %s", err)
 	}
 
-	var zones []string
+	zones := make([]string, 0, len(zoneInfo))
 	for _, z := range zoneInfo {
 		zones = append(zones, z.Name)
 	}

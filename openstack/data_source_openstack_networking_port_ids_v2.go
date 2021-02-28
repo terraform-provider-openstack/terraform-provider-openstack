@@ -223,8 +223,8 @@ func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{})
 		log.Printf("[DEBUG] No ports in openstack_networking_port_ids_v2 found")
 	}
 
-	var portsList []ports.Port
-	var portIDs []string
+	portsList := make([]ports.Port, 0, len(allPorts))
+	portIDs := make([]string, 0, len(allPorts))
 
 	// Filter returned Fixed IPs by a "fixed_ip".
 	if v, ok := d.GetOk("fixed_ip"); ok {

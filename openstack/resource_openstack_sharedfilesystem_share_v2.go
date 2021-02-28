@@ -251,7 +251,7 @@ func resourceSharedFilesystemShareV2Read(d *schema.ResourceData, meta interface{
 
 	log.Printf("[DEBUG] Retrieved share's export_locations %s: %#v", d.Id(), exportLocationsRaw)
 
-	var exportLocations []map[string]string
+	exportLocations := make([]map[string]string, 0, len(exportLocationsRaw))
 	for _, v := range exportLocationsRaw {
 		exportLocations = append(exportLocations, map[string]string{
 			"path":      v.Path,

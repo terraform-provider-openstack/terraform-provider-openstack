@@ -173,7 +173,7 @@ func dataSourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) 
 		log.Printf("[DEBUG] Unable to set availability_zone_hints: %s", err)
 	}
 
-	var externalFixedIPs []map[string]string
+	externalFixedIPs := make([]map[string]string, 0, len(router.GatewayInfo.ExternalFixedIPs))
 	for _, v := range router.GatewayInfo.ExternalFixedIPs {
 		externalFixedIPs = append(externalFixedIPs, map[string]string{
 			"subnet_id":  v.SubnetID,
