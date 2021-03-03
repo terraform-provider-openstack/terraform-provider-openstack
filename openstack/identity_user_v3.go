@@ -18,7 +18,7 @@ func getUserOptions() [4]users.Option {
 }
 
 func expandIdentityUserV3MFARules(rules []interface{}) []interface{} {
-	var mfaRules []interface{}
+	mfaRules := make([]interface{}, 0, len(rules))
 
 	for _, rule := range rules {
 		ruleMap := rule.(map[string]interface{})

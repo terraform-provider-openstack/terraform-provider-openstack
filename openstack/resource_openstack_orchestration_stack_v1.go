@@ -246,7 +246,7 @@ func resourceOrchestrationStackV1Read(d *schema.ResourceData, meta interface{}) 
 	d.Set("timeout", stack.Timeout)
 
 	// Set the outputs
-	var outputs []map[string]interface{}
+	outputs := make([]map[string]interface{}, 0, len(stack.Outputs))
 	for _, o := range stack.Outputs {
 		output := make(map[string]interface{})
 		output["description"] = o["description"]
