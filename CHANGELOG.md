@@ -1,4 +1,4 @@
-## 1.39.0 (Unreleased)
+## 1.39.0 (6 March, 2021)
 
 IMPROVEMENTS
 
