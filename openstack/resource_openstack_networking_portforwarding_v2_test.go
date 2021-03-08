@@ -24,7 +24,7 @@ func TestAccNetworkingV2Portforwarding_basic(t *testing.T) {
 	)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckPortForwarding(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortForwardingDestroy,
 		Steps: []resource.TestStep{
