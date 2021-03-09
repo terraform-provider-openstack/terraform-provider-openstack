@@ -1,3 +1,7 @@
+## 1.40.0 (Unreleased)
+
+* __New Resource__: `networking_portforwarding_v2` ([#940](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/940))
+
 ## 1.39.0 (6 March, 2021)
 
 IMPROVEMENTS
