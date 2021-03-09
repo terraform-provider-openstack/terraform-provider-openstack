@@ -43,6 +43,7 @@ var (
 	osKeymanagerEnvironment      = os.Getenv("OS_KEYMANAGER_ENVIRONMENT")
 	osGlanceimportEnvironment    = os.Getenv("OS_GLANCEIMPORT_ENVIRONMENT")
 	osHypervisorEnvironment      = os.Getenv("OS_HYPERVISOR_HOSTNAME")
+	osPortForwardingEnvironment  = os.Getenv("OS_PORT_FORWARDING_ENVIRONMENT")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -208,6 +209,14 @@ func testAccPreCheckTransparentVLAN(t *testing.T) {
 
 	if osTransparentVlanEnvironment == "" {
 		t.Skip("This environment does not support 'transparent-vlan' extension tests")
+	}
+}
+
+func testAccPreCheckPortForwarding(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if osPortForwardingEnvironment == "" {
+		t.Skip("This environment does not support 'portforwarding' extension tests")
 	}
 }
 
