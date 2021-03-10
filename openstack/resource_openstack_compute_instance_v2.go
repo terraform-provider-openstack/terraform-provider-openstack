@@ -442,6 +442,10 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
+	imageClient, err := config.ImageV2Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack image client: %s", err)
+	}
 
 	var createOpts servers.CreateOptsBuilder
 	var availabilityZone string
@@ -451,7 +455,7 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	// If a bootable block_device was specified, ignore the image altogether.
 	// If an image_id was specified, use it.
 	// If an image_name was specified, look up the image ID, report if error.
-	imageID, err := getImageIDFromConfig(computeClient, d)
+	imageID, err := getImageIDFromConfig(imageClient, d)
 	if err != nil {
 		return err
 	}
@@ -1283,7 +1287,7 @@ func resourceInstanceSchedulerHintsV2(d *schema.ResourceData, schedulerHintsRaw 
 	return schedulerHints
 }
 
-func getImageIDFromConfig(computeClient *gophercloud.ServiceClient, d *schema.ResourceData) (string, error) {
+func getImageIDFromConfig(imageClient *gophercloud.ServiceClient, d *schema.ResourceData) (string, error) {
 	// If block_device was used, an Image does not need to be specified, unless an image/local
 	// combination was used. This emulates normal boot behavior. Otherwise, ignore the image altogether.
 	if vL, ok := d.GetOk("block_device"); ok {
@@ -1316,7 +1320,7 @@ func getImageIDFromConfig(computeClient *gophercloud.ServiceClient, d *schema.Re
 	}
 
 	if imageName != "" {
-		imageID, err := images_utils.IDFromName(computeClient, imageName)
+		imageID, err := images_utils.IDFromName(imageClient, imageName)
 		if err != nil {
 			return "", err
 		}
