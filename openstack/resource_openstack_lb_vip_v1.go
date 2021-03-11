@@ -156,7 +156,9 @@ func resourceLBVipV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	floatingIP := d.Get("floating_ip").(string)
 	if floatingIP != "" {
-		lbVipV1AssignFloatingIP(floatingIP, p.PortID, networkingClient)
+		if err := lbVipV1AssignFloatingIP(floatingIP, p.PortID, networkingClient); err != nil {
+			log.Printf("[DEBUG] unable to assign floating IP: %s", err)
+		}
 	}
 
 	d.SetId(p.ID)
@@ -263,7 +265,9 @@ func resourceLBVipV1Update(d *schema.ResourceData, meta interface{}) error {
 		// Assign the updated floating IP
 		floatingIP := d.Get("floating_ip").(string)
 		if floatingIP != "" {
-			lbVipV1AssignFloatingIP(floatingIP, portID, networkingClient)
+			if err := lbVipV1AssignFloatingIP(floatingIP, portID, networkingClient); err != nil {
+				log.Printf("[DEBUG] unable to assign floating IP: %s", err)
+			}
 		}
 	}
 

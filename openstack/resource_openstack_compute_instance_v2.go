@@ -1108,7 +1108,9 @@ func resourceOpenStackComputeInstanceV2ImportState(d *schema.ResourceData, meta 
 		return nil, CheckDeleted(d, raw.Err, "openstack_compute_instance_v2")
 	}
 
-	raw.ExtractInto(&serverWithAttachments)
+	if err := raw.ExtractInto(&serverWithAttachments); err != nil {
+		log.Printf("[DEBUG] unable to unmarshal raw struct to serverWithAttachments: %s", err)
+	}
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_instance_v2 %s volume attachments: %#v",
 		d.Id(), serverWithAttachments)
@@ -1128,7 +1130,9 @@ func resourceOpenStackComputeInstanceV2ImportState(d *schema.ResourceData, meta 
 		}{}
 		for i, b := range serverWithAttachments.VolumesAttached {
 			rawVolume := volumes.Get(blockStorageClient, b["id"].(string))
-			rawVolume.ExtractInto(&volMetaData)
+			if err := rawVolume.ExtractInto(&volMetaData); err != nil {
+				log.Printf("[DEBUG] unable to unmarshal raw struct to volume metadata: %s", err)
+			}
 
 			log.Printf("[DEBUG] retrieved volume%+v", volMetaData)
 			v := map[string]interface{}{

@@ -179,7 +179,9 @@ func resourceLBMemberV1Delete(d *schema.ResourceData, meta interface{}) error {
 
 	err = members.Delete(networkingClient, d.Id()).ExtractErr()
 	if err != nil {
-		CheckDeleted(d, err, "LB member")
+		if err := CheckDeleted(d, err, "LB member"); err != nil {
+			log.Printf("%s", err)
+		}
 	}
 
 	stateConf := &resource.StateChangeConf{

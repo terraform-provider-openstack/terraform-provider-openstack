@@ -87,7 +87,9 @@ func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.Reso
 		return filename, nil
 	} else if furl := d.Get("image_source_url").(string); furl != "" {
 		dir := d.Get("image_cache_path").(string)
-		os.MkdirAll(dir, 0700)
+		if err := os.MkdirAll(dir, 0700); err != nil {
+			return "", fmt.Errorf("unable to create dir %s: %s", dir, err)
+		}
 		filename := filepath.Join(dir, fmt.Sprintf("%x.img", md5.Sum([]byte(furl))))
 
 		if _, err := os.Stat(filename); err != nil {
@@ -209,7 +211,9 @@ func resourceImagesImageV2UpdateComputedAttributes(diff *schema.ResourceDiff, me
 			//
 			// If the user has changed properties, they will be caught at this
 			// point, too.
-			diff.SetNew("properties", newProperties)
+			if err := diff.SetNew("properties", newProperties); err != nil {
+				log.Printf("[DEBUG] unable set diff for properties key: %s", err)
+			}
 		}
 	}
 

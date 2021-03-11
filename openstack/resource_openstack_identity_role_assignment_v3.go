@@ -135,8 +135,7 @@ func resourceIdentityRoleAssignmentV3Delete(d *schema.ResourceData, meta interfa
 		UserID:    userID,
 	}
 
-	roles.Unassign(identityClient, roleID, opts).ExtractErr()
-	if err != nil {
+	if err := roles.Unassign(identityClient, roleID, opts).ExtractErr(); err != nil {
 		return CheckDeleted(d, err, "Error unassigning openstack_identity_role_assignment_v3")
 	}
 

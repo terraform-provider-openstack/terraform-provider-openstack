@@ -23,7 +23,7 @@ func TestAccSFSV2SnapshotDataSource_basic(t *testing.T) {
 			t.Fatal(err)
 		}
 		shareID = snapshot.ShareID
-		defer testAccSFSV2SnapshotDelete(t, snapshot)
+		defer testAccSFSV2SnapshotDelete(t, snapshot) //nolint:errcheck
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -154,7 +154,9 @@ func testAccSFSV2SnapshotCreate(t *testing.T, snapshotName string) (*snapshots.S
 
 	t.Logf("Snapshot %s created, waiting for 'available' status", snapshot.ID)
 
-	waitForSnapshotStatus(t, client, snapshot.ID, "available", 600)
+	if err := waitForSnapshotStatus(t, client, snapshot.ID, "available", 600); err != nil {
+		return nil, err
+	}
 
 	return snapshot, nil
 }
@@ -175,7 +177,9 @@ func testAccSFSV2SnapshotDelete(t *testing.T, snapshot *snapshots.Snapshot) erro
 		return err
 	}
 
-	waitForSnapshotStatus(t, client, snapshot.ID, "deleted", 600)
+	if err := waitForSnapshotStatus(t, client, snapshot.ID, "deleted", 600); err != nil {
+		return err
+	}
 
 	t.Logf("Snapshot %s deleted", snapshot.ID)
 
@@ -184,7 +188,9 @@ func testAccSFSV2SnapshotDelete(t *testing.T, snapshot *snapshots.Snapshot) erro
 		return err
 	}
 
-	waitForShareStatus(t, client, snapshot.ShareID, "deleted", 600)
+	if err := waitForShareStatus(t, client, snapshot.ShareID, "deleted", 600); err != nil {
+		return err
+	}
 
 	t.Logf("Share %s deleted", snapshot.ShareID)
 
