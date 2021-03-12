@@ -84,6 +84,7 @@ func resourceBlockStorageQuotasetV3() *schema.Resource {
 
 			"volume_type_quota": {
 				Type:     schema.TypeMap,
+				Elem:     &schema.Schema{Type: schema.TypeInt},
 				Optional: true,
 			},
 		},
@@ -161,7 +162,16 @@ func resourceBlockStorageQuotasetV3Read(d *schema.ResourceData, meta interface{}
 	d.Set("backups", q.Backups)
 	d.Set("backup_gigabytes", q.BackupGigabytes)
 	d.Set("groups", q.Groups)
-	d.Set("volume_type_quota", q.Extra)
+
+	// We only set volume_type_quota when user is defining them to avoid unnecessary updates
+	// on every run and not introduce breaking changes
+	volumeTypeQuota := d.Get("volume_type_quota").(map[string]interface{})
+	if len(volumeTypeQuota) > 0 {
+		if err := d.Set("volume_type_quota", q.Extra); err != nil {
+			log.Printf(
+				"[WARN] Unable to set openstack_blockstorage_quotaset_v3 %s volume_type_quotas: %s", d.Id(), err)
+		}
+	}
 
 	return nil
 }
@@ -221,9 +231,17 @@ func resourceBlockStorageQuotasetV3Update(d *schema.ResourceData, meta interface
 	}
 
 	if d.HasChange("volume_type_quota") {
-		hasChange = true
-		volumeTypeQuota := d.Get("volume_type_quota").(map[string]interface{})
-		updateOpts.Extra = volumeTypeQuota
+		_, newVTQRaw := d.GetChange("volume_type_quota")
+		newVTQ := newVTQRaw.(map[string]interface{})
+
+		// if len(newVTQ) == 0 it can lead to error when trying to do an update with
+		// zero attributes. Not updating when a user removes all attributes is acceptable
+		// as this attributes are not removed anyways
+		if len(newVTQ) > 0 {
+			hasChange = true
+			volumeTypeQuota := d.Get("volume_type_quota").(map[string]interface{})
+			updateOpts.Extra = volumeTypeQuota
+		}
 	}
 
 	if hasChange {
