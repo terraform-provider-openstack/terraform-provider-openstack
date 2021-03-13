@@ -72,7 +72,7 @@ func testAccCheckIdentityV3EndpointDestroy(s *terraform.State) error {
 		}
 
 		var endpoint endpoints.Endpoint
-		endpoints.List(identityClient, nil).EachPage(func(page pagination.Page) (bool, error) {
+		endpoints.List(identityClient, nil).EachPage(func(page pagination.Page) (bool, error) { //nolint:errcheck
 			endpointList, err := endpoints.ExtractEndpoints(page)
 			if err != nil {
 				return false, err

@@ -21,7 +21,7 @@ func TestAccNetworkingV2PortSecGroupAssociate_update(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer testAccCheckNetworkingV2PortSecGroupDeletePort(t, hiddenPort)
+		defer testAccCheckNetworkingV2PortSecGroupDeletePort(t, hiddenPort) //nolint:errcheck
 	}
 
 	resource.Test(t, resource.TestCase{
