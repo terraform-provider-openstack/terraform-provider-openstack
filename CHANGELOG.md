@@ -2,6 +2,10 @@
 
 * __New Resource__: `networking_portforwarding_v2` ([#940](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/940))
 
+IMPROVEMENTS
+
+* Go version is updated to `1.16` and we're providing `darwin/arm64` binaries starting from this release ([#1206](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1206))
+
 ## 1.39.0 (6 March, 2021)
 
 IMPROVEMENTS
