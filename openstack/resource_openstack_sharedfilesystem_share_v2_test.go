@@ -32,7 +32,7 @@ func TestAccSFSV2Share_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSV2ShareExists("openstack_sharedfilesystem_share_v2.share_1", &share),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "name", "nfs_share_updated"),
-					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "is_public", "true"),
+					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "is_public", "false"),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "description", ""),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "share_proto", "NFS"),
 				),
@@ -104,6 +104,40 @@ func TestAccSFSV2Share_update(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "name", "nfs_share"),
 					testAccCheckSFSV2ShareMetadataAbsent("key", &share),
 					testAccCheckSFSV2ShareMetadataAbsent("new_key", &share),
+				),
+			},
+		},
+	})
+}
+
+func TestAccSFSV2Share_admin(t *testing.T) {
+	var share shares.Share
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckSFS(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckSFSV2ShareDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSFSV2ShareAdminConfigBasic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSFSV2ShareExists("openstack_sharedfilesystem_share_v2.share_1", &share),
+					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "name", "nfs_share_admin"),
+					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "description", "test share description"),
+					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "share_proto", "NFS"),
+				),
+			},
+			{
+				Config: testAccSFSV2ShareAdminConfigUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSFSV2ShareExists("openstack_sharedfilesystem_share_v2.share_1", &share),
+					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "name", "nfs_share_admin_updated"),
+					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "is_public", "true"),
+					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "description", ""),
+					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_v2.share_1", "share_proto", "NFS"),
 				),
 			},
 		},
@@ -214,7 +248,7 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
 const testAccSFSV2ShareConfigUpdate = `
 resource "openstack_sharedfilesystem_share_v2" "share_1" {
   name             = "nfs_share_updated"
-  is_public        = true
+  is_public        = false
   share_proto      = "NFS"
   share_type       = "dhss_false"
   size             = 1
@@ -286,6 +320,26 @@ const testAccSFSV2ShareConfigMetadataUpdate3 = `
 resource "openstack_sharedfilesystem_share_v2" "share_1" {
   name             = "nfs_share"
   description      = "test share description"
+  share_proto      = "NFS"
+  share_type       = "dhss_false"
+  size             = 1
+}
+`
+
+const testAccSFSV2ShareAdminConfigBasic = `
+resource "openstack_sharedfilesystem_share_v2" "share_1" {
+  name             = "nfs_share_admin"
+  description      = "test share description"
+  share_proto      = "NFS"
+  share_type       = "dhss_false"
+  size             = 1
+}
+`
+
+const testAccSFSV2ShareAdminConfigUpdate = `
+resource "openstack_sharedfilesystem_share_v2" "share_1" {
+  name             = "nfs_share_admin_updated"
+  is_public        = true
   share_proto      = "NFS"
   share_type       = "dhss_false"
   size             = 1
