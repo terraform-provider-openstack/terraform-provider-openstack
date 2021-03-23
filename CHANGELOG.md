@@ -1,4 +1,4 @@
-## 1.40.0 (Unreleased)
+## 1.40.0 (23 March, 2021)
 
 * __New Resource__: `networking_portforwarding_v2` ([#940](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/940))
 * __New Resource__: `blockstorage_volume_type_v3` ([#1204](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1204))
