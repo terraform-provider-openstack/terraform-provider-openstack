@@ -9,7 +9,8 @@ IMPROVEMENTS
 
 BUG FIXES
 
-* Fixed Bad request API error while updating `images_image_v2` resource because old OpenStack released don't have `hidden` argument. 
+* Fixed Bad request API error while updating `images_image_v2` resource because old OpenStack released don't have `hidden` argument ([#1209](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1209))
+* Fixed Bad request API error while updating `blockstorage_quotaset_v2`, `blockstorage_quotaset_v3` ([#1200](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1200))
 
 ## 1.39.0 (6 March, 2021)
 
