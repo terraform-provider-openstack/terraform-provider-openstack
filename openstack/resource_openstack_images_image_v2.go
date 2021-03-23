@@ -235,7 +235,6 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 	}
 
 	protected := d.Get("protected").(bool)
-	hidden := d.Get("hidden").(bool)
 	visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
 
 	properties := d.Get("properties").(map[string]interface{})
@@ -249,9 +248,13 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 		MinRAM:          d.Get("min_ram_mb").(int),
 		ID:              d.Get("image_id").(string),
 		Protected:       &protected,
-		Hidden:          &hidden,
 		Visibility:      &visibility,
 		Properties:      imageProperties,
+	}
+
+	if d.Get("hidden").(bool) {
+		hidden := true
+		createOpts.Hidden = &hidden
 	}
 
 	if v, ok := d.GetOk("tags"); ok {
