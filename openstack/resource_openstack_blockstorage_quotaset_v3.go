@@ -106,7 +106,11 @@ func resourceBlockStorageQuotasetV3Create(d *schema.ResourceData, meta interface
 	backups := d.Get("backups").(int)
 	backupGigabytes := d.Get("backup_gigabytes").(int)
 	groups := d.Get("groups").(int)
-	volumeTypeQuota := d.Get("volume_type_quota").(map[string]interface{})
+	volumeTypeQuotaRaw := d.Get("volume_type_quota").(map[string]interface{})
+	volumeTypeQuota, err := blockStorageVolumeTypeQuotaConversion(volumeTypeQuotaRaw)
+	if err != nil {
+		return fmt.Errorf("Error parsing volume_type_quota in openstack_blockstorage_quotaset_v3: %s", err)
+	}
 
 	updateOpts := quotasets.UpdateOpts{
 		Volumes:            &volumes,
@@ -161,7 +165,15 @@ func resourceBlockStorageQuotasetV3Read(d *schema.ResourceData, meta interface{}
 	d.Set("backups", q.Backups)
 	d.Set("backup_gigabytes", q.BackupGigabytes)
 	d.Set("groups", q.Groups)
-	d.Set("volume_type_quota", q.Extra)
+
+	// We only set volume_type_quota when user is defining them
+	volumeTypeQuota := d.Get("volume_type_quota").(map[string]interface{})
+	if len(volumeTypeQuota) > 0 {
+		if err := d.Set("volume_type_quota", q.Extra); err != nil {
+			log.Printf(
+				"[WARN] Unable to set openstack_blockstorage_quotaset_v3 %s volume_type_quotas: %s", d.Id(), err)
+		}
+	}
 
 	return nil
 }
@@ -221,9 +233,19 @@ func resourceBlockStorageQuotasetV3Update(d *schema.ResourceData, meta interface
 	}
 
 	if d.HasChange("volume_type_quota") {
-		hasChange = true
-		volumeTypeQuota := d.Get("volume_type_quota").(map[string]interface{})
-		updateOpts.Extra = volumeTypeQuota
+		volumeTypeQuotaRaw := d.Get("volume_type_quota").(map[string]interface{})
+
+		// if len(volumeTypeQuotaRaw) == 0 it can lead to error when trying to do an update with
+		// zero attributes. Not updating when a user removes all attributes is acceptable
+		// as this attributes are not removed anyways.
+		if len(volumeTypeQuotaRaw) > 0 {
+			volumeTypeQuota, err := blockStorageVolumeTypeQuotaConversion(volumeTypeQuotaRaw)
+			if err != nil {
+				return fmt.Errorf("Error parsing volume_type_quota in openstack_blockstorage_quotaset_v3: %s", err)
+			}
+			updateOpts.Extra = volumeTypeQuota
+			hasChange = true
+		}
 	}
 
 	if hasChange {
