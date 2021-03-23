@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/quotasets"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumetypes"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -13,8 +14,9 @@ import (
 
 func TestAccBlockStorageQuotasetV3_basic(t *testing.T) {
 	var (
-		project  projects.Project
-		quotaset quotasets.QuotaSet
+		project    projects.Project
+		quotaset   quotasets.QuotaSet
+		volumeType volumetypes.VolumeType
 	)
 
 	resource.Test(t, resource.TestCase{
@@ -23,12 +25,13 @@ func TestAccBlockStorageQuotasetV3_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIdentityV3ProjectDestroy,
+		CheckDestroy: testAccCheckBlockStorageQuotasetV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageQuotasetV3Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
+					testAccCheckBlockStorageVolumeTypeV3Exists("openstack_blockstorage_volume_type_v3.volume_type_1", &volumeType),
 					testAccCheckBlockStorageQuotasetV3Exists("openstack_blockstorage_quotaset_v3.quotaset_1", &quotaset),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_quotaset_v3.quotaset_1", "volumes", "2"),
@@ -44,12 +47,19 @@ func TestAccBlockStorageQuotasetV3_basic(t *testing.T) {
 						"openstack_blockstorage_quotaset_v3.quotaset_1", "backup_gigabytes", "1"),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_quotaset_v3.quotaset_1", "groups", "1"),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_quotaset_v3.quotaset_1", "volume_type_quota.%", "2"),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_quotaset_v3.quotaset_1", "volume_type_quota.volumes_foo", "10"),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_quotaset_v3.quotaset_1", "volume_type_quota.snapshots_foo", "10"),
 				),
 			},
 			{
 				Config: testAccBlockStorageQuotasetV3Update1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
+					testAccCheckBlockStorageVolumeTypeV3Exists("openstack_blockstorage_volume_type_v3.volume_type_1", &volumeType),
 					testAccCheckBlockStorageQuotasetV3Exists("openstack_blockstorage_quotaset_v3.quotaset_1", &quotaset),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_quotaset_v3.quotaset_1", "volumes", "3"),
@@ -65,12 +75,21 @@ func TestAccBlockStorageQuotasetV3_basic(t *testing.T) {
 						"openstack_blockstorage_quotaset_v3.quotaset_1", "backup_gigabytes", "1"),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_quotaset_v3.quotaset_1", "groups", "1"),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_quotaset_v3.quotaset_1", "volume_type_quota.%", "3"),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_quotaset_v3.quotaset_1", "volume_type_quota.volumes_foo", "100"),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_quotaset_v3.quotaset_1", "volume_type_quota.snapshots_foo", "100"),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_quotaset_v3.quotaset_1", "volume_type_quota.gigabytes_foo", "100"),
 				),
 			},
 			{
 				Config: testAccBlockStorageQuotasetV3Update2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
+					testAccCheckBlockStorageVolumeTypeV3Exists("openstack_blockstorage_volume_type_v3.volume_type_1", &volumeType),
 					testAccCheckBlockStorageQuotasetV3Exists("openstack_blockstorage_quotaset_v3.quotaset_1", &quotaset),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_quotaset_v3.quotaset_1", "volumes", "3"),
@@ -86,6 +105,10 @@ func TestAccBlockStorageQuotasetV3_basic(t *testing.T) {
 						"openstack_blockstorage_quotaset_v3.quotaset_1", "backup_gigabytes", "4"),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_quotaset_v3.quotaset_1", "groups", "4"),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_quotaset_v3.quotaset_1", "volume_type_quota.%", "1"),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_quotaset_v3.quotaset_1", "volume_type_quota.volumes_foo", "10"),
 				),
 			},
 		},
@@ -126,9 +149,29 @@ func testAccCheckBlockStorageQuotasetV3Exists(n string, quotaset *quotasets.Quot
 	}
 }
 
+func testAccCheckBlockStorageQuotasetV3Destroy(s *terraform.State) error {
+	err := testAccCheckIdentityV3ProjectDestroy(s)
+	if err != nil {
+		return err
+	}
+
+	err = testAccCheckBlockStorageVolumeTypeV3Destroy(s)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 const testAccBlockStorageQuotasetV3Basic = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"
+}
+
+resource "openstack_blockstorage_volume_type_v3" "volume_type_1" {
+  name = "foo"
+  description = "foo"
+  is_public = true
 }
 
 resource "openstack_blockstorage_quotaset_v3" "quotaset_1" {
@@ -140,12 +183,24 @@ resource "openstack_blockstorage_quotaset_v3" "quotaset_1" {
   backups               = 2
   backup_gigabytes      = 1
   groups                = 1
+  volume_type_quota     = {
+	volumes_foo   = 10
+	snapshots_foo = 10
+  }
+
+  depends_on = [openstack_blockstorage_volume_type_v3.volume_type_1]
 }
 `
 
 const testAccBlockStorageQuotasetV3Update1 = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"
+}
+
+resource "openstack_blockstorage_volume_type_v3" "volume_type_1" {
+  name = "foo"
+  description = "foo"
+  is_public = true
 }
 
 resource "openstack_blockstorage_quotaset_v3" "quotaset_1" {
@@ -157,12 +212,25 @@ resource "openstack_blockstorage_quotaset_v3" "quotaset_1" {
   backups              = 2
   backup_gigabytes     = 1
   groups               = 1
+  volume_type_quota     = {
+	volumes_foo   = 100
+	snapshots_foo = 100
+	gigabytes_foo = 100
+  }
+
+  depends_on = [openstack_blockstorage_volume_type_v3.volume_type_1]
 }
 `
 
 const testAccBlockStorageQuotasetV3Update2 = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"
+}
+
+resource "openstack_blockstorage_volume_type_v3" "volume_type_1" {
+  name = "foo"
+  description = "foo"
+  is_public = true
 }
 
 resource "openstack_blockstorage_quotaset_v3" "quotaset_1" {
@@ -174,5 +242,10 @@ resource "openstack_blockstorage_quotaset_v3" "quotaset_1" {
   backups              = 4
   backup_gigabytes     = 4
   groups               = 4
+  volume_type_quota     = {
+	volumes_foo   = 10
+  }
+
+  depends_on = [openstack_blockstorage_volume_type_v3.volume_type_1]
 }
 `
