@@ -7,6 +7,10 @@ IMPROVEMENTS
 
 * Go version is updated to `1.16` and we're providing `darwin/arm64` binaries starting from this release ([#1206](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1206))
 
+BUG FIXES
+
+* Fixed Bad request API error while updating `images_image_v2` resource because old OpenStack released don't have `hidden` argument. 
+
 ## 1.39.0 (6 March, 2021)
 
 IMPROVEMENTS
