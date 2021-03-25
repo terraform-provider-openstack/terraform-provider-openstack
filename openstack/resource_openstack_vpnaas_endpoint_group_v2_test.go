@@ -13,7 +13,11 @@ import (
 func TestAccGroupV2_basic(t *testing.T) {
 	var group endpointgroups.EndpointGroup
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckVPN(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckVPN(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckEndpointGroupV2Destroy,
 		Steps: []resource.TestStep{
@@ -34,7 +38,11 @@ func TestAccGroupV2_basic(t *testing.T) {
 func TestAccGroupV2_update(t *testing.T) {
 	var group endpointgroups.EndpointGroup
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckVPN(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckVPN(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckEndpointGroupV2Destroy,
 		Steps: []resource.TestStep{

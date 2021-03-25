@@ -46,6 +46,8 @@ func TestAccLBV2Members_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
 			testAccPreCheckOctaviaBatchMembersEnv(t)

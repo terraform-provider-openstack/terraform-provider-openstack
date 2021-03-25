@@ -18,7 +18,10 @@ func TestAccNetworkingV2AddressScope_basic(t *testing.T) {
 	newName := acctest.RandomWithPrefix("tf-acc-addrscope")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2AddressScopeDestroy,
 		Steps: []resource.TestStep{

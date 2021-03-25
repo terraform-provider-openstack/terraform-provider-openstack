@@ -15,7 +15,11 @@ import (
 func TestAccSiteConnectionV2_basic(t *testing.T) {
 	var conn siteconnections.Connection
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckVPN(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckVPN(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSiteConnectionV2Destroy,
 		Steps: []resource.TestStep{
@@ -111,7 +115,7 @@ func testAccSiteConnectionV2Basic() string {
   		router_id = "${openstack_networking_router_v2.router_1.id}"
   		subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
 	}
-	
+
 	resource "openstack_vpnaas_service_v2" "service_1" {
 		router_id = "${openstack_networking_router_v2.router_1.id}",
 		admin_state_up = "false"

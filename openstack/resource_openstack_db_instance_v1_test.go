@@ -16,7 +16,11 @@ func TestAccDatabaseV1Instance_basic(t *testing.T) {
 	var configuration configurations.Config
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDatabase(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckDatabase(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDatabaseV1InstanceDestroy,
 		Steps: []resource.TestStep{

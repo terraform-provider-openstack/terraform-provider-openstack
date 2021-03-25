@@ -14,7 +14,10 @@ func TestAccComputeV2SecGroup_basic(t *testing.T) {
 	var secgroup secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
@@ -32,7 +35,10 @@ func TestAccComputeV2SecGroup_update(t *testing.T) {
 	var secgroup secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{

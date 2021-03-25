@@ -13,7 +13,10 @@ func TestAccOrchestrationV1Stack_basic(t *testing.T) {
 	var stack stacks.RetrievedStack
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
@@ -34,7 +37,10 @@ func TestAccOrchestrationV1Stack_tags(t *testing.T) {
 	var stack stacks.RetrievedStack
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
@@ -55,7 +61,10 @@ func TestAccOrchestrationV1Stack_update(t *testing.T) {
 	var stack stacks.RetrievedStack
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
@@ -84,7 +93,10 @@ func TestAccOrchestrationV1Stack_timeout(t *testing.T) {
 	var stack stacks.RetrievedStack
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
@@ -102,7 +114,10 @@ func TestAccOrchestrationV1Stack_outputs(t *testing.T) {
 	var stack stacks.RetrievedStack
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{

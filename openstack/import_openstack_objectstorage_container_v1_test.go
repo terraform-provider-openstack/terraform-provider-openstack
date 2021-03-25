@@ -10,7 +10,11 @@ func TestAccObjectStorageV1Container_importBasic(t *testing.T) {
 	resourceName := "openstack_objectstorage_container_v1.container_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckSwift(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckSwift(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckObjectStorageV1ContainerDestroy,
 		Steps: []resource.TestStep{

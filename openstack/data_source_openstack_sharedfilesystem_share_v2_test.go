@@ -10,7 +10,11 @@ import (
 
 func TestAccSFSV2ShareDataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckSFS(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckSFS(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSFSV2ShareDestroy,
 		Steps: []resource.TestStep{

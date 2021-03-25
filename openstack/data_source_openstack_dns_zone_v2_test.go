@@ -16,7 +16,10 @@ func zoneName() string {
 func TestAccOpenStackDNSZoneV2DataSource_basic(t *testing.T) {
 	zoneName := zoneName()
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckDNS(t) },
+		PreCheck: func() {
+			testAccPreCheckDNS(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

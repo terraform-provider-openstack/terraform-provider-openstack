@@ -13,7 +13,11 @@ func TestAccSFSV2ShareAccess_importBasic(t *testing.T) {
 	shareAccessName := "openstack_sharedfilesystem_share_access_v2.share_access_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckSFS(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckSFS(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSFSV2ShareAccessDestroy,
 		Steps: []resource.TestStep{

@@ -15,8 +15,10 @@ func TestAccContainerInfraV1ClusterTemplateDataSource_basic(t *testing.T) {
 	imageName := acctest.RandomWithPrefix("tf-acc-image")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckContainerInfra(t) },
-		Providers:    testAccProviders,
+		PreCheck: func() {
+			testAccPreCheckContainerInfra(t)
+			testAccPreCheckNonAdminOnly(t)
+		}, Providers: testAccProviders,
 		CheckDestroy: testAccCheckContainerInfraV1ClusterTemplateDestroy,
 		Steps: []resource.TestStep{
 			{

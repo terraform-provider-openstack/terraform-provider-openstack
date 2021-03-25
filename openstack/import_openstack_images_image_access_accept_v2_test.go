@@ -10,7 +10,10 @@ func TestAccImagesImageAccessAcceptV2_importBasic(t *testing.T) {
 	resourceName := "openstack_images_image_access_accept_v2.image_access_accept_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckImagesImageAccessAcceptV2Destroy,
 		Steps: []resource.TestStep{

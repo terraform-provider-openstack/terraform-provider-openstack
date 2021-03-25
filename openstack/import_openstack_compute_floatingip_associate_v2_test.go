@@ -10,7 +10,10 @@ func TestAccComputeV2FloatingIPAssociate_importBasic(t *testing.T) {
 	resourceName := "openstack_compute_floatingip_associate_v2.fip_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{

@@ -19,6 +19,7 @@ func TestAccNetworkingV2Trunk_nosubports(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
@@ -45,6 +46,7 @@ func TestAccNetworkingV2Trunk_subports(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
@@ -69,6 +71,7 @@ func TestAccNetworkingV2Trunk_tags(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
@@ -100,6 +103,7 @@ func TestAccNetworkingV2Trunk_trunkUpdateSubports(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
@@ -168,6 +172,7 @@ func TestAccNetworkingV2Trunk_computeInstance(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,

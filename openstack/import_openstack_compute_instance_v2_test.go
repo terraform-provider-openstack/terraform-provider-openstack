@@ -10,7 +10,10 @@ func TestAccComputeV2Instance_importBasic(t *testing.T) {
 	resourceName := "openstack_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -35,7 +38,10 @@ func TestAccComputeV2Instance_DetachPortsBeforeDelete(t *testing.T) {
 	resourceName := "openstack_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -56,7 +62,10 @@ func TestAccComputeV2Instance_importbootFromVolumeForceNew_1(t *testing.T) {
 	resourceName := "openstack_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -79,7 +88,10 @@ func TestAccComputeV2Instance_importbootFromVolumeImage(t *testing.T) {
 	resourceName := "openstack_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{

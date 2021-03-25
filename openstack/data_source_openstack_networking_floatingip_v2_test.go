@@ -10,7 +10,10 @@ import (
 
 func TestAccOpenStackNetworkingFloatingIPV2DataSource_address(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

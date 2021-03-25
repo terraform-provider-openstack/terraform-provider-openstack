@@ -10,7 +10,11 @@ func TestAccKeyManagerOrderV1_importBasic(t *testing.T) {
 	resourceName := "openstack_keymanager_order_v1.order_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckKeyManager(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOrderV1Destroy,
 		Steps: []resource.TestStep{

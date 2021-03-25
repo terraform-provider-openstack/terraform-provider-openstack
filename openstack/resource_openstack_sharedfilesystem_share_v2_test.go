@@ -14,7 +14,11 @@ func TestAccSFSV2Share_basic(t *testing.T) {
 	var share shares.Share
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckSFS(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckSFS(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSFSV2ShareDestroy,
 		Steps: []resource.TestStep{
@@ -65,7 +69,11 @@ func TestAccSFSV2Share_update(t *testing.T) {
 	var share shares.Share
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckSFS(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckSFS(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSFSV2ShareDestroy,
 		Steps: []resource.TestStep{

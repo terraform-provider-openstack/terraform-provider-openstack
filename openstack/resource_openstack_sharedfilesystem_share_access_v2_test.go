@@ -16,7 +16,11 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 	var shareAccess2 shares.AccessRight
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckSFS(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckSFS(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSFSV2ShareAccessDestroy,
 		Steps: []resource.TestStep{

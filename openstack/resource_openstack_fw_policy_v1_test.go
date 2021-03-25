@@ -13,7 +13,11 @@ import (
 
 func TestAccFWPolicyV1_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckFW(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckFW(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWPolicyV1Destroy,
 		Steps: []resource.TestStep{
@@ -30,7 +34,11 @@ func TestAccFWPolicyV1_basic(t *testing.T) {
 
 func TestAccFWPolicyV1_addRules(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckFW(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckFW(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWPolicyV1Destroy,
 		Steps: []resource.TestStep{
@@ -47,7 +55,11 @@ func TestAccFWPolicyV1_addRules(t *testing.T) {
 
 func TestAccFWPolicyV1_deleteRules(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckFW(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckFW(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWPolicyV1Destroy,
 		Steps: []resource.TestStep{

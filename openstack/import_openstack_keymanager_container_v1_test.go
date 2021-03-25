@@ -10,7 +10,11 @@ func TestAccKeyManagerContainerV1_importBasic(t *testing.T) {
 	resourceName := "openstack_keymanager_container_v1.container_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckKeyManager(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerV1Destroy,
 		Steps: []resource.TestStep{
@@ -30,7 +34,11 @@ func TestAccKeyManagerContainerV1_importACLs(t *testing.T) {
 	resourceName := "openstack_keymanager_container_v1.container_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckKeyManager(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerV1Destroy,
 		Steps: []resource.TestStep{

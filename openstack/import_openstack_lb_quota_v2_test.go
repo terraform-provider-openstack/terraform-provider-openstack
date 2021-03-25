@@ -13,6 +13,7 @@ func TestAccLBQuotaV2_importBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
+			testAccPreCheckLB(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIdentityV3ProjectDestroy,

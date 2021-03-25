@@ -13,7 +13,11 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 	var listener listeners.Listener
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckLB(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckLB(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
@@ -43,6 +47,8 @@ func TestAccLBV2Listener_octavia(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
 		},
@@ -91,6 +97,8 @@ func TestAccLBV2Listener_octavia_udp(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
 		},
@@ -114,6 +122,8 @@ func TestAccLBV2ListenerConfig_octavia_insert_headers(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
 		},

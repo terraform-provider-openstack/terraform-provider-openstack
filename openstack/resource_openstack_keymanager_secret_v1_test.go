@@ -13,7 +13,11 @@ import (
 func TestAccKeyManagerSecretV1_basic(t *testing.T) {
 	var secret secrets.Secret
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckKeyManager(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
@@ -34,7 +38,11 @@ func TestAccKeyManagerSecretV1_basic(t *testing.T) {
 func TestAccKeyManagerSecretV1_basicWithMetadata(t *testing.T) {
 	var secret secrets.Secret
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckKeyManager(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
@@ -54,7 +62,11 @@ func TestAccKeyManagerSecretV1_basicWithMetadata(t *testing.T) {
 func TestAccKeyManagerSecretV1_updateMetadata(t *testing.T) {
 	var secret secrets.Secret
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckKeyManager(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
@@ -85,7 +97,11 @@ func TestAccKeyManagerSecretV1_updateMetadata(t *testing.T) {
 func TestAccUpdateSecretV1_payload(t *testing.T) {
 	var secret secrets.Secret
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckKeyManager(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
@@ -136,7 +152,11 @@ func TestAccUpdateSecretV1_payload(t *testing.T) {
 func TestAccKeyManagerSecretV1_acls(t *testing.T) {
 	var secret secrets.Secret
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckKeyManager(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
@@ -160,7 +180,11 @@ func TestAccKeyManagerSecretV1_acls(t *testing.T) {
 func TestAccKeyManagerSecretV1_acls_update(t *testing.T) {
 	var secret secrets.Secret
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckKeyManager(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
