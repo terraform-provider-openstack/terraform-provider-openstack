@@ -50,9 +50,10 @@ const testAccNetworkingV2QoSMinimumBandwidthRuleDataSource = `
 resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
   name = "qos_policy_1"
 }
+
 resource "openstack_networking_qos_minimum_bandwidth_rule_v2" "min_bw_rule_1" {
   qos_policy_id  = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
-  min_bw         = 3000
+  min_kbps       = 3000
 }
 `
 
@@ -61,7 +62,7 @@ func testAccOpenStackNetworkingQoSMinimumBandwidthRuleV2DataSourceBasic() string
 %s
 data "openstack_networking_qos_minimum_bandwidth_rule_v2" "min_bw_rule_1" {
   qos_policy_id = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
-  min_bw        = "${openstack_networking_qos_minimum_bandwidth_rule_v2.min_bw_rule_1.min_bw}"
+  min_kbps      = "${openstack_networking_qos_minimum_bandwidth_rule_v2.min_bw_rule_1.min_kbps}"
 }
 `, testAccNetworkingV2QoSMinimumBandwidthRuleDataSource)
 }
