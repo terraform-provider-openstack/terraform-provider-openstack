@@ -856,8 +856,6 @@ func TestAccNetworkingV2Port_portBinding_update(t *testing.T) {
 						"openstack_networking_port_v2.port_1", "binding.#", "1"),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_port_v2.port_1", "binding.0.vnic_type", "normal"),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "binding.0.host_id", ""),
 				),
 			},
 			{
@@ -2610,7 +2608,7 @@ resource "openstack_networking_port_v2" "port_1" {
   }
 
   binding {
-    vnic_type = "normal"
+	vnic_type = "normal"
   }
 }
 `
