@@ -61,6 +61,10 @@ The following arguments are supported:
 * `value_specs` - (Optional) Map of additional options. Changing this creates a
   new record set.
 
+* `disable_status_check` - (Optional) Disable wait for recordset to reach ACTIVE
+  status. This argumen is disabled by default. If it is set to true, the recordset
+  will be considered as created/updated/deleted if OpenStack request returned success.
+
 ## Attributes Reference
 
 The following attributes are exported:

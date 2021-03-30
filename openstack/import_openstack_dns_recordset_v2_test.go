@@ -22,6 +22,9 @@ func TestAccDNSV2RecordSet_importBasic(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"disable_status_check",
+				},
 			},
 		},
 	})

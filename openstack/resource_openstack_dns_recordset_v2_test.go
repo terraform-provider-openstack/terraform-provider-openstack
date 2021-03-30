@@ -192,6 +192,35 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 	}
 }
 
+func TestAccDNSV2RecordSet_ignoreStatusCheck(t *testing.T) {
+	var recordset recordsets.RecordSet
+	zoneName := randomZoneName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckDNS(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDNSV2RecordSetDisableCheck(zoneName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
+					resource.TestCheckResourceAttr(
+						"openstack_dns_recordset_v2.recordset_1", "disable_status_check", "true"),
+				),
+			},
+			{
+				Config: testAccDNSV2RecordSetBasic(zoneName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
+					resource.TestCheckResourceAttr(
+						"openstack_dns_recordset_v2.recordset_1", "disable_status_check", "false"),
+				),
+			},
+		},
+	})
+}
+
 func testAccDNSV2RecordSetBasic(zoneName string) string {
 	return fmt.Sprintf(`
 		resource "openstack_dns_zone_v2" "zone_1" {
@@ -311,6 +340,28 @@ func testAccDNSV2RecordSetEnsureSameTTL2(zoneName string) string {
 			type = "A"
 			ttl = 3000
 			records = ["10.1.0.2"]
+		}
+	`, zoneName, zoneName)
+}
+
+func testAccDNSV2RecordSetDisableCheck(zoneName string) string {
+	return fmt.Sprintf(`
+		resource "openstack_dns_zone_v2" "zone_1" {
+			name = "%s"
+			email = "email2@example.com"
+			description = "a zone"
+			ttl = 6000
+			type = "PRIMARY"
+		}
+
+		resource "openstack_dns_recordset_v2" "recordset_1" {
+			zone_id = "${openstack_dns_zone_v2.zone_1.id}"
+			name = "%s"
+			type = "A"
+			description = "a record set"
+			ttl = 3000
+			records = ["10.1.0.0"]
+			disable_status_check = true
 		}
 	`, zoneName, zoneName)
 }
