@@ -1,4 +1,12 @@
+## 1.41.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Added `disable_status_check` argument for `dns_recordset_v2` resource ([#1221](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1221))
+
 ## 1.40.0 (23 March, 2021)
+
+FEATURES
 
 * __New Resource__: `networking_portforwarding_v2` ([#940](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/940))
 * __New Resource__: `blockstorage_volume_type_v3` ([#1204](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1204))
