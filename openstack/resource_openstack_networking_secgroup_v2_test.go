@@ -14,7 +14,10 @@ func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 	var securityGroup groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
@@ -40,7 +43,10 @@ func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 	var securityGroup groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
@@ -60,7 +66,10 @@ func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 	var securityGroup groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{

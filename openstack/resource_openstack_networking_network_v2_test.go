@@ -27,7 +27,10 @@ func TestAccNetworkingV2Network_basic(t *testing.T) {
 	var network networks.Network
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
@@ -60,7 +63,10 @@ func TestAccNetworkingV2Network_netstack(t *testing.T) {
 	var router routers.Router
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
@@ -86,7 +92,10 @@ func TestAccNetworkingV2Network_fullstack(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
@@ -108,7 +117,10 @@ func TestAccNetworkingV2Network_timeout(t *testing.T) {
 	var network networks.Network
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
@@ -202,6 +214,7 @@ func TestAccNetworkingV2Network_transparent_vlan_Create(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckTransparentVLAN(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
@@ -224,6 +237,7 @@ func TestAccNetworkingV2Network_adminStateUp_omit(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
@@ -247,6 +261,7 @@ func TestAccNetworkingV2Network_adminStateUp_true(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
@@ -270,6 +285,7 @@ func TestAccNetworkingV2Network_adminStateUp_false(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
@@ -293,6 +309,7 @@ func TestAccNetworkingV2Network_adminStateUp_update(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
@@ -325,6 +342,7 @@ func TestAccNetworkingV2Network_portSecurity_omit(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
@@ -369,6 +387,7 @@ func TestAccNetworkingV2Network_portSecurity_disabled(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
@@ -403,6 +422,7 @@ func TestAccNetworkingV2Network_portSecurity_enabled(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,

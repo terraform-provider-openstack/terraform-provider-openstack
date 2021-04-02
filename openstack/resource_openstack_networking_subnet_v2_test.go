@@ -14,7 +14,10 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
@@ -52,7 +55,10 @@ func TestAccNetworkingV2Subnet_enableDHCP(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
@@ -72,7 +78,10 @@ func TestAccNetworkingV2Subnet_disableDHCP(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
@@ -92,7 +101,10 @@ func TestAccNetworkingV2Subnet_noGateway(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
@@ -112,7 +124,10 @@ func TestAccNetworkingV2Subnet_impliedGateway(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
@@ -132,7 +147,10 @@ func TestAccNetworkingV2Subnet_timeout(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
@@ -150,7 +168,10 @@ func TestAccNetworkingV2Subnet_subnetPool(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
@@ -168,7 +189,10 @@ func TestAccNetworkingV2Subnet_subnetPoolNoCIDR(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
@@ -186,7 +210,10 @@ func TestAccNetworkingV2Subnet_subnetPrefixLength(t *testing.T) {
 	var subnet [2]subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
@@ -207,7 +234,10 @@ func TestAccNetworkingV2Subnet_subnetPrefixLength(t *testing.T) {
 
 func TestAccNetworkingV2Subnet_multipleAllocationPools(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
@@ -238,7 +268,10 @@ func TestAccNetworkingV2Subnet_multipleAllocationPools(t *testing.T) {
 
 func TestAccNetworkingV2Subnet_allocationPool(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
@@ -276,7 +309,10 @@ func TestAccNetworkingV2Subnet_clearDNSNameservers(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{

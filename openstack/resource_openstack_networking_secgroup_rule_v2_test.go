@@ -18,7 +18,10 @@ func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
 	var secgroupRule2 rules.SecGroupRule
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
@@ -48,7 +51,10 @@ func TestAccNetworkingV2SecGroupRule_lowerCaseCIDR(t *testing.T) {
 	var secgroupRule1 rules.SecGroupRule
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
@@ -72,7 +78,10 @@ func TestAccNetworkingV2SecGroupRule_timeout(t *testing.T) {
 	var secgroup2 groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
@@ -111,7 +120,10 @@ func TestAccNetworkingV2SecGroupRule_protocols(t *testing.T) {
 	var secgroupRuleVrrp rules.SecGroupRule
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
@@ -203,7 +215,10 @@ func TestAccNetworkingV2SecGroupRule_numericProtocol(t *testing.T) {
 	var secgroupRule1 rules.SecGroupRule
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{

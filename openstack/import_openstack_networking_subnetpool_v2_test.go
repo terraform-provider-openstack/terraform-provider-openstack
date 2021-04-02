@@ -10,7 +10,10 @@ func TestAccNetworkingV2SubnetPoolImportBasic(t *testing.T) {
 	resourceName := "openstack_networking_subnetpool_v2.subnetpool_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetPoolDestroy,
 		Steps: []resource.TestStep{

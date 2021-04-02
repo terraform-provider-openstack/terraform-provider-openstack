@@ -20,7 +20,11 @@ func TestAccContainerInfraV1ClusterTemplate_basic(t *testing.T) {
 	dockerVolumeSize := 5
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckContainerInfra(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckContainerInfra(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerInfraV1ClusterTemplateDestroy,
 		Steps: []resource.TestStep{

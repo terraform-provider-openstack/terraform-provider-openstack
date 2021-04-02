@@ -27,7 +27,10 @@ func TestAccNetworkingV2Port_basic(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -49,7 +52,10 @@ func TestAccNetworkingV2Port_noIP(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -81,7 +87,10 @@ func TestAccNetworkingV2Port_multipleNoIP(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -104,7 +113,10 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 	var vrrpPort1, vrrpPort2, instancePort ports.Port
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -175,7 +187,10 @@ func TestAccNetworkingV2Port_allowedAddressPairsNoMAC(t *testing.T) {
 	var vrrpPort1, vrrpPort2, instancePort ports.Port
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -200,7 +215,10 @@ func TestAccNetworkingV2Port_multipleFixedIPs(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -223,7 +241,10 @@ func TestAccNetworkingV2Port_timeout(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -241,7 +262,10 @@ func TestAccNetworkingV2Port_timeout(t *testing.T) {
 
 func TestAccNetworkingV2Port_fixedIPs(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -265,7 +289,10 @@ func TestAccNetworkingV2Port_updateSecurityGroups(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -345,7 +372,10 @@ func TestAccNetworkingV2Port_noSecurityGroups(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -409,7 +439,10 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 	var port ports.Port
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -463,7 +496,10 @@ func TestAccNetworkingV2Port_createExtraDHCPOpts(t *testing.T) {
 	var port ports.Port
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -487,7 +523,10 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 	var port ports.Port
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -567,7 +606,10 @@ func TestAccNetworkingV2Port_adminStateUp_omit(t *testing.T) {
 	var port ports.Port
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -588,7 +630,10 @@ func TestAccNetworkingV2Port_adminStateUp_true(t *testing.T) {
 	var port ports.Port
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -609,7 +654,10 @@ func TestAccNetworkingV2Port_adminStateUp_false(t *testing.T) {
 	var port ports.Port
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -630,7 +678,10 @@ func TestAccNetworkingV2Port_adminStateUp_update(t *testing.T) {
 	var port ports.Port
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -660,7 +711,10 @@ func TestAccNetworkingV2Port_portSecurity_omit(t *testing.T) {
 	var port testPortWithExtensions
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -699,7 +753,10 @@ func TestAccNetworkingV2Port_portSecurity_disabled(t *testing.T) {
 	var port testPortWithExtensions
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -729,7 +786,10 @@ func TestAccNetworkingV2Port_portSecurity_enabled(t *testing.T) {
 	var port testPortWithExtensions
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{

@@ -14,7 +14,10 @@ func TestAccOpenStackIdentityAuthScopeV3DataSource_basic(t *testing.T) {
 	projectName := os.Getenv("OS_PROJECT_NAME")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

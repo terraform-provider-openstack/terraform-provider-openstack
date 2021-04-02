@@ -13,7 +13,11 @@ func TestAccLBV2L7Rule_importBasic(t *testing.T) {
 	l7policyResourceName := "openstack_lb_l7policy_v2.l7policy_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckLB(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckLB(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2L7RuleDestroy,
 		Steps: []resource.TestStep{

@@ -10,7 +10,10 @@ import (
 
 func TestAccNetworkingV2SubnetPoolDataSourceBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -32,7 +35,10 @@ func TestAccNetworkingV2SubnetPoolDataSourceBasic(t *testing.T) {
 
 func TestAccNetworkingV2SubnetPoolDataSourceTestQueries(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

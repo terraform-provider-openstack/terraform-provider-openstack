@@ -14,7 +14,10 @@ func TestAccComputeV2InterfaceAttach_basic(t *testing.T) {
 	var ai attachinterfaces.Interface
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InterfaceAttachDestroy,
 		Steps: []resource.TestStep{
@@ -32,7 +35,10 @@ func TestAccComputeV2InterfaceAttach_IP(t *testing.T) {
 	var ai attachinterfaces.Interface
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InterfaceAttachDestroy,
 		Steps: []resource.TestStep{

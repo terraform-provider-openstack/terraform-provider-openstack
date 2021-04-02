@@ -14,7 +14,10 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 	var image images.Image
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
@@ -72,7 +75,10 @@ func TestAccImagesImageV2_name(t *testing.T) {
 	var image images.Image
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
@@ -100,7 +106,10 @@ func TestAccImagesImageV2_tags(t *testing.T) {
 	var image images.Image
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
@@ -175,7 +184,10 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 	var image5 images.Image
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
@@ -241,6 +253,7 @@ func TestAccImagesImageV2_webdownload(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckGlanceImport(t)
 		},
 		Providers:    testAccProviders,

@@ -10,7 +10,11 @@ func TestAccFWFirewallV1_importBasic(t *testing.T) {
 	resourceName := "openstack_fw_firewall_v1.fw_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckFW(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckFW(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{

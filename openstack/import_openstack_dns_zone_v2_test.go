@@ -13,7 +13,11 @@ func TestAccDNSV2Zone_importBasic(t *testing.T) {
 	resourceName := "openstack_dns_zone_v2.zone_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDNS(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckDNS(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{

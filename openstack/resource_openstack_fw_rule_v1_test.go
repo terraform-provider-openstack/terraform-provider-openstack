@@ -15,7 +15,11 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 	var rule rules.Rule
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckFW(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckFW(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWRuleV1Destroy,
 		Steps: []resource.TestStep{
@@ -149,7 +153,11 @@ func TestAccFWRuleV1_anyProtocol(t *testing.T) {
 	var rule rules.Rule
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckFW(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckFW(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWRuleV1Destroy,
 		Steps: []resource.TestStep{
@@ -181,7 +189,11 @@ func TestAccFWRuleV1_updateName(t *testing.T) {
 	var rule rules.Rule
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckFW(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFWRuleV1Destroy,
 		Steps: []resource.TestStep{

@@ -15,7 +15,11 @@ import (
 func TestAccKeyManagerOrderV1_basic(t *testing.T) {
 	var order orders.Order
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckKeyManager(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOrderV1Destroy,
 		Steps: []resource.TestStep{

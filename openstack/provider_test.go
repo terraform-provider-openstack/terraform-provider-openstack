@@ -227,6 +227,13 @@ func testAccPreCheckAdminOnly(t *testing.T) {
 	}
 }
 
+func testAccPreCheckNonAdminOnly(t *testing.T) {
+	v := os.Getenv("OS_USERNAME")
+	if v != "demo" {
+		t.Skip("Skipping test because it requires the demo (non-admin) user")
+	}
+}
+
 func testAccPreCheckGlanceImport(t *testing.T) {
 	if osGlanceimportEnvironment == "" {
 		t.Skip("This environment does not support Glance import tests")

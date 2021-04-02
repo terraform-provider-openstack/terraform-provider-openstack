@@ -8,7 +8,10 @@ import (
 
 func TestAccKeyManagerContainerV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheckKeyManager(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerV1Destroy,
 		Steps: []resource.TestStep{
@@ -31,7 +34,10 @@ func TestAccKeyManagerContainerV1DataSource_basic(t *testing.T) {
 
 func TestAccKeyManagerContainerV1DataSource_acls(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheckKeyManager(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerV1Destroy,
 		Steps: []resource.TestStep{

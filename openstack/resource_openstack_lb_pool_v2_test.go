@@ -13,7 +13,11 @@ func TestAccLBV2Pool_basic(t *testing.T) {
 	var pool pools.Pool
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckLB(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckLB(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2PoolDestroy,
 		Steps: []resource.TestStep{
@@ -38,6 +42,8 @@ func TestAccLBV2Pool_octavia_udp(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
 		},

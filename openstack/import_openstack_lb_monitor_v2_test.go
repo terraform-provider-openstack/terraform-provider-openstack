@@ -10,7 +10,11 @@ func TestAccLBV2Monitor_importBasic(t *testing.T) {
 	resourceName := "openstack_lb_monitor_v2.monitor_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckLB(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckLB(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2MonitorDestroy,
 		Steps: []resource.TestStep{

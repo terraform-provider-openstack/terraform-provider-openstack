@@ -15,7 +15,11 @@ import (
 func TestAccServiceV2_basic(t *testing.T) {
 	var service services.Service
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckVPN(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckVPN(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckServiceV2Destroy,
 		Steps: []resource.TestStep{
@@ -89,7 +93,7 @@ func testAccServiceV2Basic() string {
 	  admin_state_up = "true"
 	  external_network_id = "%s"
 	}
-	
+
 	resource "openstack_vpnaas_service_v2" "service_1" {
 		router_id = "${openstack_networking_router_v2.router_1.id}",
 		admin_state_up = "false"

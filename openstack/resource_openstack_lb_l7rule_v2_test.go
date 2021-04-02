@@ -15,7 +15,11 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 	var l7rule l7rules.Rule
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckLB(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckLB(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBV2L7RuleDestroy,
 		Steps: []resource.TestStep{

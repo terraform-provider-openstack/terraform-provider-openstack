@@ -10,7 +10,11 @@ func TestAccDatabaseV1Database_importBasic(t *testing.T) {
 	resourceName := "openstack_db_database_v1.basic"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDatabase(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckDatabase(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDatabaseV1DatabaseDestroy,
 		Steps: []resource.TestStep{

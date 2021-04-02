@@ -23,7 +23,10 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -46,7 +49,10 @@ func TestAccComputeV2Instance_initialStateActive(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -85,7 +91,10 @@ func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -125,7 +134,10 @@ func TestAccComputeV2Instance_secgroupMulti(t *testing.T) {
 	var secgroup1 secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -147,7 +159,10 @@ func TestAccComputeV2Instance_secgroupMultiUpdate(t *testing.T) {
 	var secgroup1, secgroup2 secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -181,7 +196,10 @@ func TestAccComputeV2Instance_bootFromVolumeImage(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -200,7 +218,10 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -220,7 +241,10 @@ func TestAccComputeV2Instance_bootFromVolumeForceNew(t *testing.T) {
 	var instance2 servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -247,7 +271,10 @@ func TestAccComputeV2Instance_blockDeviceNewVolume(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -265,7 +292,10 @@ func TestAccComputeV2Instance_blockDeviceNewVolumeTypeAndBus(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -284,7 +314,10 @@ func TestAccComputeV2Instance_blockDeviceExistingVolume(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -305,7 +338,10 @@ func TestAccComputeV2Instance_personality(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -323,7 +359,10 @@ func TestAccComputeV2Instance_multiEphemeral(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -342,7 +381,10 @@ func TestAccComputeV2Instance_accessIPv4(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -363,7 +405,10 @@ func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 	var instance2 servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -389,7 +434,10 @@ func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 func TestAccComputeV2Instance_stopBeforeDestroy(t *testing.T) {
 	var instance servers.Server
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -407,7 +455,10 @@ func TestAccComputeV2Instance_metadataRemove(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -443,7 +494,10 @@ func TestAccComputeV2Instance_metadataRemove(t *testing.T) {
 func TestAccComputeV2Instance_forceDelete(t *testing.T) {
 	var instance servers.Server
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -460,7 +514,10 @@ func TestAccComputeV2Instance_forceDelete(t *testing.T) {
 func TestAccComputeV2Instance_timeout(t *testing.T) {
 	var instance servers.Server
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -477,7 +534,10 @@ func TestAccComputeV2Instance_timeout(t *testing.T) {
 func TestAccComputeV2Instance_networkModeAuto(t *testing.T) {
 	var instance servers.Server
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -495,7 +555,10 @@ func TestAccComputeV2Instance_networkModeAuto(t *testing.T) {
 func TestAccComputeV2Instance_networkModeNone(t *testing.T) {
 	var instance servers.Server
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -514,7 +577,10 @@ func TestAccComputeV2Instance_networkNameToID(t *testing.T) {
 	var instance servers.Server
 	var network networks.Network
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -541,7 +607,10 @@ func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 	var port4 ports.Port
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -617,7 +686,10 @@ func TestAccComputeV2Instance_tags(t *testing.T) {
 	resourceName := "openstack_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{

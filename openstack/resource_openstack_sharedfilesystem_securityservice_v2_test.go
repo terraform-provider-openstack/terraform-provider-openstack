@@ -14,7 +14,11 @@ func TestAccSFSV2SecurityService_basic(t *testing.T) {
 	var securityservice securityservices.SecurityService
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckSFS(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckSFS(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSFSV2SecurityServiceDestroy,
 		Steps: []resource.TestStep{

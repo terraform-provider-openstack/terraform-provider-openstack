@@ -14,7 +14,10 @@ func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 	var va volumeattach.VolumeAttachment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
@@ -32,7 +35,10 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 	var va volumeattach.VolumeAttachment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
@@ -51,7 +57,10 @@ func TestAccComputeV2VolumeAttach_ignore_volume_confirmation(t *testing.T) {
 	var va volumeattach.VolumeAttachment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{

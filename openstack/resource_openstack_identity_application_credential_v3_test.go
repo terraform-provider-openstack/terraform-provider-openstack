@@ -17,7 +17,10 @@ func TestAccIdentityV3ApplicationCredential_basic(t *testing.T) {
 	var applicationCredential applicationcredentials.ApplicationCredential
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIdentityV3ApplicationCredentialDestroy,
 		Steps: []resource.TestStep{
@@ -70,7 +73,10 @@ func TestAccIdentityV3ApplicationCredential_access_rules(t *testing.T) {
 	var ac1, ac2 applicationcredentials.ApplicationCredential
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIdentityV3ApplicationCredentialDestroy,
 		Steps: []resource.TestStep{
