@@ -101,6 +101,12 @@ func resourceLoadBalancerV2() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"availability_zone": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			"security_group_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -120,14 +126,36 @@ func resourceLoadBalancerV2Create(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	var (
-		lbID      string
-		vipPortID string
+		lbID       string
+		vipPortID  string
+		lbProvider string
 	)
 
-	// Choose either the Octavia or Neutron create options.
-	createOpts := chooseLBV2LoadBalancerCreateOpts(d, config)
+	if v, ok := d.GetOk("loadbalancer_provider"); ok {
+		lbProvider = v.(string)
+	}
+
+	adminStateUp := d.Get("admin_state_up").(bool)
 
 	if lbClient.Type == octaviaLBClientType {
+		createOpts := octavialoadbalancers.CreateOpts{
+			Name:         d.Get("name").(string),
+			Description:  d.Get("description").(string),
+			VipNetworkID: d.Get("vip_network_id").(string),
+			VipSubnetID:  d.Get("vip_subnet_id").(string),
+			VipPortID:    d.Get("vip_port_id").(string),
+			ProjectID:    d.Get("tenant_id").(string),
+			VipAddress:   d.Get("vip_address").(string),
+			AdminStateUp: &adminStateUp,
+			FlavorID:     d.Get("flavor_id").(string),
+			Provider:     lbProvider,
+		}
+		if v, ok := d.GetOk("availability_zone"); ok {
+			lbClient.Microversion = octaviaLBAvailabilityZoneMicroversion
+			aZ := v.(string)
+			createOpts.AvailabilityZone = aZ
+		}
+
 		log.Printf("[DEBUG][Octavia] openstack_lb_loadbalancer_v2 create options: %#v", createOpts)
 		lb, err := octavialoadbalancers.Create(lbClient, createOpts).Extract()
 		if err != nil {
@@ -136,6 +164,17 @@ func resourceLoadBalancerV2Create(d *schema.ResourceData, meta interface{}) erro
 		lbID = lb.ID
 		vipPortID = lb.VipPortID
 	} else {
+		createOpts := neutronloadbalancers.CreateOpts{
+			Name:         d.Get("name").(string),
+			Description:  d.Get("description").(string),
+			VipSubnetID:  d.Get("vip_subnet_id").(string),
+			TenantID:     d.Get("tenant_id").(string),
+			VipAddress:   d.Get("vip_address").(string),
+			AdminStateUp: &adminStateUp,
+			FlavorID:     d.Get("flavor_id").(string),
+			Provider:     lbProvider,
+		}
+
 		log.Printf("[DEBUG][Neutron] openstack_lb_loadbalancer_v2 create options: %#v", createOpts)
 		lb, err := neutronloadbalancers.Create(lbClient, createOpts).Extract()
 		if err != nil {
@@ -194,6 +233,7 @@ func resourceLoadBalancerV2Read(d *schema.ResourceData, meta interface{}) error 
 		d.Set("admin_state_up", lb.AdminStateUp)
 		d.Set("flavor_id", lb.FlavorID)
 		d.Set("loadbalancer_provider", lb.Provider)
+		d.Set("availability_zone", lb.AvailabilityZone)
 		d.Set("region", GetRegion(d, config))
 		vipPortID = lb.VipPortID
 	} else {
