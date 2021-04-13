@@ -26,6 +26,7 @@ const octaviaLBClientType = "load-balancer"
 
 const (
 	octaviaLBAvailabilityZoneMicroversion   = "2.14"
+	octaviaLBMemberBackupMicroversion       = "2.1"
 	octaviaLBQuotaRuleAndPolicyMicroversion = "2.19"
 )
 
@@ -1034,13 +1035,14 @@ func flattenLBMembersV2(members []octaviapools.Member) []map[string]interface{} 
 			"address":        member.Address,
 			"protocol_port":  member.ProtocolPort,
 			"id":             member.ID,
+			"backup":         member.Backup,
 		}
 	}
 
 	return m
 }
 
-func expandLBMembersV2(members *schema.Set) []octaviapools.BatchUpdateMemberOpts {
+func expandLBMembersV2(members *schema.Set, lbClient *gophercloud.ServiceClient) []octaviapools.BatchUpdateMemberOpts {
 	var m []octaviapools.BatchUpdateMemberOpts
 
 	if members != nil {
@@ -1058,6 +1060,12 @@ func expandLBMembersV2(members *schema.Set) []octaviapools.BatchUpdateMemberOpts
 				SubnetID:     &subnetID,
 				Weight:       &weight,
 				AdminStateUp: &adminStateUp,
+			}
+
+			if val, ok := rawMap["backup"]; ok {
+				backup := val.(bool)
+				member.Backup = &backup
+				lbClient.Microversion = octaviaLBMemberBackupMicroversion
 			}
 
 			m = append(m, member)

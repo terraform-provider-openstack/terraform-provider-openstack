@@ -81,6 +81,11 @@ func resourceMembersV2() *schema.Resource {
 							Optional: true,
 						},
 
+						"backup": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+
 						"admin_state_up": {
 							Type:     schema.TypeBool,
 							Default:  true,
@@ -100,7 +105,7 @@ func resourceMembersV2Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	createOpts := expandLBMembersV2(d.Get("member").(*schema.Set))
+	createOpts := expandLBMembersV2(d.Get("member").(*schema.Set), lbClient)
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
 	// Get a clean copy of the parent pool.
@@ -175,7 +180,7 @@ func resourceMembersV2Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if d.HasChange("member") {
-		updateOpts := expandLBMembersV2(d.Get("member").(*schema.Set))
+		updateOpts := expandLBMembersV2(d.Get("member").(*schema.Set), lbClient)
 
 		// Get a clean copy of the parent pool.
 		parentPool, err := neutronpools.Get(lbClient, d.Id()).Extract()
