@@ -3,6 +3,7 @@
 IMPROVEMENTS
 
 * Added `disable_status_check` argument for `dns_recordset_v2` resource ([#1221](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1221))
+* Added `availability_zone` argument for `lb_loadbalancer_v2` resource ([#1225](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1225))
 
 ## 1.40.0 (23 March, 2021)
 
