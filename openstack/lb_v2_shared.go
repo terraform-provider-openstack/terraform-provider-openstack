@@ -12,7 +12,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 
 	octavialisteners "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
-	octavialoadbalancers "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/loadbalancers"
 	octaviamonitors "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/monitors"
 	octaviapools "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
 
@@ -26,6 +25,7 @@ import (
 const octaviaLBClientType = "load-balancer"
 
 const (
+	octaviaLBAvailabilityZoneMicroversion   = "2.14"
 	octaviaLBQuotaRuleAndPolicyMicroversion = "2.19"
 )
 
@@ -1065,49 +1065,6 @@ func expandLBMembersV2(members *schema.Set) []octaviapools.BatchUpdateMemberOpts
 	}
 
 	return m
-}
-
-// chooseLBV2LoadBalancerCreateOpts will determine which load balancer Create options to use:
-// either the Octavia/LBaaS or the Neutron/Networking v2.
-func chooseLBV2LoadBalancerCreateOpts(d *schema.ResourceData, config *Config) neutronloadbalancers.CreateOptsBuilder {
-	var createOpts neutronloadbalancers.CreateOptsBuilder
-
-	var lbProvider string
-	if v, ok := d.GetOk("loadbalancer_provider"); ok {
-		lbProvider = v.(string)
-	}
-
-	adminStateUp := d.Get("admin_state_up").(bool)
-
-	if config.UseOctavia {
-		// Use Octavia.
-		createOpts = octavialoadbalancers.CreateOpts{
-			Name:         d.Get("name").(string),
-			Description:  d.Get("description").(string),
-			VipNetworkID: d.Get("vip_network_id").(string),
-			VipSubnetID:  d.Get("vip_subnet_id").(string),
-			VipPortID:    d.Get("vip_port_id").(string),
-			ProjectID:    d.Get("tenant_id").(string),
-			VipAddress:   d.Get("vip_address").(string),
-			AdminStateUp: &adminStateUp,
-			FlavorID:     d.Get("flavor_id").(string),
-			Provider:     lbProvider,
-		}
-	} else {
-		// Use Neutron.
-		createOpts = neutronloadbalancers.CreateOpts{
-			Name:         d.Get("name").(string),
-			Description:  d.Get("description").(string),
-			VipSubnetID:  d.Get("vip_subnet_id").(string),
-			TenantID:     d.Get("tenant_id").(string),
-			VipAddress:   d.Get("vip_address").(string),
-			AdminStateUp: &adminStateUp,
-			FlavorID:     d.Get("flavor_id").(string),
-			Provider:     lbProvider,
-		}
-	}
-
-	return createOpts
 }
 
 func resourceLoadBalancerV2SetSecurityGroups(networkingClient *gophercloud.ServiceClient, vipPortID string, d *schema.ResourceData) error {

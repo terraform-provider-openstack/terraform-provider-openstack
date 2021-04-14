@@ -63,6 +63,10 @@ The following arguments are supported:
 * `loadbalancer_provider` - (Optional) The name of the provider. Changing this
   creates a new loadbalancer.
 
+* `availability_zone` - (Optional) The availability zone of the Loadbalancer.
+  Changing this creates a new loadbalancer. Available only for Octavia
+  microversion 2.14 or later.
+
 * `security_group_ids` - (Optional) A list of security group IDs to apply to the
     loadbalancer. The security groups must be specified by ID and not name (as
     opposed to how they are configured with the Compute Instance).
@@ -81,6 +85,7 @@ The following attributes are exported:
 * `admin_state_up` - See Argument Reference above.
 * `flavor_id` - See Argument Reference above.
 * `loadbalancer_provider` - See Argument Reference above.
+* `availability_zone` - See Argument Reference above.
 * `security_group_ids` - See Argument Reference above.
 * `vip_port_id` - The Port ID of the Load Balancer IP.
 
