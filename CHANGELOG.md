@@ -1,5 +1,9 @@
 ## 1.41.0 (Unreleased)
 
+FEATURES
+
+* __New Resource__: `blockstorage_volume_type_access_v3` ([#1223](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1223))
+
 IMPROVEMENTS
 
 * Added `disable_status_check` argument for `dns_recordset_v2` resource ([#1221](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1221))
