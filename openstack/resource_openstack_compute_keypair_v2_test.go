@@ -92,7 +92,7 @@ func testAccCheckComputeV2KeypairDestroy(s *terraform.State) error {
 
 		id, userID := extractComputeKeyPairNameAndUserID(rs.Primary.ID)
 
-		_, err := keypairs.Get(computeClient, id, userID).Extract()
+		_, err := keypairs.GetWithUserID(computeClient, id, userID).Extract()
 		if err == nil {
 			return fmt.Errorf("Keypair still exists")
 		}
@@ -120,7 +120,7 @@ func testAccCheckComputeV2KeypairExists(n string, kp *keypairs.KeyPair) resource
 
 		id, userID := extractComputeKeyPairNameAndUserID(rs.Primary.ID)
 
-		found, err := keypairs.Get(computeClient, id, userID).Extract()
+		found, err := keypairs.GetWithUserID(computeClient, id, userID).Extract()
 		if err != nil {
 			return err
 		}
