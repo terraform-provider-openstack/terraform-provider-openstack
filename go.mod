@@ -2,6 +2,8 @@ module github.com/terraform-provider-openstack/terraform-provider-openstack
 
 go 1.17
 
+replace github.com/gophercloud/gophercloud => github.com/randomswdev/gophercloud v0.17.1-0.20210426202631-e0e4bc40e34b
+
 require (
 	github.com/gophercloud/gophercloud v0.17.1-0.20210517213536-0be823b69be8
 	github.com/gophercloud/utils v0.0.0-20210216074907-f6de111f2eae

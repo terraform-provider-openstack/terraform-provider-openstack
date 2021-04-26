@@ -3,6 +3,7 @@ package openstack
 import (
 	"context"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -33,6 +34,13 @@ func resourceComputeKeypairV2() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"user_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+
 			"public_key": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -60,6 +68,18 @@ func resourceComputeKeypairV2() *schema.Resource {
 	}
 }
 
+func extractComputeKeyPairNameAndUserID(fullID string) (id string, userID string) {
+	id = fullID
+
+	separatorIndex := strings.IndexRune(fullID, ':')
+	if separatorIndex != -1 {
+		userID = fullID[:separatorIndex]
+		id = fullID[separatorIndex+1:]
+	}
+
+	return
+}
+
 func resourceComputeKeypairV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
@@ -68,6 +88,7 @@ func resourceComputeKeypairV2Create(ctx context.Context, d *schema.ResourceData,
 	}
 
 	name := d.Get("name").(string)
+	_, isForUser := d.GetOk("user_id")
 	createOpts := ComputeKeyPairV2CreateOpts{
 		keypairs.CreateOpts{
 			Name:      name,
@@ -83,7 +104,11 @@ func resourceComputeKeypairV2Create(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("Unable to create openstack_compute_keypair_v2 %s: %s", name, err)
 	}
 
-	d.SetId(kp.Name)
+	id := kp.Name
+	if isForUser {
+		id = kp.UserID + ":" + id
+	}
+	d.SetId(id)
 
 	// Private Key is only available in the response to a create.
 	d.Set("private_key", kp.PrivateKey)
@@ -98,7 +123,10 @@ func resourceComputeKeypairV2Read(_ context.Context, d *schema.ResourceData, met
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	kp, err := keypairs.Get(computeClient, d.Id()).Extract()
+	// Check if the id includes a user_id
+	id, userID := extractComputeKeyPairNameAndUserID(d.Id())
+
+	kp, err := keypairs.Get(computeClient, id, userID).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_keypair_v2"))
 	}
@@ -108,6 +136,7 @@ func resourceComputeKeypairV2Read(_ context.Context, d *schema.ResourceData, met
 	d.Set("name", kp.Name)
 	d.Set("public_key", kp.PublicKey)
 	d.Set("fingerprint", kp.Fingerprint)
+	d.Set("user_id", kp.UserID)
 	d.Set("region", GetRegion(d, config))
 
 	return nil
@@ -120,7 +149,10 @@ func resourceComputeKeypairV2Delete(_ context.Context, d *schema.ResourceData, m
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	err = keypairs.Delete(computeClient, d.Id()).ExtractErr()
+	// Check if the id includes a user_id
+	id, userID := extractComputeKeyPairNameAndUserID(d.Id())
+
+	err = keypairs.Delete(computeClient, id, userID).ExtractErr()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_compute_keypair_v2"))
 	}

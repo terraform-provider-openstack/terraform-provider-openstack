@@ -26,6 +26,12 @@ func dataSourceComputeKeypairV2() *schema.Resource {
 				Required: true,
 			},
 
+			"user_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
 			// computed-only
 			"fingerprint": {
 				Type:     schema.TypeString,
@@ -48,7 +54,8 @@ func dataSourceComputeKeypairV2Read(ctx context.Context, d *schema.ResourceData,
 	}
 
 	name := d.Get("name").(string)
-	kp, err := keypairs.Get(computeClient, name).Extract()
+	userID := d.Get("user_id").(string)
+	kp, err := keypairs.Get(computeClient, name, userID).Extract()
 	if err != nil {
 		return diag.Errorf("Error retrieving openstack_compute_keypair_v2 %s: %s", name, err)
 	}
@@ -60,6 +67,7 @@ func dataSourceComputeKeypairV2Read(ctx context.Context, d *schema.ResourceData,
 	d.Set("fingerprint", kp.Fingerprint)
 	d.Set("public_key", kp.PublicKey)
 	d.Set("region", GetRegion(d, config))
+	d.Set("user_id", kp.UserID)
 
 	return nil
 }
