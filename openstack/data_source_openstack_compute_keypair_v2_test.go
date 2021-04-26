@@ -34,7 +34,7 @@ func TestAccComputeV2KeypairDataSource_basic(t *testing.T) {
 	})
 }
 
-func TestAccComputeV2KeypairDataSource_otherUser(t *testing.T) {
+func TestAccComputeV2KeypairDataSourceOtherUser(t *testing.T) {
 	var user users.User
 
 	resource.Test(t, resource.TestCase{
@@ -43,7 +43,7 @@ func TestAccComputeV2KeypairDataSource_otherUser(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2KeypairDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2KeypairDataSource_basic,
+				Config: testAccComputeV2KeypairDataSourceOtherUser,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2KeypairDataSourceID("data.openstack_compute_keypair_v2.kp"),
 					testAccCheckIdentityV3UserExists("openstack_identity_user_v3.user_1", &user),
@@ -87,7 +87,7 @@ data "openstack_compute_keypair_v2" "kp" {
 }
 `
 
-const testAccComputeV2KeypairDataSource_otherUser = `
+const testAccComputeV2KeypairDataSourceOtherUser = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"
 }
