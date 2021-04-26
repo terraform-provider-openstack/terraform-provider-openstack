@@ -40,7 +40,7 @@ func TestAccComputeV2Keypair_importOtherUser(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2KeypairDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2Keypair_otherUser,
+				Config: testAccComputeV2KeypairOtherUser,
 			},
 
 			{

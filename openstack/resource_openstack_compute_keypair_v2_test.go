@@ -32,7 +32,7 @@ func TestAccComputeV2Keypair_basic(t *testing.T) {
 	})
 }
 
-func TestAccComputeV2Keypair_otherUser(t *testing.T) {
+func TestAccComputeV2KeypairOtherUser(t *testing.T) {
 	var keypair keypairs.KeyPair
 
 	resource.Test(t, resource.TestCase{
@@ -41,7 +41,7 @@ func TestAccComputeV2Keypair_otherUser(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2KeypairDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2Keypair_otherUser,
+				Config: testAccComputeV2KeypairOtherUser,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2KeypairExists("openstack_compute_keypair_v2.kp_1", &keypair),
 				),
@@ -152,7 +152,7 @@ resource "openstack_compute_keypair_v2" "kp_1" {
 }
 `
 
-const testAccComputeV2Keypair_otherUser = `
+const testAccComputeV2KeypairOtherUser = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"
 }
