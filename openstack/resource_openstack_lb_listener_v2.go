@@ -42,7 +42,7 @@ func resourceListenerV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"TCP", "UDP", "HTTP", "HTTPS", "TERMINATED_HTTPS",
+					"TCP", "UDP", "SCTP", "HTTP", "HTTPS", "TERMINATED_HTTPS",
 				}, false),
 			},
 
@@ -160,7 +160,7 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Choose either the Octavia or Neutron create options.
-	createOpts, err := chooseLBV2ListenerCreateOpts(d, config)
+	createOpts, err := chooseLBV2ListenerCreateOpts(d, config, lbClient)
 	if err != nil {
 		return fmt.Errorf("Error building openstack_lb_listener_v2 create options: %s", err)
 	}
