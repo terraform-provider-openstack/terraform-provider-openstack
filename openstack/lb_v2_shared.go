@@ -25,9 +25,10 @@ import (
 const octaviaLBClientType = "load-balancer"
 
 const (
-	octaviaLBAvailabilityZoneMicroversion   = "2.14"
 	octaviaLBMemberBackupMicroversion       = "2.1"
+	octaviaLBAvailabilityZoneMicroversion   = "2.14"
 	octaviaLBQuotaRuleAndPolicyMicroversion = "2.19"
+	octaviaLBSCTPProtocol                   = "2.23"
 )
 
 const (
@@ -75,7 +76,7 @@ func chooseLBV2AccTestClient(config *Config, region string) (*gophercloud.Servic
 
 // chooseLBV2ListenerCreateOpts will determine which load balancer listener Create options to use:
 // either the Octavia/LBaaS or the Neutron/Networking v2.
-func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config) (neutronlisteners.CreateOptsBuilder, error) {
+func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config, lbClient *gophercloud.ServiceClient) (neutronlisteners.CreateOptsBuilder, error) {
 	adminStateUp := d.Get("admin_state_up").(bool)
 
 	var sniContainerRefs []string
@@ -142,6 +143,10 @@ func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config) (neutr
 				allowedCidrs[i] = v.(string)
 			}
 			opts.AllowedCIDRs = allowedCidrs
+		}
+
+		if v := octavialisteners.Protocol(d.Get("protocol").(string)); v == octavialisteners.ProtocolSCTP {
+			lbClient.Microversion = octaviaLBSCTPProtocol
 		}
 
 		createOpts = opts
