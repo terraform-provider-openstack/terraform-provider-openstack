@@ -1,3 +1,9 @@
+## 1.42.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Added `SCTP` protocol support for `lb_listener_v2` resource, note that will work only in Octavia ([#1236](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1236))
+
 ## 1.41.0 (23 April, 2021)
 
 FEATURES
