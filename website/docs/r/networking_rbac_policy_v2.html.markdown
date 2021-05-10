@@ -55,7 +55,8 @@ The following arguments are supported:
    `qos_policy` returns a QoS ID.
 
 * `object_type` - (Required) The type of the object that the RBAC policy
-  affects. Can either be `qos-policy` or `network`.
+  affects. Can be one of the following: `address_scope`, `address_group`,
+  `network`, `qos_policy`, `security_group` or `subnetpool`.
 
 * `target_tenant` - (Required) The ID of the tenant to which the RBAC policy
   will be enforced.
