@@ -222,7 +222,7 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"BUILD"},
-		Target:     []string{"ACTIVE"},
+		Target:     []string{"ACTIVE", "HEALTHY"},
 		Refresh:    databaseInstanceV1StateRefreshFunc(DatabaseV1Client, instance.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
