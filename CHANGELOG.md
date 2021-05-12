@@ -5,6 +5,7 @@ IMPROVEMENTS
 * Added `SCTP` protocol support for `lb_listener_v2` resource, note that will work only in Octavia ([#1236](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1236))
 * Added support for `HEALTHY` status of `db_instance_v1` resource ([#1241](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1241))
 * Added `address_group` as `object_type` for `networking_rbac_policy_v2` resource ([#1243](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1243))
+* * Updated `terraform-plugin-sdk` to `v1.17.2` ([#1244](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1244))
 
 ## 1.41.0 (23 April, 2021)
 
