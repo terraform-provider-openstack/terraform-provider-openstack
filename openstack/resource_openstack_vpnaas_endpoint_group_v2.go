@@ -59,6 +59,7 @@ func resourceEndpointGroupV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
 			},
 			"value_specs": {
 				Type:     schema.TypeMap,
@@ -79,11 +80,7 @@ func resourceEndpointGroupV2Create(d *schema.ResourceData, meta interface{}) err
 	var createOpts endpointgroups.CreateOptsBuilder
 
 	endpointType := resourceEndpointGroupV2EndpointType(d.Get("type").(string))
-	v := d.Get("endpoints").([]interface{})
-	endpoints := make([]string, len(v))
-	for i, v := range v {
-		endpoints[i] = v.(string)
-	}
+	endpoints := expandToStringSlice(d.Get("endpoints").(*schema.Set).List())
 
 	createOpts = EndpointGroupCreateOpts{
 		endpointgroups.CreateOpts{
