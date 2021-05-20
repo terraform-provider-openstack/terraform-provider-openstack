@@ -112,14 +112,14 @@ func resourceLoadBalancerQuotaV2Create(d *schema.ResourceData, meta interface{})
 		Healthmonitor: &healthmonitor,
 	}
 
+	// l7_policy requires octavia minor version 2.19. Only set when specified
 	if v, ok := d.GetOkExists("l7_policy"); ok {
-		lbClient.Microversion = octaviaLBQuotaRuleAndPolicyMicroversion
 		l7Policy := v.(int)
 		updateOpts.L7Policy = &l7Policy
 	}
 
+	// l7_rule requires octavia minor version 2.19. Only set when specified
 	if v, ok := d.GetOkExists("l7_rule"); ok {
-		lbClient.Microversion = octaviaLBQuotaRuleAndPolicyMicroversion
 		l7Rule := v.(int)
 		updateOpts.L7Rule = &l7Rule
 	}
@@ -220,14 +220,12 @@ func resourceLoadBalancerQuotaV2Update(d *schema.ResourceData, meta interface{})
 
 	if d.HasChange("l7_policy") {
 		hasChange = true
-		lbClient.Microversion = octaviaLBQuotaRuleAndPolicyMicroversion
 		l7Policy := d.Get("l7_policy").(int)
 		updateOpts.L7Policy = &l7Policy
 	}
 
 	if d.HasChange("l7_rule") {
 		hasChange = true
-		lbClient.Microversion = octaviaLBQuotaRuleAndPolicyMicroversion
 		l7Rule := d.Get("l7_rule").(int)
 		updateOpts.L7Rule = &l7Rule
 	}

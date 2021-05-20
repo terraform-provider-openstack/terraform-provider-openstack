@@ -160,7 +160,7 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Choose either the Octavia or Neutron create options.
-	createOpts, err := chooseLBV2ListenerCreateOpts(d, config, lbClient)
+	createOpts, err := chooseLBV2ListenerCreateOpts(d, config)
 	if err != nil {
 		return fmt.Errorf("Error building openstack_lb_listener_v2 create options: %s", err)
 	}

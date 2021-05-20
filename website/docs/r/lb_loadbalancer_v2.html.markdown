@@ -10,6 +10,9 @@ description: |-
 
 Manages a V2 loadbalancer resource within OpenStack.
 
+~> **Note:** This resource has attributes that depend on octavia minor versions.
+Please ensure your Openstack cloud supports the required [minor version](../#octavia-api-versioning).
+
 ## Example Usage
 
 ```hcl
@@ -65,7 +68,7 @@ The following arguments are supported:
 
 * `availability_zone` - (Optional) The availability zone of the Loadbalancer.
   Changing this creates a new loadbalancer. Available only for Octavia
-  microversion 2.14 or later.
+  **minor version 2.14 or later**.
 
 * `security_group_ids` - (Optional) A list of security group IDs to apply to the
     loadbalancer. The security groups must be specified by ID and not name (as
