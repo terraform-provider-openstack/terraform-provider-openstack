@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	//"log"
 	"regexp"
 	"testing"
 
@@ -145,6 +146,32 @@ func TestAccDNSV2RecordSet_ensureSameTTL(t *testing.T) {
 	})
 }
 
+func TestAccDNSV2RecordSet_setDifferentProject(t *testing.T) {
+	var recordset recordsets.RecordSet
+	var projectName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+	zoneName := randomZoneName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckDNS(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDNSV2RecordSetDifferentProject(projectName, zoneName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
+					resource.TestCheckResourceAttr(
+						"openstack_dns_recordset_v2.recordset_1", "records.0", "10.1.0.2"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	dnsClient, err := config.DNSV2Client(osRegionName)
@@ -160,6 +187,10 @@ func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 		zoneID, recordsetID, err := dnsRecordSetV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
+		}
+
+		if projectId, found := rs.Primary.Attributes["project_id"]; found {
+			dnsClient.MoreHeaders = map[string]string{"X-Auth-Sudo-Tenant-ID": projectId}
 		}
 
 		_, err = recordsets.Get(dnsClient, zoneID, recordsetID).Extract()
@@ -181,11 +212,16 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
+		//log.Printf("[DEBUG] 2 ----------------------- %#v", rs.Primary.Attributes["project_id"])
 
 		config := testAccProvider.Meta().(*Config)
 		dnsClient, err := config.DNSV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		}
+
+		if projectId, found := rs.Primary.Attributes["project_id"]; found {
+			dnsClient.MoreHeaders = map[string]string{"X-Auth-Sudo-Tenant-ID": projectId}
 		}
 
 		zoneID, recordsetID, err := dnsRecordSetV2ParseID(rs.Primary.ID)
@@ -380,4 +416,33 @@ func testAccDNSV2RecordSetDisableCheck(zoneName string) string {
 			disable_status_check = true
 		}
 	`, zoneName, zoneName)
+}
+
+func testAccDNSV2RecordSetDifferentProject(projectName string, zoneName string) string {
+	return fmt.Sprintf(`
+		resource "openstack_identity_project_v3" "project_1" {
+			name = "%s"
+			description = "Some project"
+			enabled = false
+			tags = ["tag1","tag2"]
+		}
+
+		resource "openstack_dns_zone_v2" "zone_1" {
+			name = "%s"
+			email = "email2@example.com"
+			ttl = 6000
+			type = "PRIMARY"
+			project_id = "${openstack_identity_project_v3.project_1.id}"
+		}
+
+		resource "openstack_dns_recordset_v2" "recordset_1" {
+			zone_id = "${openstack_dns_zone_v2.zone_1.id}"
+			name = "%s"
+			type = "A"
+			ttl = 3000
+			records = ["10.1.0.2"]
+			project_id = "${openstack_identity_project_v3.project_1.id}"
+			disable_status_check = true
+		}
+	`, projectName, zoneName, zoneName)
 }

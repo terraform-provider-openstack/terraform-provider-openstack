@@ -88,6 +88,13 @@ func resourceDNSRecordSetV2() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+
+			"project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -97,6 +104,10 @@ func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) erro
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+	}
+
+	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
+		return fmt.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
 	records := expandDNSRecordSetV2Records(d.Get("records").([]interface{}))
@@ -116,6 +127,7 @@ func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) erro
 
 	zoneID := d.Get("zone_id").(string)
 	n, err := recordsets.Create(dnsClient, zoneID, createOpts).Extract()
+
 	if err != nil {
 		return fmt.Errorf("Error creating openstack_dns_recordset_v2: %s", err)
 	}
@@ -136,7 +148,6 @@ func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) erro
 				"Error waiting for openstack_dns_recordset_v2 %s to become active: %s", d.Id(), err)
 		}
 	}
-
 	id := fmt.Sprintf("%s/%s", zoneID, n.ID)
 	d.SetId(id)
 
@@ -155,6 +166,10 @@ func resourceDNSRecordSetV2Read(d *schema.ResourceData, meta interface{}) error 
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+	}
+
+	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
+		return fmt.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
 	// Obtain relevant info from parsing the ID
@@ -176,6 +191,7 @@ func resourceDNSRecordSetV2Read(d *schema.ResourceData, meta interface{}) error 
 	d.Set("type", n.Type)
 	d.Set("zone_id", zoneID)
 	d.Set("region", GetRegion(d, config))
+	d.Set("project_id", n.ProjectID)
 
 	return nil
 }
@@ -186,6 +202,11 @@ func resourceDNSRecordSetV2Update(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
+
+	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
+		return fmt.Errorf("Error setting dns client auth headers: %s", err)
+	}
+
 	changed := false
 	var updateOpts recordsets.UpdateOpts
 	if d.HasChange("ttl") {
@@ -249,6 +270,10 @@ func resourceDNSRecordSetV2Delete(d *schema.ResourceData, meta interface{}) erro
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+	}
+
+	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
+		return fmt.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
 	// Obtain relevant info from parsing the ID
