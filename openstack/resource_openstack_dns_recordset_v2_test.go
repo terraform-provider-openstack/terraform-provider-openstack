@@ -188,8 +188,8 @@ func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 			return err
 		}
 
-		if projectId, found := rs.Primary.Attributes["project_id"]; found {
-			dnsClient.MoreHeaders = map[string]string{"X-Auth-Sudo-Tenant-ID": projectId}
+		if projectID, found := rs.Primary.Attributes["project_id"]; found {
+			dnsClient.MoreHeaders = map[string]string{"X-Auth-Sudo-Tenant-ID": projectID}
 		}
 
 		_, err = recordsets.Get(dnsClient, zoneID, recordsetID).Extract()
@@ -218,8 +218,8 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 			return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 		}
 
-		if projectId, found := rs.Primary.Attributes["project_id"]; found {
-			dnsClient.MoreHeaders = map[string]string{"X-Auth-Sudo-Tenant-ID": projectId}
+		if projectID, found := rs.Primary.Attributes["project_id"]; found {
+			dnsClient.MoreHeaders = map[string]string{"X-Auth-Sudo-Tenant-ID": projectID}
 		}
 
 		zoneID, recordsetID, err := dnsRecordSetV2ParseID(rs.Primary.ID)
