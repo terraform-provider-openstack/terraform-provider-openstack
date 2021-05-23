@@ -127,7 +127,6 @@ func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) erro
 
 	zoneID := d.Get("zone_id").(string)
 	n, err := recordsets.Create(dnsClient, zoneID, createOpts).Extract()
-
 	if err != nil {
 		return fmt.Errorf("Error creating openstack_dns_recordset_v2: %s", err)
 	}
