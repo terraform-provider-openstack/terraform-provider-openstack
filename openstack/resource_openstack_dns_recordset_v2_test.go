@@ -2,7 +2,6 @@ package openstack
 
 import (
 	"fmt"
-	//"log"
 	"regexp"
 	"testing"
 
@@ -212,7 +211,6 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		//log.Printf("[DEBUG] 2 ----------------------- %#v", rs.Primary.Attributes["project_id"])
 
 		config := testAccProvider.Meta().(*Config)
 		dnsClient, err := config.DNSV2Client(osRegionName)
