@@ -1403,31 +1403,38 @@ func getFlavorID(computeClient *gophercloud.ServiceClient, d *schema.ResourceDat
 
 func resourceComputeSchedulerHintsHash(v interface{}) int {
 	var buf bytes.Buffer
-	if v != nil && v.(map[string]interface{}) != nil {
-		m := v.(map[string]interface{})
-		if m["group"] != nil {
-			buf.WriteString(fmt.Sprintf("%s-", m["group"].(string)))
-		}
-
-		if m["target_cell"] != nil {
-			buf.WriteString(fmt.Sprintf("%s-", m["target_cell"].(string)))
-		}
-
-		if m["build_host_near_ip"] != nil {
-			buf.WriteString(fmt.Sprintf("%s-", m["build_host_near_ip"].(string)))
-		}
-
-		if m["additional_properties"] != nil {
-			for _, v := range m["additional_properties"].(map[string]interface{}) {
-				buf.WriteString(fmt.Sprintf("%s-", v))
-			}
-		}
-
-		buf.WriteString(fmt.Sprintf("%s-", m["different_host"].([]interface{})))
-		buf.WriteString(fmt.Sprintf("%s-", m["same_host"].([]interface{})))
-		buf.WriteString(fmt.Sprintf("%s-", m["query"].([]interface{})))
-		buf.WriteString(fmt.Sprintf("%s-", m["different_cell"].([]interface{})))
+	
+	m, ok := v.(map[string]interface{})
+	if !ok {
+  		return hashcode.String(buf.String())
 	}
+	if m == nil {
+  		return hashcode.String(buf.String())
+	}
+	
+	if m["group"] != nil {
+		buf.WriteString(fmt.Sprintf("%s-", m["group"].(string)))
+	}
+
+	if m["target_cell"] != nil {
+		buf.WriteString(fmt.Sprintf("%s-", m["target_cell"].(string)))
+	}
+
+	if m["build_host_near_ip"] != nil {
+		buf.WriteString(fmt.Sprintf("%s-", m["build_host_near_ip"].(string)))
+	}
+
+	if m["additional_properties"] != nil {
+		for _, v := range m["additional_properties"].(map[string]interface{}) {
+			buf.WriteString(fmt.Sprintf("%s-", v))
+		}
+	}
+
+	buf.WriteString(fmt.Sprintf("%s-", m["different_host"].([]interface{})))
+	buf.WriteString(fmt.Sprintf("%s-", m["same_host"].([]interface{})))
+	buf.WriteString(fmt.Sprintf("%s-", m["query"].([]interface{})))
+	buf.WriteString(fmt.Sprintf("%s-", m["different_cell"].([]interface{})))
+
 	return hashcode.String(buf.String())
 }
 
