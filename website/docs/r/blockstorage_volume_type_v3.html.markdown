@@ -17,10 +17,10 @@ Manages a V3 block storage volume type resource within OpenStack.
 
 ```hcl
 resource "openstack_blockstorage_volume_type_v3" "volume_type_1" {
-  name = "volume_type_1"
+  name        = "volume_type_1"
   description = "Volume type 1"
   extra_specs = {
-      capabilities = "gpu"
+      capabilities        = "gpu"
       volume_backend_name = "ssd"
   }
 }

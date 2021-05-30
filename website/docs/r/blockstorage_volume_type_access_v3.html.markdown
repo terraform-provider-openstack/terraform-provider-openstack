@@ -21,12 +21,12 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_blockstorage_volume_type_v3" "volume_type_1" {
-  name = "volume_type_1"
+  name      = "volume_type_1"
   is_public = false
 }
 
 resource "openstack_blockstorage_volume_type_access_v3" "volume_type_access" {
-  project_id = "${openstack_identity_project_v3.project_1.id}"
+  project_id     = "${openstack_identity_project_v3.project_1.id}"
   volume_type_id = "${openstack_blockstorage_volume_type_v3.volume_type_1.id}"
 }
 

@@ -28,14 +28,14 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_lb_quota_v2" "quota_1" {
-  project_id = "${openstack_identity_project_v3.project_1.id}"
-  loadbalancer        = 6
-  listener            = 7
-  member              = 8
-  pool                = 9
-  health_monitor      = 10
-  l7_policy           = 11
-  l7_rule             = 12
+  project_id     = "${openstack_identity_project_v3.project_1.id}"
+  loadbalancer   = 6
+  listener       = 7
+  member         = 8
+  pool           = 9
+  health_monitor = 10
+  l7_policy      = 11
+  l7_rule        = 12
 }
 ```
 
