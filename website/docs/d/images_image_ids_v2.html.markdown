@@ -15,8 +15,8 @@ specified criteria.
 
 ```hcl
 data "openstack_images_image_ids_v2" "images" {
-  name_regex  = "^Ubuntu 16\\.04.*-amd64"
-  sort = "updated_at"
+  name_regex = "^Ubuntu 16\\.04.*-amd64"
+  sort       = "updated_at"
 
   properties = {
     key = "value"
