@@ -16,12 +16,12 @@ Manages a V1 Barbican order resource within OpenStack.
 
 ```hcl
 resource "openstack_keymanager_order_v1" "order_1" {
-  type                 = "key"
-  meta                   {
-    algorithm            = "aes"
-    bit_length           = 256
-    name                 = "mysecret"
-    mode                 = "cbc"
+  type = "key"
+  meta {
+    algorithm  = "aes"
+    bit_length = 256
+    name       = "mysecret"
+    mode       = "cbc"
   }
 }
 ```
@@ -30,11 +30,11 @@ resource "openstack_keymanager_order_v1" "order_1" {
 
 ```hcl
 resource "openstack_keymanager_order_v1" "order_1" {
-  type                 = "asymmetric"
-  meta                   {
-    algorithm            = "rsa"
-    bit_length           = 4096
-    name                 = "mysecret"
+  type = "asymmetric"
+  meta {
+    algorithm  = "rsa"
+    bit_length = 4096
+    name       = "mysecret"
   }
 }
 ```
