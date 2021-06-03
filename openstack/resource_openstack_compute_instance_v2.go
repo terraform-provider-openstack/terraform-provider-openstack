@@ -1403,15 +1403,15 @@ func getFlavorID(computeClient *gophercloud.ServiceClient, d *schema.ResourceDat
 
 func resourceComputeSchedulerHintsHash(v interface{}) int {
 	var buf bytes.Buffer
-	
+
 	m, ok := v.(map[string]interface{})
 	if !ok {
-  		return hashcode.String(buf.String())
+		return hashcode.String(buf.String())
 	}
 	if m == nil {
-  		return hashcode.String(buf.String())
+		return hashcode.String(buf.String())
 	}
-	
+
 	if m["group"] != nil {
 		buf.WriteString(fmt.Sprintf("%s-", m["group"].(string)))
 	}
