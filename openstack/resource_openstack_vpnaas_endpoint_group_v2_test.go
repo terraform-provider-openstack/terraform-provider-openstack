@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/endpointgroups"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccGroupV2_basic(t *testing.T) {
@@ -18,8 +19,8 @@ func TestAccGroupV2_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckVPN(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckEndpointGroupV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckEndpointGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEndpointGroupV2Basic,
@@ -43,8 +44,8 @@ func TestAccGroupV2_update(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckVPN(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckEndpointGroupV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckEndpointGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEndpointGroupV2Basic,

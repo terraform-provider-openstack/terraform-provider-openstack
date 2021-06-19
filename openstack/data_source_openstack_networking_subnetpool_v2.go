@@ -1,19 +1,21 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools"
 )
 
 func dataSourceNetworkingSubnetPoolV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNetworkingSubnetPoolV2Read,
+		ReadContext: dataSourceNetworkingSubnetPoolV2Read,
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -147,11 +149,11 @@ func dataSourceNetworkingSubnetPoolV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNetworkingSubnetPoolV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	listOpts := subnetpools.ListOpts{}
@@ -209,21 +211,21 @@ func dataSourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface
 
 	pages, err := subnetpools.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_networking_subnetpool_v2: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_networking_subnetpool_v2: %s", err)
 	}
 
 	allSubnetPools, err := subnetpools.ExtractSubnetPools(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to extract openstack_networking_subnetpool_v2: %s", err)
+		return diag.Errorf("Unable to extract openstack_networking_subnetpool_v2: %s", err)
 	}
 
 	if len(allSubnetPools) < 1 {
-		return fmt.Errorf("Your query returned no openstack_networking_subnetpool_v2. " +
+		return diag.Errorf("Your query returned no openstack_networking_subnetpool_v2. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allSubnetPools) > 1 {
-		return fmt.Errorf("Your query returned more than one openstack_networking_subnetpool_v2." +
+		return diag.Errorf("Your query returned more than one openstack_networking_subnetpool_v2." +
 			" Please try a more specific search criteria")
 	}
 

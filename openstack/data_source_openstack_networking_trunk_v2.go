@@ -1,18 +1,19 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/trunks"
 )
 
 func dataSourceNetworkingTrunkV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNetworkingTrunkV2Read,
+		ReadContext: dataSourceNetworkingTrunkV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -93,11 +94,11 @@ func dataSourceNetworkingTrunkV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingTrunkV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNetworkingTrunkV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	listOpts := trunks.ListOpts{}
@@ -138,21 +139,21 @@ func dataSourceNetworkingTrunkV2Read(d *schema.ResourceData, meta interface{}) e
 
 	pages, err := trunks.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve trunks: %s", err)
+		return diag.Errorf("Unable to retrieve trunks: %s", err)
 	}
 
 	allTrunks, err := trunks.ExtractTrunks(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to extract trunks: %s", err)
+		return diag.Errorf("Unable to extract trunks: %s", err)
 	}
 
 	if len(allTrunks) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return diag.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allTrunks) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return diag.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -178,7 +179,7 @@ func dataSourceNetworkingTrunkV2Read(d *schema.ResourceData, meta interface{}) e
 		subports[i]["segmentation_id"] = trunkSubport.SegmentationID
 	}
 	if err = d.Set("sub_port", subports); err != nil {
-		return fmt.Errorf("Unable to set sub_port for trunk %s: %s", d.Id(), err)
+		return diag.Errorf("Unable to set sub_port for trunk %s: %s", d.Id(), err)
 	}
 
 	return nil

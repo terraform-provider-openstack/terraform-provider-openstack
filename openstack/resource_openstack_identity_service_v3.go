@@ -1,21 +1,23 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/services"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceIdentityServiceV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIdentityServiceV3Create,
-		Read:   resourceIdentityServiceV3Read,
-		Update: resourceIdentityServiceV3Update,
-		Delete: resourceIdentityServiceV3Delete,
+		CreateContext: resourceIdentityServiceV3Create,
+		ReadContext:   resourceIdentityServiceV3Read,
+		UpdateContext: resourceIdentityServiceV3Update,
+		DeleteContext: resourceIdentityServiceV3Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -50,11 +52,11 @@ func resourceIdentityServiceV3() *schema.Resource {
 	}
 }
 
-func resourceIdentityServiceV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityServiceV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	enabled := d.Get("enabled").(bool)
@@ -70,24 +72,24 @@ func resourceIdentityServiceV3Create(d *schema.ResourceData, meta interface{}) e
 	log.Printf("[DEBUG] openstack_identity_service_v3 create options: %#v", createOpts)
 	service, err := services.Create(identityClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_identity_service_v3: %s", err)
+		return diag.Errorf("Error creating openstack_identity_service_v3: %s", err)
 	}
 
 	d.SetId(service.ID)
 
-	return resourceIdentityServiceV3Read(d, meta)
+	return resourceIdentityServiceV3Read(ctx, d, meta)
 }
 
-func resourceIdentityServiceV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityServiceV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	service, err := services.Get(identityClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_identity_service_v3")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_identity_service_v3"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_identity_service_v3: %#v", service)
@@ -111,11 +113,11 @@ func resourceIdentityServiceV3Read(d *schema.ResourceData, meta interface{}) err
 	return nil
 }
 
-func resourceIdentityServiceV3Update(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityServiceV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	var updateOpts services.UpdateOpts
@@ -134,22 +136,22 @@ func resourceIdentityServiceV3Update(d *schema.ResourceData, meta interface{}) e
 
 	_, err = services.Update(identityClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating openstack_identity_service_v3: %s", err)
+		return diag.Errorf("Error updating openstack_identity_service_v3: %s", err)
 	}
 
-	return resourceIdentityServiceV3Read(d, meta)
+	return resourceIdentityServiceV3Read(ctx, d, meta)
 }
 
-func resourceIdentityServiceV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityServiceV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	err = services.Delete(identityClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting openstack_identity_service_v3: %s", err)
+		return diag.Errorf("Error deleting openstack_identity_service_v3: %s", err)
 	}
 
 	return nil

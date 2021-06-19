@@ -5,8 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
+	"github.com/gophercloud/utils/terraform/hashcode"
 )
 
 func expandBlockStorageExtensionsSchedulerHints(v schedulerhints.SchedulerHints) map[string]interface{} {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
@@ -19,8 +19,8 @@ func TestAccBlockStorageVolumeAttachV3_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageVolumeAttachV3Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageVolumeAttachV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageVolumeAttachV3Basic,
@@ -40,8 +40,8 @@ func TestAccBlockStorageVolumeAttachV3_timeout(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageVolumeAttachV3Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageVolumeAttachV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageVolumeAttachV3Timeout,

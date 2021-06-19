@@ -1,13 +1,14 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas/monitors"
@@ -15,12 +16,12 @@ import (
 
 func resourceLBMonitorV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLBMonitorV1Create,
-		Read:   resourceLBMonitorV1Read,
-		Update: resourceLBMonitorV1Update,
-		Delete: resourceLBMonitorV1Delete,
+		CreateContext: resourceLBMonitorV1Create,
+		ReadContext:   resourceLBMonitorV1Read,
+		UpdateContext: resourceLBMonitorV1Update,
+		DeleteContext: resourceLBMonitorV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -86,11 +87,11 @@ func resourceLBMonitorV1() *schema.Resource {
 	}
 }
 
-func resourceLBMonitorV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceLBMonitorV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	createOpts := monitors.CreateOpts{
@@ -112,7 +113,7 @@ func resourceLBMonitorV1Create(d *schema.ResourceData, meta interface{}) error {
 	if asuRaw != "" {
 		asu, err := strconv.ParseBool(asuRaw)
 		if err != nil {
-			return fmt.Errorf("admin_state_up, if provided, must be either 'true' or 'false'")
+			return diag.Errorf("admin_state_up, if provided, must be either 'true' or 'false'")
 		}
 		createOpts.AdminStateUp = &asu
 	}
@@ -120,7 +121,7 @@ func resourceLBMonitorV1Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	m, err := monitors.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack LB Monitor: %s", err)
+		return diag.Errorf("Error creating OpenStack LB Monitor: %s", err)
 	}
 	log.Printf("[INFO] LB Monitor ID: %s", m.ID)
 
@@ -135,26 +136,26 @@ func resourceLBMonitorV1Create(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(m.ID)
 
-	return resourceLBMonitorV1Read(d, meta)
+	return resourceLBMonitorV1Read(ctx, d, meta)
 }
 
-func resourceLBMonitorV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceLBMonitorV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	m, err := monitors.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "LB monitor")
+		return diag.FromErr(CheckDeleted(d, err, "LB monitor"))
 	}
 
 	log.Printf("[DEBUG] Retrieved OpenStack LB Monitor %s: %+v", d.Id(), m)
@@ -173,11 +174,11 @@ func resourceLBMonitorV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceLBMonitorV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceLBMonitorV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	updateOpts := monitors.UpdateOpts{
@@ -194,7 +195,7 @@ func resourceLBMonitorV1Update(d *schema.ResourceData, meta interface{}) error {
 		if asuRaw != "" {
 			asu, err := strconv.ParseBool(asuRaw)
 			if err != nil {
-				return fmt.Errorf("admin_state_up, if provided, must be either 'true' or 'false'")
+				return diag.Errorf("admin_state_up, if provided, must be either 'true' or 'false'")
 			}
 			updateOpts.AdminStateUp = &asu
 		}
@@ -204,17 +205,17 @@ func resourceLBMonitorV1Update(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = monitors.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenStack LB Monitor: %s", err)
+		return diag.Errorf("Error updating OpenStack LB Monitor: %s", err)
 	}
 
-	return resourceLBMonitorV1Read(d, meta)
+	return resourceLBMonitorV1Read(ctx, d, meta)
 }
 
-func resourceLBMonitorV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceLBMonitorV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -226,9 +227,9 @@ func resourceLBMonitorV1Delete(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack LB Monitor: %s", err)
+		return diag.Errorf("Error deleting OpenStack LB Monitor: %s", err)
 	}
 
 	d.SetId("")

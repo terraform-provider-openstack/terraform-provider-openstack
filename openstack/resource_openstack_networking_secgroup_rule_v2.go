@@ -1,24 +1,25 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules"
 )
 
 func resourceNetworkingSecGroupRuleV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingSecGroupRuleV2Create,
-		Read:   resourceNetworkingSecGroupRuleV2Read,
-		Delete: resourceNetworkingSecGroupRuleV2Delete,
+		CreateContext: resourceNetworkingSecGroupRuleV2Create,
+		ReadContext:   resourceNetworkingSecGroupRuleV2Read,
+		DeleteContext: resourceNetworkingSecGroupRuleV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -106,11 +107,11 @@ func resourceNetworkingSecGroupRuleV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingSecGroupRuleV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	securityGroupID := d.Get("security_group_id").(string)
@@ -123,7 +124,7 @@ func resourceNetworkingSecGroupRuleV2Create(d *schema.ResourceData, meta interfa
 
 	if protocol == "" {
 		if portRangeMin != 0 || portRangeMax != 0 {
-			return fmt.Errorf("A protocol must be specified when using port_range_min and port_range_max for openstack_networking_secgroup_rule_v2")
+			return diag.Errorf("A protocol must be specified when using port_range_min and port_range_max for openstack_networking_secgroup_rule_v2")
 		}
 	}
 
@@ -140,7 +141,7 @@ func resourceNetworkingSecGroupRuleV2Create(d *schema.ResourceData, meta interfa
 	if v, ok := d.GetOk("direction"); ok {
 		direction, err := resourceNetworkingSecGroupRuleV2Direction(v.(string))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		opts.Direction = direction
 	}
@@ -148,7 +149,7 @@ func resourceNetworkingSecGroupRuleV2Create(d *schema.ResourceData, meta interfa
 	if v, ok := d.GetOk("ethertype"); ok {
 		ethertype, err := resourceNetworkingSecGroupRuleV2EtherType(v.(string))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		opts.EtherType = ethertype
 	}
@@ -156,7 +157,7 @@ func resourceNetworkingSecGroupRuleV2Create(d *schema.ResourceData, meta interfa
 	if v, ok := d.GetOk("protocol"); ok {
 		protocol, err := resourceNetworkingSecGroupRuleV2Protocol(v.(string))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		opts.Protocol = protocol
 	}
@@ -165,25 +166,25 @@ func resourceNetworkingSecGroupRuleV2Create(d *schema.ResourceData, meta interfa
 
 	sgRule, err := rules.Create(networkingClient, opts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_networking_secgroup_rule_v2: %s", err)
+		return diag.Errorf("Error creating openstack_networking_secgroup_rule_v2: %s", err)
 	}
 
 	d.SetId(sgRule.ID)
 
 	log.Printf("[DEBUG] Created openstack_networking_secgroup_rule_v2 %s: %#v", sgRule.ID, sgRule)
-	return resourceNetworkingSecGroupRuleV2Read(d, meta)
+	return resourceNetworkingSecGroupRuleV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSecGroupRuleV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSecGroupRuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	sgRule, err := rules.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting openstack_networking_secgroup_rule_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_secgroup_rule_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_secgroup_rule_v2 %s: %#v", d.Id(), sgRule)
@@ -203,11 +204,11 @@ func resourceNetworkingSecGroupRuleV2Read(d *schema.ResourceData, meta interface
 	return nil
 }
 
-func resourceNetworkingSecGroupRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSecGroupRuleV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	securityGroupID := d.Get("security_group_id").(string)
@@ -215,7 +216,7 @@ func resourceNetworkingSecGroupRuleV2Delete(d *schema.ResourceData, meta interfa
 	defer config.MutexKV.Unlock(securityGroupID)
 
 	if err := rules.Delete(networkingClient, d.Id()).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_networking_secgroup_rule_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_secgroup_rule_v2"))
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -227,9 +228,9 @@ func resourceNetworkingSecGroupRuleV2Delete(d *schema.ResourceData, meta interfa
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_secgroup_rule_v2 %s to delete: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_networking_secgroup_rule_v2 %s to Delete:  %s", d.Id(), err)
 	}
 
 	d.SetId("")

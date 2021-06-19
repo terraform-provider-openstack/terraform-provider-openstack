@@ -5,11 +5,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/orders"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccKeyManagerOrderV1_basic(t *testing.T) {
@@ -20,8 +21,8 @@ func TestAccKeyManagerOrderV1_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOrderV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckOrderV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerOrderV1Symmetric,

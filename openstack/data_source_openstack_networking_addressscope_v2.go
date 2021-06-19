@@ -1,17 +1,18 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/addressscopes"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/addressscopes"
 )
 
 func dataSourceNetworkingAddressScopeV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNetworkingAddressScopeV2Read,
+		ReadContext: dataSourceNetworkingAddressScopeV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -42,11 +43,11 @@ func dataSourceNetworkingAddressScopeV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingAddressScopeV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNetworkingAddressScopeV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	listOpts := addressscopes.ListOpts{}
@@ -70,20 +71,20 @@ func dataSourceNetworkingAddressScopeV2Read(d *schema.ResourceData, meta interfa
 
 	pages, err := addressscopes.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to list openstack_networking_addressscope_v2: %s", err)
+		return diag.Errorf("Unable to list openstack_networking_addressscope_v2: %s", err)
 	}
 
 	allAddressScopes, err := addressscopes.ExtractAddressScopes(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_networking_addressscope_v2: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_networking_addressscope_v2: %s", err)
 	}
 
 	if len(allAddressScopes) < 1 {
-		return fmt.Errorf("No openstack_networking_addressscope_v2 found")
+		return diag.Errorf("No openstack_networking_addressscope_v2 found")
 	}
 
 	if len(allAddressScopes) > 1 {
-		return fmt.Errorf("More than one openstack_networking_addressscope_v2 found")
+		return diag.Errorf("More than one openstack_networking_addressscope_v2 found")
 	}
 
 	a := allAddressScopes[0]

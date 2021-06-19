@@ -1,21 +1,22 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 )
 
 func resourceNetworkingPortSecGroupAssociateV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingPortSecGroupAssociateV2Create,
-		Read:   resourceNetworkingPortSecGroupAssociateV2Read,
-		Update: resourceNetworkingPortSecGroupAssociateV2Update,
-		Delete: resourceNetworkingPortSecGroupAssociateV2Delete,
+		CreateContext: resourceNetworkingPortSecGroupAssociateV2Create,
+		ReadContext:   resourceNetworkingPortSecGroupAssociateV2Read,
+		UpdateContext: resourceNetworkingPortSecGroupAssociateV2Update,
+		DeleteContext: resourceNetworkingPortSecGroupAssociateV2Delete,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -54,11 +55,11 @@ func resourceNetworkingPortSecGroupAssociateV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingPortSecGroupAssociateV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingPortSecGroupAssociateV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	securityGroups := expandToStringSlice(d.Get("security_group_ids").(*schema.Set).List())
@@ -66,7 +67,7 @@ func resourceNetworkingPortSecGroupAssociateV2Create(d *schema.ResourceData, met
 
 	port, err := ports.Get(networkingClient, portID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to get %s Port: %s", portID, err)
+		return diag.Errorf("Unable to get %s Port: %s", portID, err)
 	}
 
 	log.Printf("[DEBUG] Retrieved Port %s: %+v", portID, port)
@@ -89,24 +90,24 @@ func resourceNetworkingPortSecGroupAssociateV2Create(d *schema.ResourceData, met
 
 	_, err = ports.Update(networkingClient, portID, updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error associating %s port with '%s' security groups: %s", portID, strings.Join(securityGroups, ","), err)
+		return diag.Errorf("Error associating %s port with '%s' security groups: %s", portID, strings.Join(securityGroups, ","), err)
 	}
 
 	d.SetId(portID)
 
-	return resourceNetworkingPortSecGroupAssociateV2Read(d, meta)
+	return resourceNetworkingPortSecGroupAssociateV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingPortSecGroupAssociateV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingPortSecGroupAssociateV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	port, err := ports.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error fetching port security groups")
+		return diag.FromErr(CheckDeleted(d, err, "Error fetching port security groups"))
 	}
 
 	var enforce bool
@@ -132,11 +133,11 @@ func resourceNetworkingPortSecGroupAssociateV2Read(d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceNetworkingPortSecGroupAssociateV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingPortSecGroupAssociateV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var updateOpts ports.UpdateOpts
@@ -164,18 +165,18 @@ func resourceNetworkingPortSecGroupAssociateV2Update(d *schema.ResourceData, met
 		log.Printf("[DEBUG] Port Security Group Update Options: %#v", updateOpts.SecurityGroups)
 		_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
+			return diag.Errorf("Error updating OpenStack Neutron Port: %s", err)
 		}
 	}
 
-	return resourceNetworkingPortSecGroupAssociateV2Read(d, meta)
+	return resourceNetworkingPortSecGroupAssociateV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingPortSecGroupAssociateV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingPortSecGroupAssociateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var updateOpts ports.UpdateOpts
@@ -201,7 +202,7 @@ func resourceNetworkingPortSecGroupAssociateV2Delete(d *schema.ResourceData, met
 
 	_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error disassociating port security groups")
+		return diag.FromErr(CheckDeleted(d, err, "Error disassociating port security groups"))
 	}
 
 	return nil

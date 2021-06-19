@@ -1,15 +1,16 @@
 package openstack
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/structure"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
@@ -22,12 +23,12 @@ import (
 
 func resourceNetworkingPortV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingPortV2Create,
-		Read:   resourceNetworkingPortV2Read,
-		Update: resourceNetworkingPortV2Update,
-		Delete: resourceNetworkingPortV2Delete,
+		CreateContext: resourceNetworkingPortV2Create,
+		ReadContext:   resourceNetworkingPortV2Read,
+		UpdateContext: resourceNetworkingPortV2Update,
+		DeleteContext: resourceNetworkingPortV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -278,11 +279,11 @@ func resourceNetworkingPortV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	securityGroups := expandToStringSlice(d.Get("security_group_ids").(*schema.Set).List())
@@ -290,7 +291,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 
 	// Check and make sure an invalid security group configuration wasn't given.
 	if noSecurityGroups && len(securityGroups) > 0 {
-		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set for openstack_networking_port_v2")
+		return diag.Errorf("Cannot have both no_security_groups and security_group_ids set for openstack_networking_port_v2")
 	}
 
 	allowedAddressPairs := d.Get("allowed_address_pairs").(*schema.Set)
@@ -358,7 +359,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 			if len(rawProfile) > 0 {
 				err := json.Unmarshal([]byte(rawProfile), &profile)
 				if err != nil {
-					return fmt.Errorf("Failed to unmarshal the JSON: %s", err)
+					return diag.Errorf("Failed to unmarshal the JSON: %s", err)
 				}
 			}
 
@@ -392,7 +393,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 
 	err = ports.Create(networkingClient, finalCreateOpts).ExtractInto(&port)
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_networking_port_v2: %s", err)
+		return diag.Errorf("Error creating openstack_networking_port_v2: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for openstack_networking_port_v2 %s to become available.", port.ID)
@@ -405,9 +406,9 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_port_v2 %s to become available: %s", port.ID, err)
+		return diag.Errorf("Error waiting for openstack_networking_port_v2 %s to become available: %s", port.ID, err)
 	}
 
 	d.SetId(port.ID)
@@ -417,26 +418,26 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "ports", port.ID, tagOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error setting tags on openstack_networking_port_v2 %s: %s", port.ID, err)
+			return diag.Errorf("Error setting tags on openstack_networking_port_v2 %s: %s", port.ID, err)
 		}
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_port_v2 %s", tags, port.ID)
 	}
 
 	log.Printf("[DEBUG] Created openstack_networking_port_v2 %s: %#v", port.ID, port)
-	return resourceNetworkingPortV2Read(d, meta)
+	return resourceNetworkingPortV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var port portExtended
 	err = ports.Get(networkingClient, d.Id()).ExtractInto(&port)
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting openstack_networking_port_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_port_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_port_v2 %s: %#v", d.Id(), port)
@@ -475,11 +476,11 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingPortV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	securityGroups := expandToStringSlice(d.Get("security_group_ids").(*schema.Set).List())
@@ -487,7 +488,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	// Check and make sure an invalid security group configuration wasn't given.
 	if noSecurityGroups && len(securityGroups) > 0 {
-		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set for openstack_networking_port_v2")
+		return diag.Errorf("Cannot have both no_security_groups and security_group_ids set for openstack_networking_port_v2")
 	}
 
 	var hasChange bool
@@ -609,7 +610,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 				if len(rawProfile) > 0 {
 					err := json.Unmarshal([]byte(rawProfile), &profile)
 					if err != nil {
-						return fmt.Errorf("Failed to unmarshal the JSON: %s", err)
+						return diag.Errorf("Failed to unmarshal the JSON: %s", err)
 					}
 					if profile == nil {
 						profile = map[string]interface{}{}
@@ -651,7 +652,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[DEBUG] openstack_networking_port_v2 %s update options: %#v", d.Id(), finalUpdateOpts)
 		_, err = ports.Update(networkingClient, d.Id(), finalUpdateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenStack Neutron Port: %s", err)
+			return diag.Errorf("Error updating OpenStack Neutron Port: %s", err)
 		}
 	}
 
@@ -661,23 +662,23 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "ports", d.Id(), tagOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error setting tags on openstack_networking_port_v2 %s: %s", d.Id(), err)
+			return diag.Errorf("Error setting tags on openstack_networking_port_v2 %s: %s", d.Id(), err)
 		}
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_port_v2 %s", tags, d.Id())
 	}
 
-	return resourceNetworkingPortV2Read(d, meta)
+	return resourceNetworkingPortV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingPortV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingPortV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	if err := ports.Delete(networkingClient, d.Id()).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_networking_port_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_port_v2"))
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -689,9 +690,9 @@ func resourceNetworkingPortV2Delete(d *schema.ResourceData, meta interface{}) er
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_port_v2 %s to delete: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_networking_port_v2 %s to Delete:  %s", d.Id(), err)
 	}
 
 	d.SetId("")

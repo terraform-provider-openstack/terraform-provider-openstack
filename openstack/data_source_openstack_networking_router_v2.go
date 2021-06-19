@@ -1,18 +1,19 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 )
 
 func dataSourceNetworkingRouterV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNetworkingRouterV2Read,
+		ReadContext: dataSourceNetworkingRouterV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -91,11 +92,11 @@ func dataSourceNetworkingRouterV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	listOpts := routers.ListOpts{}
@@ -137,20 +138,20 @@ func dataSourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) 
 
 	pages, err := routers.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to list Routers: %s", err)
+		return diag.Errorf("Unable to list Routers: %s", err)
 	}
 
 	allRouters, err := routers.ExtractRouters(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve Routers: %s", err)
+		return diag.Errorf("Unable to retrieve Routers: %s", err)
 	}
 
 	if len(allRouters) < 1 {
-		return fmt.Errorf("No Router found")
+		return diag.Errorf("No Router found")
 	}
 
 	if len(allRouters) > 1 {
-		return fmt.Errorf("More than one Router found")
+		return diag.Errorf("More than one Router found")
 	}
 
 	router := allRouters[0]

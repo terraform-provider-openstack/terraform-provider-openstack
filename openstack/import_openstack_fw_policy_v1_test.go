@@ -3,7 +3,7 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccFWPolicyV1_importBasic(t *testing.T) {
@@ -15,8 +15,8 @@ func TestAccFWPolicyV1_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckFW(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWPolicyV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckFWPolicyV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWPolicyV1AddRules,

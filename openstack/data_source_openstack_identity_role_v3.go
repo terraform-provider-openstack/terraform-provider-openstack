@@ -1,16 +1,18 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/roles"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceIdentityRoleV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIdentityRoleV3Read,
+		ReadContext: dataSourceIdentityRoleV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -35,11 +37,11 @@ func dataSourceIdentityRoleV3() *schema.Resource {
 }
 
 // dataSourceIdentityRoleV3Read performs the role lookup.
-func dataSourceIdentityRoleV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIdentityRoleV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	listOpts := roles.ListOpts{
@@ -52,35 +54,35 @@ func dataSourceIdentityRoleV3Read(d *schema.ResourceData, meta interface{}) erro
 	var role roles.Role
 	allPages, err := roles.List(identityClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query openstack_identity_role_v3: %s", err)
+		return diag.Errorf("Unable to query openstack_identity_role_v3: %s", err)
 	}
 
 	allRoles, err := roles.ExtractRoles(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_identity_role_v3: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_identity_role_v3: %s", err)
 	}
 
 	if len(allRoles) < 1 {
-		return fmt.Errorf("Your openstack_identity_role_v3 query returned no results")
+		return diag.Errorf("Your openstack_identity_role_v3 query returned no results")
 	}
 
 	if len(allRoles) > 1 {
-		return fmt.Errorf("Your openstack_identity_role_v3 query returned more than one result")
+		return diag.Errorf("Your openstack_identity_role_v3 query returned more than one result")
 	}
 
 	role = allRoles[0]
 
-	return dataSourceIdentityRoleV3Attributes(d, config, &role)
+	dataSourceIdentityRoleV3Attributes(d, config, &role)
+
+	return nil
 }
 
 // dataSourceIdentityRoleV3Attributes populates the fields of an Role resource.
-func dataSourceIdentityRoleV3Attributes(d *schema.ResourceData, config *Config, role *roles.Role) error {
+func dataSourceIdentityRoleV3Attributes(d *schema.ResourceData, config *Config, role *roles.Role) {
 	log.Printf("[DEBUG] openstack_identity_role_v3 details: %#v", role)
 
 	d.SetId(role.ID)
 	d.Set("name", role.Name)
 	d.Set("domain_id", role.DomainID)
 	d.Set("region", GetRegion(d, config))
-
-	return nil
 }

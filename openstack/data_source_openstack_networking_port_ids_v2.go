@@ -1,21 +1,23 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"github.com/gophercloud/utils/terraform/hashcode"
 )
 
 func dataSourceNetworkingPortIDsV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNetworkingPortIDsV2Read,
+		ReadContext: dataSourceNetworkingPortIDsV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -82,7 +84,7 @@ func dataSourceNetworkingPortIDsV2() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.SingleIP(),
+				ValidateFunc: validation.IsIPAddress,
 			},
 
 			"status": {
@@ -136,11 +138,11 @@ func dataSourceNetworkingPortIDsV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNetworkingPortIDsV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	listOpts := ports.ListOpts{}
@@ -211,12 +213,12 @@ func dataSourceNetworkingPortIDsV2Read(d *schema.ResourceData, meta interface{})
 
 	allPages, err := ports.List(networkingClient, listOptsBuilder).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to list openstack_networking_port_ids_v2: %s", err)
+		return diag.Errorf("Unable to list openstack_networking_port_ids_v2: %s", err)
 	}
 
 	allPorts, err := ports.ExtractPorts(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_networking_port_ids_v2: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_networking_port_ids_v2: %s", err)
 	}
 
 	if len(allPorts) == 0 {

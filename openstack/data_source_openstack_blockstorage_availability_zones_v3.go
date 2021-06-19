@@ -1,18 +1,20 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"sort"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/gophercloud/utils/terraform/hashcode"
 )
 
 func dataSourceBlockStorageAvailabilityZonesV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceBlockStorageAvailabilityZonesV3Read,
+		ReadContext: dataSourceBlockStorageAvailabilityZonesV3Read,
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -38,20 +40,20 @@ func dataSourceBlockStorageAvailabilityZonesV3() *schema.Resource {
 	}
 }
 
-func dataSourceBlockStorageAvailabilityZonesV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceBlockStorageAvailabilityZonesV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	client, err := config.BlockStorageV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	allPages, err := availabilityzones.List(client).AllPages()
 	if err != nil {
-		return fmt.Errorf("Error retrieving openstack_blockstorage_availability_zones_v3: %s", err)
+		return diag.Errorf("Error retrieving openstack_blockstorage_availability_zones_v3: %s", err)
 	}
 	zoneInfo, err := availabilityzones.ExtractAvailabilityZones(allPages)
 	if err != nil {
-		return fmt.Errorf("Error extracting openstack_blockstorage_availability_zones_v3 from response: %s", err)
+		return diag.Errorf("Error extracting openstack_blockstorage_availability_zones_v3 from response: %s", err)
 	}
 
 	stateBool := d.Get("state").(string) == "available"

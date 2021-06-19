@@ -3,7 +3,7 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccSFSV2ShareNetworkDataSource_basic(t *testing.T) {
@@ -13,7 +13,7 @@ func TestAccSFSV2ShareNetworkDataSource_basic(t *testing.T) {
 			testAccPreCheckSFS(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSV2ShareNetworkDataSourceBasic,

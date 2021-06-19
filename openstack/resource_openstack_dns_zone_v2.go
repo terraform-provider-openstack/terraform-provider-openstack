@@ -1,26 +1,28 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
 )
 
 func resourceDNSZoneV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDNSZoneV2Create,
-		Read:   resourceDNSZoneV2Read,
-		Update: resourceDNSZoneV2Update,
-		Delete: resourceDNSZoneV2Delete,
+		CreateContext: resourceDNSZoneV2Create,
+		ReadContext:   resourceDNSZoneV2Read,
+		UpdateContext: resourceDNSZoneV2Update,
+		DeleteContext: resourceDNSZoneV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				// Allow import from different project with id:project_id
 				parts := strings.Split(d.Id(), ":")
 				if parts[0] == "" || len(parts) > 2 {
@@ -118,11 +120,11 @@ func resourceDNSZoneV2() *schema.Resource {
 	}
 }
 
-func resourceDNSZoneV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
 	createOpts := ZoneCreateOpts{
@@ -139,20 +141,20 @@ func resourceDNSZoneV2Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
-		return fmt.Errorf("Error setting dns client auth headers: %s", err)
+		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
 	log.Printf("[DEBUG] openstack_dns_zone_v2 create options: %#v", createOpts)
 	n, err := zones.Create(dnsClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_dns_zone_v2: %s", err)
+		return diag.Errorf("Error creating openstack_dns_zone_v2: %s", err)
 	}
 
 	if d.Get("disable_status_check").(bool) {
 		d.SetId(n.ID)
 
 		log.Printf("[DEBUG] Created OpenStack DNS Zone %s: %#v", n.ID, n)
-		return resourceDNSZoneV2Read(d, meta)
+		return resourceDNSZoneV2Read(ctx, d, meta)
 	}
 
 	log.Printf("[DEBUG] Waiting for openstack_dns_zone_v2 %s to become available", n.ID)
@@ -165,32 +167,32 @@ func resourceDNSZoneV2Create(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for openstack_dns_zone_v2 %s to become active: %s", d.Id(), err)
 	}
 
 	d.SetId(n.ID)
 
 	log.Printf("[DEBUG] Created OpenStack DNS Zone %s: %#v", n.ID, n)
-	return resourceDNSZoneV2Read(d, meta)
+	return resourceDNSZoneV2Read(ctx, d, meta)
 }
 
-func resourceDNSZoneV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceDNSZoneV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
 	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
-		return fmt.Errorf("Error setting dns client auth headers: %s", err)
+		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
 	n, err := zones.Get(dnsClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_dns_zone_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_dns_zone_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_dns_zone_v2 %s: %#v", d.Id(), n)
@@ -208,11 +210,11 @@ func resourceDNSZoneV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceDNSZoneV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
 	var updateOpts zones.UpdateOpts
@@ -240,22 +242,22 @@ func resourceDNSZoneV2Update(d *schema.ResourceData, meta interface{}) error {
 
 	if !changed {
 		// Nothing in OpenStack fields really changed, so just return zone from OpenStack
-		return resourceDNSZoneV2Read(d, meta)
+		return resourceDNSZoneV2Read(ctx, d, meta)
 	}
 
 	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
-		return fmt.Errorf("Error setting dns client auth headers: %s", err)
+		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
 	log.Printf("[DEBUG] Updating openstack_dns_zone_v2 %s with options: %#v", d.Id(), updateOpts)
 
 	_, err = zones.Update(dnsClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating openstack_dns_zone_v2 %s: %s", d.Id(), err)
+		return diag.Errorf("Error updating openstack_dns_zone_v2 %s: %s", d.Id(), err)
 	}
 
 	if d.Get("disable_status_check").(bool) {
-		return resourceDNSZoneV2Read(d, meta)
+		return resourceDNSZoneV2Read(ctx, d, meta)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -267,29 +269,29 @@ func resourceDNSZoneV2Update(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for openstack_dns_zone_v2 %s to become active: %s", d.Id(), err)
 	}
 
-	return resourceDNSZoneV2Read(d, meta)
+	return resourceDNSZoneV2Read(ctx, d, meta)
 }
 
-func resourceDNSZoneV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceDNSZoneV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
 	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
-		return fmt.Errorf("Error setting dns client auth headers: %s", err)
+		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
 	_, err = zones.Delete(dnsClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_dns_zone_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_dns_zone_v2"))
 	}
 
 	if d.Get("disable_status_check").(bool) {
@@ -305,9 +307,9 @@ func resourceDNSZoneV2Delete(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for openstack_dns_zone_v2 %s to become deleted: %s", d.Id(), err)
 	}
 

@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccLBV2Pool_basic(t *testing.T) {
@@ -18,8 +19,8 @@ func TestAccLBV2Pool_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2PoolDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2PoolDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccLbV2PoolConfigBasic,
@@ -47,8 +48,8 @@ func TestAccLBV2Pool_octavia_udp(t *testing.T) {
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2PoolDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2PoolDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccLbV2PoolConfigOctaviaUDP,

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccNetworkingV2TrunkDataSource_nosubports(t *testing.T) {
@@ -13,8 +13,8 @@ func TestAccNetworkingV2TrunkDataSource_nosubports(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2TrunkDataSourceNoSubports(),
@@ -40,8 +40,8 @@ func TestAccNetworkingV2TrunkDataSource_subports(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2TrunkDataSourceSubports(),
@@ -69,8 +69,8 @@ func TestAccNetworkingV2TrunkDataSource_tags(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2TrunkDataSourceTags(),

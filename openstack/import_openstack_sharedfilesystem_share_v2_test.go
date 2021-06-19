@@ -3,7 +3,7 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccSFSV2Share_importBasic(t *testing.T) {
@@ -15,8 +15,8 @@ func TestAccSFSV2Share_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSFS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSFSV2ShareDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSFSV2ShareDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSV2ShareConfigBasic,

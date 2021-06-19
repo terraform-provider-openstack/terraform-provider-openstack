@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOpenStackNetworkingNetworkV2DataSource_basic(t *testing.T) {
@@ -14,7 +14,7 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackNetworkingNetworkV2DataSourceNetwork,
@@ -43,7 +43,7 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_subnet(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackNetworkingNetworkV2DataSourceNetwork,
@@ -72,7 +72,7 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_networkID(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackNetworkingNetworkV2DataSourceNetwork,
@@ -99,7 +99,7 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_externalExplicit(t *testing.T
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackNetworkingNetworkV2DataSourceExternalExplicit(),
@@ -125,7 +125,7 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_externalImplicit(t *testing.T
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackNetworkingNetworkV2DataSourceExternalImplicit(),
@@ -152,7 +152,7 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan(t *testing.T
 			testAccPreCheckTransparentVLAN(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkTransparentVlan,

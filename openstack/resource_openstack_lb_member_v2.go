@@ -1,24 +1,26 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 )
 
 func resourceMemberV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceMemberV2Create,
-		Read:   resourceMemberV2Read,
-		Update: resourceMemberV2Update,
-		Delete: resourceMemberV2Delete,
+		CreateContext: resourceMemberV2Create,
+		ReadContext:   resourceMemberV2Read,
+		UpdateContext: resourceMemberV2Update,
+		DeleteContext: resourceMemberV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: resourceMemberV2Import,
 		},
@@ -90,11 +92,11 @@ func resourceMemberV2() *schema.Resource {
 	}
 }
 
-func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -124,14 +126,14 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 	poolID := d.Get("pool_id").(string)
 	parentPool, err := pools.Get(lbClient, poolID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve parent pool %s: %s", poolID, err)
+		return diag.Errorf("Unable to retrieve parent pool %s: %s", poolID, err)
 	}
 
 	// Wait for parent pool to become active before continuing
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2Pool(lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to create member")
@@ -145,32 +147,32 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error creating member: %s", err)
+		return diag.Errorf("Error creating member: %s", err)
 	}
 
 	// Wait for member to become active before continuing
-	err = waitForLBV2Member(lbClient, parentPool, member, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Member(ctx, lbClient, parentPool, member, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(member.ID)
 
-	return resourceMemberV2Read(d, meta)
+	return resourceMemberV2Read(ctx, d, meta)
 }
 
-func resourceMemberV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceMemberV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	poolID := d.Get("pool_id").(string)
 
 	member, err := pools.GetMember(lbClient, poolID, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "member")
+		return diag.FromErr(CheckDeleted(d, err, "member"))
 	}
 
 	log.Printf("[DEBUG] Retrieved member %s: %#v", d.Id(), member)
@@ -187,11 +189,11 @@ func resourceMemberV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceMemberV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var updateOpts pools.UpdateMemberOpts
@@ -212,26 +214,26 @@ func resourceMemberV2Update(d *schema.ResourceData, meta interface{}) error {
 	poolID := d.Get("pool_id").(string)
 	parentPool, err := pools.Get(lbClient, poolID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve parent pool %s: %s", poolID, err)
+		return diag.Errorf("Unable to retrieve parent pool %s: %s", poolID, err)
 	}
 
 	// Get a clean copy of the member.
 	member, err := pools.GetMember(lbClient, poolID, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve member: %s: %s", d.Id(), err)
+		return diag.Errorf("Unable to retrieve member: %s: %s", d.Id(), err)
 	}
 
 	// Wait for parent pool to become active before continuing.
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2Pool(lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Wait for the member to become active before continuing.
-	err = waitForLBV2Member(lbClient, parentPool, member, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Member(ctx, lbClient, parentPool, member, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Updating member %s with options: %#v", d.Id(), updateOpts)
@@ -244,43 +246,43 @@ func resourceMemberV2Update(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Unable to update member %s: %s", d.Id(), err)
+		return diag.Errorf("Unable to update member %s: %s", d.Id(), err)
 	}
 
 	// Wait for the member to become active before continuing.
-	err = waitForLBV2Member(lbClient, parentPool, member, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Member(ctx, lbClient, parentPool, member, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceMemberV2Read(d, meta)
+	return resourceMemberV2Read(ctx, d, meta)
 }
 
-func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
 	parentPool, err := pools.Get(lbClient, poolID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve parent pool (%s) for the member: %s", poolID, err)
+		return diag.Errorf("Unable to retrieve parent pool (%s) for the member: %s", poolID, err)
 	}
 
 	// Get a clean copy of the member.
 	member, err := pools.GetMember(lbClient, poolID, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Unable to retrieve member")
+		return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve member"))
 	}
 
 	// Wait for parent pool to become active before continuing.
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = waitForLBV2Pool(lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return CheckDeleted(d, err, "Error waiting for the members pool status")
+		return diag.FromErr(CheckDeleted(d, err, "Error waiting for the members pool status"))
 	}
 
 	log.Printf("[DEBUG] Attempting to delete member %s", d.Id())
@@ -293,13 +295,13 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return CheckDeleted(d, err, "Error deleting member")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting member"))
 	}
 
 	// Wait for the member to become DELETED.
-	err = waitForLBV2Member(lbClient, parentPool, member, "DELETED", getLbPendingDeleteStatuses(), timeout)
+	err = waitForLBV2Member(ctx, lbClient, parentPool, member, "DELETED", getLbPendingDeleteStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

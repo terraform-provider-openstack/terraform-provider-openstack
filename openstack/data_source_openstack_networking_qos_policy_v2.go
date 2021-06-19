@@ -1,19 +1,20 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
 )
 
 func dataSourceNetworkingQoSPolicyV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNetworkingQoSPolicyV2Read,
+		ReadContext: dataSourceNetworkingQoSPolicyV2Read,
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -90,11 +91,11 @@ func dataSourceNetworkingQoSPolicyV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingQoSPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNetworkingQoSPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	listOpts := policies.ListOpts{}
@@ -128,21 +129,21 @@ func dataSourceNetworkingQoSPolicyV2Read(d *schema.ResourceData, meta interface{
 
 	pages, err := policies.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_networking_qos_policy_v2: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_networking_qos_policy_v2: %s", err)
 	}
 
 	allPolicies, err := policies.ExtractPolicies(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to extract openstack_networking_qos_policy_v2: %s", err)
+		return diag.Errorf("Unable to extract openstack_networking_qos_policy_v2: %s", err)
 	}
 
 	if len(allPolicies) < 1 {
-		return fmt.Errorf("Your query returned no openstack_networking_qos_policy_v2. " +
+		return diag.Errorf("Your query returned no openstack_networking_qos_policy_v2. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allPolicies) > 1 {
-		return fmt.Errorf("Your query returned more than one openstack_networking_qos_policy_v2." +
+		return diag.Errorf("Your query returned more than one openstack_networking_qos_policy_v2." +
 			" Please try a more specific search criteria")
 	}
 

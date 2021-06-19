@@ -3,7 +3,7 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccNetworkingV2SubnetPoolImportBasic(t *testing.T) {
@@ -14,8 +14,8 @@ func TestAccNetworkingV2SubnetPoolImportBasic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2SubnetPoolDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetPoolDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetPoolBasic,

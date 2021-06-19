@@ -1,18 +1,20 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/acls"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/containers"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceKeyManagerContainerV1() *schema.Resource {
 	ret := &schema.Resource{
-		Read: dataSourceKeyManagerContainerV1Read,
+		ReadContext: dataSourceKeyManagerContainerV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -107,11 +109,11 @@ func dataSourceKeyManagerContainerV1() *schema.Resource {
 	return ret
 }
 
-func dataSourceKeyManagerContainerV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceKeyManagerContainerV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	kmClient, err := config.KeyManagerV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack barbican client: %s", err)
+		return diag.Errorf("Error creating OpenStack barbican client: %s", err)
 	}
 
 	listOpts := containers.ListOpts{
@@ -122,22 +124,22 @@ func dataSourceKeyManagerContainerV1Read(d *schema.ResourceData, meta interface{
 
 	allPages, err := containers.List(kmClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query openstack_keymanager_container_v1 containers: %s", err)
+		return diag.Errorf("Unable to query openstack_keymanager_container_v1 containers: %s", err)
 	}
 
 	allContainers, err := containers.ExtractContainers(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_keymanager_container_v1 containers: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_keymanager_container_v1 containers: %s", err)
 	}
 
 	if len(allContainers) < 1 {
-		return fmt.Errorf("Your query returned no openstack_keymanager_container_v1 results. " +
+		return diag.Errorf("Your query returned no openstack_keymanager_container_v1 results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allContainers) > 1 {
 		log.Printf("[DEBUG] Multiple openstack_keymanager_container_v1 results found: %#v", allContainers)
-		return fmt.Errorf("Your query returned more than one result. Please try a more " +
+		return diag.Errorf("Your query returned more than one result. Please try a more " +
 			"specific search criteria.")
 	}
 
