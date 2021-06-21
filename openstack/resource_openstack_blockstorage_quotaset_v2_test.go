@@ -23,6 +23,7 @@ func TestAccBlockStorageQuotasetV2_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
+			testAccPreCheckBlockStorageV2(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageQuotasetV2Destroy,
