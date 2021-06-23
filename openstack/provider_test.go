@@ -44,6 +44,7 @@ var (
 	osGlanceimportEnvironment    = os.Getenv("OS_GLANCEIMPORT_ENVIRONMENT")
 	osHypervisorEnvironment      = os.Getenv("OS_HYPERVISOR_HOSTNAME")
 	osPortForwardingEnvironment  = os.Getenv("OS_PORT_FORWARDING_ENVIRONMENT")
+	osBlockStorageV2             = os.Getenv("OS_BLOCKSTORAGE_V2")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -129,6 +130,14 @@ func testAccPreCheckLB(t *testing.T) {
 
 	if osLbEnvironment == "" {
 		t.Skip("This environment does not support LB tests")
+	}
+}
+
+func testAccPreCheckBlockStorageV2(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if osBlockStorageV2 == "" {
+		t.Skip("This environment does not support BlockStorageV2 tests")
 	}
 }
 

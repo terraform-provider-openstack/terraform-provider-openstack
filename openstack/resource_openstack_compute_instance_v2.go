@@ -11,7 +11,8 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
+	volumesV2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
+	volumesV3 "github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
@@ -1122,37 +1123,70 @@ func resourceOpenStackComputeInstanceV2ImportState(d *schema.ResourceData, meta 
 	bds := []map[string]interface{}{}
 	if len(serverWithAttachments.VolumesAttached) > 0 {
 		blockStorageClient, err := config.BlockStorageV2Client(GetRegion(d, config))
-		if err != nil {
-			return nil, fmt.Errorf("Error creating OpenStack volume client: %s", err)
-		}
+		if err == nil {
+			var volMetaData = struct {
+				VolumeImageMetadata map[string]interface{} `json:"volume_image_metadata"`
+				ID                  string                 `json:"id"`
+				Size                int                    `json:"size"`
+				Bootable            string                 `json:"bootable"`
+			}{}
+			for i, b := range serverWithAttachments.VolumesAttached {
+				rawVolume := volumesV2.Get(blockStorageClient, b["id"].(string))
+				if err := rawVolume.ExtractInto(&volMetaData); err != nil {
+					log.Printf("[DEBUG] unable to unmarshal raw struct to volume metadata: %s", err)
+				}
 
-		var volMetaData = struct {
-			VolumeImageMetadata map[string]interface{} `json:"volume_image_metadata"`
-			ID                  string                 `json:"id"`
-			Size                int                    `json:"size"`
-			Bootable            string                 `json:"bootable"`
-		}{}
-		for i, b := range serverWithAttachments.VolumesAttached {
-			rawVolume := volumes.Get(blockStorageClient, b["id"].(string))
-			if err := rawVolume.ExtractInto(&volMetaData); err != nil {
-				log.Printf("[DEBUG] unable to unmarshal raw struct to volume metadata: %s", err)
+				log.Printf("[DEBUG] retrieved volume%+v", volMetaData)
+				v := map[string]interface{}{
+					"delete_on_termination": true,
+					"uuid":                  volMetaData.VolumeImageMetadata["image_id"],
+					"boot_index":            i,
+					"destination_type":      "volume",
+					"source_type":           "image",
+					"volume_size":           volMetaData.Size,
+					"disk_bus":              "",
+					"volume_type":           "",
+					"device_type":           "",
+				}
+
+				if volMetaData.Bootable == "true" {
+					bds = append(bds, v)
+				}
 			}
-
-			log.Printf("[DEBUG] retrieved volume%+v", volMetaData)
-			v := map[string]interface{}{
-				"delete_on_termination": true,
-				"uuid":                  volMetaData.VolumeImageMetadata["image_id"],
-				"boot_index":            i,
-				"destination_type":      "volume",
-				"source_type":           "image",
-				"volume_size":           volMetaData.Size,
-				"disk_bus":              "",
-				"volume_type":           "",
-				"device_type":           "",
+		} else {
+			log.Print("[DEBUG] Could not create BlockStorageV2 client, trying BlockStorageV3")
+			blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
+			if err != nil {
+				return nil, fmt.Errorf("Error creating OpenStack volume V3 client: %s", err)
 			}
+			var volMetaData = struct {
+				VolumeImageMetadata map[string]interface{} `json:"volume_image_metadata"`
+				ID                  string                 `json:"id"`
+				Size                int                    `json:"size"`
+				Bootable            string                 `json:"bootable"`
+			}{}
+			for i, b := range serverWithAttachments.VolumesAttached {
+				rawVolume := volumesV3.Get(blockStorageClient, b["id"].(string))
+				if err := rawVolume.ExtractInto(&volMetaData); err != nil {
+					log.Printf("[DEBUG] unable to unmarshal raw struct to volume metadata: %s", err)
+				}
 
-			if volMetaData.Bootable == "true" {
-				bds = append(bds, v)
+				log.Printf("[DEBUG] retrieved volume%+v", volMetaData)
+				v := map[string]interface{}{
+					"delete_on_termination": true,
+					"uuid":                  volMetaData.VolumeImageMetadata["image_id"],
+					"boot_index":            i,
+					"destination_type":      "volume",
+					"source_type":           "image",
+					"volume_size":           volMetaData.Size,
+					"disk_bus":              "",
+					"volume_type":           "",
+					"device_type":           "",
+				}
+
+				if volMetaData.Bootable == "true" {
+					bds = append(bds, v)
+				}
 			}
 		}
 
