@@ -26,16 +26,16 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_blockstorage_quotaset_v2" "quotaset_1" {
-  project_id = "${openstack_identity_project_v3.project_1.id}"
-  volumes   = 10
-  snapshots = 4
-  gigabytes = 100
+  project_id           = "${openstack_identity_project_v3.project_1.id}"
+  volumes              = 10
+  snapshots            = 4
+  gigabytes            = 100
   per_volume_gigabytes = 10
-  backups = 4
-  backup_gigabytes = 10
-  groups = 100
+  backups              = 4
+  backup_gigabytes     = 10
+  groups               = 100
   volume_type_quota = {
-    volumes_ssd = 30
+    volumes_ssd   = 30
     gigabytes_ssd = 500
     snapshots_ssd = 10
   }

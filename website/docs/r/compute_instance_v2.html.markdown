@@ -802,10 +802,10 @@ resource "openstack_compute_instance_v2" "instance_2" {
   security_groups = ["default"]
 
   block_device {
-    uuid = <image_id>"
-    source_type = "image"
-    destination_type = "volume"
-    boot_index = 0
+    uuid                  = "<image_id>"
+    source_type           = "image"
+    destination_type      = "volume"
+    boot_index            = 0
     delete_on_termination = true
   }
 
@@ -814,11 +814,11 @@ resource "openstack_compute_instance_v2" "instance_2" {
   }
 }
 resource "openstack_blockstorage_volume_v2" "volume_1" {
-  size        = 1
-  name =     "<vol_name>"
+  size = 1
+  name = "<vol_name>"
 }
 resource "openstack_compute_volume_attach_v2" "va_1" {
-  volume_id = "${openstack_blockstorage_volume_v2.volume_1.id}"
+  volume_id   = "${openstack_blockstorage_volume_v2.volume_1.id}"
   instance_id = "${openstack_compute_instance_v2.instance_2.id}"
 }
 ```

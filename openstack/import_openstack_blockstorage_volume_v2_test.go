@@ -13,6 +13,7 @@ func TestAccBlockStorageV2Volume_importBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckBlockStorageV2(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,

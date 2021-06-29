@@ -1,4 +1,4 @@
-## 1.42.0 (Unreleased)
+## 1.42.0 (12 May, 2021)
 
 IMPROVEMENTS
 

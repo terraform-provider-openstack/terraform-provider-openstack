@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
@@ -367,8 +367,8 @@ func TestAccComputeV2Instance_blockDeviceExistingVolume(t *testing.T) {
 				Config: testAccComputeV2InstanceBlockDeviceExistingVolume(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
-					testAccCheckBlockStorageV2VolumeExists(
-						"openstack_blockstorage_volume_v2.volume_1", &volume),
+					testAccCheckBlockStorageV3VolumeExists(
+						"openstack_blockstorage_volume_v3.volume_1", &volume),
 				),
 			},
 		},
@@ -781,7 +781,7 @@ func testAccCheckComputeV2InstanceDestroy(s *terraform.State) error {
 
 		server, err := servers.Get(computeClient, rs.Primary.ID).Extract()
 		if err == nil {
-			if server.Status != "SOFT_DELETED" {
+			if server.Status != "SOFT_DELETED" && server.Status != "DELETED" {
 				return fmt.Errorf("Instance still exists")
 			}
 		}
@@ -1124,7 +1124,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
 
 func testAccComputeV2InstanceBootFromVolumeVolume() string {
 	return fmt.Sprintf(`
-resource "openstack_blockstorage_volume_v2" "vol_1" {
+resource "openstack_blockstorage_volume_v3" "vol_1" {
   name = "vol_1"
   size = 5
   image_id = "%s"
@@ -1134,7 +1134,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   block_device {
-    uuid = "${openstack_blockstorage_volume_v2.vol_1.id}"
+    uuid = "${openstack_blockstorage_volume_v3.vol_1.id}"
     source_type = "volume"
     boot_index = 0
     destination_type = "volume"
@@ -1245,7 +1245,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
 
 func testAccComputeV2InstanceBlockDeviceExistingVolume() string {
 	return fmt.Sprintf(`
-resource "openstack_blockstorage_volume_v2" "volume_1" {
+resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   size = 1
 }
@@ -1261,7 +1261,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
     delete_on_termination = true
   }
   block_device {
-    uuid = "${openstack_blockstorage_volume_v2.volume_1.id}"
+    uuid = "${openstack_blockstorage_volume_v3.volume_1.id}"
     source_type = "volume"
     destination_type = "volume"
     boot_index = 1

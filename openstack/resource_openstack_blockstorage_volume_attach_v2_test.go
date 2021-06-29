@@ -18,6 +18,7 @@ func TestAccBlockStorageVolumeAttachV2_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
+			testAccPreCheckBlockStorageV2(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageVolumeAttachV2Destroy,
@@ -39,6 +40,7 @@ func TestAccBlockStorageVolumeAttachV2_timeout(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
+			testAccPreCheckBlockStorageV2(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBlockStorageVolumeAttachV2Destroy,
