@@ -1,11 +1,18 @@
 ## 1.43.0 (Unreleased)
 
+FEATURES
+
+* __New Resource__: `dns_transfer_request_v2` ([#1268](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1268))
+* __New Resource__: `dns_transfer_accept_v2` ([#1268](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1268))
+
 IMPROVEMENTS
 
+* Removed Octavia microversions and added explanation about minor version usage ([#1249](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1249))
 * Added `cidr` argument input check for `networking_subnet_v2` resource ([#1267](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1267))
 * Fixed `endpoints` argument for `vpnaas_endpoint_group_v2` resource in that way so endpoints order is not relevant anymore ([#1247](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1247))
 * Added `addresses` argument for `db_instance_v1` resource ([#1260](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1260))
 * Better formatted documentation for some resources and data sources ([#1252](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1252)), ([#1255](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1255)), ([#1256](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1256))
+* Updated issues links so they point to the right repo ([#1272](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1272))
 
 BUG FIXES
 
