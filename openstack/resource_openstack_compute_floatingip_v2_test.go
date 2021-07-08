@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips"
 )
@@ -18,8 +18,8 @@ func TestAccComputeV2FloatingIP_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2FloatingIPDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2FloatingIPDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2FloatingIPBasic,

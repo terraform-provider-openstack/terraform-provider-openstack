@@ -1,9 +1,10 @@
 package openstack
 
 import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func resourceNetworkingRouterV2StateRefreshFunc(client *gophercloud.ServiceClient, routerID string) resource.StateRefreshFunc {

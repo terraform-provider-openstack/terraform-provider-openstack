@@ -1,21 +1,23 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/servergroups"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceComputeServerGroupV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceComputeServerGroupV2Create,
-		Read:   resourceComputeServerGroupV2Read,
-		Update: nil,
-		Delete: resourceComputeServerGroupV2Delete,
+		CreateContext: resourceComputeServerGroupV2Create,
+		ReadContext:   resourceComputeServerGroupV2Read,
+		Update:        nil,
+		DeleteContext: resourceComputeServerGroupV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -54,11 +56,11 @@ func resourceComputeServerGroupV2() *schema.Resource {
 	}
 }
 
-func resourceComputeServerGroupV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	name := d.Get("name").(string)
@@ -77,24 +79,24 @@ func resourceComputeServerGroupV2Create(d *schema.ResourceData, meta interface{}
 	log.Printf("[DEBUG] openstack_compute_servergroup_v2 create options: %#v", createOpts)
 	newSG, err := servergroups.Create(computeClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_compute_servergroup_v2 %s: %s", name, err)
+		return diag.Errorf("Error creating openstack_compute_servergroup_v2 %s: %s", name, err)
 	}
 
 	d.SetId(newSG.ID)
 
-	return resourceComputeServerGroupV2Read(d, meta)
+	return resourceComputeServerGroupV2Read(ctx, d, meta)
 }
 
-func resourceComputeServerGroupV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeServerGroupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	sg, err := servergroups.Get(computeClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_compute_servergroup_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_servergroup_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_servergroup_v2 %s: %#v", d.Id(), sg)
@@ -108,15 +110,15 @@ func resourceComputeServerGroupV2Read(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func resourceComputeServerGroupV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeServerGroupV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	if err := servergroups.Delete(computeClient, d.Id()).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_compute_servergroup_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_compute_servergroup_v2"))
 	}
 
 	return nil

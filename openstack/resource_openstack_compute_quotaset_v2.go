@@ -1,23 +1,26 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/quotasets"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceComputeQuotasetV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceComputeQuotasetV2Create,
-		Read:   resourceComputeQuotasetV2Read,
-		Update: resourceComputeQuotasetV2Update,
-		Delete: schema.RemoveFromState,
+		CreateContext: resourceComputeQuotasetV2Create,
+		ReadContext:   resourceComputeQuotasetV2Read,
+		UpdateContext: resourceComputeQuotasetV2Update,
+		Delete:        schema.RemoveFromState,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -127,12 +130,12 @@ func resourceComputeQuotasetV2() *schema.Resource {
 	}
 }
 
-func resourceComputeQuotasetV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeQuotasetV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
 	computeClient, err := config.ComputeV2Client(region)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	projectID := d.Get("project_id").(string)
@@ -170,7 +173,7 @@ func resourceComputeQuotasetV2Create(d *schema.ResourceData, meta interface{}) e
 
 	q, err := quotasets.Update(computeClient, projectID, updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_compute_quotaset_v2: %s", err)
+		return diag.Errorf("Error creating openstack_compute_quotaset_v2: %s", err)
 	}
 
 	id := fmt.Sprintf("%s/%s", projectID, region)
@@ -178,15 +181,15 @@ func resourceComputeQuotasetV2Create(d *schema.ResourceData, meta interface{}) e
 
 	log.Printf("[DEBUG] Created openstack_compute_quotaset_v2 %#v", q)
 
-	return resourceComputeQuotasetV2Read(d, meta)
+	return resourceComputeQuotasetV2Read(ctx, d, meta)
 }
 
-func resourceComputeQuotasetV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeQuotasetV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
 	computeClient, err := config.ComputeV2Client(region)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	// Depending on the provider version the resource was created, the resource id
@@ -196,7 +199,7 @@ func resourceComputeQuotasetV2Read(d *schema.ResourceData, meta interface{}) err
 
 	q, err := quotasets.Get(computeClient, projectID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_compute_quotaset_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_quotaset_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_quotaset_v2 %s: %#v", d.Id(), q)
@@ -221,11 +224,11 @@ func resourceComputeQuotasetV2Read(d *schema.ResourceData, meta interface{}) err
 	return nil
 }
 
-func resourceComputeQuotasetV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeQuotasetV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	var (
@@ -322,9 +325,9 @@ func resourceComputeQuotasetV2Update(d *schema.ResourceData, meta interface{}) e
 		projectID := d.Get("project_id").(string)
 		_, err := quotasets.Update(computeClient, projectID, updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_compute_quotaset_v2: %s", err)
+			return diag.Errorf("Error updating openstack_compute_quotaset_v2: %s", err)
 		}
 	}
 
-	return resourceComputeQuotasetV2Read(d, meta)
+	return resourceComputeQuotasetV2Read(ctx, d, meta)
 }

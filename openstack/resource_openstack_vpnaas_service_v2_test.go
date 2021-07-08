@@ -5,11 +5,11 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/services"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccServiceV2_basic(t *testing.T) {
@@ -20,8 +20,8 @@ func TestAccServiceV2_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckVPN(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckServiceV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckServiceV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceV2Basic(),

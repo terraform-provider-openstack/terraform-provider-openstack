@@ -1,12 +1,13 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas/pools"
@@ -14,12 +15,12 @@ import (
 
 func resourceLBPoolV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLBPoolV1Create,
-		Read:   resourceLBPoolV1Read,
-		Update: resourceLBPoolV1Update,
-		Delete: resourceLBPoolV1Delete,
+		CreateContext: resourceLBPoolV1Create,
+		ReadContext:   resourceLBPoolV1Read,
+		UpdateContext: resourceLBPoolV1Update,
+		DeleteContext: resourceLBPoolV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -68,10 +69,10 @@ func resourceLBPoolV1() *schema.Resource {
 				Computed: true,
 			},
 			"member": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
-				Removed:  "Use openstack_lb_member_v1 instead.",
+				Type:       schema.TypeSet,
+				Elem:       &schema.Schema{Type: schema.TypeString},
+				Optional:   true,
+				Deprecated: "Use openstack_lb_member_v1 instead",
 			},
 			"monitor_ids": {
 				Type:     schema.TypeSet,
@@ -84,11 +85,11 @@ func resourceLBPoolV1() *schema.Resource {
 	}
 }
 
-func resourceLBPoolV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceLBPoolV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	createOpts := pools.CreateOpts{
@@ -111,7 +112,7 @@ func resourceLBPoolV1Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	p, err := pools.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack LB pool: %s", err)
+		return diag.Errorf("Error creating OpenStack LB pool: %s", err)
 	}
 	log.Printf("[INFO] LB Pool ID: %s", p.ID)
 
@@ -126,9 +127,9 @@ func resourceLBPoolV1Create(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(p.ID)
@@ -137,24 +138,24 @@ func resourceLBPoolV1Create(d *schema.ResourceData, meta interface{}) error {
 		for _, mID := range mIDs {
 			_, err := pools.AssociateMonitor(networkingClient, p.ID, mID).Extract()
 			if err != nil {
-				return fmt.Errorf("Error associating monitor (%s) with OpenStack LB pool (%s): %s", mID, p.ID, err)
+				return diag.Errorf("Error associating monitor (%s) with OpenStack LB pool (%s): %s", mID, p.ID, err)
 			}
 		}
 	}
 
-	return resourceLBPoolV1Read(d, meta)
+	return resourceLBPoolV1Read(ctx, d, meta)
 }
 
-func resourceLBPoolV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceLBPoolV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	p, err := pools.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "LB pool")
+		return diag.FromErr(CheckDeleted(d, err, "LB pool"))
 	}
 
 	log.Printf("[DEBUG] Retrieved OpenStack LB Pool %s: %+v", d.Id(), p)
@@ -171,11 +172,11 @@ func resourceLBPoolV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceLBPoolV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceLBPoolV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var updateOpts pools.UpdateOpts
@@ -191,7 +192,7 @@ func resourceLBPoolV1Update(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[DEBUG] Updating OpenStack LB Pool %s with options: %+v", d.Id(), updateOpts)
 		_, err = pools.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenStack LB Pool: %s", err)
+			return diag.Errorf("Error updating OpenStack LB Pool: %s", err)
 		}
 	}
 
@@ -208,7 +209,7 @@ func resourceLBPoolV1Update(d *schema.ResourceData, meta interface{}) error {
 		for _, m := range monitorsToAdd.List() {
 			_, err := pools.AssociateMonitor(networkingClient, d.Id(), m.(string)).Extract()
 			if err != nil {
-				return fmt.Errorf("Error associating monitor (%s) with OpenStack server (%s): %s", m.(string), d.Id(), err)
+				return diag.Errorf("Error associating monitor (%s) with OpenStack server (%s): %s", m.(string), d.Id(), err)
 			}
 			log.Printf("[DEBUG] Associated monitor (%s) with pool (%s)", m.(string), d.Id())
 		}
@@ -216,20 +217,20 @@ func resourceLBPoolV1Update(d *schema.ResourceData, meta interface{}) error {
 		for _, m := range monitorsToRemove.List() {
 			_, err := pools.DisassociateMonitor(networkingClient, d.Id(), m.(string)).Extract()
 			if err != nil {
-				return fmt.Errorf("Error disassociating monitor (%s) from OpenStack server (%s): %s", m.(string), d.Id(), err)
+				return diag.Errorf("Error disassociating monitor (%s) from OpenStack server (%s): %s", m.(string), d.Id(), err)
 			}
 			log.Printf("[DEBUG] Disassociated monitor (%s) from pool (%s)", m.(string), d.Id())
 		}
 	}
 
-	return resourceLBPoolV1Read(d, meta)
+	return resourceLBPoolV1Read(ctx, d, meta)
 }
 
-func resourceLBPoolV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceLBPoolV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	// Make sure all monitors are disassociated first
@@ -239,7 +240,7 @@ func resourceLBPoolV1Delete(d *schema.ResourceData, meta interface{}) error {
 				mID := monitorID.(string)
 				log.Printf("[DEBUG] Attempting to disassociate monitor %s from pool %s", mID, d.Id())
 				if res := pools.DisassociateMonitor(networkingClient, d.Id(), mID); res.Err != nil {
-					return fmt.Errorf("Error disassociating monitor %s from pool %s: %s", mID, d.Id(), err)
+					return diag.Errorf("Error disassociating monitor %s from pool %s: %s", mID, d.Id(), err)
 				}
 			}
 		}
@@ -254,9 +255,9 @@ func resourceLBPoolV1Delete(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack LB Pool: %s", err)
+		return diag.Errorf("Error deleting OpenStack LB Pool: %s", err)
 	}
 
 	d.SetId("")

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
@@ -32,7 +32,7 @@ func TestAccSFSV2SnapshotDataSource_basic(t *testing.T) {
 			testAccPreCheckSFS(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSV2SnapshotDataSourceBasic,
@@ -137,7 +137,7 @@ func testAccSFSV2SnapshotCreate(t *testing.T, snapshotName string) (*snapshots.S
 	if err != nil {
 		nErr := shares.Delete(client, share.ID).ExtractErr()
 		if nErr != nil {
-			return nil, fmt.Errorf("Unable to get share available status (%s) and delete: %s)", err, nErr)
+			return nil, fmt.Errorf("Unable to get share available status (%s) and Delete:  %s)", err, nErr)
 		}
 		return nil, err
 	}

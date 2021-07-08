@@ -6,10 +6,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccIPSecPolicyV2_basic(t *testing.T) {
@@ -20,8 +21,8 @@ func TestAccIPSecPolicyV2_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckVPN(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIPSecPolicyV2Basic,
@@ -50,8 +51,8 @@ func TestAccIPSecPolicyV2_withLifetime(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckVPN(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIPSecPolicyV2WithLifetime,
@@ -73,8 +74,8 @@ func TestAccIPSecPolicyV2_Update(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckVPN(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIPSecPolicyV2Basic,
@@ -104,8 +105,8 @@ func TestAccIPSecPolicyV2_withLifetimeUpdate(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckVPN(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIPSecPolicyV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIPSecPolicyV2WithLifetime,

@@ -1,24 +1,25 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/rules"
 )
 
 func resourceNetworkingQoSMinimumBandwidthRuleV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingQoSMinimumBandwidthRuleV2Create,
-		Read:   resourceNetworkingQoSMinimumBandwidthRuleV2Read,
-		Update: resourceNetworkingQoSMinimumBandwidthRuleV2Update,
-		Delete: resourceNetworkingQoSMinimumBandwidthRuleV2Delete,
+		CreateContext: resourceNetworkingQoSMinimumBandwidthRuleV2Create,
+		ReadContext:   resourceNetworkingQoSMinimumBandwidthRuleV2Read,
+		UpdateContext: resourceNetworkingQoSMinimumBandwidthRuleV2Update,
+		DeleteContext: resourceNetworkingQoSMinimumBandwidthRuleV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -56,11 +57,11 @@ func resourceNetworkingQoSMinimumBandwidthRuleV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingQoSMinimumBandwidthRuleV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSMinimumBandwidthRuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	createOpts := rules.CreateMinimumBandwidthRuleOpts{
@@ -72,7 +73,7 @@ func resourceNetworkingQoSMinimumBandwidthRuleV2Create(d *schema.ResourceData, m
 	log.Printf("[DEBUG] openstack_networking_qos_minimum_bandwidth_rule_v2 create options: %#v", createOpts)
 	r, err := rules.CreateMinimumBandwidthRule(networkingClient, qosPolicyID, createOpts).ExtractMinimumBandwidthRule()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_networking_qos_minimum_bandwidth_rule_v2: %s", err)
+		return diag.Errorf("Error creating openstack_networking_qos_minimum_bandwidth_rule_v2: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for openstack_networking_qos_minimum_bandwidth_rule_v2 %s to become available.", r.ID)
@@ -85,9 +86,9 @@ func resourceNetworkingQoSMinimumBandwidthRuleV2Create(d *schema.ResourceData, m
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_qos_minimum_bandwidth_rule_v2 %s to become available: %s", r.ID, err)
+		return diag.Errorf("Error waiting for openstack_networking_qos_minimum_bandwidth_rule_v2 %s to become available: %s", r.ID, err)
 	}
 
 	id := resourceNetworkingQoSRuleV2BuildID(qosPolicyID, r.ID)
@@ -95,24 +96,24 @@ func resourceNetworkingQoSMinimumBandwidthRuleV2Create(d *schema.ResourceData, m
 
 	log.Printf("[DEBUG] Created openstack_networking_qos_minimum_bandwidth_rule_v2 %s: %#v", id, r)
 
-	return resourceNetworkingQoSMinimumBandwidthRuleV2Read(d, meta)
+	return resourceNetworkingQoSMinimumBandwidthRuleV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingQoSMinimumBandwidthRuleV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSMinimumBandwidthRuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
 	if err != nil {
-		return fmt.Errorf("Error reading openstack_networking_qos_minimum_bandwidth_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.Errorf("Error reading openstack_networking_qos_minimum_bandwidth_rule_v2 ID %s: %s", d.Id(), err)
 	}
 
 	r, err := rules.GetMinimumBandwidthRule(networkingClient, qosPolicyID, qosRuleID).ExtractMinimumBandwidthRule()
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting openstack_networking_qos_minimum_bandwidth_rule_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_qos_minimum_bandwidth_rule_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_qos_minimum_bandwidth_rule_v2 %s: %#v", d.Id(), r)
@@ -125,16 +126,16 @@ func resourceNetworkingQoSMinimumBandwidthRuleV2Read(d *schema.ResourceData, met
 	return nil
 }
 
-func resourceNetworkingQoSMinimumBandwidthRuleV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSMinimumBandwidthRuleV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
 	if err != nil {
-		return fmt.Errorf("Error reading openstack_networking_qos_minimum_bandwidth_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.Errorf("Error reading openstack_networking_qos_minimum_bandwidth_rule_v2 ID %s: %s", d.Id(), err)
 	}
 
 	var hasChange bool
@@ -155,27 +156,27 @@ func resourceNetworkingQoSMinimumBandwidthRuleV2Update(d *schema.ResourceData, m
 		log.Printf("[DEBUG] openstack_networking_qos_minimum_bandwidth_rule_v2 %s update options: %#v", d.Id(), updateOpts)
 		_, err = rules.UpdateMinimumBandwidthRule(networkingClient, qosPolicyID, qosRuleID, updateOpts).ExtractMinimumBandwidthRule()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_networking_qos_minimum_bandwidth_rule_v2 %s: %s", d.Id(), err)
+			return diag.Errorf("Error updating openstack_networking_qos_minimum_bandwidth_rule_v2 %s: %s", d.Id(), err)
 		}
 	}
 
-	return resourceNetworkingQoSMinimumBandwidthRuleV2Read(d, meta)
+	return resourceNetworkingQoSMinimumBandwidthRuleV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingQoSMinimumBandwidthRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSMinimumBandwidthRuleV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
 	if err != nil {
-		return fmt.Errorf("Error reading openstack_networking_qos_minimum_bandwidth_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.Errorf("Error reading openstack_networking_qos_minimum_bandwidth_rule_v2 ID %s: %s", d.Id(), err)
 	}
 
 	if err := rules.DeleteMinimumBandwidthRule(networkingClient, qosPolicyID, qosRuleID).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error getting openstack_networking_qos_minimum_bandwidth_rule_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_qos_minimum_bandwidth_rule_v2"))
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -187,9 +188,9 @@ func resourceNetworkingQoSMinimumBandwidthRuleV2Delete(d *schema.ResourceData, m
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_qos_minimum_bandwidth_rule_v2 %s to delete: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_networking_qos_minimum_bandwidth_rule_v2 %s to Delete:  %s", d.Id(), err)
 	}
 
 	return nil

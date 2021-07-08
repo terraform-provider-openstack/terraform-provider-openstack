@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccKeyManagerSecretV1_basic(t *testing.T) {
@@ -18,8 +19,8 @@ func TestAccKeyManagerSecretV1_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSecretV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerSecretV1Basic,
@@ -43,8 +44,8 @@ func TestAccKeyManagerSecretV1_basicWithMetadata(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSecretV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerSecretV1BasicWithMetadata,
@@ -67,8 +68,8 @@ func TestAccKeyManagerSecretV1_updateMetadata(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSecretV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerSecretV1BasicWithMetadata,
@@ -102,8 +103,8 @@ func TestAccUpdateSecretV1_payload(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSecretV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerSecretV1NoPayload,
@@ -157,8 +158,8 @@ func TestAccKeyManagerSecretV1_acls(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSecretV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerSecretV1Acls,
@@ -185,8 +186,8 @@ func TestAccKeyManagerSecretV1_acls_update(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSecretV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerSecretV1Acls,

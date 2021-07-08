@@ -1,18 +1,20 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/endpoints"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/services"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func dataSourceIdentityEndpointV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIdentityEndpointV3Read,
+		ReadContext: dataSourceIdentityEndpointV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -65,11 +67,11 @@ func dataSourceIdentityEndpointV3() *schema.Resource {
 }
 
 // dataSourceIdentityEndpointV3Read performs the endpoint lookup.
-func dataSourceIdentityEndpointV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIdentityEndpointV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	listOpts := endpoints.ListOpts{
@@ -83,12 +85,12 @@ func dataSourceIdentityEndpointV3Read(d *schema.ResourceData, meta interface{}) 
 	var endpoint endpoints.Endpoint
 	allPages, err := endpoints.List(identityClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query openstack_identity_endpoint_v3: %s", err)
+		return diag.Errorf("Unable to query openstack_identity_endpoint_v3: %s", err)
 	}
 
 	allEndpoints, err := endpoints.ExtractEndpoints(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_identity_endpoint_v3: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_identity_endpoint_v3: %s", err)
 	}
 
 	// filter by name, when the name is specified
@@ -103,7 +105,7 @@ func dataSourceIdentityEndpointV3Read(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if len(allEndpoints) < 1 {
-		return fmt.Errorf("Your openstack_identity_endpoint_v3 query returned no results. " +
+		return diag.Errorf("Your openstack_identity_endpoint_v3 query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
@@ -113,12 +115,12 @@ func dataSourceIdentityEndpointV3Read(d *schema.ResourceData, meta interface{}) 
 	var filteredEndpoints []endpoints.Endpoint
 	allServicePages, err := services.List(identityClient, services.ListOpts{ServiceType: serviceType, Name: serviceName}).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query openstack_identity_endpoint_v3 services: %s", err)
+		return diag.Errorf("Unable to query openstack_identity_endpoint_v3 services: %s", err)
 	}
 
 	allServices, err := services.ExtractServices(allServicePages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_identity_endpoint_v3 services: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_identity_endpoint_v3 services: %s", err)
 	}
 
 	for _, endpoint := range allEndpoints {
@@ -138,12 +140,12 @@ func dataSourceIdentityEndpointV3Read(d *schema.ResourceData, meta interface{}) 
 	allEndpoints = filteredEndpoints
 
 	if len(allEndpoints) < 1 {
-		return fmt.Errorf("Your openstack_identity_endpoint_v3 query returned no results. " +
+		return diag.Errorf("Your openstack_identity_endpoint_v3 query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allEndpoints) > 1 {
-		return fmt.Errorf("Your openstack_identity_endpoint_v3 query returned more than one result")
+		return diag.Errorf("Your openstack_identity_endpoint_v3 query returned more than one result")
 	}
 	endpoint = allEndpoints[0]
 

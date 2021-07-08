@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccLBV2Member_basic(t *testing.T) {
@@ -19,8 +20,8 @@ func TestAccLBV2Member_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2MemberDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2MemberDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccLbV2MemberConfigBasic,

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
@@ -20,9 +20,9 @@ func TestAccLBV1Pool_basic(t *testing.T) {
 	var pool pools.Pool
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDeprecated(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV1PoolDestroy,
+		PreCheck:          func() { testAccPreCheckDeprecated(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV1PoolBasic,
@@ -51,9 +51,9 @@ func TestAccLBV1Pool_fullstack(t *testing.T) {
 	var vip vips.VirtualIP
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDeprecated(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV1PoolDestroy,
+		PreCheck:          func() { testAccPreCheckDeprecated(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV1PoolFullstack1,
@@ -89,9 +89,9 @@ func TestAccLBV1Pool_timeout(t *testing.T) {
 	var pool pools.Pool
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDeprecated(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV1PoolDestroy,
+		PreCheck:          func() { testAccPreCheckDeprecated(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV1PoolTimeout,
@@ -112,9 +112,9 @@ func TestAccLBV1Pool_updateMonitor(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDeprecated(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV1PoolDestroy,
+		PreCheck:          func() { testAccPreCheckDeprecated(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV1PoolDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV1PoolUpdateMonitor1,

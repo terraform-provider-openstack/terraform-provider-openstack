@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
@@ -12,12 +13,12 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/members"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceImagesImageV2MemberStatusFromString(v string) images.ImageMemberStatus {
@@ -170,7 +171,7 @@ func resourceImagesImageV2ExpandProperties(v map[string]interface{}) map[string]
 	return properties
 }
 
-func resourceImagesImageV2UpdateComputedAttributes(diff *schema.ResourceDiff, meta interface{}) error {
+func resourceImagesImageV2UpdateComputedAttributes(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	if diff.HasChange("properties") {
 		// Only check if the image has been created.
 		if diff.Id() != "" {

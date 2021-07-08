@@ -5,10 +5,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud/openstack/db/v1/instances"
 	"github.com/gophercloud/gophercloud/openstack/db/v1/users"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccDatabaseV1User_basic(t *testing.T) {
@@ -21,8 +22,8 @@ func TestAccDatabaseV1User_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckDatabase(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDatabaseV1UserDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDatabaseV1UserDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatabaseV1UserBasic(),

@@ -1,17 +1,19 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/users"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceIdentityUserV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIdentityUserV3Read,
+		ReadContext: dataSourceIdentityUserV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -73,11 +75,11 @@ func dataSourceIdentityUserV3() *schema.Resource {
 }
 
 // dataSourceIdentityUserV3Read performs the user lookup.
-func dataSourceIdentityUserV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	enabled := d.Get("enabled").(bool)
@@ -96,30 +98,32 @@ func dataSourceIdentityUserV3Read(d *schema.ResourceData, meta interface{}) erro
 	var user users.User
 	allPages, err := users.List(identityClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query openstack_identity_user_v3: %s", err)
+		return diag.Errorf("Unable to query openstack_identity_user_v3: %s", err)
 	}
 
 	allUsers, err := users.ExtractUsers(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_identity_user_v3: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_identity_user_v3: %s", err)
 	}
 
 	if len(allUsers) < 1 {
-		return fmt.Errorf("Your openstack_identity_user_v3 query returned no results. " +
+		return diag.Errorf("Your openstack_identity_user_v3 query returned no results. " +
 			"Please change your search criteria and try again")
 	}
 
 	if len(allUsers) > 1 {
-		return fmt.Errorf("Your openstack_identity_user_v3 query returned more than one result")
+		return diag.Errorf("Your openstack_identity_user_v3 query returned more than one result")
 	}
 
 	user = allUsers[0]
 
-	return dataSourceIdentityUserV3Attributes(d, &user)
+	dataSourceIdentityUserV3Attributes(d, &user)
+
+	return nil
 }
 
 // dataSourceIdentityUserV3Attributes populates the fields of an User resource.
-func dataSourceIdentityUserV3Attributes(d *schema.ResourceData, user *users.User) error {
+func dataSourceIdentityUserV3Attributes(d *schema.ResourceData, user *users.User) {
 	log.Printf("[DEBUG] openstack_identity_user_v3 details: %#v", user)
 
 	d.SetId(user.ID)
@@ -129,6 +133,4 @@ func dataSourceIdentityUserV3Attributes(d *schema.ResourceData, user *users.User
 	d.Set("enabled", user.Enabled)
 	d.Set("name", user.Name)
 	d.Set("password_expires_at", user.PasswordExpiresAt.Format(time.RFC3339))
-
-	return nil
 }

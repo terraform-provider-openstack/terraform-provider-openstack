@@ -5,10 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/rules"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccFWRuleV1_basic(t *testing.T) {
@@ -20,8 +21,8 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckFW(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWRuleV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckFWRuleV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWRuleV1Basic1,
@@ -158,8 +159,8 @@ func TestAccFWRuleV1_anyProtocol(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckFW(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWRuleV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckFWRuleV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWRuleV1AnyProtocol,
@@ -194,8 +195,8 @@ func TestAccFWRuleV1_updateName(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckFW(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWRuleV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckFWRuleV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWRuleV1UpdateName1,

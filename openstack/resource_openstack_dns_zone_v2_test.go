@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
 )
@@ -22,8 +22,8 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckDNS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2ZoneBasic(zoneName),
@@ -58,8 +58,8 @@ func TestAccDNSV2Zone_ignoreStatusCheck(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckDNS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2ZoneDisableCheck(zoneName),
@@ -91,8 +91,8 @@ func TestAccDNSV2Zone_readTTL(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckDNS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2ZoneReadTTL(zoneName),

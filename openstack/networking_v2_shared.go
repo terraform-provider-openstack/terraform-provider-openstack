@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func networkingV2ReadAttributesTags(d *schema.ResourceData, tags []string) {

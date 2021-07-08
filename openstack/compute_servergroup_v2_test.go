@@ -3,10 +3,11 @@ package openstack
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/servergroups"
 	th "github.com/gophercloud/gophercloud/testhelper"
 	thclient "github.com/gophercloud/gophercloud/testhelper/client"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestComputeServerGroupV2CreateOpts(t *testing.T) {

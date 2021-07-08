@@ -1,24 +1,25 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/rules"
 )
 
 func resourceNetworkingQoSBandwidthLimitRuleV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingQoSBandwidthLimitRuleV2Create,
-		Read:   resourceNetworkingQoSBandwidthLimitRuleV2Read,
-		Update: resourceNetworkingQoSBandwidthLimitRuleV2Update,
-		Delete: resourceNetworkingQoSBandwidthLimitRuleV2Delete,
+		CreateContext: resourceNetworkingQoSBandwidthLimitRuleV2Create,
+		ReadContext:   resourceNetworkingQoSBandwidthLimitRuleV2Read,
+		UpdateContext: resourceNetworkingQoSBandwidthLimitRuleV2Update,
+		DeleteContext: resourceNetworkingQoSBandwidthLimitRuleV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -62,11 +63,11 @@ func resourceNetworkingQoSBandwidthLimitRuleV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingQoSBandwidthLimitRuleV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSBandwidthLimitRuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	createOpts := rules.CreateBandwidthLimitRuleOpts{
@@ -79,7 +80,7 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Create(d *schema.ResourceData, met
 	log.Printf("[DEBUG] openstack_networking_qos_bandwidth_limit_rule_v2 create options: %#v", createOpts)
 	r, err := rules.CreateBandwidthLimitRule(networkingClient, qosPolicyID, createOpts).ExtractBandwidthLimitRule()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_networking_qos_bandwidth_limit_rule_v2: %s", err)
+		return diag.Errorf("Error creating openstack_networking_qos_bandwidth_limit_rule_v2: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for openstack_networking_qos_bandwidth_limit_rule_v2 %s to become available.", r.ID)
@@ -92,9 +93,9 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Create(d *schema.ResourceData, met
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_qos_bandwidth_limit_rule_v2 %s to become available: %s", r.ID, err)
+		return diag.Errorf("Error waiting for openstack_networking_qos_bandwidth_limit_rule_v2 %s to become available: %s", r.ID, err)
 	}
 
 	id := resourceNetworkingQoSRuleV2BuildID(qosPolicyID, r.ID)
@@ -102,24 +103,24 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Create(d *schema.ResourceData, met
 
 	log.Printf("[DEBUG] Created openstack_networking_qos_bandwidth_limit_rule_v2 %s: %#v", id, r)
 
-	return resourceNetworkingQoSBandwidthLimitRuleV2Read(d, meta)
+	return resourceNetworkingQoSBandwidthLimitRuleV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingQoSBandwidthLimitRuleV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSBandwidthLimitRuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
 	if err != nil {
-		return fmt.Errorf("Error reading openstack_networking_qos_bandwidth_limit_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.Errorf("Error reading openstack_networking_qos_bandwidth_limit_rule_v2 ID %s: %s", d.Id(), err)
 	}
 
 	r, err := rules.GetBandwidthLimitRule(networkingClient, qosPolicyID, qosRuleID).ExtractBandwidthLimitRule()
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting openstack_networking_qos_bandwidth_limit_rule_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_qos_bandwidth_limit_rule_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_qos_bandwidth_limit_rule_v2 %s: %#v", d.Id(), r)
@@ -133,16 +134,16 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Read(d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceNetworkingQoSBandwidthLimitRuleV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSBandwidthLimitRuleV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
 	if err != nil {
-		return fmt.Errorf("Error reading openstack_networking_qos_bandwidth_limit_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.Errorf("Error reading openstack_networking_qos_bandwidth_limit_rule_v2 ID %s: %s", d.Id(), err)
 	}
 
 	var hasChange bool
@@ -169,27 +170,27 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Update(d *schema.ResourceData, met
 		log.Printf("[DEBUG] openstack_networking_qos_bandwidth_limit_rule_v2 %s update options: %#v", d.Id(), updateOpts)
 		_, err = rules.UpdateBandwidthLimitRule(networkingClient, qosPolicyID, qosRuleID, updateOpts).ExtractBandwidthLimitRule()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_networking_qos_bandwidth_limit_rule_v2 %s: %s", d.Id(), err)
+			return diag.Errorf("Error updating openstack_networking_qos_bandwidth_limit_rule_v2 %s: %s", d.Id(), err)
 		}
 	}
 
-	return resourceNetworkingQoSBandwidthLimitRuleV2Read(d, meta)
+	return resourceNetworkingQoSBandwidthLimitRuleV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingQoSBandwidthLimitRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSBandwidthLimitRuleV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
 	if err != nil {
-		return fmt.Errorf("Error reading openstack_networking_qos_bandwidth_limit_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.Errorf("Error reading openstack_networking_qos_bandwidth_limit_rule_v2 ID %s: %s", d.Id(), err)
 	}
 
 	if err := rules.DeleteBandwidthLimitRule(networkingClient, qosPolicyID, qosRuleID).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error getting openstack_networking_qos_bandwidth_limit_rule_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_qos_bandwidth_limit_rule_v2"))
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -201,9 +202,9 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Delete(d *schema.ResourceData, met
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_qos_bandwidth_limit_rule_v2 %s to delete: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_networking_qos_bandwidth_limit_rule_v2 %s to Delete:  %s", d.Id(), err)
 	}
 
 	return nil

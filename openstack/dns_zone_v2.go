@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
-	tokens3 "github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 )
 
 // ZoneCreateOpts represents the attributes used when creating a new DNS zone.
@@ -92,25 +92,25 @@ func dnsZoneV2RefreshFunc(dnsClient *gophercloud.ServiceClient, zoneID string) r
 	}
 }
 
-func getProjectFromToken(dnsClient *gophercloud.ServiceClient) (*tokens3.Project, error) {
+func getProjectFromToken(dnsClient *gophercloud.ServiceClient) (*tokens.Project, error) {
 	var (
-		project *tokens3.Project
+		project *tokens.Project
 		err     error
 	)
 	r := dnsClient.ProviderClient.GetAuthResult()
 	switch result := r.(type) {
-	case tokens3.CreateResult:
+	case tokens.CreateResult:
 		project, err = result.ExtractProject()
 		if err != nil {
 			return nil, err
 		}
-	case tokens3.GetResult:
+	case tokens.GetResult:
 		project, err = result.ExtractProject()
 		if err != nil {
 			return nil, err
 		}
 	default:
-		res := tokens3.Get(dnsClient, dnsClient.ProviderClient.TokenID)
+		res := tokens.Get(dnsClient, dnsClient.ProviderClient.TokenID)
 		project, err = res.ExtractProject()
 		if err != nil {
 			return nil, err

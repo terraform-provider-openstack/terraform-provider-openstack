@@ -3,7 +3,7 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDatabaseV1Database_importBasic(t *testing.T) {
@@ -15,8 +15,8 @@ func TestAccDatabaseV1Database_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckDatabase(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDatabaseV1DatabaseDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDatabaseV1DatabaseDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatabaseV1DatabaseBasic(),

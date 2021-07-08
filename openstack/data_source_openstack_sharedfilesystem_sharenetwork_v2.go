@@ -1,17 +1,19 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/sharenetworks"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceSharedFilesystemShareNetworkV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceSharedFilesystemShareNetworkV2Read,
+		ReadContext: dataSourceSharedFilesystemShareNetworkV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -89,11 +91,11 @@ func dataSourceSharedFilesystemShareNetworkV2() *schema.Resource {
 	}
 }
 
-func dataSourceSharedFilesystemShareNetworkV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceSharedFilesystemShareNetworkV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack sharedfilesystem sfsClient: %s", err)
+		return diag.Errorf("Error creating OpenStack sharedfilesystem sfsClient: %s", err)
 	}
 
 	listOpts := sharenetworks.ListOpts{
@@ -115,16 +117,16 @@ func dataSourceSharedFilesystemShareNetworkV2Read(d *schema.ResourceData, meta i
 
 	allPages, err := sharenetworks.ListDetail(sfsClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query share networks: %s", err)
+		return diag.Errorf("Unable to query share networks: %s", err)
 	}
 
 	allShareNetworks, err := sharenetworks.ExtractShareNetworks(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve share networks: %s", err)
+		return diag.Errorf("Unable to retrieve share networks: %s", err)
 	}
 
 	if len(allShareNetworks) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return diag.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
@@ -139,7 +141,7 @@ func dataSourceSharedFilesystemShareNetworkV2Read(d *schema.ResourceData, meta i
 		for _, shareNetwork := range allShareNetworks {
 			tmp, err := resourceSharedFilesystemShareNetworkV2GetSvcByShareNetID(sfsClient, shareNetwork.ID)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if strSliceContains(tmp, securityServiceID) {
 				filteredShareNetworks = append(filteredShareNetworks, shareNetwork)
@@ -148,7 +150,7 @@ func dataSourceSharedFilesystemShareNetworkV2Read(d *schema.ResourceData, meta i
 		}
 
 		if len(filteredShareNetworks) == 0 {
-			return fmt.Errorf("Your query returned no results after the security service ID filter. " +
+			return diag.Errorf("Your query returned no results after the security service ID filter. " +
 				"Please change your search criteria and try again")
 		}
 		allShareNetworks = filteredShareNetworks
@@ -157,7 +159,7 @@ func dataSourceSharedFilesystemShareNetworkV2Read(d *schema.ResourceData, meta i
 	var shareNetwork sharenetworks.ShareNetwork
 	if len(allShareNetworks) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allShareNetworks)
-		return fmt.Errorf("Your query returned more than one result. Please try a more specific search criteria")
+		return diag.Errorf("Your query returned more than one result. Please try a more specific search criteria")
 	}
 	shareNetwork = allShareNetworks[0]
 
@@ -165,7 +167,7 @@ func dataSourceSharedFilesystemShareNetworkV2Read(d *schema.ResourceData, meta i
 	if securityServiceID == "" {
 		securityServiceIDs, err = resourceSharedFilesystemShareNetworkV2GetSvcByShareNetID(sfsClient, shareNetwork.ID)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 

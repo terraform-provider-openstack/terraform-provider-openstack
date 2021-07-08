@@ -3,7 +3,7 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccServiceV2_importBasic(t *testing.T) {
@@ -15,8 +15,8 @@ func TestAccServiceV2_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckVPN(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckServiceV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckServiceV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceV2Basic(),

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 )
@@ -18,8 +18,8 @@ func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2VolumeAttachBasic(),
@@ -39,8 +39,8 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2VolumeAttachDevice(),
@@ -61,8 +61,8 @@ func TestAccComputeV2VolumeAttach_ignore_volume_confirmation(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2VolumeAttachIgnoreVolumeConfirmation(),

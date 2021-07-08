@@ -1,23 +1,25 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/orchestration/v1/stacks"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceOrchestrationStackV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceOrchestrationStackV1Create,
-		Read:   resourceOrchestrationStackV1Read,
-		Update: resourceOrchestrationStackV1Update,
-		Delete: resourceOrchestrationStackV1Delete,
+		CreateContext: resourceOrchestrationStackV1Create,
+		ReadContext:   resourceOrchestrationStackV1Read,
+		UpdateContext: resourceOrchestrationStackV1Update,
+		DeleteContext: resourceOrchestrationStackV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -159,12 +161,12 @@ func resourceOrchestrationStackV1() *schema.Resource {
 	}
 }
 
-func resourceOrchestrationStackV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceOrchestrationStackV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Prepare for create openstack_orchestration_stack_v1")
 	config := meta.(*Config)
 	orchestrationClient, err := config.OrchestrationV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Orchestration client: %s", err)
+		return diag.Errorf("Error creating OpenStack Orchestration client: %s", err)
 	}
 	createOpts := &stacks.CreateOpts{
 		Name:         d.Get("name").(string),
@@ -196,8 +198,8 @@ func resourceOrchestrationStackV1Create(d *schema.ResourceData, meta interface{}
 	log.Printf("[DEBUG] Creating openstack_orchestration_stack_v1")
 	stack, err := stacks.Create(orchestrationClient, createOpts).Extract()
 	if err != nil {
-		log.Printf("[DEBUG] openstack_orchestration_stack_v1 error occurred during create: %s", err)
-		return fmt.Errorf("Error creating openstack_orchestration_stack_v1: %s", err)
+		log.Printf("[DEBUG] openstack_orchestration_stack_v1 error occurred during Create: %s", err)
+		return diag.Errorf("Error creating openstack_orchestration_stack_v1: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -209,9 +211,9 @@ func resourceOrchestrationStackV1Create(d *schema.ResourceData, meta interface{}
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for openstack_orchestration_stack_v1 %s to become ready: %s", stack.ID, err)
 	}
 
@@ -219,20 +221,20 @@ func resourceOrchestrationStackV1Create(d *schema.ResourceData, meta interface{}
 	d.SetId(stack.ID)
 	log.Printf("[INFO] openstack_orchestration_stack_v1 %s create complete", stack.ID)
 
-	return resourceOrchestrationStackV1Read(d, meta)
+	return resourceOrchestrationStackV1Read(ctx, d, meta)
 }
 
-func resourceOrchestrationStackV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceOrchestrationStackV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	orchestrationClient, err := config.OrchestrationV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Orchestration client: %s", err)
+		return diag.Errorf("Error creating OpenStack Orchestration client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Fetch openstack_orchestration_stack_v1 information: %s", d.Id())
 	stack, err := stacks.Find(orchestrationClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_orchestration_stack_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_orchestration_stack_v1"))
 	}
 
 	d.Set("name", stack.Name)
@@ -290,13 +292,13 @@ func resourceOrchestrationStackV1Read(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func resourceOrchestrationStackV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceOrchestrationStackV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Prepare information for update openstack_orchestration_stack_v1")
 
 	config := meta.(*Config)
 	orchestrationClient, err := config.OrchestrationV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Orchestration client: %s", err)
+		return diag.Errorf("Error creating OpenStack Orchestration client: %s", err)
 	}
 
 	updateOpts := &stacks.UpdateOpts{
@@ -323,36 +325,36 @@ func resourceOrchestrationStackV1Update(d *schema.ResourceData, meta interface{}
 
 	stack, err := stacks.Find(orchestrationClient, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Error retrieving openstack_orchestration_stack_v1 %s before update: %s", d.Id(), err)
+		return diag.Errorf("Error retrieving openstack_orchestration_stack_v1 %s before Update:  %s", d.Id(), err)
 	}
 
 	log.Printf("[DEBUG] Updating openstack_orchestration_stack_v1")
 	result := stacks.Update(orchestrationClient, stack.Name, d.Id(), updateOpts)
 	if result.Err != nil {
-		return fmt.Errorf("Error updating openstack_orchestration_stack_v1 %s: %s", d.Id(), result.Err)
+		return diag.Errorf("Error updating openstack_orchestration_stack_v1 %s: %s", d.Id(), result.Err)
 	}
 
 	log.Printf("[INFO] openstack_orchestration_stack_v1 %s update complete", d.Id())
-	return resourceOrchestrationStackV1Read(d, meta)
+	return resourceOrchestrationStackV1Read(ctx, d, meta)
 }
 
-func resourceOrchestrationStackV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceOrchestrationStackV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Prepare for delete openstack_orchestration_stack_v1")
 	config := meta.(*Config)
 	orchestrationClient, err := config.OrchestrationV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Orchestration client: %s", err)
+		return diag.Errorf("Error creating OpenStack Orchestration client: %s", err)
 	}
 
 	stack, err := stacks.Find(orchestrationClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_orchestration_stack_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_orchestration_stack_v1"))
 	}
 
 	if stack.Status != "DELETE_IN_PROGRESS" {
 		log.Printf("[DEBUG] Deleting openstack_orchestration_stack_v1: %s", d.Id())
 		if err := stacks.Delete(orchestrationClient, stack.Name, d.Id()).ExtractErr(); err != nil {
-			return CheckDeleted(d, err, "Error deleting openstack_orchestration_stack_v1")
+			return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_orchestration_stack_v1"))
 		}
 	}
 
@@ -365,9 +367,9 @@ func resourceOrchestrationStackV1Delete(d *schema.ResourceData, meta interface{}
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_orchestration_stack_v1 %s to delete: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_orchestration_stack_v1 %s to Delete:  %s", d.Id(), err)
 	}
 
 	log.Printf("[INFO] openstack_orchestration_stack_v1 %s delete complete", d.Id())

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/trunks"
@@ -21,8 +21,8 @@ func TestAccNetworkingV2Trunk_nosubports(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2TrunkNoSubports,
@@ -48,8 +48,8 @@ func TestAccNetworkingV2Trunk_subports(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2TrunkSubports,
@@ -73,8 +73,8 @@ func TestAccNetworkingV2Trunk_tags(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2TrunkTags1,
@@ -105,8 +105,8 @@ func TestAccNetworkingV2Trunk_trunkUpdateSubports(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2TrunkUpdateSubports1,
@@ -174,8 +174,8 @@ func TestAccNetworkingV2Trunk_computeInstance(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2TrunkComputeInstance,

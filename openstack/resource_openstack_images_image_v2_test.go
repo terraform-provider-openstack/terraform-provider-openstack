@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 )
 
 func TestAccImagesImageV2_basic(t *testing.T) {
@@ -18,8 +18,8 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckImagesImageV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2Basic,
@@ -79,8 +79,8 @@ func TestAccImagesImageV2_name(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckImagesImageV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2Name1,
@@ -110,8 +110,8 @@ func TestAccImagesImageV2_tags(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckImagesImageV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2Tags1,
@@ -153,8 +153,8 @@ func TestAccImagesImageV2_visibility(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckImagesImageV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2Visibility1,
@@ -188,8 +188,8 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckImagesImageV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2Basic,
@@ -256,8 +256,8 @@ func TestAccImagesImageV2_webdownload(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckGlanceImport(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckImagesImageV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2Webdownload,

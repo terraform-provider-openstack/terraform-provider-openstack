@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas/monitors"
 )
@@ -14,9 +14,9 @@ func TestAccLBV1Monitor_basic(t *testing.T) {
 	var monitor monitors.Monitor
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDeprecated(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV1MonitorDestroy,
+		PreCheck:          func() { testAccPreCheckDeprecated(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV1MonitorDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV1MonitorBasic,
@@ -38,9 +38,9 @@ func TestAccLBV1Monitor_timeout(t *testing.T) {
 	var monitor monitors.Monitor
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDeprecated(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV1MonitorDestroy,
+		PreCheck:          func() { testAccPreCheckDeprecated(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV1MonitorDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV1MonitorTimeout,

@@ -1,12 +1,13 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
@@ -15,11 +16,11 @@ import (
 
 func resourceNetworkingRouterInterfaceV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingRouterInterfaceV2Create,
-		Read:   resourceNetworkingRouterInterfaceV2Read,
-		Delete: resourceNetworkingRouterInterfaceV2Delete,
+		CreateContext: resourceNetworkingRouterInterfaceV2Create,
+		ReadContext:   resourceNetworkingRouterInterfaceV2Read,
+		DeleteContext: resourceNetworkingRouterInterfaceV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -58,11 +59,11 @@ func resourceNetworkingRouterInterfaceV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingRouterInterfaceV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterInterfaceV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	createOpts := routers.AddInterfaceOpts{
@@ -73,7 +74,7 @@ func resourceNetworkingRouterInterfaceV2Create(d *schema.ResourceData, meta inte
 	log.Printf("[DEBUG] openstack_networking_router_interface_v2 create options: %#v", createOpts)
 	r, err := routers.AddInterface(networkingClient, d.Get("router_id").(string), createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_networking_router_interface_v2: %s", err)
+		return diag.Errorf("Error creating openstack_networking_router_interface_v2: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for openstack_networking_router_interface_v2 %s to become available", r.PortID)
@@ -87,22 +88,22 @@ func resourceNetworkingRouterInterfaceV2Create(d *schema.ResourceData, meta inte
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_router_interface_v2 %s to become available: %s", r.ID, err)
+		return diag.Errorf("Error waiting for openstack_networking_router_interface_v2 %s to become available: %s", r.ID, err)
 	}
 
 	d.SetId(r.PortID)
 
 	log.Printf("[DEBUG] Created openstack_networking_router_interface_v2 %s: %#v", r.ID, r)
-	return resourceNetworkingRouterInterfaceV2Read(d, meta)
+	return resourceNetworkingRouterInterfaceV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingRouterInterfaceV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterInterfaceV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	r, err := ports.Get(networkingClient, d.Id()).Extract()
@@ -112,7 +113,7 @@ func resourceNetworkingRouterInterfaceV2Read(d *schema.ResourceData, meta interf
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving openstack_networking_router_interface_v2: %s", err)
+		return diag.Errorf("Error retrieving openstack_networking_router_interface_v2: %s", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_router_interface_v2 %s: %#v", d.Id(), r)
@@ -135,11 +136,11 @@ func resourceNetworkingRouterInterfaceV2Read(d *schema.ResourceData, meta interf
 	return nil
 }
 
-func resourceNetworkingRouterInterfaceV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterInterfaceV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -151,9 +152,9 @@ func resourceNetworkingRouterInterfaceV2Delete(d *schema.ResourceData, meta inte
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_router_interface_v2 %s to delete: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_networking_router_interface_v2 %s to Delete:  %s", d.Id(), err)
 	}
 
 	d.SetId("")

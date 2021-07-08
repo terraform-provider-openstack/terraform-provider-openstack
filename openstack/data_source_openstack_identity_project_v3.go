@@ -1,10 +1,11 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/users"
@@ -12,7 +13,7 @@ import (
 
 func dataSourceIdentityProjectV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIdentityProjectV3Read,
+		ReadContext: dataSourceIdentityProjectV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -76,12 +77,12 @@ func filterProjects(allProjects []projects.Project, listOpts projects.ListOpts) 
 }
 
 // dataSourceIdentityProjectV3Read performs the project lookup.
-func dataSourceIdentityProjectV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	enabled := d.Get("enabled").(bool)
@@ -103,43 +104,45 @@ func dataSourceIdentityProjectV3Read(d *schema.ResourceData, meta interface{}) e
 		if userID == "" {
 			tokenInfo, tokenErr := getTokenInfo(identityClient)
 			if tokenErr != nil {
-				return fmt.Errorf("Error when getting token info: %s", err)
+				return diag.Errorf("Error when getting token info: %s", err)
 			}
 			userID = tokenInfo.userID
 		}
 		// Search for all the projects using the users.ListProjects API call and filter them
 		allPages, err = users.ListProjects(identityClient, userID).AllPages()
 		if err != nil {
-			return fmt.Errorf("Unable to query openstack_identity_project_v3: %s", err)
+			return diag.Errorf("Unable to query openstack_identity_project_v3: %s", err)
 		}
 		allProjects, err = projects.ExtractProjects(allPages)
 		if err != nil {
-			return fmt.Errorf("Unable to retrieve openstack_identity_project_v3: %s", err)
+			return diag.Errorf("Unable to retrieve openstack_identity_project_v3: %s", err)
 		}
 		allProjects = filterProjects(allProjects, listOpts)
 	} else {
 		allProjects, err = projects.ExtractProjects(allPages)
 		if err != nil {
-			return fmt.Errorf("Unable to retrieve openstack_identity_project_v3: %s", err)
+			return diag.Errorf("Unable to retrieve openstack_identity_project_v3: %s", err)
 		}
 	}
 
 	if len(allProjects) < 1 {
-		return fmt.Errorf("Your openstack_identity_project_v3 query returned no results. " +
+		return diag.Errorf("Your openstack_identity_project_v3 query returned no results. " +
 			"Please change your search criteria and try again")
 	}
 
 	if len(allProjects) > 1 {
-		return fmt.Errorf("Your openstack_identity_project_v3 query returned more than one result %#v", allProjects)
+		return diag.Errorf("Your openstack_identity_project_v3 query returned more than one result %#v", allProjects)
 	}
 
 	project = allProjects[0]
 
-	return dataSourceIdentityProjectV3Attributes(d, &project)
+	dataSourceIdentityProjectV3Attributes(d, &project)
+
+	return nil
 }
 
 // dataSourceIdentityProjectV3Attributes populates the fields of an Project resource.
-func dataSourceIdentityProjectV3Attributes(d *schema.ResourceData, project *projects.Project) error {
+func dataSourceIdentityProjectV3Attributes(d *schema.ResourceData, project *projects.Project) {
 	log.Printf("[DEBUG] openstack_identity_project_v3 details: %#v", project)
 
 	d.SetId(project.ID)
@@ -150,6 +153,4 @@ func dataSourceIdentityProjectV3Attributes(d *schema.ResourceData, project *proj
 	d.Set("name", project.Name)
 	d.Set("parent_id", project.ParentID)
 	d.Set("tags", project.Tags)
-
-	return nil
 }

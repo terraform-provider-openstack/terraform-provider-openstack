@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumetypes"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccBlockStorageVolumeTypeV3_basic(t *testing.T) {
@@ -17,8 +18,8 @@ func TestAccBlockStorageVolumeTypeV3_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageVolumeTypeV3Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageVolumeTypeV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageVolumeTypeV3Basic,

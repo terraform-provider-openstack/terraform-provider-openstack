@@ -1,12 +1,13 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
@@ -18,7 +19,7 @@ import (
 
 func dataSourceNetworkingNetworkV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNetworkingNetworkV2Read,
+		ReadContext: dataSourceNetworkingNetworkV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -116,11 +117,11 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	// Prepare basic listOpts.
@@ -172,25 +173,25 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 
 	pages, err := networks.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// First extract into a normal networks.Network in order to see if
 	// there were any results at all.
 	tmpAllNetworks, err := networks.ExtractNetworks(pages)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if len(tmpAllNetworks) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return diag.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	var allNetworks []networkExtended
 	err = networks.ExtractNetworksInto(pages, &allNetworks)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_networking_networks_v2: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_networking_networks_v2: %s", err)
 	}
 
 	var refinedNetworks []networkExtended
@@ -202,7 +203,7 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 					if _, ok := err.(gophercloud.ErrDefault404); ok {
 						continue
 					}
-					return fmt.Errorf("Unable to retrieve openstack_networking_network_v2 subnet: %s", err)
+					return diag.Errorf("Unable to retrieve openstack_networking_network_v2 subnet: %s", err)
 				}
 				if cidr == subnet.CIDR {
 					refinedNetworks = append(refinedNetworks, n)
@@ -214,12 +215,12 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	}
 
 	if len(refinedNetworks) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return diag.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedNetworks) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return diag.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

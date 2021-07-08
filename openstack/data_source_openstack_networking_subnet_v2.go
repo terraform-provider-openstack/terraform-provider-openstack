@@ -1,19 +1,20 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
 
 func dataSourceNetworkingSubnetV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNetworkingSubnetV2Read,
+		ReadContext: dataSourceNetworkingSubnetV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -173,11 +174,11 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	listOpts := subnets.ListOpts{}
@@ -243,21 +244,21 @@ func dataSourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) 
 
 	pages, err := subnets.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_networking_subnet_v2: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_networking_subnet_v2: %s", err)
 	}
 
 	allSubnets, err := subnets.ExtractSubnets(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to extract openstack_networking_subnet_v2: %s", err)
+		return diag.Errorf("Unable to extract openstack_networking_subnet_v2: %s", err)
 	}
 
 	if len(allSubnets) < 1 {
-		return fmt.Errorf("Your query returned no openstack_networking_subnet_v2. " +
+		return diag.Errorf("Your query returned no openstack_networking_subnet_v2. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allSubnets) > 1 {
-		return fmt.Errorf("Your query returned more than one openstack_networking_subnet_v2." +
+		return diag.Errorf("Your query returned more than one openstack_networking_subnet_v2." +
 			" Please try a more specific search criteria")
 	}
 

@@ -3,8 +3,9 @@ package openstack
 import (
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions"
 )
 
 func TestExpandBlockStorageV2AttachMode(t *testing.T) {

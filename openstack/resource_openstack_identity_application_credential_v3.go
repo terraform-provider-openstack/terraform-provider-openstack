@@ -1,12 +1,13 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/applicationcredentials"
@@ -14,11 +15,11 @@ import (
 
 func resourceIdentityApplicationCredentialV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIdentityApplicationCredentialV3Create,
-		Read:   resourceIdentityApplicationCredentialV3Read,
-		Delete: resourceIdentityApplicationCredentialV3Delete,
+		CreateContext: resourceIdentityApplicationCredentialV3Create,
+		ReadContext:   resourceIdentityApplicationCredentialV3Read,
+		DeleteContext: resourceIdentityApplicationCredentialV3Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -109,22 +110,22 @@ func resourceIdentityApplicationCredentialV3() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.ValidateRFC3339TimeString,
+				ValidateFunc: validation.IsRFC3339Time,
 			},
 		},
 	}
 }
 
-func resourceIdentityApplicationCredentialV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityApplicationCredentialV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	tokenInfo, err := getTokenInfo(identityClient)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var expiresAt *time.Time
@@ -148,9 +149,9 @@ func resourceIdentityApplicationCredentialV3Create(d *schema.ResourceData, meta 
 	applicationCredential, err := applicationcredentials.Create(identityClient, tokenInfo.userID, createOpts).Extract()
 	if err != nil {
 		if v, ok := err.(gophercloud.ErrDefault404); ok {
-			return fmt.Errorf("Error creating openstack_identity_application_credential_v3: %s", v.ErrUnexpectedResponseCode.Body)
+			return diag.Errorf("Error creating openstack_identity_application_credential_v3: %s", v.ErrUnexpectedResponseCode.Body)
 		}
-		return fmt.Errorf("Error creating openstack_identity_application_credential_v3: %s", err)
+		return diag.Errorf("Error creating openstack_identity_application_credential_v3: %s", err)
 	}
 
 	d.SetId(applicationCredential.ID)
@@ -158,24 +159,24 @@ func resourceIdentityApplicationCredentialV3Create(d *schema.ResourceData, meta 
 	// Secret is returned only once
 	d.Set("secret", applicationCredential.Secret)
 
-	return resourceIdentityApplicationCredentialV3Read(d, meta)
+	return resourceIdentityApplicationCredentialV3Read(ctx, d, meta)
 }
 
-func resourceIdentityApplicationCredentialV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityApplicationCredentialV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	tokenInfo, err := getTokenInfo(identityClient)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	applicationCredential, err := applicationcredentials.Get(identityClient, tokenInfo.userID, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_identity_application_credential_v3")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_identity_application_credential_v3"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_identity_application_credential_v3 %s: %#v", d.Id(), applicationCredential)
@@ -197,27 +198,27 @@ func resourceIdentityApplicationCredentialV3Read(d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceIdentityApplicationCredentialV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityApplicationCredentialV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	tokenInfo, err := getTokenInfo(identityClient)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	err = applicationcredentials.Delete(identityClient, tokenInfo.userID, d.Id()).ExtractErr()
 	if err != nil {
 		err = CheckDeleted(d, err, "Error deleting openstack_identity_application_credential_v3")
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	// cleanup access rules
 	accessRules := expandIdentityApplicationCredentialAccessRulesV3(d.Get("access_rules").(*schema.Set).List())
-	return applicationCredentialCleanupAccessRulesV3(identityClient, tokenInfo.userID, d.Id(), accessRules)
+	return diag.FromErr(applicationCredentialCleanupAccessRulesV3(identityClient, tokenInfo.userID, d.Id(), accessRules))
 }

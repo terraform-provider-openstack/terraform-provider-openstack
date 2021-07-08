@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
 )
@@ -20,8 +20,8 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2L7PolicyDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2L7PolicyDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLbV2L7PolicyConfigBasic(),

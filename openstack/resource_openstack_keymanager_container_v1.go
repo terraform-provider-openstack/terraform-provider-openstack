@@ -1,27 +1,29 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/acls"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/containers"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func resourceKeyManagerContainerV1() *schema.Resource {
 	ret := &schema.Resource{
-		Create: resourceKeyManagerContainerV1Create,
-		Read:   resourceKeyManagerContainerV1Read,
-		Update: resourceKeyManagerContainerV1Update,
-		Delete: resourceKeyManagerContainerV1Delete,
+		CreateContext: resourceKeyManagerContainerV1Create,
+		ReadContext:   resourceKeyManagerContainerV1Read,
+		UpdateContext: resourceKeyManagerContainerV1Update,
+		DeleteContext: resourceKeyManagerContainerV1Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -132,11 +134,11 @@ func resourceKeyManagerContainerV1() *schema.Resource {
 	return ret
 }
 
-func resourceKeyManagerContainerV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceKeyManagerContainerV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	kmClient, err := config.KeyManagerV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
+		return diag.Errorf("Error creating OpenStack KeyManager client: %s", err)
 	}
 
 	containerType := keyManagerContainerV1Type(d.Get("type").(string))
@@ -151,7 +153,7 @@ func resourceKeyManagerContainerV1Create(d *schema.ResourceData, meta interface{
 
 	container, err := containers.Create(kmClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_keymanager_container_v1: %s", err)
+		return diag.Errorf("Error creating openstack_keymanager_container_v1: %s", err)
 	}
 
 	uuid := keyManagerContainerV1GetUUIDfromContainerRef(container.ContainerRef)
@@ -165,9 +167,9 @@ func resourceKeyManagerContainerV1Create(d *schema.ResourceData, meta interface{
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_keymanager_container_v1: %s", err)
+		return diag.Errorf("Error waiting for openstack_keymanager_container_v1: %s", err)
 	}
 
 	d.SetId(uuid)
@@ -179,30 +181,30 @@ func resourceKeyManagerContainerV1Create(d *schema.ResourceData, meta interface{
 		setOpts := expandKeyManagerV1ACLs(d.Get("acl"))
 		_, err = acls.SetContainerACL(kmClient, uuid, setOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error settings ACLs for the openstack_keymanager_container_v1: %s", err)
+			return diag.Errorf("Error settings ACLs for the openstack_keymanager_container_v1: %s", err)
 		}
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_keymanager_container_v1: %s", err)
+		return diag.Errorf("Error waiting for openstack_keymanager_container_v1: %s", err)
 	}
 
 	d.Partial(false)
 
-	return resourceKeyManagerContainerV1Read(d, meta)
+	return resourceKeyManagerContainerV1Read(ctx, d, meta)
 }
 
-func resourceKeyManagerContainerV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceKeyManagerContainerV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	kmClient, err := config.KeyManagerV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack barbican client: %s", err)
+		return diag.Errorf("Error creating OpenStack barbican client: %s", err)
 	}
 
 	container, err := containers.Get(kmClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_keymanager_container_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_keymanager_container_v1"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_keymanager_container_v1 %s: %#v", d.Id(), container)
@@ -231,18 +233,18 @@ func resourceKeyManagerContainerV1Read(d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func resourceKeyManagerContainerV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceKeyManagerContainerV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	kmClient, err := config.KeyManagerV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack barbican client: %s", err)
+		return diag.Errorf("Error creating OpenStack barbican client: %s", err)
 	}
 
 	if d.HasChange("acl") {
 		updateOpts := expandKeyManagerV1ACLs(d.Get("acl"))
 		_, err := acls.UpdateContainerACL(kmClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_keymanager_container_v1 %s acl: %s", d.Id(), err)
+			return diag.Errorf("Error updating openstack_keymanager_container_v1 %s acl: %s", d.Id(), err)
 		}
 	}
 
@@ -258,7 +260,7 @@ func resourceKeyManagerContainerV1Update(d *schema.ResourceData, meta interface{
 			res := containers.DeleteSecretRef(kmClient, d.Id(), delRef)
 			if res.Err != nil {
 				if _, ok := res.Err.(gophercloud.ErrDefault404); !ok {
-					return fmt.Errorf("Error removing old %s secret reference from the %s container: %s", delRef.Name, d.Id(), res.Err)
+					return diag.Errorf("Error removing old %s secret reference from the %s container: %s", delRef.Name, d.Id(), res.Err)
 				}
 			}
 		}
@@ -267,19 +269,19 @@ func resourceKeyManagerContainerV1Update(d *schema.ResourceData, meta interface{
 		for _, addRef := range expandKeyManagerContainerV1SecretRefs(addRefs) {
 			res := containers.CreateSecretRef(kmClient, d.Id(), addRef)
 			if res.Err != nil {
-				return fmt.Errorf("Error adding new %s secret reference to the %s container: %s", addRef.Name, d.Id(), res.Err)
+				return diag.Errorf("Error adding new %s secret reference to the %s container: %s", addRef.Name, d.Id(), res.Err)
 			}
 		}
 	}
 
-	return resourceKeyManagerContainerV1Read(d, meta)
+	return resourceKeyManagerContainerV1Read(ctx, d, meta)
 }
 
-func resourceKeyManagerContainerV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceKeyManagerContainerV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	kmClient, err := config.KeyManagerV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack barbican client: %s", err)
+		return diag.Errorf("Error creating OpenStack barbican client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -291,8 +293,8 @@ func resourceKeyManagerContainerV1Delete(d *schema.ResourceData, meta interface{
 		MinTimeout: 2 * time.Second,
 	}
 
-	if _, err = stateConf.WaitForState(); err != nil {
-		return err
+	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil

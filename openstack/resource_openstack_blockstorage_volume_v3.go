@@ -1,28 +1,29 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceBlockStorageVolumeV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceBlockStorageVolumeV3Create,
-		Read:   resourceBlockStorageVolumeV3Read,
-		Update: resourceBlockStorageVolumeV3Update,
-		Delete: resourceBlockStorageVolumeV3Delete,
+		CreateContext: resourceBlockStorageVolumeV3Create,
+		ReadContext:   resourceBlockStorageVolumeV3Read,
+		UpdateContext: resourceBlockStorageVolumeV3Update,
+		DeleteContext: resourceBlockStorageVolumeV3Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -178,11 +179,11 @@ func resourceBlockStorageVolumeV3() *schema.Resource {
 	}
 }
 
-func resourceBlockStorageVolumeV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageVolumeV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	metadata := d.Get("metadata").(map[string]interface{})
@@ -218,7 +219,7 @@ func resourceBlockStorageVolumeV3Create(d *schema.ResourceData, meta interface{}
 
 	v, err := volumes.Create(blockStorageClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_blockstorage_volume_v3: %s", err)
+		return diag.Errorf("Error creating openstack_blockstorage_volume_v3: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -230,27 +231,27 @@ func resourceBlockStorageVolumeV3Create(d *schema.ResourceData, meta interface{}
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for openstack_blockstorage_volume_v3 %s to become ready: %s", v.ID, err)
 	}
 
 	d.SetId(v.ID)
 
-	return resourceBlockStorageVolumeV3Read(d, meta)
+	return resourceBlockStorageVolumeV3Read(ctx, d, meta)
 }
 
-func resourceBlockStorageVolumeV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageVolumeV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	v, err := volumes.Get(blockStorageClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_blockstorage_volume_v3")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_blockstorage_volume_v3"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_blockstorage_volume_v3 %s: %#v", d.Id(), v)
@@ -275,11 +276,11 @@ func resourceBlockStorageVolumeV3Read(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func resourceBlockStorageVolumeV3Update(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageVolumeV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	name := d.Get("name").(string)
@@ -298,12 +299,12 @@ func resourceBlockStorageVolumeV3Update(d *schema.ResourceData, meta interface{}
 	if d.HasChange("size") {
 		v, err = volumes.Get(blockStorageClient, d.Id()).Extract()
 		if err != nil {
-			return fmt.Errorf("Error extending openstack_blockstorage_volume_v3 %s: %s", d.Id(), err)
+			return diag.Errorf("Error extending openstack_blockstorage_volume_v3 %s: %s", d.Id(), err)
 		}
 
 		if v.Status == "in-use" {
 			if v, ok := d.Get("enable_online_resize").(bool); ok && !v {
-				return fmt.Errorf(
+				return diag.Errorf(
 					`Error extending openstack_blockstorage_volume_v3 %s,
 					volume is attached to the instance and
 					resizing online is disabled,
@@ -319,7 +320,7 @@ func resourceBlockStorageVolumeV3Update(d *schema.ResourceData, meta interface{}
 
 		err = volumeactions.ExtendSize(blockStorageClient, d.Id(), extendOpts).ExtractErr()
 		if err != nil {
-			return fmt.Errorf("Error extending openstack_blockstorage_volume_v3 %s size: %s", d.Id(), err)
+			return diag.Errorf("Error extending openstack_blockstorage_volume_v3 %s size: %s", d.Id(), err)
 		}
 
 		stateConf := &resource.StateChangeConf{
@@ -331,38 +332,38 @@ func resourceBlockStorageVolumeV3Update(d *schema.ResourceData, meta interface{}
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err := stateConf.WaitForState()
+		_, err := stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return fmt.Errorf(
+			return diag.Errorf(
 				"Error waiting for openstack_blockstorage_volume_v3 %s to become ready: %s", d.Id(), err)
 		}
 	}
 
 	_, err = volumes.Update(blockStorageClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating openstack_blockstorage_volume_v3 %s: %s", d.Id(), err)
+		return diag.Errorf("Error updating openstack_blockstorage_volume_v3 %s: %s", d.Id(), err)
 	}
 
-	return resourceBlockStorageVolumeV3Read(d, meta)
+	return resourceBlockStorageVolumeV3Read(ctx, d, meta)
 }
 
-func resourceBlockStorageVolumeV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageVolumeV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	v, err := volumes.Get(blockStorageClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_blockstorage_volume_v3")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_blockstorage_volume_v3"))
 	}
 
 	// make sure this volume is detached from all instances before deleting
 	if len(v.Attachments) > 0 {
 		computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+			return diag.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
 		for _, volumeAttachment := range v.Attachments {
@@ -384,7 +385,7 @@ func resourceBlockStorageVolumeV3Delete(d *schema.ResourceData, meta interface{}
 					continue
 				}
 
-				return fmt.Errorf(
+				return diag.Errorf(
 					"Error detaching openstack_blockstorage_volume_v3 %s from %s: %s", d.Id(), serverID, err)
 			}
 		}
@@ -398,9 +399,9 @@ func resourceBlockStorageVolumeV3Delete(d *schema.ResourceData, meta interface{}
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return fmt.Errorf(
+			return diag.Errorf(
 				"Error waiting for openstack_blockstorage_volume_v3 %s to become available: %s", d.Id(), err)
 		}
 	}
@@ -410,7 +411,7 @@ func resourceBlockStorageVolumeV3Delete(d *schema.ResourceData, meta interface{}
 	// If this is true, just move on. It'll eventually delete.
 	if v.Status != "deleting" {
 		if err := volumes.Delete(blockStorageClient, d.Id(), nil).ExtractErr(); err != nil {
-			return CheckDeleted(d, err, "Error deleting openstack_blockstorage_volume_v3")
+			return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_blockstorage_volume_v3"))
 		}
 	}
 
@@ -423,9 +424,9 @@ func resourceBlockStorageVolumeV3Delete(d *schema.ResourceData, meta interface{}
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_blockstorage_volume_v3 %s to delete: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_blockstorage_volume_v3 %s to Delete:  %s", d.Id(), err)
 	}
 
 	return nil

@@ -3,8 +3,9 @@ package openstack
 import (
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccNetworkingQuotaV2_basic(t *testing.T) {
@@ -15,8 +16,8 @@ func TestAccNetworkingQuotaV2_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIdentityV3ProjectDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckIdentityV3ProjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingQuotaV2Basic,

@@ -1,24 +1,26 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/orders"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func resourceKeyManagerOrderV1() *schema.Resource {
 	ret := &schema.Resource{
-		Create: resourceKeyManagerOrderV1Create,
-		Read:   resourceKeyManagerOrderV1Read,
-		Delete: resourceKeyManagerOrderV1Delete,
+		CreateContext: resourceKeyManagerOrderV1Create,
+		ReadContext:   resourceKeyManagerOrderV1Read,
+		DeleteContext: resourceKeyManagerOrderV1Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -49,7 +51,7 @@ func resourceKeyManagerOrderV1() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ForceNew:     true,
-							ValidateFunc: validation.ValidateRFC3339TimeString,
+							ValidateFunc: validation.IsRFC3339Time,
 						},
 						"mode": {
 							Type:     schema.TypeString,
@@ -128,11 +130,11 @@ func resourceKeyManagerOrderV1() *schema.Resource {
 	return ret
 }
 
-func resourceKeyManagerOrderV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceKeyManagerOrderV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	kmClient, err := config.KeyManagerV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
+		return diag.Errorf("Error creating OpenStack KeyManager client: %s", err)
 	}
 
 	orderType := keyManagerOrderV1OrderType(d.Get("type").(string))
@@ -147,7 +149,7 @@ func resourceKeyManagerOrderV1Create(d *schema.ResourceData, meta interface{}) e
 	var order *orders.Order
 	order, err = orders.Create(kmClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_keymanager_order_v1: %s", err)
+		return diag.Errorf("Error creating openstack_keymanager_order_v1: %s", err)
 	}
 
 	uuid := keyManagerOrderV1GetUUIDfromOrderRef(order.OrderRef)
@@ -161,26 +163,26 @@ func resourceKeyManagerOrderV1Create(d *schema.ResourceData, meta interface{}) e
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_keymanager_order_v1: %s", err)
+		return diag.Errorf("Error waiting for openstack_keymanager_order_v1: %s", err)
 	}
 
 	d.SetId(uuid)
 
-	return resourceKeyManagerOrderV1Read(d, meta)
+	return resourceKeyManagerOrderV1Read(ctx, d, meta)
 }
 
-func resourceKeyManagerOrderV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceKeyManagerOrderV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	kmClient, err := config.KeyManagerV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack barbican client: %s", err)
+		return diag.Errorf("Error creating OpenStack barbican client: %s", err)
 	}
 
 	order, err := orders.Get(kmClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_keymanager_order_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_keymanager_order_v1"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_keymanager_order_v1 %s: %#v", d.Id(), order)
@@ -196,17 +198,17 @@ func resourceKeyManagerOrderV1Read(d *schema.ResourceData, meta interface{}) err
 	d.Set("type", order.Type)
 	d.Set("updated", order.Updated.Format(time.RFC3339))
 	if err := d.Set("meta", flattenKeyManagerOrderV1Meta(order.Meta)); err != nil {
-		return fmt.Errorf("error setting meta for resource %s: %s", d.Id(), err)
+		return diag.Errorf("error setting meta for resource %s: %s", d.Id(), err)
 	}
 
 	return nil
 }
 
-func resourceKeyManagerOrderV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceKeyManagerOrderV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	kmClient, err := config.KeyManagerV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack barbican client: %s", err)
+		return diag.Errorf("Error creating OpenStack barbican client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -218,8 +220,8 @@ func resourceKeyManagerOrderV1Delete(d *schema.ResourceData, meta interface{}) e
 		MinTimeout: 2 * time.Second,
 	}
 
-	if _, err = stateConf.WaitForState(); err != nil {
-		return err
+	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil

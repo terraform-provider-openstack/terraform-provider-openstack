@@ -1,14 +1,15 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/terraform-provider-openstack/terraform-provider-openstack/openstack/internal/pathorcontents"
 
 	"github.com/gophercloud/utils/terraform/auth"
 	"github.com/gophercloud/utils/terraform/mutexkv"
@@ -47,13 +48,17 @@ var (
 	osBlockStorageV2             = os.Getenv("OS_BLOCKSTORAGE_V2")
 )
 
-var testAccProviders map[string]terraform.ResourceProvider
-var testAccProvider *schema.Provider
+var (
+	testAccProviders map[string]func() (*schema.Provider, error)
+	testAccProvider  *schema.Provider
+)
 
 func init() {
-	testAccProvider = Provider().(*schema.Provider)
-	testAccProviders = map[string]terraform.ResourceProvider{
-		"openstack": testAccProvider,
+	testAccProvider = Provider()
+	testAccProviders = map[string]func() (*schema.Provider, error){
+		"openstack": func() (*schema.Provider, error) {
+			return testAccProvider, nil
+		},
 	}
 }
 
@@ -256,13 +261,9 @@ func testAccPreCheckHypervisor(t *testing.T) {
 }
 
 func TestProvider(t *testing.T) {
-	if err := Provider().(*schema.Provider).InternalValidate(); err != nil {
+	if err := Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
-}
-
-func TestProvider_impl(t *testing.T) {
-	var _ terraform.ResourceProvider = Provider()
 }
 
 // Steps for configuring OpenStack with SSL validation are here:
@@ -287,9 +288,9 @@ func TestAccProvider_caCertFile(t *testing.T) {
 		"cacert_file": caFile,
 	}
 
-	err = p.Configure(terraform.NewResourceConfigRaw(raw))
-	if err != nil {
-		t.Fatalf("Unexpected err when specifying OpenStack CA by file: %s", err)
+	diag := p.Configure(context.Background(), terraform.NewResourceConfigRaw(raw))
+	if diag != nil {
+		t.Fatalf("Unexpected err when specifying OpenStack CA by file: %v", diag)
 	}
 }
 
@@ -311,9 +312,9 @@ func TestAccProvider_caCertString(t *testing.T) {
 		"cacert_file": caContents,
 	}
 
-	err = p.Configure(terraform.NewResourceConfigRaw(raw))
-	if err != nil {
-		t.Fatalf("Unexpected err when specifying OpenStack CA by string: %s", err)
+	diag := p.Configure(context.Background(), terraform.NewResourceConfigRaw(raw))
+	if diag != nil {
+		t.Fatalf("Unexpected err when specifying OpenStack CA by string: %v", diag)
 	}
 }
 
@@ -343,9 +344,9 @@ func TestAccProvider_clientCertFile(t *testing.T) {
 		"key":  keyFile,
 	}
 
-	err = p.Configure(terraform.NewResourceConfigRaw(raw))
-	if err != nil {
-		t.Fatalf("Unexpected err when specifying OpenStack Client keypair by file: %s", err)
+	diag := p.Configure(context.Background(), terraform.NewResourceConfigRaw(raw))
+	if diag != nil {
+		t.Fatalf("Unexpected err when specifying OpenStack Client keypair by file: %v", diag)
 	}
 }
 
@@ -373,9 +374,9 @@ func TestAccProvider_clientCertString(t *testing.T) {
 		"key":  keyContents,
 	}
 
-	err = p.Configure(terraform.NewResourceConfigRaw(raw))
-	if err != nil {
-		t.Fatalf("Unexpected err when specifying OpenStack Client keypair by contents: %s", err)
+	diag := p.Configure(context.Background(), terraform.NewResourceConfigRaw(raw))
+	if diag != nil {
+		t.Fatalf("Unexpected err when specifying OpenStack Client keypair by contents: %v", diag)
 	}
 }
 

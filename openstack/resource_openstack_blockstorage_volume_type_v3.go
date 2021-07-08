@@ -1,21 +1,24 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumetypes"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceBlockStorageVolumeTypeV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceBlockStorageVolumeTypeV3Create,
-		Read:   resourceBlockStorageVolumeTypeV3Read,
-		Update: resourceBlockStorageVolumeTypeV3Update,
-		Delete: resourceBlockStorageVolumeTypeV3Delete,
+		CreateContext: resourceBlockStorageVolumeTypeV3Create,
+		ReadContext:   resourceBlockStorageVolumeTypeV3Read,
+		UpdateContext: resourceBlockStorageVolumeTypeV3Update,
+		DeleteContext: resourceBlockStorageVolumeTypeV3Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -52,11 +55,11 @@ func resourceBlockStorageVolumeTypeV3() *schema.Resource {
 	}
 }
 
-func resourceBlockStorageVolumeTypeV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageVolumeTypeV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	name := d.Get("name").(string)
@@ -73,24 +76,24 @@ func resourceBlockStorageVolumeTypeV3Create(d *schema.ResourceData, meta interfa
 	log.Printf("[DEBUG] openstack_blockstorage_volume_type_v3 create options: %#v", createOpts)
 	vt, err := volumetypes.Create(blockStorageClient, &createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_blockstorage_volume_type_v3 %s: %s", name, err)
+		return diag.Errorf("Error creating openstack_blockstorage_volume_type_v3 %s: %s", name, err)
 	}
 
 	d.SetId(vt.ID)
 
-	return resourceBlockStorageVolumeTypeV3Read(d, meta)
+	return resourceBlockStorageVolumeTypeV3Read(ctx, d, meta)
 }
 
-func resourceBlockStorageVolumeTypeV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageVolumeTypeV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	vt, err := volumetypes.Get(blockStorageClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_blockstorage_volume_type_v3")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_blockstorage_volume_type_v3"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_blockstorage_volume_type_v3 %s: %#v", d.Id(), vt)
@@ -102,7 +105,7 @@ func resourceBlockStorageVolumeTypeV3Read(d *schema.ResourceData, meta interface
 
 	es, err := volumetypes.ListExtraSpecs(blockStorageClient, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Error reading extra_specs for openstack_blockstorage_volume_type_v3 %s: %s", d.Id(), err)
+		return diag.Errorf("Error reading extra_specs for openstack_blockstorage_volume_type_v3 %s: %s", d.Id(), err)
 	}
 
 	if err := d.Set("extra_specs", es); err != nil {
@@ -112,11 +115,11 @@ func resourceBlockStorageVolumeTypeV3Read(d *schema.ResourceData, meta interface
 	return nil
 }
 
-func resourceBlockStorageVolumeTypeV3Update(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageVolumeTypeV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	hasChange := false
@@ -143,7 +146,7 @@ func resourceBlockStorageVolumeTypeV3Update(d *schema.ResourceData, meta interfa
 	if hasChange {
 		_, err = volumetypes.Update(blockStorageClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_blockstorage_volume_type_v3 %s: %s", d.Id(), err)
+			return diag.Errorf("Error updating openstack_blockstorage_volume_type_v3 %s: %s", d.Id(), err)
 		}
 	}
 
@@ -153,7 +156,7 @@ func resourceBlockStorageVolumeTypeV3Update(d *schema.ResourceData, meta interfa
 		// Delete all old extra specs.
 		for oldKey := range oldES.(map[string]interface{}) {
 			if err := volumetypes.DeleteExtraSpec(blockStorageClient, d.Id(), oldKey).ExtractErr(); err != nil {
-				return fmt.Errorf("Error deleting extra_spec %s from openstack_blockstorage_volume_type_v3 %s: %s", oldKey, d.Id(), err)
+				return diag.Errorf("Error deleting extra_spec %s from openstack_blockstorage_volume_type_v3 %s: %s", oldKey, d.Id(), err)
 			}
 		}
 
@@ -164,24 +167,24 @@ func resourceBlockStorageVolumeTypeV3Update(d *schema.ResourceData, meta interfa
 
 			_, err := volumetypes.CreateExtraSpecs(blockStorageClient, d.Id(), extraSpecs).Extract()
 			if err != nil {
-				return fmt.Errorf("Error creating extra_specs for openstack_blockstorage_volume_type_v3 %s: %s", d.Id(), err)
+				return diag.Errorf("Error creating extra_specs for openstack_blockstorage_volume_type_v3 %s: %s", d.Id(), err)
 			}
 		}
 	}
 
-	return resourceBlockStorageVolumeTypeV3Read(d, meta)
+	return resourceBlockStorageVolumeTypeV3Read(ctx, d, meta)
 }
 
-func resourceBlockStorageVolumeTypeV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageVolumeTypeV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	err = volumetypes.Delete(blockStorageClient, d.Id()).ExtractErr()
 	if err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_blockstorage_volume_type_v3")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_blockstorage_volume_type_v3"))
 	}
 
 	return nil

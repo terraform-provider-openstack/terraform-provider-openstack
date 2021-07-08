@@ -1,23 +1,25 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/attachinterfaces"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/attachinterfaces"
 )
 
 func resourceComputeInterfaceAttachV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceComputeInterfaceAttachV2Create,
-		Read:   resourceComputeInterfaceAttachV2Read,
-		Delete: resourceComputeInterfaceAttachV2Delete,
+		CreateContext: resourceComputeInterfaceAttachV2Create,
+		ReadContext:   resourceComputeInterfaceAttachV2Read,
+		DeleteContext: resourceComputeInterfaceAttachV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -66,11 +68,11 @@ func resourceComputeInterfaceAttachV2() *schema.Resource {
 	}
 }
 
-func resourceComputeInterfaceAttachV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeInterfaceAttachV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	instanceID := d.Get("instance_id").(string)
@@ -86,7 +88,7 @@ func resourceComputeInterfaceAttachV2Create(d *schema.ResourceData, meta interfa
 	}
 
 	if networkID == "" && portID == "" {
-		return fmt.Errorf("Must set one of network_id and port_id")
+		return diag.Errorf("Must set one of network_id and port_id")
 	}
 
 	// For some odd reason the API takes an array of IPs, but you can only have one element in the array.
@@ -105,7 +107,7 @@ func resourceComputeInterfaceAttachV2Create(d *schema.ResourceData, meta interfa
 
 	attachment, err := attachinterfaces.Create(computeClient, instanceID, attachOpts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -117,8 +119,8 @@ func resourceComputeInterfaceAttachV2Create(d *schema.ResourceData, meta interfa
 		MinTimeout: 5 * time.Second,
 	}
 
-	if _, err = stateConf.WaitForState(); err != nil {
-		return fmt.Errorf("Error creating openstack_compute_interface_attach_v2 %s: %s", instanceID, err)
+	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
+		return diag.Errorf("Error creating openstack_compute_interface_attach_v2 %s: %s", instanceID, err)
 	}
 
 	// Use the instance ID and attachment ID as the resource ID.
@@ -128,24 +130,24 @@ func resourceComputeInterfaceAttachV2Create(d *schema.ResourceData, meta interfa
 
 	d.SetId(id)
 
-	return resourceComputeInterfaceAttachV2Read(d, meta)
+	return resourceComputeInterfaceAttachV2Read(ctx, d, meta)
 }
 
-func resourceComputeInterfaceAttachV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeInterfaceAttachV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	instanceID, attachmentID, err := computeInterfaceAttachV2ParseID(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	attachment, err := attachinterfaces.Get(computeClient, instanceID, attachmentID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_compute_interface_attach_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_interface_attach_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_interface_attach_v2 %s: %#v", d.Id(), attachment)
@@ -162,16 +164,16 @@ func resourceComputeInterfaceAttachV2Read(d *schema.ResourceData, meta interface
 	return nil
 }
 
-func resourceComputeInterfaceAttachV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeInterfaceAttachV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	instanceID, attachmentID, err := computeInterfaceAttachV2ParseID(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -183,8 +185,8 @@ func resourceComputeInterfaceAttachV2Delete(d *schema.ResourceData, meta interfa
 		MinTimeout: 5 * time.Second,
 	}
 
-	if _, err = stateConf.WaitForState(); err != nil {
-		return fmt.Errorf("Error detaching openstack_compute_interface_attach_v2 %s: %s", d.Id(), err)
+	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
+		return diag.Errorf("Error detaching openstack_compute_interface_attach_v2 %s: %s", d.Id(), err)
 	}
 
 	return nil

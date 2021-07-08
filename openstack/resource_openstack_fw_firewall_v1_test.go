@@ -5,10 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/firewalls"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccFWFirewallV1_basic(t *testing.T) {
@@ -20,8 +21,8 @@ func TestAccFWFirewallV1_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckFW(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWFirewallV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWFirewallV1Basic1,
@@ -49,8 +50,8 @@ func TestAccFWFirewallV1_router(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckFW(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWFirewallV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWFirewallV1Router,
@@ -72,8 +73,8 @@ func TestAccFWFirewallV1_no_router(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckFW(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWFirewallV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWFirewallV1NoRouter,
@@ -96,8 +97,8 @@ func TestAccFWFirewallV1_router_update(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckFW(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWFirewallV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWFirewallV1Router,
@@ -126,8 +127,8 @@ func TestAccFWFirewallV1_router_remove(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckFW(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWFirewallV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckFWFirewallV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWFirewallV1Router,

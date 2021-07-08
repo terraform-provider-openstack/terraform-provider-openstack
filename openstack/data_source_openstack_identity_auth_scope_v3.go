@@ -1,15 +1,16 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceIdentityAuthScopeV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIdentityAuthScopeV3Read,
+		ReadContext: dataSourceIdentityAuthScopeV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -145,18 +146,18 @@ func dataSourceIdentityAuthScopeV3() *schema.Resource {
 	}
 }
 
-func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIdentityAuthScopeV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	d.SetId(d.Get("name").(string))
 
 	tokenDetails, err := getTokenDetails(identityClient)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.Set("user_name", tokenDetails.user.Name)

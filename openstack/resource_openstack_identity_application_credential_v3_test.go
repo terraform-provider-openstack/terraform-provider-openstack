@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/applicationcredentials"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
@@ -21,8 +21,8 @@ func TestAccIdentityV3ApplicationCredential_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIdentityV3ApplicationCredentialDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckIdentityV3ApplicationCredentialDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3ApplicationCredentialBasic,
@@ -77,8 +77,8 @@ func TestAccIdentityV3ApplicationCredential_access_rules(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIdentityV3ApplicationCredentialDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckIdentityV3ApplicationCredentialDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3ApplicationCredentialAccessRules,

@@ -1,13 +1,13 @@
 package openstack
 
 import (
-	"errors"
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
@@ -27,12 +27,12 @@ const (
 
 func resourceNetworkingRouterV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingRouterV2Create,
-		Read:   resourceNetworkingRouterV2Read,
-		Update: resourceNetworkingRouterV2Update,
-		Delete: resourceNetworkingRouterV2Delete,
+		CreateContext: resourceNetworkingRouterV2Create,
+		ReadContext:   resourceNetworkingRouterV2Read,
+		UpdateContext: resourceNetworkingRouterV2Update,
+		DeleteContext: resourceNetworkingRouterV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -177,11 +177,11 @@ func resourceNetworkingRouterV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	createOpts := RouterCreateOpts{
@@ -227,7 +227,7 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 
 	if esRaw, ok := d.GetOkExists("enable_snat"); ok {
 		if externalNetworkID == "" {
-			return errors.New(errEnableSNATWithoutExternalNet)
+			return diag.Errorf(errEnableSNATWithoutExternalNet)
 		}
 		es := esRaw.(bool)
 		gatewayInfo.EnableSNAT = &es
@@ -236,7 +236,7 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 	externalFixedIPs := expandNetworkingRouterExternalFixedIPsV2(d.Get("external_fixed_ip").([]interface{}))
 	if len(externalFixedIPs) > 0 {
 		if externalNetworkID == "" {
-			return errors.New(errExternalFixedIPWithoutExternalNet)
+			return diag.Errorf(errExternalFixedIPWithoutExternalNet)
 		}
 		gatewayInfo.ExternalFixedIPs = externalFixedIPs
 	}
@@ -258,11 +258,11 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 		// router creation without a retry
 		r, err = routers.Create(networkingClient, createOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error creating openstack_networking_router_v2: %s", err)
+			return diag.Errorf("Error creating openstack_networking_router_v2: %s", err)
 		}
 	} else {
 		if externalNetworkID == "" {
-			return errors.New(errExternalSubnetIDWithoutExternalNet)
+			return diag.Errorf(errExternalSubnetIDWithoutExternalNet)
 		}
 
 		// create a router in a loop with the first available external subnet
@@ -276,13 +276,13 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 				if retryOn409(err) {
 					continue
 				}
-				return fmt.Errorf("Error creating openstack_networking_router_v2: %s", err)
+				return diag.Errorf("Error creating openstack_networking_router_v2: %s", err)
 			}
 			break
 		}
 		// handle the last error
 		if err != nil {
-			return fmt.Errorf("Error creating openstack_networking_router_v2: %d subnets exhausted: %s", len(externalSubnetIDs), err)
+			return diag.Errorf("Error creating openstack_networking_router_v2: %d subnets exhausted: %s", len(externalSubnetIDs), err)
 		}
 	}
 
@@ -297,9 +297,9 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_router_v2 %s to become available: %s", r.ID, err)
+		return diag.Errorf("Error waiting for openstack_networking_router_v2 %s to become available: %s", r.ID, err)
 	}
 
 	d.SetId(r.ID)
@@ -315,7 +315,7 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 		log.Printf("[DEBUG] Assigning external_gateway to openstack_networking_router_v2 %s with options: %#v", r.ID, updateOpts)
 		_, err = routers.Update(networkingClient, r.ID, updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_networking_router_v2: %s", err)
+			return diag.Errorf("Error updating openstack_networking_router_v2: %s", err)
 		}
 	}
 
@@ -324,20 +324,20 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "routers", r.ID, tagOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error setting tags on openstack_networking_router_v2 %s: %s", r.ID, err)
+			return diag.Errorf("Error setting tags on openstack_networking_router_v2 %s: %s", r.ID, err)
 		}
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_router_v2 %s", tags, r.ID)
 	}
 
 	log.Printf("[DEBUG] Created openstack_networking_router_v2 %s: %#v", r.ID, r)
-	return resourceNetworkingRouterV2Read(d, meta)
+	return resourceNetworkingRouterV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	r, err := routers.Get(networkingClient, d.Id()).Extract()
@@ -347,7 +347,7 @@ func resourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) er
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving openstack_networking_router_v2: %s", err)
+		return diag.Errorf("Error retrieving openstack_networking_router_v2: %s", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_router_v2 %s: %#v", d.Id(), r)
@@ -379,11 +379,11 @@ func resourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	routerID := d.Id()
@@ -435,7 +435,7 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 	if d.HasChange("enable_snat") {
 		updateGatewaySettings = true
 		if externalNetworkID == "" {
-			return errors.New(errEnableSNATWithoutExternalNet)
+			return diag.Errorf(errEnableSNATWithoutExternalNet)
 		}
 
 		enableSNAT := d.Get("enable_snat").(bool)
@@ -449,7 +449,7 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 		gatewayInfo.ExternalFixedIPs = externalFixedIPs
 		if len(externalFixedIPs) > 0 {
 			if externalNetworkID == "" {
-				return errors.New(errExternalFixedIPWithoutExternalNet)
+				return diag.Errorf(errExternalFixedIPWithoutExternalNet)
 			}
 		}
 	}
@@ -463,7 +463,7 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 		log.Printf("[DEBUG] openstack_networking_router_v2 %s update options: %#v", d.Id(), updateOpts)
 		_, err = routers.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_networking_router_v2: %s", err)
+			return diag.Errorf("Error updating openstack_networking_router_v2: %s", err)
 		}
 	}
 
@@ -473,23 +473,23 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "routers", d.Id(), tagOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error setting tags on openstack_networking_router_v2 %s: %s", d.Id(), err)
+			return diag.Errorf("Error setting tags on openstack_networking_router_v2 %s: %s", d.Id(), err)
 		}
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_router_v2 %s", tags, d.Id())
 	}
 
-	return resourceNetworkingRouterV2Read(d, meta)
+	return resourceNetworkingRouterV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingRouterV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	if err := routers.Delete(networkingClient, d.Id()).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_networking_router_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_router_v2"))
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -501,9 +501,9 @@ func resourceNetworkingRouterV2Delete(d *schema.ResourceData, meta interface{}) 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error deleting openstack_networking_router_v2: %s", err)
+		return diag.Errorf("Error deleting openstack_networking_router_v2: %s", err)
 	}
 
 	d.SetId("")

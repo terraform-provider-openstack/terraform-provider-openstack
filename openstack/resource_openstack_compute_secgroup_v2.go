@@ -1,25 +1,27 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceComputeSecGroupV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceComputeSecGroupV2Create,
-		Read:   resourceComputeSecGroupV2Read,
-		Update: resourceComputeSecGroupV2Update,
-		Delete: resourceComputeSecGroupV2Delete,
+		CreateContext: resourceComputeSecGroupV2Create,
+		ReadContext:   resourceComputeSecGroupV2Read,
+		UpdateContext: resourceComputeSecGroupV2Update,
+		DeleteContext: resourceComputeSecGroupV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -104,16 +106,16 @@ func resourceComputeSecGroupV2() *schema.Resource {
 	}
 }
 
-func resourceComputeSecGroupV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeSecGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	// Before creating the security group, make sure all rules are valid.
 	if err := computeSecGroupV2RulesCheckForErrors(d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// If all rules are valid, proceed with creating the security gruop.
@@ -126,7 +128,7 @@ func resourceComputeSecGroupV2Create(d *schema.ResourceData, meta interface{}) e
 	log.Printf("[DEBUG] openstack_compute_secgroup_v2 Create Options: %#v", createOpts)
 	sg, err := secgroups.Create(computeClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_compute_secgroup_v2 %s: %s", name, err)
+		return diag.Errorf("Error creating openstack_compute_secgroup_v2 %s: %s", name, err)
 	}
 
 	d.SetId(sg.ID)
@@ -137,23 +139,23 @@ func resourceComputeSecGroupV2Create(d *schema.ResourceData, meta interface{}) e
 	for _, createRuleOpts := range createRuleOptsList {
 		_, err := secgroups.CreateRule(computeClient, createRuleOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error creating openstack_compute_secgroup_v2 %s rule: %s", name, err)
+			return diag.Errorf("Error creating openstack_compute_secgroup_v2 %s rule: %s", name, err)
 		}
 	}
 
-	return resourceComputeSecGroupV2Read(d, meta)
+	return resourceComputeSecGroupV2Read(ctx, d, meta)
 }
 
-func resourceComputeSecGroupV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeSecGroupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	sg, err := secgroups.Get(computeClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_compute_secgroup_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_secgroup_v2"))
 	}
 
 	d.Set("name", sg.Name)
@@ -161,13 +163,13 @@ func resourceComputeSecGroupV2Read(d *schema.ResourceData, meta interface{}) err
 
 	rules, err := flattenComputeSecGroupV2Rules(computeClient, d, sg.Rules)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_secgroup_v2 %s rules: %#v", d.Id(), rules)
 
 	if err := d.Set("rule", rules); err != nil {
-		return fmt.Errorf("Unable to set openstack_compute_secgroup_v2 %s rules: %s", d.Id(), err)
+		return diag.Errorf("Unable to set openstack_compute_secgroup_v2 %s rules: %s", d.Id(), err)
 	}
 
 	d.Set("region", GetRegion(d, config))
@@ -175,11 +177,11 @@ func resourceComputeSecGroupV2Read(d *schema.ResourceData, meta interface{}) err
 	return nil
 }
 
-func resourceComputeSecGroupV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeSecGroupV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	description := d.Get("description").(string)
@@ -192,7 +194,7 @@ func resourceComputeSecGroupV2Update(d *schema.ResourceData, meta interface{}) e
 
 	_, err = secgroups.Update(computeClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating openstack_compute_secgroup_v2 %s: %s", d.Id(), err)
+		return diag.Errorf("Error updating openstack_compute_secgroup_v2 %s: %s", d.Id(), err)
 	}
 
 	if d.HasChange("rule") {
@@ -209,7 +211,7 @@ func resourceComputeSecGroupV2Update(d *schema.ResourceData, meta interface{}) e
 
 			_, err := secgroups.CreateRule(computeClient, createRuleOpts).Extract()
 			if err != nil {
-				return fmt.Errorf("Error adding rule to openstack_compute_secgroup_v2 %s: %s", d.Id(), err)
+				return diag.Errorf("Error adding rule to openstack_compute_secgroup_v2 %s: %s", d.Id(), err)
 			}
 		}
 
@@ -222,19 +224,19 @@ func resourceComputeSecGroupV2Update(d *schema.ResourceData, meta interface{}) e
 					continue
 				}
 
-				return fmt.Errorf("Error removing rule %s from openstack_compute_secgroup_v2 %s: %s", rule.ID, d.Id(), err)
+				return diag.Errorf("Error removing rule %s from openstack_compute_secgroup_v2 %s: %s", rule.ID, d.Id(), err)
 			}
 		}
 	}
 
-	return resourceComputeSecGroupV2Read(d, meta)
+	return resourceComputeSecGroupV2Read(ctx, d, meta)
 }
 
-func resourceComputeSecGroupV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeSecGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -246,9 +248,9 @@ func resourceComputeSecGroupV2Delete(d *schema.ResourceData, meta interface{}) e
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_compute_secgroup_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_compute_secgroup_v2"))
 	}
 
 	return nil
