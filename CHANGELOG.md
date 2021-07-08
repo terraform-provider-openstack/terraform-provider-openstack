@@ -7,6 +7,7 @@ FEATURES
 
 IMPROVEMENTS
 
+* Added `SCTP`, `PROXYV2` protocols for `lb_pool_v2` resource ([#1251](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1251))
 * Removed Octavia microversions and added explanation about minor version usage ([#1249](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1249))
 * Added `cidr` argument input check for `networking_subnet_v2` resource ([#1267](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1267))
 * Fixed `endpoints` argument for `vpnaas_endpoint_group_v2` resource in that way so endpoints order is not relevant anymore ([#1247](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1247))
