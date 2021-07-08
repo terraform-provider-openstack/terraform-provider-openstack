@@ -464,7 +464,7 @@ $ git commit
 $ git push -u my-github-username my-feature
 ```
 
-Then navigate to https://github.com/terraform-providers/terraform-provider-openstack
+Then navigate to https://github.com/terraform-provider-openstack/terraform-provider-openstack
 and create a Pull Request.
 
 ### OpenLab Testing
