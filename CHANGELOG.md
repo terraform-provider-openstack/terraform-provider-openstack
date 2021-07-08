@@ -1,3 +1,16 @@
+## 1.43.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Added `cidr` argument input check for `networking_subnet_v2` resource ([#1267](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1267))
+* Fixed `endpoints` argument for `vpnaas_endpoint_group_v2` resource in that way so endpoints order is not relevant anymore ([#1247](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1247))
+* Added `addresses` argument for `db_instance_v1` resource ([#1260](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1260))
+* Better formatted documentation for some resources and data sources ([#1252](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1252)), ([#1255](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1255)), ([#1256](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1256))
+
+BUG FIXES
+
+* Fixed `nil` panics in `compute_instance_v2` resource that could be caught while trying to unassign a server group from an instance ([#1248](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1248))
+
 ## 1.42.0 (12 May, 2021)
 
 IMPROVEMENTS
