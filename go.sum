@@ -176,6 +176,8 @@ github.com/gophercloud/gophercloud v0.17.1-0.20210429172743-0fc2c97ff6da h1:QgVv
 github.com/gophercloud/gophercloud v0.17.1-0.20210429172743-0fc2c97ff6da/go.mod h1:wRtmUelyIIv3CSSDI47aUwbs075O6i+LY+pXsKCBsb4=
 github.com/gophercloud/utils v0.0.0-20210216074907-f6de111f2eae h1:Hi3IgB9RQDE15Kfovd8MTZrcana+UlQqNbOif8dLpA0=
 github.com/gophercloud/utils v0.0.0-20210216074907-f6de111f2eae/go.mod h1:wx8HMD8oQD0Ryhz6+6ykq75PJ79iPyEqYHfwZ4l7OsA=
+github.com/gophercloud/utils v0.0.0-20210530213738-7c693d7efe47 h1:dgJIKVhOL+7WKORGsRAk3EbYsr9z0Lwjr7sfxcmtvQA=
+github.com/gophercloud/utils v0.0.0-20210530213738-7c693d7efe47/go.mod h1:wx8HMD8oQD0Ryhz6+6ykq75PJ79iPyEqYHfwZ4l7OsA=
 github.com/hashicorp/errwrap v1.0.0 h1:hLrqtEDnRye3+sgx6z4qVLNuviH3MR5aQ0ykNJa/UYA=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-checkpoint v0.5.0 h1:MFYpPZCnQqQTE18jFwSII6eUQrD/oxMFp3mlgcqk5mU=

@@ -1,6 +1,9 @@
 package openstack
 
 import (
+	"os"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/logging"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/meta"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -243,6 +246,13 @@ func Provider() terraform.ResourceProvider {
 				Default:     false,
 				Description: descriptions["disable_no_cache_header"],
 			},
+
+			"enable_logging": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: descriptions["enable_logging"],
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -478,10 +488,22 @@ func init() {
 			"automatically, if the initial auth token get expired. Defaults to `true`",
 
 		"max_retries": "How many times HTTP connection should be retried until giving up.",
+
+		"enable_logging": "Outputs very verbose logs with all calls made to and responses from OpenStack",
 	}
 }
 
 func configureProvider(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
+	enable_logging := d.Get("enable_logging").(bool)
+	if !enable_logging {
+		// enforce logging (similar to OS_DEBUG) when TF_LOG is 'DEBUG' or 'TRACE'
+		if logLevel := logging.LogLevel(); logLevel != "" && os.Getenv("OS_DEBUG") == "" {
+			if logLevel == "DEBUG" || logLevel == "TRACE" {
+				enable_logging = true
+			}
+		}
+	}
+
 	config := Config{
 		auth.Config{
 			CACertFile:                  d.Get("cacert_file").(string),
@@ -517,6 +539,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 			TerraformVersion:            terraformVersion,
 			SDKVersion:                  meta.SDKVersionString(),
 			MutexKV:                     mutexkv.NewMutexKV(),
+			EnableLogger:                enable_logging,
 		},
 	}
 
