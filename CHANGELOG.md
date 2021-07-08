@@ -17,7 +17,7 @@ IMPROVEMENTS
 
 BUG FIXES
 
-* Fixed `nil` panics in `compute_instance_v2` resource that could be caught while trying to unassign a server group from an instance ([#1248](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1248))
+* Fixed `nil` panic in `compute_instance_v2` resource that could be caught while trying to unassign a server group from an instance ([#1248](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1248))
 
 ## 1.42.0 (12 May, 2021)
 
