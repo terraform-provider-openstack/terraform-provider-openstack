@@ -129,6 +129,48 @@ func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2Instance_initialShelve(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2InstanceStateActive(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "power_state", "active"),
+					testAccCheckComputeV2InstanceState(&instance, "active"),
+				),
+			},
+			{
+				Config: testAccComputeV2InstanceStateShelve(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "power_state", "shelved_offloaded"),
+					testAccCheckComputeV2InstanceState(&instance, "shelved_offloaded"),
+				),
+			},
+			{
+				Config: testAccComputeV2InstanceStateActive(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "power_state", "active"),
+					testAccCheckComputeV2InstanceState(&instance, "active"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeV2Instance_secgroupMulti(t *testing.T) {
 	var instance1 servers.Server
 	var secgroup1 secgroups.SecurityGroup
@@ -1640,6 +1682,19 @@ resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   power_state = "shutoff"
+  network {
+    uuid = "%s"
+  }
+}
+`, osNetworkID)
+}
+
+func testAccComputeV2InstanceStateShelve() string {
+	return fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  power_state = "shelved_offloaded"
   network {
     uuid = "%s"
   }

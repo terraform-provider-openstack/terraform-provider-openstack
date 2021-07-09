@@ -399,7 +399,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 				ForceNew: false,
 				Default:  "active",
 				ValidateFunc: validation.StringInSlice([]string{
-					"active", "shutoff",
+					"active", "shutoff", "shelved_offloaded",
 				}, true),
 				DiffSuppressFunc: suppressPowerStateDiffs,
 			},
@@ -768,6 +768,26 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		powerStateOldRaw, powerStateNewRaw := d.GetChange("power_state")
 		powerStateOld := powerStateOldRaw.(string)
 		powerStateNew := powerStateNewRaw.(string)
+		if strings.ToLower(powerStateNew) == "shelved_offloaded" {
+			err = shelveunshelve.Shelve(computeClient, d.Id()).ExtractErr()
+			if err != nil {
+				return fmt.Errorf("Error shelve OpenStack instance: %s", err)
+			}
+			shelveStateConf := &resource.StateChangeConf{
+				//Pending:    []string{"ACTIVE"},
+				Target:     []string{"SHELVED_OFFLOADED"},
+				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
+
+			log.Printf("[DEBUG] Waiting for instance (%s) to shelve", d.Id())
+			_, err = shelveStateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("Error waiting for instance (%s) to become shelve: %s", d.Id(), err)
+			}
+		}
 		if strings.ToLower(powerStateNew) == "shutoff" {
 			err = startstop.Stop(computeClient, d.Id()).ExtractErr()
 			if err != nil {
