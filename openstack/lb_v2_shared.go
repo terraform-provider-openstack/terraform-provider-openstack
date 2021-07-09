@@ -25,13 +25,6 @@ import (
 const octaviaLBClientType = "load-balancer"
 
 const (
-	octaviaLBMemberBackupMicroversion       = "2.1"
-	octaviaLBAvailabilityZoneMicroversion   = "2.14"
-	octaviaLBQuotaRuleAndPolicyMicroversion = "2.19"
-	octaviaLBSCTPProtocol                   = "2.23"
-)
-
-const (
 	lbPendingCreate = "PENDING_CREATE"
 	lbPendingUpdate = "PENDING_UPDATE"
 	lbPendingDelete = "PENDING_DELETE"
@@ -76,7 +69,7 @@ func chooseLBV2AccTestClient(config *Config, region string) (*gophercloud.Servic
 
 // chooseLBV2ListenerCreateOpts will determine which load balancer listener Create options to use:
 // either the Octavia/LBaaS or the Neutron/Networking v2.
-func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config, lbClient *gophercloud.ServiceClient) (neutronlisteners.CreateOptsBuilder, error) {
+func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config) (neutronlisteners.CreateOptsBuilder, error) {
 	adminStateUp := d.Get("admin_state_up").(bool)
 
 	var sniContainerRefs []string
@@ -91,6 +84,7 @@ func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config, lbClie
 	if config.UseOctavia {
 		// Use Octavia.
 		opts := octavialisteners.CreateOpts{
+			// Protocol SCTP requires octavia minor version 2.23
 			Protocol:               octavialisteners.Protocol(d.Get("protocol").(string)),
 			ProtocolPort:           d.Get("protocol_port").(int),
 			ProjectID:              d.Get("tenant_id").(string),
@@ -143,10 +137,6 @@ func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config, lbClie
 				allowedCidrs[i] = v.(string)
 			}
 			opts.AllowedCIDRs = allowedCidrs
-		}
-
-		if v := octavialisteners.Protocol(d.Get("protocol").(string)); v == octavialisteners.ProtocolSCTP {
-			lbClient.Microversion = octaviaLBSCTPProtocol
 		}
 
 		createOpts = opts
@@ -1067,10 +1057,10 @@ func expandLBMembersV2(members *schema.Set, lbClient *gophercloud.ServiceClient)
 				AdminStateUp: &adminStateUp,
 			}
 
+			// backup requires octavia minor version 2.1. Only set when specified
 			if val, ok := rawMap["backup"]; ok {
 				backup := val.(bool)
 				member.Backup = &backup
-				lbClient.Microversion = octaviaLBMemberBackupMicroversion
 			}
 
 			m = append(m, member)

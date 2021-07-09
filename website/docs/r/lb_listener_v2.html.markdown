@@ -10,6 +10,9 @@ description: |-
 
 Manages a V2 listener resource within OpenStack.
 
+~> **Note:** This resource has attributes that depend on octavia minor versions.
+Please ensure your Openstack cloud supports the required [minor version](../#octavia-api-versioning).
+
 ## Example Usage
 
 ```hcl
@@ -35,7 +38,7 @@ The following arguments are supported:
 
 * `protocol` - (Required) The protocol - can either be TCP, HTTP, HTTPS,
   TERMINATED_HTTPS, UDP (supported only in Octavia) or SCTP (supported only
-  in Octavia microversion >= 2.23). Changing this creates a new Listener.
+  in **Octavia minor version >= 2.23**). Changing this creates a new Listener.
 
 * `protocol_port` - (Required) The port on which to listen for client traffic.
     Changing this creates a new Listener.

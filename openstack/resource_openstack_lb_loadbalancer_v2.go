@@ -150,8 +150,9 @@ func resourceLoadBalancerV2Create(d *schema.ResourceData, meta interface{}) erro
 			FlavorID:     d.Get("flavor_id").(string),
 			Provider:     lbProvider,
 		}
+
+		// availability_zone requires octavia minor version 2.14. Only set when specified.
 		if v, ok := d.GetOk("availability_zone"); ok {
-			lbClient.Microversion = octaviaLBAvailabilityZoneMicroversion
 			aZ := v.(string)
 			createOpts.AvailabilityZone = aZ
 		}

@@ -241,6 +241,22 @@ accommodate these modifications, but we can't guarantee this.
 We try to support _all_ releases of OpenStack when we can. If your OpenStack
 cloud is running an older release, we still should be able to support it.
 
+### Octavia api versioning
+
+[Octavia api](https://docs.openstack.org/api-ref/load-balancer/v2/) is using
+minor versions when adding new features and functionality. The required minor
+version of each feature are documented on the resource page. When using such a
+feature ensure that your Openstack cloud supports the required minor version.
+A simple way of checking which minor versions are supported on your Openstack
+cloud is the following:
+
+```shell
+export OS_TOKEN=`openstack token issue -c id -f value`
+curl -s -H "X-Auth-Token: $OS_TOKEN"  "https://example.com:9876/"
+```
+
+
+
 ### Rackspace Compatibility
 
 Using this OpenStack provider with Rackspace is not supported and not
@@ -464,7 +480,7 @@ $ git commit
 $ git push -u my-github-username my-feature
 ```
 
-Then navigate to https://github.com/terraform-providers/terraform-provider-openstack
+Then navigate to https://github.com/terraform-provider-openstack/terraform-provider-openstack
 and create a Pull Request.
 
 ### OpenLab Testing

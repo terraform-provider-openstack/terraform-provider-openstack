@@ -192,7 +192,7 @@ func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("name", monitor.Name)
 		d.Set("region", GetRegion(d, config))
 
-		// OpenContrail workaround (https://github.com/terraform-providers/terraform-provider-openstack/issues/762)
+		// OpenContrail workaround (https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/762)
 		if len(monitor.Pools) > 0 && monitor.Pools[0].ID != "" {
 			d.Set("pool_id", monitor.Pools[0].ID)
 		}
@@ -208,7 +208,7 @@ func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Retrieved openstack_lb_monitor_v2 %s: %#v", d.Id(), monitor)
 
-	// OpenContrail workaround (https://github.com/terraform-providers/terraform-provider-openstack/issues/762)
+	// OpenContrail workaround (https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/762)
 	if len(monitor.Pools) > 0 && monitor.Pools[0].ID != "" {
 		d.Set("pool_id", monitor.Pools[0].ID)
 	}

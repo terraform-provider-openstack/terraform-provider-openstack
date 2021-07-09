@@ -10,6 +10,9 @@ description: |-
 
 Manages a V2 pool resource within OpenStack.
 
+~> **Note:** This resource has attributes that depend on octavia minor versions.
+Please ensure your Openstack cloud supports the required [minor version](../#octavia-api-versioning).
+
 ## Example Usage
 
 ```hcl
@@ -42,8 +45,9 @@ The following arguments are supported:
 
 * `description` - (Optional) Human-readable description for the pool.
 
-* `protocol` - (Required) The protocol - can either be TCP, HTTP, HTTPS, PROXY
-  or UDP (supported only in Octavia). Changing this creates a new pool.
+* `protocol` - (Required) The protocol - can either be TCP, HTTP, HTTPS, PROXY,
+  UDP (supported only in Octavia), PROXYV2 (**Octavia minor version >= 2.22**)
+  or SCTP (**Octavia minor version >= 2.23**). Changing this creates a new pool.
 
 * `loadbalancer_id` - (Optional) The load balancer on which to provision this
     pool. Changing this creates a new pool.
