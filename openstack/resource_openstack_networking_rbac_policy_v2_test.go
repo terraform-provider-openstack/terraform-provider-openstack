@@ -166,3 +166,271 @@ func testAccNetworkingV2RBACPolicyUpdate(projectName string) string {
     }
   `, projectName)
 }
+
+func TestAccNetworkingV2RBACPolicy_search(t *testing.T) {
+	var rbac1, rbac2 rbacpolicies.RBACPolicy
+	var project1, project2, project3 projects.Project
+	var network1, network2, network3 networks.Network
+	var projectOneName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+	var projectTwoName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+	var projectThreeName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNetworkingV2RBACPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2RBACPolicy_shared_basic(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network1),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_2", &network2),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_3", &network3),
+				),
+			},
+			{
+				Config: testAccNetworkingV2RBACPolicy_shared_update1(projectOneName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project1),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network1),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_2", &network2),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_3", &network3),
+					testAccCheckNetworkingV2RBACPolicyExists("openstack_networking_rbac_policy_v2.rbac_policy_1", &rbac1),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "action", "access_as_shared"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "action", (*string)(&rbac1.Action)),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "object_id", &network1.ID),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "object_type", &rbac1.ObjectType),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "object_type", "network"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "target_tenant", &project1.ID),
+				),
+			},
+			{
+				Config: testAccNetworkingV2RBACPolicy_shared_update2(projectOneName, projectTwoName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project1),
+					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_2", &project2),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network1),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_2", &network2),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_3", &network3),
+					testAccCheckNetworkingV2RBACPolicyExists("openstack_networking_rbac_policy_v2.rbac_policy_1", &rbac1),
+					testAccCheckNetworkingV2RBACPolicyExists("openstack_networking_rbac_policy_v2.rbac_policy_2", &rbac2),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "action", "access_as_shared"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "action", (*string)(&rbac1.Action)),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "object_id", &network1.ID),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "object_type", &rbac1.ObjectType),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "object_type", "network"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "target_tenant", &project1.ID),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_2", "action", "access_as_shared"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_2", "action", (*string)(&rbac2.Action)),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_2", "object_id", &network2.ID),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_2", "object_type", &rbac2.ObjectType),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_2", "object_type", "network"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_2", "target_tenant", &project2.ID),
+				),
+			},
+			{
+				Config: testAccNetworkingV2RBACPolicy_shared_update3(projectThreeName, projectTwoName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_3", &project3),
+					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_2", &project2),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network1),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_2", &network2),
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_3", &network3),
+					testAccCheckNetworkingV2RBACPolicyExists("openstack_networking_rbac_policy_v2.rbac_policy_1", &rbac1),
+					testAccCheckNetworkingV2RBACPolicyExists("openstack_networking_rbac_policy_v2.rbac_policy_2", &rbac2),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "action", "access_as_shared"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "action", (*string)(&rbac1.Action)),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "object_id", &network1.ID),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "object_type", &rbac1.ObjectType),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "object_type", "network"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_1", "target_tenant", &project3.ID),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_2", "action", "access_as_shared"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_2", "action", (*string)(&rbac2.Action)),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_2", "object_id", &network2.ID),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_2", "object_type", &rbac2.ObjectType),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_2", "object_type", "network"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_rbac_policy_v2.rbac_policy_2", "target_tenant", &project2.ID),
+				),
+			},
+		},
+	})
+}
+
+func testAccNetworkingV2RBACPolicy_shared_basic() string {
+	return `
+    resource "openstack_networking_network_v2" "network_1" {
+      name           = "network_0_24"
+      admin_state_up = "false"
+    }
+
+    resource "openstack_networking_network_v2" "network_2" {
+		name           = "network_1_24"
+		admin_state_up = "false"
+	}
+	
+    resource "openstack_networking_network_v2" "network_3" {
+		name           = "network_0_32"
+		admin_state_up = "false"
+	}
+    `
+}
+
+func testAccNetworkingV2RBACPolicy_shared_update1(projectOneName string) string {
+	return fmt.Sprintf(`
+    resource "openstack_networking_network_v2" "network_1" {
+      name           = "network_0_24"
+      admin_state_up = "false"
+    }
+
+    resource "openstack_networking_network_v2" "network_2" {
+		name           = "network_1_24"
+		admin_state_up = "false"
+	}
+	
+    resource "openstack_networking_network_v2" "network_3" {
+		name           = "network_0_32"
+		admin_state_up = "false"
+	}
+
+    resource "openstack_identity_project_v3" "project_1" {
+		name        = "%s"
+		description = "The second project"
+	}
+	
+	resource "openstack_networking_rbac_policy_v2" "rbac_policy_1" {
+		action        = "access_as_shared"
+		object_search {
+			name_glob = "network_*_24"
+		}
+		object_type   = "network"
+		target_tenant = "${openstack_identity_project_v3.project_1.id}"
+	}
+    `, projectOneName)
+}
+
+func testAccNetworkingV2RBACPolicy_shared_update2(projectOneName, projectTwoName string) string {
+	return fmt.Sprintf(`
+    resource "openstack_networking_network_v2" "network_1" {
+      name           = "network_0_24"
+      admin_state_up = "false"
+    }
+
+    resource "openstack_networking_network_v2" "network_2" {
+		name           = "network_1_24"
+		admin_state_up = "false"
+	}
+	
+    resource "openstack_networking_network_v2" "network_3" {
+		name           = "network_0_32"
+		admin_state_up = "false"
+	}
+
+    resource "openstack_identity_project_v3" "project_1" {
+		name        = "%s"
+		description = "The second project"
+	}
+	
+	resource "openstack_networking_rbac_policy_v2" "rbac_policy_1" {
+		action        = "access_as_shared"
+		object_search {
+			name_glob = "network_*_24"
+		}
+		object_type   = "network"
+		target_tenant = "${openstack_identity_project_v3.project_1.id}"
+	}
+	
+	resource "openstack_identity_project_v3" "project_2" {
+		name        = "%s"
+		description = "The second project"
+	}
+	
+	resource "openstack_networking_rbac_policy_v2" "rbac_policy_2" {
+		action        = "access_as_shared"
+		object_search {
+			name_glob = "network_*_24"
+		}
+		object_type   = "network"
+		target_tenant = "${openstack_identity_project_v3.project_2.id}"
+	}
+    `, projectOneName, projectTwoName)
+}
+
+func testAccNetworkingV2RBACPolicy_shared_update3(projectThreeName, projectTwoName string) string {
+	return fmt.Sprintf(`
+    resource "openstack_networking_network_v2" "network_1" {
+      name           = "network_0_24"
+      admin_state_up = "false"
+    }
+
+    resource "openstack_networking_network_v2" "network_2" {
+		name           = "network_1_24"
+		admin_state_up = "false"
+	}
+	
+    resource "openstack_networking_network_v2" "network_3" {
+		name           = "network_0_32"
+		admin_state_up = "false"
+	}
+
+    resource "openstack_identity_project_v3" "project_3" {
+		name        = "%s"
+		description = "The second project"
+	}
+	
+	resource "openstack_networking_rbac_policy_v2" "rbac_policy_1" {
+		action        = "access_as_shared"
+		object_search {
+			name_glob = "network_*_24"
+		}
+		object_type   = "network"
+		target_tenant = "${openstack_identity_project_v3.project_3.id}"
+	}
+	
+	resource "openstack_identity_project_v3" "project_2" {
+		name        = "%s"
+		description = "The second project"
+	}
+	
+	resource "openstack_networking_rbac_policy_v2" "rbac_policy_2" {
+		action        = "access_as_shared"
+		object_search {
+			name_glob = "network_*_24"
+		}
+		object_type   = "network"
+		target_tenant = "${openstack_identity_project_v3.project_2.id}"
+	}
+    `, projectThreeName, projectTwoName)
+}
