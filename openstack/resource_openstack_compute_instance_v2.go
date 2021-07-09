@@ -775,7 +775,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 			}
 			shelveStateConf := &resource.StateChangeConf{
 				//Pending:    []string{"ACTIVE"},
-				Target:     []string{"SHUTOFF"},
+				Target:     []string{"SHELVED_OFFLOADED"},
 				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
 				Delay:      10 * time.Second,
