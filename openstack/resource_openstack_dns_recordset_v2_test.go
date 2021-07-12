@@ -145,7 +145,7 @@ func TestAccDNSV2RecordSet_ensureSameTTL(t *testing.T) {
 	})
 }
 
-func TestAccDNSV2RecordSet_setDifferentProject(t *testing.T) {
+func TestAccDNSV2RecordSet_sudoProjectId(t *testing.T) {
 	var recordset recordsets.RecordSet
 	zoneName := randomZoneName()
 
@@ -159,11 +159,11 @@ func TestAccDNSV2RecordSet_setDifferentProject(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSV2RecordSetDifferentProject(zoneName),
+				Config: testAccDNSV2RecordSetSudoProjectId(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
 					resource.TestCheckResourceAttr(
-						"openstack_dns_recordset_v2.recordset_1", "records.0", "10.1.0.2"),
+						"openstack_dns_recordset_v2.recordset_1", "records.0", "10.1.0.1"),
 				),
 			},
 		},
@@ -185,10 +185,6 @@ func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 		zoneID, recordsetID, err := dnsRecordSetV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
-		}
-
-		if projectID, found := rs.Primary.Attributes["project_id"]; found {
-			dnsClient.MoreHeaders = map[string]string{"X-Auth-Sudo-Tenant-ID": projectID}
 		}
 
 		_, err = recordsets.Get(dnsClient, zoneID, recordsetID).Extract()
@@ -215,10 +211,6 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 		dnsClient, err := config.DNSV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
-		}
-
-		if projectID, found := rs.Primary.Attributes["project_id"]; found {
-			dnsClient.MoreHeaders = map[string]string{"X-Auth-Sudo-Tenant-ID": projectID}
 		}
 
 		zoneID, recordsetID, err := dnsRecordSetV2ParseID(rs.Primary.ID)
@@ -415,7 +407,7 @@ func testAccDNSV2RecordSetDisableCheck(zoneName string) string {
 	`, zoneName, zoneName)
 }
 
-func testAccDNSV2RecordSetDifferentProject(zoneName string) string {
+func testAccDNSV2RecordSetSudoProjectId(zoneName string) string {
 	return fmt.Sprintf(`
 		resource "openstack_dns_zone_v2" "zone_1" {
 			name = "%s"
@@ -429,9 +421,8 @@ func testAccDNSV2RecordSetDifferentProject(zoneName string) string {
 			name = "%s"
 			type = "A"
 			ttl = 3000
-			records = ["10.1.0.2"]
-			project_id = "${openstack_dns_zone_v2.zone_1.project_id}"
-			disable_status_check = true
+			records = ["10.1.0.1"]
+            project_id = "${openstack_dns_zone_v2.zone_1.project_id}"
 		}
 	`, zoneName, zoneName)
 }
