@@ -47,6 +47,10 @@ The following arguments are supported:
 * `name` - (Required) The name of the record set. Note the `.` at the end of the name.
   Changing this creates a new DNS  record set.
 
+* `project_id` - (Optional) The ID of the project DNS zone is created
+  for, sets `X-Auth-Sudo-Tenant-ID` header (requires an assigned 
+  user role in target project)
+
 * `type` - (Optional) The type of record set. Examples: "A", "MX".
   Changing this creates a new DNS  record set.
 

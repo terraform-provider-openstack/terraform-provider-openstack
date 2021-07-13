@@ -145,6 +145,31 @@ func TestAccDNSV2RecordSet_ensureSameTTL(t *testing.T) {
 	})
 }
 
+func TestAccDNSV2RecordSet_sudoProjectID(t *testing.T) {
+	var recordset recordsets.RecordSet
+	zoneName := randomZoneName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckDNS(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDNSV2RecordSetSudoProjectID(zoneName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
+					resource.TestCheckResourceAttr(
+						"openstack_dns_recordset_v2.recordset_1", "records.0", "10.1.0.1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	dnsClient, err := config.DNSV2Client(osRegionName)
@@ -378,6 +403,26 @@ func testAccDNSV2RecordSetDisableCheck(zoneName string) string {
 			ttl = 3000
 			records = ["10.1.0.0"]
 			disable_status_check = true
+		}
+	`, zoneName, zoneName)
+}
+
+func testAccDNSV2RecordSetSudoProjectID(zoneName string) string {
+	return fmt.Sprintf(`
+		resource "openstack_dns_zone_v2" "zone_1" {
+			name = "%s"
+			email = "email2@example.com"
+			ttl = 6000
+			type = "PRIMARY"
+		}
+
+		resource "openstack_dns_recordset_v2" "recordset_1" {
+			zone_id = "${openstack_dns_zone_v2.zone_1.id}"
+			name = "%s"
+			type = "A"
+			ttl = 3000
+			records = ["10.1.0.1"]
+            project_id = "${openstack_dns_zone_v2.zone_1.project_id}"
 		}
 	`, zoneName, zoneName)
 }
