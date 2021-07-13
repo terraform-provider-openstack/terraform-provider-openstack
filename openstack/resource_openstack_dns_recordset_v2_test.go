@@ -145,7 +145,7 @@ func TestAccDNSV2RecordSet_ensureSameTTL(t *testing.T) {
 	})
 }
 
-func TestAccDNSV2RecordSet_sudoProjectId(t *testing.T) {
+func TestAccDNSV2RecordSet_sudoProjectID(t *testing.T) {
 	var recordset recordsets.RecordSet
 	zoneName := randomZoneName()
 
@@ -159,7 +159,7 @@ func TestAccDNSV2RecordSet_sudoProjectId(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSV2RecordSetSudoProjectId(zoneName),
+				Config: testAccDNSV2RecordSetSudoProjectID(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
 					resource.TestCheckResourceAttr(
@@ -407,7 +407,7 @@ func testAccDNSV2RecordSetDisableCheck(zoneName string) string {
 	`, zoneName, zoneName)
 }
 
-func testAccDNSV2RecordSetSudoProjectId(zoneName string) string {
+func testAccDNSV2RecordSetSudoProjectID(zoneName string) string {
 	return fmt.Sprintf(`
 		resource "openstack_dns_zone_v2" "zone_1" {
 			name = "%s"
