@@ -8,8 +8,10 @@ FEATURES
 IMPROVEMENTS
 
 * Added `SCTP`, `PROXYV2` protocols for `lb_pool_v2` resource ([#1251](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1251))
-* Removed Octavia microversions and added explanation about minor version usage ([#1249](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1249))
+* Added `project_id` argument for `dns_recordset_v2` resource ([#1254](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1254))
+* Added support for `shelved_offloaded` power state of `compute_instance_v2` resource ([#1259](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1259))
 * Added `cidr` argument input check for `networking_subnet_v2` resource ([#1267](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1267))
+* Removed Octavia microversions and added explanation about minor version usage ([#1249](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1249))
 * Fixed `endpoints` argument for `vpnaas_endpoint_group_v2` resource in that way so endpoints order is not relevant anymore ([#1247](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1247))
 * Added `addresses` argument for `db_instance_v1` resource ([#1260](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1260))
 * Better formatted documentation for some resources and data sources ([#1252](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1252)), ([#1255](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1255)), ([#1256](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1256))
