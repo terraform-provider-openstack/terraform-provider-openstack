@@ -2,6 +2,10 @@ package openstack
 
 import "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 
+const (
+	computeV2KeyPairUserID = "2.10"
+)
+
 // ComputeKeyPairV2CreateOpts is a custom KeyPair struct to include the ValueSpecs field.
 type ComputeKeyPairV2CreateOpts struct {
 	keypairs.CreateOpts

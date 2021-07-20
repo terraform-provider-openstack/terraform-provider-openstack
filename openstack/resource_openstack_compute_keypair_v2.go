@@ -86,15 +86,21 @@ func resourceComputeKeypairV2Create(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
+	computeClient.Microversion = computeV2KeyPairUserID
 
 	name := d.Get("name").(string)
-	_, isForUser := d.GetOk("user_id")
 	createOpts := ComputeKeyPairV2CreateOpts{
 		keypairs.CreateOpts{
 			Name:      name,
 			PublicKey: d.Get("public_key").(string),
 		},
 		MapValueSpecs(d),
+	}
+
+	// Check if the private key is for a specific user and in case update the creation properties
+	userID, isForUser := d.GetOk("user_id")
+	if isForUser {
+		createOpts.CreateOpts.UserID = userID.(string)
 	}
 
 	log.Printf("[DEBUG] openstack_compute_keypair_v2 create options: %#v", createOpts)
@@ -122,11 +128,15 @@ func resourceComputeKeypairV2Read(_ context.Context, d *schema.ResourceData, met
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
+	computeClient.Microversion = computeV2KeyPairUserID
 
 	// Check if the id includes a user_id
 	id, userID := extractComputeKeyPairNameAndUserID(d.Id())
+	opts := keypairs.GetOpts{
+		UserID: userID,
+	}
 
-	kp, err := keypairs.GetWithUserID(computeClient, id, userID).Extract()
+	kp, err := keypairs.Get(computeClient, id, opts).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_keypair_v2"))
 	}
@@ -148,11 +158,15 @@ func resourceComputeKeypairV2Delete(_ context.Context, d *schema.ResourceData, m
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
+	computeClient.Microversion = computeV2KeyPairUserID
 
 	// Check if the id includes a user_id
 	id, userID := extractComputeKeyPairNameAndUserID(d.Id())
+	opts := keypairs.DeleteOpts{
+		UserID: userID,
+	}
 
-	err = keypairs.DeleteWithUserID(computeClient, id, userID).ExtractErr()
+	err = keypairs.Delete(computeClient, id, opts).ExtractErr()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_compute_keypair_v2"))
 	}
