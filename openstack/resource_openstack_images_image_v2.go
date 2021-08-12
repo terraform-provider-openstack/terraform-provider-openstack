@@ -133,6 +133,13 @@ func resourceImagesImageV2() *schema.Resource {
 				Default:  false,
 			},
 
+			"hidden": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: false,
+				Default:  false,
+			},
+
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -243,6 +250,11 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 		Protected:       &protected,
 		Visibility:      &visibility,
 		Properties:      imageProperties,
+	}
+
+	if d.Get("hidden").(bool) {
+		hidden := true
+		createOpts.Hidden = &hidden
 	}
 
 	if v, ok := d.GetOk("tags"); ok {
@@ -368,6 +380,7 @@ func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("file", img.File)
 	d.Set("name", img.Name)
 	d.Set("protected", img.Protected)
+	d.Set("hidden", img.Hidden)
 	d.Set("size_bytes", img.SizeBytes)
 	d.Set("tags", img.Tags)
 	d.Set("visibility", img.Visibility)
@@ -396,6 +409,12 @@ func resourceImagesImageV2Update(d *schema.ResourceData, meta interface{}) error
 	if d.HasChange("visibility") {
 		visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
 		v := images.UpdateVisibility{Visibility: visibility}
+		updateOpts = append(updateOpts, v)
+	}
+
+	if d.HasChange("hidden") {
+		hidden := d.Get("hidden").(bool)
+		v := images.ReplaceImageHidden{NewHidden: hidden}
 		updateOpts = append(updateOpts, v)
 	}
 

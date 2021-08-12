@@ -98,7 +98,7 @@ The `user` block supports:
 * `host` - (Optional) An ip address or % sign indicating what ip addresses can connect with
     this user credentials. Changing this creates a new instance.
 
-* `databases` - (Optional) A list of databases that user will have access to. If not specified, 
+* `databases` - (Optional) A list of databases that user will have access to. If not specified,
      user has access to all databases on th einstance. Changing this creates a new instance.
 
 The `database` block supports:
@@ -134,3 +134,4 @@ The following attributes are exported:
 * `user/password` - See Argument Reference above.
 * `user/databases` - See Argument Reference above.
 * `user/host` - See Argument Reference above.
+* `addresses` - A list of IP addresses assigned to the instance.

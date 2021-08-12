@@ -10,7 +10,10 @@ import (
 
 func TestAccOpenStackNetworkingNetworkV2DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -36,7 +39,10 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_basic(t *testing.T) {
 
 func TestAccOpenStackNetworkingNetworkV2DataSource_subnet(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -62,7 +68,10 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_subnet(t *testing.T) {
 
 func TestAccOpenStackNetworkingNetworkV2DataSource_networkID(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -88,6 +97,7 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_externalExplicit(t *testing.T
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -113,6 +123,7 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_externalImplicit(t *testing.T
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -139,6 +150,7 @@ func TestAccOpenStackNetworkingNetworkV2DataSource_transparent_vlan(t *testing.T
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckTransparentVLAN(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

@@ -2,6 +2,8 @@ package openstack
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 	"testing"
 
 	"github.com/gophercloud/gophercloud"
@@ -13,7 +15,11 @@ import (
 func TestAccGroupV2_basic(t *testing.T) {
 	var group endpointgroups.EndpointGroup
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckVPN(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckVPN(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckEndpointGroupV2Destroy,
 		Steps: []resource.TestStep{
@@ -24,7 +30,7 @@ func TestAccGroupV2_basic(t *testing.T) {
 						"openstack_vpnaas_endpoint_group_v2.group_1", &group),
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_endpoint_group_v2.group_1", "name", &group.Name),
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_endpoint_group_v2.group_1", "type", &group.Type),
-					//testAccCheckEndpoints("openstack_vpnaas_endpoint_group_v2.group_1", &group.Endpoints),
+					testAccCheckEndpoints("openstack_vpnaas_endpoint_group_v2.group_1", &group.Endpoints),
 				),
 			},
 		},
@@ -34,7 +40,11 @@ func TestAccGroupV2_basic(t *testing.T) {
 func TestAccGroupV2_update(t *testing.T) {
 	var group endpointgroups.EndpointGroup
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckVPN(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckVPN(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckEndpointGroupV2Destroy,
 		Steps: []resource.TestStep{
@@ -45,7 +55,7 @@ func TestAccGroupV2_update(t *testing.T) {
 						"openstack_vpnaas_endpoint_group_v2.group_1", &group),
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_endpoint_group_v2.group_1", "name", &group.Name),
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_endpoint_group_v2.group_1", "type", &group.Type),
-					//testAccCheckEndpoints("openstack_vpnaas_endpoint_group_v2.group_1", &group.Endpoints),
+					testAccCheckEndpoints("openstack_vpnaas_endpoint_group_v2.group_1", &group.Endpoints),
 				),
 			},
 			{
@@ -55,7 +65,7 @@ func TestAccGroupV2_update(t *testing.T) {
 						"openstack_vpnaas_endpoint_group_v2.group_1", &group),
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_endpoint_group_v2.group_1", "name", &group.Name),
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_endpoint_group_v2.group_1", "type", &group.Type),
-					//testAccCheckEndpoints("openstack_vpnaas_endpoint_group_v2.group_1", &group.Endpoints),
+					testAccCheckEndpoints("openstack_vpnaas_endpoint_group_v2.group_1", &group.Endpoints),
 				),
 			},
 		},
@@ -112,11 +122,6 @@ func testAccCheckEndpointGroupV2Exists(n string, group *endpointgroups.EndpointG
 	}
 }
 
-/*
-NOTE: this test is currently disabled since flatmap is deprecated.
-Since VPNaaS is not actively tested, we don't have a way of confidently
-creating an alernative test. Once we can, we can revisit this.
-
 func testAccCheckEndpoints(n string, actual *[]string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -127,19 +132,31 @@ func testAccCheckEndpoints(n string, actual *[]string) resource.TestCheckFunc {
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		endpoints := flatmap.Expand(rs.Primary.Attributes, "endpoints")
-		i := 0
-		for _, raw := range endpoints.([]interface{}) {
-			endpoint := raw.(string)
-			if endpoint != (*actual)[i] {
-				return fmt.Errorf("The endpoints did not match. Expected: %v but got %v", endpoint, (*actual)[i])
+		var endpointsList []string
+		// Find all "endpoints.<number>" keys and collect the values.
+		// The <number> values are seemingly random and very large.
+		for k, v := range rs.Primary.Attributes {
+			println("[DEBUG] key:", k, "value:", v)
+			if strings.HasPrefix(k, "endpoints.") && k[10] >= '0' && k[10] <= '9' {
+				endpointsList = append(endpointsList, v)
 			}
-			i++
+		}
+
+		if len(*actual) != len(endpointsList) {
+			return fmt.Errorf("The number of endpoints did not match. Expected: %v but got %v", len(*actual), len(endpointsList))
+		}
+
+		sort.Strings(endpointsList)
+		sort.Strings(*actual)
+
+		for i, endpoint := range endpointsList {
+			if endpoint != (*actual)[i] {
+				return fmt.Errorf("The endpoints did not match. Expected: '%v' but got '%v'", endpoint, (*actual)[i])
+			}
 		}
 		return nil
 	}
 }
-*/
 
 const testAccEndpointGroupV2Basic = `
 	resource "openstack_vpnaas_endpoint_group_v2" "group_1" {

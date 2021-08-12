@@ -10,7 +10,10 @@ func TestAccNetworkingV2SubnetRoute_importBasic(t *testing.T) {
 	resourceName := "openstack_networking_subnet_route_v2.subnet_route_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetRouteDestroy,
 		Steps: []resource.TestStep{

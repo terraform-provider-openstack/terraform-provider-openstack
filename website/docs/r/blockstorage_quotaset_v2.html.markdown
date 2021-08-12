@@ -16,7 +16,7 @@ Manages a V2 block storage quotaset resource within OpenStack.
     in case of delete call.
 
 ~> **Note:** This resource has all-in creation so all optional quota arguments that were not specified are
-    created with zero value.
+    created with zero value. This excludes volume type quota.
 
 ## Example Usage
 
@@ -26,14 +26,19 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_blockstorage_quotaset_v2" "quotaset_1" {
-  project_id = "${openstack_identity_project_v3.project_1.id}"
-  volumes   = 10
-  snapshots = 4
-  gigabytes = 100
+  project_id           = "${openstack_identity_project_v3.project_1.id}"
+  volumes              = 10
+  snapshots            = 4
+  gigabytes            = 100
   per_volume_gigabytes = 10
-  backups = 4
-  backup_gigabytes = 10
-  groups = 100
+  backups              = 4
+  backup_gigabytes     = 10
+  groups               = 100
+  volume_type_quota = {
+    volumes_ssd   = 30
+    gigabytes_ssd = 500
+    snapshots_ssd = 10
+  }
 }
 ```
 
@@ -69,6 +74,10 @@ The following arguments are supported:
 * `groups` - (Optional) Quota value for groups. Changing this updates the
     existing quotaset.
 
+* `volume_type_quota` - (Optional)  Key/Value pairs for setting quota for
+    volumes types. Possible keys are `snapshots_<volume_type_name>`,
+    `volumes_<volume_type_name>` and `gigabytes_<volume_type_name>`.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -82,11 +91,12 @@ The following attributes are exported:
 * `backups` - See Argument Reference above.
 * `backup_gigabytes` - See Argument Reference above.
 * `groups` - See Argument Reference above.
+* `volume_type_quota` - See Argument Reference above.
 
 ## Import
 
-Quotasets can be imported using the `project_id`, e.g.
+Quotasets can be imported using the `project_id/region`, e.g.
 
 ```
-$ terraform import openstack_blockstorage_quotaset_v2.quotaset_1 2a0f2240-c5e6-41de-896d-e80d97428d6b
+$ terraform import openstack_blockstorage_quotaset_v2.quotaset_1 2a0f2240-c5e6-41de-896d-e80d97428d6b/region_1
 ```

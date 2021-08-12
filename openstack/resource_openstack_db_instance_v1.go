@@ -165,6 +165,16 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 				Computed: false,
 				ForceNew: false,
 			},
+
+			"addresses": {
+				Type:     schema.TypeList,
+				Optional: false,
+				Computed: true,
+				ForceNew: false,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -222,7 +232,7 @@ func resourceDatabaseInstanceV1Create(d *schema.ResourceData, meta interface{}) 
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"BUILD"},
-		Target:     []string{"ACTIVE"},
+		Target:     []string{"ACTIVE", "HEALTHY"},
 		Refresh:    databaseInstanceV1StateRefreshFunc(DatabaseV1Client, instance.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
@@ -267,6 +277,7 @@ func resourceDatabaseInstanceV1Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("flavor_id", instance.Flavor)
 	d.Set("datastore", instance.Datastore)
 	d.Set("region", GetRegion(d, config))
+	d.Set("addresses", instance.IP)
 
 	return nil
 }

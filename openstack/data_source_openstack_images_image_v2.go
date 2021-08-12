@@ -108,6 +108,13 @@ func dataSourceImagesImageV2() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"hidden": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: false,
+				Default:  false,
+			},
+
 			// Computed values
 			"container_format": {
 				Type:     schema.TypeString,
@@ -199,6 +206,7 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 	listOpts := images.ListOpts{
 		Name:         d.Get("name").(string),
 		Visibility:   visibility,
+		Hidden:       d.Get("hidden").(bool),
 		Owner:        d.Get("owner").(string),
 		Status:       images.ImageStatusActive,
 		SizeMin:      int64(d.Get("size_min").(int)),
@@ -272,6 +280,7 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 	d.Set("updated_at", image.UpdatedAt.Format(time.RFC3339))
 	d.Set("file", image.File)
 	d.Set("schema", image.Schema)
+	d.Set("hidden", image.Hidden)
 
 	return nil
 }

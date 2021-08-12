@@ -9,7 +9,10 @@ import (
 
 func TestAccOpenStackNetworkingAddressScopeV2DataSource_name(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -30,7 +33,10 @@ func TestAccOpenStackNetworkingAddressScopeV2DataSource_name(t *testing.T) {
 
 func TestAccOpenStackNetworkingAddressScopeV2DataSource_ipversion(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -51,7 +57,10 @@ func TestAccOpenStackNetworkingAddressScopeV2DataSource_ipversion(t *testing.T) 
 
 func TestAccOpenStackNetworkingAddressScopeV2DataSource_shared(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

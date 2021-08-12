@@ -11,7 +11,8 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
+	volumesV2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
+	volumesV3 "github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
@@ -398,7 +399,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 				ForceNew: false,
 				Default:  "active",
 				ValidateFunc: validation.StringInSlice([]string{
-					"active", "shutoff",
+					"active", "shutoff", "shelved_offloaded",
 				}, true),
 				DiffSuppressFunc: suppressPowerStateDiffs,
 			},
@@ -442,6 +443,10 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
+	imageClient, err := config.ImageV2Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack image client: %s", err)
+	}
 
 	var createOpts servers.CreateOptsBuilder
 	var availabilityZone string
@@ -451,7 +456,7 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	// If a bootable block_device was specified, ignore the image altogether.
 	// If an image_id was specified, use it.
 	// If an image_name was specified, look up the image ID, report if error.
-	imageID, err := getImageIDFromConfig(computeClient, d)
+	imageID, err := getImageIDFromConfig(imageClient, d)
 	if err != nil {
 		return err
 	}
@@ -763,6 +768,26 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		powerStateOldRaw, powerStateNewRaw := d.GetChange("power_state")
 		powerStateOld := powerStateOldRaw.(string)
 		powerStateNew := powerStateNewRaw.(string)
+		if strings.ToLower(powerStateNew) == "shelved_offloaded" {
+			err = shelveunshelve.Shelve(computeClient, d.Id()).ExtractErr()
+			if err != nil {
+				return fmt.Errorf("Error shelve OpenStack instance: %s", err)
+			}
+			shelveStateConf := &resource.StateChangeConf{
+				//Pending:    []string{"ACTIVE"},
+				Target:     []string{"SHELVED_OFFLOADED"},
+				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
+
+			log.Printf("[DEBUG] Waiting for instance (%s) to shelve", d.Id())
+			_, err = shelveStateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("Error waiting for instance (%s) to become shelve: %s", d.Id(), err)
+			}
+		}
 		if strings.ToLower(powerStateNew) == "shutoff" {
 			err = startstop.Stop(computeClient, d.Id()).ExtractErr()
 			if err != nil {
@@ -1108,7 +1133,9 @@ func resourceOpenStackComputeInstanceV2ImportState(d *schema.ResourceData, meta 
 		return nil, CheckDeleted(d, raw.Err, "openstack_compute_instance_v2")
 	}
 
-	raw.ExtractInto(&serverWithAttachments)
+	if err := raw.ExtractInto(&serverWithAttachments); err != nil {
+		log.Printf("[DEBUG] unable to unmarshal raw struct to serverWithAttachments: %s", err)
+	}
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_instance_v2 %s volume attachments: %#v",
 		d.Id(), serverWithAttachments)
@@ -1116,35 +1143,70 @@ func resourceOpenStackComputeInstanceV2ImportState(d *schema.ResourceData, meta 
 	bds := []map[string]interface{}{}
 	if len(serverWithAttachments.VolumesAttached) > 0 {
 		blockStorageClient, err := config.BlockStorageV2Client(GetRegion(d, config))
-		if err != nil {
-			return nil, fmt.Errorf("Error creating OpenStack volume client: %s", err)
-		}
+		if err == nil {
+			var volMetaData = struct {
+				VolumeImageMetadata map[string]interface{} `json:"volume_image_metadata"`
+				ID                  string                 `json:"id"`
+				Size                int                    `json:"size"`
+				Bootable            string                 `json:"bootable"`
+			}{}
+			for i, b := range serverWithAttachments.VolumesAttached {
+				rawVolume := volumesV2.Get(blockStorageClient, b["id"].(string))
+				if err := rawVolume.ExtractInto(&volMetaData); err != nil {
+					log.Printf("[DEBUG] unable to unmarshal raw struct to volume metadata: %s", err)
+				}
 
-		var volMetaData = struct {
-			VolumeImageMetadata map[string]interface{} `json:"volume_image_metadata"`
-			ID                  string                 `json:"id"`
-			Size                int                    `json:"size"`
-			Bootable            string                 `json:"bootable"`
-		}{}
-		for i, b := range serverWithAttachments.VolumesAttached {
-			rawVolume := volumes.Get(blockStorageClient, b["id"].(string))
-			rawVolume.ExtractInto(&volMetaData)
+				log.Printf("[DEBUG] retrieved volume%+v", volMetaData)
+				v := map[string]interface{}{
+					"delete_on_termination": true,
+					"uuid":                  volMetaData.VolumeImageMetadata["image_id"],
+					"boot_index":            i,
+					"destination_type":      "volume",
+					"source_type":           "image",
+					"volume_size":           volMetaData.Size,
+					"disk_bus":              "",
+					"volume_type":           "",
+					"device_type":           "",
+				}
 
-			log.Printf("[DEBUG] retrieved volume%+v", volMetaData)
-			v := map[string]interface{}{
-				"delete_on_termination": true,
-				"uuid":                  volMetaData.VolumeImageMetadata["image_id"],
-				"boot_index":            i,
-				"destination_type":      "volume",
-				"source_type":           "image",
-				"volume_size":           volMetaData.Size,
-				"disk_bus":              "",
-				"volume_type":           "",
-				"device_type":           "",
+				if volMetaData.Bootable == "true" {
+					bds = append(bds, v)
+				}
 			}
+		} else {
+			log.Print("[DEBUG] Could not create BlockStorageV2 client, trying BlockStorageV3")
+			blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
+			if err != nil {
+				return nil, fmt.Errorf("Error creating OpenStack volume V3 client: %s", err)
+			}
+			var volMetaData = struct {
+				VolumeImageMetadata map[string]interface{} `json:"volume_image_metadata"`
+				ID                  string                 `json:"id"`
+				Size                int                    `json:"size"`
+				Bootable            string                 `json:"bootable"`
+			}{}
+			for i, b := range serverWithAttachments.VolumesAttached {
+				rawVolume := volumesV3.Get(blockStorageClient, b["id"].(string))
+				if err := rawVolume.ExtractInto(&volMetaData); err != nil {
+					log.Printf("[DEBUG] unable to unmarshal raw struct to volume metadata: %s", err)
+				}
 
-			if volMetaData.Bootable == "true" {
-				bds = append(bds, v)
+				log.Printf("[DEBUG] retrieved volume%+v", volMetaData)
+				v := map[string]interface{}{
+					"delete_on_termination": true,
+					"uuid":                  volMetaData.VolumeImageMetadata["image_id"],
+					"boot_index":            i,
+					"destination_type":      "volume",
+					"source_type":           "image",
+					"volume_size":           volMetaData.Size,
+					"disk_bus":              "",
+					"volume_type":           "",
+					"device_type":           "",
+				}
+
+				if volMetaData.Bootable == "true" {
+					bds = append(bds, v)
+				}
 			}
 		}
 
@@ -1283,7 +1345,7 @@ func resourceInstanceSchedulerHintsV2(d *schema.ResourceData, schedulerHintsRaw 
 	return schedulerHints
 }
 
-func getImageIDFromConfig(computeClient *gophercloud.ServiceClient, d *schema.ResourceData) (string, error) {
+func getImageIDFromConfig(imageClient *gophercloud.ServiceClient, d *schema.ResourceData) (string, error) {
 	// If block_device was used, an Image does not need to be specified, unless an image/local
 	// combination was used. This emulates normal boot behavior. Otherwise, ignore the image altogether.
 	if vL, ok := d.GetOk("block_device"); ok {
@@ -1316,7 +1378,7 @@ func getImageIDFromConfig(computeClient *gophercloud.ServiceClient, d *schema.Re
 	}
 
 	if imageName != "" {
-		imageID, err := images_utils.IDFromName(computeClient, imageName)
+		imageID, err := images_utils.IDFromName(imageClient, imageName)
 		if err != nil {
 			return "", err
 		}
@@ -1395,7 +1457,14 @@ func getFlavorID(computeClient *gophercloud.ServiceClient, d *schema.ResourceDat
 
 func resourceComputeSchedulerHintsHash(v interface{}) int {
 	var buf bytes.Buffer
-	m := v.(map[string]interface{})
+
+	m, ok := v.(map[string]interface{})
+	if !ok {
+		return hashcode.String(buf.String())
+	}
+	if m == nil {
+		return hashcode.String(buf.String())
+	}
 
 	if m["group"] != nil {
 		buf.WriteString(fmt.Sprintf("%s-", m["group"].(string)))

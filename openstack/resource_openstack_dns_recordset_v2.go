@@ -82,6 +82,19 @@ func resourceDNSRecordSetV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+
+			"disable_status_check": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+
+			"project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -91,6 +104,10 @@ func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) erro
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+	}
+
+	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
+		return fmt.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
 	records := expandDNSRecordSetV2Records(d.Get("records").([]interface{}))
@@ -114,21 +131,22 @@ func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error creating openstack_dns_recordset_v2: %s", err)
 	}
 
-	stateConf := &resource.StateChangeConf{
-		Target:     []string{"ACTIVE"},
-		Pending:    []string{"PENDING"},
-		Refresh:    dnsRecordSetV2RefreshFunc(dnsClient, zoneID, n.ID),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
-	}
+	if !d.Get("disable_status_check").(bool) {
+		stateConf := &resource.StateChangeConf{
+			Target:     []string{"ACTIVE"},
+			Pending:    []string{"PENDING"},
+			Refresh:    dnsRecordSetV2RefreshFunc(dnsClient, zoneID, n.ID),
+			Timeout:    d.Timeout(schema.TimeoutCreate),
+			Delay:      5 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
 
-	_, err = stateConf.WaitForState()
-	if err != nil {
-		return fmt.Errorf(
-			"Error waiting for openstack_dns_recordset_v2 %s to become active: %s", d.Id(), err)
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf(
+				"Error waiting for openstack_dns_recordset_v2 %s to become active: %s", d.Id(), err)
+		}
 	}
-
 	id := fmt.Sprintf("%s/%s", zoneID, n.ID)
 	d.SetId(id)
 
@@ -147,6 +165,10 @@ func resourceDNSRecordSetV2Read(d *schema.ResourceData, meta interface{}) error 
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+	}
+
+	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
+		return fmt.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
 	// Obtain relevant info from parsing the ID
@@ -168,6 +190,7 @@ func resourceDNSRecordSetV2Read(d *schema.ResourceData, meta interface{}) error 
 	d.Set("type", n.Type)
 	d.Set("zone_id", zoneID)
 	d.Set("region", GetRegion(d, config))
+	d.Set("project_id", n.ProjectID)
 
 	return nil
 }
@@ -179,20 +202,33 @@ func resourceDNSRecordSetV2Update(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
+	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
+		return fmt.Errorf("Error setting dns client auth headers: %s", err)
+	}
+
+	changed := false
 	var updateOpts recordsets.UpdateOpts
 	if d.HasChange("ttl") {
 		ttl := d.Get("ttl").(int)
 		updateOpts.TTL = &ttl
+		changed = true
 	}
 
 	if d.HasChange("records") {
 		records := expandDNSRecordSetV2Records(d.Get("records").([]interface{}))
 		updateOpts.Records = records
+		changed = true
 	}
 
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
+		changed = true
+	}
+
+	if !changed {
+		// Nothing in OpenStack fields really changed, so just return zone from OpenStack
+		return resourceDNSRecordSetV2Read(d, meta)
 	}
 
 	// Obtain relevant info from parsing the ID
@@ -208,19 +244,21 @@ func resourceDNSRecordSetV2Update(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error updating openstack_dns_recordset_v2 %s: %s", d.Id(), err)
 	}
 
-	stateConf := &resource.StateChangeConf{
-		Target:     []string{"ACTIVE"},
-		Pending:    []string{"PENDING"},
-		Refresh:    dnsRecordSetV2RefreshFunc(dnsClient, zoneID, recordsetID),
-		Timeout:    d.Timeout(schema.TimeoutUpdate),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
-	}
+	if !d.Get("disable_status_check").(bool) {
+		stateConf := &resource.StateChangeConf{
+			Target:     []string{"ACTIVE"},
+			Pending:    []string{"PENDING"},
+			Refresh:    dnsRecordSetV2RefreshFunc(dnsClient, zoneID, recordsetID),
+			Timeout:    d.Timeout(schema.TimeoutUpdate),
+			Delay:      5 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
 
-	_, err = stateConf.WaitForState()
-	if err != nil {
-		return fmt.Errorf(
-			"Error waiting for openstack_dns_recordset_v2 %s to become active: %s", d.Id(), err)
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf(
+				"Error waiting for openstack_dns_recordset_v2 %s to become active: %s", d.Id(), err)
+		}
 	}
 
 	return resourceDNSRecordSetV2Read(d, meta)
@@ -231,6 +269,10 @@ func resourceDNSRecordSetV2Delete(d *schema.ResourceData, meta interface{}) erro
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+	}
+
+	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
+		return fmt.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
 	// Obtain relevant info from parsing the ID
@@ -244,19 +286,21 @@ func resourceDNSRecordSetV2Delete(d *schema.ResourceData, meta interface{}) erro
 		return CheckDeleted(d, err, "Error deleting openstack_dns_recordset_v2")
 	}
 
-	stateConf := &resource.StateChangeConf{
-		Target:     []string{"DELETED"},
-		Pending:    []string{"ACTIVE", "PENDING"},
-		Refresh:    dnsRecordSetV2RefreshFunc(dnsClient, zoneID, recordsetID),
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
-	}
+	if !d.Get("disable_status_check").(bool) {
+		stateConf := &resource.StateChangeConf{
+			Target:     []string{"DELETED"},
+			Pending:    []string{"ACTIVE", "PENDING"},
+			Refresh:    dnsRecordSetV2RefreshFunc(dnsClient, zoneID, recordsetID),
+			Timeout:    d.Timeout(schema.TimeoutDelete),
+			Delay:      5 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
 
-	_, err = stateConf.WaitForState()
-	if err != nil {
-		return fmt.Errorf(
-			"Error waiting for openstack_dns_recordset_v2 %s to become deleted: %s", d.Id(), err)
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf(
+				"Error waiting for openstack_dns_recordset_v2 %s to become deleted: %s", d.Id(), err)
+		}
 	}
 
 	return nil

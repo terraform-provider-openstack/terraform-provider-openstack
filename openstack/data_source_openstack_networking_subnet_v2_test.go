@@ -10,7 +10,10 @@ import (
 
 func TestAccNetworkingV2SubnetDataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -33,7 +36,10 @@ func TestAccNetworkingV2SubnetDataSource_basic(t *testing.T) {
 
 func TestAccNetworkingV2SubnetDataSource_testQueries(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -81,7 +87,10 @@ func TestAccNetworkingV2SubnetDataSource_testQueries(t *testing.T) {
 
 func TestAccNetworkingV2SubnetDataSource_networkIdAttribute(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -102,7 +111,10 @@ func TestAccNetworkingV2SubnetDataSource_networkIdAttribute(t *testing.T) {
 
 func TestAccNetworkingV2SubnetDataSource_subnetPoolIdAttribute(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

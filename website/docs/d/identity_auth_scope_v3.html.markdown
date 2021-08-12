@@ -25,10 +25,10 @@ service catalog:
 
 ```hcl
 locals {
-  object_store_service = [for entry in data.openstack_identity_auth_scope_v3.scope.service_catalog:
-                              entry if entry.type=="object-store"][0]
-  object_store_endpoint = [for endpoint in local.object_store_service.endpoints:
-                               endpoint if (endpoint.interface=="public" && endpoint.region=="region1")][0]
+  object_store_service    = [for entry in data.openstack_identity_auth_scope_v3.scope.service_catalog:
+                                 entry if entry.type=="object-store"][0]
+  object_store_endpoint   = [for endpoint in local.object_store_service.endpoints:
+                                 endpoint if (endpoint.interface=="public" && endpoint.region=="region1")][0]
   object_store_public_url = local.object_store_endpoint.url
 }
 ```

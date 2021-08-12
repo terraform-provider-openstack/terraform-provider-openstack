@@ -1,0 +1,85 @@
+- hosts: all
+  become: yes
+  roles:
+    - clone-devstack-gate-to-workspace
+    - role: create-devstack-local-conf
+      enable_services:
+        - 'trove'
+    - install-devstack
+
+- hosts: all
+  tasks:
+    - name:  Install and init trove environment
+      shell:
+        cmd: |
+          set -e
+          set -x
+          sudo chown zuul.zuul /opt/stack/new/trove/ -R
+          sudo chown zuul.zuul /etc/trove/ -R
+          export BRIDGE_IP=10.0.0.1
+          export DEST='/opt/stack/new'
+          export PATH_DEVSTACK_SRC=$DEST/devstack
+          export TROVE_RESIZE_TIME_OUT=''
+          cd $DEST/trove
+          sed -i 's/\/opt\/stack\/trove\/test-upper-constraints.txt/{toxinidir}\/test-upper-constraints.txt/' tox.ini
+          tox -etrovestack -vv -- kick-start mysql
+          source $PATH_DEVSTACK_SRC/openrc admin admin
+
+          # Following commands show some info for debugging
+          trove datastore-list
+          openstack image list
+          trove flavor-list
+          df -h
+
+        executable: /bin/bash
+        chdir: '{{ ansible_user_dir }}/workspace'
+      environment: '{{ zuul | zuul_legacy_vars }}'
+
+- hosts: all
+  become: yes
+  roles:
+    - config-golang
+  tasks:
+    - name: Run trove acceptance tests with terraform-provider-openstack
+      shell:
+        cmd: |
+          set -e
+          set -o pipefail
+          set -x
+          export DEST='/opt/stack/new'
+          export PATH_DEVSTACK_SRC=$DEST/devstack
+          pushd $PATH_DEVSTACK_SRC
+          source openrc admin admin
+          openstack flavor create m1.acctest --id 99 --ram 512 --disk 5 --vcpu 1 --ephemeral 10
+          openstack flavor create m1.resize --id 98 --ram 512 --disk 6 --vcpu 1 --ephemeral 10
+          _NETWORK_ID=$(openstack network show private -c id -f value)
+          _EXTGW_ID=$(openstack network show public -c id -f value)
+          _IMAGE=$(openstack image list | grep -i cirros | head -n 1)
+          _IMAGE_ID=$(echo $_IMAGE | awk -F\| '{print $2}' | tr -d ' ')
+          _IMAGE_NAME=$(echo $_IMAGE | awk -F\| '{print $3}' | tr -d ' ')
+          echo export OS_IMAGE_NAME="$_IMAGE_NAME" >> openrc
+          echo export OS_IMAGE_ID="$_IMAGE_ID" >> openrc
+          echo export OS_NETWORK_ID=$_NETWORK_ID >> openrc
+          echo export OS_EXTGW_ID=$_EXTGW_ID >> openrc
+          echo export OS_POOL_NAME="public" >> openrc
+          # echo export OS_FLAVOR_ID=99 >> openrc
+          echo export OS_FLAVOR_ID=15 >> openrc
+          echo export OS_FLAVOR_ID_RESIZE=98 >> openrc
+          source openrc demo demo
+          popd
+
+          # Fix iptables rules that prevent amqp connections from the devstack box to the guests
+          iptables -D openstack-INPUT -j REJECT --reject-with icmp-host-prohibited || true
+
+          # Run the DNS test 100 testcases at a time
+          export OS_DB_ENVIRONMENT=1
+
+          export OS_DB_DATASTORE_TYPE=mysql
+          mysql_version=$(openstack datastore version list ${OS_DB_DATASTORE_TYPE} -f value -c Name --sort-column Name |head -n 1)
+          export OS_DB_DATASTORE_VERSION=${mysql_version}
+          testcases=`go test ./openstack/ -v -list 'Acc'`
+          testcases=`echo "$testcases" | sed '$d' | grep Database`
+          echo "$testcases" | xargs -t -n100 sh -c 'TF_LOG=DEBUG TF_ACC=1 go test ./openstack -v -timeout 120m -run $(echo "$@" | tr " " "|")' argv0 2>&1 | tee $TEST_RESULTS_TXT
+        executable: /bin/bash
+        chdir: '{{ zuul.project.src_dir }}'
+      environment: '{{ global_env }}'

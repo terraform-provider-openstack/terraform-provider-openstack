@@ -10,6 +10,9 @@ description: |-
 
 Manages a V2 members resource within OpenStack (batch members update).
 
+~> **Note:** This resource has attributes that depend on octavia minor versions.
+Please ensure your Openstack cloud supports the required [minor version](../#octavia-api-versioning).
+
 ~> **Note:** This resource works only within [Octavia API](../#use_octavia). For
 legacy Neutron LBaaS v2 extension please use
 [openstack_lb_member_v2](lb_member_v2.html) resource.
@@ -65,6 +68,9 @@ The `member` block supports:
 
 * `admin_state_up` - (Optional) The administrative state of the member.
   A valid value is true (UP) or false (DOWN). Defaults to true.
+
+* `backup` - (Optional) A bool that indicates whether the the member is
+  backup. **Requires octavia minor version 2.1 or later**.
 
 ## Attributes Reference
 

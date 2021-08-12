@@ -637,6 +637,8 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if d.HasChange("qos_policy_id") {
+		hasChange = true
+
 		qosPolicyID := d.Get("qos_policy_id").(string)
 		finalUpdateOpts = policies.PortUpdateOptsExt{
 			UpdateOptsBuilder: finalUpdateOpts,

@@ -13,7 +13,11 @@ import (
 func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 	var container containers.Container
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckKeyManager(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerV1Destroy,
 		Steps: []resource.TestStep{
@@ -64,7 +68,11 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 func TestAccKeyManagerContainerV1_acls(t *testing.T) {
 	var container containers.Container
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckKeyManager(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
@@ -87,7 +95,11 @@ func TestAccKeyManagerContainerV1_acls(t *testing.T) {
 func TestAccKeyManagerContainerV1_certificate_type(t *testing.T) {
 	var container containers.Container
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckKeyManager(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
@@ -108,7 +120,11 @@ func TestAccKeyManagerContainerV1_certificate_type(t *testing.T) {
 func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
 	var container containers.Container
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckKeyManager(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckKeyManager(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{

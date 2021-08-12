@@ -13,7 +13,11 @@ import (
 func TestAccIKEPolicyV2_basic(t *testing.T) {
 	var policy ikepolicies.Policy
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckVPN(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckVPN(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
@@ -34,7 +38,11 @@ func TestAccIKEPolicyV2_basic(t *testing.T) {
 func TestAccIKEPolicyV2_withLifetime(t *testing.T) {
 	var policy ikepolicies.Policy
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckVPN(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckVPN(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
@@ -53,7 +61,11 @@ func TestAccIKEPolicyV2_withLifetime(t *testing.T) {
 func TestAccIKEPolicyV2_Update(t *testing.T) {
 	var policy ikepolicies.Policy
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckVPN(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckVPN(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
@@ -80,7 +92,11 @@ func TestAccIKEPolicyV2_Update(t *testing.T) {
 func TestAccIKEPolicyV2_withLifetimeUpdate(t *testing.T) {
 	var policy ikepolicies.Policy
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckVPN(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckVPN(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{

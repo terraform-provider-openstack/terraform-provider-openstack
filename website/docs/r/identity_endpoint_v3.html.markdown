@@ -21,10 +21,10 @@ resource "openstack_identity_service_v3" "service_1" {
 }
 
 resource "openstack_identity_endpoint_v3" "endpoint_1" {
-  name = "my-endpoint"
-  service_id = "${openstack_identity_service_v3.service_1.id}"
+  name            = "my-endpoint"
+  service_id      = "${openstack_identity_service_v3.service_1.id}"
   endpoint_region = "${openstack_identity_service_v3.service_1.region}"
-  url = "http://my-endpoint"
+  url             = "http://my-endpoint"
 }
 ```
 

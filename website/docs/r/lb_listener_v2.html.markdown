@@ -10,6 +10,9 @@ description: |-
 
 Manages a V2 listener resource within OpenStack.
 
+~> **Note:** This resource has attributes that depend on octavia minor versions.
+Please ensure your Openstack cloud supports the required [minor version](../#octavia-api-versioning).
+
 ## Example Usage
 
 ```hcl
@@ -34,8 +37,8 @@ The following arguments are supported:
     Listener.
 
 * `protocol` - (Required) The protocol - can either be TCP, HTTP, HTTPS,
-  TERMINATED_HTTPS or UDP (supported only in Octavia). Changing this creates a
-  new Listener.
+  TERMINATED_HTTPS, UDP (supported only in Octavia) or SCTP (supported only
+  in **Octavia minor version >= 2.23**). Changing this creates a new Listener.
 
 * `protocol_port` - (Required) The port on which to listen for client traffic.
     Changing this creates a new Listener.
@@ -57,13 +60,13 @@ The following arguments are supported:
 
 * `connection_limit` - (Optional) The maximum number of connections allowed
     for the Listener.
-    
+
 * `timeout_client_data` - (Optional) The client inactivity timeout in milliseconds.
-    
+
 * `timeout_member_connect` - (Optional) The member connection timeout in milliseconds.
-    
+
 * `timeout_member_data` - (Optional) The member inactivity timeout in milliseconds.
-    
+
 * `timeout_tcp_inspect` - (Optional) The time in milliseconds, to wait for additional
     TCP packets for content inspection.
 

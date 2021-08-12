@@ -70,7 +70,7 @@ func dnsClientSetAuthHeader(resourceData *schema.ResourceData, dnsClient *gopher
 
 	if len(headers) != 0 {
 		dnsClient.MoreHeaders = headers
-		log.Printf("[DEBUG] openstack_dns_zone_v2 request headers set: %#v", headers)
+		log.Printf("[DEBUG] request headers set: %#v", headers)
 	}
 
 	return nil

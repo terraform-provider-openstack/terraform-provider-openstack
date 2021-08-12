@@ -3,7 +3,6 @@ package openstack
 import (
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -13,7 +12,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 
 	octavialisteners "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
-	octavialoadbalancers "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/loadbalancers"
 	octaviamonitors "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/monitors"
 	octaviapools "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
 
@@ -25,10 +23,6 @@ import (
 )
 
 const octaviaLBClientType = "load-balancer"
-
-const (
-	octaviaLBQuotaRuleAndPolicyMicroversion = "2.19"
-)
 
 const (
 	lbPendingCreate = "PENDING_CREATE"
@@ -90,6 +84,7 @@ func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config) (neutr
 	if config.UseOctavia {
 		// Use Octavia.
 		opts := octavialisteners.CreateOpts{
+			// Protocol SCTP requires octavia minor version 2.23
 			Protocol:               octavialisteners.Protocol(d.Get("protocol").(string)),
 			ProtocolPort:           d.Get("protocol_port").(int),
 			ProjectID:              d.Get("tenant_id").(string),
@@ -1035,13 +1030,14 @@ func flattenLBMembersV2(members []octaviapools.Member) []map[string]interface{} 
 			"address":        member.Address,
 			"protocol_port":  member.ProtocolPort,
 			"id":             member.ID,
+			"backup":         member.Backup,
 		}
 	}
 
 	return m
 }
 
-func expandLBMembersV2(members *schema.Set) []octaviapools.BatchUpdateMemberOpts {
+func expandLBMembersV2(members *schema.Set, lbClient *gophercloud.ServiceClient) []octaviapools.BatchUpdateMemberOpts {
 	var m []octaviapools.BatchUpdateMemberOpts
 
 	if members != nil {
@@ -1061,54 +1057,17 @@ func expandLBMembersV2(members *schema.Set) []octaviapools.BatchUpdateMemberOpts
 				AdminStateUp: &adminStateUp,
 			}
 
+			// backup requires octavia minor version 2.1. Only set when specified
+			if val, ok := rawMap["backup"]; ok {
+				backup := val.(bool)
+				member.Backup = &backup
+			}
+
 			m = append(m, member)
 		}
 	}
 
 	return m
-}
-
-// chooseLBV2LoadBalancerCreateOpts will determine which load balancer Create options to use:
-// either the Octavia/LBaaS or the Neutron/Networking v2.
-func chooseLBV2LoadBalancerCreateOpts(d *schema.ResourceData, config *Config) neutronloadbalancers.CreateOptsBuilder {
-	var createOpts neutronloadbalancers.CreateOptsBuilder
-
-	var lbProvider string
-	if v, ok := d.GetOk("loadbalancer_provider"); ok {
-		lbProvider = v.(string)
-	}
-
-	adminStateUp := d.Get("admin_state_up").(bool)
-
-	if config.UseOctavia {
-		// Use Octavia.
-		createOpts = octavialoadbalancers.CreateOpts{
-			Name:         d.Get("name").(string),
-			Description:  d.Get("description").(string),
-			VipNetworkID: d.Get("vip_network_id").(string),
-			VipSubnetID:  d.Get("vip_subnet_id").(string),
-			VipPortID:    d.Get("vip_port_id").(string),
-			ProjectID:    d.Get("tenant_id").(string),
-			VipAddress:   d.Get("vip_address").(string),
-			AdminStateUp: &adminStateUp,
-			FlavorID:     d.Get("flavor_id").(string),
-			Provider:     lbProvider,
-		}
-	} else {
-		// Use Neutron.
-		createOpts = neutronloadbalancers.CreateOpts{
-			Name:         d.Get("name").(string),
-			Description:  d.Get("description").(string),
-			VipSubnetID:  d.Get("vip_subnet_id").(string),
-			TenantID:     d.Get("tenant_id").(string),
-			VipAddress:   d.Get("vip_address").(string),
-			AdminStateUp: &adminStateUp,
-			FlavorID:     d.Get("flavor_id").(string),
-			Provider:     lbProvider,
-		}
-	}
-
-	return createOpts
 }
 
 func resourceLoadBalancerV2SetSecurityGroups(networkingClient *gophercloud.ServiceClient, vipPortID string, d *schema.ResourceData) error {
@@ -1141,17 +1100,4 @@ func resourceLoadBalancerV2GetSecurityGroups(networkingClient *gophercloud.Servi
 	d.Set("security_group_ids", port.SecurityGroups)
 
 	return nil
-}
-
-func parseLBQuotaID(id string) (string, string, error) {
-	// Use SplitN as it is possible for a region name to contain "/"
-	idParts := strings.SplitN(id, "/", 2)
-	if len(idParts) < 2 {
-		return "", "", fmt.Errorf("Unable to determine lb quota ID %s", id)
-	}
-
-	projectID := idParts[0]
-	region := idParts[1]
-
-	return projectID, region, nil
 }

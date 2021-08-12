@@ -14,7 +14,10 @@ func TestAccNetworkingV2SubnetPoolBasic(t *testing.T) {
 	var subnetPool subnetpools.SubnetPool
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2SubnetPoolDestroy,
 		Steps: []resource.TestStep{

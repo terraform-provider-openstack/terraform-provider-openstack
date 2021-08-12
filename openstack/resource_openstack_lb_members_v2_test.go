@@ -46,6 +46,8 @@ func TestAccLBV2Members_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
 			testAccPreCheckOctaviaBatchMembersEnv(t)
@@ -62,6 +64,8 @@ func TestAccLBV2Members_basic(t *testing.T) {
 					testAccCheckLBV2MembersComputeHash(&members, 1, "192.168.199.111", &idx2),
 					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx1, "0"),
 					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx2, "1"),
+					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.backup", &idx1, "false"),
+					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.backup", &idx2, "true"),
 					testCheckResourceAttrSetWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.subnet_id", &idx1),
 					testCheckResourceAttrSetWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.subnet_id", &idx2),
 				),
@@ -75,6 +79,8 @@ func TestAccLBV2Members_basic(t *testing.T) {
 					testAccCheckLBV2MembersComputeHash(&members, 15, "192.168.199.111", &idx2),
 					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx1, "10"),
 					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx2, "15"),
+					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.backup", &idx1, "true"),
+					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.backup", &idx2, "false"),
 					testCheckResourceAttrSetWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.subnet_id", &idx1),
 					testCheckResourceAttrSetWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.subnet_id", &idx2),
 				),
@@ -218,7 +224,8 @@ resource "openstack_lb_members_v2" "members_1" {
   member {
     address = "192.168.199.111"
     protocol_port = 8080
-    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+	subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+	backup = true
   }
 
   timeouts {
@@ -270,14 +277,16 @@ resource "openstack_lb_members_v2" "members_1" {
     weight = 10
     admin_state_up = "true"
     subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
-  }
+	backup = true
+}
 
   member {
     address = "192.168.199.111"
     protocol_port = 8080
     weight = 15
     admin_state_up = "true"
-    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+	subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+	backup = false
   }
 
   timeouts {

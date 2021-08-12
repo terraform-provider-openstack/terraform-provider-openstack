@@ -11,6 +11,7 @@ func TestAccNetworkingV2TrunkDataSource_nosubports(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
@@ -37,6 +38,7 @@ func TestAccNetworkingV2TrunkDataSource_subports(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,
@@ -65,6 +67,7 @@ func TestAccNetworkingV2TrunkDataSource_tags(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2TrunkDestroy,

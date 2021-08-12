@@ -20,6 +20,9 @@ Manages a V2 load balancer quota resource within OpenStack.
 ~> **Note:** This resource has all-in creation so all optional quota arguments that were not specified are
    created with zero value.
 
+~> **Note:** This resource has attributes that depend on octavia minor versions.
+Please ensure your Openstack cloud supports the required [minor version](../#octavia-api-versioning).
+
 ## Example Usage
 
 ```hcl
@@ -28,14 +31,14 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_lb_quota_v2" "quota_1" {
-  project_id = "${openstack_identity_project_v3.project_1.id}"
-  loadbalancer        = 6
-  listener            = 7
-  member              = 8
-  pool                = 9
-  health_monitor      = 10
-  l7_policy           = 11
-  l7_rule             = 12
+  project_id     = "${openstack_identity_project_v3.project_1.id}"
+  loadbalancer   = 6
+  listener       = 7
+  member         = 8
+  pool           = 9
+  health_monitor = 10
+  l7_policy      = 11
+  l7_rule        = 12
 }
 ```
 
@@ -66,11 +69,11 @@ The following arguments are supported:
 
 * `l7_policy` - (Optional) Quota value for l7_policies. Changing this
   updates the existing quota. Omitting it sets it to 0. Available in
-  Octavia 2.19.
+  **Octavia minor version 2.19**.
 
 * `l7_rule` - (Optional) Quota value for l7_rules. Changing this
   updates the existing quota. Omitting it sets it to 0. Available in
-  Octavia 2.19.
+  **Octavia minor version 2.19**.
 
 
 ## Attributes Reference

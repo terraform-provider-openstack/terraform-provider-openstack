@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/quotasets"
@@ -128,7 +129,8 @@ func resourceComputeQuotasetV2() *schema.Resource {
 
 func resourceComputeQuotasetV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	region := GetRegion(d, config)
+	computeClient, err := config.ComputeV2Client(region)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -171,7 +173,8 @@ func resourceComputeQuotasetV2Create(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error creating openstack_compute_quotaset_v2: %s", err)
 	}
 
-	d.SetId(projectID)
+	id := fmt.Sprintf("%s/%s", projectID, region)
+	d.SetId(id)
 
 	log.Printf("[DEBUG] Created openstack_compute_quotaset_v2 %#v", q)
 
@@ -180,19 +183,26 @@ func resourceComputeQuotasetV2Create(d *schema.ResourceData, meta interface{}) e
 
 func resourceComputeQuotasetV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	region := GetRegion(d, config)
+	computeClient, err := config.ComputeV2Client(region)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	q, err := quotasets.Get(computeClient, d.Id()).Extract()
+	// Depending on the provider version the resource was created, the resource id
+	// can be either <project_id> or <project_id>/<region>. This parses the project_id
+	// in both cases
+	projectID := strings.Split(d.Id(), "/")[0]
+
+	q, err := quotasets.Get(computeClient, projectID).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "Error retrieving openstack_compute_quotaset_v2")
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_quotaset_v2 %s: %#v", d.Id(), q)
 
-	d.Set("project_id", d.Id())
+	d.Set("project_id", projectID)
+	d.Set("region", region)
 	d.Set("fixed_ips", q.FixedIPs)
 	d.Set("floating_ips", q.FloatingIPs)
 	d.Set("injected_file_content_bytes", q.InjectedFileContentBytes)
@@ -309,7 +319,8 @@ func resourceComputeQuotasetV2Update(d *schema.ResourceData, meta interface{}) e
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_compute_quotaset_v2 %s update options: %#v", d.Id(), updateOpts)
-		_, err := quotasets.Update(computeClient, d.Id(), updateOpts).Extract()
+		projectID := d.Get("project_id").(string)
+		_, err := quotasets.Update(computeClient, projectID, updateOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("Error updating openstack_compute_quotaset_v2: %s", err)
 		}

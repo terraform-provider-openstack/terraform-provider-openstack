@@ -76,9 +76,9 @@ type InstanceNetwork struct {
 //
 // So, let's begin the journey.
 func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]InstanceNetwork, error) {
-	var instanceNetworks []InstanceNetwork
-
 	networks := d.Get("network").([]interface{})
+
+	instanceNetworks := make([]InstanceNetwork, 0, len(networks))
 	for _, v := range networks {
 		network := v.(map[string]interface{})
 		networkID := network["uuid"].(string)
@@ -333,7 +333,7 @@ func getInstanceNetworkInfoNeutron(client *gophercloud.ServiceClient, queryType,
 // getInstanceAddresses parses a Gophercloud server.Server's Address field into
 // a structured InstanceAddresses struct.
 func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses {
-	var allInstanceAddresses []InstanceAddresses
+	allInstanceAddresses := make([]InstanceAddresses, 0, len(addresses))
 
 	// Addresses includes a list of all IP addresses assigned to the server,
 	// keyed by pool. This unfortunately causes problems because addresses are a
@@ -417,7 +417,7 @@ func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses 
 // expandInstanceNetworks takes network information found in []InstanceNetwork
 // and builds a Gophercloud []servers.Network for use in creating an Instance.
 func expandInstanceNetworks(allInstanceNetworks []InstanceNetwork) []servers.Network {
-	var networks []servers.Network
+	networks := make([]servers.Network, 0, len(allInstanceNetworks))
 	for _, v := range allInstanceNetworks {
 		n := servers.Network{
 			UUID:    v.UUID,

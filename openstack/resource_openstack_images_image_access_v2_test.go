@@ -14,7 +14,10 @@ func TestAccImagesImageAccessV2_basic(t *testing.T) {
 	var member members.Member
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckImagesImageAccessV2Destroy,
 		Steps: []resource.TestStep{

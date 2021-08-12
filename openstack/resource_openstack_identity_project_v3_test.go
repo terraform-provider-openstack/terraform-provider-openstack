@@ -53,12 +53,9 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 						"openstack_identity_project_v3.project_1", "enabled", "false"),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_project_v3.project_1", "is_domain", "false"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "tags.#", "2"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "tags.1", "tag1"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_project_v3.project_1", "tags.2", "tag2"),
+					testAccCheckIdentityV3ProjectHasTag("openstack_identity_project_v3.project_1", "tag1"),
+					testAccCheckIdentityV3ProjectHasTag("openstack_identity_project_v3.project_1", "tag2"),
+					testAccCheckIdentityV3ProjectTagCount("openstack_identity_project_v3.project_1", 2),
 				),
 			},
 		},
@@ -113,6 +110,76 @@ func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) re
 		}
 
 		*project = *found
+
+		return nil
+	}
+}
+
+func testAccCheckIdentityV3ProjectHasTag(n, tag string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := testAccProvider.Meta().(*Config)
+		identityClient, err := config.IdentityV3Client(osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		}
+
+		found, err := projects.Get(identityClient, rs.Primary.ID).Extract()
+		if err != nil {
+			return err
+		}
+
+		if found.ID != rs.Primary.ID {
+			return fmt.Errorf("Project not found")
+		}
+
+		for _, v := range found.Tags {
+			if tag == v {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Tag not found: %s", tag)
+	}
+}
+
+func testAccCheckIdentityV3ProjectTagCount(n string, expected int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := testAccProvider.Meta().(*Config)
+		identityClient, err := config.IdentityV3Client(osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		}
+
+		found, err := projects.Get(identityClient, rs.Primary.ID).Extract()
+		if err != nil {
+			return err
+		}
+
+		if found.ID != rs.Primary.ID {
+			return fmt.Errorf("Project not found")
+		}
+
+		if len(found.Tags) != expected {
+			return fmt.Errorf("Expecting %d tags, found %d", expected, len(found.Tags))
+		}
 
 		return nil
 	}

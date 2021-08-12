@@ -9,7 +9,7 @@ import (
 )
 
 func flattenIdentityApplicationCredentialRolesV3(roles []applicationcredentials.Role) []string {
-	var res []string
+	res := make([]string, 0, len(roles))
 	for _, role := range roles {
 		res = append(res, role.Name)
 	}
@@ -17,7 +17,7 @@ func flattenIdentityApplicationCredentialRolesV3(roles []applicationcredentials.
 }
 
 func expandIdentityApplicationCredentialRolesV3(roles []interface{}) []applicationcredentials.Role {
-	var res []applicationcredentials.Role
+	res := make([]applicationcredentials.Role, 0, len(roles))
 	for _, role := range roles {
 		res = append(res, applicationcredentials.Role{Name: role.(string)})
 	}
@@ -25,20 +25,20 @@ func expandIdentityApplicationCredentialRolesV3(roles []interface{}) []applicati
 }
 
 func flattenIdentityApplicationCredentialAccessRulesV3(rules []applicationcredentials.AccessRule) []map[string]string {
-	res := make([]map[string]string, len(rules))
-	for i, v := range rules {
-		res[i] = map[string]string{
-			"id":      v.ID,
-			"path":    v.Path,
-			"method":  v.Method,
-			"service": v.Service,
-		}
+	res := make([]map[string]string, 0, len(rules))
+	for _, role := range rules {
+		res = append(res, map[string]string{
+			"id":      role.ID,
+			"path":    role.Path,
+			"method":  role.Method,
+			"service": role.Service,
+		})
 	}
 	return res
 }
 
 func expandIdentityApplicationCredentialAccessRulesV3(rules []interface{}) []applicationcredentials.AccessRule {
-	var res []applicationcredentials.AccessRule
+	res := make([]applicationcredentials.AccessRule, 0, len(rules))
 	for _, v := range rules {
 		rule := v.(map[string]interface{})
 		res = append(res,

@@ -11,7 +11,11 @@ func TestAccDNSV2RecordSet_importBasic(t *testing.T) {
 	resourceName := "openstack_dns_recordset_v2.recordset_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDNS(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckDNS(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
@@ -22,6 +26,9 @@ func TestAccDNSV2RecordSet_importBasic(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"disable_status_check",
+				},
 			},
 		},
 	})

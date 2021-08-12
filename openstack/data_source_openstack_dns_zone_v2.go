@@ -146,7 +146,9 @@ func dataSourceDNSZoneV2Read(d *schema.ResourceData, meta interface{}) error {
 		listOpts.Type = v.(string)
 	}
 
-	dnsClientSetAuthHeader(d, dnsClient)
+	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
+		log.Printf("[DEBUG] unable to ser auth header: %s", err)
+	}
 
 	pages, err := zones.List(dnsClient, listOpts).AllPages()
 	if err != nil {

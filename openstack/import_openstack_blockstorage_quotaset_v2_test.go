@@ -13,6 +13,7 @@ func TestAccBlockStorageV2Quotaset_importBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
+			testAccPreCheckBlockStorageV2(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIdentityV3ProjectDestroy,

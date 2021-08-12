@@ -47,6 +47,10 @@ The following arguments are supported:
 * `name` - (Required) The name of the record set. Note the `.` at the end of the name.
   Changing this creates a new DNS  record set.
 
+* `project_id` - (Optional) The ID of the project DNS zone is created
+  for, sets `X-Auth-Sudo-Tenant-ID` header (requires an assigned 
+  user role in target project)
+
 * `type` - (Optional) The type of record set. Examples: "A", "MX".
   Changing this creates a new DNS  record set.
 
@@ -60,6 +64,10 @@ The following arguments are supported:
 
 * `value_specs` - (Optional) Map of additional options. Changing this creates a
   new record set.
+
+* `disable_status_check` - (Optional) Disable wait for recordset to reach ACTIVE
+  status. This argumen is disabled by default. If it is set to true, the recordset
+  will be considered as created/updated/deleted if OpenStack request returned success.
 
 ## Attributes Reference
 

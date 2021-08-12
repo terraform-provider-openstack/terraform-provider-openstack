@@ -23,7 +23,7 @@ func expandDatabaseUserV1Databases(rawDatabases []interface{}) databases.BatchCr
 }
 
 func flattenDatabaseUserV1Databases(dbs []databases.Database) []string {
-	var databases []string
+	databases := make([]string, 0, len(dbs))
 	for _, db := range dbs {
 		databases = append(databases, db.Name)
 	}

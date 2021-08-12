@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"net"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
@@ -50,6 +51,10 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				Optional:      true,
 				Computed:      true,
 				ForceNew:      true,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.IsCIDR,
+				},
 			},
 
 			"prefix_length": {
@@ -261,9 +266,13 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 		MapValueSpecs(d),
 	}
 
-	// Set CIDR if provided.
+	// Set CIDR if provided. Check if inferred subnet would match the provided cidr.
 	if v, ok := d.GetOk("cidr"); ok {
 		cidr := v.(string)
+		_, netAddr, _ := net.ParseCIDR(cidr)
+		if netAddr.String() != cidr {
+			return fmt.Errorf("cidr %s doesn't match subnet address %s for openstack_networking_subnet_v2", cidr, netAddr.String())
+		}
 		createOpts.CIDR = cidr
 	}
 

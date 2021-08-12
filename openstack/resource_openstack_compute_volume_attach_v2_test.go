@@ -14,7 +14,10 @@ func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 	var va volumeattach.VolumeAttachment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
@@ -32,7 +35,10 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 	var va volumeattach.VolumeAttachment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
@@ -51,7 +57,10 @@ func TestAccComputeV2VolumeAttach_ignore_volume_confirmation(t *testing.T) {
 	var va volumeattach.VolumeAttachment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
@@ -187,7 +196,7 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
 
 func testAccComputeV2VolumeAttachIgnoreVolumeConfirmation() string {
 	return fmt.Sprintf(`
-resource "openstack_blockstorage_volume_v2" "volume_1" {
+resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   size = 1
 }
@@ -202,7 +211,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
 
 resource "openstack_compute_volume_attach_v2" "va_1" {
   instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  volume_id = "${openstack_blockstorage_volume_v2.volume_1.id}"
+  volume_id = "${openstack_blockstorage_volume_v3.volume_1.id}"
   vendor_options {
     ignore_volume_confirmation = true
   }

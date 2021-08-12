@@ -15,7 +15,10 @@ func TestAccIdentityV3Ec2Credential_basic(t *testing.T) {
 	var Ec2Credential ec2credentials.Credential
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIdentityV3Ec2CredentialDestroy,
 		Steps: []resource.TestStep{

@@ -23,7 +23,7 @@ func expandDatabaseInstanceV1Datastore(rawDatastore []interface{}) instances.Dat
 }
 
 func expandDatabaseInstanceV1Networks(rawNetworks []interface{}) []instances.NetworkOpts {
-	var networks []instances.NetworkOpts
+	networks := make([]instances.NetworkOpts, 0, len(rawNetworks))
 	for _, v := range rawNetworks {
 		network := v.(map[string]interface{})
 		networks = append(networks, instances.NetworkOpts{

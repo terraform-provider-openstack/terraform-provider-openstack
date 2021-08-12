@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/quotas"
@@ -111,14 +112,14 @@ func resourceLoadBalancerQuotaV2Create(d *schema.ResourceData, meta interface{})
 		Healthmonitor: &healthmonitor,
 	}
 
+	// l7_policy requires octavia minor version 2.19. Only set when specified
 	if v, ok := d.GetOkExists("l7_policy"); ok {
-		lbClient.Microversion = octaviaLBQuotaRuleAndPolicyMicroversion
 		l7Policy := v.(int)
 		updateOpts.L7Policy = &l7Policy
 	}
 
+	// l7_rule requires octavia minor version 2.19. Only set when specified
 	if v, ok := d.GetOkExists("l7_rule"); ok {
-		lbClient.Microversion = octaviaLBQuotaRuleAndPolicyMicroversion
 		l7Rule := v.(int)
 		updateOpts.L7Rule = &l7Rule
 	}
@@ -138,6 +139,7 @@ func resourceLoadBalancerQuotaV2Create(d *schema.ResourceData, meta interface{})
 
 func resourceLoadBalancerQuotaV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	region := GetRegion(d, config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack loadbalancing client: %s", err)
@@ -147,10 +149,8 @@ func resourceLoadBalancerQuotaV2Read(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error creating openstack_lb_quota_v2: Only available when using octavia")
 	}
 
-	projectID, region, err := parseLBQuotaID(d.Id())
-	if err != nil {
-		return CheckDeleted(d, err, "Error parsing ID of openstack_lb_quota_v2")
-	}
+	// Pase projectID from resource id that is <project_id>/<region>
+	projectID := strings.Split(d.Id(), "/")[0]
 
 	q, err := quotas.Get(lbClient, projectID).Extract()
 	if err != nil {
@@ -220,25 +220,20 @@ func resourceLoadBalancerQuotaV2Update(d *schema.ResourceData, meta interface{})
 
 	if d.HasChange("l7_policy") {
 		hasChange = true
-		lbClient.Microversion = octaviaLBQuotaRuleAndPolicyMicroversion
 		l7Policy := d.Get("l7_policy").(int)
 		updateOpts.L7Policy = &l7Policy
 	}
 
 	if d.HasChange("l7_rule") {
 		hasChange = true
-		lbClient.Microversion = octaviaLBQuotaRuleAndPolicyMicroversion
 		l7Rule := d.Get("l7_rule").(int)
 		updateOpts.L7Rule = &l7Rule
 	}
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_lb_quota_v2 %s update options: %#v", d.Id(), updateOpts)
-		projectID, _, err := parseLBQuotaID(d.Id())
-		if err != nil {
-			return CheckDeleted(d, err, "Error parsing ID of openstack_lb_quota_v2")
-		}
-		_, err = quotas.Update(lbClient, projectID, updateOpts).Extract()
+		projectID := d.Get("project_id").(string)
+		_, err := quotas.Update(lbClient, projectID, updateOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("Error updating openstack_lb_quota_v2: %s", err)
 		}

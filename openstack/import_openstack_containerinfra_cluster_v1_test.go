@@ -15,7 +15,11 @@ func TestAccContainerInfraV1ClusterImport_basic(t *testing.T) {
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckContainerInfra(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckContainerInfra(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerInfraV1ClusterDestroy,
 		Steps: []resource.TestStep{

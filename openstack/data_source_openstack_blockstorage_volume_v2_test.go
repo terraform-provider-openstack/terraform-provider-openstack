@@ -18,7 +18,7 @@ func TestAccBlockStorageV2VolumeDataSource_basic(t *testing.T) {
 	volumeName := acctest.RandomWithPrefix("tf-acc-volume")
 
 	var volumeID string
-	if os.Getenv("TF_ACC") != "" {
+	if os.Getenv("TF_ACC") != "" && os.Getenv("OS_BLOCKSTORAGE_V2") != "" {
 		var err error
 		volumeID, err = testAccBlockStorageV2CreateVolume(volumeName)
 		if err != nil {
@@ -28,7 +28,11 @@ func TestAccBlockStorageV2VolumeDataSource_basic(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckBlockStorageV2(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

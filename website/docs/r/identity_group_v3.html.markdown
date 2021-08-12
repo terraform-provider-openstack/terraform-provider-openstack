@@ -17,7 +17,7 @@ this resource.
 
 ```hcl
 resource "openstack_identity_group_v3" "group_1" {
-  name = "group_1"
+  name        = "group_1"
   description = "group 1"
 }
 ```
