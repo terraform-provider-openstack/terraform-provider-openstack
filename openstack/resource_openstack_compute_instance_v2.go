@@ -585,7 +585,7 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 		server.ID)
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"BUILD"},
+		Pending:    []string{"BUILD", "retryableerror"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    ServerV2StateRefreshFunc(computeClient, server.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
@@ -955,7 +955,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		// Resize instance without confirmation if specified by user.
 		if ignoreResizeConfirmation {
 			stateConf := &resource.StateChangeConf{
-				Pending:    []string{"RESIZE", "VERIFY_RESIZE"},
+				Pending:    []string{"RESIZE", "VERIFY_RESIZE", "retryableerror"},
 				Target:     []string{"ACTIVE", "SHUTOFF"},
 				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
@@ -969,7 +969,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 			}
 		} else {
 			stateConf := &resource.StateChangeConf{
-				Pending:    []string{"RESIZE"},
+				Pending:    []string{"RESIZE", "retryableerror"},
 				Target:     []string{"VERIFY_RESIZE"},
 				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
@@ -990,7 +990,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 			}
 
 			stateConf = &resource.StateChangeConf{
-				Pending:    []string{"VERIFY_RESIZE"},
+				Pending:    []string{"VERIFY_RESIZE", "retryableerror"},
 				Target:     []string{"ACTIVE", "SHUTOFF"},
 				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
@@ -1033,7 +1033,7 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 			log.Printf("[WARN] Error stopping openstack_compute_instance_v2: %s", err)
 		} else {
 			stopStateConf := &resource.StateChangeConf{
-				Pending:    []string{"ACTIVE"},
+				Pending:    []string{"ACTIVE", "retryableerror"},
 				Target:     []string{"SHUTOFF"},
 				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutDelete),
@@ -1093,7 +1093,7 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 	log.Printf("[DEBUG] Waiting for instance (%s) to delete", d.Id())
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"ACTIVE", "SHUTOFF"},
+		Pending:    []string{"ACTIVE", "SHUTOFF", "retryableerror"},
 		Target:     []string{"DELETED", "SOFT_DELETED"},
 		Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
@@ -1231,8 +1231,15 @@ func ServerV2StateRefreshFunc(client *gophercloud.ServiceClient, instanceID stri
 	return func() (interface{}, string, error) {
 		s, err := servers.Get(client, instanceID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			switch err.(type) {
+			case gophercloud.ErrDefault404:
 				return s, "DELETED", nil
+			case gophercloud.ErrDefault409:
+				return s, "retryableerror", nil
+			case gophercloud.ErrDefault500:
+				return s, "retryableerror", nil
+			case gophercloud.ErrDefault503:
+				return s, "retryableerror", nil
 			}
 			return nil, "", err
 		}
