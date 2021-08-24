@@ -60,7 +60,7 @@ func dnsClientSetAuthHeader(resourceData *schema.ResourceData, dnsClient *gopher
 	// If project_id is different from auth one, set AuthSudo header
 	if v, ok := resourceData.GetOk("project_id"); ok {
 		if projectID, ok := v.(string); ok {
-			if project.ID != projectID {
+			if project != nil && project.ID != projectID {
 				headers[headerAuthSudoTenantID] = projectID
 			}
 		} else {

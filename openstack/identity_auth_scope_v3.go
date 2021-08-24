@@ -167,7 +167,9 @@ func getTokenInfoV3(t interface{}) (authScopeTokenInfo, error) {
 			return info, err
 		}
 		info.userID = user.ID
-		info.projectID = project.ID
+		if project != nil {
+			info.projectID = project.ID
+		}
 		return info, nil
 	case tokens3.GetResult:
 		user, err := r.ExtractUser()
@@ -179,7 +181,9 @@ func getTokenInfoV3(t interface{}) (authScopeTokenInfo, error) {
 			return info, err
 		}
 		info.userID = user.ID
-		info.projectID = project.ID
+		if project != nil {
+			info.projectID = project.ID
+		}
 		return info, nil
 	default:
 		return info, fmt.Errorf("got unexpected AuthResult type %t", r)
