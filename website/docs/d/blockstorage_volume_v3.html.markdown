@@ -43,3 +43,4 @@ are exported:
 * `size` - The size of the volume in GBs.
 * `source_volume_id` - The ID of the volume from which the current volume was created.
 * `multiattach` - Indicates if the volume can be attached to more then one server.
+* `host` - The OpenStack host on which the volume is located.
