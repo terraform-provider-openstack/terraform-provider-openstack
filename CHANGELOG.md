@@ -1,3 +1,9 @@
+## 1.43.1 (21 September, 2021)
+
+BUG FIXES
+
+* Fixed panics when a token doesn't have a project scope ([#1282](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1282))
+
 ## 1.43.0 (16 July, 2021)
 
 FEATURES
