@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
-
 	"github.com/stretchr/testify/assert"
+
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 )
 
 func blockStorageVolumeV2VolumeFixture() volumes.Volume {

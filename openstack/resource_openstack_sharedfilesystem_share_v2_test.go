@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
 )
@@ -19,8 +19,8 @@ func TestAccSFSV2Share_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSFS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSFSV2ShareDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSFSV2ShareDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSV2ShareConfigBasic,
@@ -74,8 +74,8 @@ func TestAccSFSV2Share_update(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSFS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSFSV2ShareDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSFSV2ShareDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSV2ShareConfigMetadataUpdate,
@@ -126,8 +126,8 @@ func TestAccSFSV2Share_admin(t *testing.T) {
 			testAccPreCheckSFS(t)
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSFSV2ShareDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSFSV2ShareDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSV2ShareAdminConfigBasic,

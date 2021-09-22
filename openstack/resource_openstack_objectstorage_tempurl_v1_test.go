@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOpenStackObjectStorageTempurlV1_basic(t *testing.T) {
@@ -21,7 +21,7 @@ func TestAccOpenStackObjectStorageTempurlV1_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSwift(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackObjectstorageTempurlV1ResourceBasic(containerName, objectName, "get", ttl),

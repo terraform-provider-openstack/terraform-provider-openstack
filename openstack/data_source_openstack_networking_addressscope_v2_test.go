@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccOpenStackNetworkingAddressScopeV2DataSource_name(t *testing.T) {
@@ -13,7 +13,7 @@ func TestAccOpenStackNetworkingAddressScopeV2DataSource_name(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackNetworkingAddressScopeV2DataSourceAddressscope,
@@ -37,7 +37,7 @@ func TestAccOpenStackNetworkingAddressScopeV2DataSource_ipversion(t *testing.T) 
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackNetworkingAddressScopeV2DataSourceAddressscope,
@@ -61,7 +61,7 @@ func TestAccOpenStackNetworkingAddressScopeV2DataSource_shared(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackNetworkingAddressScopeV2DataSourceAddressscope,

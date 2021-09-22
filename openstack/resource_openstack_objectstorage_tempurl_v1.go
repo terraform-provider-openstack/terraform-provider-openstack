@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
@@ -9,16 +10,17 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects"
 )
 
 func resourceObjectstorageTempurlV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceObjectstorageTempurlV1Create,
-		Read:   resourceObjectstorageTempurlV1Read,
-		Delete: schema.RemoveFromState,
+		CreateContext: resourceObjectstorageTempurlV1Create,
+		ReadContext:   resourceObjectstorageTempurlV1Read,
+		Delete:        schema.RemoveFromState,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -82,11 +84,11 @@ func resourceObjectstorageTempurlV1() *schema.Resource {
 }
 
 // resourceObjectstorageTempurlV1Create performs the image lookup.
-func resourceObjectstorageTempurlV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceObjectstorageTempurlV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	objectStorageClient, err := config.ObjectStorageV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	method := objects.GET
@@ -112,7 +114,7 @@ func resourceObjectstorageTempurlV1Create(d *schema.ResourceData, meta interface
 
 	url, err := objects.CreateTempURL(objectStorageClient, containerName, objectName, turlOptions)
 	if err != nil {
-		return fmt.Errorf("Unable to generate a temporary url for the object %s in container %s: %s",
+		return diag.Errorf("Unable to generate a temporary url for the object %s in container %s: %s",
 			objectName, containerName, err)
 	}
 
@@ -127,22 +129,22 @@ func resourceObjectstorageTempurlV1Create(d *schema.ResourceData, meta interface
 }
 
 // resourceObjectstorageTempurlV1Read performs the image lookup.
-func resourceObjectstorageTempurlV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceObjectstorageTempurlV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	turl := d.Get("url").(string)
 	u, err := url.Parse(turl)
 	if err != nil {
-		return fmt.Errorf("Failed to read the temporary url %s: %s", turl, err)
+		return diag.Errorf("Failed to read the temporary url %s: %s", turl, err)
 	}
 
 	qp, err := url.ParseQuery(u.RawQuery)
 	if err != nil {
-		return fmt.Errorf("Failed to parse the temporary url %s query string: %s", turl, err)
+		return diag.Errorf("Failed to parse the temporary url %s query string: %s", turl, err)
 	}
 
 	tempURLExpires := qp.Get("temp_url_expires")
 	expiry, err := strconv.ParseInt(tempURLExpires, 10, 64)
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Failed to parse the temporary url %s expiration time %s: %s",
 			turl, tempURLExpires, err)
 	}

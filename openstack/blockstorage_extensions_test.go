@@ -3,8 +3,9 @@ package openstack
 import (
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints"
 )
 
 func blockStorageExtensionsSchedulerHints() schedulerhints.SchedulerHints {

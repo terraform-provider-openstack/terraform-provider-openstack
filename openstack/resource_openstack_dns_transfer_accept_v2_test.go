@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/transfer/accept"
 )
@@ -21,8 +21,8 @@ func TestAccDNSV2TransferAccept_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckDNS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2TransferAcceptDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDNSV2TransferAcceptDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2TransferAcceptBasic(zoneName),
@@ -45,8 +45,8 @@ func TestAccDNSV2TransferAccept_ignoreStatusCheck(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckDNS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2TransferAcceptDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDNSV2TransferAcceptDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2TransferAcceptDisableCheck(zoneName),

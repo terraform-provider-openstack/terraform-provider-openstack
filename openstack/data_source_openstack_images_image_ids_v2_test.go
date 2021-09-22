@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccOpenStackImagesV2ImageIDsDataSource_basic(t *testing.T) {
@@ -13,7 +13,7 @@ func TestAccOpenStackImagesV2ImageIDsDataSource_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackImagesV2ImageIDsDataSourceEmpty(),

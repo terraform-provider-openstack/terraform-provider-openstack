@@ -5,10 +5,11 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
@@ -26,8 +27,8 @@ func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckContainerInfra(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerInfraV1ClusterDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerInfraV1ClusterBasic(imageName, keypairName, clusterTemplateName, clusterName),

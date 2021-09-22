@@ -1,12 +1,13 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	octavialoadbalancers "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/loadbalancers"
 	neutronloadbalancers "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
@@ -14,12 +15,12 @@ import (
 
 func resourceLoadBalancerV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLoadBalancerV2Create,
-		Read:   resourceLoadBalancerV2Read,
-		Update: resourceLoadBalancerV2Update,
-		Delete: resourceLoadBalancerV2Delete,
+		CreateContext: resourceLoadBalancerV2Create,
+		ReadContext:   resourceLoadBalancerV2Read,
+		UpdateContext: resourceLoadBalancerV2Update,
+		DeleteContext: resourceLoadBalancerV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -118,11 +119,11 @@ func resourceLoadBalancerV2() *schema.Resource {
 	}
 }
 
-func resourceLoadBalancerV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var (
@@ -160,7 +161,7 @@ func resourceLoadBalancerV2Create(d *schema.ResourceData, meta interface{}) erro
 		log.Printf("[DEBUG][Octavia] openstack_lb_loadbalancer_v2 create options: %#v", createOpts)
 		lb, err := octavialoadbalancers.Create(lbClient, createOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error creating openstack_lb_loadbalancer_v2: %s", err)
+			return diag.Errorf("Error creating openstack_lb_loadbalancer_v2: %s", err)
 		}
 		lbID = lb.ID
 		vipPortID = lb.VipPortID
@@ -179,7 +180,7 @@ func resourceLoadBalancerV2Create(d *schema.ResourceData, meta interface{}) erro
 		log.Printf("[DEBUG][Neutron] openstack_lb_loadbalancer_v2 create options: %#v", createOpts)
 		lb, err := neutronloadbalancers.Create(lbClient, createOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error creating openstack_lb_loadbalancer_v2: %s", err)
+			return diag.Errorf("Error creating openstack_lb_loadbalancer_v2: %s", err)
 		}
 		lbID = lb.ID
 		vipPortID = lb.VipPortID
@@ -187,31 +188,31 @@ func resourceLoadBalancerV2Create(d *schema.ResourceData, meta interface{}) erro
 
 	// Wait for load-balancer to become active before continuing.
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2LoadBalancer(lbClient, lbID, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2LoadBalancer(ctx, lbClient, lbID, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Once the load-balancer has been created, apply any requested security groups
 	// to the port that was created behind the scenes.
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 	if err := resourceLoadBalancerV2SetSecurityGroups(networkingClient, vipPortID, d); err != nil {
-		return fmt.Errorf("Error setting openstack_lb_loadbalancer_v2 security groups: %s", err)
+		return diag.Errorf("Error setting openstack_lb_loadbalancer_v2 security groups: %s", err)
 	}
 
 	d.SetId(lbID)
 
-	return resourceLoadBalancerV2Read(d, meta)
+	return resourceLoadBalancerV2Read(ctx, d, meta)
 }
 
-func resourceLoadBalancerV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceLoadBalancerV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var vipPortID string
@@ -219,7 +220,7 @@ func resourceLoadBalancerV2Read(d *schema.ResourceData, meta interface{}) error 
 	if lbClient.Type == octaviaLBClientType {
 		lb, err := octavialoadbalancers.Get(lbClient, d.Id()).Extract()
 		if err != nil {
-			return CheckDeleted(d, err, "Unable to retrieve openstack_lb_loadbalancer_v2")
+			return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve openstack_lb_loadbalancer_v2"))
 		}
 
 		log.Printf("[DEBUG][Octavia] Retrieved openstack_lb_loadbalancer_v2 %s: %#v", d.Id(), lb)
@@ -240,7 +241,7 @@ func resourceLoadBalancerV2Read(d *schema.ResourceData, meta interface{}) error 
 	} else {
 		lb, err := neutronloadbalancers.Get(lbClient, d.Id()).Extract()
 		if err != nil {
-			return CheckDeleted(d, err, "Unable to retrieve openstack_lb_loadbalancer_v2")
+			return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve openstack_lb_loadbalancer_v2"))
 		}
 
 		log.Printf("[DEBUG][Neutron] Retrieved openstack_lb_loadbalancer_v2 %s: %#v", d.Id(), lb)
@@ -262,21 +263,21 @@ func resourceLoadBalancerV2Read(d *schema.ResourceData, meta interface{}) error 
 	if vipPortID != "" {
 		networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return diag.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 		if err := resourceLoadBalancerV2GetSecurityGroups(networkingClient, vipPortID, d); err != nil {
-			return fmt.Errorf("Error getting port security groups for openstack_lb_loadbalancer_v2: %s", err)
+			return diag.Errorf("Error getting port security groups for openstack_lb_loadbalancer_v2: %s", err)
 		}
 	}
 
 	return nil
 }
 
-func resourceLoadBalancerV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var updateOpts neutronloadbalancers.UpdateOpts
@@ -296,9 +297,9 @@ func resourceLoadBalancerV2Update(d *schema.ResourceData, meta interface{}) erro
 	if updateOpts != (neutronloadbalancers.UpdateOpts{}) {
 		// Wait for load-balancer to become active before continuing.
 		timeout := d.Timeout(schema.TimeoutUpdate)
-		err = waitForLBV2LoadBalancer(lbClient, d.Id(), "ACTIVE", getLbPendingStatuses(), timeout)
+		err = waitForLBV2LoadBalancer(ctx, lbClient, d.Id(), "ACTIVE", getLbPendingStatuses(), timeout)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		log.Printf("[DEBUG] Updating openstack_lb_loadbalancer_v2 %s with options: %#v", d.Id(), updateOpts)
@@ -311,13 +312,13 @@ func resourceLoadBalancerV2Update(d *schema.ResourceData, meta interface{}) erro
 		})
 
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_lb_loadbalancer_v2 %s: %s", d.Id(), err)
+			return diag.Errorf("Error updating openstack_lb_loadbalancer_v2 %s: %s", d.Id(), err)
 		}
 
 		// Wait for load-balancer to become active before continuing.
-		err = waitForLBV2LoadBalancer(lbClient, d.Id(), "ACTIVE", getLbPendingStatuses(), timeout)
+		err = waitForLBV2LoadBalancer(ctx, lbClient, d.Id(), "ACTIVE", getLbPendingStatuses(), timeout)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -325,22 +326,22 @@ func resourceLoadBalancerV2Update(d *schema.ResourceData, meta interface{}) erro
 	if d.HasChange("security_group_ids") {
 		networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return diag.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 		vipPortID := d.Get("vip_port_id").(string)
 		if err := resourceLoadBalancerV2SetSecurityGroups(networkingClient, vipPortID, d); err != nil {
-			return fmt.Errorf("Error setting openstack_lb_loadbalancer_v2 security groups: %s", err)
+			return diag.Errorf("Error setting openstack_lb_loadbalancer_v2 security groups: %s", err)
 		}
 	}
 
-	return resourceLoadBalancerV2Read(d, meta)
+	return resourceLoadBalancerV2Read(ctx, d, meta)
 }
 
-func resourceLoadBalancerV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceLoadBalancerV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting openstack_lb_loadbalancer_v2 %s", d.Id())
@@ -354,13 +355,13 @@ func resourceLoadBalancerV2Delete(d *schema.ResourceData, meta interface{}) erro
 	})
 
 	if err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_lb_loadbalancer_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_lb_loadbalancer_v2"))
 	}
 
 	// Wait for load-balancer to become deleted.
-	err = waitForLBV2LoadBalancer(lbClient, d.Id(), "DELETED", getLbPendingDeleteStatuses(), timeout)
+	err = waitForLBV2LoadBalancer(ctx, lbClient, d.Id(), "DELETED", getLbPendingDeleteStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

@@ -1,25 +1,27 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceContainerInfraClusterV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceContainerInfraClusterV1Create,
-		Read:   resourceContainerInfraClusterV1Read,
-		Update: resourceContainerInfraClusterV1Update,
-		Delete: resourceContainerInfraClusterV1Delete,
+		CreateContext: resourceContainerInfraClusterV1Create,
+		ReadContext:   resourceContainerInfraClusterV1Read,
+		UpdateContext: resourceContainerInfraClusterV1Update,
+		DeleteContext: resourceContainerInfraClusterV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -206,51 +208,24 @@ func resourceContainerInfraClusterV1() *schema.Resource {
 				Type:      schema.TypeMap,
 				Computed:  true,
 				Sensitive: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"raw_config": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
-						"host": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
-						"cluster_ca_certificate": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
-						"client_key": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
-						"client_certificate": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
+				Elem:      &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
 }
 
-func resourceContainerInfraClusterV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceContainerInfraClusterV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
+		return diag.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
 
 	// Get and check labels map.
 	rawLabels := d.Get("labels").(map[string]interface{})
 	labels, err := expandContainerInfraV1LabelsMap(rawLabels)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Determine the flavors to use.
@@ -258,12 +233,12 @@ func resourceContainerInfraClusterV1Create(d *schema.ResourceData, meta interfac
 	// If not, try using the appropriate environment variable.
 	flavor, err := containerInfraClusterV1Flavor(d)
 	if err != nil {
-		return fmt.Errorf("Unable to determine openstack_containerinfra_cluster_v1 flavor")
+		return diag.Errorf("Unable to determine openstack_containerinfra_cluster_v1 flavor")
 	}
 
 	masterFlavor, err := containerInfraClusterV1MasterFlavor(d)
 	if err != nil {
-		return fmt.Errorf("Unable to determine openstack_containerinfra_cluster_v1 master_flavor")
+		return diag.Errorf("Unable to determine openstack_containerinfra_cluster_v1 master_flavor")
 	}
 
 	// Get boolean parameters that will be passed by reference.
@@ -310,7 +285,7 @@ func resourceContainerInfraClusterV1Create(d *schema.ResourceData, meta interfac
 
 	s, err := clusters.Create(containerInfraClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_containerinfra_cluster_v1: %s", err)
+		return diag.Errorf("Error creating openstack_containerinfra_cluster_v1: %s", err)
 	}
 
 	// Store the Cluster ID.
@@ -324,33 +299,33 @@ func resourceContainerInfraClusterV1Create(d *schema.ResourceData, meta interfac
 		Delay:        1 * time.Minute,
 		PollInterval: 20 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for openstack_containerinfra_cluster_v1 %s to become ready: %s", s, err)
 	}
 
 	log.Printf("[DEBUG] Created openstack_containerinfra_cluster_v1 %s", s)
 
-	return resourceContainerInfraClusterV1Read(d, meta)
+	return resourceContainerInfraClusterV1Read(ctx, d, meta)
 }
 
-func resourceContainerInfraClusterV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceContainerInfraClusterV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
+		return diag.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
 
 	s, err := clusters.Get(containerInfraClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_containerinfra_cluster_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_containerinfra_cluster_v1"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_containerinfra_cluster_v1 %s: %#v", d.Id(), s)
 
 	if err := d.Set("labels", s.Labels); err != nil {
-		return fmt.Errorf("Unable to set openstack_containerinfra_cluster_v1 labels: %s", err)
+		return diag.Errorf("Unable to set openstack_containerinfra_cluster_v1 labels: %s", err)
 	}
 
 	d.Set("name", s.Name)
@@ -375,7 +350,7 @@ func resourceContainerInfraClusterV1Read(d *schema.ResourceData, meta interface{
 
 	kubeconfig, err := flattenContainerInfraV1Kubeconfig(d, containerInfraClient)
 	if err != nil {
-		return fmt.Errorf("Error building kubeconfig for openstack_containerinfra_cluster_v1 %s: %s", d.Id(), err)
+		return diag.Errorf("Error building kubeconfig for openstack_containerinfra_cluster_v1 %s: %s", d.Id(), err)
 	}
 	d.Set("kubeconfig", kubeconfig)
 
@@ -389,11 +364,11 @@ func resourceContainerInfraClusterV1Read(d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func resourceContainerInfraClusterV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceContainerInfraClusterV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
+		return diag.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
 
 	updateOpts := []clusters.UpdateOptsBuilder{}
@@ -414,7 +389,7 @@ func resourceContainerInfraClusterV1Update(d *schema.ResourceData, meta interfac
 
 		_, err = clusters.Update(containerInfraClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_containerinfra_cluster_v1 %s: %s", d.Id(), err)
+			return diag.Errorf("Error updating openstack_containerinfra_cluster_v1 %s: %s", d.Id(), err)
 		}
 
 		stateConf := &resource.StateChangeConf{
@@ -425,24 +400,24 @@ func resourceContainerInfraClusterV1Update(d *schema.ResourceData, meta interfac
 			Delay:        1 * time.Minute,
 			PollInterval: 20 * time.Second,
 		}
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return fmt.Errorf(
+			return diag.Errorf(
 				"Error waiting for openstack_containerinfra_cluster_v1 %s to become updated: %s", d.Id(), err)
 		}
 	}
-	return resourceContainerInfraClusterV1Read(d, meta)
+	return resourceContainerInfraClusterV1Read(ctx, d, meta)
 }
 
-func resourceContainerInfraClusterV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceContainerInfraClusterV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
+		return diag.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
 
 	if err := clusters.Delete(containerInfraClient, d.Id()).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_containerinfra_cluster_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_containerinfra_cluster_v1"))
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -453,9 +428,9 @@ func resourceContainerInfraClusterV1Delete(d *schema.ResourceData, meta interfac
 		Delay:        30 * time.Second,
 		PollInterval: 10 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for openstack_containerinfra_cluster_v1 %s to become deleted: %s", d.Id(), err)
 	}
 

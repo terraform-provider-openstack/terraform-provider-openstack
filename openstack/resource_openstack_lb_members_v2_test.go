@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func testAccCheckLBV2MembersComputeHash(members *[]pools.Member, weight int, address string, idx *int) resource.TestCheckFunc {
@@ -52,8 +53,8 @@ func TestAccLBV2Members_basic(t *testing.T) {
 			testAccPreCheckUseOctavia(t)
 			testAccPreCheckOctaviaBatchMembersEnv(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2MembersDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2MembersDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccLbV2MembersConfigBasic,

@@ -3,9 +3,8 @@ package openstack
 import (
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/db/v1/databases"
 	"github.com/gophercloud/gophercloud/openstack/db/v1/instances"

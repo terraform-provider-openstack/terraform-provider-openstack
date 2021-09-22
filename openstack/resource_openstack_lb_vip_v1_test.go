@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas/vips"
 )
@@ -14,9 +14,9 @@ func TestAccLBV1VIP_basic(t *testing.T) {
 	var vip vips.VirtualIP
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDeprecated(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV1VIPDestroy,
+		PreCheck:          func() { testAccPreCheckDeprecated(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV1VIPDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV1VIPBasic,
@@ -38,9 +38,9 @@ func TestAccLBV1VIP_timeout(t *testing.T) {
 	var vip vips.VirtualIP
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDeprecated(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV1VIPDestroy,
+		PreCheck:          func() { testAccPreCheckDeprecated(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV1VIPDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV1VIPTimeout,

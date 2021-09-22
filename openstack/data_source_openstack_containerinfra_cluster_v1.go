@@ -1,17 +1,19 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceContainerInfraCluster() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceContainerInfraClusterRead,
+		ReadContext: dataSourceContainerInfraClusterRead,
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -144,17 +146,17 @@ func dataSourceContainerInfraCluster() *schema.Resource {
 	}
 }
 
-func dataSourceContainerInfraClusterRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceContainerInfraClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
+		return diag.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
 
 	name := d.Get("name").(string)
 	c, err := clusters.Get(containerInfraClient, name).Extract()
 	if err != nil {
-		return fmt.Errorf("Error getting openstack_containerinfra_cluster_v1 %s: %s", name, err)
+		return diag.Errorf("Error getting openstack_containerinfra_cluster_v1 %s: %s", name, err)
 	}
 
 	d.SetId(c.UUID)

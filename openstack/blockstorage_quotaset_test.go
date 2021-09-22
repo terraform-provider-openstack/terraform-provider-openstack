@@ -16,7 +16,7 @@ func TestBlockStorageVolumeTypeQuotaConversion(t *testing.T) {
 		"bar": 43,
 	}
 
-	actual, err := blockStorageVolumeTypeQuotaConversion(raw)
+	actual, err := blockStorageQuotasetVolTypeQuotaToInt(raw)
 
 	if err != nil {
 		t.Fatal(err)
@@ -33,7 +33,7 @@ func TestBlockStorageVolumeTypeQuotaConversion_err(t *testing.T) {
 		"bar": 200,
 	}
 
-	_, err := blockStorageVolumeTypeQuotaConversion(raw)
+	_, err := blockStorageQuotasetVolTypeQuotaToInt(raw)
 
 	if err == nil {
 		t.Fatal("Expected error in asserting string")
@@ -46,7 +46,7 @@ func TestBlockStorageVolumeTypeQuotaConversion_err2(t *testing.T) {
 		"bar": "bar",
 	}
 
-	_, err := blockStorageVolumeTypeQuotaConversion(raw)
+	_, err := blockStorageQuotasetVolTypeQuotaToInt(raw)
 
 	if err == nil {
 		t.Fatal("Expected error in converting to int")

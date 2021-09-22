@@ -1,11 +1,13 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
@@ -14,11 +16,11 @@ import (
 
 func resourceComputeFlavorAccessV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceComputeFlavorAccessV2Create,
-		Read:   resourceComputeFlavorAccessV2Read,
-		Delete: resourceComputeFlavorAccessV2Delete,
+		CreateContext: resourceComputeFlavorAccessV2Create,
+		ReadContext:   resourceComputeFlavorAccessV2Read,
+		DeleteContext: resourceComputeFlavorAccessV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -42,11 +44,11 @@ func resourceComputeFlavorAccessV2() *schema.Resource {
 	}
 }
 
-func resourceComputeFlavorAccessV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeFlavorAccessV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	flavorID := d.Get("flavor_id").(string)
@@ -58,25 +60,25 @@ func resourceComputeFlavorAccessV2Create(d *schema.ResourceData, meta interface{
 	log.Printf("[DEBUG] Flavor Access Options: %#v", accessOpts)
 
 	if _, err := flavors.AddAccess(computeClient, flavorID, accessOpts).Extract(); err != nil {
-		return fmt.Errorf("Error adding access to tenant %s for flavor %s: %s", tenantID, flavorID, err)
+		return diag.Errorf("Error adding access to tenant %s for flavor %s: %s", tenantID, flavorID, err)
 	}
 
 	id := fmt.Sprintf("%s/%s", flavorID, tenantID)
 	d.SetId(id)
 
-	return resourceComputeFlavorAccessV2Read(d, meta)
+	return resourceComputeFlavorAccessV2Read(ctx, d, meta)
 }
 
-func resourceComputeFlavorAccessV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeFlavorAccessV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	flavorAccess, err := getFlavorAccess(computeClient, d)
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting flavor access")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting flavor access"))
 	}
 
 	d.Set("region", GetRegion(d, config))
@@ -86,23 +88,23 @@ func resourceComputeFlavorAccessV2Read(d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func resourceComputeFlavorAccessV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeFlavorAccessV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	flavorAccess, err := getFlavorAccess(computeClient, d)
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting flavor access")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting flavor access"))
 	}
 
 	removeAccessOpts := flavors.RemoveAccessOpts{Tenant: flavorAccess.TenantID}
 	log.Printf("[DEBUG] RemoveAccess Options: %#v", removeAccessOpts)
 
 	if _, err := flavors.RemoveAccess(computeClient, flavorAccess.FlavorID, removeAccessOpts).Extract(); err != nil {
-		return CheckDeleted(d, err, fmt.Sprintf("Error removing tenant %s access from flavor %s", flavorAccess.TenantID, flavorAccess.FlavorID))
+		return diag.FromErr(CheckDeleted(d, err, fmt.Sprintf("Error removing tenant %s access from flavor %s", flavorAccess.TenantID, flavorAccess.FlavorID)))
 	}
 
 	return nil

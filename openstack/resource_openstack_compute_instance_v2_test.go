@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
@@ -27,8 +27,8 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceBasic(),
@@ -53,8 +53,8 @@ func TestAccComputeV2Instance_initialStateActive(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceStateActive(),
@@ -95,8 +95,8 @@ func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceStateShutoff(),
@@ -137,8 +137,8 @@ func TestAccComputeV2Instance_initialShelve(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceStateActive(),
@@ -180,8 +180,8 @@ func TestAccComputeV2Instance_secgroupMulti(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceSecgroupMulti(),
@@ -205,8 +205,8 @@ func TestAccComputeV2Instance_secgroupMultiUpdate(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceSecgroupMultiUpdate1(),
@@ -242,8 +242,8 @@ func TestAccComputeV2Instance_bootFromVolumeImage(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceBootFromVolumeImage(),
@@ -264,8 +264,8 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceBootFromVolumeVolume(),
@@ -287,8 +287,8 @@ func TestAccComputeV2Instance_bootFromVolumeForceNew(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceBootFromVolumeForceNew1(),
@@ -317,8 +317,8 @@ func TestAccComputeV2Instance_blockDeviceNewVolume(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceBlockDeviceNewVolume(),
@@ -338,8 +338,8 @@ func TestAccComputeV2Instance_blockDeviceNewVolumeTypeAndBus(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceBlockDeviceNewVolumeTypeAndBus(),
@@ -360,8 +360,8 @@ func TestAccComputeV2Instance_blockDeviceExistingVolume(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceBlockDeviceExistingVolume(),
@@ -384,8 +384,8 @@ func TestAccComputeV2Instance_personality(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstancePersonality(),
@@ -405,8 +405,8 @@ func TestAccComputeV2Instance_multiEphemeral(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceMultiEphemeral(),
@@ -427,8 +427,8 @@ func TestAccComputeV2Instance_accessIPv4(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceAccessIPv4(),
@@ -451,8 +451,8 @@ func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceChangeFixedIP1(),
@@ -480,8 +480,8 @@ func TestAccComputeV2Instance_stopBeforeDestroy(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceStopBeforeDestroy(),
@@ -501,8 +501,8 @@ func TestAccComputeV2Instance_metadataRemove(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceMetadataRemove1(),
@@ -540,8 +540,8 @@ func TestAccComputeV2Instance_forceDelete(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceForceDelete(),
@@ -560,8 +560,8 @@ func TestAccComputeV2Instance_timeout(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceTimeout(),
@@ -580,8 +580,8 @@ func TestAccComputeV2Instance_networkModeAuto(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceNetworkModeAuto(),
@@ -601,8 +601,8 @@ func TestAccComputeV2Instance_networkModeNone(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceNetworkModeNone(),
@@ -623,8 +623,8 @@ func TestAccComputeV2Instance_networkNameToID(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceNetworkNameToID(),
@@ -653,8 +653,8 @@ func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceCrazyNICs(),
@@ -732,8 +732,8 @@ func TestAccComputeV2Instance_tags(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceTagsCreate(),
@@ -952,7 +952,7 @@ func testAccCheckComputeV2InstanceTags(name string, tags []string) resource.Test
 	}
 }
 
-func testAccCheckComputeV2InstanceNetworkExists(n string, instance *servers.Server) resource.TestCheckFunc {
+func testAccCheckComputeV2InstanceNetworkExists(n string, _ *servers.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 
@@ -974,7 +974,7 @@ func testAccCheckComputeV2InstanceNetworkExists(n string, instance *servers.Serv
 	}
 }
 
-func testAccCheckComputeV2InstanceNetworkDoesNotExist(n string, instance *servers.Server) resource.TestCheckFunc {
+func testAccCheckComputeV2InstanceNetworkDoesNotExist(n string, _ *servers.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 

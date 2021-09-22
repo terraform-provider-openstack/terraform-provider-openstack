@@ -1,16 +1,18 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceComputeKeypairV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceComputeKeypairV2Read,
+		ReadContext: dataSourceComputeKeypairV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -38,17 +40,17 @@ func dataSourceComputeKeypairV2() *schema.Resource {
 	}
 }
 
-func dataSourceComputeKeypairV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceComputeKeypairV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	name := d.Get("name").(string)
 	kp, err := keypairs.Get(computeClient, name).Extract()
 	if err != nil {
-		return fmt.Errorf("Error retrieving openstack_compute_keypair_v2 %s: %s", name, err)
+		return diag.Errorf("Error retrieving openstack_compute_keypair_v2 %s: %s", name, err)
 	}
 
 	d.SetId(name)

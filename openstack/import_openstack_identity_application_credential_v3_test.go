@@ -3,7 +3,7 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccIdentityV3ApplicationCredential_importBasic(t *testing.T) {
@@ -14,8 +14,8 @@ func TestAccIdentityV3ApplicationCredential_importBasic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIdentityV3ApplicationCredentialDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckIdentityV3ApplicationCredentialDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3ApplicationCredentialBasic,
@@ -39,8 +39,8 @@ func TestAccIdentityV3ApplicationCredential_importCustomSecret(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIdentityV3ApplicationCredentialDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckIdentityV3ApplicationCredentialDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3ApplicationCredentialCustomSecret,

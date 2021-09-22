@@ -1,22 +1,24 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/policies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/rules"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceFWRuleV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceFWRuleV1Create,
-		Read:   resourceFWRuleV1Read,
-		Update: resourceFWRuleV1Update,
-		Delete: resourceFWRuleV1Delete,
+		CreateContext: resourceFWRuleV1Create,
+		ReadContext:   resourceFWRuleV1Read,
+		UpdateContext: resourceFWRuleV1Update,
+		DeleteContext: resourceFWRuleV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -94,11 +96,11 @@ func resourceFWRuleV1() *schema.Resource {
 	}
 }
 
-func resourceFWRuleV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceFWRuleV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	enabled := d.Get("enabled").(bool)
@@ -123,26 +125,26 @@ func resourceFWRuleV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	rule, err := rules.Create(networkingClient, ruleConfiguration).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_fw_rule_v1: %s", err)
+		return diag.Errorf("Error creating openstack_fw_rule_v1: %s", err)
 	}
 
 	log.Printf("[DEBUG] Created openstack_fw_rule_v1 %s: %#v", rule.ID, rule)
 
 	d.SetId(rule.ID)
 
-	return resourceFWRuleV1Read(d, meta)
+	return resourceFWRuleV1Read(ctx, d, meta)
 }
 
-func resourceFWRuleV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceFWRuleV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	rule, err := rules.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_fw_rule_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_fw_rule_v1"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_fw_rule_v1 %s: %#v", d.Id(), rule)
@@ -168,11 +170,11 @@ func resourceFWRuleV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceFWRuleV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceFWRuleV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var updateOpts rules.UpdateOpts
@@ -252,34 +254,34 @@ func resourceFWRuleV1Update(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] openstack_fw_rule_v1 %s update options: %#v", d.Id(), updateOpts)
 	err = rules.Update(networkingClient, d.Id(), updateOpts).Err
 	if err != nil {
-		return fmt.Errorf("Error updating openstack_fw_rule_v1 %s: %s", d.Id(), err)
+		return diag.Errorf("Error updating openstack_fw_rule_v1 %s: %s", d.Id(), err)
 	}
 
-	return resourceFWRuleV1Read(d, meta)
+	return resourceFWRuleV1Read(ctx, d, meta)
 }
 
-func resourceFWRuleV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceFWRuleV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	rule, err := rules.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_fw_rule_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_fw_rule_v1"))
 	}
 
 	if rule.PolicyID != "" {
 		_, err := policies.RemoveRule(networkingClient, rule.PolicyID, rule.ID).Extract()
 		if err != nil {
-			return fmt.Errorf("Error removing openstack_fw_rule_v1 %s from policy %s: %s", d.Id(), rule.PolicyID, err)
+			return diag.Errorf("Error removing openstack_fw_rule_v1 %s from policy %s: %s", d.Id(), rule.PolicyID, err)
 		}
 	}
 
 	err = rules.Delete(networkingClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting openstack_fw_rule_v1 %s: %s", d.Id(), err)
+		return diag.Errorf("Error deleting openstack_fw_rule_v1 %s: %s", d.Id(), err)
 	}
 
 	return nil

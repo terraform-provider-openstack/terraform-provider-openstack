@@ -1,21 +1,23 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"regexp"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
+	"github.com/gophercloud/utils/terraform/hashcode"
 )
 
 func dataSourceNetworkingSubnetIDsV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNetworkingSubnetIDsV2Read,
+		ReadContext: dataSourceNetworkingSubnetIDsV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -137,11 +139,11 @@ func dataSourceNetworkingSubnetIDsV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingSubnetIDsV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNetworkingSubnetIDsV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	listOpts := subnets.ListOpts{}
@@ -206,12 +208,12 @@ func dataSourceNetworkingSubnetIDsV2Read(d *schema.ResourceData, meta interface{
 
 	pages, err := subnets.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_networking_subnet_ids_v2: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_networking_subnet_ids_v2: %s", err)
 	}
 
 	allSubnets, err := subnets.ExtractSubnets(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to extract openstack_networking_subnet_ids_v2: %s", err)
+		return diag.Errorf("Unable to extract openstack_networking_subnet_ids_v2: %s", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved %d subnets in openstack_networking_subnet_ids_v2: %+v", len(allSubnets), allSubnets)

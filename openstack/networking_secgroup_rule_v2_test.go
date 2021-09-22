@@ -3,8 +3,9 @@ package openstack
 import (
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules"
 )
 
 func TestResourceNetworkingSecGroupRuleV2DirectionIngress(t *testing.T) {

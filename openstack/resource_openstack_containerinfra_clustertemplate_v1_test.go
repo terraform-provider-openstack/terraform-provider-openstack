@@ -5,10 +5,11 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clustertemplates"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccContainerInfraV1ClusterTemplate_basic(t *testing.T) {
@@ -25,8 +26,8 @@ func TestAccContainerInfraV1ClusterTemplate_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckContainerInfra(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerInfraV1ClusterTemplateDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckContainerInfraV1ClusterTemplateDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerInfraV1ClusterTemplateBasic(clusterTemplateName, imageName),
@@ -57,9 +58,9 @@ func TestAccContainerInfraV1ClusterTemplate_labels(t *testing.T) {
 	imageName := acctest.RandomWithPrefix("tf-acc-image")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckContainerInfra(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerInfraV1ClusterTemplateDestroy,
+		PreCheck:          func() { testAccPreCheckContainerInfra(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckContainerInfraV1ClusterTemplateDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerInfraV1ClusterTemplateLabels(clusterTemplateName, imageName),

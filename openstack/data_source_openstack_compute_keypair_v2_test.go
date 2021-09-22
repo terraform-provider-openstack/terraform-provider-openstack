@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccComputeV2KeypairDataSource_basic(t *testing.T) {
@@ -14,8 +14,8 @@ func TestAccComputeV2KeypairDataSource_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2KeypairDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2KeypairDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2KeypairDataSourceBasic,

@@ -1,12 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools"
@@ -14,12 +16,12 @@ import (
 
 func resourceNetworkingSubnetPoolV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingSubnetPoolV2Create,
-		Read:   resourceNetworkingSubnetPoolV2Read,
-		Update: resourceNetworkingSubnetPoolV2Update,
-		Delete: resourceNetworkingSubnetPoolV2Delete,
+		CreateContext: resourceNetworkingSubnetPoolV2Create,
+		ReadContext:   resourceNetworkingSubnetPoolV2Read,
+		UpdateContext: resourceNetworkingSubnetPoolV2Update,
+		DeleteContext: resourceNetworkingSubnetPoolV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -159,11 +161,11 @@ func resourceNetworkingSubnetPoolV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingSubnetPoolV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSubnetPoolV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	createOpts := SubnetPoolCreateOpts{
@@ -186,7 +188,7 @@ func resourceNetworkingSubnetPoolV2Create(d *schema.ResourceData, meta interface
 	log.Printf("[DEBUG] openstack_networking_subnetpool_v2 create options: %#v", createOpts)
 	s, err := subnetpools.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_networking_subnetpool_v2: %s", err)
+		return diag.Errorf("Error creating openstack_networking_subnetpool_v2: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for openstack_networking_subnetpool_v2 %s to become available.", s.ID)
@@ -199,9 +201,9 @@ func resourceNetworkingSubnetPoolV2Create(d *schema.ResourceData, meta interface
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_subnetpool_v2 %s to become available: %s", s.ID, err)
+		return diag.Errorf("Error waiting for openstack_networking_subnetpool_v2 %s to become available: %s", s.ID, err)
 	}
 
 	d.SetId(s.ID)
@@ -211,25 +213,25 @@ func resourceNetworkingSubnetPoolV2Create(d *schema.ResourceData, meta interface
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "subnetpools", s.ID, tagOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error setting tags on openstack_networking_subnetpool_v2 %s: %s", s.ID, err)
+			return diag.Errorf("Error setting tags on openstack_networking_subnetpool_v2 %s: %s", s.ID, err)
 		}
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_subnetpool_v2 %s", tags, s.ID)
 	}
 
 	log.Printf("[DEBUG] Created openstack_networking_subnetpool_v2 %s: %#v", s.ID, s)
-	return resourceNetworkingSubnetPoolV2Read(d, meta)
+	return resourceNetworkingSubnetPoolV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSubnetPoolV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	s, err := subnetpools.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting openstack_networking_subnetpool_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_subnetpool_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_subnetpool_v2 %s: %#v", d.Id(), s)
@@ -263,11 +265,11 @@ func resourceNetworkingSubnetPoolV2Read(d *schema.ResourceData, meta interface{}
 	return nil
 }
 
-func resourceNetworkingSubnetPoolV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSubnetPoolV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var hasChange bool
@@ -331,7 +333,7 @@ func resourceNetworkingSubnetPoolV2Update(d *schema.ResourceData, meta interface
 		log.Printf("[DEBUG] openstack_networking_subnetpool_v2 %s update options: %#v", d.Id(), updateOpts)
 		_, err = subnetpools.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_networking_subnetpool_v2 %s: %s", d.Id(), err)
+			return diag.Errorf("Error updating openstack_networking_subnetpool_v2 %s: %s", d.Id(), err)
 		}
 	}
 
@@ -340,23 +342,23 @@ func resourceNetworkingSubnetPoolV2Update(d *schema.ResourceData, meta interface
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "subnetpools", d.Id(), tagOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error setting tags on openstack_networking_subnetpool_v2 %s: %s", d.Id(), err)
+			return diag.Errorf("Error setting tags on openstack_networking_subnetpool_v2 %s: %s", d.Id(), err)
 		}
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_subnetpool_v2 %s", tags, d.Id())
 	}
 
-	return resourceNetworkingSubnetPoolV2Read(d, meta)
+	return resourceNetworkingSubnetPoolV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSubnetPoolV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSubnetPoolV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	if err := subnetpools.Delete(networkingClient, d.Id()).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_networking_subnetpool_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_subnetpool_v2"))
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -368,9 +370,9 @@ func resourceNetworkingSubnetPoolV2Delete(d *schema.ResourceData, meta interface
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_subnetpool_v2 %s to delete: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_networking_subnetpool_v2 %s to Delete:  %s", d.Id(), err)
 	}
 
 	return nil

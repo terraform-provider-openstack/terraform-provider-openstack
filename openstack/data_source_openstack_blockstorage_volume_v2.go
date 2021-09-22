@@ -1,17 +1,18 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 )
 
 func dataSourceBlockStorageVolumeV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceBlockStorageVolumeV2Read,
+		ReadContext: dataSourceBlockStorageVolumeV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -64,11 +65,11 @@ func dataSourceBlockStorageVolumeV2() *schema.Resource {
 	}
 }
 
-func dataSourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceBlockStorageVolumeV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	client, err := config.BlockStorageV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	listOpts := volumes.ListOpts{
@@ -79,26 +80,28 @@ func dataSourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}
 
 	allPages, err := volumes.List(client, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query openstack_blockstorage_volume_v2: %s", err)
+		return diag.Errorf("Unable to query openstack_blockstorage_volume_v2: %s", err)
 	}
 
 	allVolumes, err := volumes.ExtractVolumes(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_blockstorage_volume_v2: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_blockstorage_volume_v2: %s", err)
 	}
 
 	if len(allVolumes) > 1 {
-		return fmt.Errorf("Your openstack_blockstorage_volume_v2 query returned multiple results")
+		return diag.Errorf("Your openstack_blockstorage_volume_v2 query returned multiple results")
 	}
 
 	if len(allVolumes) < 1 {
-		return fmt.Errorf("Your openstack_blockstorage_volume_v2 query returned no results")
+		return diag.Errorf("Your openstack_blockstorage_volume_v2 query returned no results")
 	}
 
-	return dataSourceBlockStorageVolumeV2Attributes(d, allVolumes[0])
+	dataSourceBlockStorageVolumeV2Attributes(d, allVolumes[0])
+
+	return nil
 }
 
-func dataSourceBlockStorageVolumeV2Attributes(d *schema.ResourceData, volume volumes.Volume) error {
+func dataSourceBlockStorageVolumeV2Attributes(d *schema.ResourceData, volume volumes.Volume) {
 	d.SetId(volume.ID)
 	d.Set("name", volume.Name)
 	d.Set("status", volume.Status)
@@ -110,6 +113,4 @@ func dataSourceBlockStorageVolumeV2Attributes(d *schema.ResourceData, volume vol
 	if err := d.Set("metadata", volume.Metadata); err != nil {
 		log.Printf("[DEBUG] Unable to set metadata for volume %s: %s", volume.ID, err)
 	}
-
-	return nil
 }

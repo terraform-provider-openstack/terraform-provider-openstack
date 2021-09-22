@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/containers"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccObjectStorageV1Container_basic(t *testing.T) {
@@ -16,8 +17,8 @@ func TestAccObjectStorageV1Container_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSwift(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckObjectStorageV1ContainerDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckObjectStorageV1ContainerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObjectStorageV1ContainerBasic,

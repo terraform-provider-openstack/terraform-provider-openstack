@@ -1,9 +1,10 @@
 package openstack
 
 import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func networkingSubnetpoolV2StateRefreshFunc(client *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {

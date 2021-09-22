@@ -1,8 +1,6 @@
 package openstack
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestComputeVolumeAttachV2ParseID(t *testing.T) {
 	id := "foo/bar"

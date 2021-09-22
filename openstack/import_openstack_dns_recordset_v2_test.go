@@ -3,7 +3,7 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDNSV2RecordSet_importBasic(t *testing.T) {
@@ -16,8 +16,8 @@ func TestAccDNSV2RecordSet_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckDNS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2RecordSetBasic(zoneName),

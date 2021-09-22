@@ -1,17 +1,19 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"sort"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/availabilityzones"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/gophercloud/utils/terraform/hashcode"
 )
 
 func dataSourceSharedFilesystemAvailabilityZonesV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceSharedFilesystemAvailabilityZonesV2Read,
+		ReadContext: dataSourceSharedFilesystemAvailabilityZonesV2Read,
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -30,20 +32,20 @@ func dataSourceSharedFilesystemAvailabilityZonesV2() *schema.Resource {
 	}
 }
 
-func dataSourceSharedFilesystemAvailabilityZonesV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceSharedFilesystemAvailabilityZonesV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	client, err := config.SharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
 	allPages, err := availabilityzones.List(client).AllPages()
 	if err != nil {
-		return fmt.Errorf("Error retrieving openstack_sharedfilesystem_availability_zones_v2: %s", err)
+		return diag.Errorf("Error retrieving openstack_sharedfilesystem_availability_zones_v2: %s", err)
 	}
 	zoneInfo, err := availabilityzones.ExtractAvailabilityZones(allPages)
 	if err != nil {
-		return fmt.Errorf("Error extracting openstack_sharedfilesystem_availability_zones_v2 from response: %s", err)
+		return diag.Errorf("Error extracting openstack_sharedfilesystem_availability_zones_v2 from response: %s", err)
 	}
 
 	zones := make([]string, 0, len(zoneInfo))

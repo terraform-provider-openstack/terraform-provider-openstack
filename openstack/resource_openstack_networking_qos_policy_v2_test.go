@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
 )
@@ -18,8 +18,8 @@ func TestAccNetworkingV2QoSPolicyBasic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2QoSPolicyDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2QoSPolicyDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2QoSPolicyBasic,

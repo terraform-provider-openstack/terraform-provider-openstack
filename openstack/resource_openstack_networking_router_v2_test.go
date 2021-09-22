@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 )
@@ -18,8 +18,8 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterBasic,
@@ -50,8 +50,8 @@ func TestAccNetworkingV2Router_updateExternalGateway(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterUpdateExternalGateway1,
@@ -78,8 +78,8 @@ func TestAccNetworkingV2Router_vendor_opts(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterVendorOpts(),
@@ -102,8 +102,8 @@ func TestAccNetworkingV2Router_vendor_opts_no_snat(t *testing.T) {
 			// (rule:create_router and rule:create_router:distributed) is disallowed by policy
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterVendorOptsNoSnat(),
@@ -124,8 +124,8 @@ func TestAccNetworkingV2Router_extFixedIPs(t *testing.T) {
 			// (rule:create_router and (rule:create_router:external_gateway_info and (rule:create_router:external_gateway_info:network_id and rule:create_router:external_gateway_info:external_fixed_ips))) is disallowed by policy
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterExtFixedIPs(),
@@ -149,8 +149,8 @@ func TestAccNetworkingV2Router_extSubnetIDs(t *testing.T) {
 			// (rule:create_router and (rule:create_router:external_gateway_info and (rule:create_router:external_gateway_info:network_id and rule:create_router:external_gateway_info:external_fixed_ips))) is disallowed by policy
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterExtSubnetIDs(),

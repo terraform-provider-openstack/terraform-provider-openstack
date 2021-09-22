@@ -1,18 +1,20 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"sort"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/gophercloud/utils/terraform/hashcode"
 )
 
 func dataSourceComputeAvailabilityZonesV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceComputeAvailabilityZonesV2Read,
+		ReadContext: dataSourceComputeAvailabilityZonesV2Read,
 		Schema: map[string]*schema.Schema{
 			"names": {
 				Type:     schema.TypeList,
@@ -38,21 +40,21 @@ func dataSourceComputeAvailabilityZonesV2() *schema.Resource {
 	}
 }
 
-func dataSourceComputeAvailabilityZonesV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceComputeAvailabilityZonesV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
 	computeClient, err := config.ComputeV2Client(region)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	allPages, err := availabilityzones.List(computeClient).AllPages()
 	if err != nil {
-		return fmt.Errorf("Error retrieving openstack_compute_availability_zones_v2: %s", err)
+		return diag.Errorf("Error retrieving openstack_compute_availability_zones_v2: %s", err)
 	}
 	zoneInfo, err := availabilityzones.ExtractAvailabilityZones(allPages)
 	if err != nil {
-		return fmt.Errorf("Error extracting openstack_compute_availability_zones_v2 from response: %s", err)
+		return diag.Errorf("Error extracting openstack_compute_availability_zones_v2 from response: %s", err)
 	}
 
 	stateBool := d.Get("state").(string) == "available"

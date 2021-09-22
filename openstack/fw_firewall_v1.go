@@ -3,11 +3,11 @@ package openstack
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/firewalls"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/routerinsertion"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 // Firewall is an OpenStack firewall.

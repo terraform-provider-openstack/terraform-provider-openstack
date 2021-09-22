@@ -1,20 +1,24 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumetypes"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceBlockstorageVolumeTypeAccessV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceBlockstorageVolumeTypeAccessV3Create,
-		Read:   resourceBlockstorageVolumeTypeAccessV3Read,
-		Delete: resourceBlockstorageVolumeTypeAccessV3Delete,
+		CreateContext: resourceBlockstorageVolumeTypeAccessV3Create,
+		ReadContext:   resourceBlockstorageVolumeTypeAccessV3Read,
+		DeleteContext: resourceBlockstorageVolumeTypeAccessV3Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -38,11 +42,11 @@ func resourceBlockstorageVolumeTypeAccessV3() *schema.Resource {
 	}
 }
 
-func resourceBlockstorageVolumeTypeAccessV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockstorageVolumeTypeAccessV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	projectID := d.Get("project_id").(string)
@@ -53,35 +57,35 @@ func resourceBlockstorageVolumeTypeAccessV3Create(d *schema.ResourceData, meta i
 	}
 
 	if err := volumetypes.AddAccess(blockStorageClient, vtID, accessOpts).ExtractErr(); err != nil {
-		return fmt.Errorf("Error creating openstack_blockstorage_volume_type_access_v3: %s", err)
+		return diag.Errorf("Error creating openstack_blockstorage_volume_type_access_v3: %s", err)
 	}
 
 	id := fmt.Sprintf("%s/%s", vtID, projectID)
 	d.SetId(id)
 
-	return resourceBlockstorageVolumeTypeAccessV3Read(d, meta)
+	return resourceBlockstorageVolumeTypeAccessV3Read(ctx, d, meta)
 }
 
-func resourceBlockstorageVolumeTypeAccessV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockstorageVolumeTypeAccessV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	vtID, projectID, err := parseVolumeTypeAccessID(d.Id())
 	if err != nil {
-		return CheckDeleted(d, err, "Error parsing ID of openstack_blockstorage_volume_type_access_v3")
+		return diag.FromErr(CheckDeleted(d, err, "Error parsing ID of openstack_blockstorage_volume_type_access_v3"))
 	}
 
 	allPages, err := volumetypes.ListAccesses(blockStorageClient, vtID).AllPages()
 	if err != nil {
-		return fmt.Errorf("Error retrieving accesses openstack_blockstorage_volume_type_access_v3 for vt: %s", vtID)
+		return diag.Errorf("Error retrieving accesses openstack_blockstorage_volume_type_access_v3 for vt: %s", vtID)
 	}
 
 	allAccesses, err := volumetypes.ExtractAccesses(allPages)
 	if err != nil {
-		return fmt.Errorf("Error extracting accesses openstack_blockstorage_volume_type_access_v3 for vt: %s", vtID)
+		return diag.Errorf("Error extracting accesses openstack_blockstorage_volume_type_access_v3 for vt: %s", vtID)
 	}
 
 	found := false
@@ -93,7 +97,7 @@ func resourceBlockstorageVolumeTypeAccessV3Read(d *schema.ResourceData, meta int
 	}
 
 	if !found {
-		return fmt.Errorf("Error getting volume type access openstack_blockstorage_volume_type_access_v3 for vt: %s", vtID)
+		return diag.Errorf("Error getting volume type access openstack_blockstorage_volume_type_access_v3 for vt: %s", vtID)
 	}
 
 	d.Set("region", GetRegion(d, config))
@@ -103,16 +107,16 @@ func resourceBlockstorageVolumeTypeAccessV3Read(d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceBlockstorageVolumeTypeAccessV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockstorageVolumeTypeAccessV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	vtID, projectID, err := parseVolumeTypeAccessID(d.Id())
 	if err != nil {
-		return fmt.Errorf("Error parsing ID of openstack_blockstorage_volume_type_access_v3 %s: %s", d.Id(), err)
+		return diag.Errorf("Error parsing ID of openstack_blockstorage_volume_type_access_v3 %s: %s", d.Id(), err)
 	}
 
 	removeOpts := volumetypes.RemoveAccessOpts{
@@ -120,7 +124,7 @@ func resourceBlockstorageVolumeTypeAccessV3Delete(d *schema.ResourceData, meta i
 	}
 
 	if err := volumetypes.RemoveAccess(blockStorageClient, vtID, removeOpts).ExtractErr(); err != nil {
-		return fmt.Errorf("Error removing openstack_blockstorage_volume_type_access_v3 %s: %s", d.Id(), err)
+		return diag.Errorf("Error removing openstack_blockstorage_volume_type_access_v3 %s: %s", d.Id(), err)
 	}
 
 	return nil

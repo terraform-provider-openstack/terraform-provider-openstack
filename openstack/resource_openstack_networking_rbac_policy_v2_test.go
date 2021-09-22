@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/rbacpolicies"
@@ -25,8 +25,8 @@ func TestAccNetworkingV2RBACPolicy_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2RBACPolicyDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2RBACPolicyDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RBACPolicyBasic(projectOneName),

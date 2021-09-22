@@ -1,16 +1,18 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/policies"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceFWPolicyV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceFWPolicyV1Read,
+		ReadContext: dataSourceFWPolicyV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -61,11 +63,11 @@ func dataSourceFWPolicyV1() *schema.Resource {
 	}
 }
 
-func dataSourceFWPolicyV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceFWPolicyV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	listOpts := policies.ListOpts{
@@ -76,20 +78,20 @@ func dataSourceFWPolicyV1Read(d *schema.ResourceData, meta interface{}) error {
 
 	pages, err := policies.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	allFWPolicies, err := policies.ExtractPolicies(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_fw_policy_v1: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_fw_policy_v1: %s", err)
 	}
 
 	if len(allFWPolicies) < 1 {
-		return fmt.Errorf("No openstack_fw_policy_v1 found with name: %s", d.Get("name"))
+		return diag.Errorf("No openstack_fw_policy_v1 found with name: %s", d.Get("name"))
 	}
 
 	if len(allFWPolicies) > 1 {
-		return fmt.Errorf("More than one openstack_fw_policy_v1 found with name: %s", d.Get("name"))
+		return diag.Errorf("More than one openstack_fw_policy_v1 found with name: %s", d.Get("name"))
 	}
 
 	policy := allFWPolicies[0]

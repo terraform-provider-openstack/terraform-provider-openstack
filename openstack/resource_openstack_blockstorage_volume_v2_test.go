@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 )
@@ -19,8 +19,8 @@ func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckBlockStorageV2(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2VolumeBasic,
@@ -53,8 +53,8 @@ func TestAccBlockStorageV2Volume_image(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckBlockStorageV2(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2VolumeImage(),
@@ -77,8 +77,8 @@ func TestAccBlockStorageV2Volume_timeout(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckBlockStorageV2(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2VolumeTimeout,

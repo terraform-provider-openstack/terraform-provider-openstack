@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
@@ -31,8 +31,8 @@ func TestAccNetworkingV2Network_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkBasic,
@@ -67,8 +67,8 @@ func TestAccNetworkingV2Network_netstack(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkNetstack,
@@ -96,8 +96,8 @@ func TestAccNetworkingV2Network_fullstack(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkFullstack,
@@ -121,8 +121,8 @@ func TestAccNetworkingV2Network_timeout(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkTimeout,
@@ -142,8 +142,8 @@ func TestAccNetworkingV2Network_multipleSegmentMappings(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkMultipleSegmentMappings,
@@ -163,8 +163,8 @@ func TestAccNetworkingV2Network_externalCreate(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkExternal,
@@ -186,8 +186,8 @@ func TestAccNetworkingV2Network_externalUpdate(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkBasic,
@@ -216,8 +216,8 @@ func TestAccNetworkingV2Network_transparent_vlan_Create(t *testing.T) {
 			testAccPreCheckTransparentVLAN(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkTransparentVlan,
@@ -239,8 +239,8 @@ func TestAccNetworkingV2Network_adminStateUp_omit(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkAdminStateUpOmit,
@@ -263,8 +263,8 @@ func TestAccNetworkingV2Network_adminStateUp_true(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkAdminStateUpTrue,
@@ -287,8 +287,8 @@ func TestAccNetworkingV2Network_adminStateUp_false(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkAdminStateUpFalse,
@@ -311,8 +311,8 @@ func TestAccNetworkingV2Network_adminStateUp_update(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkAdminStateUpOmit,
@@ -344,8 +344,8 @@ func TestAccNetworkingV2Network_portSecurity_omit(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkAdminStateUpOmit,
@@ -389,8 +389,8 @@ func TestAccNetworkingV2Network_portSecurity_disabled(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkPortSecurityDisabled,
@@ -424,8 +424,8 @@ func TestAccNetworkingV2Network_portSecurity_enabled(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkPortSecurityEnabled,
@@ -462,8 +462,8 @@ func TestAccNetworkingV2Network_qos_policy_create(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkQosPolicy,
@@ -491,8 +491,8 @@ func TestAccNetworkingV2Network_qos_policy_update(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkBasic,

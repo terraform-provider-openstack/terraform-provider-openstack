@@ -3,7 +3,7 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccIdentityV3Group_importBasic(t *testing.T) {
@@ -14,8 +14,8 @@ func TestAccIdentityV3Group_importBasic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIdentityV3GroupDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckIdentityV3GroupDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3GroupBasic,
