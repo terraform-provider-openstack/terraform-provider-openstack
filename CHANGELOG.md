@@ -1,3 +1,14 @@
+## 1.44.0 (2 October, 2021)
+
+NOTES
+
+* This release updates major version of `terraform-plugin-sdk` from `v1` to `v2` and that caused lots of changes in the code. If you experiencing new bugs after updating the provider please create an issue with a description of how to reproduce them.
+
+FEATURES
+
+* Updated `terraform-plugin-sdk` to `v2.7.1`
+* Updated Go to `1.17`
+
 ## 1.43.1 (21 September, 2021)
 
 BUG FIXES
