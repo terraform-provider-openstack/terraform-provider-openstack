@@ -1,16 +1,18 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/services"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceIdentityServiceV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIdentityServiceV3Read,
+		ReadContext: dataSourceIdentityServiceV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -44,11 +46,11 @@ func dataSourceIdentityServiceV3() *schema.Resource {
 }
 
 // dataSourceIdentityServiceV3Read performs the service lookup.
-func dataSourceIdentityServiceV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIdentityServiceV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	name := d.Get("name").(string)
@@ -62,12 +64,12 @@ func dataSourceIdentityServiceV3Read(d *schema.ResourceData, meta interface{}) e
 	var service services.Service
 	allPages, err := services.List(identityClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query openstack_identity_service_v3: %s", err)
+		return diag.Errorf("Unable to query openstack_identity_service_v3: %s", err)
 	}
 
 	allServices, err := services.ExtractServices(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_identity_service_v3: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_identity_service_v3: %s", err)
 	}
 
 	// filter by enabled, when the enabled is specified
@@ -82,12 +84,12 @@ func dataSourceIdentityServiceV3Read(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if len(allServices) < 1 {
-		return fmt.Errorf("Your openstack_identity_service_v3 query returned no results. " +
+		return diag.Errorf("Your openstack_identity_service_v3 query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allServices) > 1 {
-		return fmt.Errorf("Your openstack_identity_service_v3 query returned more than one result")
+		return diag.Errorf("Your openstack_identity_service_v3 query returned more than one result")
 	}
 	service = allServices[0]
 

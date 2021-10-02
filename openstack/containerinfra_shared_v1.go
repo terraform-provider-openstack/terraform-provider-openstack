@@ -11,15 +11,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"gopkg.in/yaml.v2"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/certificates"
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clustertemplates"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-
-	yaml "gopkg.in/yaml.v2"
 )
 
 const (
@@ -170,13 +169,10 @@ type kubernetesConfigUserData struct {
 	ClientCertificateData string `yaml:"client-certificate-data"`
 }
 
-func flattenContainerInfraV1Kubeconfig(d *schema.ResourceData, containerInfraClient *gophercloud.ServiceClient) (map[string]interface{}, error) {
-	var kubeconfig map[string]interface{}
-	name := d.Get("name").(string)
-	host := d.Get("api_address").(string)
-
-	if d.Get("kubeconfig.client_certificate").(string) != "" {
-		return d.Get("kubeconfig").(map[string]interface{}), nil
+func flattenContainerInfraV1Kubeconfig(d *schema.ResourceData, containerInfraClient *gophercloud.ServiceClient) (map[string]string, error) {
+	clientSert, ok := d.Get("kubeconfig.client_certificate").(string)
+	if ok && clientSert != "" {
+		return d.Get("kubeconfig").(map[string]string), nil
 	}
 
 	certificateAuthority, err := certificates.Get(containerInfraClient, d.Id()).Extract()
@@ -228,20 +224,20 @@ func flattenContainerInfraV1Kubeconfig(d *schema.ResourceData, containerInfraCli
 		return nil, fmt.Errorf("Error requesting client certificate: %s", err)
 	}
 
+	name := d.Get("name").(string)
+	host := d.Get("api_address").(string)
 	rawKubeconfig, err := renderKubeconfig(name, host, []byte(certificateAuthority.PEM), []byte(clientCertificate.PEM), pemClientKey)
 	if err != nil {
 		return nil, fmt.Errorf("Error rendering kubeconfig: %s", err)
 	}
 
-	kubeconfig = map[string]interface{}{
+	return map[string]string{
 		"raw_config":             string(rawKubeconfig),
 		"host":                   host,
 		"cluster_ca_certificate": certificateAuthority.PEM,
 		"client_certificate":     clientCertificate.PEM,
 		"client_key":             string(pemClientKey),
-	}
-
-	return kubeconfig, nil
+	}, nil
 }
 
 func renderKubeconfig(name string, host string, clusterCaCertificate []byte, clientCertificate []byte, clientKey []byte) ([]byte, error) {

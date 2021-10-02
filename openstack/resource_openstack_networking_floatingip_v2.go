@@ -1,14 +1,15 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"regexp"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
@@ -17,12 +18,12 @@ import (
 
 func resourceNetworkingFloatingIPV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkFloatingIPV2Create,
-		Read:   resourceNetworkFloatingIPV2Read,
-		Update: resourceNetworkFloatingIPV2Update,
-		Delete: resourceNetworkFloatingIPV2Delete,
+		CreateContext: resourceNetworkFloatingIPV2Create,
+		ReadContext:   resourceNetworkFloatingIPV2Read,
+		UpdateContext: resourceNetworkFloatingIPV2Update,
+		DeleteContext: resourceNetworkFloatingIPV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -125,20 +126,20 @@ func resourceNetworkingFloatingIPV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkFloatingIPV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack network client: %s", err)
+		return diag.Errorf("Error creating OpenStack network client: %s", err)
 	}
 
 	poolName := d.Get("pool").(string)
 	poolID, err := networkingNetworkV2ID(d, meta, poolName)
 	if err != nil {
-		return fmt.Errorf("Error retrieving ID for openstack_networking_floatingip_v2 pool name %s: %s", poolName, err)
+		return diag.Errorf("Error retrieving ID for openstack_networking_floatingip_v2 pool name %s: %s", poolName, err)
 	}
 	if len(poolID) == 0 {
-		return fmt.Errorf("No network found with name: %s", poolName)
+		return diag.Errorf("No network found with name: %s", poolName)
 	}
 
 	subnetID := d.Get("subnet_id").(string)
@@ -188,7 +189,7 @@ func resourceNetworkFloatingIPV2Create(d *schema.ResourceData, meta interface{})
 		// floating IP allocation without a retry
 		err = floatingips.Create(networkingClient, finalCreateOpts).ExtractInto(&fip)
 		if err != nil {
-			return fmt.Errorf("Error creating openstack_networking_floatingip_v2: %s", err)
+			return diag.Errorf("Error creating openstack_networking_floatingip_v2: %s", err)
 		}
 	} else {
 		// create a floatingip in a loop with the first available external subnet
@@ -202,13 +203,13 @@ func resourceNetworkFloatingIPV2Create(d *schema.ResourceData, meta interface{})
 				if retryOn409(err) {
 					continue
 				}
-				return fmt.Errorf("Error creating openstack_networking_floatingip_v2: %s", err)
+				return diag.Errorf("Error creating openstack_networking_floatingip_v2: %s", err)
 			}
 			break
 		}
 		// handle the last error
 		if err != nil {
-			return fmt.Errorf("Error creating openstack_networking_floatingip_v2: %d subnets exhausted: %s", len(subnetIDs), err)
+			return diag.Errorf("Error creating openstack_networking_floatingip_v2: %d subnets exhausted: %s", len(subnetIDs), err)
 		}
 	}
 
@@ -222,9 +223,9 @@ func resourceNetworkFloatingIPV2Create(d *schema.ResourceData, meta interface{})
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_floatingip_v2 %s to become available: %s", fip.ID, err)
+		return diag.Errorf("Error waiting for openstack_networking_floatingip_v2 %s to become available: %s", fip.ID, err)
 	}
 
 	d.SetId(fip.ID)
@@ -239,27 +240,27 @@ func resourceNetworkFloatingIPV2Create(d *schema.ResourceData, meta interface{})
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "floatingips", fip.ID, tagOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error setting tags on openstack_networking_floatingip_v2 %s: %s", fip.ID, err)
+			return diag.Errorf("Error setting tags on openstack_networking_floatingip_v2 %s: %s", fip.ID, err)
 		}
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_floatingip_v2 %s", tags, fip.ID)
 	}
 
 	log.Printf("[DEBUG] Created openstack_networking_floatingip_v2 %s: %#v", fip.ID, fip)
-	return resourceNetworkFloatingIPV2Read(d, meta)
+	return resourceNetworkFloatingIPV2Read(ctx, d, meta)
 }
 
-func resourceNetworkFloatingIPV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkFloatingIPV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack network client: %s", err)
+		return diag.Errorf("Error creating OpenStack network client: %s", err)
 	}
 
 	var fip floatingIPExtended
 
 	err = floatingips.Get(networkingClient, d.Id()).ExtractInto(&fip)
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting openstack_networking_floatingip_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_floatingip_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_floatingip_v2 %s: %#v", d.Id(), fip)
@@ -277,18 +278,18 @@ func resourceNetworkFloatingIPV2Read(d *schema.ResourceData, meta interface{}) e
 
 	poolName, err := networkingNetworkV2Name(d, meta, fip.FloatingNetworkID)
 	if err != nil {
-		return fmt.Errorf("Error retrieving pool name for openstack_networking_floatingip_v2 %s: %s", d.Id(), err)
+		return diag.Errorf("Error retrieving pool name for openstack_networking_floatingip_v2 %s: %s", d.Id(), err)
 	}
 	d.Set("pool", poolName)
 
 	return nil
 }
 
-func resourceNetworkFloatingIPV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkFloatingIPV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack network client: %s", err)
+		return diag.Errorf("Error creating OpenStack network client: %s", err)
 	}
 
 	var hasChange bool
@@ -317,7 +318,7 @@ func resourceNetworkFloatingIPV2Update(d *schema.ResourceData, meta interface{})
 		log.Printf("[DEBUG] openstack_networking_floatingip_v2 %s update options: %#v", d.Id(), updateOpts)
 		_, err = floatingips.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_networking_floatingip_v2 %s: %s", d.Id(), err)
+			return diag.Errorf("Error updating openstack_networking_floatingip_v2 %s: %s", d.Id(), err)
 		}
 	}
 
@@ -326,23 +327,23 @@ func resourceNetworkFloatingIPV2Update(d *schema.ResourceData, meta interface{})
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "floatingips", d.Id(), tagOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error setting tags on openstack_networking_floatingip_v2 %s: %s", d.Id(), err)
+			return diag.Errorf("Error setting tags on openstack_networking_floatingip_v2 %s: %s", d.Id(), err)
 		}
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_floatingip_v2 %s", tags, d.Id())
 	}
 
-	return resourceNetworkFloatingIPV2Read(d, meta)
+	return resourceNetworkFloatingIPV2Read(ctx, d, meta)
 }
 
-func resourceNetworkFloatingIPV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkFloatingIPV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack network client: %s", err)
+		return diag.Errorf("Error creating OpenStack network client: %s", err)
 	}
 
 	if err := floatingips.Delete(networkingClient, d.Id()).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_networking_floatingip_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_floatingip_v2"))
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -354,9 +355,9 @@ func resourceNetworkFloatingIPV2Delete(d *schema.ResourceData, meta interface{})
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_floatingip_v2 %s to delete: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_networking_floatingip_v2 %s to Delete:  %s", d.Id(), err)
 	}
 
 	d.SetId("")

@@ -5,9 +5,10 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/aggregates"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 var testAccAggregateConfig = `
@@ -34,8 +35,8 @@ func TestAccComputeV2Aggregate(t *testing.T) {
 	var aggregate aggregates.Aggregate
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckAdminOnly(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckAdminOnly(t) },
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAggregateConfig,
@@ -57,7 +58,7 @@ func TestAccComputeV2AggregateWithHypervisor(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 			testAccPreCheckHypervisor(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAggregateConfig,

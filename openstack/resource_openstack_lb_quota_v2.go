@@ -1,23 +1,27 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/quotas"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceLoadBalancerQuotaV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLoadBalancerQuotaV2Create,
-		Read:   resourceLoadBalancerQuotaV2Read,
-		Update: resourceLoadBalancerQuotaV2Update,
-		Delete: schema.RemoveFromState,
+		CreateContext: resourceLoadBalancerQuotaV2Create,
+		ReadContext:   resourceLoadBalancerQuotaV2Read,
+		UpdateContext: resourceLoadBalancerQuotaV2Update,
+		DeleteContext: resourceLoadBalancerQuotaV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -85,15 +89,15 @@ func resourceLoadBalancerQuotaV2() *schema.Resource {
 	}
 }
 
-func resourceLoadBalancerQuotaV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceLoadBalancerQuotaV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack loadbalancing client: %s", err)
+		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
 	if lbClient.Type != octaviaLBClientType {
-		return fmt.Errorf("Error creating openstack_lb_quota_v2: Only available when using octavia")
+		return diag.Errorf("Error creating openstack_lb_quota_v2: Only available when using octavia")
 	}
 
 	region := GetRegion(d, config)
@@ -126,7 +130,7 @@ func resourceLoadBalancerQuotaV2Create(d *schema.ResourceData, meta interface{})
 
 	q, err := quotas.Update(lbClient, projectID, updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_lb_quota_v2: %s", err)
+		return diag.Errorf("Error creating openstack_lb_quota_v2: %s", err)
 	}
 
 	id := fmt.Sprintf("%s/%s", projectID, region)
@@ -134,19 +138,19 @@ func resourceLoadBalancerQuotaV2Create(d *schema.ResourceData, meta interface{})
 
 	log.Printf("[DEBUG] Created openstack_lb_quota_v2 %#v", q)
 
-	return resourceLoadBalancerQuotaV2Read(d, meta)
+	return resourceLoadBalancerQuotaV2Read(ctx, d, meta)
 }
 
-func resourceLoadBalancerQuotaV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceLoadBalancerQuotaV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack loadbalancing client: %s", err)
+		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
 	if lbClient.Type != octaviaLBClientType {
-		return fmt.Errorf("Error creating openstack_lb_quota_v2: Only available when using octavia")
+		return diag.Errorf("Error creating openstack_lb_quota_v2: Only available when using octavia")
 	}
 
 	// Pase projectID from resource id that is <project_id>/<region>
@@ -154,7 +158,7 @@ func resourceLoadBalancerQuotaV2Read(d *schema.ResourceData, meta interface{}) e
 
 	q, err := quotas.Get(lbClient, projectID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_lb_quota_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_lb_quota_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_lb_quota_v2 %s: %#v", d.Id(), q)
@@ -172,15 +176,15 @@ func resourceLoadBalancerQuotaV2Read(d *schema.ResourceData, meta interface{}) e
 	return nil
 }
 
-func resourceLoadBalancerQuotaV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceLoadBalancerQuotaV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack loadbalancing client: %s", err)
+		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
 	if lbClient.Type != octaviaLBClientType {
-		return fmt.Errorf("Error creating openstack_lb_quota_v2: Only available when using octavia")
+		return diag.Errorf("Error creating openstack_lb_quota_v2: Only available when using octavia")
 	}
 
 	var (
@@ -235,9 +239,14 @@ func resourceLoadBalancerQuotaV2Update(d *schema.ResourceData, meta interface{})
 		projectID := d.Get("project_id").(string)
 		_, err := quotas.Update(lbClient, projectID, updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_lb_quota_v2: %s", err)
+			return diag.Errorf("Error updating openstack_lb_quota_v2: %s", err)
 		}
 	}
 
-	return resourceLoadBalancerQuotaV2Read(d, meta)
+	return resourceLoadBalancerQuotaV2Read(ctx, d, meta)
+}
+
+func resourceLoadBalancerQuotaV2Delete(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	d.SetId("")
+	return nil
 }

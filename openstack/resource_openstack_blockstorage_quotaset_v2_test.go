@@ -5,11 +5,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/quotasets"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumetypes"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccBlockStorageQuotasetV2_basic(t *testing.T) {
@@ -25,8 +26,8 @@ func TestAccBlockStorageQuotasetV2_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 			testAccPreCheckBlockStorageV2(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageQuotasetV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageQuotasetV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageQuotasetV2Basic,

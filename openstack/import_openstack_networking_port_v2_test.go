@@ -3,7 +3,7 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccNetworkingV2Port_importBasic(t *testing.T) {
@@ -14,8 +14,8 @@ func TestAccNetworkingV2Port_importBasic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2PortBasic,
@@ -41,8 +41,8 @@ func TestAccNetworkingV2Port_importAllowedAddressPairs(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2PortAllowedAddressPairs1,
@@ -68,8 +68,8 @@ func TestAccNetworkingV2Port_importAllowedAddressPairsNoMAC(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2PortAllowedAddressPairsNoMAC,
@@ -95,8 +95,8 @@ func TestAccNetworkingV2Port_importDHCPOpts(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2PortCreateExtraDhcpOpts,

@@ -1,29 +1,31 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/imagedata"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/imageimport"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func resourceImagesImageV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceImagesImageV2Create,
-		Read:   resourceImagesImageV2Read,
-		Update: resourceImagesImageV2Update,
-		Delete: resourceImagesImageV2Delete,
+		CreateContext: resourceImagesImageV2Create,
+		ReadContext:   resourceImagesImageV2Read,
+		UpdateContext: resourceImagesImageV2Update,
+		DeleteContext: resourceImagesImageV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		CustomizeDiff: resourceImagesImageV2UpdateComputedAttributes,
@@ -227,11 +229,11 @@ func resourceImagesImageV2() *schema.Resource {
 	}
 }
 
-func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	imageClient, err := config.ImageV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack image client: %s", err)
+		return diag.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
 	protected := d.Get("protected").(bool)
@@ -267,7 +269,7 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	newImg, err := images.Create(imageClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating Image: %s", err)
+		return diag.Errorf("Error creating Image: %s", err)
 	}
 
 	d.SetId(newImg.ID)
@@ -284,24 +286,24 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 		// downloading/getting image file props
 		imgFilePath, err = resourceImagesImageV2File(imageClient, d)
 		if err != nil {
-			return fmt.Errorf("Error opening file for Image: %s", err)
+			return diag.Errorf("Error opening file for Image: %s", err)
 		}
 		fileSize, fileChecksum, err = resourceImagesImageV2FileProps(imgFilePath)
 		if err != nil {
-			return fmt.Errorf("Error getting file props: %s", err)
+			return diag.Errorf("Error getting file props: %s", err)
 		}
 
 		// upload
 		imgFile, err = os.Open(imgFilePath)
 		if err != nil {
-			return fmt.Errorf("Error opening file %q: %s", imgFilePath, err)
+			return diag.Errorf("Error opening file %q: %s", imgFilePath, err)
 		}
 		defer imgFile.Close()
 		log.Printf("[WARN] Uploading image %s (%d bytes). This can be pretty long.", d.Id(), fileSize)
 
 		res := imagedata.Upload(imageClient, d.Id(), imgFile)
 		if res.Err != nil {
-			return fmt.Errorf("Error while uploading file %q: %s", imgFilePath, res.Err)
+			return diag.Errorf("Error while uploading file %q: %s", imgFilePath, res.Err)
 		}
 	} else {
 		// import
@@ -315,7 +317,7 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 		log.Printf("[DEBUG] Import Options: %#v", importOpts)
 		res := imageimport.Create(imageClient, d.Id(), importOpts)
 		if res.Err != nil {
-			return fmt.Errorf("Error while importing url %q: %s", imgURL, res.Err)
+			return diag.Errorf("Error while importing url %q: %s", imgURL, res.Err)
 		}
 	}
 
@@ -329,36 +331,36 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 		MinTimeout: 3 * time.Second,
 	}
 
-	if _, err = stateConf.WaitForState(); err != nil {
-		return fmt.Errorf("Error waiting for Image: %s", err)
+	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
+		return diag.Errorf("Error waiting for Image: %s", err)
 	}
 
 	img, err := images.Get(imageClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "image")
+		return diag.FromErr(CheckDeleted(d, err, "image"))
 	}
 
 	if v, ok := d.GetOkExists("verify_checksum"); !useWebDownload && (!ok || (ok && v.(bool))) {
 		if img.Checksum != fileChecksum {
-			return fmt.Errorf("Error wrong checksum: got %q, expected %q", img.Checksum, fileChecksum)
+			return diag.Errorf("Error wrong checksum: got %q, expected %q", img.Checksum, fileChecksum)
 		}
 	}
 
 	d.Partial(false)
 
-	return resourceImagesImageV2Read(d, meta)
+	return resourceImagesImageV2Read(ctx, d, meta)
 }
 
-func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	imageClient, err := config.ImageV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack image client: %s", err)
+		return diag.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
 	img, err := images.Get(imageClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "image")
+		return diag.FromErr(CheckDeleted(d, err, "image"))
 	}
 
 	log.Printf("[DEBUG] Retrieved Image %s: %#v", d.Id(), img)
@@ -397,11 +399,11 @@ func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceImagesImageV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceImagesImageV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	imageClient, err := config.ImageV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack image client: %s", err)
+		return diag.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
 	updateOpts := make(images.UpdateOpts, 0)
@@ -509,22 +511,22 @@ func resourceImagesImageV2Update(d *schema.ResourceData, meta interface{}) error
 
 	_, err = images.Update(imageClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating image: %s", err)
+		return diag.Errorf("Error updating image: %s", err)
 	}
 
-	return resourceImagesImageV2Read(d, meta)
+	return resourceImagesImageV2Read(ctx, d, meta)
 }
 
-func resourceImagesImageV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceImagesImageV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	imageClient, err := config.ImageV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack image client: %s", err)
+		return diag.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting Image %s", d.Id())
 	if err := images.Delete(imageClient, d.Id()).Err; err != nil {
-		return fmt.Errorf("Error deleting Image: %s", err)
+		return diag.Errorf("Error deleting Image: %s", err)
 	}
 
 	d.SetId("")

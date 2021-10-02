@@ -3,8 +3,9 @@ package openstack
 import (
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 )
 
 func TestFlattenIdentityAuthScopeV3Roles(t *testing.T) {

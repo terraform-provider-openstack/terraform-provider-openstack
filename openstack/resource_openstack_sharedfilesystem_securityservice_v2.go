@@ -1,25 +1,26 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/securityservices"
 )
 
 func resourceSharedFilesystemSecurityServiceV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSharedFilesystemSecurityServiceV2Create,
-		Read:   resourceSharedFilesystemSecurityServiceV2Read,
-		Update: resourceSharedFilesystemSecurityServiceV2Update,
-		Delete: resourceSharedFilesystemSecurityServiceV2Delete,
+		CreateContext: resourceSharedFilesystemSecurityServiceV2Create,
+		ReadContext:   resourceSharedFilesystemSecurityServiceV2Read,
+		UpdateContext: resourceSharedFilesystemSecurityServiceV2Update,
+		DeleteContext: resourceSharedFilesystemSecurityServiceV2Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -93,11 +94,11 @@ func resourceSharedFilesystemSecurityServiceV2() *schema.Resource {
 	}
 }
 
-func resourceSharedFilesystemSecurityServiceV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemSecurityServiceV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
 	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
@@ -122,19 +123,19 @@ func resourceSharedFilesystemSecurityServiceV2Create(d *schema.ResourceData, met
 	createOpts.Password = d.Get("password").(string)
 	securityservice, err := securityservices.Create(sfsClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_sharedfilesystem_securityservice_v2: %s", err)
+		return diag.Errorf("Error creating openstack_sharedfilesystem_securityservice_v2: %s", err)
 	}
 
 	d.SetId(securityservice.ID)
 
-	return resourceSharedFilesystemSecurityServiceV2Read(d, meta)
+	return resourceSharedFilesystemSecurityServiceV2Read(ctx, d, meta)
 }
 
-func resourceSharedFilesystemSecurityServiceV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemSecurityServiceV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
 	// Select microversion to use.
@@ -145,7 +146,7 @@ func resourceSharedFilesystemSecurityServiceV2Read(d *schema.ResourceData, meta 
 
 	securityservice, err := securityservices.Get(sfsClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting openstack_sharedfilesystem_securityservice_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_sharedfilesystem_securityservice_v2"))
 	}
 
 	// Workaround for resource import.
@@ -176,11 +177,11 @@ func resourceSharedFilesystemSecurityServiceV2Read(d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceSharedFilesystemSecurityServiceV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemSecurityServiceV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
 	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
@@ -236,21 +237,21 @@ func resourceSharedFilesystemSecurityServiceV2Update(d *schema.ResourceData, met
 
 	_, err = securityservices.Update(sfsClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating openstack_sharedfilesystem_securityservice_v2 %s: %s", d.Id(), err)
+		return diag.Errorf("Error updating openstack_sharedfilesystem_securityservice_v2 %s: %s", d.Id(), err)
 	}
 
-	return resourceSharedFilesystemSecurityServiceV2Read(d, meta)
+	return resourceSharedFilesystemSecurityServiceV2Read(ctx, d, meta)
 }
 
-func resourceSharedFilesystemSecurityServiceV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemSecurityServiceV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
 	if err := securityservices.Delete(sfsClient, d.Id()).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_sharedfilesystem_securityservice_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_sharedfilesystem_securityservice_v2"))
 	}
 
 	return nil

@@ -1,17 +1,19 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceDNSZoneV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDNSZoneV2Read,
+		ReadContext: dataSourceDNSZoneV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -113,11 +115,11 @@ func dataSourceDNSZoneV2() *schema.Resource {
 	}
 }
 
-func dataSourceDNSZoneV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	listOpts := zones.ListOpts{}
@@ -152,21 +154,21 @@ func dataSourceDNSZoneV2Read(d *schema.ResourceData, meta interface{}) error {
 
 	pages, err := zones.List(dnsClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve zones: %s", err)
+		return diag.Errorf("Unable to retrieve zones: %s", err)
 	}
 
 	allZones, err := zones.ExtractZones(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to extract zones: %s", err)
+		return diag.Errorf("Unable to extract zones: %s", err)
 	}
 
 	if len(allZones) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return diag.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allZones) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return diag.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -199,14 +201,14 @@ func dataSourceDNSZoneV2Read(d *schema.ResourceData, meta interface{}) error {
 	err = d.Set("attributes", zone.Attributes)
 	if err != nil {
 		log.Printf("[DEBUG] Unable to set attributes: %s", err)
-		return err
+		return diag.FromErr(err)
 	}
 
 	// slices
 	err = d.Set("masters", zone.Masters)
 	if err != nil {
 		log.Printf("[DEBUG] Unable to set masters: %s", err)
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

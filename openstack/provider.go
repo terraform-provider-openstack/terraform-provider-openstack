@@ -1,9 +1,11 @@
 package openstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/meta"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 
 	"github.com/gophercloud/utils/terraform/auth"
 	"github.com/gophercloud/utils/terraform/mutexkv"
@@ -16,7 +18,7 @@ type Config struct {
 }
 
 // Provider returns a schema.Provider for OpenStack.
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"auth_url": {
@@ -395,7 +397,7 @@ func Provider() terraform.ResourceProvider {
 		},
 	}
 
-	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+	provider.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		terraformVersion := provider.TerraformVersion
 		if terraformVersion == "" {
 			// Terraform 0.12 introduced this field to the protocol
@@ -483,7 +485,7 @@ func init() {
 	}
 }
 
-func configureProvider(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
+func configureProvider(d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
 	config := Config{
 		auth.Config{
 			CACertFile:                  d.Get("cacert_file").(string),
@@ -529,7 +531,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 	}
 
 	if err := config.LoadAndValidate(); err != nil {
-		return nil, err
+		return nil, diag.FromErr(err)
 	}
 
 	return &config, nil

@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud/openstack/orchestration/v1/stacks"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccOrchestrationV1Stack_basic(t *testing.T) {
@@ -17,8 +18,8 @@ func TestAccOrchestrationV1Stack_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrchestrationV1StackBasic,
@@ -41,8 +42,8 @@ func TestAccOrchestrationV1Stack_tags(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrchestrationV1StackTags,
@@ -65,8 +66,8 @@ func TestAccOrchestrationV1Stack_update(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrchestrationV1StackPreUpdate,
@@ -97,8 +98,8 @@ func TestAccOrchestrationV1Stack_timeout(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrchestrationV1StackTimeout,
@@ -118,8 +119,8 @@ func TestAccOrchestrationV1Stack_outputs(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrchestrationV1StackOutputs,

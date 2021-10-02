@@ -1,24 +1,26 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ikepolicies"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceIKEPolicyV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIKEPolicyV2Create,
-		Read:   resourceIKEPolicyV2Read,
-		Update: resourceIKEPolicyV2Update,
-		Delete: resourceIKEPolicyV2Delete,
+		CreateContext: resourceIKEPolicyV2Create,
+		ReadContext:   resourceIKEPolicyV2Read,
+		UpdateContext: resourceIKEPolicyV2Update,
+		DeleteContext: resourceIKEPolicyV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -99,11 +101,11 @@ func resourceIKEPolicyV2() *schema.Resource {
 	}
 }
 
-func resourceIKEPolicyV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceIKEPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	lifetime := resourceIKEPolicyV2LifetimeCreateOpts(d.Get("lifetime").(*schema.Set))
@@ -131,7 +133,7 @@ func resourceIKEPolicyV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	policy, err := ikepolicies.Create(networkingClient, opts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -142,9 +144,9 @@ func resourceIKEPolicyV2Create(d *schema.ResourceData, meta interface{}) error {
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for openstack_vpnaas_ike_policy_v2 %s to become active: %s", policy.ID, err)
 	}
 
@@ -152,21 +154,21 @@ func resourceIKEPolicyV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(policy.ID)
 
-	return resourceIKEPolicyV2Read(d, meta)
+	return resourceIKEPolicyV2Read(ctx, d, meta)
 }
 
-func resourceIKEPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceIKEPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about IKE policy: %s", d.Id())
 
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	policy, err := ikepolicies.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "IKE policy")
+		return diag.FromErr(CheckDeleted(d, err, "IKE policy"))
 	}
 
 	log.Printf("[DEBUG] Read OpenStack IKE Policy %s: %#v", d.Id(), policy)
@@ -195,11 +197,11 @@ func resourceIKEPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceIKEPolicyV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceIKEPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	opts := ikepolicies.UpdateOpts{}
@@ -250,7 +252,7 @@ func resourceIKEPolicyV2Update(d *schema.ResourceData, meta interface{}) error {
 	if hasChange {
 		err = ikepolicies.Update(networkingClient, d.Id(), opts).Err
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
@@ -260,21 +262,21 @@ func resourceIKEPolicyV2Update(d *schema.ResourceData, meta interface{}) error {
 			Delay:      0,
 			MinTimeout: 2 * time.Second,
 		}
-		if _, err = stateConf.WaitForState(); err != nil {
-			return err
+		if _, err = stateConf.WaitForStateContext(ctx); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
-	return resourceIKEPolicyV2Read(d, meta)
+	return resourceIKEPolicyV2Read(ctx, d, meta)
 }
 
-func resourceIKEPolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceIKEPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy IKE policy: %s", d.Id())
 
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -286,8 +288,8 @@ func resourceIKEPolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 2 * time.Second,
 	}
 
-	if _, err = stateConf.WaitForState(); err != nil {
-		return err
+	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil

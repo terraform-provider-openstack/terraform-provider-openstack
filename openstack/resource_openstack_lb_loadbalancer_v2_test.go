@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
@@ -27,8 +27,8 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2LoadBalancerConfigBasic(lbProvider),
@@ -60,8 +60,8 @@ func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2LoadBalancerSecGroup,
@@ -120,8 +120,8 @@ func TestAccLBV2LoadBalancer_vip_network(t *testing.T) {
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2LoadBalancerConfigVIPNetwork,
@@ -144,8 +144,8 @@ func TestAccLBV2LoadBalancer_vip_port_id(t *testing.T) {
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2LoadBalancerConfigVIPPortID,

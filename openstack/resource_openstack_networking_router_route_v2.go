@@ -1,21 +1,22 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 )
 
 func resourceNetworkingRouterRouteV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingRouterRouteV2Create,
-		Read:   resourceNetworkingRouterRouteV2Read,
-		Delete: resourceNetworkingRouterRouteV2Delete,
+		CreateContext: resourceNetworkingRouterRouteV2Create,
+		ReadContext:   resourceNetworkingRouterRouteV2Read,
+		DeleteContext: resourceNetworkingRouterRouteV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -47,11 +48,11 @@ func resourceNetworkingRouterRouteV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingRouterRouteV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	routerID := d.Get("router_id").(string)
@@ -60,7 +61,7 @@ func resourceNetworkingRouterRouteV2Create(d *schema.ResourceData, meta interfac
 
 	r, err := routers.Get(networkingClient, routerID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting openstack_networking_router_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_router_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_router_v2 %s: %#v", routerID, r)
@@ -79,7 +80,7 @@ func resourceNetworkingRouterRouteV2Create(d *schema.ResourceData, meta interfac
 
 	if exists {
 		log.Printf("[DEBUG] openstack_networking_router_v2 %s already has route to %s via %s", routerID, dstCIDR, nextHop)
-		return resourceNetworkingRouterRouteV2Read(d, meta)
+		return resourceNetworkingRouterRouteV2Read(ctx, d, meta)
 	}
 
 	routes = append(routes, routers.Route{
@@ -92,24 +93,24 @@ func resourceNetworkingRouterRouteV2Create(d *schema.ResourceData, meta interfac
 	log.Printf("[DEBUG] openstack_networking_router_v2 %s update options: %#v", routerID, updateOpts)
 	_, err = routers.Update(networkingClient, routerID, updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating openstack_networking_router_v2: %s", err)
+		return diag.Errorf("Error updating openstack_networking_router_v2: %s", err)
 	}
 
 	d.SetId(resourceNetworkingRouterRouteV2BuildID(routerID, dstCIDR, nextHop))
 
-	return resourceNetworkingRouterRouteV2Read(d, meta)
+	return resourceNetworkingRouterRouteV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingRouterRouteV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterRouteV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	idFromResource, dstCIDR, nextHop, err := resourceNetworkingRouterRouteV2ParseID(d.Id())
 	if err != nil {
-		return fmt.Errorf("Error reading openstack_networking_router_route_v2 ID %s: %s", d.Id(), err)
+		return diag.Errorf("Error reading openstack_networking_router_route_v2 ID %s: %s", d.Id(), err)
 	}
 
 	routerID := d.Get("router_id").(string)
@@ -120,7 +121,7 @@ func resourceNetworkingRouterRouteV2Read(d *schema.ResourceData, meta interface{
 
 	r, err := routers.Get(networkingClient, routerID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting openstack_networking_router_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_router_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_router_v2 %s: %#v", routerID, r)
@@ -138,11 +139,11 @@ func resourceNetworkingRouterRouteV2Read(d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func resourceNetworkingRouterRouteV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterRouteV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	routerID := d.Get("router_id").(string)
@@ -151,7 +152,7 @@ func resourceNetworkingRouterRouteV2Delete(d *schema.ResourceData, meta interfac
 
 	r, err := routers.Get(networkingClient, routerID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting openstack_networking_router_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_router_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_router_v2 %s: %#v", routerID, r)
@@ -169,7 +170,7 @@ func resourceNetworkingRouterRouteV2Delete(d *schema.ResourceData, meta interfac
 	}
 
 	if len(oldRoutes) == len(newRoute) {
-		return fmt.Errorf("Can't find route to %s via %s on openstack_networking_router_v2 %s", dstCIDR, nextHop, routerID)
+		return diag.Errorf("Can't find route to %s via %s on openstack_networking_router_v2 %s", dstCIDR, nextHop, routerID)
 	}
 
 	log.Printf("[DEBUG] Deleting openstack_networking_router_v2 %s route to %s via %s", routerID, dstCIDR, nextHop)
@@ -178,7 +179,7 @@ func resourceNetworkingRouterRouteV2Delete(d *schema.ResourceData, meta interfac
 	}
 	_, err = routers.Update(networkingClient, routerID, updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating openstack_networking_router_v2: %s", err)
+		return diag.Errorf("Error updating openstack_networking_router_v2: %s", err)
 	}
 
 	return nil

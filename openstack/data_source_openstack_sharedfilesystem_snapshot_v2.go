@@ -1,16 +1,18 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/snapshots"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceSharedFilesystemSnapshotV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceSharedFilesystemSnapshotV2Read,
+		ReadContext: dataSourceSharedFilesystemSnapshotV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -66,11 +68,11 @@ func dataSourceSharedFilesystemSnapshotV2() *schema.Resource {
 	}
 }
 
-func dataSourceSharedFilesystemSnapshotV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceSharedFilesystemSnapshotV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack sharedfilesystem sfsClient: %s", err)
+		return diag.Errorf("Error creating OpenStack sharedfilesystem sfsClient: %s", err)
 	}
 
 	sfsClient.Microversion = minManilaShareMicroversion
@@ -84,29 +86,31 @@ func dataSourceSharedFilesystemSnapshotV2Read(d *schema.ResourceData, meta inter
 
 	allPages, err := snapshots.ListDetail(sfsClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query snapshots: %s", err)
+		return diag.Errorf("Unable to query snapshots: %s", err)
 	}
 
 	allSnapshots, err := snapshots.ExtractSnapshots(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve snapshots: %s", err)
+		return diag.Errorf("Unable to retrieve snapshots: %s", err)
 	}
 
 	if len(allSnapshots) < 1 {
-		return fmt.Errorf("Your query returned no results. Please change your search criteria and try again")
+		return diag.Errorf("Your query returned no results. Please change your search criteria and try again")
 	}
 
 	var share snapshots.Snapshot
 	if len(allSnapshots) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allSnapshots)
-		return fmt.Errorf("Your query returned more than one result. Please try a more specific search criteria")
+		return diag.Errorf("Your query returned more than one result. Please try a more specific search criteria")
 	}
 	share = allSnapshots[0]
 
-	return dataSourceSharedFilesystemSnapshotV2Attributes(d, &share, GetRegion(d, config))
+	dataSourceSharedFilesystemSnapshotV2Attributes(d, &share, GetRegion(d, config))
+
+	return nil
 }
 
-func dataSourceSharedFilesystemSnapshotV2Attributes(d *schema.ResourceData, snapshot *snapshots.Snapshot, region string) error {
+func dataSourceSharedFilesystemSnapshotV2Attributes(d *schema.ResourceData, snapshot *snapshots.Snapshot, region string) {
 	d.SetId(snapshot.ID)
 	d.Set("name", snapshot.Name)
 	d.Set("region", region)
@@ -117,6 +121,4 @@ func dataSourceSharedFilesystemSnapshotV2Attributes(d *schema.ResourceData, snap
 	d.Set("share_id", snapshot.ShareID)
 	d.Set("share_proto", snapshot.ShareProto)
 	d.Set("share_size", snapshot.ShareSize)
-
-	return nil
 }

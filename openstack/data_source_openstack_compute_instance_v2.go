@@ -1,20 +1,22 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tags"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceComputeInstanceV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceComputeInstanceV2Read,
+		ReadContext: dataSourceComputeInstanceV2Read,
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -30,6 +32,10 @@ func dataSourceComputeInstanceV2() *schema.Resource {
 				Computed: true,
 			},
 			"image_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"image_name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -106,6 +112,10 @@ func dataSourceComputeInstanceV2() *schema.Resource {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
+			"power_state": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"tags": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -115,19 +125,19 @@ func dataSourceComputeInstanceV2() *schema.Resource {
 	}
 }
 
-func dataSourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	log.Print("[DEBUG] Creating compute client")
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	id := d.Get("id").(string)
 	log.Printf("[DEBUG] Attempting to retrieve server %s", id)
 	server, err := servers.Get(computeClient, id).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "server")
+		return diag.FromErr(CheckDeleted(d, err, "server"))
 	}
 
 	log.Printf("[DEBUG] Retrieved Server %s: %+v", id, server)
@@ -140,7 +150,7 @@ func dataSourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) e
 	// Get the instance network and address information
 	networks, err := flattenInstanceNetworks(d, meta)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Determine the best IPv4 and IPv6 addresses to access the instance with
@@ -175,20 +185,20 @@ func dataSourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) e
 
 	flavorID, ok := server.Flavor["id"].(string)
 	if !ok {
-		return fmt.Errorf("Error setting OpenStack server's flavor: %v", server.Flavor)
+		return diag.Errorf("Error setting OpenStack server's flavor: %v", server.Flavor)
 	}
 	d.Set("flavor_id", flavorID)
 
 	d.Set("key_pair", server.KeyName)
 	flavor, err := flavors.Get(computeClient, flavorID).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.Set("flavor_name", flavor.Name)
 
 	// Set the instance's image information appropriately
 	if err := setImageInformation(computeClient, server, d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Build a custom struct for the availability zone extension
@@ -200,7 +210,7 @@ func dataSourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) e
 	// Do another Get so the above work is not disturbed.
 	err = servers.Get(computeClient, d.Id()).ExtractInto(&serverWithAZ)
 	if err != nil {
-		return CheckDeleted(d, err, "server")
+		return diag.FromErr(CheckDeleted(d, err, "server"))
 	}
 	// Set the availability zone
 	d.Set("availability_zone", serverWithAZ.AvailabilityZone)
@@ -214,7 +224,7 @@ func dataSourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) e
 	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved":
 		d.Set("power_state", currentStatus)
 	default:
-		return fmt.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
+		return diag.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
 	}
 
 	// Populate tags.

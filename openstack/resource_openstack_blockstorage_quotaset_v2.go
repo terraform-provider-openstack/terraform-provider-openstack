@@ -1,23 +1,26 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/quotasets"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceBlockStorageQuotasetV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceBlockStorageQuotasetV2Create,
-		Read:   resourceBlockStorageQuotasetV2Read,
-		Update: resourceBlockStorageQuotasetV2Update,
-		Delete: schema.RemoveFromState,
+		CreateContext: resourceBlockStorageQuotasetV2Create,
+		ReadContext:   resourceBlockStorageQuotasetV2Read,
+		UpdateContext: resourceBlockStorageQuotasetV2Update,
+		Delete:        schema.RemoveFromState,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -90,12 +93,12 @@ func resourceBlockStorageQuotasetV2() *schema.Resource {
 	}
 }
 
-func resourceBlockStorageQuotasetV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageQuotasetV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
 	blockStorageClient, err := config.BlockStorageV2Client(region)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	projectID := d.Get("project_id").(string)
@@ -107,9 +110,9 @@ func resourceBlockStorageQuotasetV2Create(d *schema.ResourceData, meta interface
 	backupGigabytes := d.Get("backup_gigabytes").(int)
 	groups := d.Get("groups").(int)
 	volumeTypeQuotaRaw := d.Get("volume_type_quota").(map[string]interface{})
-	volumeTypeQuota, err := blockStorageVolumeTypeQuotaConversion(volumeTypeQuotaRaw)
+	volumeTypeQuota, err := blockStorageQuotasetVolTypeQuotaToInt(volumeTypeQuotaRaw)
 	if err != nil {
-		return fmt.Errorf("Error parsing volume_type_quota in openstack_blockstorage_quotaset_v2: %s", err)
+		return diag.Errorf("Error parsing volume_type_quota in openstack_blockstorage_quotaset_v2: %s", err)
 	}
 
 	updateOpts := quotasets.UpdateOpts{
@@ -125,7 +128,7 @@ func resourceBlockStorageQuotasetV2Create(d *schema.ResourceData, meta interface
 
 	q, err := quotasets.Update(blockStorageClient, projectID, updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_blockstorage_quotaset_v2: %s", err)
+		return diag.Errorf("Error creating openstack_blockstorage_quotaset_v2: %s", err)
 	}
 
 	id := fmt.Sprintf("%s/%s", projectID, region)
@@ -133,15 +136,15 @@ func resourceBlockStorageQuotasetV2Create(d *schema.ResourceData, meta interface
 
 	log.Printf("[DEBUG] Created openstack_blockstorage_quotaset_v2 %#v", q)
 
-	return resourceBlockStorageQuotasetV2Read(d, meta)
+	return resourceBlockStorageQuotasetV2Read(ctx, d, meta)
 }
 
-func resourceBlockStorageQuotasetV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageQuotasetV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
 	blockStorageClient, err := config.BlockStorageV2Client(region)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	// Depending on the provider version the resource was created, the resource id
@@ -151,7 +154,7 @@ func resourceBlockStorageQuotasetV2Read(d *schema.ResourceData, meta interface{}
 
 	q, err := quotasets.Get(blockStorageClient, projectID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_blockstorage_quotaset_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_blockstorage_quotaset_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_blockstorage_quotaset_v2 %s: %#v", d.Id(), q)
@@ -167,9 +170,13 @@ func resourceBlockStorageQuotasetV2Read(d *schema.ResourceData, meta interface{}
 	d.Set("groups", q.Groups)
 
 	// We only set volume_type_quota when user is defining them
-	volumeTypeQuota := d.Get("volume_type_quota").(map[string]interface{})
-	if len(volumeTypeQuota) > 0 {
-		if err := d.Set("volume_type_quota", q.Extra); err != nil {
+	volumeTypeQuotaProvided := d.Get("volume_type_quota").(map[string]interface{})
+	if len(volumeTypeQuotaProvided) > 0 {
+		volumeTypeQuota, err := blockStorageQuotasetVolTypeQuotaToStr(q.Extra)
+		if err != nil {
+			log.Printf("[WARN] Unable to read openstack_blockstorage_quotaset_v2 %s volume_type_quotas: %s", d.Id(), err)
+		}
+		if err := d.Set("volume_type_quota", volumeTypeQuota); err != nil {
 			log.Printf(
 				"[WARN] Unable to set openstack_blockstorage_quotaset_v2 %s volume_type_quotas: %s", d.Id(), err)
 		}
@@ -178,11 +185,11 @@ func resourceBlockStorageQuotasetV2Read(d *schema.ResourceData, meta interface{}
 	return nil
 }
 
-func resourceBlockStorageQuotasetV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageQuotasetV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	blockStorageClient, err := config.BlockStorageV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	var (
@@ -239,9 +246,9 @@ func resourceBlockStorageQuotasetV2Update(d *schema.ResourceData, meta interface
 		// zero attributes. Not updating when a user removes all attributes is acceptable
 		// as this attributes are not removed anyways.
 		if len(volumeTypeQuotaRaw) > 0 {
-			volumeTypeQuota, err := blockStorageVolumeTypeQuotaConversion(volumeTypeQuotaRaw)
+			volumeTypeQuota, err := blockStorageQuotasetVolTypeQuotaToInt(volumeTypeQuotaRaw)
 			if err != nil {
-				return fmt.Errorf("Error parsing volume_type_quota in openstack_blockstorage_quotaset_v2: %s", err)
+				return diag.Errorf("Error parsing volume_type_quota in openstack_blockstorage_quotaset_v2: %s", err)
 			}
 			updateOpts.Extra = volumeTypeQuota
 			hasChange = true
@@ -253,9 +260,9 @@ func resourceBlockStorageQuotasetV2Update(d *schema.ResourceData, meta interface
 		projectID := d.Get("project_id").(string)
 		_, err := quotasets.Update(blockStorageClient, projectID, updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_blockstorage_quotaset_v2: %s", err)
+			return diag.Errorf("Error updating openstack_blockstorage_quotaset_v2: %s", err)
 		}
 	}
 
-	return resourceBlockStorageQuotasetV2Read(d, meta)
+	return resourceBlockStorageQuotasetV2Read(ctx, d, meta)
 }

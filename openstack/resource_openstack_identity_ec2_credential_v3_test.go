@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/extensions/ec2credentials"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
@@ -19,8 +19,8 @@ func TestAccIdentityV3Ec2Credential_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIdentityV3Ec2CredentialDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckIdentityV3Ec2CredentialDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3Ec2CredentialBasic,

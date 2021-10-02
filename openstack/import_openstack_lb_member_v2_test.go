@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccLBV2Member_importBasic(t *testing.T) {
@@ -18,8 +18,8 @@ func TestAccLBV2Member_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2MemberDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2MemberDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccLbV2MemberConfigBasic,

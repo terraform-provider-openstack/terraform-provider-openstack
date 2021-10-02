@@ -1,24 +1,25 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/rules"
 )
 
 func resourceNetworkingQoSDSCPMarkingRuleV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingQoSDSCPMarkingRuleV2Create,
-		Read:   resourceNetworkingQoSDSCPMarkingRuleV2Read,
-		Update: resourceNetworkingQoSDSCPMarkingRuleV2Update,
-		Delete: resourceNetworkingQoSDSCPMarkingRuleV2Delete,
+		CreateContext: resourceNetworkingQoSDSCPMarkingRuleV2Create,
+		ReadContext:   resourceNetworkingQoSDSCPMarkingRuleV2Read,
+		UpdateContext: resourceNetworkingQoSDSCPMarkingRuleV2Update,
+		DeleteContext: resourceNetworkingQoSDSCPMarkingRuleV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -49,11 +50,11 @@ func resourceNetworkingQoSDSCPMarkingRuleV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingQoSDSCPMarkingRuleV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSDSCPMarkingRuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	createOpts := rules.CreateDSCPMarkingRuleOpts{
@@ -64,7 +65,7 @@ func resourceNetworkingQoSDSCPMarkingRuleV2Create(d *schema.ResourceData, meta i
 	log.Printf("[DEBUG] openstack_networking_qos_dscp_marking_rule_v2 create options: %#v", createOpts)
 	r, err := rules.CreateDSCPMarkingRule(networkingClient, qosPolicyID, createOpts).ExtractDSCPMarkingRule()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_networking_qos_dscp_marking_rule_v2: %s", err)
+		return diag.Errorf("Error creating openstack_networking_qos_dscp_marking_rule_v2: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for openstack_networking_qos_dscp_marking_rule_v2 %s to become available.", r.ID)
@@ -77,9 +78,9 @@ func resourceNetworkingQoSDSCPMarkingRuleV2Create(d *schema.ResourceData, meta i
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_qos_dscp_marking_rule_v2 %s to become available: %s", r.ID, err)
+		return diag.Errorf("Error waiting for openstack_networking_qos_dscp_marking_rule_v2 %s to become available: %s", r.ID, err)
 	}
 
 	id := resourceNetworkingQoSRuleV2BuildID(qosPolicyID, r.ID)
@@ -87,24 +88,24 @@ func resourceNetworkingQoSDSCPMarkingRuleV2Create(d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Created openstack_networking_qos_dscp_marking_rule_v2 %s: %#v", id, r)
 
-	return resourceNetworkingQoSDSCPMarkingRuleV2Read(d, meta)
+	return resourceNetworkingQoSDSCPMarkingRuleV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingQoSDSCPMarkingRuleV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSDSCPMarkingRuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
 	if err != nil {
-		return fmt.Errorf("Error reading openstack_networking_qos_dscp_marking_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.Errorf("Error reading openstack_networking_qos_dscp_marking_rule_v2 ID %s: %s", d.Id(), err)
 	}
 
 	r, err := rules.GetDSCPMarkingRule(networkingClient, qosPolicyID, qosRuleID).ExtractDSCPMarkingRule()
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting openstack_networking_qos_dscp_marking_rule_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_qos_dscp_marking_rule_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_qos_dscp_marking_rule_v2 %s: %#v", d.Id(), r)
@@ -116,16 +117,16 @@ func resourceNetworkingQoSDSCPMarkingRuleV2Read(d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceNetworkingQoSDSCPMarkingRuleV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSDSCPMarkingRuleV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
 	if err != nil {
-		return fmt.Errorf("Error reading openstack_networking_qos_dscp_marking_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.Errorf("Error reading openstack_networking_qos_dscp_marking_rule_v2 ID %s: %s", d.Id(), err)
 	}
 
 	if d.HasChange("dscp_mark") {
@@ -136,27 +137,27 @@ func resourceNetworkingQoSDSCPMarkingRuleV2Update(d *schema.ResourceData, meta i
 		log.Printf("[DEBUG] openstack_networking_qos_dscp_marking_rule_v2 %s update options: %#v", d.Id(), updateOpts)
 		_, err = rules.UpdateDSCPMarkingRule(networkingClient, qosPolicyID, qosRuleID, updateOpts).ExtractDSCPMarkingRule()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_networking_qos_dscp_marking_rule_v2 %s: %s", d.Id(), err)
+			return diag.Errorf("Error updating openstack_networking_qos_dscp_marking_rule_v2 %s: %s", d.Id(), err)
 		}
 	}
 
-	return resourceNetworkingQoSDSCPMarkingRuleV2Read(d, meta)
+	return resourceNetworkingQoSDSCPMarkingRuleV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingQoSDSCPMarkingRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSDSCPMarkingRuleV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
 	if err != nil {
-		return fmt.Errorf("Error reading openstack_networking_qos_dscp_marking_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.Errorf("Error reading openstack_networking_qos_dscp_marking_rule_v2 ID %s: %s", d.Id(), err)
 	}
 
 	if err := rules.DeleteDSCPMarkingRule(networkingClient, qosPolicyID, qosRuleID).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error getting openstack_networking_qos_dscp_marking_rule_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_qos_dscp_marking_rule_v2"))
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -168,9 +169,9 @@ func resourceNetworkingQoSDSCPMarkingRuleV2Delete(d *schema.ResourceData, meta i
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_qos_dscp_marking_rule_v2 %s to delete: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_networking_qos_dscp_marking_rule_v2 %s to Delete:  %s", d.Id(), err)
 	}
 
 	return nil

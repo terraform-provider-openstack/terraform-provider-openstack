@@ -3,8 +3,9 @@ package openstack
 import (
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/acls"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 // So far only "read" is supported.

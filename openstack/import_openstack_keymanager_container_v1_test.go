@@ -3,7 +3,7 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccKeyManagerContainerV1_importBasic(t *testing.T) {
@@ -15,8 +15,8 @@ func TestAccKeyManagerContainerV1_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckContainerV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerContainerV1Basic(),
@@ -39,8 +39,8 @@ func TestAccKeyManagerContainerV1_importACLs(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckContainerV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerContainerV1Acls(),

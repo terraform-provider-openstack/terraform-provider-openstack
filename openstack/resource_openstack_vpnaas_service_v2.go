@@ -1,24 +1,27 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/services"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceServiceV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceV2Create,
-		Read:   resourceServiceV2Read,
-		Update: resourceServiceV2Update,
-		Delete: resourceServiceV2Delete,
+		CreateContext: resourceServiceV2Create,
+		ReadContext:   resourceServiceV2Read,
+		UpdateContext: resourceServiceV2Update,
+		DeleteContext: resourceServiceV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -85,11 +88,11 @@ func resourceServiceV2() *schema.Resource {
 	}
 }
 
-func resourceServiceV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceServiceV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var createOpts services.CreateOptsBuilder
@@ -111,7 +114,7 @@ func resourceServiceV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	service, err := services.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -122,31 +125,31 @@ func resourceServiceV2Create(d *schema.ResourceData, meta interface{}) error {
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Service created: %#v", service)
 
 	d.SetId(service.ID)
 
-	return resourceServiceV2Read(d, meta)
+	return resourceServiceV2Read(ctx, d, meta)
 }
 
-func resourceServiceV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceServiceV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about service: %s", d.Id())
 
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	service, err := services.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "service")
+		return diag.FromErr(CheckDeleted(d, err, "service"))
 	}
 
 	log.Printf("[DEBUG] Read OpenStack Service %s: %#v", d.Id(), service)
@@ -165,11 +168,11 @@ func resourceServiceV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceServiceV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceServiceV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	opts := services.UpdateOpts{}
@@ -202,7 +205,7 @@ func resourceServiceV2Update(d *schema.ResourceData, meta interface{}) error {
 	if hasChange {
 		service, err := services.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
@@ -212,31 +215,31 @@ func resourceServiceV2Update(d *schema.ResourceData, meta interface{}) error {
 			Delay:      0,
 			MinTimeout: 2 * time.Second,
 		}
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		log.Printf("[DEBUG] Updated service with id %s", d.Id())
 	}
 
-	return resourceServiceV2Read(d, meta)
+	return resourceServiceV2Read(ctx, d, meta)
 }
 
-func resourceServiceV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceServiceV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy service: %s", d.Id())
 
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	err = services.Delete(networkingClient, d.Id()).Err
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -248,9 +251,9 @@ func resourceServiceV2Delete(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
-	return err
+	return diag.FromErr(err)
 }
 
 func waitForServiceDeletion(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {

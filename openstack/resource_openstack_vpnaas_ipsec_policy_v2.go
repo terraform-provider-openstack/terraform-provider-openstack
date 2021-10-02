@@ -1,24 +1,26 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceIPSecPolicyV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIPSecPolicyV2Create,
-		Read:   resourceIPSecPolicyV2Read,
-		Update: resourceIPSecPolicyV2Update,
-		Delete: resourceIPSecPolicyV2Delete,
+		CreateContext: resourceIPSecPolicyV2Create,
+		ReadContext:   resourceIPSecPolicyV2Read,
+		UpdateContext: resourceIPSecPolicyV2Update,
+		DeleteContext: resourceIPSecPolicyV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -100,11 +102,11 @@ func resourceIPSecPolicyV2() *schema.Resource {
 	}
 }
 
-func resourceIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceIPSecPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	encapsulationMode := resourceIPSecPolicyV2EncapsulationMode(d.Get("encapsulation_mode").(string))
@@ -133,7 +135,7 @@ func resourceIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) error
 
 	policy, err := ipsecpolicies.Create(networkingClient, opts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -144,9 +146,9 @@ func resourceIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) error
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for openstack_vpnaas_ipsec_policy_v2 %s to become active: %s", policy.ID, err)
 	}
 
@@ -154,21 +156,21 @@ func resourceIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) error
 
 	d.SetId(policy.ID)
 
-	return resourceIPSecPolicyV2Read(d, meta)
+	return resourceIPSecPolicyV2Read(ctx, d, meta)
 }
 
-func resourceIPSecPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceIPSecPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about IPSec policy: %s", d.Id())
 
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	policy, err := ipsecpolicies.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "IPSec policy")
+		return diag.FromErr(CheckDeleted(d, err, "IPSec policy"))
 	}
 
 	log.Printf("[DEBUG] Read OpenStack IPSec policy %s: %#v", d.Id(), policy)
@@ -197,11 +199,11 @@ func resourceIPSecPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceIPSecPolicyV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceIPSecPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var hasChange bool
@@ -255,7 +257,7 @@ func resourceIPSecPolicyV2Update(d *schema.ResourceData, meta interface{}) error
 	if hasChange {
 		_, err = ipsecpolicies.Update(networkingClient, d.Id(), opts).Extract()
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		stateConf := &resource.StateChangeConf{
@@ -266,20 +268,20 @@ func resourceIPSecPolicyV2Update(d *schema.ResourceData, meta interface{}) error
 			Delay:      0,
 			MinTimeout: 2 * time.Second,
 		}
-		if _, err = stateConf.WaitForState(); err != nil {
-			return err
+		if _, err = stateConf.WaitForStateContext(ctx); err != nil {
+			return diag.FromErr(err)
 		}
 	}
-	return resourceIPSecPolicyV2Read(d, meta)
+	return resourceIPSecPolicyV2Read(ctx, d, meta)
 }
 
-func resourceIPSecPolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceIPSecPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy IPSec policy: %s", d.Id())
 
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -291,8 +293,8 @@ func resourceIPSecPolicyV2Delete(d *schema.ResourceData, meta interface{}) error
 		MinTimeout: 2 * time.Second,
 	}
 
-	if _, err = stateConf.WaitForState(); err != nil {
-		return err
+	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil

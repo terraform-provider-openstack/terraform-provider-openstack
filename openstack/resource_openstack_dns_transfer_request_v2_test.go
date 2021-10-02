@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/transfer/request"
 )
@@ -21,8 +21,8 @@ func TestAccDNSV2TransferRequest_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckDNS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2TransferRequestDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDNSV2TransferRequestDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2TransferRequestBasic(zoneName),
@@ -54,8 +54,8 @@ func TestAccDNSV2TransferRequest_ignoreStatusCheck(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckDNS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2TransferRequestDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDNSV2TransferRequestDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2TransferRequestDisableCheck(zoneName),

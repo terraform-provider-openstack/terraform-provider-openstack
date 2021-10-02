@@ -1,12 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips"
@@ -15,11 +17,11 @@ import (
 
 func resourceComputeFloatingIPAssociateV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceComputeFloatingIPAssociateV2Create,
-		Read:   resourceComputeFloatingIPAssociateV2Read,
-		Delete: resourceComputeFloatingIPAssociateV2Delete,
+		CreateContext: resourceComputeFloatingIPAssociateV2Create,
+		ReadContext:   resourceComputeFloatingIPAssociateV2Read,
+		DeleteContext: resourceComputeFloatingIPAssociateV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -61,11 +63,11 @@ func resourceComputeFloatingIPAssociateV2() *schema.Resource {
 	}
 }
 
-func resourceComputeFloatingIPAssociateV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeFloatingIPAssociateV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	floatingIP := d.Get("floating_ip").(string)
@@ -80,7 +82,7 @@ func resourceComputeFloatingIPAssociateV2Create(d *schema.ResourceData, meta int
 
 	err = floatingips.AssociateInstance(computeClient, instanceID, associateOpts).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_compute_floatingip_associate_v2: %s", err)
+		return diag.Errorf("Error creating openstack_compute_floatingip_associate_v2: %s", err)
 	}
 
 	// This API call should be synchronous, but we've had reports where it isn't.
@@ -102,9 +104,9 @@ func resourceComputeFloatingIPAssociateV2Create(d *schema.ResourceData, meta int
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err := stateConf.WaitForState()
+		_, err := stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -114,20 +116,20 @@ func resourceComputeFloatingIPAssociateV2Create(d *schema.ResourceData, meta int
 	id := fmt.Sprintf("%s/%s/%s", floatingIP, instanceID, fixedIP)
 	d.SetId(id)
 
-	return resourceComputeFloatingIPAssociateV2Read(d, meta)
+	return resourceComputeFloatingIPAssociateV2Read(ctx, d, meta)
 }
 
-func resourceComputeFloatingIPAssociateV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeFloatingIPAssociateV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	// Obtain relevant info from parsing the ID
 	floatingIP, instanceID, fixedIP, err := parseComputeFloatingIPAssociateID(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Now check and see whether the floating IP still exists.
@@ -148,7 +150,7 @@ func resourceComputeFloatingIPAssociateV2Read(d *schema.ResourceData, meta inter
 	}
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if !exists {
@@ -187,11 +189,11 @@ func resourceComputeFloatingIPAssociateV2Read(d *schema.ResourceData, meta inter
 	return nil
 }
 
-func resourceComputeFloatingIPAssociateV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeFloatingIPAssociateV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	floatingIP := d.Get("floating_ip").(string)
@@ -208,7 +210,7 @@ func resourceComputeFloatingIPAssociateV2Delete(d *schema.ResourceData, meta int
 			// 409 is returned when floating ip address is not associated with an instance.
 			log.Printf("[DEBUG] openstack_compute_floatingip_associate_v2 %s is not associated with instance %s", d.Id(), instanceID)
 		} else {
-			return CheckDeleted(d, err, "Error deleting openstack_compute_floatingip_associate_v2")
+			return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_compute_floatingip_associate_v2"))
 		}
 	}
 

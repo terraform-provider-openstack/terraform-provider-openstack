@@ -1,25 +1,24 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
-
 	octavialisteners "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
 	octaviamonitors "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/monitors"
 	octaviapools "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
-
 	neutronl7policies "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
 	neutronlisteners "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 	neutronloadbalancers "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
 	neutronmonitors "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/monitors"
 	neutronpools "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 )
 
 const octaviaLBClientType = "load-balancer"
@@ -346,7 +345,7 @@ func expandLBV2ListenerHeadersMap(raw map[string]interface{}) (map[string]string
 	return m, nil
 }
 
-func waitForLBV2Listener(lbClient *gophercloud.ServiceClient, listener *neutronlisteners.Listener, target string, pending []string, timeout time.Duration) error {
+func waitForLBV2Listener(ctx context.Context, lbClient *gophercloud.ServiceClient, listener *neutronlisteners.Listener, target string, pending []string, timeout time.Duration) error {
 	log.Printf("[DEBUG] Waiting for openstack_lb_listener_v2 %s to become %s.", listener.ID, target)
 
 	if len(listener.Loadbalancers) == 0 {
@@ -364,7 +363,7 @@ func waitForLBV2Listener(lbClient *gophercloud.ServiceClient, listener *neutronl
 		MinTimeout: 1 * time.Second,
 	}
 
-	_, err := stateConf.WaitForState()
+	_, err := stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
 			if target == "DELETED" {
@@ -546,7 +545,7 @@ func chooseLBV2MonitorUpdateOpts(d *schema.ResourceData, config *Config) neutron
 	return nil
 }
 
-func waitForLBV2LoadBalancer(lbClient *gophercloud.ServiceClient, lbID string, target string, pending []string, timeout time.Duration) error {
+func waitForLBV2LoadBalancer(ctx context.Context, lbClient *gophercloud.ServiceClient, lbID string, target string, pending []string, timeout time.Duration) error {
 	log.Printf("[DEBUG] Waiting for loadbalancer %s to become %s.", lbID, target)
 
 	stateConf := &resource.StateChangeConf{
@@ -558,7 +557,7 @@ func waitForLBV2LoadBalancer(lbClient *gophercloud.ServiceClient, lbID string, t
 		MinTimeout: 1 * time.Second,
 	}
 
-	_, err := stateConf.WaitForState()
+	_, err := stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
 			switch target {
@@ -585,7 +584,7 @@ func resourceLBV2LoadBalancerRefreshFunc(lbClient *gophercloud.ServiceClient, id
 	}
 }
 
-func waitForLBV2Member(lbClient *gophercloud.ServiceClient, parentPool *neutronpools.Pool, member *neutronpools.Member, target string, pending []string, timeout time.Duration) error {
+func waitForLBV2Member(ctx context.Context, lbClient *gophercloud.ServiceClient, parentPool *neutronpools.Pool, member *neutronpools.Member, target string, pending []string, timeout time.Duration) error {
 	log.Printf("[DEBUG] Waiting for member %s to become %s.", member.ID, target)
 
 	lbID, err := lbV2FindLBIDviaPool(lbClient, parentPool)
@@ -602,7 +601,7 @@ func waitForLBV2Member(lbClient *gophercloud.ServiceClient, parentPool *neutronp
 		MinTimeout: 1 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
 			if target == "DELETED" {
@@ -639,7 +638,7 @@ func resourceLBV2MemberRefreshFunc(lbClient *gophercloud.ServiceClient, lbID str
 	return resourceLBV2LoadBalancerStatusRefreshFuncNeutron(lbClient, lbID, "member", member.ID, poolID)
 }
 
-func waitForLBV2Monitor(lbClient *gophercloud.ServiceClient, parentPool *neutronpools.Pool, monitor *neutronmonitors.Monitor, target string, pending []string, timeout time.Duration) error {
+func waitForLBV2Monitor(ctx context.Context, lbClient *gophercloud.ServiceClient, parentPool *neutronpools.Pool, monitor *neutronmonitors.Monitor, target string, pending []string, timeout time.Duration) error {
 	log.Printf("[DEBUG] Waiting for openstack_lb_monitor_v2 %s to become %s.", monitor.ID, target)
 
 	lbID, err := lbV2FindLBIDviaPool(lbClient, parentPool)
@@ -656,7 +655,7 @@ func waitForLBV2Monitor(lbClient *gophercloud.ServiceClient, parentPool *neutron
 		MinTimeout: 1 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
 			if target == "DELETED" {
@@ -692,7 +691,7 @@ func resourceLBV2MonitorRefreshFunc(lbClient *gophercloud.ServiceClient, lbID st
 	return resourceLBV2LoadBalancerStatusRefreshFuncNeutron(lbClient, lbID, "monitor", monitor.ID, "")
 }
 
-func waitForLBV2Pool(lbClient *gophercloud.ServiceClient, pool *neutronpools.Pool, target string, pending []string, timeout time.Duration) error {
+func waitForLBV2Pool(ctx context.Context, lbClient *gophercloud.ServiceClient, pool *neutronpools.Pool, target string, pending []string, timeout time.Duration) error {
 	log.Printf("[DEBUG] Waiting for pool %s to become %s.", pool.ID, target)
 
 	lbID, err := lbV2FindLBIDviaPool(lbClient, pool)
@@ -709,7 +708,7 @@ func waitForLBV2Pool(lbClient *gophercloud.ServiceClient, pool *neutronpools.Poo
 		MinTimeout: 1 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
 			if target == "DELETED" {
@@ -893,7 +892,7 @@ func resourceLBV2L7PolicyRefreshFunc(lbClient *gophercloud.ServiceClient, lbID s
 	return resourceLBV2LoadBalancerStatusRefreshFuncNeutron(lbClient, lbID, "l7policy", l7policy.ID, "")
 }
 
-func waitForLBV2L7Policy(lbClient *gophercloud.ServiceClient, parentListener *neutronlisteners.Listener, l7policy *neutronl7policies.L7Policy, target string, pending []string, timeout time.Duration) error {
+func waitForLBV2L7Policy(ctx context.Context, lbClient *gophercloud.ServiceClient, parentListener *neutronlisteners.Listener, l7policy *neutronl7policies.L7Policy, target string, pending []string, timeout time.Duration) error {
 	log.Printf("[DEBUG] Waiting for l7policy %s to become %s.", l7policy.ID, target)
 
 	if len(parentListener.Loadbalancers) == 0 {
@@ -911,7 +910,7 @@ func waitForLBV2L7Policy(lbClient *gophercloud.ServiceClient, parentListener *ne
 		MinTimeout: 1 * time.Second,
 	}
 
-	_, err := stateConf.WaitForState()
+	_, err := stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
 			if target == "DELETED" {
@@ -977,7 +976,7 @@ func resourceLBV2L7RuleRefreshFunc(lbClient *gophercloud.ServiceClient, lbID str
 	return resourceLBV2LoadBalancerStatusRefreshFuncNeutron(lbClient, lbID, "l7rule", l7rule.ID, l7policyID)
 }
 
-func waitForLBV2L7Rule(lbClient *gophercloud.ServiceClient, parentListener *neutronlisteners.Listener, parentL7policy *neutronl7policies.L7Policy, l7rule *neutronl7policies.Rule, target string, pending []string, timeout time.Duration) error {
+func waitForLBV2L7Rule(ctx context.Context, lbClient *gophercloud.ServiceClient, parentListener *neutronlisteners.Listener, parentL7policy *neutronl7policies.L7Policy, l7rule *neutronl7policies.Rule, target string, pending []string, timeout time.Duration) error {
 	log.Printf("[DEBUG] Waiting for l7rule %s to become %s.", l7rule.ID, target)
 
 	if len(parentListener.Loadbalancers) == 0 {
@@ -995,7 +994,7 @@ func waitForLBV2L7Rule(lbClient *gophercloud.ServiceClient, parentListener *neut
 		MinTimeout: 1 * time.Second,
 	}
 
-	_, err := stateConf.WaitForState()
+	_, err := stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
 			if target == "DELETED" {

@@ -1,26 +1,29 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/containers"
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects"
 	"github.com/gophercloud/gophercloud/pagination"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func resourceObjectStorageContainerV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceObjectStorageContainerV1Create,
-		Read:   resourceObjectStorageContainerV1Read,
-		Update: resourceObjectStorageContainerV1Update,
-		Delete: resourceObjectStorageContainerV1Delete,
+		CreateContext: resourceObjectStorageContainerV1Create,
+		ReadContext:   resourceObjectStorageContainerV1Read,
+		UpdateContext: resourceObjectStorageContainerV1Update,
+		DeleteContext: resourceObjectStorageContainerV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -94,11 +97,11 @@ func resourceObjectStorageContainerV1() *schema.Resource {
 	}
 }
 
-func resourceObjectStorageContainerV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceObjectStorageContainerV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	objectStorageClient, err := config.ObjectStorageV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack object storage client: %s", err)
+		return diag.Errorf("error creating OpenStack object storage client: %s", err)
 	}
 
 	cn := d.Get("name").(string)
@@ -128,39 +131,39 @@ func resourceObjectStorageContainerV1Create(d *schema.ResourceData, meta interfa
 	log.Printf("[DEBUG] Create Options for objectstorage_container_v1: %#v", createOpts)
 	_, err = containers.Create(objectStorageClient, cn, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating objectstorage_container_v1: %s", err)
+		return diag.Errorf("error creating objectstorage_container_v1: %s", err)
 	}
 	log.Printf("[INFO] objectstorage_container_v1 created with ID: %s", cn)
 
 	// Store the ID now
 	d.SetId(cn)
 
-	return resourceObjectStorageContainerV1Read(d, meta)
+	return resourceObjectStorageContainerV1Read(ctx, d, meta)
 }
 
-func resourceObjectStorageContainerV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceObjectStorageContainerV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 
 	objectStorageClient, err := config.ObjectStorageV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack object storage client: %s", err)
+		return diag.Errorf("error creating OpenStack object storage client: %s", err)
 	}
 
 	result := containers.Get(objectStorageClient, d.Id(), nil)
 
 	if result.Err != nil {
-		return CheckDeleted(d, result.Err, "container")
+		return diag.FromErr(CheckDeleted(d, result.Err, "container"))
 	}
 
 	headers, err := result.Extract()
 	if err != nil {
-		return fmt.Errorf("error extracting headers for objectstorage_container_v1 '%s': %s", d.Id(), err)
+		return diag.Errorf("error extracting headers for objectstorage_container_v1 '%s': %s", d.Id(), err)
 	}
 	log.Printf("[DEBUG] Retrieved headers for objectstorage_container_v1 '%s': %#v", d.Id(), headers)
 
 	metadata, err := result.ExtractMetadata()
 	if err != nil {
-		return fmt.Errorf("error extracting metadata for objectstorage_container_v1 '%s': %s", d.Id(), err)
+		return diag.Errorf("error extracting metadata for objectstorage_container_v1 '%s': %s", d.Id(), err)
 	}
 	log.Printf("[DEBUG] Retrieved metadata for objectstorage_container_v1 '%s': %#v", d.Id(), metadata)
 
@@ -177,7 +180,7 @@ func resourceObjectStorageContainerV1Read(d *schema.ResourceData, meta interface
 	versioningResource := resourceObjectStorageContainerV1().Schema["versioning"].Elem.(*schema.Resource)
 
 	if headers.VersionsLocation != "" && headers.HistoryLocation != "" {
-		return fmt.Errorf("error reading versioning headers for objectstorage_container_v1 '%s': found location for both exclusive types, versions ('%s') and history ('%s')", d.Id(), headers.VersionsLocation, headers.HistoryLocation)
+		return diag.Errorf("error reading versioning headers for objectstorage_container_v1 '%s': found location for both exclusive types, versions ('%s') and history ('%s')", d.Id(), headers.VersionsLocation, headers.HistoryLocation)
 	}
 
 	if headers.VersionsLocation != "" {
@@ -186,7 +189,7 @@ func resourceObjectStorageContainerV1Read(d *schema.ResourceData, meta interface
 			"location": headers.VersionsLocation,
 		}
 		if err := d.Set("versioning", schema.NewSet(schema.HashResource(versioningResource), []interface{}{versioning})); err != nil {
-			return fmt.Errorf("error setting 'versions' versioning for objectstorage_container_v1 '%s': %s", d.Id(), err)
+			return diag.Errorf("error setting 'versions' versioning for objectstorage_container_v1 '%s': %s", d.Id(), err)
 		}
 	}
 
@@ -196,7 +199,7 @@ func resourceObjectStorageContainerV1Read(d *schema.ResourceData, meta interface
 			"location": headers.HistoryLocation,
 		}
 		if err := d.Set("versioning", schema.NewSet(schema.HashResource(versioningResource), []interface{}{versioning})); err != nil {
-			return fmt.Errorf("error setting 'history' versioning for objectstorage_container_v1 '%s': %s", d.Id(), err)
+			return diag.Errorf("error setting 'history' versioning for objectstorage_container_v1 '%s': %s", d.Id(), err)
 		}
 	}
 
@@ -205,11 +208,11 @@ func resourceObjectStorageContainerV1Read(d *schema.ResourceData, meta interface
 	return nil
 }
 
-func resourceObjectStorageContainerV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceObjectStorageContainerV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	objectStorageClient, err := config.ObjectStorageV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack object storage client: %s", err)
+		return diag.Errorf("error creating OpenStack object storage client: %s", err)
 	}
 
 	updateOpts := containers.UpdateOpts{
@@ -248,17 +251,17 @@ func resourceObjectStorageContainerV1Update(d *schema.ResourceData, meta interfa
 
 	_, err = containers.Update(objectStorageClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error updating objectstorage_container_v1 '%s': %s", d.Id(), err)
+		return diag.Errorf("error updating objectstorage_container_v1 '%s': %s", d.Id(), err)
 	}
 
-	return resourceObjectStorageContainerV1Read(d, meta)
+	return resourceObjectStorageContainerV1Read(ctx, d, meta)
 }
 
-func resourceObjectStorageContainerV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceObjectStorageContainerV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	objectStorageClient, err := config.ObjectStorageV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack object storage client: %s", err)
+		return diag.Errorf("error creating OpenStack object storage client: %s", err)
 	}
 
 	_, err = containers.Delete(objectStorageClient, d.Id()).Extract()
@@ -289,11 +292,11 @@ func resourceObjectStorageContainerV1Delete(d *schema.ResourceData, meta interfa
 				return true, nil
 			})
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
-			return resourceObjectStorageContainerV1Delete(d, meta)
+			return resourceObjectStorageContainerV1Delete(ctx, d, meta)
 		}
-		return fmt.Errorf("error deleting objectstorage_container_v1 '%s': %s", d.Id(), err)
+		return diag.Errorf("error deleting objectstorage_container_v1 '%s': %s", d.Id(), err)
 	}
 
 	d.SetId("")

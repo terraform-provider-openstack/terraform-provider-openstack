@@ -1,18 +1,19 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
 )
 
 func dataSourceNetworkingSecGroupV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNetworkingSecGroupV2Read,
+		ReadContext: dataSourceNetworkingSecGroupV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -53,11 +54,11 @@ func dataSourceNetworkingSecGroupV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNetworkingSecGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	listOpts := groups.ListOpts{
@@ -74,20 +75,20 @@ func dataSourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}
 
 	pages, err := groups.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	allSecGroups, err := groups.ExtractGroups(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve security groups: %s", err)
+		return diag.Errorf("Unable to retrieve security groups: %s", err)
 	}
 
 	if len(allSecGroups) < 1 {
-		return fmt.Errorf("No Security Group found with name: %s", d.Get("name"))
+		return diag.Errorf("No Security Group found with name: %s", d.Get("name"))
 	}
 
 	if len(allSecGroups) > 1 {
-		return fmt.Errorf("More than one Security Group found with name: %s", d.Get("name"))
+		return diag.Errorf("More than one Security Group found with name: %s", d.Get("name"))
 	}
 
 	secGroup := allSecGroups[0]

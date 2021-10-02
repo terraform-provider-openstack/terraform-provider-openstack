@@ -1,16 +1,18 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/snapshots"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceBlockStorageSnapshotV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceBlockStorageSnapshotV3Read,
+		ReadContext: dataSourceBlockStorageSnapshotV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -61,11 +63,11 @@ func dataSourceBlockStorageSnapshotV3() *schema.Resource {
 	}
 }
 
-func dataSourceBlockStorageSnapshotV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceBlockStorageSnapshotV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	client, err := config.BlockStorageV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	listOpts := snapshots.ListOpts{
@@ -76,16 +78,16 @@ func dataSourceBlockStorageSnapshotV3Read(d *schema.ResourceData, meta interface
 
 	allPages, err := snapshots.List(client, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query openstack_blockstorage_snapshots_v3: %s", err)
+		return diag.Errorf("Unable to query openstack_blockstorage_snapshots_v3: %s", err)
 	}
 
 	allSnapshots, err := snapshots.ExtractSnapshots(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_blockstorage_snapshots_v3: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_blockstorage_snapshots_v3: %s", err)
 	}
 
 	if len(allSnapshots) < 1 {
-		return fmt.Errorf("Your openstack_blockstorage_snapshot_v3 query returned no results. " +
+		return diag.Errorf("Your openstack_blockstorage_snapshot_v3 query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
@@ -98,17 +100,19 @@ func dataSourceBlockStorageSnapshotV3Read(d *schema.ResourceData, meta interface
 		} else {
 			log.Printf("[DEBUG] Multiple openstack_blockstorage_snapshot_v3 results found: %#v", allSnapshots)
 
-			return fmt.Errorf("Your query returned more than one result. Please try a more " +
+			return diag.Errorf("Your query returned more than one result. Please try a more " +
 				"specific search criteria, or set `most_recent` attribute to true.")
 		}
 	} else {
 		snapshot = allSnapshots[0]
 	}
 
-	return dataSourceBlockStorageSnapshotV3Attributes(d, snapshot)
+	dataSourceBlockStorageSnapshotV3Attributes(d, snapshot)
+
+	return nil
 }
 
-func dataSourceBlockStorageSnapshotV3Attributes(d *schema.ResourceData, snapshot snapshots.Snapshot) error {
+func dataSourceBlockStorageSnapshotV3Attributes(d *schema.ResourceData, snapshot snapshots.Snapshot) {
 	d.SetId(snapshot.ID)
 	d.Set("name", snapshot.Name)
 	d.Set("description", snapshot.Description)
@@ -119,6 +123,4 @@ func dataSourceBlockStorageSnapshotV3Attributes(d *schema.ResourceData, snapshot
 	if err := d.Set("metadata", snapshot.Metadata); err != nil {
 		log.Printf("[DEBUG] Unable to set metadata for snapshot %s: %s", snapshot.ID, err)
 	}
-
-	return nil
 }

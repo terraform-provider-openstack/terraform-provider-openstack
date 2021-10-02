@@ -1,12 +1,13 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas/members"
@@ -14,12 +15,12 @@ import (
 
 func resourceLBMemberV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLBMemberV1Create,
-		Read:   resourceLBMemberV1Read,
-		Update: resourceLBMemberV1Update,
-		Delete: resourceLBMemberV1Delete,
+		CreateContext: resourceLBMemberV1Create,
+		ReadContext:   resourceLBMemberV1Read,
+		UpdateContext: resourceLBMemberV1Update,
+		DeleteContext: resourceLBMemberV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -69,11 +70,11 @@ func resourceLBMemberV1() *schema.Resource {
 	}
 }
 
-func resourceLBMemberV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceLBMemberV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	createOpts := members.CreateOpts{
@@ -86,7 +87,7 @@ func resourceLBMemberV1Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] OpenStack LB Member Create Options: %#v", createOpts)
 	m, err := members.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack LB member: %s", err)
+		return diag.Errorf("Error creating OpenStack LB member: %s", err)
 	}
 	log.Printf("[INFO] LB member ID: %s", m.ID)
 
@@ -101,9 +102,9 @@ func resourceLBMemberV1Create(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(m.ID)
@@ -117,22 +118,22 @@ func resourceLBMemberV1Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] OpenStack LB Member Update Options: %#v", createOpts)
 	_, err = members.Update(networkingClient, m.ID, updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenStack LB member: %s", err)
+		return diag.Errorf("Error updating OpenStack LB member: %s", err)
 	}
 
-	return resourceLBMemberV1Read(d, meta)
+	return resourceLBMemberV1Read(ctx, d, meta)
 }
 
-func resourceLBMemberV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceLBMemberV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	m, err := members.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "LB member")
+		return diag.FromErr(CheckDeleted(d, err, "LB member"))
 	}
 
 	log.Printf("[DEBUG] Retrieved OpenStack LB member %s: %+v", d.Id(), m)
@@ -147,11 +148,11 @@ func resourceLBMemberV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceLBMemberV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceLBMemberV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var updateOpts members.UpdateOpts
@@ -164,17 +165,17 @@ func resourceLBMemberV1Update(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = members.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenStack LB member: %s", err)
+		return diag.Errorf("Error updating OpenStack LB member: %s", err)
 	}
 
-	return resourceLBMemberV1Read(d, meta)
+	return resourceLBMemberV1Read(ctx, d, meta)
 }
 
-func resourceLBMemberV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceLBMemberV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	err = members.Delete(networkingClient, d.Id()).ExtractErr()
@@ -193,9 +194,9 @@ func resourceLBMemberV1Delete(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack LB member: %s", err)
+		return diag.Errorf("Error deleting OpenStack LB member: %s", err)
 	}
 
 	d.SetId("")

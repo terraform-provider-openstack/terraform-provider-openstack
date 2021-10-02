@@ -1,20 +1,22 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 
-	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
+	"github.com/gophercloud/utils/terraform/hashcode"
 )
 
 func dataSourceImagesImageIDsV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceImagesImageIdsV2Read,
+		ReadContext: dataSourceImagesImageIdsV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -131,11 +133,11 @@ func dataSourceImagesImageIDsV2() *schema.Resource {
 }
 
 // dataSourceImagesImageIdsV2Read performs the image lookup.
-func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceImagesImageIdsV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	imageClient, err := config.ImageV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack image client: %s", err)
+		return diag.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
 	sortValue := d.Get("sort")
@@ -179,12 +181,12 @@ func dataSourceImagesImageIdsV2Read(d *schema.ResourceData, meta interface{}) er
 
 	allPages, err := images.List(imageClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to list images in openstack_images_image_ids_v2: %s", err)
+		return diag.Errorf("Unable to list images in openstack_images_image_ids_v2: %s", err)
 	}
 
 	allImages, err := images.ExtractImages(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve images in openstack_images_image_ids_v2: %s", err)
+		return diag.Errorf("Unable to retrieve images in openstack_images_image_ids_v2: %s", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved %d images in openstack_images_image_ids_v2: %+v", len(allImages), allImages)

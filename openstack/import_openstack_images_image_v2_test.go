@@ -3,7 +3,7 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccImagesImageV2_importBasic(t *testing.T) {
@@ -14,8 +14,8 @@ func TestAccImagesImageV2_importBasic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckImagesImageV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2Basic,

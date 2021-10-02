@@ -1,18 +1,19 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
 func dataSourceNetworkingFloatingIPV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNetworkingFloatingIPV2Read,
+		ReadContext: dataSourceNetworkingFloatingIPV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -80,11 +81,11 @@ func dataSourceNetworkingFloatingIPV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNetworkingFloatingIPV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	listOpts := floatingips.ListOpts{}
@@ -124,22 +125,22 @@ func dataSourceNetworkingFloatingIPV2Read(d *schema.ResourceData, meta interface
 
 	pages, err := floatingips.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to list openstack_networking_floatingips_v2: %s", err)
+		return diag.Errorf("Unable to list openstack_networking_floatingips_v2: %s", err)
 	}
 
 	var allFloatingIPs []floatingIPExtended
 
 	err = floatingips.ExtractFloatingIPsInto(pages, &allFloatingIPs)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_networking_floatingips_v2: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_networking_floatingips_v2: %s", err)
 	}
 
 	if len(allFloatingIPs) < 1 {
-		return fmt.Errorf("No openstack_networking_floatingip_v2 found")
+		return diag.Errorf("No openstack_networking_floatingip_v2 found")
 	}
 
 	if len(allFloatingIPs) > 1 {
-		return fmt.Errorf("More than one openstack_networking_floatingip_v2 found")
+		return diag.Errorf("More than one openstack_networking_floatingip_v2 found")
 	}
 
 	fip := allFloatingIPs[0]

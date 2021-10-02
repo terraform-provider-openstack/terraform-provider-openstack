@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ikepolicies"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccIKEPolicyV2_basic(t *testing.T) {
@@ -18,8 +19,8 @@ func TestAccIKEPolicyV2_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckVPN(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIKEPolicyV2Basic,
@@ -43,8 +44,8 @@ func TestAccIKEPolicyV2_withLifetime(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckVPN(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIKEPolicyV2WithLifetime,
@@ -66,8 +67,8 @@ func TestAccIKEPolicyV2_Update(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckVPN(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIKEPolicyV2Basic,
@@ -97,8 +98,8 @@ func TestAccIKEPolicyV2_withLifetimeUpdate(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckVPN(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIKEPolicyV2WithLifetime,

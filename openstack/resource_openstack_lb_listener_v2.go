@@ -1,13 +1,14 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	octavialisteners "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
 	neutronlisteners "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
@@ -15,12 +16,12 @@ import (
 
 func resourceListenerV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceListenerV2Create,
-		Read:   resourceListenerV2Read,
-		Update: resourceListenerV2Update,
-		Delete: resourceListenerV2Delete,
+		CreateContext: resourceListenerV2Create,
+		ReadContext:   resourceListenerV2Read,
+		UpdateContext: resourceListenerV2Update,
+		DeleteContext: resourceListenerV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -144,25 +145,25 @@ func resourceListenerV2() *schema.Resource {
 	}
 }
 
-func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	timeout := d.Timeout(schema.TimeoutCreate)
 
 	// Wait for LoadBalancer to become active before continuing.
-	err = waitForLBV2LoadBalancer(lbClient, d.Get("loadbalancer_id").(string), "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2LoadBalancer(ctx, lbClient, d.Get("loadbalancer_id").(string), "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Choose either the Octavia or Neutron create options.
 	createOpts, err := chooseLBV2ListenerCreateOpts(d, config)
 	if err != nil {
-		return fmt.Errorf("Error building openstack_lb_listener_v2 create options: %s", err)
+		return diag.Errorf("Error building openstack_lb_listener_v2 create options: %s", err)
 	}
 
 	log.Printf("[DEBUG] openstack_lb_listener_v2 create options: %#v", createOpts)
@@ -176,32 +177,32 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_lb_listener_v2: %s", err)
+		return diag.Errorf("Error creating openstack_lb_listener_v2: %s", err)
 	}
 
 	// Wait for the listener to become ACTIVE.
-	err = waitForLBV2Listener(lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Listener(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(listener.ID)
 
-	return resourceListenerV2Read(d, meta)
+	return resourceListenerV2Read(ctx, d, meta)
 }
 
-func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceListenerV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	// Use Octavia listener body if Octavia/LBaaS is enabled.
 	if config.UseOctavia {
 		listener, err := octavialisteners.Get(lbClient, d.Id()).Extract()
 		if err != nil {
-			return CheckDeleted(d, err, "openstack_lb_listener_v2")
+			return diag.FromErr(CheckDeleted(d, err, "openstack_lb_listener_v2"))
 		}
 
 		log.Printf("[DEBUG] Retrieved openstack_lb_listener_v2 %s: %#v", d.Id(), listener)
@@ -229,7 +230,7 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		if err := d.Set("insert_headers", listener.InsertHeaders); err != nil {
-			return fmt.Errorf("Unable to set openstack_lb_listener_v2 insert_headers: %s", err)
+			return diag.Errorf("Unable to set openstack_lb_listener_v2 insert_headers: %s", err)
 		}
 
 		return nil
@@ -238,7 +239,7 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 	// Use Neutron/Networking in other case.
 	listener, err := neutronlisteners.Get(lbClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "openstack_lb_listener_v2")
+		return diag.FromErr(CheckDeleted(d, err, "openstack_lb_listener_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_lb_listener_v2 %s: %#v", d.Id(), listener)
@@ -263,33 +264,33 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	// Get a clean copy of the listener.
 	listener, err := neutronlisteners.Get(lbClient, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_lb_listener_v2 %s: %s", d.Id(), err)
+		return diag.Errorf("Unable to retrieve openstack_lb_listener_v2 %s: %s", d.Id(), err)
 	}
 
 	// Wait for the listener to become ACTIVE.
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2Listener(lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Listener(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	updateOpts, err := chooseLBV2ListenerUpdateOpts(d, config)
 	if err != nil {
-		return fmt.Errorf("Error building openstack_lb_listener_v2 update options: %s", err)
+		return diag.Errorf("Error building openstack_lb_listener_v2 update options: %s", err)
 	}
 	if updateOpts == nil {
 		log.Printf("[DEBUG] openstack_lb_listener_v2 %s: nothing to update", d.Id())
-		return resourceListenerV2Read(d, meta)
+		return resourceListenerV2Read(ctx, d, meta)
 	}
 
 	log.Printf("[DEBUG] openstack_lb_listener_v2 %s update options: %#v", d.Id(), updateOpts)
@@ -302,29 +303,29 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error updating openstack_lb_listener_v2 %s: %s", d.Id(), err)
+		return diag.Errorf("Error updating openstack_lb_listener_v2 %s: %s", d.Id(), err)
 	}
 
 	// Wait for the listener to become ACTIVE.
-	err = waitForLBV2Listener(lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Listener(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceListenerV2Read(d, meta)
+	return resourceListenerV2Read(ctx, d, meta)
 }
 
-func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	// Get a clean copy of the listener.
 	listener, err := neutronlisteners.Get(lbClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Unable to retrieve openstack_lb_listener_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve openstack_lb_listener_v2"))
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
@@ -339,13 +340,13 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_lb_listener_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_lb_listener_v2"))
 	}
 
 	// Wait for the listener to become DELETED.
-	err = waitForLBV2Listener(lbClient, listener, "DELETED", getLbPendingDeleteStatuses(), timeout)
+	err = waitForLBV2Listener(ctx, lbClient, listener, "DELETED", getLbPendingDeleteStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

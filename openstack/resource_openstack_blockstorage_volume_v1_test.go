@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v1/volumes"
 )
@@ -14,9 +14,9 @@ func TestAccBlockStorageV1Volume_basic(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDeprecated(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV1VolumeDestroy,
+		PreCheck:          func() { testAccPreCheckDeprecated(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV1VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV1VolumeBasic,
@@ -44,9 +44,9 @@ func TestAccBlockStorageV1Volume_image(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDeprecated(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV1VolumeDestroy,
+		PreCheck:          func() { testAccPreCheckDeprecated(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV1VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV1VolumeImage(),
@@ -64,9 +64,9 @@ func TestAccBlockStorageV1Volume_timeout(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDeprecated(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV1VolumeDestroy,
+		PreCheck:          func() { testAccPreCheckDeprecated(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV1VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV1VolumeTimeout,

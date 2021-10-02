@@ -1,25 +1,27 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas/vips"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceLBVipV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLBVipV1Create,
-		Read:   resourceLBVipV1Read,
-		Update: resourceLBVipV1Update,
-		Delete: resourceLBVipV1Delete,
+		CreateContext: resourceLBVipV1Create,
+		ReadContext:   resourceLBVipV1Read,
+		UpdateContext: resourceLBVipV1Update,
+		DeleteContext: resourceLBVipV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -108,11 +110,11 @@ func resourceLBVipV1() *schema.Resource {
 	}
 }
 
-func resourceLBVipV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceLBVipV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	createOpts := vips.CreateOpts{
@@ -134,7 +136,7 @@ func resourceLBVipV1Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	p, err := vips.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack LB VIP: %s", err)
+		return diag.Errorf("Error creating OpenStack LB VIP: %s", err)
 	}
 	log.Printf("[INFO] LB VIP ID: %s", p.ID)
 
@@ -149,33 +151,33 @@ func resourceLBVipV1Create(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	floatingIP := d.Get("floating_ip").(string)
 	if floatingIP != "" {
 		if err := lbVipV1AssignFloatingIP(floatingIP, p.PortID, networkingClient); err != nil {
-			log.Printf("[DEBUG] unable to assign floating IP: %s", err)
+			log.Printf("[DEBUG] unable to assign floating IP: %v", err)
 		}
 	}
 
 	d.SetId(p.ID)
 
-	return resourceLBVipV1Read(d, meta)
+	return resourceLBVipV1Read(ctx, d, meta)
 }
 
-func resourceLBVipV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceLBVipV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	p, err := vips.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "LB VIP")
+		return diag.FromErr(CheckDeleted(d, err, "LB VIP"))
 	}
 
 	log.Printf("[DEBUG] Retrieved OpenStack LB VIP %s: %+v", d.Id(), p)
@@ -207,11 +209,11 @@ func resourceLBVipV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceLBVipV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceLBVipV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var updateOpts vips.UpdateOpts
@@ -243,12 +245,12 @@ func resourceLBVipV1Update(d *schema.ResourceData, meta interface{}) error {
 		}
 		page, err := floatingips.List(networkingClient, listOpts).AllPages()
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		fips, err := floatingips.ExtractFloatingIPs(page)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		// If a floating IP is found we unassign it
@@ -258,7 +260,7 @@ func resourceLBVipV1Update(d *schema.ResourceData, meta interface{}) error {
 				PortID: &portID,
 			}
 			if err = floatingips.Update(networkingClient, fips[0].ID, updateOpts).Err; err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 
@@ -266,7 +268,7 @@ func resourceLBVipV1Update(d *schema.ResourceData, meta interface{}) error {
 		floatingIP := d.Get("floating_ip").(string)
 		if floatingIP != "" {
 			if err := lbVipV1AssignFloatingIP(floatingIP, portID, networkingClient); err != nil {
-				log.Printf("[DEBUG] unable to assign floating IP: %s", err)
+				log.Printf("[DEBUG] unable to assign floating IP: %v", err)
 			}
 		}
 	}
@@ -283,17 +285,17 @@ func resourceLBVipV1Update(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = vips.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenStack LB VIP: %s", err)
+		return diag.Errorf("Error updating OpenStack LB VIP: %s", err)
 	}
 
-	return resourceLBVipV1Read(d, meta)
+	return resourceLBVipV1Read(ctx, d, meta)
 }
 
-func resourceLBVipV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceLBVipV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -305,9 +307,9 @@ func resourceLBVipV1Delete(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack LB VIP: %s", err)
+		return diag.Errorf("Error deleting OpenStack LB VIP: %s", err)
 	}
 
 	d.SetId("")
@@ -330,7 +332,7 @@ func resourceVipPersistenceV1(d *schema.ResourceData) *vips.SessionPersistence {
 	return nil
 }
 
-func lbVipV1AssignFloatingIP(floatingIP, portID string, networkingClient *gophercloud.ServiceClient) error {
+func lbVipV1AssignFloatingIP(floatingIP, portID string, networkingClient *gophercloud.ServiceClient) diag.Diagnostics {
 	log.Printf("[DEBUG] Assigning floating IP %s to VIP %s", floatingIP, portID)
 
 	listOpts := floatingips.ListOpts{
@@ -338,22 +340,22 @@ func lbVipV1AssignFloatingIP(floatingIP, portID string, networkingClient *gopher
 	}
 	page, err := floatingips.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	fips, err := floatingips.ExtractFloatingIPs(page)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if len(fips) != 1 {
-		return fmt.Errorf("Unable to retrieve floating IP '%s'", floatingIP)
+		return diag.Errorf("Unable to retrieve floating IP '%s'", floatingIP)
 	}
 
 	updateOpts := floatingips.UpdateOpts{
 		PortID: &portID,
 	}
 	if err = floatingips.Update(networkingClient, fips[0].ID, updateOpts).Err; err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
