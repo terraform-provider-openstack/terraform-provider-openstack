@@ -38,6 +38,12 @@ func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(networkingClient *goph
 			PortID:   d.Get("port_id").(string),
 		}
 
+		if removeOpts.SubnetID != "" {
+			// We need to make sure to only send subnet_id, because the port may have multiple
+			// openstack_networking_router_interface_v2 attached. Otherwise openstack would delete them too.
+			removeOpts.PortID = ""
+		}
+
 		r, err := ports.Get(networkingClient, routerInterfaceID).Extract()
 		if err != nil {
 			if _, ok := err.(gophercloud.ErrDefault404); ok {

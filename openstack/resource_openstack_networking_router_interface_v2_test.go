@@ -39,6 +39,43 @@ func TestAccNetworkingV2RouterInterface_basic_subnet(t *testing.T) {
 	})
 }
 
+// TestAccNetworkingV2RouterInterface_v6_subnet tests that multiple router interfaces for IPv6 subnets
+// which are attached to the same port are handled properly.
+func TestAccNetworkingV2RouterInterface_v6_subnet(t *testing.T) {
+	var network networks.Network
+	var router routers.Router
+	var subnet1 subnets.Subnet
+	var subnet2 subnets.Subnet
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2RouterInterfaceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2RouterInterfaceV6Subnet + testAccNetworkingV2RouterInterfaceV6SubnetSecondInterface,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet1),
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_2", &subnet2),
+					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
+					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
+					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_2"),
+				),
+			},
+			{ // Make sure deleting one of the router interfaces does not remove the other one.
+				Config: testAccNetworkingV2RouterInterfaceV6Subnet,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccNetworkingV2RouterInterface_basic_port(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
@@ -164,6 +201,42 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
   ip_version = 4
   network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+`
+
+const testAccNetworkingV2RouterInterfaceV6Subnet = `
+resource "openstack_networking_router_v2" "router_1" {
+  name = "router_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_router_interface_v2" "int_1" {
+  subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  router_id = "${openstack_networking_router_v2.router_1.id}"
+}
+
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  cidr = "fd00:0:0:1::/64"
+  ip_version = 6
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_2" {
+  cidr = "fd00:0:0:2::/64"
+  ip_version = 6
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+`
+
+const testAccNetworkingV2RouterInterfaceV6SubnetSecondInterface = `
+resource "openstack_networking_router_interface_v2" "int_2" {
+  subnet_id = "${openstack_networking_subnet_v2.subnet_2.id}"
+  router_id = "${openstack_networking_router_v2.router_1.id}"
 }
 `
 
