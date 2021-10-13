@@ -109,7 +109,6 @@ func resourceImagesImageV2() *schema.Resource {
 			"min_disk_gb": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.IntAtLeast(0),
 				Default:      0,
 			},
@@ -117,7 +116,6 @@ func resourceImagesImageV2() *schema.Resource {
 			"min_ram_mb": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.IntAtLeast(0),
 				Default:      0,
 			},
@@ -131,7 +129,6 @@ func resourceImagesImageV2() *schema.Resource {
 			"protected": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: true,
 				Default:  false,
 			},
 
