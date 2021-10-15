@@ -74,6 +74,9 @@ The following arguments are supported:
     loadbalancer. The security groups must be specified by ID and not name (as
     opposed to how they are configured with the Compute Instance).
 
+* `tags` - (Optional) A list of simple strings assigned to the loadbalancer.
+    Available only for Octavia **minor version 2.5 or later**.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -90,6 +93,7 @@ The following attributes are exported:
 * `loadbalancer_provider` - See Argument Reference above.
 * `availability_zone` - See Argument Reference above.
 * `security_group_ids` - See Argument Reference above.
+* `tags` - See Argument Reference above.
 * `vip_port_id` - The Port ID of the Load Balancer IP.
 
 ## Import

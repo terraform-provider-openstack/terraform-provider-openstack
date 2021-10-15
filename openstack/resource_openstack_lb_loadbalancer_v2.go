@@ -115,6 +115,12 @@ func resourceLoadBalancerV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
+			"tags": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
 		},
 	}
 }
@@ -156,6 +162,11 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 		if v, ok := d.GetOk("availability_zone"); ok {
 			aZ := v.(string)
 			createOpts.AvailabilityZone = aZ
+		}
+
+		if v, ok := d.GetOk("tags"); ok {
+			tags := v.(*schema.Set).List()
+			createOpts.Tags = expandToStringSlice(tags)
 		}
 
 		log.Printf("[DEBUG][Octavia] openstack_lb_loadbalancer_v2 create options: %#v", createOpts)
@@ -237,6 +248,7 @@ func resourceLoadBalancerV2Read(ctx context.Context, d *schema.ResourceData, met
 		d.Set("loadbalancer_provider", lb.Provider)
 		d.Set("availability_zone", lb.AvailabilityZone)
 		d.Set("region", GetRegion(d, config))
+		d.Set("tags", lb.Tags)
 		vipPortID = lb.VipPortID
 	} else {
 		lb, err := neutronloadbalancers.Get(lbClient, d.Id()).Extract()
@@ -280,21 +292,12 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	var updateOpts neutronloadbalancers.UpdateOpts
-	if d.HasChange("name") {
-		name := d.Get("name").(string)
-		updateOpts.Name = &name
-	}
-	if d.HasChange("description") {
-		description := d.Get("description").(string)
-		updateOpts.Description = &description
-	}
-	if d.HasChange("admin_state_up") {
-		asu := d.Get("admin_state_up").(bool)
-		updateOpts.AdminStateUp = &asu
+	updateOpts, err := chooseLBV2LoadbalancerUpdateOpts(d, config)
+	if err != nil {
+		return diag.Errorf("Error building openstack_lb_loadbalancer_v2 update options: %s", err)
 	}
 
-	if updateOpts != (neutronloadbalancers.UpdateOpts{}) {
+	if updateOpts != nil {
 		// Wait for load-balancer to become active before continuing.
 		timeout := d.Timeout(schema.TimeoutUpdate)
 		err = waitForLBV2LoadBalancer(ctx, lbClient, d.Id(), "ACTIVE", getLbPendingStatuses(), timeout)

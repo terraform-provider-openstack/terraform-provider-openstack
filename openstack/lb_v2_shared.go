@@ -11,6 +11,7 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	octavialisteners "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
+	octavialoadbalancers "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/loadbalancers"
 	octaviamonitors "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/monitors"
 	octaviapools "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
 	neutronl7policies "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
@@ -64,6 +65,73 @@ func chooseLBV2AccTestClient(config *Config, region string) (*gophercloud.Servic
 		return config.LoadBalancerV2Client(region)
 	}
 	return config.NetworkingV2Client(region)
+}
+
+// chooseLBV2LoadbalancerUpdateOpts will determine which load balancer update options to use:
+// either the Octavia/LBaaS or the Neutron/Networking v2.
+func chooseLBV2LoadbalancerUpdateOpts(d *schema.ResourceData, config *Config) (neutronloadbalancers.UpdateOptsBuilder, error) {
+	var hasChange bool
+
+	if config.UseOctavia {
+		// Use Octavia.
+		var updateOpts octavialoadbalancers.UpdateOpts
+
+		if d.HasChange("name") {
+			hasChange = true
+			name := d.Get("name").(string)
+			updateOpts.Name = &name
+		}
+		if d.HasChange("description") {
+			hasChange = true
+			description := d.Get("description").(string)
+			updateOpts.Description = &description
+		}
+		if d.HasChange("admin_state_up") {
+			hasChange = true
+			asu := d.Get("admin_state_up").(bool)
+			updateOpts.AdminStateUp = &asu
+		}
+
+		if d.HasChange("tags") {
+			hasChange = true
+			if v, ok := d.GetOk("tags"); ok {
+				tags := v.(*schema.Set).List()
+				tagsToUpdate := expandToStringSlice(tags)
+				updateOpts.Tags = &tagsToUpdate
+			} else {
+				updateOpts.Tags = &[]string{}
+			}
+		}
+
+		if hasChange {
+			return updateOpts, nil
+		}
+	}
+
+	// Use Neutron.
+	var updateOpts neutronloadbalancers.UpdateOpts
+
+	if d.HasChange("name") {
+		hasChange = true
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
+	}
+	if d.HasChange("description") {
+		hasChange = true
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
+	}
+	if d.HasChange("admin_state_up") {
+		hasChange = true
+		asu := d.Get("admin_state_up").(bool)
+		updateOpts.AdminStateUp = &asu
+	}
+
+	if hasChange {
+		return updateOpts, nil
+	}
+
+	return nil, nil
 }
 
 // chooseLBV2ListenerCreateOpts will determine which load balancer listener Create options to use:
