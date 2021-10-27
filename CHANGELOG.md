@@ -2,6 +2,10 @@
 
 FEATURES
 
+* __New Data Source__: `openstack_compute_quotaset_v2` ([#1302](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1302))
+
+BUG FIXES
+
 * Improved removal of `networking_router_interface_v2` resource so it will delete only needed port on a router ([#1297](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1297))
 
 ## 1.44.0 (2 October, 2021)
