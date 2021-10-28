@@ -36,9 +36,9 @@ func TestAccComputeV2KeypairOtherUser(t *testing.T) {
 	var keypair keypairs.KeyPair
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2KeypairDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2KeypairDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2KeypairOtherUser,
@@ -92,7 +92,11 @@ func testAccCheckComputeV2KeypairDestroy(s *terraform.State) error {
 
 		id, userID := extractComputeKeyPairNameAndUserID(rs.Primary.ID)
 
-		_, err := keypairs.GetWithUserID(computeClient, id, userID).Extract()
+		getOpts := keypairs.GetOpts{
+			UserID: userID,
+		}
+
+		_, err := keypairs.Get(computeClient, id, getOpts).Extract()
 		if err == nil {
 			return fmt.Errorf("Keypair still exists")
 		}
@@ -120,7 +124,11 @@ func testAccCheckComputeV2KeypairExists(n string, kp *keypairs.KeyPair) resource
 
 		id, userID := extractComputeKeyPairNameAndUserID(rs.Primary.ID)
 
-		found, err := keypairs.GetWithUserID(computeClient, id, userID).Extract()
+		getOpts := keypairs.GetOpts{
+			UserID: userID,
+		}
+
+		found, err := keypairs.Get(computeClient, id, getOpts).Extract()
 		if err != nil {
 			return err
 		}
