@@ -78,6 +78,7 @@ func resourceObjectstorageTempurlV1() *schema.Resource {
 			"url": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Sensitive: true,
 			},
 		},
 	}
