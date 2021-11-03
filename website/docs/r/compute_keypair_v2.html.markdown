@@ -47,6 +47,9 @@ The following arguments are supported:
 * `name` - (Required) A unique name for the keypair. Changing this creates a new
     keypair.
 
+* `user_id` - (Optional) The id of the user who will own this keypair.
+    This parameter can be specified only if the provider is configured to use the credentials of an OpenStack administrator.
+
 * `public_key` - (Optional) A pregenerated OpenSSH-formatted public key.
     Changing this creates a new keypair. If a public key is not specified, then
     a public/private key pair will be automatically generated. If a pair is
@@ -61,6 +64,7 @@ The following attributes are exported:
 
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
+* `user_id` - See Argument Reference above.
 * `public_key` - See Argument Reference above.
 * `fingerprint` - The fingerprint of the public key.
 * `private_key` - The generated private key when no public key is specified.
