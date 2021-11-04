@@ -17,7 +17,7 @@ NOTES
 
 FEATURES
 
-* Updated `terraform-plugin-sdk` to `v2.7.1` ([#1244](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1244))
+* Updated `terraform-plugin-sdk` to `v2.7.1` ([#1139](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1139))
 * Updated Go to `1.17` ([#1295](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1295))
 
 ## 1.43.1 (21 September, 2021)
