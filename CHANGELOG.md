@@ -6,7 +6,7 @@ FEATURES
 
 IMPROVEMENTS
 
-* Added retries reading `dns_zone_v2` and `compute_instance_v2` state after creation in case of 502, 504 HTTP errors ([#1302](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1302))
+* Added retries reading `dns_zone_v2` and `compute_instance_v2` state after creation in case of 502, 504 HTTP errors ([#1303](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1303))
 
 BUG FIXES
 
