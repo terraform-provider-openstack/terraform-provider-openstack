@@ -88,22 +88,26 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 			"segments": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"physical_network": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 							ForceNew: true,
 						},
 						"network_type": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 							ForceNew: true,
 						},
 						"segmentation_id": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Computed: true,
 							ForceNew: true,
 						},
 					},
@@ -166,6 +170,18 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
+				Computed: true,
+			},
+			"network_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"physical_network": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"segmentation_id": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -332,6 +348,21 @@ func resourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceData
 	d.Set("dns_domain", network.DNSDomain)
 	d.Set("qos_policy_id", network.QoSPolicyID)
 	d.Set("region", GetRegion(d, config))
+	d.Set("network_type", network.NetworkType)
+	d.Set("physical_network", network.PhysicalNetwork)
+	d.Set("segmentation_id", network.SegmentationID)
+
+	// Set the segments
+	segments := make([]map[string]interface{}, 0, len(network.Segments))
+	for _, v := range network.Segments {
+		segment := make(map[string]interface{})
+		segment["network_type"] = v.NetworkType
+		segment["physical_network"] = v.PhysicalNetwork
+		segment["segmentation_id"] = v.SegmentationID
+
+		segments = append(segments, segment)
+	}
+	d.Set("segments", segments)
 
 	networkingV2ReadAttributesTags(d, network.Tags)
 
