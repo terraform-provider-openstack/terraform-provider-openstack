@@ -596,7 +596,15 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForStateContext(ctx)
+	err = resource.Retry(stateConf.Timeout, func() *resource.RetryError {
+		_, err = stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			log.Printf("[DEBUG] Retrying after error: %s", err)
+			return checkForRetryableError(err)
+		}
+		return nil
+	})
+
 	if err != nil {
 		return diag.Errorf(
 			"Error waiting for instance (%s) to become ready: %s",

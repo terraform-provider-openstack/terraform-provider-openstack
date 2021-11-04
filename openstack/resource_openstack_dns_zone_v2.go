@@ -167,7 +167,15 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForStateContext(ctx)
+	err = resource.Retry(stateConf.Timeout, func() *resource.RetryError {
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			log.Printf("[DEBUG] Retrying after error: %s", err)
+			return checkForRetryableError(err)
+		}
+		return nil
+	})
+
 	if err != nil {
 		return diag.Errorf(
 			"Error waiting for openstack_dns_zone_v2 %s to become active: %s", d.Id(), err)
