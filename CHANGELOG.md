@@ -4,10 +4,15 @@ FEATURES
 
 * __New Data Source__: `openstack_compute_quotaset_v2` ([#1302](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1302))
 
+IMPROVEMENTS
+
+* Added retries reading `dns_zone_v2` and `compute_instance_v2` state after creation in case of 502, 504 HTTP errors ([#1302](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1302))
+
 BUG FIXES
 
 * Improved removal of `networking_router_interface_v2` resource so it will delete only needed port on a router ([#1297](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1297))
 * Flagged `url` attribute of `objectstorage_tempurl_v1` resource as sensitive ([#1305](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1305))
+* Fixed not specified quota values are being set to 0 in `compute_quotaset_v2` resource ([#1304](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1304))
 
 ## 1.44.0 (2 October, 2021)
 
