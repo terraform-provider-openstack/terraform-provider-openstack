@@ -1,4 +1,4 @@
-## 1.45.0 (Unreleased)
+## 1.45.0 (4 November, 2021)
 
 FEATURES
 
@@ -7,6 +7,7 @@ FEATURES
 BUG FIXES
 
 * Improved removal of `networking_router_interface_v2` resource so it will delete only needed port on a router ([#1297](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1297))
+* Flagged `url` attribute of `objectstorage_tempurl_v1` resource as sensitive ([#1305](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1305))
 
 ## 1.44.0 (2 October, 2021)
 
