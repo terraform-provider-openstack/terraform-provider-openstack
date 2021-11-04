@@ -139,36 +139,64 @@ func resourceComputeQuotasetV2Create(ctx context.Context, d *schema.ResourceData
 	}
 
 	projectID := d.Get("project_id").(string)
-	fixedIPs := d.Get("fixed_ips").(int)
-	floatingIPs := d.Get("floating_ips").(int)
-	injectedFileContentBytes := d.Get("injected_file_content_bytes").(int)
-	injectedFilePathBytes := d.Get("injected_file_path_bytes").(int)
-	injectedFiles := d.Get("injected_files").(int)
-	keyPairs := d.Get("key_pairs").(int)
-	metadataItems := d.Get("metadata_items").(int)
-	ram := d.Get("ram").(int)
-	securityGroupRules := d.Get("security_group_rules").(int)
-	securityGroups := d.Get("security_groups").(int)
-	cores := d.Get("cores").(int)
-	instances := d.Get("instances").(int)
-	serverGroups := d.Get("server_groups").(int)
-	serverGroupMembers := d.Get("server_group_members").(int)
 
-	updateOpts := quotasets.UpdateOpts{
-		FixedIPs:                 &fixedIPs,
-		FloatingIPs:              &floatingIPs,
-		InjectedFileContentBytes: &injectedFileContentBytes,
-		InjectedFilePathBytes:    &injectedFilePathBytes,
-		InjectedFiles:            &injectedFiles,
-		KeyPairs:                 &keyPairs,
-		MetadataItems:            &metadataItems,
-		RAM:                      &ram,
-		SecurityGroupRules:       &securityGroupRules,
-		SecurityGroups:           &securityGroups,
-		Cores:                    &cores,
-		Instances:                &instances,
-		ServerGroups:             &serverGroups,
-		ServerGroupMembers:       &serverGroupMembers,
+	updateOpts := quotasets.UpdateOpts{}
+
+	if v, ok := d.GetOkExists("fixed_ips"); ok {
+		value := v.(int)
+		updateOpts.FixedIPs = &value
+	}
+	if v, ok := d.GetOkExists("floating_ips"); ok {
+		value := v.(int)
+		updateOpts.FloatingIPs = &value
+	}
+	if v, ok := d.GetOkExists("injected_file_content_bytes"); ok {
+		value := v.(int)
+		updateOpts.InjectedFileContentBytes = &value
+	}
+	if v, ok := d.GetOkExists("injected_file_path_bytes"); ok {
+		value := v.(int)
+		updateOpts.InjectedFilePathBytes = &value
+	}
+	if v, ok := d.GetOkExists("injected_files"); ok {
+		value := v.(int)
+		updateOpts.InjectedFiles = &value
+	}
+	if v, ok := d.GetOkExists("key_pairs"); ok {
+		value := v.(int)
+		updateOpts.KeyPairs = &value
+	}
+	if v, ok := d.GetOkExists("metadata_items"); ok {
+		value := v.(int)
+		updateOpts.MetadataItems = &value
+	}
+	if v, ok := d.GetOkExists("ram"); ok {
+		value := v.(int)
+		updateOpts.RAM = &value
+	}
+	if v, ok := d.GetOkExists("security_group_rules"); ok {
+		value := v.(int)
+		updateOpts.SecurityGroupRules = &value
+	}
+	if v, ok := d.GetOkExists("security_groups"); ok {
+		value := v.(int)
+		updateOpts.SecurityGroups = &value
+	}
+	if v, ok := d.GetOkExists("cores"); ok {
+		value := v.(int)
+		updateOpts.Cores = &value
+	}
+	if v, ok := d.GetOkExists("instances"); ok {
+		value := v.(int)
+		updateOpts.Instances = &value
+	}
+	if v, ok := d.GetOkExists("server_groups"); ok {
+		value := v.(int)
+		updateOpts.ServerGroups = &value
+	}
+	if v, ok := d.GetOkExists("server_group_members"); ok {
+		value := v.(int)
+		updateOpts.ServerGroupMembers = &value
 	}
 
 	q, err := quotasets.Update(computeClient, projectID, updateOpts).Extract()
