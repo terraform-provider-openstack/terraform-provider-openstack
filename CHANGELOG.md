@@ -1,3 +1,9 @@
+## 1.46.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Added `region` argument to `compute_aggregate_v2` resource ([#1276](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1276))
+
 ## 1.45.0 (4 November, 2021)
 
 FEATURES
