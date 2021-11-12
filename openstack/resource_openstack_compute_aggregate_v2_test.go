@@ -31,6 +31,14 @@ resource "openstack_compute_aggregate_v2" "test" {
     `, osHypervisorEnvironment)
 }
 
+var testAccAggregateRegionConfig = `
+resource "openstack_compute_aggregate_v2" "test" {
+  region = "RegionOne"
+  name   = "test-aggregate"
+  zone   = "nova"
+}
+`
+
 func TestAccComputeV2Aggregate(t *testing.T) {
 	var aggregate aggregates.Aggregate
 
@@ -78,6 +86,24 @@ func TestAccComputeV2AggregateWithHypervisor(t *testing.T) {
 					testAccCheckAggregateExists("openstack_compute_aggregate_v2.test", &aggregate),
 					resource.TestCheckResourceAttr("openstack_compute_aggregate_v2.test", "hosts.#", "0"),
 					resource.TestCheckNoResourceAttr("openstack_compute_aggregate_v2.test", "metadata.test"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2AggregateWithRegion(t *testing.T) {
+	var aggregate aggregates.Aggregate
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheckAdminOnly(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAggregateRegionConfig,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAggregateExists("openstack_compute_aggregate_v2.test", &aggregate),
+					resource.TestCheckResourceAttr("openstack_compute_aggregate_v2.test", "region", "RegionOne"),
 				),
 			},
 		},
