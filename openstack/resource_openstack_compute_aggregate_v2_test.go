@@ -96,8 +96,8 @@ func TestAccComputeV2AggregateWithRegion(t *testing.T) {
 	var aggregate aggregates.Aggregate
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckAdminOnly(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckAdminOnly(t) },
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAggregateRegionConfig,
