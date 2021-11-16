@@ -280,6 +280,11 @@ func resourceComputeInstanceV2() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 						},
+						"device_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
 						"disk_bus": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -1178,6 +1183,7 @@ func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schem
 					"disk_bus":              "",
 					"volume_type":           "",
 					"device_type":           "",
+					"device_name":           "",
 				}
 
 				if volMetaData.Bootable == "true" {
@@ -1213,6 +1219,7 @@ func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schem
 					"disk_bus":              "",
 					"volume_type":           "",
 					"device_type":           "",
+					"device_name":           "",
 				}
 
 				if volMetaData.Bootable == "true" {
@@ -1281,6 +1288,7 @@ func resourceInstanceBlockDevicesV2(_ *schema.ResourceData, bds []interface{}) (
 			GuestFormat:         bdM["guest_format"].(string),
 			VolumeType:          bdM["volume_type"].(string),
 			DeviceType:          bdM["device_type"].(string),
+			DeviceName:          bdM["device_name"].(string),
 			DiskBus:             bdM["disk_bus"].(string),
 		}
 

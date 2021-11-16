@@ -1225,6 +1225,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
     boot_index = 0
 		delete_on_termination = true
 		device_type = "disk"
+		device_name = "/dev/sda"
 		disk_bus = "virtio"
   }
   block_device {
@@ -1234,6 +1235,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
     boot_index = 1
 		delete_on_termination = true
 		device_type = "disk"
+		device_name = "/dev/sdb"
 		disk_bus = "virtio"
   }
   network {

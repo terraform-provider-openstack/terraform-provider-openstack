@@ -475,6 +475,9 @@ The `block_device` block supports:
 * `device_type` - (Optional) The low-level device type that will be used. Most
     common thing is to leave this empty. Changing this creates a new server.
 
+* `device_name` - (Optional) The low-level device name that will be used. Most
+    common thing is to leave this empty. Changing this creates a new server.
+
 * `disk_bus` - (Optional) The low-level disk bus that will be used. Most common
     thing is to leave this empty. Changing this creates a new server.
 
