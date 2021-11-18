@@ -98,7 +98,7 @@ func resourceComputeKeypairV2Read(_ context.Context, d *schema.ResourceData, met
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	kp, err := keypairs.Get(computeClient, d.Id()).Extract()
+	kp, err := keypairs.Get(computeClient, d.Id(), keypairs.GetOpts{}).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_keypair_v2"))
 	}
@@ -120,7 +120,7 @@ func resourceComputeKeypairV2Delete(_ context.Context, d *schema.ResourceData, m
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	err = keypairs.Delete(computeClient, d.Id()).ExtractErr()
+	err = keypairs.Delete(computeClient, d.Id(), keypairs.DeleteOpts{}).ExtractErr()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_compute_keypair_v2"))
 	}

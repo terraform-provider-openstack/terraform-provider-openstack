@@ -72,7 +72,7 @@ func testAccCheckComputeV2KeypairDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := keypairs.Get(computeClient, rs.Primary.ID).Extract()
+		_, err := keypairs.Get(computeClient, rs.Primary.ID, keypairs.GetOpts{}).Extract()
 		if err == nil {
 			return fmt.Errorf("Keypair still exists")
 		}
@@ -98,7 +98,7 @@ func testAccCheckComputeV2KeypairExists(n string, kp *keypairs.KeyPair) resource
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		found, err := keypairs.Get(computeClient, rs.Primary.ID).Extract()
+		found, err := keypairs.Get(computeClient, rs.Primary.ID, keypairs.GetOpts{}).Extract()
 		if err != nil {
 			return err
 		}

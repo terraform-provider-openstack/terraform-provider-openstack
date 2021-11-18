@@ -215,12 +215,18 @@ func resourceObjectStorageContainerV1Update(ctx context.Context, d *schema.Resou
 		return diag.Errorf("error creating OpenStack object storage client: %s", err)
 	}
 
+	containerRead := d.Get("container_read").(string)
+	containerSyncTo := d.Get("container_sync_to").(string)
+	containerSyncKey := d.Get("container_sync_key").(string)
+	containerWrite := d.Get("container_write").(string)
+	contentType := d.Get("content_type").(string)
+
 	updateOpts := containers.UpdateOpts{
-		ContainerRead:    d.Get("container_read").(string),
-		ContainerSyncTo:  d.Get("container_sync_to").(string),
-		ContainerSyncKey: d.Get("container_sync_key").(string),
-		ContainerWrite:   d.Get("container_write").(string),
-		ContentType:      d.Get("content_type").(string),
+		ContainerRead:    &containerRead,
+		ContainerSyncTo:  &containerSyncTo,
+		ContainerSyncKey: &containerSyncKey,
+		ContainerWrite:   &containerWrite,
+		ContentType:      &contentType,
 	}
 
 	if d.HasChange("versioning") {

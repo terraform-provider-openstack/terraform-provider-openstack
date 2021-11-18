@@ -64,7 +64,7 @@ func dataSourceComputeHypervisorV2Read(ctx context.Context, d *schema.ResourceDa
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	allPages, err := hypervisors.List(computeClient).AllPages()
+	allPages, err := hypervisors.List(computeClient, hypervisors.ListOpts{}).AllPages()
 	if err != nil {
 		return diag.Errorf("Error listing compute hypervisors: %s", err)
 	}
