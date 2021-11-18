@@ -108,27 +108,53 @@ func resourceNetworkingQuotaV2Create(ctx context.Context, d *schema.ResourceData
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	projectID := d.Get("project_id").(string)
-	floatingIP := d.Get("floatingip").(int)
-	network := d.Get("network").(int)
-	port := d.Get("port").(int)
-	rbacPolicy := d.Get("rbac_policy").(int)
-	router := d.Get("router").(int)
-	securityGroup := d.Get("security_group").(int)
-	securityGroupRule := d.Get("security_group_rule").(int)
-	subnet := d.Get("subnet").(int)
-	subnetPool := d.Get("subnetpool").(int)
+	var updateOpts quotas.UpdateOpts
 
-	updateOpts := quotas.UpdateOpts{
-		FloatingIP:        &floatingIP,
-		Network:           &network,
-		Port:              &port,
-		RBACPolicy:        &rbacPolicy,
-		Router:            &router,
-		SecurityGroup:     &securityGroup,
-		SecurityGroupRule: &securityGroupRule,
-		Subnet:            &subnet,
-		SubnetPool:        &subnetPool,
+	projectID := d.Get("project_id").(string)
+	floatingIP, ok := d.GetOk("floatingip")
+	if ok {
+		pfloatingIP := floatingIP.(int)
+		updateOpts.FloatingIP = &pfloatingIP
+	}
+	network, ok := d.GetOk("network")
+	if ok {
+		pnetwork := network.(int)
+		updateOpts.Network = &pnetwork
+	}
+	port, ok := d.GetOk("port")
+	if ok {
+		pport := port.(int)
+		updateOpts.Port = &pport
+	}
+	rbacPolicy, ok := d.GetOk("rbac_policy")
+	if ok {
+		prbacPolicy := rbacPolicy.(int)
+		updateOpts.RBACPolicy = &prbacPolicy
+	}
+	router, ok := d.GetOk("router")
+	if ok {
+		prouter := router.(int)
+		updateOpts.Router = &prouter
+	}
+	securityGroup, ok := d.GetOk("security_group")
+	if ok {
+		psecurityGroup := securityGroup.(int)
+		updateOpts.SecurityGroup = &psecurityGroup
+	}
+	securityGroupRule := d.Get("security_group_rule")
+	if ok {
+		psecurityGroupRule := securityGroupRule.(int)
+		updateOpts.SecurityGroupRule = &psecurityGroupRule
+	}
+	subnet, ok := d.GetOk("subnet")
+	if ok {
+		psubnet := subnet.(int)
+		updateOpts.Subnet = &psubnet
+	}
+	subnetPool, ok := d.GetOk("subnetpool")
+	if ok {
+		psubnetPool := subnetPool.(int)
+		updateOpts.SubnetPool = &psubnetPool
 	}
 
 	q, err := quotas.Update(networkingClient, projectID, updateOpts).Extract()
