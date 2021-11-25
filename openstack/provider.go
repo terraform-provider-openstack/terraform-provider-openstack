@@ -279,6 +279,7 @@ func Provider() *schema.Provider {
 			"openstack_networking_qos_dscp_marking_rule_v2":      dataSourceNetworkingQoSDSCPMarkingRuleV2(),
 			"openstack_networking_qos_minimum_bandwidth_rule_v2": dataSourceNetworkingQoSMinimumBandwidthRuleV2(),
 			"openstack_networking_qos_policy_v2":                 dataSourceNetworkingQoSPolicyV2(),
+			"openstack_networking_quota_v2":                      dataSourceNetworkingQuotaV2(),
 			"openstack_networking_subnet_v2":                     dataSourceNetworkingSubnetV2(),
 			"openstack_networking_subnet_ids_v2":                 dataSourceNetworkingSubnetIDsV2(),
 			"openstack_networking_secgroup_v2":                   dataSourceNetworkingSecGroupV2(),
