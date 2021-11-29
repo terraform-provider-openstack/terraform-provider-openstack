@@ -92,6 +92,10 @@ The following arguments are supported:
 * `floating_ip_enabled` - (Optional) Indicates whether floating IP should be
     created for every cluster node. Changing this creates a new cluster.
 
+* `master_lb_enabled` - (Optional) Indicates whether a loadbalancer should be
+    created for the master cluster nodes. Changing this creates a new cluster.
+
+
 ## Attributes reference
 
 The following attributes are exported:
@@ -118,6 +122,7 @@ The following attributes are exported:
 * `fixed_network` - See Argument Reference above.
 * `fixed_subnet` - See Argument Reference above.
 * `floating_ip_enabled` - See Argument Reference above.
+* `master_lb_enabled` - See Argument Reference above.
 * `master_addresses` - IP addresses of the master node of the cluster.
 * `node_addresses` - IP addresses of the node of the cluster.
 * `stack_id` - UUID of the Orchestration service stack.
