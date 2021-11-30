@@ -13,6 +13,7 @@ func TestAccNetworkingV2QoSPolicyDataSource_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
+			t.Skip("Currently failing in Openlab")
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
@@ -38,6 +39,7 @@ func TestAccNetworkingV2QoSPolicyDataSource_description(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
+			t.Skip("Currently failing in Openlab")
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{

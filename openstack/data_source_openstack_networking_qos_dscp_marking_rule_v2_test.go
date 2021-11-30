@@ -13,6 +13,7 @@ func TestAccNetworkingV2QoSDSCPMarkingRuleDataSource_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
+			t.Skip("Currently failing in Openlab")
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
