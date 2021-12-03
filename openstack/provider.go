@@ -201,7 +201,7 @@ func Provider() *schema.Provider {
 			"use_octavia": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_USE_OCTAVIA", false),
+				DefaultFunc: schema.EnvDefaultFunc("OS_USE_OCTAVIA", true),
 				Description: descriptions["use_octavia"],
 			},
 
