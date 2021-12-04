@@ -1,5 +1,9 @@
 ## 1.46.0 (Unreleased)
 
+FEATURES
+
+* __New Data Source__: `openstack_blockstorage_quotaset_v3` ([#1319](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1319))
+
 IMPROVEMENTS
 
 * Added `region` argument to `compute_aggregate_v2` resource ([#1276](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1276))
