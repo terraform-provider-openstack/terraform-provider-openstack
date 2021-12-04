@@ -5,6 +5,7 @@ IMPROVEMENTS
 * Added `region` argument to `compute_aggregate_v2` resource ([#1276](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1276))
 * Fixed default `0` value in skipped arguments of `networking_quota_v2` resource ([#1316](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1316))
 * Added providerext attributes to `networking_network_v2` resource and datasource ([#1309](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1309))
+* Added `tags` to `lb_loadbalancer_v2` resource ([#1301](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1301))
 * Updated `gophercloud` to `v0.23.0` ([#1315](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1315))
 
 ## 1.45.0 (4 November, 2021)
