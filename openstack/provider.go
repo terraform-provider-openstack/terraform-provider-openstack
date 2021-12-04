@@ -253,6 +253,7 @@ func Provider() *schema.Provider {
 			"openstack_blockstorage_snapshot_v3":                 dataSourceBlockStorageSnapshotV3(),
 			"openstack_blockstorage_volume_v2":                   dataSourceBlockStorageVolumeV2(),
 			"openstack_blockstorage_volume_v3":                   dataSourceBlockStorageVolumeV3(),
+			"openstack_blockstorage_quotaset_v3":                 dataSourceBlockStorageQuotasetV3(),
 			"openstack_compute_aggregate_v2":                     dataSourceComputeAggregateV2(),
 			"openstack_compute_availability_zones_v2":            dataSourceComputeAvailabilityZonesV2(),
 			"openstack_compute_instance_v2":                      dataSourceComputeInstanceV2(),
