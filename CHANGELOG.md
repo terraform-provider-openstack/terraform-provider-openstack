@@ -2,8 +2,9 @@
 
 FEATURES
 
-* __New Data Source__: `openstack_blockstorage_quotaset_v3` ([#1319](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1319))
-* __New Data Source__: `openstack_networking_quota_v2` ([#1318](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1318))
+* __New Resource__: `blockstorage_qos_v3` ([#1325](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1325))
+* __New Data Source__: `blockstorage_quotaset_v3` ([#1319](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1319))
+* __New Data Source__: `networking_quota_v2` ([#1318](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1318))
 
 IMPROVEMENTS
 
