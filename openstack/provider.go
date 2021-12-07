@@ -299,6 +299,7 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
+			"openstack_blockstorage_qos_association_v3":          resourceBlockStorageQosAssociationV3(),
 			"openstack_blockstorage_qos_v3":                      resourceBlockStorageQosV3(),
 			"openstack_blockstorage_quotaset_v2":                 resourceBlockStorageQuotasetV2(),
 			"openstack_blockstorage_quotaset_v3":                 resourceBlockStorageQuotasetV3(),
