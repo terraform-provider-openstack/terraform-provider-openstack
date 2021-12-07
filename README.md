@@ -1,26 +1,13 @@
 Terraform OpenStack Provider
 ============================
 
-- Website: https://www.terraform.io
-- [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
-- Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
-
-<img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
-
-Maintainers
------------
-
-This provider plugin is maintained by:
-
-* Andrei Ozerov ([@ozerovandrei](https://github.com/ozerovandrei))
-* Gavin Williams ([@fatmcgav](https://github.com/fatmcgav))
-* Joe Topjian ([@jtopjian](https://github.com/jtopjian))
+Documentation: [registry.terraform.io](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs)
 
 Requirements
 ------------
 
--	[Terraform](https://www.terraform.io/downloads.html) 0.12.x
--	[Go](https://golang.org/doc/install) 1.17 (to build the provider plugin)
+- [Terraform](https://www.terraform.io/downloads.html) 1.0.x
+- [Go](https://golang.org/doc/install) 1.17 (to build the provider plugin)
 
 Building The Provider
 ---------------------
@@ -40,7 +27,7 @@ $ make build
 
 Using the provider
 ----------------------
-Please see the documentation at [terraform.io](https://www.terraform.io/docs/providers/openstack/index.html).
+Please see the documentation at [registry.terraform.io](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs).
 
 Or you can browse the documentation within this repo [here](https://github.com/terraform-provider-openstack/terraform-provider-openstack/tree/main/website/docs).
 
@@ -55,7 +42,7 @@ To compile the provider, run `make build`. This will build the provider and put 
 $ make build
 ```
 
-For further details on how to work on this provider, please see the [Testing and Development](https://www.terraform.io/docs/providers/openstack/index.html#testing-and-development) documentation.
+For further details on how to work on this provider, please see the [Testing and Development](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs#testing-and-development) documentation.
 
 Releasing the Provider
 ----------------------
@@ -87,5 +74,3 @@ OpenLab is providing a full CI environment to test each PR and merge for a varie
 <a href="https://vexxhost.com/"><img src="assets/vexxhost.png" width="600px"></a>
 
 VEXXHOST is providing their services to assist with the development and testing of this provider.
-
-
