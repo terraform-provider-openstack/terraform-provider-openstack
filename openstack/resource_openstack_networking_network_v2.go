@@ -172,16 +172,22 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				ForceNew: false,
 				Computed: true,
 			},
+
 			"network_type": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
+
 			"physical_network": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
+
 			"segmentation_id": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 		},
