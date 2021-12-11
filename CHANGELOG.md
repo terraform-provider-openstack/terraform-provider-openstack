@@ -16,6 +16,7 @@ IMPROVEMENTS
 * Use Otavia API for `lb_loadbalancer_v2` resource by default ([#1326](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1326))
 * Updated `images_image_v2` resource to not recreate image `on min_disk_gb`, `min_ram_mb`, `protected` attributes changes ([#1299](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1299))
 * Updated `gophercloud` to `v0.23.0` ([#1315](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1315))
+* Updated `terraform-plugin-sdk` to `v2.10.0` ([#1333](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1333))
 
 ## 1.45.0 (4 November, 2021)
 
