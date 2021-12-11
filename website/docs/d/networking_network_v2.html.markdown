@@ -67,11 +67,3 @@ are exported:
   is enabled
 * `subnets` - A list of subnet IDs belonging to the network.
 * `all_tags` - The set of string tags applied on the network.
-* `physical_network` - The physical network where this network is implemented.
-* `segmentation_id` - An isolated segment on the physical network.
-* `network_type` - The type of physical network.
-* `segments` - An array of one or more provider segment objects.
-  * `network_type` - The type of physical network.
-  * `physical_network` - The physical network where this network is implemented.
-  * `segmentation_id` - An isolated segment on the physical network.
-

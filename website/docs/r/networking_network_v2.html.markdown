@@ -148,10 +148,6 @@ The following attributes are exported:
 * `mtu` - See Argument Reference above.
 * `dns_domain` - See Argument Reference above.
 * `qos_policy_id` - See Argument Reference above.
-* `physical_network` - The physical network where this network is implemented.
-* `segmentation_id` - An isolated segment on the physical network.
-* `network_type` - The type of physical network.
-* `segments` - See Argument Reference above.
 
 ## Import
 
