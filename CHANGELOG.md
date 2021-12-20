@@ -1,4 +1,4 @@
-## 1.46.0 (Unreleased)
+## 1.46.0 (18 December, 2021)
 
 FEATURES
 
