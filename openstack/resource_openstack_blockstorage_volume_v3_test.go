@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 )
@@ -18,8 +18,8 @@ func TestAccBlockStorageV3Volume_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV3VolumeBasic,
@@ -54,8 +54,8 @@ func TestAccBlockStorageV3Volume_online_resize(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreOnlineResize(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV3VolumeOnlineResize(),
@@ -83,8 +83,8 @@ func TestAccBlockStorageV3Volume_image(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV3VolumeImage(),
@@ -106,8 +106,8 @@ func TestAccBlockStorageV3Volume_image_multiattach(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV3VolumeImageMultiattach(),
@@ -131,8 +131,8 @@ func TestAccBlockStorageV3Volume_timeout(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV3VolumeDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV3VolumeTimeout,

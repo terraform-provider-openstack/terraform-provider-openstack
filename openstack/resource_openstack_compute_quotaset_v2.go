@@ -1,23 +1,26 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/quotasets"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceComputeQuotasetV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceComputeQuotasetV2Create,
-		Read:   resourceComputeQuotasetV2Read,
-		Update: resourceComputeQuotasetV2Update,
-		Delete: schema.RemoveFromState,
+		CreateContext: resourceComputeQuotasetV2Create,
+		ReadContext:   resourceComputeQuotasetV2Read,
+		UpdateContext: resourceComputeQuotasetV2Update,
+		Delete:        schema.RemoveFromState,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -127,50 +130,78 @@ func resourceComputeQuotasetV2() *schema.Resource {
 	}
 }
 
-func resourceComputeQuotasetV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeQuotasetV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
 	computeClient, err := config.ComputeV2Client(region)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	projectID := d.Get("project_id").(string)
-	fixedIPs := d.Get("fixed_ips").(int)
-	floatingIPs := d.Get("floating_ips").(int)
-	injectedFileContentBytes := d.Get("injected_file_content_bytes").(int)
-	injectedFilePathBytes := d.Get("injected_file_path_bytes").(int)
-	injectedFiles := d.Get("injected_files").(int)
-	keyPairs := d.Get("key_pairs").(int)
-	metadataItems := d.Get("metadata_items").(int)
-	ram := d.Get("ram").(int)
-	securityGroupRules := d.Get("security_group_rules").(int)
-	securityGroups := d.Get("security_groups").(int)
-	cores := d.Get("cores").(int)
-	instances := d.Get("instances").(int)
-	serverGroups := d.Get("server_groups").(int)
-	serverGroupMembers := d.Get("server_group_members").(int)
 
-	updateOpts := quotasets.UpdateOpts{
-		FixedIPs:                 &fixedIPs,
-		FloatingIPs:              &floatingIPs,
-		InjectedFileContentBytes: &injectedFileContentBytes,
-		InjectedFilePathBytes:    &injectedFilePathBytes,
-		InjectedFiles:            &injectedFiles,
-		KeyPairs:                 &keyPairs,
-		MetadataItems:            &metadataItems,
-		RAM:                      &ram,
-		SecurityGroupRules:       &securityGroupRules,
-		SecurityGroups:           &securityGroups,
-		Cores:                    &cores,
-		Instances:                &instances,
-		ServerGroups:             &serverGroups,
-		ServerGroupMembers:       &serverGroupMembers,
+	updateOpts := quotasets.UpdateOpts{}
+
+	if v, ok := d.GetOkExists("fixed_ips"); ok {
+		value := v.(int)
+		updateOpts.FixedIPs = &value
+	}
+	if v, ok := d.GetOkExists("floating_ips"); ok {
+		value := v.(int)
+		updateOpts.FloatingIPs = &value
+	}
+	if v, ok := d.GetOkExists("injected_file_content_bytes"); ok {
+		value := v.(int)
+		updateOpts.InjectedFileContentBytes = &value
+	}
+	if v, ok := d.GetOkExists("injected_file_path_bytes"); ok {
+		value := v.(int)
+		updateOpts.InjectedFilePathBytes = &value
+	}
+	if v, ok := d.GetOkExists("injected_files"); ok {
+		value := v.(int)
+		updateOpts.InjectedFiles = &value
+	}
+	if v, ok := d.GetOkExists("key_pairs"); ok {
+		value := v.(int)
+		updateOpts.KeyPairs = &value
+	}
+	if v, ok := d.GetOkExists("metadata_items"); ok {
+		value := v.(int)
+		updateOpts.MetadataItems = &value
+	}
+	if v, ok := d.GetOkExists("ram"); ok {
+		value := v.(int)
+		updateOpts.RAM = &value
+	}
+	if v, ok := d.GetOkExists("security_group_rules"); ok {
+		value := v.(int)
+		updateOpts.SecurityGroupRules = &value
+	}
+	if v, ok := d.GetOkExists("security_groups"); ok {
+		value := v.(int)
+		updateOpts.SecurityGroups = &value
+	}
+	if v, ok := d.GetOkExists("cores"); ok {
+		value := v.(int)
+		updateOpts.Cores = &value
+	}
+	if v, ok := d.GetOkExists("instances"); ok {
+		value := v.(int)
+		updateOpts.Instances = &value
+	}
+	if v, ok := d.GetOkExists("server_groups"); ok {
+		value := v.(int)
+		updateOpts.ServerGroups = &value
+	}
+	if v, ok := d.GetOkExists("server_group_members"); ok {
+		value := v.(int)
+		updateOpts.ServerGroupMembers = &value
 	}
 
 	q, err := quotasets.Update(computeClient, projectID, updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_compute_quotaset_v2: %s", err)
+		return diag.Errorf("Error creating openstack_compute_quotaset_v2: %s", err)
 	}
 
 	id := fmt.Sprintf("%s/%s", projectID, region)
@@ -178,15 +209,15 @@ func resourceComputeQuotasetV2Create(d *schema.ResourceData, meta interface{}) e
 
 	log.Printf("[DEBUG] Created openstack_compute_quotaset_v2 %#v", q)
 
-	return resourceComputeQuotasetV2Read(d, meta)
+	return resourceComputeQuotasetV2Read(ctx, d, meta)
 }
 
-func resourceComputeQuotasetV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeQuotasetV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
 	computeClient, err := config.ComputeV2Client(region)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	// Depending on the provider version the resource was created, the resource id
@@ -196,7 +227,7 @@ func resourceComputeQuotasetV2Read(d *schema.ResourceData, meta interface{}) err
 
 	q, err := quotasets.Get(computeClient, projectID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_compute_quotaset_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_quotaset_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_quotaset_v2 %s: %#v", d.Id(), q)
@@ -221,11 +252,11 @@ func resourceComputeQuotasetV2Read(d *schema.ResourceData, meta interface{}) err
 	return nil
 }
 
-func resourceComputeQuotasetV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeQuotasetV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	var (
@@ -322,9 +353,9 @@ func resourceComputeQuotasetV2Update(d *schema.ResourceData, meta interface{}) e
 		projectID := d.Get("project_id").(string)
 		_, err := quotasets.Update(computeClient, projectID, updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_compute_quotaset_v2: %s", err)
+			return diag.Errorf("Error updating openstack_compute_quotaset_v2: %s", err)
 		}
 	}
 
-	return resourceComputeQuotasetV2Read(d, meta)
+	return resourceComputeQuotasetV2Read(ctx, d, meta)
 }

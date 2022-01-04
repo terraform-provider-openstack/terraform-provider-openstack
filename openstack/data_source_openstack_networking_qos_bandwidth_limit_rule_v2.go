@@ -1,17 +1,18 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/rules"
 )
 
 func dataSourceNetworkingQoSBandwidthLimitRuleV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNetworkingQoSBandwidthLimitRuleV2Read,
+		ReadContext: dataSourceNetworkingQoSBandwidthLimitRuleV2Read,
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -49,11 +50,11 @@ func dataSourceNetworkingQoSBandwidthLimitRuleV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingQoSBandwidthLimitRuleV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNetworkingQoSBandwidthLimitRuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	listOpts := rules.BandwidthLimitRulesListOpts{}
@@ -70,21 +71,21 @@ func dataSourceNetworkingQoSBandwidthLimitRuleV2Read(d *schema.ResourceData, met
 
 	pages, err := rules.ListBandwidthLimitRules(networkingClient, qosPolicyID, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_networking_qos_bandwidth_limit_rule_v2: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_networking_qos_bandwidth_limit_rule_v2: %s", err)
 	}
 
 	allRules, err := rules.ExtractBandwidthLimitRules(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to extract openstack_networking_qos_bandwidth_limit_rule_v2: %s", err)
+		return diag.Errorf("Unable to extract openstack_networking_qos_bandwidth_limit_rule_v2: %s", err)
 	}
 
 	if len(allRules) < 1 {
-		return fmt.Errorf("Your query returned no openstack_networking_qos_bandwidth_limit_rule_v2. " +
+		return diag.Errorf("Your query returned no openstack_networking_qos_bandwidth_limit_rule_v2. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allRules) > 1 {
-		return fmt.Errorf("Your query returned more than one openstack_networking_qos_bandwidth_limit_rule_v2." +
+		return diag.Errorf("Your query returned more than one openstack_networking_qos_bandwidth_limit_rule_v2." +
 			" Please try a more specific search criteria")
 	}
 

@@ -7,9 +7,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 // BuildRequest takes an opts struct and builds a request body for
@@ -70,13 +71,19 @@ func MapValueSpecs(d *schema.ResourceData) map[string]string {
 }
 
 func checkForRetryableError(err error) *resource.RetryError {
-	switch err.(type) {
+	switch e := err.(type) {
 	case gophercloud.ErrDefault500:
 		return resource.RetryableError(err)
 	case gophercloud.ErrDefault409:
 		return resource.RetryableError(err)
 	case gophercloud.ErrDefault503:
 		return resource.RetryableError(err)
+	case gophercloud.ErrUnexpectedResponseCode:
+		if e.GetStatusCode() == 504 || e.GetStatusCode() == 502 {
+			return resource.RetryableError(err)
+		} else {
+			return resource.NonRetryableError(err)
+		}
 	default:
 		return resource.NonRetryableError(err)
 	}

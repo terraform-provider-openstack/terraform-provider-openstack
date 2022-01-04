@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/securityservices"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/sharenetworks"
@@ -25,8 +25,8 @@ func TestAccSFSV2ShareNetwork_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSFS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSFSV2ShareNetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSFSV2ShareNetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSV2ShareNetworkConfigBasic(),
@@ -74,8 +74,8 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSFS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSFSV2ShareNetworkDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSFSV2ShareNetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSV2ShareNetworkConfigSecService1(),

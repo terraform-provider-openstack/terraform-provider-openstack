@@ -5,9 +5,10 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
+	octavialoadbalancers "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
@@ -27,18 +28,23 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2LoadBalancerConfigBasic(lbProvider),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2LoadBalancerExists("openstack_lb_loadbalancer_v2.loadbalancer_1", &lb),
+					testAccCheckLBV2LoadBalancerHasTag("openstack_lb_loadbalancer_v2.loadbalancer_1", "tag1"),
+					testAccCheckLBV2LoadBalancerTagCount("openstack_lb_loadbalancer_v2.loadbalancer_1", 1),
 				),
 			},
 			{
 				Config: testAccLbV2LoadBalancerConfigUpdate(lbProvider),
 				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV2LoadBalancerHasTag("openstack_lb_loadbalancer_v2.loadbalancer_1", "tag1"),
+					testAccCheckLBV2LoadBalancerHasTag("openstack_lb_loadbalancer_v2.loadbalancer_1", "tag2"),
+					testAccCheckLBV2LoadBalancerTagCount("openstack_lb_loadbalancer_v2.loadbalancer_1", 2),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_loadbalancer_v2.loadbalancer_1", "name", "loadbalancer_1_updated"),
 					resource.TestMatchResourceAttr(
@@ -60,8 +66,8 @@ func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2LoadBalancerSecGroup,
@@ -120,8 +126,8 @@ func TestAccLBV2LoadBalancer_vip_network(t *testing.T) {
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2LoadBalancerConfigVIPNetwork,
@@ -144,8 +150,8 @@ func TestAccLBV2LoadBalancer_vip_port_id(t *testing.T) {
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2LoadBalancerConfigVIPPortID,
@@ -207,10 +213,79 @@ func testAccCheckLBV2LoadBalancerExists(
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Member not found")
+			return fmt.Errorf("Loadbalancer not found")
 		}
 
 		*lb = *found
+
+		return nil
+	}
+}
+func testAccCheckLBV2LoadBalancerHasTag(n, tag string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := testAccProvider.Meta().(*Config)
+		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+		}
+
+		found, err := octavialoadbalancers.Get(lbClient, rs.Primary.ID).Extract()
+		if err != nil {
+			return err
+		}
+
+		if found.ID != rs.Primary.ID {
+			return fmt.Errorf("Loadbalancer not found")
+		}
+
+		for _, v := range found.Tags {
+			if tag == v {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Tag not found: %s", tag)
+	}
+}
+
+func testAccCheckLBV2LoadBalancerTagCount(n string, expected int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := testAccProvider.Meta().(*Config)
+		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+		}
+
+		found, err := octavialoadbalancers.Get(lbClient, rs.Primary.ID).Extract()
+		if err != nil {
+			return err
+		}
+
+		if found.ID != rs.Primary.ID {
+			return fmt.Errorf("Loadbalancer not found")
+		}
+
+		if len(found.Tags) != expected {
+			return fmt.Errorf("Expecting %d tags, found %d", expected, len(found.Tags))
+		}
 
 		return nil
 	}
@@ -258,6 +333,7 @@ func testAccLbV2LoadBalancerConfigBasic(lbProvider string) string {
       name = "loadbalancer_1"
       loadbalancer_provider = "%s"
       vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+	  tags = ["tag1"]
 
       timeouts {
         create = "15m"
@@ -286,6 +362,7 @@ func testAccLbV2LoadBalancerConfigUpdate(lbProvider string) string {
       loadbalancer_provider = "%s"
       admin_state_up = "true"
       vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+	  tags = ["tag1", "tag2"]
 
       timeouts {
         create = "15m"

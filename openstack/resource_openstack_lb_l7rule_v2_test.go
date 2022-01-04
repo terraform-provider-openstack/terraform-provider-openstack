@@ -5,14 +5,14 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	l7rules "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
 )
 
 func TestAccLBV2L7Rule_basic(t *testing.T) {
-	var l7rule l7rules.Rule
+	var l7rule l7policies.Rule
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -20,8 +20,8 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2L7RuleDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2L7RuleDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLbV2L7RuleConfigBasic(),
@@ -165,7 +165,7 @@ func testAccCheckLBV2L7RuleDestroy(s *terraform.State) error {
 			return fmt.Errorf("Unable to find l7policy_id")
 		}
 
-		_, err := l7rules.GetRule(lbClient, l7policyID, rs.Primary.ID).Extract()
+		_, err := l7policies.GetRule(lbClient, l7policyID, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("L7 Rule still exists: %s", rs.Primary.ID)
 		}
@@ -174,7 +174,7 @@ func testAccCheckLBV2L7RuleDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckLBV2L7RuleExists(n string, l7rule *l7rules.Rule) resource.TestCheckFunc {
+func testAccCheckLBV2L7RuleExists(n string, l7rule *l7policies.Rule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -203,7 +203,7 @@ func testAccCheckLBV2L7RuleExists(n string, l7rule *l7rules.Rule) resource.TestC
 			return fmt.Errorf("Unable to find l7policy_id")
 		}
 
-		found, err := l7rules.GetRule(lbClient, l7policyID, rs.Primary.ID).Extract()
+		found, err := l7policies.GetRule(lbClient, l7policyID, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

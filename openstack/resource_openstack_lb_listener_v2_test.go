@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccLBV2Listener_basic(t *testing.T) {
@@ -18,8 +19,8 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2ListenerDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2ListenerConfigBasic,
@@ -52,8 +53,8 @@ func TestAccLBV2Listener_octavia(t *testing.T) {
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2ListenerDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2ListenerConfigOctavia,
@@ -102,8 +103,8 @@ func TestAccLBV2Listener_octavia_udp(t *testing.T) {
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2ListenerDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2ListenerConfigOctaviaUDP,
@@ -127,8 +128,8 @@ func TestAccLBV2ListenerConfig_octavia_insert_headers(t *testing.T) {
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2ListenerDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2ListenerConfigOctaviaInsertHeaders1,

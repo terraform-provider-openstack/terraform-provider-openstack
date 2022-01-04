@@ -1,9 +1,11 @@
 package openstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/meta"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 
 	"github.com/gophercloud/utils/terraform/auth"
 	"github.com/gophercloud/utils/terraform/mutexkv"
@@ -16,7 +18,7 @@ type Config struct {
 }
 
 // Provider returns a schema.Provider for OpenStack.
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"auth_url": {
@@ -199,7 +201,7 @@ func Provider() terraform.ResourceProvider {
 			"use_octavia": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_USE_OCTAVIA", false),
+				DefaultFunc: schema.EnvDefaultFunc("OS_USE_OCTAVIA", true),
 				Description: descriptions["use_octavia"],
 			},
 
@@ -251,12 +253,14 @@ func Provider() terraform.ResourceProvider {
 			"openstack_blockstorage_snapshot_v3":                 dataSourceBlockStorageSnapshotV3(),
 			"openstack_blockstorage_volume_v2":                   dataSourceBlockStorageVolumeV2(),
 			"openstack_blockstorage_volume_v3":                   dataSourceBlockStorageVolumeV3(),
+			"openstack_blockstorage_quotaset_v3":                 dataSourceBlockStorageQuotasetV3(),
 			"openstack_compute_aggregate_v2":                     dataSourceComputeAggregateV2(),
 			"openstack_compute_availability_zones_v2":            dataSourceComputeAvailabilityZonesV2(),
 			"openstack_compute_instance_v2":                      dataSourceComputeInstanceV2(),
 			"openstack_compute_flavor_v2":                        dataSourceComputeFlavorV2(),
 			"openstack_compute_hypervisor_v2":                    dataSourceComputeHypervisorV2(),
 			"openstack_compute_keypair_v2":                       dataSourceComputeKeypairV2(),
+			"openstack_compute_quotaset_v2":                      dataSourceComputeQuotasetV2(),
 			"openstack_containerinfra_clustertemplate_v1":        dataSourceContainerInfraClusterTemplateV1(),
 			"openstack_containerinfra_cluster_v1":                dataSourceContainerInfraCluster(),
 			"openstack_dns_zone_v2":                              dataSourceDNSZoneV2(),
@@ -276,6 +280,7 @@ func Provider() terraform.ResourceProvider {
 			"openstack_networking_qos_dscp_marking_rule_v2":      dataSourceNetworkingQoSDSCPMarkingRuleV2(),
 			"openstack_networking_qos_minimum_bandwidth_rule_v2": dataSourceNetworkingQoSMinimumBandwidthRuleV2(),
 			"openstack_networking_qos_policy_v2":                 dataSourceNetworkingQoSPolicyV2(),
+			"openstack_networking_quota_v2":                      dataSourceNetworkingQuotaV2(),
 			"openstack_networking_subnet_v2":                     dataSourceNetworkingSubnetV2(),
 			"openstack_networking_subnet_ids_v2":                 dataSourceNetworkingSubnetIDsV2(),
 			"openstack_networking_secgroup_v2":                   dataSourceNetworkingSecGroupV2(),
@@ -294,6 +299,8 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
+			"openstack_blockstorage_qos_association_v3":          resourceBlockStorageQosAssociationV3(),
+			"openstack_blockstorage_qos_v3":                      resourceBlockStorageQosV3(),
 			"openstack_blockstorage_quotaset_v2":                 resourceBlockStorageQuotasetV2(),
 			"openstack_blockstorage_quotaset_v3":                 resourceBlockStorageQuotasetV3(),
 			"openstack_blockstorage_volume_v1":                   resourceBlockStorageVolumeV1(),
@@ -395,7 +402,7 @@ func Provider() terraform.ResourceProvider {
 		},
 	}
 
-	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+	provider.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		terraformVersion := provider.TerraformVersion
 		if terraformVersion == "" {
 			// Terraform 0.12 introduced this field to the protocol
@@ -483,7 +490,7 @@ func init() {
 	}
 }
 
-func configureProvider(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
+func configureProvider(d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
 	config := Config{
 		auth.Config{
 			CACertFile:                  d.Get("cacert_file").(string),
@@ -529,7 +536,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 	}
 
 	if err := config.LoadAndValidate(); err != nil {
-		return nil, err
+		return nil, diag.FromErr(err)
 	}
 
 	return &config, nil

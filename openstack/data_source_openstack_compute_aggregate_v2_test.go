@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 const testAccAggregateResource = `
@@ -34,8 +34,8 @@ resource "openstack_compute_aggregate_v2" "test2" {
 
 func TestAccAggregateDataSource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckAdminOnly(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckAdminOnly(t) },
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAggregateResource,
@@ -83,7 +83,7 @@ func TestAccAggregateDataSourceWithHypervisor(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 			testAccPreCheckHypervisor(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAggregateResourceWithHypervisor(),

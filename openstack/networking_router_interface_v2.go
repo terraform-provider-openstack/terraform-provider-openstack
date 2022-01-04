@@ -3,11 +3,12 @@ package openstack
 import (
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceNetworkingRouterInterfaceV2StateRefreshFunc(networkingClient *gophercloud.ServiceClient, portID string) resource.StateRefreshFunc {
@@ -35,6 +36,12 @@ func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(networkingClient *goph
 		removeOpts := routers.RemoveInterfaceOpts{
 			SubnetID: d.Get("subnet_id").(string),
 			PortID:   d.Get("port_id").(string),
+		}
+
+		if removeOpts.SubnetID != "" {
+			// We need to make sure to only send subnet_id, because the port may have multiple
+			// openstack_networking_router_interface_v2 attached. Otherwise openstack would delete them too.
+			removeOpts.PortID = ""
 		}
 
 		r, err := ports.Get(networkingClient, routerInterfaceID).Extract()

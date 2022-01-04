@@ -1,8 +1,6 @@
 package openstack
 
-import (
-	"github.com/gophercloud/gophercloud"
-)
+import "github.com/gophercloud/gophercloud"
 
 func identityEndpointAvailability(v string) gophercloud.Availability {
 	availability := gophercloud.AvailabilityPublic

@@ -1,14 +1,16 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/url"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
@@ -17,10 +19,10 @@ import (
 
 func resourceL7PolicyV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceL7PolicyV2Create,
-		Read:   resourceL7PolicyV2Read,
-		Update: resourceL7PolicyV2Update,
-		Delete: resourceL7PolicyV2Delete,
+		CreateContext: resourceL7PolicyV2Create,
+		ReadContext:   resourceL7PolicyV2Read,
+		UpdateContext: resourceL7PolicyV2Update,
+		DeleteContext: resourceL7PolicyV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: resourceL7PolicyV2Import,
 		},
@@ -105,11 +107,11 @@ func resourceL7PolicyV2() *schema.Resource {
 	}
 }
 
-func resourceL7PolicyV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	// Assign some required variables for use in creation.
@@ -121,7 +123,7 @@ func resourceL7PolicyV2Create(d *schema.ResourceData, meta interface{}) error {
 	// Ensure the right combination of options have been specified.
 	err = checkL7PolicyAction(action, redirectURL, redirectPoolID)
 	if err != nil {
-		return fmt.Errorf("Unable to create L7 Policy: %s", err)
+		return diag.Errorf("Unable to create L7 Policy: %s", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -148,25 +150,25 @@ func resourceL7PolicyV2Create(d *schema.ResourceData, meta interface{}) error {
 	if redirectPoolID != "" {
 		pool, err := pools.Get(lbClient, redirectPoolID).Extract()
 		if err != nil {
-			return fmt.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
+			return diag.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
 		}
 
-		err = waitForLBV2Pool(lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
+		err = waitForLBV2Pool(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	// Get a clean copy of the parent listener.
 	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve listener %s: %s", listenerID, err)
+		return diag.Errorf("Unable to retrieve listener %s: %s", listenerID, err)
 	}
 
 	// Wait for parent Listener to become active before continuing.
-	err = waitForLBV2Listener(lbClient, parentListener, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Listener(ctx, lbClient, parentListener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to create L7 Policy")
@@ -180,30 +182,30 @@ func resourceL7PolicyV2Create(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error creating L7 Policy: %s", err)
+		return diag.Errorf("Error creating L7 Policy: %s", err)
 	}
 
 	// Wait for L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(l7Policy.ID)
 
-	return resourceL7PolicyV2Read(d, meta)
+	return resourceL7PolicyV2Read(ctx, d, meta)
 }
 
-func resourceL7PolicyV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceL7PolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	l7Policy, err := l7policies.Get(lbClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "L7 Policy")
+		return diag.FromErr(CheckDeleted(d, err, "L7 Policy"))
 	}
 
 	log.Printf("[DEBUG] Retrieved L7 Policy %s: %#v", d.Id(), l7Policy)
@@ -221,11 +223,11 @@ func resourceL7PolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceL7PolicyV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	// Assign some required variables for use in updating.
@@ -267,7 +269,7 @@ func resourceL7PolicyV2Update(d *schema.ResourceData, meta interface{}) error {
 	// Ensure the right combination of options have been specified.
 	err = checkL7PolicyAction(action, redirectURL, redirectPoolID)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Make sure the pool is active before continuing.
@@ -275,37 +277,37 @@ func resourceL7PolicyV2Update(d *schema.ResourceData, meta interface{}) error {
 	if redirectPoolID != "" {
 		pool, err := pools.Get(lbClient, redirectPoolID).Extract()
 		if err != nil {
-			return fmt.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
+			return diag.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
 		}
 
-		err = waitForLBV2Pool(lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
+		err = waitForLBV2Pool(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	// Get a clean copy of the parent listener.
 	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve parent listener %s: %s", listenerID, err)
+		return diag.Errorf("Unable to retrieve parent listener %s: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the L7 Policy.
 	l7Policy, err := l7policies.Get(lbClient, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve L7 Policy: %s: %s", d.Id(), err)
+		return diag.Errorf("Unable to retrieve L7 Policy: %s: %s", d.Id(), err)
 	}
 
 	// Wait for parent Listener to become active before continuing.
-	err = waitForLBV2Listener(lbClient, parentListener, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Listener(ctx, lbClient, parentListener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Wait for L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Updating L7 Policy %s with options: %#v", d.Id(), updateOpts)
@@ -318,23 +320,23 @@ func resourceL7PolicyV2Update(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Unable to update L7 Policy %s: %s", d.Id(), err)
+		return diag.Errorf("Unable to update L7 Policy %s: %s", d.Id(), err)
 	}
 
 	// Wait for L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceL7PolicyV2Read(d, meta)
+	return resourceL7PolicyV2Read(ctx, d, meta)
 }
 
-func resourceL7PolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	lbClient, err := chooseLBV2Client(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
@@ -343,19 +345,19 @@ func resourceL7PolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
 	// Get a clean copy of the listener.
 	listener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve parent listener (%s) for the L7 Policy: %s", listenerID, err)
+		return diag.Errorf("Unable to retrieve parent listener (%s) for the L7 Policy: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the L7 Policy.
 	l7Policy, err := l7policies.Get(lbClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Unable to retrieve L7 Policy")
+		return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve L7 Policy"))
 	}
 
 	// Wait for Listener to become active before continuing.
-	err = waitForLBV2Listener(lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Listener(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to delete L7 Policy %s", d.Id())
@@ -368,12 +370,12 @@ func resourceL7PolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return CheckDeleted(d, err, "Error deleting L7 Policy")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting L7 Policy"))
 	}
 
-	err = waitForLBV2L7Policy(lbClient, listener, l7Policy, "DELETED", getLbPendingDeleteStatuses(), timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, listener, l7Policy, "DELETED", getLbPendingDeleteStatuses(), timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

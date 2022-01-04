@@ -1,14 +1,16 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/apiversions"
@@ -18,11 +20,11 @@ import (
 
 func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSharedFilesystemShareAccessV2Create,
-		Read:   resourceSharedFilesystemShareAccessV2Read,
-		Delete: resourceSharedFilesystemShareAccessV2Delete,
+		CreateContext: resourceSharedFilesystemShareAccessV2Create,
+		ReadContext:   resourceSharedFilesystemShareAccessV2Read,
+		DeleteContext: resourceSharedFilesystemShareAccessV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: resourceSharedFilesystemShareAccessV2Import,
+			StateContext: resourceSharedFilesystemShareAccessV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -78,11 +80,11 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 	}
 }
 
-func resourceSharedFilesystemShareAccessV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemShareAccessV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
 	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
@@ -116,10 +118,10 @@ func resourceSharedFilesystemShareAccessV2Create(d *schema.ResourceData, meta in
 		detailedErr := errors.ErrorDetails{}
 		e := errors.ExtractErrorInto(err, &detailedErr)
 		if e != nil {
-			return fmt.Errorf("Error creating openstack_sharedfilesystem_share_access_v2: %s: %s", err, e)
+			return diag.Errorf("Error creating openstack_sharedfilesystem_share_access_v2: %s: %s", err, e)
 		}
 		for k, msg := range detailedErr {
-			return fmt.Errorf("Error creating openstack_sharedfilesystem_share_access_v2: %s (%d): %s", k, msg.Code, msg.Message)
+			return diag.Errorf("Error creating openstack_sharedfilesystem_share_access_v2: %s (%d): %s", k, msg.Code, msg.Message)
 		}
 	}
 
@@ -133,21 +135,21 @@ func resourceSharedFilesystemShareAccessV2Create(d *schema.ResourceData, meta in
 		MinTimeout: 1 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_sharedfilesystem_share_access_v2 %s to become available: %s", access.ID, err)
+		return diag.Errorf("Error waiting for openstack_sharedfilesystem_share_access_v2 %s to become available: %s", access.ID, err)
 	}
 
 	d.SetId(access.ID)
 
-	return resourceSharedFilesystemShareAccessV2Read(d, meta)
+	return resourceSharedFilesystemShareAccessV2Read(ctx, d, meta)
 }
 
-func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemShareAccessV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
 	// Set the client to the minimum supported microversion.
@@ -157,12 +159,12 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 	// If so, use that for the API request for access_key support.
 	apiInfo, err := apiversions.Get(sfsClient, "v2").Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to query API endpoint for openstack_sharedfilesystem_share_access_v2: %s", err)
+		return diag.Errorf("Unable to query API endpoint for openstack_sharedfilesystem_share_access_v2: %s", err)
 	}
 
 	compatible, err := compatibleMicroversion("min", "2.21", apiInfo.Version)
 	if err != nil {
-		return fmt.Errorf("Error comparing microversions for openstack_sharedfilesystem_share_access_v2 %s: %s", d.Id(), err)
+		return diag.Errorf("Error comparing microversions for openstack_sharedfilesystem_share_access_v2 %s: %s", d.Id(), err)
 	}
 
 	if compatible {
@@ -172,7 +174,7 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 	shareID := d.Get("share_id").(string)
 	access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_sharedfilesystem_share_access_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_sharedfilesystem_share_access_v2"))
 	}
 
 	for _, v := range access {
@@ -198,11 +200,11 @@ func resourceSharedFilesystemShareAccessV2Read(d *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceSharedFilesystemShareAccessV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceSharedFilesystemShareAccessV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
 	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
@@ -230,10 +232,10 @@ func resourceSharedFilesystemShareAccessV2Delete(d *schema.ResourceData, meta in
 		detailedErr := errors.ErrorDetails{}
 		e = errors.ExtractErrorInto(err, &detailedErr)
 		if e != nil {
-			return fmt.Errorf("Error waiting for openstack_sharedfilesystem_share_access_v2 on %s to be removed: %s: %s", shareID, err, e)
+			return diag.Errorf("Error waiting for openstack_sharedfilesystem_share_access_v2 on %s to be removed: %s: %s", shareID, err, e)
 		}
 		for k, msg := range detailedErr {
-			return fmt.Errorf("Error waiting for openstack_sharedfilesystem_share_access_v2 on %s to be removed: %s (%d): %s", shareID, k, msg.Code, msg.Message)
+			return diag.Errorf("Error waiting for openstack_sharedfilesystem_share_access_v2 on %s to be removed: %s (%d): %s", shareID, k, msg.Code, msg.Message)
 		}
 	}
 
@@ -247,18 +249,18 @@ func resourceSharedFilesystemShareAccessV2Delete(d *schema.ResourceData, meta in
 		MinTimeout: 1 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
 			return nil
 		}
-		return fmt.Errorf("Error waiting for openstack_sharedfilesystem_share_access_v2 %s to become denied: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_sharedfilesystem_share_access_v2 %s to become denied: %s", d.Id(), err)
 	}
 
 	return nil
 }
 
-func resourceSharedFilesystemShareAccessV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceSharedFilesystemShareAccessV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
 		err := fmt.Errorf("Invalid format specified for openstack_sharedfilesystem_share_access_v2. Format must be <share id>/<ACL id>")

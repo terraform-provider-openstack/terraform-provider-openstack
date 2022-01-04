@@ -1,16 +1,19 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/acls"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func getDateFilters() [4]string {
@@ -29,7 +32,7 @@ func getDateFiltersRegexPreformatted() string {
 
 func dataSourceKeyManagerSecretV1() *schema.Resource {
 	ret := &schema.Resource{
-		Read: dataSourceKeyManagerSecretV1Read,
+		ReadContext: dataSourceKeyManagerSecretV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -163,11 +166,11 @@ func dataSourceKeyManagerSecretV1() *schema.Resource {
 	return ret
 }
 
-func dataSourceKeyManagerSecretV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	kmClient, err := config.KeyManagerV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack barbican client: %s", err)
+		return diag.Errorf("Error creating OpenStack barbican client: %s", err)
 	}
 
 	aclOnly := d.Get("acl_only").(bool)
@@ -188,22 +191,22 @@ func dataSourceKeyManagerSecretV1Read(d *schema.ResourceData, meta interface{}) 
 
 	allPages, err := secrets.List(kmClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query openstack_keymanager_secret_v1 secrets: %s", err)
+		return diag.Errorf("Unable to query openstack_keymanager_secret_v1 secrets: %s", err)
 	}
 
 	allSecrets, err := secrets.ExtractSecrets(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve openstack_keymanager_secret_v1 secrets: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_keymanager_secret_v1 secrets: %s", err)
 	}
 
 	if len(allSecrets) < 1 {
-		return fmt.Errorf("Your query returned no openstack_keymanager_secret_v1 results. " +
+		return diag.Errorf("Your query returned no openstack_keymanager_secret_v1 results. " +
 			"Please change your search criteria and try again")
 	}
 
 	if len(allSecrets) > 1 {
 		log.Printf("[DEBUG] Multiple openstack_keymanager_secret_v1 results found: %#v", allSecrets)
-		return fmt.Errorf("Your query returned more than one result. Please try a more " +
+		return diag.Errorf("Your query returned more than one result. Please try a more " +
 			"specific search criteria")
 	}
 

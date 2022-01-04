@@ -1,12 +1,13 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
@@ -14,12 +15,12 @@ import (
 
 func resourceNetworkingQoSPolicyV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingQoSPolicyV2Create,
-		Read:   resourceNetworkingQoSPolicyV2Read,
-		Update: resourceNetworkingQoSPolicyV2Update,
-		Delete: resourceNetworkingQoSPolicyV2Delete,
+		CreateContext: resourceNetworkingQoSPolicyV2Create,
+		ReadContext:   resourceNetworkingQoSPolicyV2Read,
+		UpdateContext: resourceNetworkingQoSPolicyV2Update,
+		DeleteContext: resourceNetworkingQoSPolicyV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -105,11 +106,11 @@ func resourceNetworkingQoSPolicyV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingQoSPolicyV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	createOpts := QoSPolicyCreateOpts{
@@ -126,7 +127,7 @@ func resourceNetworkingQoSPolicyV2Create(d *schema.ResourceData, meta interface{
 	log.Printf("[DEBUG] openstack_networking_qos_policy_v2 create options: %#v", createOpts)
 	p, err := policies.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_networking_qos_policy_v2: %s", err)
+		return diag.Errorf("Error creating openstack_networking_qos_policy_v2: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for openstack_networking_qos_policy_v2 %s to become available.", p.ID)
@@ -139,9 +140,9 @@ func resourceNetworkingQoSPolicyV2Create(d *schema.ResourceData, meta interface{
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_qos_policy_v2 %s to become available: %s", p.ID, err)
+		return diag.Errorf("Error waiting for openstack_networking_qos_policy_v2 %s to become available: %s", p.ID, err)
 	}
 
 	d.SetId(p.ID)
@@ -151,26 +152,26 @@ func resourceNetworkingQoSPolicyV2Create(d *schema.ResourceData, meta interface{
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "qos/policies", p.ID, tagOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error setting tags on openstack_networking_qos_policy_v2 %s: %s", p.ID, err)
+			return diag.Errorf("Error setting tags on openstack_networking_qos_policy_v2 %s: %s", p.ID, err)
 		}
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_qos_policy_v2 %s", tags, p.ID)
 	}
 
 	log.Printf("[DEBUG] Created openstack_networking_qos_policy_v2 %s: %#v", p.ID, p)
 
-	return resourceNetworkingQoSPolicyV2Read(d, meta)
+	return resourceNetworkingQoSPolicyV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingQoSPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	p, err := policies.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting openstack_networking_qos_policy_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_qos_policy_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_qos_policy_v2 %s: %#v", d.Id(), p)
@@ -195,11 +196,11 @@ func resourceNetworkingQoSPolicyV2Read(d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func resourceNetworkingQoSPolicyV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var hasChange bool
@@ -232,7 +233,7 @@ func resourceNetworkingQoSPolicyV2Update(d *schema.ResourceData, meta interface{
 		log.Printf("[DEBUG] openstack_networking_qos_policy_v2 %s update options: %#v", d.Id(), updateOpts)
 		_, err = policies.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating openstack_networking_qos_policy_v2 %s: %s", d.Id(), err)
+			return diag.Errorf("Error updating openstack_networking_qos_policy_v2 %s: %s", d.Id(), err)
 		}
 	}
 
@@ -241,23 +242,23 @@ func resourceNetworkingQoSPolicyV2Update(d *schema.ResourceData, meta interface{
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 		tags, err := attributestags.ReplaceAll(networkingClient, "qos/policies", d.Id(), tagOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error setting tags on openstack_networking_qos_policy_v2 %s: %s", d.Id(), err)
+			return diag.Errorf("Error setting tags on openstack_networking_qos_policy_v2 %s: %s", d.Id(), err)
 		}
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_qos_policy_v2 %s", tags, d.Id())
 	}
 
-	return resourceNetworkingQoSPolicyV2Read(d, meta)
+	return resourceNetworkingQoSPolicyV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingQoSPolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingQoSPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	if err := policies.Delete(networkingClient, d.Id()).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_networking_qos_policy_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_qos_policy_v2"))
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -269,9 +270,9 @@ func resourceNetworkingQoSPolicyV2Delete(d *schema.ResourceData, meta interface{
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_networking_qos_policy_v2 %s to delete: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_networking_qos_policy_v2 %s to Delete:  %s", d.Id(), err)
 	}
 
 	return nil

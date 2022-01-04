@@ -5,10 +5,10 @@ import (
 	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/attachinterfaces"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func computeInterfaceAttachV2AttachFunc(

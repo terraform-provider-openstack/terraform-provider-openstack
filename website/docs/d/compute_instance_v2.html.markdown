@@ -32,6 +32,8 @@ In addition to the above, the following attributes are exported:
 
 * `image_id` - The image ID used to create the server.
 
+* `image_name` - The image name used to create the server.
+
 * `flavor_id` - The flavor ID used to create the server.
 
 * `flavor_name` - The flavor name used to create the server.

@@ -1,24 +1,26 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets"
 )
 
 func resourceDNSRecordSetV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDNSRecordSetV2Create,
-		Read:   resourceDNSRecordSetV2Read,
-		Update: resourceDNSRecordSetV2Update,
-		Delete: resourceDNSRecordSetV2Delete,
+		CreateContext: resourceDNSRecordSetV2Create,
+		ReadContext:   resourceDNSRecordSetV2Read,
+		UpdateContext: resourceDNSRecordSetV2Update,
+		DeleteContext: resourceDNSRecordSetV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: resourceDNSRecordSetV2Import,
+			StateContext: resourceDNSRecordSetV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -99,15 +101,15 @@ func resourceDNSRecordSetV2() *schema.Resource {
 	}
 }
 
-func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
 	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
-		return fmt.Errorf("Error setting dns client auth headers: %s", err)
+		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
 	records := expandDNSRecordSetV2Records(d.Get("records").([]interface{}))
@@ -128,7 +130,7 @@ func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) erro
 	zoneID := d.Get("zone_id").(string)
 	n, err := recordsets.Create(dnsClient, zoneID, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_dns_recordset_v2: %s", err)
+		return diag.Errorf("Error creating openstack_dns_recordset_v2: %s", err)
 	}
 
 	if !d.Get("disable_status_check").(bool) {
@@ -141,9 +143,9 @@ func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) erro
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return fmt.Errorf(
+			return diag.Errorf(
 				"Error waiting for openstack_dns_recordset_v2 %s to become active: %s", d.Id(), err)
 		}
 	}
@@ -157,29 +159,29 @@ func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) erro
 	d.Set("records", records)
 
 	log.Printf("[DEBUG] Created openstack_dns_recordset_v2 %s: %#v", n.ID, n)
-	return resourceDNSRecordSetV2Read(d, meta)
+	return resourceDNSRecordSetV2Read(ctx, d, meta)
 }
 
-func resourceDNSRecordSetV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceDNSRecordSetV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
 	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
-		return fmt.Errorf("Error setting dns client auth headers: %s", err)
+		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
 	// Obtain relevant info from parsing the ID
 	zoneID, recordsetID, err := dnsRecordSetV2ParseID(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	n, err := recordsets.Get(dnsClient, zoneID, recordsetID).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_dns_recordset_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_dns_recordset_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_dns_recordset_v2 %s: %#v", recordsetID, n)
@@ -195,15 +197,15 @@ func resourceDNSRecordSetV2Read(d *schema.ResourceData, meta interface{}) error 
 	return nil
 }
 
-func resourceDNSRecordSetV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceDNSRecordSetV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
 	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
-		return fmt.Errorf("Error setting dns client auth headers: %s", err)
+		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
 	changed := false
@@ -228,20 +230,20 @@ func resourceDNSRecordSetV2Update(d *schema.ResourceData, meta interface{}) erro
 
 	if !changed {
 		// Nothing in OpenStack fields really changed, so just return zone from OpenStack
-		return resourceDNSRecordSetV2Read(d, meta)
+		return resourceDNSRecordSetV2Read(ctx, d, meta)
 	}
 
 	// Obtain relevant info from parsing the ID
 	zoneID, recordsetID, err := dnsRecordSetV2ParseID(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Updating openstack_dns_recordset_v2 %s with options: %#v", recordsetID, updateOpts)
 
 	_, err = recordsets.Update(dnsClient, zoneID, recordsetID, updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating openstack_dns_recordset_v2 %s: %s", d.Id(), err)
+		return diag.Errorf("Error updating openstack_dns_recordset_v2 %s: %s", d.Id(), err)
 	}
 
 	if !d.Get("disable_status_check").(bool) {
@@ -254,36 +256,36 @@ func resourceDNSRecordSetV2Update(d *schema.ResourceData, meta interface{}) erro
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return fmt.Errorf(
+			return diag.Errorf(
 				"Error waiting for openstack_dns_recordset_v2 %s to become active: %s", d.Id(), err)
 		}
 	}
 
-	return resourceDNSRecordSetV2Read(d, meta)
+	return resourceDNSRecordSetV2Read(ctx, d, meta)
 }
 
-func resourceDNSRecordSetV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceDNSRecordSetV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
 	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
-		return fmt.Errorf("Error setting dns client auth headers: %s", err)
+		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
 	// Obtain relevant info from parsing the ID
 	zoneID, recordsetID, err := dnsRecordSetV2ParseID(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	err = recordsets.Delete(dnsClient, zoneID, recordsetID).ExtractErr()
 	if err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_dns_recordset_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_dns_recordset_v2"))
 	}
 
 	if !d.Get("disable_status_check").(bool) {
@@ -296,9 +298,9 @@ func resourceDNSRecordSetV2Delete(d *schema.ResourceData, meta interface{}) erro
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return fmt.Errorf(
+			return diag.Errorf(
 				"Error waiting for openstack_dns_recordset_v2 %s to become deleted: %s", d.Id(), err)
 		}
 	}
@@ -306,7 +308,7 @@ func resourceDNSRecordSetV2Delete(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func resourceDNSRecordSetV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceDNSRecordSetV2Import(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {

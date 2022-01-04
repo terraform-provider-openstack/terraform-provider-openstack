@@ -1,18 +1,19 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceComputeFlavorV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceComputeFlavorV2Read,
+		ReadContext: dataSourceComputeFlavorV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -96,11 +97,11 @@ func dataSourceComputeFlavorV2() *schema.Resource {
 }
 
 // dataSourceComputeFlavorV2Read performs the flavor lookup.
-func dataSourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceComputeFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	var allFlavors []flavors.Flavor
@@ -108,9 +109,9 @@ func dataSourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) err
 		flavor, err := flavors.Get(computeClient, v).Extract()
 		if err != nil {
 			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				return fmt.Errorf("No Flavor found")
+				return diag.Errorf("No Flavor found")
 			}
-			return fmt.Errorf("Unable to retrieve OpenStack %s flavor: %s", v, err)
+			return diag.Errorf("Unable to retrieve OpenStack %s flavor: %s", v, err)
 		}
 
 		allFlavors = append(allFlavors, *flavor)
@@ -135,12 +136,12 @@ func dataSourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) err
 
 		allPages, err := flavors.ListDetail(computeClient, listOpts).AllPages()
 		if err != nil {
-			return fmt.Errorf("Unable to query OpenStack flavors: %s", err)
+			return diag.Errorf("Unable to query OpenStack flavors: %s", err)
 		}
 
 		allFlavors, err = flavors.ExtractFlavors(allPages)
 		if err != nil {
-			return fmt.Errorf("Unable to retrieve OpenStack flavors: %s", err)
+			return diag.Errorf("Unable to retrieve OpenStack flavors: %s", err)
 		}
 	}
 
@@ -192,17 +193,17 @@ func dataSourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) err
 	}
 
 	if len(allFlavors) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return diag.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allFlavors) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allFlavors)
-		return fmt.Errorf("Your query returned more than one result. " +
+		return diag.Errorf("Your query returned more than one result. " +
 			"Please try a more specific search criteria")
 	}
 
-	return dataSourceComputeFlavorV2Attributes(d, computeClient, &allFlavors[0])
+	return diag.FromErr(dataSourceComputeFlavorV2Attributes(d, computeClient, &allFlavors[0]))
 }
 
 // dataSourceComputeFlavorV2Attributes populates the fields of a Flavor resource.

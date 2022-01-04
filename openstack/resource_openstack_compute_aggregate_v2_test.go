@@ -5,9 +5,10 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/aggregates"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 var testAccAggregateConfig = `
@@ -30,12 +31,20 @@ resource "openstack_compute_aggregate_v2" "test" {
     `, osHypervisorEnvironment)
 }
 
+var testAccAggregateRegionConfig = `
+resource "openstack_compute_aggregate_v2" "test" {
+  region = "RegionOne"
+  name   = "test-aggregate"
+  zone   = "nova"
+}
+`
+
 func TestAccComputeV2Aggregate(t *testing.T) {
 	var aggregate aggregates.Aggregate
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckAdminOnly(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheckAdminOnly(t) },
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAggregateConfig,
@@ -57,7 +66,7 @@ func TestAccComputeV2AggregateWithHypervisor(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 			testAccPreCheckHypervisor(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAggregateConfig,
@@ -77,6 +86,24 @@ func TestAccComputeV2AggregateWithHypervisor(t *testing.T) {
 					testAccCheckAggregateExists("openstack_compute_aggregate_v2.test", &aggregate),
 					resource.TestCheckResourceAttr("openstack_compute_aggregate_v2.test", "hosts.#", "0"),
 					resource.TestCheckNoResourceAttr("openstack_compute_aggregate_v2.test", "metadata.test"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2AggregateWithRegion(t *testing.T) {
+	var aggregate aggregates.Aggregate
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheckAdminOnly(t) },
+		ProviderFactories: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAggregateRegionConfig,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAggregateExists("openstack_compute_aggregate_v2.test", &aggregate),
+					resource.TestCheckResourceAttr("openstack_compute_aggregate_v2.test", "region", "RegionOne"),
 				),
 			},
 		},

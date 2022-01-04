@@ -1,24 +1,26 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/firewalls"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/routerinsertion"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceFWFirewallV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceFWFirewallV1Create,
-		Read:   resourceFWFirewallV1Read,
-		Update: resourceFWFirewallV1Update,
-		Delete: resourceFWFirewallV1Delete,
+		CreateContext: resourceFWFirewallV1Create,
+		ReadContext:   resourceFWFirewallV1Read,
+		UpdateContext: resourceFWFirewallV1Update,
+		DeleteContext: resourceFWFirewallV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -87,11 +89,11 @@ func resourceFWFirewallV1() *schema.Resource {
 	}
 }
 
-func resourceFWFirewallV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceFWFirewallV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var createOpts firewalls.CreateOptsBuilder
@@ -133,7 +135,7 @@ func resourceFWFirewallV1Create(d *schema.ResourceData, meta interface{}) error 
 
 	firewall, err := firewalls.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] openstack_fw_firewall_v1 created: %#v", firewall)
@@ -147,27 +149,27 @@ func resourceFWFirewallV1Create(d *schema.ResourceData, meta interface{}) error 
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_fw_firewall_v1 to become active: %s", err)
+		return diag.Errorf("Error waiting for openstack_fw_firewall_v1 to become active: %s", err)
 	}
 
 	d.SetId(firewall.ID)
 
-	return resourceFWFirewallV1Read(d, meta)
+	return resourceFWFirewallV1Read(ctx, d, meta)
 }
 
-func resourceFWFirewallV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceFWFirewallV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var firewall Firewall
 	err = firewalls.Get(networkingClient, d.Id()).ExtractInto(&firewall)
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_fw_firewall_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_fw_firewall_v1"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_fw_firewall_v1 %s: %#v", d.Id(), firewall)
@@ -183,11 +185,11 @@ func resourceFWFirewallV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceFWFirewallV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceFWFirewallV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	// PolicyID is required
@@ -235,7 +237,7 @@ func resourceFWFirewallV1Update(d *schema.ResourceData, meta interface{}) error 
 
 	err = firewalls.Update(networkingClient, d.Id(), updateOpts).Err
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -247,24 +249,24 @@ func resourceFWFirewallV1Update(d *schema.ResourceData, meta interface{}) error 
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_fw_firewall_v1 %s to become active: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_fw_firewall_v1 %s to become active: %s", d.Id(), err)
 	}
 
-	return resourceFWFirewallV1Read(d, meta)
+	return resourceFWFirewallV1Read(ctx, d, meta)
 }
 
-func resourceFWFirewallV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceFWFirewallV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	_, err = firewalls.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_fw_firewall_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_fw_firewall_v1"))
 	}
 
 	// Ensure the firewall was fully created/updated before being deleted.
@@ -277,14 +279,14 @@ func resourceFWFirewallV1Delete(d *schema.ResourceData, meta interface{}) error 
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_fw_firewall_v1 %s to become active: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_fw_firewall_v1 %s to become active: %s", d.Id(), err)
 	}
 
 	err = firewalls.Delete(networkingClient, d.Id()).Err
 	if err != nil {
-		return fmt.Errorf("Error deleting openstack_fw_firewall_v1 %s: %s", d.Id(), err)
+		return diag.Errorf("Error deleting openstack_fw_firewall_v1 %s: %s", d.Id(), err)
 	}
 
 	stateConf = &resource.StateChangeConf{
@@ -296,10 +298,10 @@ func resourceFWFirewallV1Delete(d *schema.ResourceData, meta interface{}) error 
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error waiting for openstack_fw_firewall_v1 %s to delete: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_fw_firewall_v1 %s to Delete:  %s", d.Id(), err)
 	}
 
-	return err
+	return nil
 }

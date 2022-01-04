@@ -1,8 +1,6 @@
 package openstack
 
-import (
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
-)
+import "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 
 // ComputeKeyPairV2CreateOpts is a custom KeyPair struct to include the ValueSpecs field.
 type ComputeKeyPairV2CreateOpts struct {

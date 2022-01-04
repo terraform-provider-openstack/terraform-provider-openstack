@@ -1,10 +1,11 @@
 package openstack
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
@@ -12,11 +13,11 @@ import (
 
 func resourceNetworkingSubnetRouteV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingSubnetRouteV2Create,
-		Read:   resourceNetworkingSubnetRouteV2Read,
-		Delete: resourceNetworkingSubnetRouteV2Delete,
+		CreateContext: resourceNetworkingSubnetRouteV2Create,
+		ReadContext:   resourceNetworkingSubnetRouteV2Read,
+		DeleteContext: resourceNetworkingSubnetRouteV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -48,11 +49,11 @@ func resourceNetworkingSubnetRouteV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingSubnetRouteV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSubnetRouteV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	subnetID := d.Get("subnet_id").(string)
@@ -66,7 +67,7 @@ func resourceNetworkingSubnetRouteV2Create(d *schema.ResourceData, meta interfac
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving openstack_networking_subnet_v2: %s", err)
+		return diag.Errorf("Error retrieving openstack_networking_subnet_v2: %s", err)
 	}
 
 	destCIDR := d.Get("destination_cidr").(string)
@@ -74,7 +75,7 @@ func resourceNetworkingSubnetRouteV2Create(d *schema.ResourceData, meta interfac
 
 	for _, r := range subnet.HostRoutes {
 		if r.DestinationCIDR == destCIDR && r.NextHop == nextHop {
-			return fmt.Errorf(
+			return diag.Errorf(
 				"openstack_networking_subnet_v2 %s already has a route to %s via %s",
 				subnetID,
 				r.DestinationCIDR,
@@ -101,24 +102,24 @@ func resourceNetworkingSubnetRouteV2Create(d *schema.ResourceData, meta interfac
 	log.Printf("[DEBUG] Updating openstack_networking_subnet_v2 %s with options: %+v", subnetID, updateOpts)
 	_, err = subnets.Update(networkingClient, subnetID, updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating openstack_networking_subnet_v2: %s", err)
+		return diag.Errorf("Error updating openstack_networking_subnet_v2: %s", err)
 	}
 
 	d.SetId(resourceNetworkingSubnetRouteV2BuildID(subnetID, destCIDR, nextHop))
 
-	return resourceNetworkingSubnetRouteV2Read(d, meta)
+	return resourceNetworkingSubnetRouteV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSubnetRouteV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSubnetRouteV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	subnetID, destCIDR, nextHop, err := resourceNetworkingSubnetRouteV2ParseID(d.Id())
 	if err != nil {
-		return fmt.Errorf("Error reading openstack_networking_subnet_route_v2 ID %s: %s", d.Id(), err)
+		return diag.Errorf("Error reading openstack_networking_subnet_route_v2 ID %s: %s", d.Id(), err)
 	}
 
 	subnet, err := subnets.Get(networkingClient, subnetID).Extract()
@@ -128,7 +129,7 @@ func resourceNetworkingSubnetRouteV2Read(d *schema.ResourceData, meta interface{
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving openstack_networking_subnet_v2: %s", err)
+		return diag.Errorf("Error retrieving openstack_networking_subnet_v2: %s", err)
 	}
 
 	exists := false
@@ -138,7 +139,7 @@ func resourceNetworkingSubnetRouteV2Read(d *schema.ResourceData, meta interface{
 		}
 	}
 	if !exists {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"openstack_networking_subnet_v2 %s doesn't have a route to %s via %s",
 			subnetID,
 			destCIDR,
@@ -154,11 +155,11 @@ func resourceNetworkingSubnetRouteV2Read(d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func resourceNetworkingSubnetRouteV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSubnetRouteV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	subnetID := d.Get("subnet_id").(string)
@@ -171,11 +172,11 @@ func resourceNetworkingSubnetRouteV2Delete(d *schema.ResourceData, meta interfac
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving openstack_networking_subnet_v2: %s", err)
+		return diag.Errorf("Error retrieving openstack_networking_subnet_v2: %s", err)
 	}
 
-	var destCIDR string = d.Get("destination_cidr").(string)
-	var nextHop string = d.Get("next_hop").(string)
+	var destCIDR = d.Get("destination_cidr").(string)
+	var nextHop = d.Get("next_hop").(string)
 
 	oldRoutes := subnet.HostRoutes
 	newRoutes := make([]subnets.HostRoute, 0, 1)
@@ -187,7 +188,7 @@ func resourceNetworkingSubnetRouteV2Delete(d *schema.ResourceData, meta interfac
 	}
 
 	if len(oldRoutes) == len(newRoutes) {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"openstack_networking_subnet_v2 %s already doesn't have a route to %s via %s",
 			subnetID,
 			destCIDR,
@@ -207,7 +208,7 @@ func resourceNetworkingSubnetRouteV2Delete(d *schema.ResourceData, meta interfac
 	log.Printf("[DEBUG] Updating openstack_networking_subnet_v2 %s with options: %#v", subnetID, updateOpts)
 	_, err = subnets.Update(networkingClient, subnetID, updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating openstack_networking_subnet_v2: %s", err)
+		return diag.Errorf("Error updating openstack_networking_subnet_v2: %s", err)
 	}
 
 	return nil

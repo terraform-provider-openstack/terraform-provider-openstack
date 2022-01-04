@@ -1,20 +1,23 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/users"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceIdentityUserMembershipV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIdentityUserMembershipV3Create,
-		Read:   resourceIdentityUserMembershipV3Read,
-		Delete: resourceIdentityUserMembershipV3Delete,
+		CreateContext: resourceIdentityUserMembershipV3Create,
+		ReadContext:   resourceIdentityUserMembershipV3Read,
+		DeleteContext: resourceIdentityUserMembershipV3Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -38,41 +41,41 @@ func resourceIdentityUserMembershipV3() *schema.Resource {
 	}
 }
 
-func resourceIdentityUserMembershipV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityUserMembershipV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	userID := d.Get("user_id").(string)
 	groupID := d.Get("group_id").(string)
 
 	if err := users.AddToGroup(identityClient, groupID, userID).ExtractErr(); err != nil {
-		return fmt.Errorf("Error creating openstack_identity_user_membership_v3: %s", err)
+		return diag.Errorf("Error creating openstack_identity_user_membership_v3: %s", err)
 	}
 
 	id := fmt.Sprintf("%s/%s", userID, groupID)
 	d.SetId(id)
 
-	return resourceIdentityUserMembershipV3Read(d, meta)
+	return resourceIdentityUserMembershipV3Read(ctx, d, meta)
 }
 
-func resourceIdentityUserMembershipV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityUserMembershipV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	userID, groupID, err := parseUserMembershipID(d.Id())
 	if err != nil {
-		return CheckDeleted(d, err, "Error parsing ID of openstack_identity_user_membership_v3")
+		return diag.FromErr(CheckDeleted(d, err, "Error parsing ID of openstack_identity_user_membership_v3"))
 	}
 
 	userMembership, err := users.IsMemberOfGroup(identityClient, groupID, userID).Extract()
 	if err != nil || !userMembership {
-		return CheckDeleted(d, err, "Error retrieving openstack_identity_user_membership_v3")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_identity_user_membership_v3"))
 	}
 
 	d.Set("region", GetRegion(d, config))
@@ -82,20 +85,20 @@ func resourceIdentityUserMembershipV3Read(d *schema.ResourceData, meta interface
 	return nil
 }
 
-func resourceIdentityUserMembershipV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityUserMembershipV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	userID, groupID, err := parseUserMembershipID(d.Id())
 	if err != nil {
-		return CheckDeleted(d, err, "Error parsing ID of openstack_identity_user_membership_v3")
+		return diag.FromErr(CheckDeleted(d, err, "Error parsing ID of openstack_identity_user_membership_v3"))
 	}
 
 	if err := users.RemoveFromGroup(identityClient, groupID, userID).ExtractErr(); err != nil {
-		return CheckDeleted(d, err, "Error removing openstack_identity_user_membership_v3")
+		return diag.FromErr(CheckDeleted(d, err, "Error removing openstack_identity_user_membership_v3"))
 	}
 
 	return nil

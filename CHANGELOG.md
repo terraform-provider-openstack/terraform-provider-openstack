@@ -1,3 +1,55 @@
+## 1.46.0 (18 December, 2021)
+
+FEATURES
+
+* __New Resource__: `blockstorage_qos_v3` ([#1325](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1325))
+* __New Resource__: `blockstorage_qos_association_v3` ([#1331](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1331))
+* __New Data Source__: `blockstorage_quotaset_v3` ([#1319](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1319))
+* __New Data Source__: `networking_quota_v2` ([#1318](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1318))
+
+IMPROVEMENTS
+
+* Added `region` argument to `compute_aggregate_v2` resource ([#1276](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1276))
+* Fixed default `0` value in skipped arguments of `networking_quota_v2` resource ([#1316](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1316))
+* Added `tags` to `lb_loadbalancer_v2` resource ([#1301](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1301))
+* Use Otavia API for `lb_loadbalancer_v2` resource by default ([#1326](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1326))
+* Updated `images_image_v2` resource to not recreate image `on min_disk_gb`, `min_ram_mb`, `protected` attributes changes ([#1299](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1299))
+* Updated `gophercloud` to `v0.23.0` ([#1315](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1315))
+* Updated `terraform-plugin-sdk` to `v2.10.0` ([#1333](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1333))
+
+## 1.45.0 (4 November, 2021)
+
+FEATURES
+
+* __New Data Source__: `openstack_compute_quotaset_v2` ([#1302](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1302))
+
+IMPROVEMENTS
+
+* Added retries reading `dns_zone_v2` and `compute_instance_v2` state after creation in case of 502, 504 HTTP errors ([#1303](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1303))
+
+BUG FIXES
+
+* Improved removal of `networking_router_interface_v2` resource so it will delete only needed port on a router ([#1297](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1297))
+* Flagged `url` attribute of `objectstorage_tempurl_v1` resource as sensitive ([#1305](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1305))
+* Fixed not specified quota values are being set to 0 in `compute_quotaset_v2` resource ([#1304](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1304))
+
+## 1.44.0 (2 October, 2021)
+
+NOTES
+
+* This release updates major version of `terraform-plugin-sdk` from `v1` to `v2` and that caused lots of changes in the code. If you experiencing new bugs after updating the provider please create an issue with a description of how to reproduce them.
+
+FEATURES
+
+* Updated `terraform-plugin-sdk` to `v2.7.1` ([#1139](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1139))
+* Updated Go to `1.17` ([#1295](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1295))
+
+## 1.43.1 (21 September, 2021)
+
+BUG FIXES
+
+* Fixed panics when a token doesn't have a project scope ([#1282](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1282))
+
 ## 1.43.0 (16 July, 2021)
 
 FEATURES

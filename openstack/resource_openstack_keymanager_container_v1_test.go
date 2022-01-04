@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/containers"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccKeyManagerContainerV1_basic(t *testing.T) {
@@ -18,8 +19,8 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckContainerV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerContainerV1Basic(),
@@ -73,8 +74,8 @@ func TestAccKeyManagerContainerV1_acls(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSecretV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerContainerV1Acls(),
@@ -100,8 +101,8 @@ func TestAccKeyManagerContainerV1_certificate_type(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSecretV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerContainerV1CertificateType(),
@@ -125,8 +126,8 @@ func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSecretV1Destroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerContainerV1Acls(),

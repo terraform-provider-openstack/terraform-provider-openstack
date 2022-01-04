@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets"
 )
@@ -26,8 +26,8 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckDNS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2RecordSetBasic(zoneName),
@@ -65,8 +65,8 @@ func TestAccDNSV2RecordSet_ipv6(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckDNS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2RecordSetIPv6(zoneName),
@@ -94,8 +94,8 @@ func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckDNS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2RecordSetReadTTL(zoneName),
@@ -119,8 +119,8 @@ func TestAccDNSV2RecordSet_ensureSameTTL(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckDNS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2RecordSetEnsureSameTTL1(zoneName),
@@ -155,8 +155,8 @@ func TestAccDNSV2RecordSet_sudoProjectID(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckDNS(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2RecordSetSudoProjectID(zoneName),
@@ -238,9 +238,9 @@ func TestAccDNSV2RecordSet_ignoreStatusCheck(t *testing.T) {
 	zoneName := randomZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDNS(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		PreCheck:          func() { testAccPreCheckDNS(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2RecordSetDisableCheck(zoneName),

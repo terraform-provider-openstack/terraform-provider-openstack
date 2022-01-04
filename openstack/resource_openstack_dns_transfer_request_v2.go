@@ -5,10 +5,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/gophercloud/gophercloud/openstack/dns/v2/transfer/request"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/gophercloud/gophercloud/openstack/dns/v2/transfer/request"
 )
 
 func resourceDNSTransferRequestV2() *schema.Resource {

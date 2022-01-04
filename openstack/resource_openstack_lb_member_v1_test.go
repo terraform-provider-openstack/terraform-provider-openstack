@@ -4,18 +4,19 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas/members"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccLBV1Member_basic(t *testing.T) {
 	var member members.Member
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDeprecated(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV1MemberDestroy,
+		PreCheck:          func() { testAccPreCheckDeprecated(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV1MemberDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV1MemberBasic,
@@ -37,9 +38,9 @@ func TestAccLBV1Member_timeout(t *testing.T) {
 	var member members.Member
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDeprecated(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV1MemberDestroy,
+		PreCheck:          func() { testAccPreCheckDeprecated(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV1MemberDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV1MemberTimeout,

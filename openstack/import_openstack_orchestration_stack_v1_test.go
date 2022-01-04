@@ -3,7 +3,7 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccOrchestrationStackV1_importBasic(t *testing.T) {
@@ -14,8 +14,8 @@ func TestAccOrchestrationStackV1_importBasic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOrchestrationV1StackDestroy,
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckOrchestrationV1StackDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrchestrationV1StackBasic,
