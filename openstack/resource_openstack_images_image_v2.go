@@ -411,9 +411,27 @@ func resourceImagesImageV2Update(ctx context.Context, d *schema.ResourceData, me
 		updateOpts = append(updateOpts, v)
 	}
 
+	if d.HasChange("protected") {
+		protected := d.Get("protected").(bool)
+		v := images.ReplaceImageProtected{NewProtected: protected}
+		updateOpts = append(updateOpts, v)
+	}
+
 	if d.HasChange("hidden") {
 		hidden := d.Get("hidden").(bool)
 		v := images.ReplaceImageHidden{NewHidden: hidden}
+		updateOpts = append(updateOpts, v)
+	}
+
+	if d.HasChange("min_disk_gb") {
+		minDiskGb := d.Get("min_disk_gb").(int)
+		v := images.ReplaceImageMinDisk{NewMinDisk: minDiskGb}
+		updateOpts = append(updateOpts, v)
+	}
+
+	if d.HasChange("min_ram_mb") {
+		minRAMMb := d.Get("min_ram_mb").(int)
+		v := images.ReplaceImageMinRam{NewMinRam: minRAMMb}
 		updateOpts = append(updateOpts, v)
 	}
 
