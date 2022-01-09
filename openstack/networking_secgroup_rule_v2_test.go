@@ -81,7 +81,7 @@ func TestResourceNetworkingSecGroupRuleV2ProtocolString(t *testing.T) {
 		string(rules.ProtocolUDP):       rules.ProtocolUDP,
 		string(rules.ProtocolUDPLite):   rules.ProtocolUDPLite,
 		string(rules.ProtocolVRRP):      rules.ProtocolVRRP,
-		string(rules.ProtocolANY):       rules.ProtocolANY,
+		string(rules.ProtocolAny):       rules.ProtocolAny,
 	}
 
 	for name, expected := range protocols {
