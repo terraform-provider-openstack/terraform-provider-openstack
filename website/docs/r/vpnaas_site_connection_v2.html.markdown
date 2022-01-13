@@ -22,6 +22,11 @@ resource "openstack_vpnaas_site_connection_v2" "conn_1" {
   peer_address      = "192.168.10.1"
   local_ep_group_id = "${openstack_vpnaas_endpoint_group_v2.group_2.id}"
   peer_ep_group_id  = "${openstack_vpnaas_endpoint_group_v2.group_1.id}"
+  dpd {
+    action   = "restart"
+    timeout  = 42
+    interval = 21
+  }
 }
 ```
 

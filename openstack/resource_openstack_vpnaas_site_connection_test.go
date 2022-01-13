@@ -37,6 +37,9 @@ func TestAccSiteConnectionV2_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_site_connection_v2.conn_1", "local_id", &conn.LocalID),
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_site_connection_v2.conn_1", "peer_ep_group_id", &conn.PeerEPGroupID),
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_site_connection_v2.conn_1", "name", &conn.Name),
+					resource.TestCheckResourceAttrPtr("openstack_vpnaas_site_connection_v2.conn_1", "dpd.0.action", &conn.DPD.Action),
+					resource.TestCheckResourceAttr("openstack_vpnaas_site_connection_v2.conn_1", "dpd.0.timeout", strconv.Itoa(conn.DPD.Timeout)),
+					resource.TestCheckResourceAttr("openstack_vpnaas_site_connection_v2.conn_1", "dpd.0.interval", strconv.Itoa(conn.DPD.Interval)),
 				),
 			},
 		},
@@ -146,6 +149,11 @@ func testAccSiteConnectionV2Basic() string {
 		peer_id = "192.168.10.1"
 		local_ep_group_id = "${openstack_vpnaas_endpoint_group_v2.group_2.id}"
 		peer_ep_group_id = "${openstack_vpnaas_endpoint_group_v2.group_1.id}"
+		dpd {
+			action   = "restart"
+			timeout  = 42
+			interval = 21
+		}
 		depends_on = ["openstack_networking_router_interface_v2.router_interface_1"]
 	}
 	`, osExtGwID)
