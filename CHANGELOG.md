@@ -1,3 +1,13 @@
+## 1.47.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Added `host` attribute to `blockstorage_volume_v3` datasource ([#1291](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1291))
+
+BUG FIXES
+
+* Fixed `lb_members_v2` documentation ([#1340](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1340))
+
 ## 1.46.0 (18 December, 2021)
 
 FEATURES
