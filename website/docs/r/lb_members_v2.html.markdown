@@ -69,7 +69,7 @@ The `member` block supports:
 * `admin_state_up` - (Optional) The administrative state of the member.
   A valid value is true (UP) or false (DOWN). Defaults to true.
 
-* `backup` - (Optional) A bool that indicates whether the the member is
+* `backup` - (Optional) A bool that indicates whether the member is
   backup. **Requires octavia minor version 2.1 or later**.
 
 ## Attributes Reference
