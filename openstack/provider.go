@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	"github.com/hashicorp/terraform/helper/logging"
 
 	"github.com/gophercloud/utils/terraform/auth"
 	"github.com/gophercloud/utils/terraform/mutexkv"
