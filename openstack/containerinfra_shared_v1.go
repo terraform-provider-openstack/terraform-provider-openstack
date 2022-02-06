@@ -169,10 +169,10 @@ type kubernetesConfigUserData struct {
 	ClientCertificateData string `yaml:"client-certificate-data"`
 }
 
-func flattenContainerInfraV1Kubeconfig(d *schema.ResourceData, containerInfraClient *gophercloud.ServiceClient) (map[string]string, error) {
+func flattenContainerInfraV1Kubeconfig(d *schema.ResourceData, containerInfraClient *gophercloud.ServiceClient) (map[string]interface{}, error) {
 	clientSert, ok := d.Get("kubeconfig.client_certificate").(string)
 	if ok && clientSert != "" {
-		return d.Get("kubeconfig").(map[string]string), nil
+		return d.Get("kubeconfig").(map[string]interface{}), nil
 	}
 
 	certificateAuthority, err := certificates.Get(containerInfraClient, d.Id()).Extract()
@@ -231,7 +231,7 @@ func flattenContainerInfraV1Kubeconfig(d *schema.ResourceData, containerInfraCli
 		return nil, fmt.Errorf("Error rendering kubeconfig: %s", err)
 	}
 
-	return map[string]string{
+	return map[string]interface{}{
 		"raw_config":             string(rawKubeconfig),
 		"host":                   host,
 		"cluster_ca_certificate": certificateAuthority.PEM,
