@@ -7,6 +7,7 @@ IMPROVEMENTS
 BUG FIXES
 
 * Fixed `lb_members_v2` documentation ([#1340](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1340))
+* Added missing environent variables from documentation ([#1348](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1348))
 
 ## 1.46.0 (18 December, 2021)
 
