@@ -61,7 +61,7 @@ func resourcePoolV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"TCP", "UDP", "HTTP", "HTTPS", "PROXY", "SCTP", "PROXYv2",
+					"TCP", "UDP", "HTTP", "HTTPS", "PROXY", "SCTP", "PROXYV2",
 				}, false),
 			},
 
