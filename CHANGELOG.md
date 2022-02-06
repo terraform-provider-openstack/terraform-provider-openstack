@@ -4,6 +4,7 @@ IMPROVEMENTS
 
 * Added `host` attribute to `blockstorage_volume_v3` datasource ([#1291](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1291))
 * Added possibility to update `protected`, `min_disk_gb`, `min_ram_mb` arguments of `image_v2` resource ([#1341](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1341))
+* Added `enable_logging` flag into provider configuration that sets the same behaviour as `OS_DEBUG` env variable ([#1246](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1246))
 
 BUG FIXES
 
