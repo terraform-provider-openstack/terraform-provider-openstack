@@ -12,6 +12,7 @@ BUG FIXES
 * Fixed `lb_members_v2` documentation ([#1340](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1340))
 * Added missing environent variables from documentation ([#1348](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1348))
 * Fixed `PROXYV2` protocol validation in `lb_pool_v2` resource ([#1346](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1346))
+* Fixed provider panics on `containerinfra_cluster_v1` resource ([#1308](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1308))
 
 ## 1.46.0 (18 December, 2021)
 
