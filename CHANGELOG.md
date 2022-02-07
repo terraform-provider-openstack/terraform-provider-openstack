@@ -1,4 +1,4 @@
-## 1.47.0 (Unreleased)
+## 1.47.0 (7 February, 2022)
 
 IMPROVEMENTS
 
