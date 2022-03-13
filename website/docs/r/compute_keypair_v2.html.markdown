@@ -53,6 +53,10 @@ The following arguments are supported:
     created, then destroying this resource means you will lose access to that
     keypair forever.
 
+* `user_id` - (Optional) This allows administrative users to operate key-pairs
+    of specified user ID. For this feature your need to have openstack microversion
+    2.10 (Liberty) or later.
+
 * `value_specs` - (Optional) Map of additional options.
 
 ## Attributes Reference

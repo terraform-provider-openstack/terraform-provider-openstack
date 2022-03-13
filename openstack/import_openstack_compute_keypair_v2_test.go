@@ -25,7 +25,7 @@ func TestAccComputeV2Keypair_importBasic(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"private_key"},
+				ImportStateVerifyIgnore: []string{"private_key", "user_id"},
 			},
 		},
 	})
