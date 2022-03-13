@@ -1,3 +1,9 @@
+## 1.48.0 (Unreleased)
+
+IMPROVEMENTS
+
+* Added `user_id` argument to `compute_keypair_v2` resource ([#1349](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1349))
+
 ## 1.47.0 (7 February, 2022)
 
 IMPROVEMENTS
