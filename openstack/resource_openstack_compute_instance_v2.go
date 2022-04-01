@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -434,6 +435,16 @@ func resourceComputeInstanceV2() *schema.Resource {
 				},
 			},
 		},
+		CustomizeDiff: customdiff.All(
+			// OpenStack cannot resize an instance, if its original flavor is deleted, that is why
+			// we need to force recreation, if old flavor name or ID is reported as an empty string
+			customdiff.ForceNewIfChange("flavor_id", func(ctx context.Context, old, new, meta interface{}) bool {
+				return old.(string) == ""
+			}),
+			customdiff.ForceNewIfChange("flavor_name", func(ctx context.Context, old, new, meta interface{}) bool {
+				return old.(string) == ""
+			}),
+		),
 	}
 }
 
@@ -697,18 +708,28 @@ func resourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, me
 	}
 	d.Set("security_groups", secGrpNames)
 
+	d.Set("key_pair", server.KeyName)
+
 	flavorID, ok := server.Flavor["id"].(string)
 	if !ok {
 		return diag.Errorf("Error setting OpenStack server's flavor: %v", server.Flavor)
 	}
 	d.Set("flavor_id", flavorID)
 
-	d.Set("key_pair", server.KeyName)
 	flavor, err := flavors.Get(computeClient, flavorID).Extract()
 	if err != nil {
-		return diag.FromErr(err)
+		if _, ok := err.(gophercloud.ErrDefault404); ok {
+			// Original flavor was deleted, but it is possible that instance started
+			// with this flavor is still running
+			log.Printf("[DEBUG] Original instance flavor id %s could not be found", d.Id())
+			d.Set("flavor_id", "")
+			d.Set("flavor_name", "")
+		} else {
+			return diag.FromErr(err)
+		}
+	} else {
+		d.Set("flavor_name", flavor.Name)
 	}
-	d.Set("flavor_name", flavor.Name)
 
 	// Set the instance's image information appropriately
 	if err := setImageInformation(computeClient, server, d); err != nil {
