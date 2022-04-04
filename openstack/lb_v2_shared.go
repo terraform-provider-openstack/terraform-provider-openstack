@@ -1090,14 +1090,16 @@ func flattenLBMembersV2(members []octaviapools.Member) []map[string]interface{} 
 
 	for i, member := range members {
 		m[i] = map[string]interface{}{
-			"name":           member.Name,
-			"weight":         member.Weight,
-			"admin_state_up": member.AdminStateUp,
-			"subnet_id":      member.SubnetID,
-			"address":        member.Address,
-			"protocol_port":  member.ProtocolPort,
-			"id":             member.ID,
-			"backup":         member.Backup,
+			"name":            member.Name,
+			"weight":          member.Weight,
+			"admin_state_up":  member.AdminStateUp,
+			"subnet_id":       member.SubnetID,
+			"address":         member.Address,
+			"protocol_port":   member.ProtocolPort,
+			"monitor_port":    member.MonitorPort,
+			"monitor_address": member.MonitorAddress,
+			"id":              member.ID,
+			"backup":          member.Backup,
 		}
 	}
 
@@ -1113,15 +1115,19 @@ func expandLBMembersV2(members *schema.Set, lbClient *gophercloud.ServiceClient)
 			name := rawMap["name"].(string)
 			subnetID := rawMap["subnet_id"].(string)
 			weight := rawMap["weight"].(int)
+			monitor_port := rawMap["monitor_port"].(int)
+			monitor_address := rawMap["monitor_address"].(string)
 			adminStateUp := rawMap["admin_state_up"].(bool)
 
 			member := octaviapools.BatchUpdateMemberOpts{
-				Address:      rawMap["address"].(string),
-				ProtocolPort: rawMap["protocol_port"].(int),
-				Name:         &name,
-				SubnetID:     &subnetID,
-				Weight:       &weight,
-				AdminStateUp: &adminStateUp,
+				Address:        rawMap["address"].(string),
+				ProtocolPort:   rawMap["protocol_port"].(int),
+				Name:           &name,
+				SubnetID:       &subnetID,
+				Weight:         &weight,
+				MonitorPort:    &monitor_port,
+				MonitorAddress: &monitor_address,
+				AdminStateUp:   &adminStateUp,
 			}
 
 			// backup requires octavia minor version 2.1. Only set when specified

@@ -78,6 +78,17 @@ func resourceMembersV2() *schema.Resource {
 							ValidateFunc: validation.IntBetween(0, 256),
 						},
 
+						"monitor_port": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ValidateFunc: validation.IntBetween(1, 65535),
+						},
+
+						"monitor_address": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+
 						"subnet_id": {
 							Type:     schema.TypeString,
 							Optional: true,
