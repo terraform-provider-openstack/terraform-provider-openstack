@@ -19,11 +19,14 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/certificates"
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clustertemplates"
+	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/nodegroups"
 )
 
 const (
 	rsaPrivateKeyBlockType      = "RSA PRIVATE KEY"
 	certificateRequestBlockType = "CERTIFICATE REQUEST"
+
+	containerInfraV1NodeGroupMinMicroversion = "1.9"
 )
 
 func expandContainerInfraV1LabelsMap(v map[string]interface{}) (map[string]string, error) {
@@ -71,6 +74,22 @@ func containerInfraClusterTemplateV1AppendUpdateOpts(updateOpts []clustertemplat
 	return updateOpts
 }
 
+func containerInfraNodeGroupV1AppendUpdateOpts(updateOpts []nodegroups.UpdateOptsBuilder, attribute, value string) []nodegroups.UpdateOptsBuilder {
+	if value == "" {
+		updateOpts = append(updateOpts, nodegroups.UpdateOpts{
+			Op:   nodegroups.RemoveOp,
+			Path: strings.Join([]string{"/", attribute}, ""),
+		})
+	} else {
+		updateOpts = append(updateOpts, nodegroups.UpdateOpts{
+			Op:    nodegroups.ReplaceOp,
+			Path:  strings.Join([]string{"/", attribute}, ""),
+			Value: value,
+		})
+	}
+	return updateOpts
+}
+
 // ContainerInfraClusterV1StateRefreshFunc returns a resource.StateRefreshFunc
 // that is used to watch a container infra Cluster.
 func containerInfraClusterV1StateRefreshFunc(client *gophercloud.ServiceClient, clusterID string) resource.StateRefreshFunc {
@@ -98,6 +117,36 @@ func containerInfraClusterV1StateRefreshFunc(client *gophercloud.ServiceClient, 
 		}
 
 		return c, c.Status, nil
+	}
+}
+
+// ContainerInfraNodeGroupV1StateRefreshFunc returns a resource.StateRefreshFunc
+// that is used to watch a container infra NodeGroup.
+func containerInfraNodeGroupV1StateRefreshFunc(client *gophercloud.ServiceClient, clusterId string, nodeGroupId string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		nodeGroup, err := nodegroups.Get(client, clusterId, nodeGroupId).Extract()
+		if err != nil {
+			if _, ok := err.(gophercloud.ErrDefault404); ok {
+				return nodeGroup, "DELETE_COMPLETE", nil
+			}
+			return nil, "", err
+		}
+
+		errorStatuses := []string{
+			"CREATE_FAILED",
+			"UPDATE_FAILED",
+			"DELETE_FAILED",
+			"RESUME_FAILED",
+			"ROLLBACK_FAILED",
+		}
+		for _, errorStatus := range errorStatuses {
+			if nodeGroup.Status == errorStatus {
+				err = fmt.Errorf("openstack_containerinfra_nodegroup_v1 is in an error state: %s", nodeGroup.StatusReason)
+				return nodeGroup, nodeGroup.Status, err
+			}
+		}
+
+		return nodeGroup, nodeGroup.Status, nil
 	}
 }
 
