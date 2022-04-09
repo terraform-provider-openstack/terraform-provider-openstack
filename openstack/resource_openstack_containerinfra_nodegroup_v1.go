@@ -91,7 +91,7 @@ func resourceContainerInfraNodeGroupV1() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
-				Computed: true,
+				Default:  1,
 			},
 
 			"min_node_count": {
@@ -156,8 +156,12 @@ func resourceContainerInfraNodeGroupV1Create(ctx context.Context, d *schema.Reso
 		createOpts.DockerVolumeSize = &dockerVolumeSize
 	}
 	nodeCount := d.Get("node_count").(int)
-	if nodeCount > 0 {
+	if nodeCount >= 0 {
 		createOpts.NodeCount = &nodeCount
+		if nodeCount == 0 {
+			containerInfraClient.Microversion = containerInfraV1ZeroNodeCountMicroversion
+
+		}
 	}
 	maxNodeCount := d.Get("max_node_count").(int)
 	if maxNodeCount > 0 {
