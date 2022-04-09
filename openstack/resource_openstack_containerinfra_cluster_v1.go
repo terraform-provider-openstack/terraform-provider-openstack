@@ -160,7 +160,7 @@ func resourceContainerInfraClusterV1() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
+				Default:  1,
 			},
 
 			"master_addresses": {
@@ -274,8 +274,11 @@ func resourceContainerInfraClusterV1Create(ctx context.Context, d *schema.Resour
 	}
 
 	nodeCount := d.Get("node_count").(int)
-	if nodeCount > 0 {
+	if nodeCount >= 0 {
 		createOpts.NodeCount = &nodeCount
+		if nodeCount == 0 {
+			containerInfraClient.Microversion = containerInfraV1ZeroNodeCountMicroversion
+		}
 	}
 
 	mergeLabels := d.Get("merge_labels").(bool)
