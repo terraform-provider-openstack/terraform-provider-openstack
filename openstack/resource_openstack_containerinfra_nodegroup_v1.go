@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/nodegroups"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -90,7 +91,6 @@ func resourceContainerInfraNodeGroupV1() *schema.Resource {
 			"node_count": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				ForceNew: true,
 				Default:  1,
 			},
 
@@ -281,6 +281,19 @@ func resourceContainerInfraNodeGroupV1Update(ctx context.Context, d *schema.Reso
 		_, err = nodegroups.Update(containerInfraClient, clusterId, nodeGroupId, updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_containerinfra_nodegroup_v1 %s: %s", d.Id(), err)
+		}
+	}
+
+	if d.HasChange("node_count") {
+		v := d.Get("node_count").(int)
+		var resizeOpts clusters.ResizeOptsBuilder
+		resizeOpts = clusters.ResizeOpts{
+			NodeCount: &v,
+			NodeGroup: nodeGroupId,
+		}
+		_, err = clusters.Resize(containerInfraClient, clusterId, resizeOpts).Extract()
+		if err != nil {
+			return diag.Errorf("Error resizing openstack_containerinfra_nodegroup_v1 %s: %s", d.Id(), err)
 		}
 
 		stateConf := &resource.StateChangeConf{
