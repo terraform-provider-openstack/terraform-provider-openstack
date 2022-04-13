@@ -67,13 +67,11 @@ func resourceComputeInstanceV2() *schema.Resource {
 			"image_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 				Computed: true,
 			},
 			"image_name": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 				Computed: true,
 			},
 			"flavor_id": {
@@ -367,7 +365,6 @@ func resourceComputeInstanceV2() *schema.Resource {
 			"personality": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"file": {
@@ -1013,6 +1010,53 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			if err != nil {
 				return diag.Errorf("Error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
 			}
+		}
+	}
+
+	if d.HasChange("image_id") || d.HasChange("image_name") || d.HasChange("personality") {
+		var newImageID string
+		imageClient, err := config.ImageV2Client(GetRegion(d, config))
+		if err != nil {
+			return diag.Errorf("Error creating OpenStack image client: %s", err)
+		}
+
+		if d.HasChange("image_id") {
+			newImageID = d.Get("image_id").(string)
+		} else if d.HasChange("image_name") {
+			newImageName := d.Get("image_name").(string)
+			newImageID, err = imagesutils.IDFromName(computeClient, newImageName)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		} else {
+			newImageID, err = getImageIDFromConfig(imageClient, d)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+
+		var rebuildOpts servers.RebuildOptsBuilder
+		rebuildOpts = &servers.RebuildOpts{
+			ImageRef:    newImageID,
+			Personality: resourceInstancePersonalityV2(d),
+		}
+
+		log.Printf("[DEBUG] Rebuild configuration: %#v", rebuildOpts)
+		_, err = servers.Rebuild(computeClient, d.Id(), rebuildOpts).Extract()
+		if err != nil {
+			return diag.Errorf("Error rebuilding OpenStack server: %s", err)
+		}
+		stateConf := &resource.StateChangeConf{
+			Pending:    []string{"REBUILD"},
+			Target:     []string{"ACTIVE", "SHUTOFF"},
+			Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+			Timeout:    d.Timeout(schema.TimeoutUpdate),
+			Delay:      10 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
+		_, err = stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return diag.Errorf("Error waiting for instance (%s) to rebuild: %s", d.Id(), err)
 		}
 	}
 
