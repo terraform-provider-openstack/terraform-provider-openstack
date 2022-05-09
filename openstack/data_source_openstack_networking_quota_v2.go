@@ -14,10 +14,11 @@ import (
 func dataSourceNetworkingQuotaV2() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceNetworkingQuotaV2Read,
+
 		Schema: map[string]*schema.Schema{
 			"region": {
-				Type: schema.TypeString,
-
+				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
@@ -96,7 +97,7 @@ func dataSourceNetworkingQuotaV2Read(ctx context.Context, d *schema.ResourceData
 	id := fmt.Sprintf("%s/%s", projectID, region)
 	d.SetId(id)
 	d.Set("project_id", projectID)
-	d.Set("region", region)
+	d.Set("region", GetRegion(d, config))
 	d.Set("floatingip", q.FloatingIP)
 	d.Set("network", q.Network)
 	d.Set("port", q.Port)
