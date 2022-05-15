@@ -3,6 +3,14 @@
 IMPROVEMENTS
 
 * Added `user_id` argument to `compute_keypair_v2` resource ([#1349](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1349))
+* Updated `gophercloud` to `v0.24.0` ([#1378](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1378))
+* Updated `terraform-plugin-sdk` to `v2.16.0` ([#1378](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1378))
+
+BUG FIXES
+
+* Fixed panic on ignored error from `net.ParseCIDR(cidr)` ([#1377](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1377))
+* Fixed required `region` attribute on `networking_quota_v2` datasource ([#1374](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1374))
+* Fixed not setting `properties` on `images_image_v2` datasource ([#1370](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1370))
 
 ## 1.47.0 (7 February, 2022)
 
