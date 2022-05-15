@@ -270,7 +270,10 @@ func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceDat
 	// Set CIDR if provided. Check if inferred subnet would match the provided cidr.
 	if v, ok := d.GetOk("cidr"); ok {
 		cidr := v.(string)
-		_, netAddr, _ := net.ParseCIDR(cidr)
+		_, netAddr, err := net.ParseCIDR(cidr)
+		if err != nil {
+			return diag.Errorf("Invalid CIDR %s: %s", cidr, err)
+		}
 		if netAddr.String() != cidr {
 			return diag.Errorf("cidr %s doesn't match subnet address %s for openstack_networking_subnet_v2", cidr, netAddr.String())
 		}
