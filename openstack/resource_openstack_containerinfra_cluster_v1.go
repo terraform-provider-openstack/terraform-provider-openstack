@@ -327,7 +327,11 @@ func resourceContainerInfraClusterV1Read(_ context.Context, d *schema.ResourceDa
 
 	log.Printf("[DEBUG] Retrieved openstack_containerinfra_cluster_v1 %s: %#v", d.Id(), s)
 
-	if err := d.Set("labels", s.Labels); err != nil {
+	labels := s.Labels
+	if d.Get("merge_labels").(bool) {
+		labels = containerInfraV1GetLabelsMerged(s.LabelsAdded, s.LabelsSkipped, s.LabelsOverridden, s.Labels)
+	}
+	if err := d.Set("labels", labels); err != nil {
 		return diag.Errorf("Unable to set openstack_containerinfra_cluster_v1 labels: %s", err)
 	}
 

@@ -59,6 +59,21 @@ func expandContainerInfraV1LabelsString(v map[string]interface{}) (string, error
 	return formattedLabels, nil
 }
 
+func containerInfraV1GetLabelsMerged(labelsAdded map[string]string, labelsSkipped map[string]string, labelsOverriden map[string]string, labels map[string]string) map[string]string {
+	m := make(map[string]string)
+	for key, val := range labelsAdded {
+		m[key] = val
+	}
+	for key, val := range labelsSkipped {
+		m[key] = val
+	}
+	for key, _ := range labelsOverriden {
+		// We have to get the actual value here, not the one overriden
+		m[key] = labels[key]
+	}
+	return m
+}
+
 func containerInfraClusterTemplateV1AppendUpdateOpts(updateOpts []clustertemplates.UpdateOptsBuilder, attribute, value string) []clustertemplates.UpdateOptsBuilder {
 	if value == "" {
 		updateOpts = append(updateOpts, clustertemplates.UpdateOpts{
