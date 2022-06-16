@@ -82,6 +82,12 @@ func resourceContainerInfraNodeGroupV1() *schema.Resource {
 				Computed: true,
 			},
 
+			"merge_labels": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			"role": {
 				Type:     schema.TypeString,
 				ForceNew: true,
@@ -168,6 +174,11 @@ func resourceContainerInfraNodeGroupV1Create(ctx context.Context, d *schema.Reso
 		createOpts.MaxNodeCount = &maxNodeCount
 	}
 
+	mergeLabels := d.Get("merge_labels").(bool)
+	if mergeLabels {
+		createOpts.MergeLabels = &mergeLabels
+	}
+
 	log.Printf("[DEBUG] openstack_containerinfra_nodegroup_v1 create options: %#v", createOpts)
 
 	clusterId := d.Get("cluster_id").(string)
@@ -219,8 +230,12 @@ func resourceContainerInfraNodeGroupV1Read(_ context.Context, d *schema.Resource
 
 	log.Printf("[DEBUG] Retrieved openstack_containerinfra_nodegroup_v1 %s: %#v", d.Id(), nodeGroup)
 
-	if err := d.Set("labels", nodeGroup.Labels); err != nil {
-		return diag.Errorf("Unable to set labels: %s", err)
+	labels := nodeGroup.Labels
+	if d.Get("merge_labels").(bool) {
+		labels = containerInfraV1GetLabelsMerged(nodeGroup.LabelsAdded, nodeGroup.LabelsSkipped, nodeGroup.LabelsOverridden, nodeGroup.Labels)
+	}
+	if err := d.Set("labels", labels); err != nil {
+		return diag.Errorf("Unable to set openstack_containerinfra_nodegroup_v1 labels: %s", err)
 	}
 
 	d.Set("cluster_id", clusterId)

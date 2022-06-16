@@ -55,6 +55,9 @@ The following arguments are supported:
 * `labels` - (Optional) The list of key value pairs representing additional
     properties of the node group. Changing this creates a new node group.
 
+* `merge_labels` - (Optional) Indicates whether the provided labels should be
+    merged with cluster labels. Changing this creates a new nodegroup.
+
 * `node_count` - (Optional) The number of nodes for the node group. Changing
     this update the number of nodes of the node group.
 
