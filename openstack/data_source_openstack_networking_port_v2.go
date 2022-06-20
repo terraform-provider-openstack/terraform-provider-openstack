@@ -73,9 +73,22 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 			},
 
 			"fixed_ip": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.IsIPAddress,
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: false,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"subnet_id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"ip_address": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
 			},
 
 			"status": {
@@ -350,6 +363,7 @@ func dataSourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData,
 	d.Set("all_tags", port.Tags)
 	d.Set("all_security_group_ids", port.SecurityGroups)
 	d.Set("all_fixed_ips", expandNetworkingPortFixedIPToStringSlice(port.FixedIPs))
+	d.Set("fixed_ip", formatFixedIpsToSubnetIdsAndIPs(port.FixedIPs))
 	d.Set("allowed_address_pairs", flattenNetworkingPortAllowedAddressPairsV2(port.MACAddress, port.AllowedAddressPairs))
 	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDHCPOptsExt))
 	d.Set("binding", flattenNetworkingPortBindingV2(port))

@@ -113,6 +113,7 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Type:          schema.TypeList,
 				Optional:      true,
 				ForceNew:      false,
+				Computed:      true,
 				ConflictsWith: []string{"no_fixed_ip"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -464,6 +465,7 @@ func resourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData, m
 	// This will be in the order returned by the API,
 	// which is usually alpha-numeric.
 	d.Set("all_fixed_ips", expandNetworkingPortFixedIPToStringSlice(port.FixedIPs))
+	d.Set("fixed_ip", formatFixedIpsToSubnetIdsAndIPs(port.FixedIPs))
 
 	// Set all security groups.
 	// This can be different from what the user specified since
