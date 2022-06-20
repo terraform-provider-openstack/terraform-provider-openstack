@@ -18,7 +18,7 @@ func TestAccBlockStorageV3AvailabilityZonesV3_basic(t *testing.T) {
 			{
 				Config: testAccBlockStorageV3AvailabilityZonesConfig,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr("data.openstack_blockstorage_availability_zones_v3.zones", "names.#", regexp.MustCompile("[1-9]\\d*")),
+					resource.TestMatchResourceAttr("data.openstack_blockstorage_availability_zones_v3.zones", "names.#", regexp.MustCompile(`[1-9]\d*`)),
 				),
 			},
 		},

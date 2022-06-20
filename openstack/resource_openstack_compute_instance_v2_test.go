@@ -1485,23 +1485,22 @@ resource "openstack_compute_instance_v2" "instance_1" {
 }
 
 func testAccComputeV2InstanceNetworkModeAuto() string {
-	return fmt.Sprintf(`
-resource "openstack_compute_instance_v2" "instance_1" {
+	return `resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
 
   network_mode = "auto"
 }
-`)
+`
 }
 
 func testAccComputeV2InstanceNetworkModeNone() string {
-	return fmt.Sprintf(`
+	return `
 resource "openstack_compute_instance_v2" "instance_1" {
   name = "test-instance-1"
 
   network_mode = "none"
 }
-`)
+`
 }
 
 func testAccComputeV2InstanceNetworkNameToID() string {

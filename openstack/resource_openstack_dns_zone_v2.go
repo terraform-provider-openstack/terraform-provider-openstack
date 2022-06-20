@@ -167,7 +167,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 		MinTimeout: 3 * time.Second,
 	}
 
-	err = resource.Retry(stateConf.Timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, stateConf.Timeout, func() *resource.RetryError {
 		_, err = stateConf.WaitForState()
 		if err != nil {
 			log.Printf("[DEBUG] Retrying after error: %s", err)

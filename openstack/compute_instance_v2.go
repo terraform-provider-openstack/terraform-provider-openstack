@@ -364,7 +364,7 @@ func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses 
 	}
 
 	for _, networkName := range networkNames {
-		v, _ := addresses[networkName]
+		v := addresses[networkName]
 		instanceAddresses := InstanceAddresses{
 			NetworkName: networkName,
 		}

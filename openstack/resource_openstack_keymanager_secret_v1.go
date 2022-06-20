@@ -100,10 +100,7 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 				ForceNew:  true,
 				Computed:  true,
 				DiffSuppressFunc: func(k, o, n string, d *schema.ResourceData) bool {
-					if strings.TrimSpace(o) == strings.TrimSpace(n) {
-						return true
-					}
-					return false
+					return strings.TrimSpace(o) == strings.TrimSpace(n)
 				},
 			},
 
@@ -262,8 +259,7 @@ func resourceKeyManagerSecretV1Create(ctx context.Context, d *schema.ResourceDat
 	}
 
 	// set the metadata
-	var metadataCreateOpts secrets.MetadataOpts
-	metadataCreateOpts = flattenKeyManagerSecretV1Metadata(d)
+	var metadataCreateOpts secrets.MetadataOpts = flattenKeyManagerSecretV1Metadata(d)
 
 	log.Printf("[DEBUG] Metadata Create Options for resource_keymanager_secret_metadata_v1 %s: %#v", uuid, metadataCreateOpts)
 
@@ -321,7 +317,7 @@ func resourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceData,
 	d.Set("content_types", secret.ContentTypes)
 
 	// don't fail, if the default key doesn't exist
-	payloadContentType, _ := secret.ContentTypes["default"]
+	payloadContentType := secret.ContentTypes["default"]
 	d.Set("payload_content_type", payloadContentType)
 
 	d.Set("payload", keyManagerSecretV1GetPayload(kmClient, d.Id()))

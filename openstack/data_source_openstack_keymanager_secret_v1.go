@@ -230,7 +230,7 @@ func dataSourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceDat
 	d.Set("content_types", secret.ContentTypes)
 
 	// don't fail, if the default key doesn't exist
-	payloadContentType, _ := secret.ContentTypes["default"]
+	payloadContentType := secret.ContentTypes["default"]
 	d.Set("payload_content_type", payloadContentType)
 
 	d.Set("payload", keyManagerSecretV1GetPayload(kmClient, d.Id()))

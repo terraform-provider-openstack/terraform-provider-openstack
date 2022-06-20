@@ -173,8 +173,7 @@ func resourceEndpointGroupV2Update(ctx context.Context, d *schema.ResourceData, 
 		hasChange = true
 	}
 
-	var updateOpts endpointgroups.UpdateOptsBuilder
-	updateOpts = opts
+	var updateOpts endpointgroups.UpdateOptsBuilder = opts
 
 	log.Printf("[DEBUG] Updating endpoint group with id %s: %#v", d.Id(), updateOpts)
 
