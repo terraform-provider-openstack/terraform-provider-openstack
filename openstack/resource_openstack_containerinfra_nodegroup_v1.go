@@ -8,11 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
-	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/nodegroups"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
+	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/nodegroups"
 )
 
 func resourceContainerInfraNodeGroupV1() *schema.Resource {
@@ -166,7 +167,6 @@ func resourceContainerInfraNodeGroupV1Create(ctx context.Context, d *schema.Reso
 		createOpts.NodeCount = &nodeCount
 		if nodeCount == 0 {
 			containerInfraClient.Microversion = containerInfraV1ZeroNodeCountMicroversion
-
 		}
 	}
 	maxNodeCount := d.Get("max_node_count").(int)
@@ -181,19 +181,19 @@ func resourceContainerInfraNodeGroupV1Create(ctx context.Context, d *schema.Reso
 
 	log.Printf("[DEBUG] openstack_containerinfra_nodegroup_v1 create options: %#v", createOpts)
 
-	clusterId := d.Get("cluster_id").(string)
-	nodeGroup, err := nodegroups.Create(containerInfraClient, clusterId, createOpts).Extract()
+	clusterID := d.Get("cluster_id").(string)
+	nodeGroup, err := nodegroups.Create(containerInfraClient, clusterID, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_containerinfra_nodegroup_v1: %s", err)
 	}
 
-	id := fmt.Sprintf("%s/%s", clusterId, nodeGroup.UUID)
+	id := fmt.Sprintf("%s/%s", clusterID, nodeGroup.UUID)
 	d.SetId(id)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:      []string{"CREATE_IN_PROGRESS"},
 		Target:       []string{"CREATE_COMPLETE"},
-		Refresh:      containerInfraNodeGroupV1StateRefreshFunc(containerInfraClient, clusterId, nodeGroup.UUID),
+		Refresh:      containerInfraNodeGroupV1StateRefreshFunc(containerInfraClient, clusterID, nodeGroup.UUID),
 		Timeout:      d.Timeout(schema.TimeoutCreate),
 		Delay:        1 * time.Minute,
 		PollInterval: 20 * time.Second,
@@ -218,12 +218,12 @@ func resourceContainerInfraNodeGroupV1Read(_ context.Context, d *schema.Resource
 
 	containerInfraClient.Microversion = containerInfraV1NodeGroupMinMicroversion
 
-	clusterId, nodeGroupId, err := parseNodeGroupID(d.Id())
+	clusterID, nodeGroupID, err := parseNodeGroupID(d.Id())
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error parsing ID of openstack_containerinfra_nodegroup_v1"))
 	}
 
-	nodeGroup, err := nodegroups.Get(containerInfraClient, clusterId, nodeGroupId).Extract()
+	nodeGroup, err := nodegroups.Get(containerInfraClient, clusterID, nodeGroupID).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_containerinfra_nodegroup_v1"))
 	}
@@ -238,7 +238,7 @@ func resourceContainerInfraNodeGroupV1Read(_ context.Context, d *schema.Resource
 		return diag.Errorf("Unable to set openstack_containerinfra_nodegroup_v1 labels: %s", err)
 	}
 
-	d.Set("cluster_id", clusterId)
+	d.Set("cluster_id", clusterID)
 	d.Set("region", GetRegion(d, config))
 	d.Set("name", nodeGroup.Name)
 	d.Set("project_id", nodeGroup.ProjectID)
@@ -268,7 +268,7 @@ func resourceContainerInfraNodeGroupV1Update(ctx context.Context, d *schema.Reso
 
 	containerInfraClient.Microversion = containerInfraV1NodeGroupMinMicroversion
 
-	clusterId, nodeGroupId, err := parseNodeGroupID(d.Id())
+	clusterID, nodeGroupID, err := parseNodeGroupID(d.Id())
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error parsing ID of openstack_containerinfra_nodegroup_v1"))
 	}
@@ -293,7 +293,7 @@ func resourceContainerInfraNodeGroupV1Update(ctx context.Context, d *schema.Reso
 		log.Printf(
 			"[DEBUG] Updating openstack_containerinfra_nodegroup_v1 %s with options: %#v", d.Id(), updateOpts)
 
-		_, err = nodegroups.Update(containerInfraClient, clusterId, nodeGroupId, updateOpts).Extract()
+		_, err = nodegroups.Update(containerInfraClient, clusterID, nodeGroupID, updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_containerinfra_nodegroup_v1 %s: %s", d.Id(), err)
 		}
@@ -301,12 +301,11 @@ func resourceContainerInfraNodeGroupV1Update(ctx context.Context, d *schema.Reso
 
 	if d.HasChange("node_count") {
 		v := d.Get("node_count").(int)
-		var resizeOpts clusters.ResizeOptsBuilder
-		resizeOpts = clusters.ResizeOpts{
+		var resizeOpts = clusters.ResizeOpts{
 			NodeCount: &v,
-			NodeGroup: nodeGroupId,
+			NodeGroup: nodeGroupID,
 		}
-		_, err = clusters.Resize(containerInfraClient, clusterId, resizeOpts).Extract()
+		_, err = clusters.Resize(containerInfraClient, clusterID, resizeOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error resizing openstack_containerinfra_nodegroup_v1 %s: %s", d.Id(), err)
 		}
@@ -314,7 +313,7 @@ func resourceContainerInfraNodeGroupV1Update(ctx context.Context, d *schema.Reso
 		stateConf := &resource.StateChangeConf{
 			Pending:      []string{"UPDATE_IN_PROGRESS"},
 			Target:       []string{"UPDATE_COMPLETE"},
-			Refresh:      containerInfraNodeGroupV1StateRefreshFunc(containerInfraClient, clusterId, nodeGroupId),
+			Refresh:      containerInfraNodeGroupV1StateRefreshFunc(containerInfraClient, clusterID, nodeGroupID),
 			Timeout:      d.Timeout(schema.TimeoutUpdate),
 			Delay:        1 * time.Minute,
 			PollInterval: 20 * time.Second,
@@ -337,19 +336,19 @@ func resourceContainerInfraNodeGroupV1Delete(ctx context.Context, d *schema.Reso
 
 	containerInfraClient.Microversion = containerInfraV1NodeGroupMinMicroversion
 
-	clusterId, nodeGroupId, err := parseNodeGroupID(d.Id())
+	clusterID, nodeGroupID, err := parseNodeGroupID(d.Id())
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error parsing ID of openstack_containerinfra_nodegroup_v1"))
 	}
 
-	if err := nodegroups.Delete(containerInfraClient, clusterId, nodeGroupId).ExtractErr(); err != nil {
+	if err := nodegroups.Delete(containerInfraClient, clusterID, nodeGroupID).ExtractErr(); err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_containerinfra_nodegroup_v1"))
 	}
 
 	stateConf := &resource.StateChangeConf{
 		Pending:      []string{"DELETE_IN_PROGRESS"},
 		Target:       []string{"DELETE_COMPLETE"},
-		Refresh:      containerInfraNodeGroupV1StateRefreshFunc(containerInfraClient, clusterId, nodeGroupId),
+		Refresh:      containerInfraNodeGroupV1StateRefreshFunc(containerInfraClient, clusterID, nodeGroupID),
 		Timeout:      d.Timeout(schema.TimeoutDelete),
 		Delay:        30 * time.Second,
 		PollInterval: 10 * time.Second,

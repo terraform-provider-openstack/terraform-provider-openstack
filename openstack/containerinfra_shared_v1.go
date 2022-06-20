@@ -59,7 +59,7 @@ func expandContainerInfraV1LabelsString(v map[string]interface{}) (string, error
 	return formattedLabels, nil
 }
 
-func containerInfraV1GetLabelsMerged(labelsAdded map[string]string, labelsSkipped map[string]string, labelsOverriden map[string]string, labels map[string]string) map[string]string {
+func containerInfraV1GetLabelsMerged(labelsAdded map[string]string, labelsSkipped map[string]string, labelsOverridden map[string]string, labels map[string]string) map[string]string {
 	m := make(map[string]string)
 	for key, val := range labelsAdded {
 		m[key] = val
@@ -67,8 +67,8 @@ func containerInfraV1GetLabelsMerged(labelsAdded map[string]string, labelsSkippe
 	for key, val := range labelsSkipped {
 		m[key] = val
 	}
-	for key, _ := range labelsOverriden {
-		// We have to get the actual value here, not the one overriden
+	for key := range labelsOverridden {
+		// We have to get the actual value here, not the one overridden
 		m[key] = labels[key]
 	}
 	return m
@@ -138,9 +138,9 @@ func containerInfraClusterV1StateRefreshFunc(client *gophercloud.ServiceClient, 
 
 // ContainerInfraNodeGroupV1StateRefreshFunc returns a resource.StateRefreshFunc
 // that is used to watch a container infra NodeGroup.
-func containerInfraNodeGroupV1StateRefreshFunc(client *gophercloud.ServiceClient, clusterId string, nodeGroupId string) resource.StateRefreshFunc {
+func containerInfraNodeGroupV1StateRefreshFunc(client *gophercloud.ServiceClient, clusterID string, nodeGroupID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		nodeGroup, err := nodegroups.Get(client, clusterId, nodeGroupId).Extract()
+		nodeGroup, err := nodegroups.Get(client, clusterID, nodeGroupID).Extract()
 		if err != nil {
 			if _, ok := err.(gophercloud.ErrDefault404); ok {
 				return nodeGroup, "DELETE_COMPLETE", nil

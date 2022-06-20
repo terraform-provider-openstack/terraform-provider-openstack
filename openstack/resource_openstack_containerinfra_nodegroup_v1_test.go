@@ -68,11 +68,11 @@ func testAccCheckContainerInfraV1NodeGroupExists(n string, nodeGroup *nodegroups
 			return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
 		}
 
-		clusterId, nodeGroupId, err := parseVolumeTypeAccessID(rs.Primary.ID)
+		clusterID, nodeGroupID, err := parseVolumeTypeAccessID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
-		found, err := nodegroups.Get(containerInfraClient, clusterId, nodeGroupId).Extract()
+		found, err := nodegroups.Get(containerInfraClient, clusterID, nodeGroupID).Extract()
 		if err != nil {
 			return err
 		}
@@ -98,12 +98,12 @@ func testAccCheckContainerInfraV1NodeGroupDestroy(s *terraform.State) error {
 		if rs.Type != "openstack_containerinfra_nodegroup_v1" {
 			continue
 		}
-		clusterId, nodeGroupId, err := parseVolumeTypeAccessID(rs.Primary.ID)
+		clusterID, nodeGroupID, err := parseVolumeTypeAccessID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		_, err = nodegroups.Get(containerInfraClient, clusterId, nodeGroupId).Extract()
+		_, err = nodegroups.Get(containerInfraClient, clusterID, nodeGroupID).Extract()
 		if err == nil {
 			return fmt.Errorf("node group still exists")
 		}

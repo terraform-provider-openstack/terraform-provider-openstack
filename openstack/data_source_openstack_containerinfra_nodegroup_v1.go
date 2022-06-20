@@ -5,9 +5,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/nodegroups"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/nodegroups"
 )
 
 func dataSourceContainerInfraNodeGroupV1() *schema.Resource {
@@ -98,9 +99,9 @@ func dataSourceContainerInfraNodeGroupRead(ctx context.Context, d *schema.Resour
 
 	containerInfraClient.Microversion = containerInfraV1NodeGroupMinMicroversion
 
-	clusterId := d.Get("cluster_id").(string)
+	clusterID := d.Get("cluster_id").(string)
 	name := d.Get("name").(string)
-	nodeGroup, err := nodegroups.Get(containerInfraClient, clusterId, name).Extract()
+	nodeGroup, err := nodegroups.Get(containerInfraClient, clusterID, name).Extract()
 	if err != nil {
 		return diag.Errorf("Error getting openstack_containerinfra_nodegroup_v1 %s: %s", name, err)
 	}
