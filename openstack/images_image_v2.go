@@ -147,7 +147,7 @@ func resourceImagesImageV2RefreshFunc(client *gophercloud.ServiceClient, id stri
 		}
 		log.Printf("[DEBUG] OpenStack image status is: %s", img.Status)
 
-		return img, fmt.Sprintf("%s", img.Status), nil
+		return img, string(img.Status), nil
 	}
 }
 

@@ -84,8 +84,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 			return fmt.Errorf("Error determining openstack_identity_role_assignment_v3 ID: %s", err)
 		}
 
-		var opts roles.ListAssignmentsOpts
-		opts = roles.ListAssignmentsOpts{
+		var opts = roles.ListAssignmentsOpts{
 			GroupID:        groupID,
 			ScopeDomainID:  domainID,
 			ScopeProjectID: projectID,

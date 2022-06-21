@@ -248,8 +248,7 @@ func resourceSiteConnectionV2Read(ctx context.Context, d *schema.ResourceData, m
 	d.Set("peer_cidrs", conn.PeerCIDRs)
 
 	// Set the dpd
-	var dpdMap map[string]interface{}
-	dpdMap = make(map[string]interface{})
+	var dpdMap = make(map[string]interface{})
 	dpdMap["action"] = conn.DPD.Action
 	dpdMap["interval"] = conn.DPD.Interval
 	dpdMap["timeout"] = conn.DPD.Timeout
@@ -344,8 +343,7 @@ func resourceSiteConnectionV2Update(ctx context.Context, d *schema.ResourceData,
 		hasChange = true
 	}
 
-	var updateOpts siteconnections.UpdateOptsBuilder
-	updateOpts = opts
+	var updateOpts siteconnections.UpdateOptsBuilder = opts
 
 	log.Printf("[DEBUG] Updating site connection with id %s: %#v", d.Id(), updateOpts)
 

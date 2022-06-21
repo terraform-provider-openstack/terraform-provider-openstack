@@ -100,9 +100,9 @@ func resourceComputeInstanceV2() *schema.Resource {
 				ForceNew: true,
 				// just stash the hash for state & diff comparisons
 				StateFunc: func(v interface{}) string {
-					switch v.(type) {
+					switch v := v.(type) {
 					case string:
-						hash := sha1.Sum([]byte(v.(string)))
+						hash := sha1.Sum([]byte(v))
 						return hex.EncodeToString(hash[:])
 					default:
 						return ""
@@ -596,7 +596,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		MinTimeout: 3 * time.Second,
 	}
 
-	err = resource.Retry(stateConf.Timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, stateConf.Timeout, func() *resource.RetryError {
 		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			log.Printf("[DEBUG] Retrying after error: %s", err)
@@ -794,7 +794,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			}
 
 			log.Printf("[DEBUG] Waiting for instance (%s) to shelve", d.Id())
-			_, err = shelveStateConf.WaitForState()
+			_, err = shelveStateConf.WaitForStateContext(ctx)
 			if err != nil {
 				return diag.Errorf("Error waiting for instance (%s) to become shelve: %s", d.Id(), err)
 			}

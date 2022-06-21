@@ -197,8 +197,7 @@ func resourceServiceV2Update(ctx context.Context, d *schema.ResourceData, meta i
 		hasChange = true
 	}
 
-	var updateOpts services.UpdateOptsBuilder
-	updateOpts = opts
+	var updateOpts services.UpdateOptsBuilder = opts
 
 	log.Printf("[DEBUG] Updating service with id %s: %#v", d.Id(), updateOpts)
 

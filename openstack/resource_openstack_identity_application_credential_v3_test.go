@@ -62,7 +62,7 @@ func TestAccIdentityV3ApplicationCredential_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_identity_application_credential_v3.app_cred_1", "expires_at", ""),
 					resource.TestMatchResourceAttr(
-						"openstack_identity_application_credential_v3.app_cred_1", "roles.#", regexp.MustCompile("^[2-9]\\d*")),
+						"openstack_identity_application_credential_v3.app_cred_1", "roles.#", regexp.MustCompile(`^[2-9]\d*`)),
 				),
 			},
 		},

@@ -25,7 +25,7 @@ func expandDatabaseConfigurationV1Values(rawValues []interface{}) map[string]int
 	for _, rawValue := range rawValues {
 		v := rawValue.(map[string]interface{})
 		name := v["name"].(string)
-		value := v["value"].(interface{})
+		value := v["value"]
 
 		// check if value can be converted into int
 		if valueInt, err := strconv.Atoi(value.(string)); err == nil {

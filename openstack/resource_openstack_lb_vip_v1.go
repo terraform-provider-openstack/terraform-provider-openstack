@@ -317,7 +317,7 @@ func resourceLBVipV1Delete(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceVipPersistenceV1(d *schema.ResourceData) *vips.SessionPersistence {
-	rawP := d.Get("persistence").(interface{})
+	rawP := d.Get("persistence")
 	rawMap := rawP.(map[string]interface{})
 	if len(rawMap) != 0 {
 		p := vips.SessionPersistence{}

@@ -429,9 +429,7 @@ func resourceSharedFilesystemShareV2Update(ctx context.Context, d *schema.Resour
 
 		// Remove already removed metadata from the update list
 		for oldKey := range metadataToDelete {
-			if _, ok := metadataToUpdate[oldKey]; ok {
-				delete(metadataToUpdate, oldKey)
-			}
+			delete(metadataToUpdate, oldKey)
 		}
 
 		log.Printf("[DEBUG] Updating the following items in metadata for openstack_sharedfilesystem_share_v2 %s: %v", d.Id(), metadataToUpdate)
