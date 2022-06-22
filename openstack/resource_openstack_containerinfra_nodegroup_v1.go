@@ -115,14 +115,14 @@ func resourceContainerInfraNodeGroupV1() *schema.Resource {
 				Computed: true,
 			},
 
-			"image": {
+			"image_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"flavor": {
+			"flavor_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -153,8 +153,8 @@ func resourceContainerInfraNodeGroupV1Create(ctx context.Context, d *schema.Reso
 		Labels:       labels,
 		MinNodeCount: d.Get("min_node_count").(int),
 		Role:         d.Get("role").(string),
-		ImageID:      d.Get("image").(string),
-		FlavorID:     d.Get("flavor").(string),
+		ImageID:      d.Get("image_id").(string),
+		FlavorID:     d.Get("flavor_id").(string),
 	}
 
 	// Set int parameters that will be passed by reference.
