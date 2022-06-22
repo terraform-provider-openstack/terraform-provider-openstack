@@ -13,7 +13,6 @@ func TestAccContainerInfraV1NodeGroupDataSource_basic(t *testing.T) {
 	resourceName := "openstack_containerinfra_nodegroup_v1.nodegroup_1"
 	nodeGroupName := acctest.RandomWithPrefix("tf-acc-nodegroup")
 	clusterName := acctest.RandomWithPrefix("tf-acc-cluster")
-	imageName := acctest.RandomWithPrefix("tf-acc-image")
 	keypairName := acctest.RandomWithPrefix("tf-acc-keypair")
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
 
@@ -26,11 +25,11 @@ func TestAccContainerInfraV1NodeGroupDataSource_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerInfraV1NodeGroupUpdate(imageName, keypairName, clusterTemplateName, clusterName, nodeGroupName, 1),
+				Config: testAccContainerInfraV1NodeGroupUpdate(keypairName, clusterTemplateName, clusterName, nodeGroupName, 1),
 			},
 			{
 				Config: testAccContainerInfraV1NodeGroupDataSourceBasic(
-					testAccContainerInfraV1NodeGroupUpdate(imageName, keypairName, clusterTemplateName, clusterName, nodeGroupName, 1),
+					testAccContainerInfraV1NodeGroupUpdate(keypairName, clusterTemplateName, clusterName, nodeGroupName, 1),
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1NodeGroupDataSourceID(resourceName),

@@ -17,7 +17,6 @@ func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
 
 	resourceName := "openstack_containerinfra_cluster_v1.cluster_1"
 	clusterName := acctest.RandomWithPrefix("tf-acc-cluster")
-	imageName := acctest.RandomWithPrefix("tf-acc-image")
 	keypairName := acctest.RandomWithPrefix("tf-acc-keypair")
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
 
@@ -31,7 +30,7 @@ func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerInfraV1ClusterBasic(imageName, keypairName, clusterTemplateName, clusterName),
+				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1ClusterExists(resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
@@ -42,7 +41,7 @@ func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccContainerInfraV1ClusterUpdate(imageName, keypairName, clusterTemplateName, clusterName),
+				Config: testAccContainerInfraV1ClusterUpdate(keypairName, clusterTemplateName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1ClusterExists(resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
@@ -109,25 +108,15 @@ func testAccCheckContainerInfraV1ClusterDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccContainerInfraV1ClusterBasic(imageName, keypairName, clusterTemplateName, clusterName string) string {
+func testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName string) string {
 	return fmt.Sprintf(`
-resource "openstack_images_image_v2" "image_1" {
-  name             = "%s"
-  image_source_url = "https://dl.fedoraproject.org/pub/fedora/linux/releases/27/CloudImages/x86_64/images/Fedora-Atomic-27-1.6.x86_64.qcow2"
-  container_format = "bare"
-  disk_format      = "qcow2"
-  properties = {
-    os_distro = "fedora-atomic"
-  }
-}
-
 resource "openstack_compute_keypair_v2" "keypair_1" {
   name = "%s"
 }
 
 resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   name                  = "%s"
-  image                 = "${openstack_images_image_v2.image_1.name}"
+  image                 = "%s"
   coe                   = "kubernetes"
   master_flavor         = "%s"
   flavor                = "%s"
@@ -148,28 +137,18 @@ resource "openstack_containerinfra_cluster_v1" "cluster_1" {
   node_count           = 1
   keypair              = "${openstack_compute_keypair_v2.keypair_1.name}"
 }
-`, imageName, keypairName, clusterTemplateName, osMagnumFlavor, osMagnumFlavor, osExtGwID, clusterName)
+`, keypairName, clusterTemplateName, osMagnumImage, osMagnumFlavor, osMagnumFlavor, osExtGwID, clusterName)
 }
 
-func testAccContainerInfraV1ClusterUpdate(imageName, keypairName, clusterTemplateName, clusterName string) string {
+func testAccContainerInfraV1ClusterUpdate(keypairName, clusterTemplateName, clusterName string) string {
 	return fmt.Sprintf(`
-resource "openstack_images_image_v2" "image_1" {
-  name             = "%s"
-  image_source_url = "https://dl.fedoraproject.org/pub/fedora/linux/releases/27/CloudImages/x86_64/images/Fedora-Atomic-27-1.6.x86_64.qcow2"
-  container_format = "bare"
-  disk_format      = "qcow2"
-  properties = {
-    os_distro = "fedora-atomic"
-  }
-}
-
 resource "openstack_compute_keypair_v2" "keypair_1" {
   name = "%s"
 }
 
 resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   name                  = "%s"
-  image                 = "${openstack_images_image_v2.image_1.name}"
+  image                 = "%s"
   coe                   = "kubernetes"
   master_flavor         = "%s"
   flavor                = "%s"
@@ -188,5 +167,5 @@ resource "openstack_containerinfra_cluster_v1" "cluster_1" {
   node_count           = 2
   keypair              = "${openstack_compute_keypair_v2.keypair_1.name}"
 }
-`, imageName, keypairName, clusterTemplateName, osMagnumFlavor, osMagnumFlavor, osExtGwID, clusterName)
+`, keypairName, clusterTemplateName, osMagnumImage, osMagnumFlavor, osMagnumFlavor, osExtGwID, clusterName)
 }

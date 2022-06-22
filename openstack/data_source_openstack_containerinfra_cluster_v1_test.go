@@ -12,7 +12,6 @@ import (
 func TestAccContainerInfraV1ClusterDataSource_basic(t *testing.T) {
 	resourceName := "openstack_containerinfra_cluster_v1.cluster_1"
 	clusterName := acctest.RandomWithPrefix("tf-acc-cluster")
-	imageName := acctest.RandomWithPrefix("tf-acc-image")
 	keypairName := acctest.RandomWithPrefix("tf-acc-keypair")
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
 
@@ -25,11 +24,11 @@ func TestAccContainerInfraV1ClusterDataSource_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerInfraV1ClusterBasic(imageName, keypairName, clusterTemplateName, clusterName),
+				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName),
 			},
 			{
 				Config: testAccContainerInfraV1ClusterDataSourceBasic(
-					testAccContainerInfraV1ClusterBasic(imageName, keypairName, clusterTemplateName, clusterName),
+					testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName),
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1ClusterDataSourceID(resourceName),

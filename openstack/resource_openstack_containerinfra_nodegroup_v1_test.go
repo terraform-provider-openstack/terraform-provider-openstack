@@ -17,7 +17,6 @@ func TestAccContainerInfraV1NodeGroup_basic(t *testing.T) {
 
 	resourceName := "openstack_containerinfra_nodegroup_v1.nodegroup_1"
 	clusterName := acctest.RandomWithPrefix("tf-acc-cluster")
-	imageName := acctest.RandomWithPrefix("tf-acc-image")
 	keypairName := acctest.RandomWithPrefix("tf-acc-keypair")
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
 	nodeGroupName := acctest.RandomWithPrefix("tf-acc-nodegroup")
@@ -32,7 +31,7 @@ func TestAccContainerInfraV1NodeGroup_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckContainerInfraV1NodeGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerInfraV1NodeGroupUpdate(imageName, keypairName, clusterTemplateName, clusterName, nodeGroupName, 1),
+				Config: testAccContainerInfraV1NodeGroupUpdate(keypairName, clusterTemplateName, clusterName, nodeGroupName, 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1NodeGroupExists(resourceName, &nodeGroup),
 					resource.TestCheckResourceAttr(resourceName, "name", nodeGroupName),
@@ -40,7 +39,7 @@ func TestAccContainerInfraV1NodeGroup_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccContainerInfraV1NodeGroupUpdate(imageName, keypairName, clusterTemplateName, clusterName, nodeGroupName, 2),
+				Config: testAccContainerInfraV1NodeGroupUpdate(keypairName, clusterTemplateName, clusterName, nodeGroupName, 2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1NodeGroupExists(resourceName, &nodeGroup),
 					resource.TestCheckResourceAttr(resourceName, "name", nodeGroupName),
@@ -111,29 +110,15 @@ func testAccCheckContainerInfraV1NodeGroupDestroy(s *terraform.State) error {
 
 	return nil
 }
-func testAccContainerInfraV1NodeGroupUpdate(imageName, keypairName, clusterTemplateName, clusterName string, nodeGroupName string, nodeCount int) string {
+func testAccContainerInfraV1NodeGroupUpdate(keypairName, clusterTemplateName, clusterName string, nodeGroupName string, nodeCount int) string {
 	return fmt.Sprintf(`
-resource "openstack_images_image_v2" "image_1" {
-  name             = "%s"
-  image_source_url = "https://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img"
-  container_format = "bare"
-  disk_format      = "raw"
-  properties = {
-    os_distro = "fedora-atomic"
-  }
-
-  timeouts {
-    create = "10m"
-  }
-}
-
 resource "openstack_compute_keypair_v2" "keypair_1" {
   name = "%s"
 }
 
 resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   name       = "%s"
-  image      = "${openstack_images_image_v2.image_1.id}"
+  image      = "%s"
   coe        = "kubernetes"
   http_proxy = "127.0.0.1:8801"
 }
@@ -151,5 +136,5 @@ resource "openstack_containerinfra_nodegroup_v1" "nodegroup_1" {
   cluster_id           = "${openstack_containerinfra_cluster_v1.cluster_1.id}"
   node_count           = %d
 }
-`, imageName, keypairName, clusterTemplateName, clusterName, nodeGroupName, nodeCount)
+`, keypairName, clusterTemplateName, osMagnumImage, clusterName, nodeGroupName, nodeCount)
 }
