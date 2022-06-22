@@ -67,7 +67,8 @@ func testAccCheckContainerInfraV1NodeGroupExists(n string, nodeGroup *nodegroups
 			return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
 		}
 
-		clusterID, nodeGroupID, err := parseVolumeTypeAccessID(rs.Primary.ID)
+		containerInfraClient.Microversion = containerInfraV1NodeGroupMinMicroversion
+		clusterID, nodeGroupID, err := parseNodeGroupID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -76,8 +77,8 @@ func testAccCheckContainerInfraV1NodeGroupExists(n string, nodeGroup *nodegroups
 			return err
 		}
 
-		if found.UUID != rs.Primary.ID {
-			return fmt.Errorf("Cluster template not found")
+		if found.UUID != nodeGroupID {
+			return fmt.Errorf("Nodegroup not found")
 		}
 
 		*nodeGroup = *found
@@ -92,6 +93,8 @@ func testAccCheckContainerInfraV1NodeGroupDestroy(s *terraform.State) error {
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
+
+	containerInfraClient.Microversion = containerInfraV1NodeGroupMinMicroversion
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "openstack_containerinfra_nodegroup_v1" {

@@ -56,13 +56,13 @@ func testAccCheckContainerInfraV1NodeGroupDataSourceID(n string) resource.TestCh
 	}
 }
 
-func testAccContainerInfraV1NodeGroupDataSourceBasic(clusterResource string) string {
+func testAccContainerInfraV1NodeGroupDataSourceBasic(nodeGroupResource string) string {
 	return fmt.Sprintf(`
 %s
 
-data "openstack_containerinfra_nodegroup_v1" "cluster_1" {
+data "openstack_containerinfra_nodegroup_v1" "nodegroup_1" {
   cluster_id = "${openstack_containerinfra_cluster_v1.cluster_1.name}"
-  name = "${openstack_containerinfra_nodegroup_v1.node_group_1.name}"
+  name = "${openstack_containerinfra_nodegroup_v1.nodegroup_1.name}"
 }
-`, clusterResource)
+`, nodeGroupResource)
 }
