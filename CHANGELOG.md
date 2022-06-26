@@ -3,8 +3,7 @@
 IMPROVEMENTS
 
 * Added `user_id` argument to `compute_keypair_v2` resource ([#1349](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1349))
-* Updated `gophercloud` to `v0.24.0` ([#1378](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1378))
-* Updated `terraform-plugin-sdk` to `v2.16.0` ([#1378](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1378))
+* Added `containerinfra_nodegroup_v1` resource and datasource ([#1364](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1364))
 
 BUG FIXES
 
