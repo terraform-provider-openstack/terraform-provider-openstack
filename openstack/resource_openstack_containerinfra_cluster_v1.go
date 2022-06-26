@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -11,7 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
+	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/nodegroups"
 )
 
 func resourceContainerInfraClusterV1() *schema.Resource {
@@ -160,7 +163,7 @@ func resourceContainerInfraClusterV1() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
+				Default:  1,
 			},
 
 			"master_addresses": {
@@ -274,8 +277,11 @@ func resourceContainerInfraClusterV1Create(ctx context.Context, d *schema.Resour
 	}
 
 	nodeCount := d.Get("node_count").(int)
-	if nodeCount > 0 {
+	if nodeCount >= 0 {
 		createOpts.NodeCount = &nodeCount
+		if nodeCount == 0 {
+			containerInfraClient.Microversion = containerInfraV1ZeroNodeCountMicroversion
+		}
 	}
 
 	mergeLabels := d.Get("merge_labels").(bool)
@@ -310,6 +316,29 @@ func resourceContainerInfraClusterV1Create(ctx context.Context, d *schema.Resour
 	return resourceContainerInfraClusterV1Read(ctx, d, meta)
 }
 
+func getDefaultNodegroupNodeCount(containerInfraClient *gophercloud.ServiceClient, clusterID string) (int, error) {
+	containerInfraClient.Microversion = containerInfraV1NodeGroupMinMicroversion
+	listOpts := nodegroups.ListOpts{}
+
+	allPages, err := nodegroups.List(containerInfraClient, clusterID, listOpts).AllPages()
+	if err != nil {
+		return 0, err
+	}
+
+	ngs, err := nodegroups.ExtractNodeGroups(allPages)
+	if err != nil {
+		return 0, err
+	}
+
+	for _, ng := range ngs {
+		if ng.IsDefault && ng.Role != "master" {
+			return ng.NodeCount, nil
+		}
+	}
+
+	return 0, fmt.Errorf("Default worker nodegroup not found")
+}
+
 func resourceContainerInfraClusterV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
@@ -324,8 +353,19 @@ func resourceContainerInfraClusterV1Read(_ context.Context, d *schema.ResourceDa
 
 	log.Printf("[DEBUG] Retrieved openstack_containerinfra_cluster_v1 %s: %#v", d.Id(), s)
 
-	if err := d.Set("labels", s.Labels); err != nil {
+	labels := s.Labels
+	if d.Get("merge_labels").(bool) {
+		labels = containerInfraV1GetLabelsMerged(s.LabelsAdded, s.LabelsSkipped, s.LabelsOverridden, s.Labels)
+	}
+	if err := d.Set("labels", labels); err != nil {
 		return diag.Errorf("Unable to set openstack_containerinfra_cluster_v1 labels: %s", err)
+	}
+
+	nodeCount, err := getDefaultNodegroupNodeCount(containerInfraClient, d.Id())
+	if err != nil {
+		log.Printf("[DEBUG] Can't retrieve node_count of the default worker node group %s: %s", d.Id(), err)
+
+		nodeCount = s.NodeCount
 	}
 
 	d.Set("name", s.Name)
@@ -340,7 +380,7 @@ func resourceContainerInfraClusterV1Read(_ context.Context, d *schema.ResourceDa
 	d.Set("master_flavor", s.MasterFlavorID)
 	d.Set("keypair", s.KeyPair)
 	d.Set("master_count", s.MasterCount)
-	d.Set("node_count", s.NodeCount)
+	d.Set("node_count", nodeCount)
 	d.Set("master_addresses", s.MasterAddresses)
 	d.Set("node_addresses", s.NodeAddresses)
 	d.Set("stack_id", s.StackID)

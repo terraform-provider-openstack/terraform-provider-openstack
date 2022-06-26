@@ -7,11 +7,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccContainerInfraV1ClusterImport_basic(t *testing.T) {
-	resourceName := "openstack_containerinfra_cluster_v1.cluster_1"
+func TestAccContainerInfraV1NodeGroupImport_basic(t *testing.T) {
+	resourceName := "openstack_containerinfra_nodegroup_v1.nodegroup_1"
 	clusterName := acctest.RandomWithPrefix("tf-acc-cluster")
 	keypairName := acctest.RandomWithPrefix("tf-acc-keypair")
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
+	nodeGroupName := acctest.RandomWithPrefix("tf-acc-cluster")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -20,16 +21,16 @@ func TestAccContainerInfraV1ClusterImport_basic(t *testing.T) {
 			testAccPreCheckContainerInfra(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
+		CheckDestroy:      testAccCheckContainerInfraV1NodeGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName),
+				Config: testAccContainerInfraV1NodeGroupUpdate(keypairName, clusterTemplateName, clusterName, nodeGroupName, 1),
 			},
 			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"keypair", "cluster_template_id"},
+				ImportStateVerifyIgnore: []string{"cluster_id"},
 			},
 		},
 	})

@@ -19,11 +19,15 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/certificates"
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clustertemplates"
+	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/nodegroups"
 )
 
 const (
 	rsaPrivateKeyBlockType      = "RSA PRIVATE KEY"
 	certificateRequestBlockType = "CERTIFICATE REQUEST"
+
+	containerInfraV1NodeGroupMinMicroversion  = "1.9"
+	containerInfraV1ZeroNodeCountMicroversion = "1.10"
 )
 
 func expandContainerInfraV1LabelsMap(v map[string]interface{}) (map[string]string, error) {
@@ -55,6 +59,21 @@ func expandContainerInfraV1LabelsString(v map[string]interface{}) (string, error
 	return formattedLabels, nil
 }
 
+func containerInfraV1GetLabelsMerged(labelsAdded map[string]string, labelsSkipped map[string]string, labelsOverridden map[string]string, labels map[string]string) map[string]string {
+	m := make(map[string]string)
+	for key, val := range labelsAdded {
+		m[key] = val
+	}
+	for key, val := range labelsSkipped {
+		m[key] = val
+	}
+	for key := range labelsOverridden {
+		// We have to get the actual value here, not the one overridden
+		m[key] = labels[key]
+	}
+	return m
+}
+
 func containerInfraClusterTemplateV1AppendUpdateOpts(updateOpts []clustertemplates.UpdateOptsBuilder, attribute, value string) []clustertemplates.UpdateOptsBuilder {
 	if value == "" {
 		updateOpts = append(updateOpts, clustertemplates.UpdateOpts{
@@ -64,6 +83,22 @@ func containerInfraClusterTemplateV1AppendUpdateOpts(updateOpts []clustertemplat
 	} else {
 		updateOpts = append(updateOpts, clustertemplates.UpdateOpts{
 			Op:    clustertemplates.ReplaceOp,
+			Path:  strings.Join([]string{"/", attribute}, ""),
+			Value: value,
+		})
+	}
+	return updateOpts
+}
+
+func containerInfraNodeGroupV1AppendUpdateOpts(updateOpts []nodegroups.UpdateOptsBuilder, attribute, value string) []nodegroups.UpdateOptsBuilder {
+	if value == "" {
+		updateOpts = append(updateOpts, nodegroups.UpdateOpts{
+			Op:   nodegroups.RemoveOp,
+			Path: strings.Join([]string{"/", attribute}, ""),
+		})
+	} else {
+		updateOpts = append(updateOpts, nodegroups.UpdateOpts{
+			Op:    nodegroups.ReplaceOp,
 			Path:  strings.Join([]string{"/", attribute}, ""),
 			Value: value,
 		})
@@ -98,6 +133,36 @@ func containerInfraClusterV1StateRefreshFunc(client *gophercloud.ServiceClient, 
 		}
 
 		return c, c.Status, nil
+	}
+}
+
+// ContainerInfraNodeGroupV1StateRefreshFunc returns a resource.StateRefreshFunc
+// that is used to watch a container infra NodeGroup.
+func containerInfraNodeGroupV1StateRefreshFunc(client *gophercloud.ServiceClient, clusterID string, nodeGroupID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		nodeGroup, err := nodegroups.Get(client, clusterID, nodeGroupID).Extract()
+		if err != nil {
+			if _, ok := err.(gophercloud.ErrDefault404); ok {
+				return nodeGroup, "DELETE_COMPLETE", nil
+			}
+			return nil, "", err
+		}
+
+		errorStatuses := []string{
+			"CREATE_FAILED",
+			"UPDATE_FAILED",
+			"DELETE_FAILED",
+			"RESUME_FAILED",
+			"ROLLBACK_FAILED",
+		}
+		for _, errorStatus := range errorStatuses {
+			if nodeGroup.Status == errorStatus {
+				err = fmt.Errorf("openstack_containerinfra_nodegroup_v1 is in an error state: %s", nodeGroup.StatusReason)
+				return nodeGroup, nodeGroup.Status, err
+			}
+		}
+
+		return nodeGroup, nodeGroup.Status, nil
 	}
 }
 
