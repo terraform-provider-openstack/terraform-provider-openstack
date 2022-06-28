@@ -397,6 +397,33 @@ func TestAccComputeV2Instance_personality(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2Instance_personalityRebuild(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2InstanceBasic(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+				),
+			},
+			{
+				Config: testAccComputeV2InstancePersonality(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeV2Instance_multiEphemeral(t *testing.T) {
 	var instance servers.Server
 

@@ -332,11 +332,12 @@ The following arguments are supported:
 
 * `image_id` - (Optional; Required if `image_name` is empty and not booting
     from a volume. Do not specify if booting from a volume.) The image ID of
-    the desired image for the server. Changing this creates a new server.
+    the desired image for the server. Changing this rebuilds the existing
+    server.
 
 * `image_name` - (Optional; Required if `image_id` is empty and not booting
     from a volume. Do not specify if booting from a volume.) The name of the
-    desired image for the server. Changing this creates a new server.
+    desired image for the server. Changing this rebuilds the existing server.
 
 * `flavor_id` - (Optional; Required if `flavor_name` is empty) The flavor ID of
     the desired flavor for the server. Changing this resizes the existing server.
@@ -398,7 +399,7 @@ The following arguments are supported:
 
 * `personality` - (Optional) Customize the personality of an instance by
     defining one or more files and their contents. The personality structure
-    is described below.
+    is described below. Changing this rebuilds the existing server.
 
 * `stop_before_destroy` - (Optional) Whether to try stop instance gracefully
     before destroying it, thus giving chance for guest OS daemons to stop correctly.
