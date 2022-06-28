@@ -196,6 +196,31 @@ func expandNetworkingPortFixedIPV2(d *schema.ResourceData) any {
 	return ip
 }
 
+func expandNetworkingPortFixedIPFilterV2(d *schema.ResourceData) []ports.FixedIPOpts {
+	if v, ok := d.Get("fixed_ip").(string); ok && v != "" {
+		return []ports.FixedIPOpts{{
+			IPAddress: v,
+		}}
+	}
+
+	rawIP := d.Get("fixed_ips").([]any)
+	if len(rawIP) == 0 {
+		return nil
+	}
+
+	ip := make([]ports.FixedIPOpts, len(rawIP))
+
+	for i, raw := range rawIP {
+		rawMap := raw.(map[string]any)
+		ip[i] = ports.FixedIPOpts{
+			SubnetID:  rawMap["subnet_id"].(string),
+			IPAddress: rawMap["ip_address"].(string),
+		}
+	}
+
+	return ip
+}
+
 func resourceNetworkingPortV2AllowedAddressPairsHash(v any) int {
 	var buf bytes.Buffer
 
@@ -205,7 +230,7 @@ func resourceNetworkingPortV2AllowedAddressPairsHash(v any) int {
 	return hashcode.String(buf.String())
 }
 
-func expandNetworkingPortFixedIPToStringSlice(fixedIPs []ports.IP) []string {
+func flattenNetworkingPortFixedIPToStringSlice(fixedIPs []ports.IP) []string {
 	s := make([]string, len(fixedIPs))
 	for i, fixedIP := range fixedIPs {
 		s[i] = fixedIP.IPAddress
@@ -214,17 +239,17 @@ func expandNetworkingPortFixedIPToStringSlice(fixedIPs []ports.IP) []string {
 	return s
 }
 
-func formatFixedIpsToSubnetIdsAndIPs(fixedIPs []ports.IP) []map[string]any {
-	subnetIpPairs := make([]map[string]any, len(fixedIPs))
+func flattenNetworkingPortFixedIPsV2(fixedIPs []ports.IP) []map[string]any {
+	subnetIPPairs := make([]map[string]any, len(fixedIPs))
 
-	for i, subnetIpPair := range fixedIPs {
-		subnetIpPairs[i] = map[string]any{
-			"subnet_id":  subnetIpPair.SubnetID,
-			"ip_address": subnetIpPair.IPAddress,
+	for i, subnetIPPair := range fixedIPs {
+		subnetIPPairs[i] = map[string]any{
+			"subnet_id":  subnetIPPair.SubnetID,
+			"ip_address": subnetIPPair.IPAddress,
 		}
 	}
 
-	return subnetIpPairs
+	return subnetIPPairs
 }
 
 func flattenNetworkingPortBindingV2(port portExtended) any {
