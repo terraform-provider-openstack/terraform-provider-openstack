@@ -489,13 +489,14 @@ $ git push -u my-github-username my-feature
 Then navigate to https://github.com/terraform-provider-openstack/terraform-provider-openstack
 and create a Pull Request.
 
-### OpenLab Testing
+### Testing with GitHub Actions
 
 Once you have created a Pull Request, it will automatically be tested by
-[OpenLab](https://openlabtesting.org/). OpenLab will run most of the Acceptance
-Tests in a clean OpenStack cloud (see below for the resources which you must
-tell OpenLab to run). Testing will take between 90-120 minutes and you will
-receive a notification with a test report when testing has finished.
+various GitHub Actions. GitHub Actions use Devstack to create a clean
+vanilla Openstack Cloud. Multiple jobs are triggered to test various
+versions of Openstack as well as different services. Testing will take
+between 90-120 minutes and you will receive a notification with a test
+report when testing has finished.
 
 If there were any failures, check the provided logs.
 
@@ -506,30 +507,7 @@ There are a few reasons for test failures:
 
 2. Your code changes caused another test to fail.
 
-3. OpenLab is having issues.
+3. DevStack is having issues.
 
 If you are unable to determine why the failures happened, please ask and
 we'll look into the cause.
-
-The OpenLab integration has a few keywords that you can use to retest your
-code. Simply make a comment in your Pull Request with one of the following:
-
-* `recheck` - Run the standard test suite again.
-
-* `recheck designate` - Run the tests for the `openstack_dns_*` resources.
-
-* `recheck trove` - Run the tests for the `openstack_db_*` resources.
-
-* `recheck lbaas` - Run the tests for the `openstack_lb_*` resources.
-
-* `recheck fwaas` - Run the tests for the `openstack_fw_*` resources.
-
-* `recheck stable/mitaka` - Run the standard test suite on OpenStack Mitaka.
-
-* `recheck stable/newton` - Run the standard test suite on OpenStack Newton.
-
-* `recheck stable/ocata` - Run the standard test suite on OpenStack Ocata.
-
-* `recheck stable/pike` - Run the standard test suite on OpenStack Pike.
-
-* `recheck stable/queens` - Run the standard test suite on OpenStack Queens.
