@@ -26,11 +26,9 @@ func TestAccComputeV2FlavorDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "ram", "512"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_compute_flavor_v2.flavor_1", "disk", "5"),
+						"data.openstack_compute_flavor_v2.flavor_1", "disk", "10"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "vcpus", "1"),
-					resource.TestCheckResourceAttr(
-						"data.openstack_compute_flavor_v2.flavor_1", "rx_tx_factor", "1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "is_public", "true"),
 				),
@@ -56,11 +54,9 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "ram", "512"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_compute_flavor_v2.flavor_1", "disk", "6"),
+						"data.openstack_compute_flavor_v2.flavor_1", "disk", "11"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "vcpus", "1"),
-					resource.TestCheckResourceAttr(
-						"data.openstack_compute_flavor_v2.flavor_1", "rx_tx_factor", "1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "is_public", "true"),
 				),
@@ -74,11 +70,9 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "ram", "512"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_compute_flavor_v2.flavor_1", "disk", "5"),
+						"data.openstack_compute_flavor_v2.flavor_1", "disk", "10"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "vcpus", "1"),
-					resource.TestCheckResourceAttr(
-						"data.openstack_compute_flavor_v2.flavor_1", "rx_tx_factor", "1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "is_public", "true"),
 				),
@@ -92,11 +86,9 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "ram", "512"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_compute_flavor_v2.flavor_1", "disk", "5"),
+						"data.openstack_compute_flavor_v2.flavor_1", "disk", "10"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "vcpus", "1"),
-					resource.TestCheckResourceAttr(
-						"data.openstack_compute_flavor_v2.flavor_1", "rx_tx_factor", "1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "is_public", "true"),
 				),
@@ -110,11 +102,9 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "ram", "512"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_compute_flavor_v2.flavor_1", "disk", "5"),
+						"data.openstack_compute_flavor_v2.flavor_1", "disk", "10"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "vcpus", "1"),
-					resource.TestCheckResourceAttr(
-						"data.openstack_compute_flavor_v2.flavor_1", "rx_tx_factor", "1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "is_public", "true"),
 				),
@@ -208,14 +198,14 @@ data "openstack_compute_flavor_v2" "flavor_1" {
 
 const testAccComputeV2FlavorDataSourceQueryDisk = `
 data "openstack_compute_flavor_v2" "flavor_1" {
-  disk = 6
+  disk = 11
 }
 `
 
 const testAccComputeV2FlavorDataSourceQueryMinDisk = `
 data "openstack_compute_flavor_v2" "flavor_1" {
   name = "m1.acctest"
-  min_disk = 5
+  min_disk = 10
 }
 `
 
