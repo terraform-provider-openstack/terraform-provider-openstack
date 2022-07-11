@@ -1,0 +1,60 @@
+# Keymanager/barbican tests run only for versions >= wallaby
+# due to barbican's default policies changing completely
+# on wallaby
+name: functional-keymanager
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/functional-keymanager.yml'
+      - '**keymanager**'
+      - 'CHANGELOG.md'
+  schedule:
+    - cron: '0 0 * * *'
+jobs:
+  functional-keymanager:
+    strategy:
+      fail-fast: false
+      matrix:
+        name: ["master"]
+        openstack_version: ["master"]
+        ubuntu_version: ["20.04"]
+        include:
+          - name: "yoga"
+            openstack_version: "stable/yoga"
+            ubuntu_version: "20.04"
+          - name: "xena"
+            openstack_version: "stable/xena"
+            ubuntu_version: "20.04"
+          - name: "wallaby"
+            openstack_version: "stable/wallaby"
+            ubuntu_version: "20.04"
+    runs-on: ubuntu-${{ matrix.ubuntu_version }}
+    name: keymanager on OpenStack ${{ matrix.name }} with Barbican and run keymanager acceptance tests
+    steps:
+      - name: Checkout TPO
+        uses: actions/checkout@v3
+      - name: Deploy devstack
+        uses: EmilienM/devstack-action@v0.7
+        with:
+          branch: ${{ matrix.openstack_version }}
+          conf_overrides: |
+            enable_plugin barbican https://opendev.org/openstack/barbican ${{ matrix.openstack_version }}
+          enabled_services: 'barbican-svc,barbican-retry,barbican-keystone-listener'
+      - name: Checkout go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.17'
+      - name: Run TPO acceptance tests
+        run: OS_KEYMANAGER_ENVIRONMENT=True ./scripts/acceptancetest.sh
+        env:
+          DEVSTACK_PATH: ${{ github.workspace }}/devstack
+          ACCEPTANCE_TESTS_FILTER: "keymanager"
+      - name: Generate logs on failure
+        run: ./scripts/collectlogs.sh
+        if: failure()
+      - name: Upload logs artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: functional-keymanager-${{ matrix.name }}
+          path: /tmp/devstack-logs/*
