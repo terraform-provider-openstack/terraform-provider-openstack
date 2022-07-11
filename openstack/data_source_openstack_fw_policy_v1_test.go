@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccOpenStackNetworkingFWPolicyV1DataSource_basic(t *testing.T) {
+func TestAccFirewallPolicyV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -17,12 +17,12 @@ func TestAccOpenStackNetworkingFWPolicyV1DataSource_basic(t *testing.T) {
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingFWPolicyV1DataSourceGroup,
+				Config: testAccFirewallPolicyV1DataSourceGroup,
 			},
 			{
-				Config: testAccOpenStackNetworkingFWPolicyV1DataSourceBasic(),
+				Config: testAccFirewallPolicyV1DataSourceBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingFWPolicyV1DataSourceID("data.openstack_fw_policy_v1.policy_1"),
+					testAccCheckFirewallPolicyV1DataSourceID("data.openstack_fw_policy_v1.policy_1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_fw_policy_v1.policy_1", "name", "policy_1"),
 				),
@@ -30,7 +30,7 @@ func TestAccOpenStackNetworkingFWPolicyV1DataSource_basic(t *testing.T) {
 		},
 	})
 }
-func TestAccOpenStackNetworkingFWPolicyV1DataSource_FWPolicyID(t *testing.T) {
+func TestAccFirewallPolicyV1DataSource_FWPolicyID(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -39,12 +39,12 @@ func TestAccOpenStackNetworkingFWPolicyV1DataSource_FWPolicyID(t *testing.T) {
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingFWPolicyV1DataSourceGroup,
+				Config: testAccFirewallPolicyV1DataSourceGroup,
 			},
 			{
-				Config: testAccOpenStackNetworkingFWPolicyV1DataSourcePolicyID(),
+				Config: testAccFirewallPolicyV1DataSourcePolicyID(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingFWPolicyV1DataSourceID("data.openstack_fw_policy_v1.policy_1"),
+					testAccCheckFirewallPolicyV1DataSourceID("data.openstack_fw_policy_v1.policy_1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_fw_policy_v1.policy_1", "name", "policy_1"),
 				),
@@ -53,7 +53,7 @@ func TestAccOpenStackNetworkingFWPolicyV1DataSource_FWPolicyID(t *testing.T) {
 	})
 }
 
-func testAccCheckNetworkingFWPolicyV1DataSourceID(n string) resource.TestCheckFunc {
+func testAccCheckFirewallPolicyV1DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -68,29 +68,29 @@ func testAccCheckNetworkingFWPolicyV1DataSourceID(n string) resource.TestCheckFu
 	}
 }
 
-const testAccOpenStackNetworkingFWPolicyV1DataSourceGroup = `
+const testAccFirewallPolicyV1DataSourceGroup = `
 resource "openstack_fw_policy_v1" "policy_1" {
-        name        = "policy_1"
+    name        = "policy_1"
 	description = "My firewall policy"
 }
 `
 
-func testAccOpenStackNetworkingFWPolicyV1DataSourceBasic() string {
+func testAccFirewallPolicyV1DataSourceBasic() string {
 	return fmt.Sprintf(`
 %s
 
 data "openstack_fw_policy_v1" "policy_1" {
 	name = "${openstack_fw_policy_v1.policy_1.name}"
 }
-`, testAccOpenStackNetworkingFWPolicyV1DataSourceGroup)
+`, testAccFirewallPolicyV1DataSourceGroup)
 }
 
-func testAccOpenStackNetworkingFWPolicyV1DataSourcePolicyID() string {
+func testAccFirewallPolicyV1DataSourcePolicyID() string {
 	return fmt.Sprintf(`
 %s
 
 data "openstack_fw_policy_v1" "policy_1" {
 	policy_id = "${openstack_fw_policy_v1.policy_1.id}"
 }
-`, testAccOpenStackNetworkingFWPolicyV1DataSourceGroup)
+`, testAccFirewallPolicyV1DataSourceGroup)
 }

@@ -1,0 +1,81 @@
+# Functional testing for networking
+name: functional-networking
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/functional-networking.yml'
+      - '**networking**'
+      - 'CHANGELOG.md'
+  schedule:
+    - cron: '0 0 * * *'
+jobs:
+  functional-basic:
+    strategy:
+      fail-fast: false
+      matrix:
+        name: ["master"]
+        openstack_version: ["master"]
+        ubuntu_version: ["20.04"]
+        devstack_conf_overrides: ["enable_plugin neutron-dynamic-routing https://opendev.org/openstack/neutron-dynamic-routing master"]
+        include:
+          - name: "yoga"
+            openstack_version: "stable/yoga"
+            ubuntu_version: "20.04"
+            devstack_conf_overrides: |
+              enable_plugin neutron-dynamic-routing https://opendev.org/openstack/neutron-dynamic-routing stable/yoga
+          - name: "xena"
+            openstack_version: "stable/xena"
+            ubuntu_version: "20.04"
+            devstack_conf_overrides: |
+              enable_plugin neutron-dynamic-routing https://opendev.org/openstack/neutron-dynamic-routing stable/xena
+          - name: "wallaby"
+            openstack_version: "stable/wallaby"
+            ubuntu_version: "20.04"
+            devstack_conf_overrides: |
+              enable_plugin neutron-dynamic-routing https://opendev.org/openstack/neutron-dynamic-routing stable/wallaby
+          - name: "victoria"
+            openstack_version: "stable/victoria"
+            ubuntu_version: "20.04"
+            devstack_conf_overrides: |
+              enable_plugin neutron-dynamic-routing https://opendev.org/openstack/neutron-dynamic-routing stable/victoria
+          - name: "ussuri"
+            openstack_version: "stable/ussuri"
+            ubuntu_version: "18.04"
+            devstack_conf_overrides: |
+              enable_plugin neutron-dynamic-routing https://opendev.org/openstack/neutron-dynamic-routing stable/ussuri
+          - name: "train"
+            openstack_version: "stable/train"
+            ubuntu_version: "18.04"
+            devstack_conf_overrides: |
+              enable_plugin neutron-dynamic-routing https://opendev.org/openstack/neutron-dynamic-routing train-eol
+    runs-on: ubuntu-${{ matrix.ubuntu_version }}
+    name: networking on OpenStack ${{ matrix.name }} with defaults and run basic acceptance tests
+    steps:
+      - name: Checkout TPO
+        uses: actions/checkout@v3
+      - name: Deploy devstack
+        uses: EmilienM/devstack-action@v0.7
+        with:
+          branch: ${{ matrix.openstack_version }}
+          conf_overrides: |
+            Q_ML2_PLUGIN_EXT_DRIVERS=qos,port_security,dns_domain_keywords
+            ${{ matrix.devstack_conf_overrides }}
+          enabled_services: 'neutron-dhcp,neutron-dns,neutron-qos,neutron-segments,neutron-trunk,neutron-uplink-status-propagation,neutron-network-segment-range,neutron-port-forwarding'
+      - name: Checkout go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.17'
+      - name: Run TPO acceptance tests
+        run: ./scripts/acceptancetest.sh
+        env:
+          DEVSTACK_PATH: ${{ github.workspace }}/devstack
+          ACCEPTANCE_TESTS_FILTER: 'networking'
+      - name: Generate logs on failure
+        run: ./scripts/collectlogs.sh
+        if: failure()
+      - name: Upload logs artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: functional-basic-${{ matrix.name }}
+          path: /tmp/devstack-logs/*

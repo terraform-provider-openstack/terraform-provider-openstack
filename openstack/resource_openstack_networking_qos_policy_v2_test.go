@@ -17,7 +17,7 @@ func TestAccNetworkingV2QoSPolicyBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
-			t.Skip("Currently failing in Openlab")
+			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckNetworkingV2QoSPolicyDestroy,

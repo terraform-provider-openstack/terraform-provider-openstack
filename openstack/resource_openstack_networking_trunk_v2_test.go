@@ -20,7 +20,7 @@ func TestAccNetworkingV2Trunk_nosubports(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
-			t.Skip("Currently failing in Openlab")
+			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy,
@@ -48,7 +48,7 @@ func TestAccNetworkingV2Trunk_subports(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
-			t.Skip("Currently failing in Openlab")
+			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy,
@@ -74,7 +74,7 @@ func TestAccNetworkingV2Trunk_tags(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
-			t.Skip("Currently failing in Openlab")
+			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy,
@@ -207,7 +207,7 @@ func TestAccNetworkingV2Trunk_computeInstance(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
-			t.Skip("Currently failing in Openlab")
+			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
