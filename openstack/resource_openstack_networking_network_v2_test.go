@@ -141,6 +141,7 @@ func TestAccNetworkingV2Network_multipleSegmentMappings(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
+			t.Skip("Currently failing in GH-A: cant enable vxlan")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
@@ -461,7 +462,7 @@ func TestAccNetworkingV2Network_qos_policy_create(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
-			t.Skip("Currently failing in Openlab")
+			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
@@ -491,7 +492,7 @@ func TestAccNetworkingV2Network_qos_policy_update(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
-			t.Skip("Currently failing in Openlab")
+			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
@@ -730,7 +731,7 @@ resource "openstack_networking_network_v2" "network_1" {
   admin_state_up = "true"
 
   segments {
-    segmentation_id = 2
+	segmentation_id = 2
     network_type = "vxlan"
   }
 }

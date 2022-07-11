@@ -594,8 +594,8 @@ func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
-					resource.TestCheckNoResourceAttr(
-						"openstack_networking_port_v2.port_1", "extra_dhcp_option"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "extra_dhcp_option.#", "0"),
 				),
 			},
 		},
@@ -945,7 +945,7 @@ func TestAccNetworkingV2Port_qos_policy_create(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
-			t.Skip("Currently failing in Openlab")
+			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
@@ -975,7 +975,7 @@ func TestAccNetworkingV2Port_qos_policy_update(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
-			t.Skip("Currently failing in Openlab")
+			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,

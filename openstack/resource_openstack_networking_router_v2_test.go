@@ -101,6 +101,7 @@ func TestAccNetworkingV2Router_vendor_opts_no_snat(t *testing.T) {
 			testAccPreCheck(t)
 			// (rule:create_router and rule:create_router:distributed) is disallowed by policy
 			testAccPreCheckAdminOnly(t)
+			t.Skip("Currently failing in GH-A: Cannot enable DVR + OVN on devstack")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
