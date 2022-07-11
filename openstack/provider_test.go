@@ -38,15 +38,13 @@ var (
 	osUseOctavia                     = os.Getenv("OS_USE_OCTAVIA")
 	osOctaviaBatchMembersEnvironment = os.Getenv("OS_OCTAVIA_BATCH_MEMBERS_ENVIRONMENT")
 	osContainerInfraEnvironment      = os.Getenv("OS_CONTAINER_INFRA_ENVIRONMENT")
-	/* TODO: enable when ready in OpenLab
 	osSfsEnvironment                 = os.Getenv("OS_SFS_ENVIRONMENT")
-	*/
-	osTransparentVlanEnvironment = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
-	osKeymanagerEnvironment      = os.Getenv("OS_KEYMANAGER_ENVIRONMENT")
-	osGlanceimportEnvironment    = os.Getenv("OS_GLANCEIMPORT_ENVIRONMENT")
-	osHypervisorEnvironment      = os.Getenv("OS_HYPERVISOR_HOSTNAME")
-	osPortForwardingEnvironment  = os.Getenv("OS_PORT_FORWARDING_ENVIRONMENT")
-	osBlockStorageV2             = os.Getenv("OS_BLOCKSTORAGE_V2")
+	osTransparentVlanEnvironment     = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
+	osKeymanagerEnvironment          = os.Getenv("OS_KEYMANAGER_ENVIRONMENT")
+	osGlanceimportEnvironment        = os.Getenv("OS_GLANCEIMPORT_ENVIRONMENT")
+	osHypervisorEnvironment          = os.Getenv("OS_HYPERVISOR_HOSTNAME")
+	osPortForwardingEnvironment      = os.Getenv("OS_PORT_FORWARDING_ENVIRONMENT")
+	osBlockStorageV2                 = os.Getenv("OS_BLOCKSTORAGE_V2")
 )
 
 var (
@@ -198,11 +196,9 @@ func testAccPreCheckContainerInfra(t *testing.T) {
 func testAccPreCheckSFS(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	/* TODO: enable when ready in OpenLab
 	if osSfsEnvironment == "" {
 		t.Skip("This environment does not support Shared File Systems tests")
 	}
-	*/
 }
 
 func testAccPreOnlineResize(t *testing.T) {
