@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccKeyManagerOrderV1_importBasic(t *testing.T) {
-	resourceName := "openstack_keymanager_order_v1.order_1"
+	resourceName := "openstack_keymanager_order_v1.test-acc-basic"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
