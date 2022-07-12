@@ -11,7 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ikepolicies"
 )
 
-func TestAccIKEPolicyV2_basic(t *testing.T) {
+func TestAccIKEPolicyVPNaaSV2_basic(t *testing.T) {
 	var policy ikepolicies.Policy
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -36,7 +36,7 @@ func TestAccIKEPolicyV2_basic(t *testing.T) {
 	})
 }
 
-func TestAccIKEPolicyV2_withLifetime(t *testing.T) {
+func TestAccIKEPolicyVPNaaSV2_withLifetime(t *testing.T) {
 	var policy ikepolicies.Policy
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -59,7 +59,7 @@ func TestAccIKEPolicyV2_withLifetime(t *testing.T) {
 	})
 }
 
-func TestAccIKEPolicyV2_Update(t *testing.T) {
+func TestAccIKEPolicyVPNaaSV2_Update(t *testing.T) {
 	var policy ikepolicies.Policy
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -90,7 +90,7 @@ func TestAccIKEPolicyV2_Update(t *testing.T) {
 	})
 }
 
-func TestAccIKEPolicyV2_withLifetimeUpdate(t *testing.T) {
+func TestAccIKEPolicyVPNaaSV2_withLifetimeUpdate(t *testing.T) {
 	var policy ikepolicies.Policy
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

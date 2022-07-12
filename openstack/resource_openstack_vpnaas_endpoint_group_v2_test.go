@@ -13,7 +13,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/endpointgroups"
 )
 
-func TestAccGroupV2_basic(t *testing.T) {
+func TestAccGroupVPNaaSV2_basic(t *testing.T) {
 	var group endpointgroups.EndpointGroup
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -38,7 +38,7 @@ func TestAccGroupV2_basic(t *testing.T) {
 	})
 }
 
-func TestAccGroupV2_update(t *testing.T) {
+func TestAccGroupVPNaaSV2_update(t *testing.T) {
 	var group endpointgroups.EndpointGroup
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

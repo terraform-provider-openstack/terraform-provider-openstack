@@ -13,7 +13,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
 )
 
-func TestAccIPSecPolicyV2_basic(t *testing.T) {
+func TestAccIPSecPolicyVPNaaSV2_basic(t *testing.T) {
 	var policy ipsecpolicies.Policy
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -43,7 +43,7 @@ func TestAccIPSecPolicyV2_basic(t *testing.T) {
 	})
 }
 
-func TestAccIPSecPolicyV2_withLifetime(t *testing.T) {
+func TestAccIPSecPolicyVPNaaSV2_withLifetime(t *testing.T) {
 	var policy ipsecpolicies.Policy
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -66,7 +66,7 @@ func TestAccIPSecPolicyV2_withLifetime(t *testing.T) {
 	})
 }
 
-func TestAccIPSecPolicyV2_Update(t *testing.T) {
+func TestAccIPSecPolicyVPNaaSV2_Update(t *testing.T) {
 	var policy ipsecpolicies.Policy
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -97,7 +97,7 @@ func TestAccIPSecPolicyV2_Update(t *testing.T) {
 	})
 }
 
-func TestAccIPSecPolicyV2_withLifetimeUpdate(t *testing.T) {
+func TestAccIPSecPolicyVPNaaSV2_withLifetimeUpdate(t *testing.T) {
 	var policy ipsecpolicies.Policy
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
