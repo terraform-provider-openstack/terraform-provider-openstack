@@ -1,0 +1,66 @@
+name: functional-fwaas
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/functional-fwaas.yml'
+      - '**fw**'
+      - 'CHANGELOG.md'
+  schedule:
+    - cron: '0 0 * * *'
+jobs:
+  functional-fwaas:
+    strategy:
+      fail-fast: false
+      matrix:
+        name: ["master"]
+        openstack_version: ["master"]
+        ubuntu_version: ["20.04"]
+        devstack_conf_overrides: [
+          "enable_plugin neutron-fwaas https://opendev.org/openstack/neutron-fwaas master",
+          "enable_plugin neutron-dynamic-routing https://opendev.org/openstack/neutron-dynamic-routing master"
+        ]
+        include:
+          - name: "ussuri"
+            openstack_version: "stable/ussuri"
+            ubuntu_version: "18.04"
+            devstack_conf_overrides: |
+              enable_plugin neutron-fwaas https://opendev.org/openstack/neutron-fwaas stable/ussuri
+              enable_plugin neutron-dynamic-routing https://opendev.org/openstack/neutron-dynamic-routing stable/ussuri
+          - name: "train"
+            openstack_version: "stable/train"
+            ubuntu_version: "18.04"
+            devstack_conf_overrides: |
+              enable_plugin neutron-fwaas https://opendev.org/openstack/neutron-fwaas stable/train
+              enable_plugin neutron-dynamic-routing https://opendev.org/openstack/neutron-dynamic-routing train-eol
+    runs-on: ubuntu-${{ matrix.ubuntu_version }}
+    name: fwaas on OpenStack ${{ matrix.name }} with Neutron and run fwaas acceptance tests
+    steps:
+      - name: Checkout TPO
+        uses: actions/checkout@v3
+      - name: Deploy devstack
+        uses: EmilienM/devstack-action@v0.7
+        with:
+          branch: ${{ matrix.openstack_version }}
+          conf_overrides: |
+            Q_ML2_PLUGIN_EXT_DRIVERS=qos,port_security,dns_domain_keywords
+            ${{ matrix.devstack_conf_overrides }}
+          enabled_services: 'neutron-dns,neutron-qos,neutron-segments,neutron-trunk,neutron-uplink-status-propagation,neutron-network-segment-range,neutron-port-forwarding'
+      - name: Checkout go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.17'
+      - name: Run TPO acceptance tests
+        run: OS_FW_ENVIRONMENT=true ./scripts/acceptancetest.sh
+        env:
+          DEVSTACK_PATH: ${{ github.workspace }}/devstack
+          ACCEPTANCE_TESTS_FILTER: "fw"
+          OS_BRANCH: ${{ matrix.openstack_version }}
+      - name: Generate logs on failure
+        run: ./scripts/collectlogs.sh
+        if: failure()
+      - name: Upload logs artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: functional-fwaas-${{ matrix.name }}
+          path: /tmp/devstack-logs/*
