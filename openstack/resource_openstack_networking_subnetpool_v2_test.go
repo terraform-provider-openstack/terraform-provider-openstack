@@ -10,7 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools"
 )
 
-func TestAccNetworkingV2SubnetPoolBasic(t *testing.T) {
+func TestAccNetworkingV2SubnetPool_Basic(t *testing.T) {
 	var subnetPool subnetpools.SubnetPool
 
 	resource.Test(t, resource.TestCase{

@@ -16,6 +16,7 @@ import (
 )
 
 var (
+	osBranch                         = os.Getenv("OS_BRANCH")
 	osDBEnvironment                  = os.Getenv("OS_DB_ENVIRONMENT")
 	osDBDatastoreVersion             = os.Getenv("OS_DB_DATASTORE_VERSION")
 	osDBDatastoreType                = os.Getenv("OS_DB_DATASTORE_TYPE")
@@ -255,6 +256,28 @@ func testAccPreCheckHypervisor(t *testing.T) {
 	if osHypervisorEnvironment == "" {
 		t.Skip("This environment does not support Hypervisor data source tests")
 	}
+}
+
+// SkipReleasesBelow will have the test be skipped on releases below a certain
+// one. Releases are named such as 'stable/mitaka', master, etc.
+func testAccSkipReleasesBelow(t *testing.T, release string) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if IsReleasesBelow(t, release) {
+		t.Skipf("this is not supported below %s, testing in %s", release, osBranch)
+	}
+}
+
+// IsReleasesBelow will return true on releases below a certain
+// one. Releases are named such as 'stable/mitaka', master, etc.
+func IsReleasesBelow(t *testing.T, release string) bool {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if osBranch != "master" && osBranch < release {
+		return true
+	}
+	t.Logf("Target release %s is above the current branch %s", release, osBranch)
+	return false
 }
 
 func TestProvider(t *testing.T) {
