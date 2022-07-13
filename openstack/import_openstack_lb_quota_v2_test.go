@@ -14,6 +14,7 @@ func TestAccLBQuotaV2_importBasic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
 			testAccPreCheckLB(t)
+			testAccSkipReleasesBelow(t, "stable/victoria")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckIdentityV3ProjectDestroy,
