@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/functional-blockstorage_v3.yml'
       - '**blockstorage**'
+      - '!**v2**'
+      - '!**v1**'
       - 'CHANGELOG.md'
   schedule:
     - cron: '0 0 * * *'
