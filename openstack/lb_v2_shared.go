@@ -1115,8 +1115,8 @@ func expandLBMembersV2(members *schema.Set, lbClient *gophercloud.ServiceClient)
 			name := rawMap["name"].(string)
 			subnetID := rawMap["subnet_id"].(string)
 			weight := rawMap["weight"].(int)
-			monitor_port := rawMap["monitor_port"].(int)
-			monitor_address := rawMap["monitor_address"].(string)
+			monitorPort := rawMap["monitor_port"].(int)
+			monitorAddress := rawMap["monitor_address"].(string)
 			adminStateUp := rawMap["admin_state_up"].(bool)
 
 			member := octaviapools.BatchUpdateMemberOpts{
@@ -1125,8 +1125,8 @@ func expandLBMembersV2(members *schema.Set, lbClient *gophercloud.ServiceClient)
 				Name:           &name,
 				SubnetID:       &subnetID,
 				Weight:         &weight,
-				MonitorPort:    &monitor_port,
-				MonitorAddress: &monitor_address,
+				MonitorPort:    &monitorPort,
+				MonitorAddress: &monitorAddress,
 				AdminStateUp:   &adminStateUp,
 			}
 
