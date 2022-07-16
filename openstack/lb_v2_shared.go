@@ -683,7 +683,61 @@ func waitForLBV2Member(ctx context.Context, lbClient *gophercloud.ServiceClient,
 	return nil
 }
 
+func waitForLBV2OctaviaMember(ctx context.Context, lbClient *gophercloud.ServiceClient, parentPool *neutronpools.Pool, member *octaviapools.Member, target string, pending []string, timeout time.Duration) error {
+	log.Printf("[DEBUG] Waiting for member %s to become %s.", member.ID, target)
+
+	lbID, err := lbV2FindLBIDviaPool(lbClient, parentPool)
+	if err != nil {
+		return err
+	}
+
+	stateConf := &resource.StateChangeConf{
+		Target:     []string{target},
+		Pending:    pending,
+		Refresh:    resourceLBV2OctaviaMemberRefreshFunc(lbClient, lbID, parentPool.ID, member),
+		Timeout:    timeout,
+		Delay:      1 * time.Second,
+		MinTimeout: 1 * time.Second,
+	}
+
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if target == "DELETED" {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Error waiting for member %s to become %s: %s", member.ID, target, err)
+	}
+
+	return nil
+}
+
 func resourceLBV2MemberRefreshFunc(lbClient *gophercloud.ServiceClient, lbID string, poolID string, member *neutronpools.Member) resource.StateRefreshFunc {
+	if member.ProvisioningStatus != "" {
+		return func() (interface{}, string, error) {
+			lb, status, err := resourceLBV2LoadBalancerRefreshFunc(lbClient, lbID)()
+			if err != nil {
+				return lb, status, err
+			}
+			if !strSliceContains(getLbSkipStatuses(), status) {
+				return lb, status, nil
+			}
+
+			member, err := neutronpools.GetMember(lbClient, poolID, member.ID).Extract()
+			if err != nil {
+				return nil, "", err
+			}
+
+			return member, member.ProvisioningStatus, nil
+		}
+	}
+
+	return resourceLBV2LoadBalancerStatusRefreshFuncNeutron(lbClient, lbID, "member", member.ID, poolID)
+}
+
+func resourceLBV2OctaviaMemberRefreshFunc(lbClient *gophercloud.ServiceClient, lbID string, poolID string, member *octaviapools.Member) resource.StateRefreshFunc {
 	if member.ProvisioningStatus != "" {
 		return func() (interface{}, string, error) {
 			lb, status, err := resourceLBV2LoadBalancerRefreshFunc(lbClient, lbID)()
