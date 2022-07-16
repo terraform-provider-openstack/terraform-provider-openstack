@@ -98,7 +98,7 @@ func resourceMemberV2() *schema.Resource {
 			},
 
 			"monitor_port": {
-				Type:         schema.TypeString,
+				Type:         schema.TypeInt,
 				Default:      nil,
 				Optional:     true,
 				ForceNew:     false,
