@@ -118,15 +118,12 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	adminStateUp := d.Get("admin_state_up").(bool)
 
 	if config.UseOctavia {
-		monitorPort := d.Get("monitor_port").(int)
 		createOpts := octaviapools.CreateMemberOpts{
-			Name:           d.Get("name").(string),
-			ProjectID:      d.Get("tenant_id").(string),
-			Address:        d.Get("address").(string),
-			ProtocolPort:   d.Get("protocol_port").(int),
-			AdminStateUp:   &adminStateUp,
-			MonitorAddress: d.Get("monitor_address").(string),
-			MonitorPort:    &monitorPort,
+			Name:         d.Get("name").(string),
+			ProjectID:    d.Get("tenant_id").(string),
+			Address:      d.Get("address").(string),
+			ProtocolPort: d.Get("protocol_port").(int),
+			AdminStateUp: &adminStateUp,
 		}
 
 		// Must omit if not set
@@ -139,6 +136,15 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 		if v, ok := d.GetOkExists("weight"); ok {
 			weight := v.(int)
 			createOpts.Weight = &weight
+		}
+
+		if v, ok := d.GetOk("monitor_address"); ok {
+			createOpts.MonitorAddress = v.(string)
+		}
+
+		if v, ok := d.GetOk("monitor_port"); ok {
+			monitorPort := v.(int)
+			createOpts.MonitorPort = &monitorPort
 		}
 
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
