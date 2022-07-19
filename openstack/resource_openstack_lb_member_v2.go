@@ -188,7 +188,6 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 		d.SetId(member.ID)
 
 		return resourceMemberV2Read(ctx, d, meta)
-
 	}
 
 	createOpts := neutronpools.CreateMemberOpts{
@@ -380,7 +379,6 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		}
 
 		return resourceMemberV2Read(ctx, d, meta)
-
 	}
 
 	var updateOpts neutronpools.UpdateMemberOpts
