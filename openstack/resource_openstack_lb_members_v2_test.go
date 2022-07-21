@@ -237,10 +237,10 @@ resource "openstack_lb_members_v2" "members_1" {
   member {
     address = "192.168.199.111"
     protocol_port = 8080
-	monitor_address = "192.168.199.111"
-	monitor_port = 8088
-	subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
-	backup = true
+    monitor_address = "192.168.199.111"
+    monitor_port = 8088
+    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    backup = true
   }
 
   timeouts {
