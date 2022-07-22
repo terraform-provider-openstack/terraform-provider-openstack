@@ -1115,25 +1115,32 @@ func expandLBMembersV2(members *schema.Set, lbClient *gophercloud.ServiceClient)
 			name := rawMap["name"].(string)
 			subnetID := rawMap["subnet_id"].(string)
 			weight := rawMap["weight"].(int)
-			monitorPort := rawMap["monitor_port"].(int)
-			monitorAddress := rawMap["monitor_address"].(string)
 			adminStateUp := rawMap["admin_state_up"].(bool)
 
 			member := octaviapools.BatchUpdateMemberOpts{
-				Address:        rawMap["address"].(string),
-				ProtocolPort:   rawMap["protocol_port"].(int),
-				Name:           &name,
-				SubnetID:       &subnetID,
-				Weight:         &weight,
-				MonitorPort:    &monitorPort,
-				MonitorAddress: &monitorAddress,
-				AdminStateUp:   &adminStateUp,
+				Address:      rawMap["address"].(string),
+				ProtocolPort: rawMap["protocol_port"].(int),
+				Name:         &name,
+				SubnetID:     &subnetID,
+				Weight:       &weight,
+				AdminStateUp: &adminStateUp,
 			}
 
 			// backup requires octavia minor version 2.1. Only set when specified
 			if val, ok := rawMap["backup"]; ok {
 				backup := val.(bool)
 				member.Backup = &backup
+			}
+
+			// Only set monitor_port and monitor_address when explicitly specified, as they are optional arguments
+			if val, ok := rawMap["monitor_port"]; ok {
+				monitorPort := val.(int)
+				member.MonitorPort = &monitorPort
+			}
+
+			if val, ok := rawMap["monitor_address"]; ok {
+				monitorAddress := val.(string)
+				member.MonitorAddress = &monitorAddress
 			}
 
 			m = append(m, member)
