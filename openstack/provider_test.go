@@ -16,36 +16,35 @@ import (
 )
 
 var (
-	osBranch                         = os.Getenv("OS_BRANCH")
-	osDBEnvironment                  = os.Getenv("OS_DB_ENVIRONMENT")
-	osDBDatastoreVersion             = os.Getenv("OS_DB_DATASTORE_VERSION")
-	osDBDatastoreType                = os.Getenv("OS_DB_DATASTORE_TYPE")
-	osDeprecatedEnvironment          = os.Getenv("OS_DEPRECATED_ENVIRONMENT")
-	osDNSEnvironment                 = os.Getenv("OS_DNS_ENVIRONMENT")
-	osExtGwID                        = os.Getenv("OS_EXTGW_ID")
-	osFlavorID                       = os.Getenv("OS_FLAVOR_ID")
-	osFlavorName                     = os.Getenv("OS_FLAVOR_NAME")
-	osImageID                        = os.Getenv("OS_IMAGE_ID")
-	osImageName                      = os.Getenv("OS_IMAGE_NAME")
-	osMagnumFlavor                   = os.Getenv("OS_MAGNUM_FLAVOR")
-	osMagnumImage                    = os.Getenv("OS_MAGNUM_IMAGE")
-	osNetworkID                      = os.Getenv("OS_NETWORK_ID")
-	osPoolName                       = os.Getenv("OS_POOL_NAME")
-	osRegionName                     = os.Getenv("OS_REGION_NAME")
-	osSwiftEnvironment               = os.Getenv("OS_SWIFT_ENVIRONMENT")
-	osLbEnvironment                  = os.Getenv("OS_LB_ENVIRONMENT")
-	osFwEnvironment                  = os.Getenv("OS_FW_ENVIRONMENT")
-	osVpnEnvironment                 = os.Getenv("OS_VPN_ENVIRONMENT")
-	osUseOctavia                     = os.Getenv("OS_USE_OCTAVIA")
-	osOctaviaBatchMembersEnvironment = os.Getenv("OS_OCTAVIA_BATCH_MEMBERS_ENVIRONMENT")
-	osContainerInfraEnvironment      = os.Getenv("OS_CONTAINER_INFRA_ENVIRONMENT")
-	osSfsEnvironment                 = os.Getenv("OS_SFS_ENVIRONMENT")
-	osTransparentVlanEnvironment     = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
-	osKeymanagerEnvironment          = os.Getenv("OS_KEYMANAGER_ENVIRONMENT")
-	osGlanceimportEnvironment        = os.Getenv("OS_GLANCEIMPORT_ENVIRONMENT")
-	osHypervisorEnvironment          = os.Getenv("OS_HYPERVISOR_HOSTNAME")
-	osPortForwardingEnvironment      = os.Getenv("OS_PORT_FORWARDING_ENVIRONMENT")
-	osBlockStorageV2                 = os.Getenv("OS_BLOCKSTORAGE_V2")
+	osBranch                     = os.Getenv("OS_BRANCH")
+	osDBEnvironment              = os.Getenv("OS_DB_ENVIRONMENT")
+	osDBDatastoreVersion         = os.Getenv("OS_DB_DATASTORE_VERSION")
+	osDBDatastoreType            = os.Getenv("OS_DB_DATASTORE_TYPE")
+	osDeprecatedEnvironment      = os.Getenv("OS_DEPRECATED_ENVIRONMENT")
+	osDNSEnvironment             = os.Getenv("OS_DNS_ENVIRONMENT")
+	osExtGwID                    = os.Getenv("OS_EXTGW_ID")
+	osFlavorID                   = os.Getenv("OS_FLAVOR_ID")
+	osFlavorName                 = os.Getenv("OS_FLAVOR_NAME")
+	osImageID                    = os.Getenv("OS_IMAGE_ID")
+	osImageName                  = os.Getenv("OS_IMAGE_NAME")
+	osMagnumFlavor               = os.Getenv("OS_MAGNUM_FLAVOR")
+	osMagnumImage                = os.Getenv("OS_MAGNUM_IMAGE")
+	osNetworkID                  = os.Getenv("OS_NETWORK_ID")
+	osPoolName                   = os.Getenv("OS_POOL_NAME")
+	osRegionName                 = os.Getenv("OS_REGION_NAME")
+	osSwiftEnvironment           = os.Getenv("OS_SWIFT_ENVIRONMENT")
+	osLbEnvironment              = os.Getenv("OS_LB_ENVIRONMENT")
+	osFwEnvironment              = os.Getenv("OS_FW_ENVIRONMENT")
+	osVpnEnvironment             = os.Getenv("OS_VPN_ENVIRONMENT")
+	osUseOctavia                 = os.Getenv("OS_USE_OCTAVIA")
+	osContainerInfraEnvironment  = os.Getenv("OS_CONTAINER_INFRA_ENVIRONMENT")
+	osSfsEnvironment             = os.Getenv("OS_SFS_ENVIRONMENT")
+	osTransparentVlanEnvironment = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
+	osKeymanagerEnvironment      = os.Getenv("OS_KEYMANAGER_ENVIRONMENT")
+	osGlanceimportEnvironment    = os.Getenv("OS_GLANCEIMPORT_ENVIRONMENT")
+	osHypervisorEnvironment      = os.Getenv("OS_HYPERVISOR_HOSTNAME")
+	osPortForwardingEnvironment  = os.Getenv("OS_PORT_FORWARDING_ENVIRONMENT")
+	osBlockStorageV2             = os.Getenv("OS_BLOCKSTORAGE_V2")
 )
 
 var (
@@ -151,14 +150,6 @@ func testAccPreCheckUseOctavia(t *testing.T) {
 
 	if osUseOctavia == "" {
 		t.Skip("This environment does not support Octavia tests")
-	}
-}
-
-func testAccPreCheckOctaviaBatchMembersEnv(t *testing.T) {
-	testAccPreCheckRequiredEnvVars(t)
-
-	if osOctaviaBatchMembersEnvironment == "" {
-		t.Skip("This environment does not support Octavia batch member update tests")
 	}
 }
 

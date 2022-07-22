@@ -28,18 +28,6 @@ func testAccCheckLBV2MembersComputeHash(members *[]pools.Member, weight int, add
 	}
 }
 
-func testCheckResourceAttrWithIndexesAddr(name, format string, idx *int, value string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		return resource.TestCheckResourceAttr(name, fmt.Sprintf(format, *idx), value)(s)
-	}
-}
-
-func testCheckResourceAttrSetWithIndexesAddr(name, format string, idx *int) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		return resource.TestCheckResourceAttrSet(name, fmt.Sprintf(format, *idx))(s)
-	}
-}
-
 func TestAccLBV2Members_basic(t *testing.T) {
 	var members []pools.Member
 	var idx1 int
@@ -51,7 +39,7 @@ func TestAccLBV2Members_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
-			testAccPreCheckOctaviaBatchMembersEnv(t)
+			testAccSkipReleasesBelow(t, "stable/ussuri")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckLBV2MembersDestroy,
@@ -63,12 +51,10 @@ func TestAccLBV2Members_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.#", "2"),
 					testAccCheckLBV2MembersComputeHash(&members, 0, "192.168.199.110", &idx1),
 					testAccCheckLBV2MembersComputeHash(&members, 1, "192.168.199.111", &idx2),
-					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx1, "0"),
-					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx2, "1"),
-					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.backup", &idx1, "false"),
-					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.backup", &idx2, "true"),
-					testCheckResourceAttrSetWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.subnet_id", &idx1),
-					testCheckResourceAttrSetWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.subnet_id", &idx2),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.0.weight", "0"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.1.weight", "1"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.0.backup", "false"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.1.backup", "true"),
 				),
 			},
 			{
@@ -78,12 +64,10 @@ func TestAccLBV2Members_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.#", "2"),
 					testAccCheckLBV2MembersComputeHash(&members, 10, "192.168.199.110", &idx1),
 					testAccCheckLBV2MembersComputeHash(&members, 15, "192.168.199.111", &idx2),
-					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx1, "10"),
-					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx2, "15"),
-					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.backup", &idx1, "true"),
-					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.backup", &idx2, "false"),
-					testCheckResourceAttrSetWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.subnet_id", &idx1),
-					testCheckResourceAttrSetWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.subnet_id", &idx2),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.0.weight", "10"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.1.weight", "15"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.0.backup", "true"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.1.backup", "false"),
 				),
 			},
 			{
@@ -93,10 +77,10 @@ func TestAccLBV2Members_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.#", "2"),
 					testAccCheckLBV2MembersComputeHash(&members, 10, "192.168.199.110", &idx1),
 					testAccCheckLBV2MembersComputeHash(&members, 15, "192.168.199.111", &idx2),
-					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx1, "10"),
-					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.weight", &idx2, "15"),
-					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.subnet_id", &idx1, ""),
-					testCheckResourceAttrWithIndexesAddr("openstack_lb_members_v2.members_1", "member.%d.subnet_id", &idx2, ""),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.0.weight", "10"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.1.weight", "15"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.0.subnet_id", ""),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.1.subnet_id", ""),
 				),
 			},
 			{
