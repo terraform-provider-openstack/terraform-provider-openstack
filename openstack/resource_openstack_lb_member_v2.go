@@ -168,7 +168,6 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 		err = resource.Retry(timeout, func() *resource.RetryError {
 			member, err = octaviapools.CreateMember(lbClient, poolID, createOpts).Extract()
 
-			// neutronpools.Create(lbClient, poolID, createOpts).Extract()
 			if err != nil {
 				return checkForRetryableError(err)
 			}

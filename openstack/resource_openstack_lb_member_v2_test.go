@@ -96,6 +96,42 @@ func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestC
 	}
 }
 
+func TestAccLBV2Member_monitor(t *testing.T) {
+	var member1 pools.Member
+	var member2 pools.Member
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckLB(t)
+			testAccPreCheckUseOctavia(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2MemberDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: TestAccLbV2MemberConfigBasic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV2MemberExists("openstack_lb_member_v2.member_1", &member1),
+					testAccCheckLBV2MemberExists("openstack_lb_member_v2.member_2", &member2),
+					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "monitor_address", "192.168.199.110"),
+					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "monitor_port", "8080"),
+					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_2", "monitor_address", "192.168.199.111"),
+					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "monitor_port", "8080"),
+				),
+			},
+			{
+				Config: TestAccLbV2MemberConfigUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_2", "monitor_address", "192.168.199.110"),
+					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "monitor_port", "443"),
+				),
+			},
+		},
+	})
+}
+
 const TestAccLbV2MemberConfigBasic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
@@ -141,6 +177,8 @@ resource "openstack_lb_member_v2" "member_1" {
   pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
   weight = 0
+  monitor_address = "192.168.199.110"
+  monitor_port = 8080
 
   timeouts {
     create = "5m"
@@ -154,6 +192,8 @@ resource "openstack_lb_member_v2" "member_2" {
   protocol_port = 8080
   pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  monitor_address = "192.168.199.111"
+  monitor_port = 8080
 
   timeouts {
     create = "5m"
@@ -208,6 +248,8 @@ resource "openstack_lb_member_v2" "member_1" {
   admin_state_up = "true"
   pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  monitor_address = "192.168.199.110"
+  monitor_port = 8080
 
   timeouts {
     create = "5m"
@@ -223,6 +265,8 @@ resource "openstack_lb_member_v2" "member_2" {
   admin_state_up = "true"
   pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  monitor_address = "192.168.199.110"
+  monitor_port = 443
 
   timeouts {
     create = "5m"
