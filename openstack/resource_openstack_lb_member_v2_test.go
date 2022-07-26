@@ -69,6 +69,8 @@ func TestAccLBV2Member_monitor(t *testing.T) {
 			{
 				Config: TestAccLbV2MemberMonitorUpdate,
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "monitor_address", "192.168.199.110"),
+					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "monitor_port", "8080"),
 					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_2", "monitor_address", "192.168.199.110"),
 					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_2", "monitor_port", "443"),
 				),
