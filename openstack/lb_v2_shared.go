@@ -1135,12 +1135,16 @@ func expandLBMembersV2(members *schema.Set, lbClient *gophercloud.ServiceClient)
 			// Only set monitor_port and monitor_address when explicitly specified, as they are optional arguments
 			if val, ok := rawMap["monitor_port"]; ok {
 				monitorPort := val.(int)
-				member.MonitorPort = &monitorPort
+				if monitorPort > 0 {
+					member.MonitorPort = &monitorPort
+				}
 			}
 
 			if val, ok := rawMap["monitor_address"]; ok {
 				monitorAddress := val.(string)
-				member.MonitorAddress = &monitorAddress
+				if monitorAddress != "" {
+					member.MonitorAddress = &monitorAddress
+				}
 			}
 
 			m = append(m, member)
