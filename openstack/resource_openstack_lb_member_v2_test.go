@@ -330,7 +330,7 @@ resource "openstack_lb_member_v2" "member_2" {
   protocol_port = 8080
   pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
-  monitor_address = "192.168.199.111
+  monitor_address = "192.168.199.111"
   monitor_port = 8080
 
   timeouts {
