@@ -109,6 +109,9 @@ The following arguments are supported:
 * `content_type` - (Optional) The MIME type for the container. Changing this
     updates the MIME type.
 
+* `storage_policy` - (Optional) The storage policy to be used for the container. 
+    Changing this creates a new container.
+
 * `force_destroy` -  (Optional, Default:false ) A boolean that indicates all objects should be deleted from the container so that the container can be destroyed without error. These objects are not recoverable.
 
 The `versioning` block supports:
@@ -130,6 +133,7 @@ The following attributes are exported:
 * `versioning` - See Argument Reference above.
 * `metadata` - See Argument Reference above.
 * `content_type` - See Argument Reference above.
+* `storage_policy` - See Argument Reference above.
 
 ## Import
 
