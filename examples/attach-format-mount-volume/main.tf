@@ -1,30 +1,30 @@
 resource "openstack_compute_keypair_v2" "terraform" {
   name       = "terraform"
-  public_key = "${file("${var.ssh_key_file}.pub")}"
+  public_key = file("${var.ssh_key_file}.pub")
 }
 
 resource "openstack_compute_instance_v2" "my_instance" {
   name            = "my_instance"
-  image_name      = "${var.image}"
-  flavor_name     = "${var.flavor}"
-  key_pair        = "${openstack_compute_keypair_v2.terraform.name}"
+  image_name      = var.image
+  flavor_name     = var.flavor
+  key_pair        = openstack_compute_keypair_v2.terraform.name
   security_groups = ["default"]
   network {
-    name = "${var.network_name}"
+    name = var.network_name
   }
 }
 
 resource "openstack_networking_floatingip_v2" "fip" {
-  pool = "${var.pool}"
+  pool = var.pool
 }
 
 resource "openstack_compute_floatingip_associate_v2" "fip" {
-  instance_id = "${openstack_compute_instance_v2.my_instance.id}"
-  floating_ip = "${openstack_networking_floatingip_v2.fip.address}"
+  instance_id = openstack_compute_instance_v2.my_instance.id
+  floating_ip = openstack_networking_floatingip_v2.fip.address
   connection {
-    host        = "${openstack_networking_floatingip_v2.fip.address}"
-    user        = "${var.ssh_user_name}"
-    private_key = "${file(var.ssh_key_file)}"
+    host        = openstack_networking_floatingip_v2.fip.address
+    user        = var.ssh_user_name
+    private_key = file(var.ssh_key_file)
   }
 
   provisioner "local-exec" {
