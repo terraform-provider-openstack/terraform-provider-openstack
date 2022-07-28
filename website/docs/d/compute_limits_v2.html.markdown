@@ -31,6 +31,7 @@ data "openstack_compute_limits_v2" "limits" {
 The following attributes are exported:
 
 * `project_id` - See Argument Reference above.
+* `region` - See Argument Reference above.
 * `max_total_cores` - The number of allowed server cores for the tenant.
 * `max_image_meta` - The number of allowed metadata items for each image. Starting from version 2.39 this field is dropped from ‘os-limits’ response, because ‘image-metadata’ proxy API was deprecated. Available until version 2.38.
 * `max_server_meta` - The number of allowed server groups for the tenant.

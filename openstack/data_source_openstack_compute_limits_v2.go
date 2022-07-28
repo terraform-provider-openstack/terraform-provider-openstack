@@ -15,6 +15,13 @@ func dataSourceComputeLimitsV2() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceComputeLimitsV2Read,
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+
 			"project_id": {
 				Type:     schema.TypeString,
 				Required: true,
