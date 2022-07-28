@@ -2,6 +2,9 @@
 # due to barbican's default policies changing completely
 # on wallaby
 name: functional-keymanager
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
   pull_request:
     paths:
