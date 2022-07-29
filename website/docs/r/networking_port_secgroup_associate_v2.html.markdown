@@ -99,3 +99,11 @@ The following attributes are exported:
 * `security_group_ids` - See Argument Reference above.
 * `all_security_group_ids` - The collection of Security Group IDs on the port
   which have been explicitly and implicitly added.
+
+## Import
+
+Port security group association can be imported using the `id` of the port, e.g.
+
+```
+$ terraform import openstack_networking_port_secgroup_associate_v2.port_1 eae26a3e-1c33-4cc1-9c31-0cd729c438a1
+```

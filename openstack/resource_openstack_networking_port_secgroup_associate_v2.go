@@ -17,6 +17,9 @@ func resourceNetworkingPortSecGroupAssociateV2() *schema.Resource {
 		ReadContext:   resourceNetworkingPortSecGroupAssociateV2Read,
 		UpdateContext: resourceNetworkingPortSecGroupAssociateV2Update,
 		DeleteContext: resourceNetworkingPortSecGroupAssociateV2Delete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -110,7 +113,9 @@ func resourceNetworkingPortSecGroupAssociateV2Read(ctx context.Context, d *schem
 		return diag.FromErr(CheckDeleted(d, err, "Error fetching port security groups"))
 	}
 
-	var enforce bool
+	// We can assume enforce is `false` as it is defaulted to it. If user
+	// passes `true` it will be overwritten in the if clause
+	enforce := false
 	if v, ok := d.GetOkExists("enforce"); ok {
 		enforce = v.(bool)
 	}
@@ -128,6 +133,8 @@ func resourceNetworkingPortSecGroupAssociateV2Read(ctx context.Context, d *schem
 		}
 	}
 
+	d.Set("enforce", enforce)
+	d.Set("port_id", d.Id())
 	d.Set("region", GetRegion(d, config))
 
 	return nil
