@@ -44,6 +44,35 @@ func TestAccObjectStorageV1Container_basic(t *testing.T) {
 	})
 }
 
+func TestAccObjectStorageV1Container_storagePolicy(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckSwift(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckObjectStorageV1ContainerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObjectStorageV1ContainerStoragePolicy,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_container_v1.container_1", "name", "container_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_container_v1.container_1", "metadata.test", "true"),
+					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_container_v1.container_1", "metadata.upperTest", "true"),
+					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_container_v1.container_1", "content_type", "application/json"),
+					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_container_v1.container_1", "storage_policy", "Policy-0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckObjectStorageV1ContainerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	objectStorageClient, err := config.ObjectStorageV1Client(osRegionName)
@@ -100,5 +129,17 @@ resource "openstack_objectstorage_container_v1" "container_1" {
     test = "true"
   }
   content_type = "text/plain"
+}
+`
+
+const testAccObjectStorageV1ContainerStoragePolicy = `
+resource "openstack_objectstorage_container_v1" "container_1" {
+  name = "container_1"
+  metadata = {
+    test = "true"
+    upperTest = "true"
+  }
+  content_type = "application/json"
+  storage_policy = "Policy-0"
 }
 `

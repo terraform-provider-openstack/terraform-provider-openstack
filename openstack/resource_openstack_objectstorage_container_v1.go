@@ -93,6 +93,12 @@ func resourceObjectStorageContainerV1() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"storage_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -112,6 +118,7 @@ func resourceObjectStorageContainerV1Create(ctx context.Context, d *schema.Resou
 		ContainerSyncKey: d.Get("container_sync_key").(string),
 		ContainerWrite:   d.Get("container_write").(string),
 		ContentType:      d.Get("content_type").(string),
+		StoragePolicy:    d.Get("storage_policy").(string),
 		Metadata:         resourceContainerMetadataV2(d),
 	}
 
@@ -175,6 +182,10 @@ func resourceObjectStorageContainerV1Read(ctx context.Context, d *schema.Resourc
 
 	if len(headers.Write) > 0 && headers.Write[0] != "" {
 		d.Set("container_write", strings.Join(headers.Write, ","))
+	}
+
+	if len(headers.StoragePolicy) > 0 {
+		d.Set("storage_policy", headers.StoragePolicy)
 	}
 
 	versioningResource := resourceObjectStorageContainerV1().Schema["versioning"].Elem.(*schema.Resource)
