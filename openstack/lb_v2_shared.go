@@ -1090,14 +1090,16 @@ func flattenLBMembersV2(members []octaviapools.Member) []map[string]interface{} 
 
 	for i, member := range members {
 		m[i] = map[string]interface{}{
-			"name":           member.Name,
-			"weight":         member.Weight,
-			"admin_state_up": member.AdminStateUp,
-			"subnet_id":      member.SubnetID,
-			"address":        member.Address,
-			"protocol_port":  member.ProtocolPort,
-			"id":             member.ID,
-			"backup":         member.Backup,
+			"name":            member.Name,
+			"weight":          member.Weight,
+			"admin_state_up":  member.AdminStateUp,
+			"subnet_id":       member.SubnetID,
+			"address":         member.Address,
+			"protocol_port":   member.ProtocolPort,
+			"monitor_port":    member.MonitorPort,
+			"monitor_address": member.MonitorAddress,
+			"id":              member.ID,
+			"backup":          member.Backup,
 		}
 	}
 
@@ -1128,6 +1130,21 @@ func expandLBMembersV2(members *schema.Set, lbClient *gophercloud.ServiceClient)
 			if val, ok := rawMap["backup"]; ok {
 				backup := val.(bool)
 				member.Backup = &backup
+			}
+
+			// Only set monitor_port and monitor_address when explicitly specified, as they are optional arguments
+			if val, ok := rawMap["monitor_port"]; ok {
+				monitorPort := val.(int)
+				if monitorPort > 0 {
+					member.MonitorPort = &monitorPort
+				}
+			}
+
+			if val, ok := rawMap["monitor_address"]; ok {
+				monitorAddress := val.(string)
+				if monitorAddress != "" {
+					member.MonitorAddress = &monitorAddress
+				}
 			}
 
 			m = append(m, member)

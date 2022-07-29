@@ -55,6 +55,10 @@ func TestAccLBV2Members_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.1.weight", "1"),
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.0.backup", "false"),
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.1.backup", "true"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.0.monitor_address", "192.168.199.110"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.1.monitor_address", "192.168.199.111"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.0.monitor_port", "8088"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.1.monitor_port", "8088"),
 				),
 			},
 			{
@@ -68,6 +72,10 @@ func TestAccLBV2Members_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.1.weight", "15"),
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.0.backup", "true"),
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.1.backup", "false"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.0.monitor_address", "192.168.199.10"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.1.monitor_address", "192.168.199.11"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.0.monitor_port", "8080"),
+					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.1.monitor_port", "8080"),
 				),
 			},
 			{
@@ -202,6 +210,8 @@ resource "openstack_lb_members_v2" "members_1" {
   member {
     address = "192.168.199.110"
     protocol_port = 8080
+    monitor_address = "192.168.199.110"
+    monitor_port = 8088
     subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
     weight = 0
   }
@@ -209,8 +219,10 @@ resource "openstack_lb_members_v2" "members_1" {
   member {
     address = "192.168.199.111"
     protocol_port = 8080
-	subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
-	backup = true
+    monitor_address = "192.168.199.111"
+    monitor_port = 8088
+    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    backup = true
   }
 
   timeouts {
@@ -259,6 +271,8 @@ resource "openstack_lb_members_v2" "members_1" {
   member {
     address = "192.168.199.110"
     protocol_port = 8080
+    monitor_address = "192.168.199.10"
+    monitor_port = 8080
     weight = 10
     admin_state_up = "true"
     subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
@@ -268,10 +282,12 @@ resource "openstack_lb_members_v2" "members_1" {
   member {
     address = "192.168.199.111"
     protocol_port = 8080
+    monitor_address = "192.168.199.11"
+    monitor_port = 8080
     weight = 15
     admin_state_up = "true"
-	subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
-	backup = false
+    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    backup = false
   }
 
   timeouts {

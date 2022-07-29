@@ -66,6 +66,12 @@ The `member` block supports:
   example, a member with a weight of 10 receives five times as much traffic
   as a member with a weight of 2. Defaults to 1.
 
+* `monitor_port` - (Optional) An alternate protocol port used for health 
+  monitoring a backend member.
+
+* `monitor_address` - (Optional) An alternate IP address used for health 
+monitoring a backend member.
+
 * `admin_state_up` - (Optional) The administrative state of the member.
   A valid value is true (UP) or false (DOWN). Defaults to true.
 
