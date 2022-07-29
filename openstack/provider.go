@@ -270,6 +270,7 @@ func Provider() *schema.Provider {
 			"openstack_compute_hypervisor_v2":                    dataSourceComputeHypervisorV2(),
 			"openstack_compute_keypair_v2":                       dataSourceComputeKeypairV2(),
 			"openstack_compute_quotaset_v2":                      dataSourceComputeQuotasetV2(),
+			"openstack_compute_limits_v2":                        dataSourceComputeLimitsV2(),
 			"openstack_containerinfra_nodegroup_v1":              dataSourceContainerInfraNodeGroupV1(),
 			"openstack_containerinfra_clustertemplate_v1":        dataSourceContainerInfraClusterTemplateV1(),
 			"openstack_containerinfra_cluster_v1":                dataSourceContainerInfraCluster(),
