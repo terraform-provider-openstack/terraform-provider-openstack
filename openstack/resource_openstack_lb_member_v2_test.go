@@ -28,12 +28,14 @@ func TestAccLBV2Member_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MemberExists("openstack_lb_member_v2.member_1", &member1),
 					testAccCheckLBV2MemberExists("openstack_lb_member_v2.member_2", &member2),
+					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "backup", "true"),
 				),
 			},
 			{
 				Config: TestAccLbV2MemberConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "weight", "10"),
+					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "backup", "false"),
 					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_2", "weight", "15"),
 				),
 			},
@@ -179,6 +181,7 @@ resource "openstack_lb_member_v2" "member_1" {
   pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
   weight = 0
+  backup = true
 
   timeouts {
     create = "5m"
@@ -246,6 +249,7 @@ resource "openstack_lb_member_v2" "member_1" {
   admin_state_up = "true"
   pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  backup = false
 
   timeouts {
     create = "5m"

@@ -60,6 +60,9 @@ The following arguments are supported:
 * `monitor_port` - (Optional) An alternate protocol port used for health monitoring a backend member.
   Available only for Octavia
 
+* `backup` - (Optional) Boolean that indicates whether that member works as a backup or not. Available 
+  only for Octavia >= 2.1.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -75,6 +78,7 @@ The following attributes are exported:
 * `protocol_port` - See Argument Reference above.
 * `monitor_address` - See Argument reference above.
 * `monitor_port` - See Argument reference above.
+* `backup` - See Argument reference above.
 
 ## Import
 
