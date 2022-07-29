@@ -12,7 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
+	octaviapools "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
+	neutronpools "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 )
 
 func resourceMemberV2() *schema.Resource {
@@ -88,6 +89,21 @@ func resourceMemberV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+
+			"monitor_address": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  nil,
+				ForceNew: false,
+			},
+
+			"monitor_port": {
+				Type:         schema.TypeInt,
+				Default:      nil,
+				Optional:     true,
+				ForceNew:     false,
+				ValidateFunc: validation.IntBetween(1, 65535),
+			},
 		},
 	}
 }
@@ -100,7 +116,80 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
-	createOpts := pools.CreateMemberOpts{
+
+	if config.UseOctavia {
+		createOpts := octaviapools.CreateMemberOpts{
+			Name:         d.Get("name").(string),
+			ProjectID:    d.Get("tenant_id").(string),
+			Address:      d.Get("address").(string),
+			ProtocolPort: d.Get("protocol_port").(int),
+			AdminStateUp: &adminStateUp,
+		}
+
+		// Must omit if not set
+		if v, ok := d.GetOk("subnet_id"); ok {
+			createOpts.SubnetID = v.(string)
+		}
+
+		// Set the weight only if it's defined in the configuration.
+		// This prevents all members from being created with a default weight of 0.
+		if v, ok := d.GetOkExists("weight"); ok {
+			weight := v.(int)
+			createOpts.Weight = &weight
+		}
+
+		if v, ok := d.GetOk("monitor_address"); ok {
+			createOpts.MonitorAddress = v.(string)
+		}
+
+		if v, ok := d.GetOk("monitor_port"); ok {
+			monitorPort := v.(int)
+			createOpts.MonitorPort = &monitorPort
+		}
+
+		log.Printf("[DEBUG] Create Options: %#v", createOpts)
+
+		// Get a clean copy of the parent pool.
+		poolID := d.Get("pool_id").(string)
+		parentPool, err := neutronpools.Get(lbClient, poolID).Extract()
+		if err != nil {
+			return diag.Errorf("Unable to retrieve parent pool %s: %s", poolID, err)
+		}
+
+		// Wait for parent pool to become active before continuing
+		timeout := d.Timeout(schema.TimeoutCreate)
+		err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		log.Printf("[DEBUG] Attempting to create member")
+		var member *octaviapools.Member
+		err = resource.Retry(timeout, func() *resource.RetryError {
+			member, err = octaviapools.CreateMember(lbClient, poolID, createOpts).Extract()
+
+			if err != nil {
+				return checkForRetryableError(err)
+			}
+			return nil
+		})
+
+		if err != nil {
+			return diag.Errorf("Error creating member: %s", err)
+		}
+
+		// Wait for member to become active before continuing
+		err = waitForLBV2OctaviaMember(ctx, lbClient, parentPool, member, "ACTIVE", getLbPendingStatuses(), timeout)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		d.SetId(member.ID)
+
+		return resourceMemberV2Read(ctx, d, meta)
+	}
+
+	createOpts := neutronpools.CreateMemberOpts{
 		Name:         d.Get("name").(string),
 		TenantID:     d.Get("tenant_id").(string),
 		Address:      d.Get("address").(string),
@@ -124,7 +213,7 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 
 	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
-	parentPool, err := pools.Get(lbClient, poolID).Extract()
+	parentPool, err := neutronpools.Get(lbClient, poolID).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to retrieve parent pool %s: %s", poolID, err)
 	}
@@ -137,9 +226,11 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	log.Printf("[DEBUG] Attempting to create member")
-	var member *pools.Member
+	var member *neutronpools.Member
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		member, err = pools.CreateMember(lbClient, poolID, createOpts).Extract()
+		member, err = neutronpools.CreateMember(lbClient, poolID, createOpts).Extract()
+
+		// neutronpools.Create(lbClient, poolID, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -170,7 +261,29 @@ func resourceMemberV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 
 	poolID := d.Get("pool_id").(string)
 
-	member, err := pools.GetMember(lbClient, poolID, d.Id()).Extract()
+	if config.UseOctavia {
+		member, err := octaviapools.GetMember(lbClient, poolID, d.Id()).Extract()
+		if err != nil {
+			return diag.FromErr(CheckDeleted(d, err, "member"))
+		}
+
+		log.Printf("[DEBUG] Retrieved member %s: %#v", d.Id(), member)
+
+		d.Set("name", member.Name)
+		d.Set("weight", member.Weight)
+		d.Set("admin_state_up", member.AdminStateUp)
+		d.Set("tenant_id", member.ProjectID)
+		d.Set("subnet_id", member.SubnetID)
+		d.Set("address", member.Address)
+		d.Set("protocol_port", member.ProtocolPort)
+		d.Set("region", GetRegion(d, config))
+		d.Set("monitor_address", member.MonitorAddress)
+		d.Set("monitor_port", member.MonitorPort)
+
+		return nil
+	}
+
+	member, err := neutronpools.GetMember(lbClient, poolID, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "member"))
 	}
@@ -196,7 +309,78 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	var updateOpts pools.UpdateMemberOpts
+	if config.UseOctavia {
+		var updateOpts octaviapools.UpdateMemberOpts
+		if d.HasChange("name") {
+			name := d.Get("name").(string)
+			updateOpts.Name = &name
+		}
+		if d.HasChange("weight") {
+			weight := d.Get("weight").(int)
+			updateOpts.Weight = &weight
+		}
+		if d.HasChange("admin_state_up") {
+			asu := d.Get("admin_state_up").(bool)
+			updateOpts.AdminStateUp = &asu
+		}
+		if d.HasChange("monitor_address") {
+			monitorAddress := d.Get("monitor_address").(string)
+			updateOpts.MonitorAddress = &monitorAddress
+		}
+		if d.HasChange("monitor_port") {
+			monitorPort := d.Get("monitor_port").(int)
+			updateOpts.MonitorPort = &monitorPort
+		}
+
+		// Get a clean copy of the parent pool.
+		poolID := d.Get("pool_id").(string)
+		parentPool, err := neutronpools.Get(lbClient, poolID).Extract()
+		if err != nil {
+			return diag.Errorf("Unable to retrieve parent pool %s: %s", poolID, err)
+		}
+
+		// Get a clean copy of the member.
+		member, err := octaviapools.GetMember(lbClient, poolID, d.Id()).Extract()
+		if err != nil {
+			return diag.Errorf("Unable to retrieve member: %s: %s", d.Id(), err)
+		}
+
+		// Wait for parent pool to become active before continuing.
+		timeout := d.Timeout(schema.TimeoutUpdate)
+		err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		// Wait for the member to become active before continuing.
+		err = waitForLBV2OctaviaMember(ctx, lbClient, parentPool, member, "ACTIVE", getLbPendingStatuses(), timeout)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		log.Printf("[DEBUG] Updating member %s with options: %#v", d.Id(), updateOpts)
+		err = resource.Retry(timeout, func() *resource.RetryError {
+			_, err = octaviapools.UpdateMember(lbClient, poolID, d.Id(), updateOpts).Extract()
+			if err != nil {
+				return checkForRetryableError(err)
+			}
+			return nil
+		})
+
+		if err != nil {
+			return diag.Errorf("Unable to update member %s: %s", d.Id(), err)
+		}
+
+		// Wait for the member to become active before continuing.
+		err = waitForLBV2OctaviaMember(ctx, lbClient, parentPool, member, "ACTIVE", getLbPendingStatuses(), timeout)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		return resourceMemberV2Read(ctx, d, meta)
+	}
+
+	var updateOpts neutronpools.UpdateMemberOpts
 	if d.HasChange("name") {
 		name := d.Get("name").(string)
 		updateOpts.Name = &name
@@ -212,13 +396,13 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 
 	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
-	parentPool, err := pools.Get(lbClient, poolID).Extract()
+	parentPool, err := neutronpools.Get(lbClient, poolID).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to retrieve parent pool %s: %s", poolID, err)
 	}
 
 	// Get a clean copy of the member.
-	member, err := pools.GetMember(lbClient, poolID, d.Id()).Extract()
+	member, err := neutronpools.GetMember(lbClient, poolID, d.Id()).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to retrieve member: %s: %s", d.Id(), err)
 	}
@@ -238,7 +422,7 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[DEBUG] Updating member %s with options: %#v", d.Id(), updateOpts)
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		_, err = pools.UpdateMember(lbClient, poolID, d.Id(), updateOpts).Extract()
+		_, err = neutronpools.UpdateMember(lbClient, poolID, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -265,15 +449,58 @@ func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	if config.UseOctavia {
+		// Get a clean copy of the parent pool.
+		poolID := d.Get("pool_id").(string)
+		parentPool, err := neutronpools.Get(lbClient, poolID).Extract()
+		if err != nil {
+			return diag.Errorf("Unable to retrieve parent pool (%s) for the member: %s", poolID, err)
+		}
+
+		// Get a clean copy of the member.
+		member, err := octaviapools.GetMember(lbClient, poolID, d.Id()).Extract()
+		if err != nil {
+			return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve member"))
+		}
+
+		// Wait for parent pool to become active before continuing.
+		timeout := d.Timeout(schema.TimeoutDelete)
+		err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
+		if err != nil {
+			return diag.FromErr(CheckDeleted(d, err, "Error waiting for the members pool status"))
+		}
+
+		log.Printf("[DEBUG] Attempting to delete member %s", d.Id())
+		err = resource.Retry(timeout, func() *resource.RetryError {
+			err = neutronpools.DeleteMember(lbClient, poolID, d.Id()).ExtractErr()
+			if err != nil {
+				return checkForRetryableError(err)
+			}
+			return nil
+		})
+
+		if err != nil {
+			return diag.FromErr(CheckDeleted(d, err, "Error deleting member"))
+		}
+
+		// Wait for the member to become DELETED.
+		err = waitForLBV2OctaviaMember(ctx, lbClient, parentPool, member, "DELETED", getLbPendingDeleteStatuses(), timeout)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		return nil
+	}
+
 	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
-	parentPool, err := pools.Get(lbClient, poolID).Extract()
+	parentPool, err := neutronpools.Get(lbClient, poolID).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to retrieve parent pool (%s) for the member: %s", poolID, err)
 	}
 
 	// Get a clean copy of the member.
-	member, err := pools.GetMember(lbClient, poolID, d.Id()).Extract()
+	member, err := neutronpools.GetMember(lbClient, poolID, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve member"))
 	}
@@ -287,7 +514,7 @@ func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[DEBUG] Attempting to delete member %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		err = pools.DeleteMember(lbClient, poolID, d.Id()).ExtractErr()
+		err = neutronpools.DeleteMember(lbClient, poolID, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}

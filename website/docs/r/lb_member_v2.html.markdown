@@ -54,6 +54,12 @@ The following arguments are supported:
 * `admin_state_up` - (Optional) The administrative state of the member.
   A valid value is true (UP) or false (DOWN). Defaults to true.
 
+* `monitor_address` - (Optional) An alternate IP address used for health monitoring a backend member.
+  Available only for Octavia
+
+* `monitor_port` - (Optional) An alternate protocol port used for health monitoring a backend member.
+  Available only for Octavia
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -67,6 +73,8 @@ The following attributes are exported:
 * `pool_id` - See Argument Reference above.
 * `address` - See Argument Reference above.
 * `protocol_port` - See Argument Reference above.
+* `monitor_address` - See Argument reference above.
+* `monitor_port` - See Argument reference above.
 
 ## Import
 
