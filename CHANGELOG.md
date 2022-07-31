@@ -1,16 +1,27 @@
-## 1.48.0 (Unreleased)
+## 1.48.0 (30 July, 2022)
+
+FEATURES
+
+* __New Resource__: `containerinfra_nodegroup_v1` ([#1364](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1364))
+* __New Data Source__: `containerinfra_nodegroup_v1` ([#1364](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1364))
+* __New Data Source__: `openstack_compute_limits_v2` ([#1418](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/
+1418))
 
 IMPROVEMENTS
 
 * Added `user_id` argument to `compute_keypair_v2` resource ([#1349](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1349))
-* Added `containerinfra_nodegroup_v1` resource and datasource ([#1364](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1364))
 * Added rebuild support for `compute_instance_v2` resource so `image_id`, `image_name` and `personality` won't create a new resource anymore ([#1368](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1368))
+* Added `monitor_port` and `monitor_address` to `lb_members_v2` ([#1363](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1363))
+* Added `monitor_port` and `monitor_address` to `lb_member_v2` ([#1390](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1390))
+* Added ability to import `openstack_networking_port_secgroup_associate_v2` ([#1415](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1415))
+* Added `storage_policy` to `objectstorage_container_v1` ([#1416](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1416))
 
 BUG FIXES
 
 * Fixed panic on ignored error from `net.ParseCIDR(cidr)` ([#1377](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1377))
 * Fixed required `region` attribute on `networking_quota_v2` datasource ([#1374](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1374))
 * Fixed not setting `properties` on `images_image_v2` datasource ([#1370](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1370))
+* Fixed handling of missing flavors in `openstack_compute_instance_v2` ([#1362](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1362))
 
 ## 1.47.0 (7 February, 2022)
 
