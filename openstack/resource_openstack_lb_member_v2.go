@@ -90,6 +90,11 @@ func resourceMemberV2() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"backup": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+
 			"monitor_address": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -145,6 +150,13 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 		if v, ok := d.GetOk("monitor_port"); ok {
 			monitorPort := v.(int)
 			createOpts.MonitorPort = &monitorPort
+		}
+
+		// Only set backup if it is defined by user as it requires
+		// version 2.1 or later
+		if v, ok := d.GetOk("backup"); ok {
+			backup := v.(bool)
+			createOpts.Backup = &backup
 		}
 
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -279,6 +291,7 @@ func resourceMemberV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 		d.Set("region", GetRegion(d, config))
 		d.Set("monitor_address", member.MonitorAddress)
 		d.Set("monitor_port", member.MonitorPort)
+		d.Set("backup", member.Backup)
 
 		return nil
 	}
@@ -330,6 +343,10 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		if d.HasChange("monitor_port") {
 			monitorPort := d.Get("monitor_port").(int)
 			updateOpts.MonitorPort = &monitorPort
+		}
+		if d.HasChange("backup") {
+			backup := d.Get("backup").(bool)
+			updateOpts.Backup = &backup
 		}
 
 		// Get a clean copy of the parent pool.
