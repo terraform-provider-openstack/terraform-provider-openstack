@@ -4,8 +4,7 @@ FEATURES
 
 * __New Resource__: `containerinfra_nodegroup_v1` ([#1364](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1364))
 * __New Data Source__: `containerinfra_nodegroup_v1` ([#1364](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1364))
-* __New Data Source__: `openstack_compute_limits_v2` ([#1418](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/
-1418))
+* __New Data Source__: `openstack_compute_limits_v2` ([#1418](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1418))
 
 IMPROVEMENTS
 
