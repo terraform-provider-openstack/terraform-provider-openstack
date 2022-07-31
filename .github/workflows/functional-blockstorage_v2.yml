@@ -1,6 +1,9 @@
 # Functional testing for blockstorage_v2 which was deprecated on Pike
 # and completely removed on Xena
 name: functional-blockstorage_v2
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
   pull_request:
     paths:

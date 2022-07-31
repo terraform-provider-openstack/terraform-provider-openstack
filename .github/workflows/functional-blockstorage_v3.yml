@@ -1,5 +1,8 @@
 # Functional testing for blockstorage_v3
 name: functional-blockstorage_v3
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
   pull_request:
     paths:
