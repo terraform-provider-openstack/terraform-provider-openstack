@@ -121,6 +121,14 @@ func dataSourceComputeInstanceV2() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"created": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -145,6 +153,8 @@ func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData
 	d.SetId(server.ID)
 
 	d.Set("name", server.Name)
+	d.Set("created", server.Created.String())
+	d.Set("updated", server.Updated.String())
 	d.Set("image_id", server.Image["ID"])
 
 	// Get the instance network and address information

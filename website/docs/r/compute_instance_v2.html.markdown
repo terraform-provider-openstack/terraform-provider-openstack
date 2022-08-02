@@ -553,6 +553,8 @@ The following attributes are exported:
 * `tags` - See Argument Reference above.
 * `all_tags` - The collection of tags assigned on the instance, which have
     been explicitly and implicitly added.
+* `created` - The creation time of the instance.
+* `updated` - The time when the instance was last updated.
 
 ## Notes
 
