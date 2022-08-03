@@ -434,6 +434,14 @@ func resourceComputeInstanceV2() *schema.Resource {
 					},
 				},
 			},
+			"created": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 		CustomizeDiff: customdiff.All(
 			// OpenStack cannot resize an instance, if its original flavor is deleted, that is why
@@ -659,6 +667,8 @@ func resourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, me
 	log.Printf("[DEBUG] Retrieved Server %s: %+v", d.Id(), server)
 
 	d.Set("name", server.Name)
+	d.Set("created", server.Created.String())
+	d.Set("updated", server.Updated.String())
 
 	// Get the instance network and address information
 	networks, err := flattenInstanceNetworks(d, meta)
