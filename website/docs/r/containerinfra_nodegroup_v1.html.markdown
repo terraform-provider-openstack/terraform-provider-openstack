@@ -44,11 +44,11 @@ The following arguments are supported:
 * `docker_volume_size` - (Optional) The size (in GB) of the Docker volume.
     Changing this creates a new node group.
 
-* `image` - (Required) The reference to an image that is used for nodes of the
+* `image_id` - (Required) The reference to an image that is used for nodes of the
     node group. Can be set via the `OS_MAGNUM_IMAGE` environment variable.
     Changing this updates the image attribute of the existing node group.
 
-* `flavor` - (Optional) The flavor for the nodes of the node group. Can be set
+* `flavor_id` - (Optional) The flavor for the nodes of the node group. Can be set
     via the `OS_MAGNUM_FLAVOR` environment variable. Changing this creates a new
     node group.
 
