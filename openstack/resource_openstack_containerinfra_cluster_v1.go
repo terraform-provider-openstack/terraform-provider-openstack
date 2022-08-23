@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 	"time"
 
@@ -414,8 +413,7 @@ func resourceContainerInfraClusterV1Update(ctx context.Context, d *schema.Resour
 	updateOpts := []clusters.UpdateOptsBuilder{}
 
 	if d.HasChange("node_count") {
-		v := d.Get("node_count").(int)
-		nodeCount := strconv.Itoa(v)
+		nodeCount := d.Get("node_count").(int)
 		updateOpts = append(updateOpts, clusters.UpdateOpts{
 			Op:    clusters.ReplaceOp,
 			Path:  strings.Join([]string{"/", "node_count"}, ""),
