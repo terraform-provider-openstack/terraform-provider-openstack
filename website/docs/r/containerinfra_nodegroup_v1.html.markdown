@@ -82,8 +82,8 @@ The following attributes are exported:
 * `updated_at` - The time at which cluster was created.
 * `docker_volume_size` - See Argument Reference above.
 * `role` - See Argument Reference above.
-* `image` - See Argument Reference above.
-* `flavor` - See Argument Reference above.
+* `image_id` - See Argument Reference above.
+* `flavor_id` - See Argument Reference above.
 * `labels` - See Argument Reference above.
 * `node_count` - See Argument Reference above.
 * `min_node_count` - See Argument Reference above.
