@@ -90,8 +90,8 @@ func containerInfraClusterTemplateV1AppendUpdateOpts(updateOpts []clustertemplat
 	return updateOpts
 }
 
-func containerInfraNodeGroupV1AppendUpdateOpts(updateOpts []nodegroups.UpdateOptsBuilder, attribute, value string) []nodegroups.UpdateOptsBuilder {
-	if value == "" {
+func containerInfraNodeGroupV1AppendUpdateOpts(updateOpts []nodegroups.UpdateOptsBuilder, attribute string, value int) []nodegroups.UpdateOptsBuilder {
+	if value == 0 && attribute == "max_node_count" {
 		updateOpts = append(updateOpts, nodegroups.UpdateOpts{
 			Op:   nodegroups.RemoveOp,
 			Path: strings.Join([]string{"/", attribute}, ""),

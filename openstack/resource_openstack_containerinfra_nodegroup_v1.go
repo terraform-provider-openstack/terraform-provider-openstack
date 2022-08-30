@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 	"time"
 
@@ -112,7 +111,6 @@ func resourceContainerInfraNodeGroupV1() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: false,
-				Computed: true,
 			},
 
 			"image_id": {
@@ -244,8 +242,8 @@ func resourceContainerInfraNodeGroupV1Read(_ context.Context, d *schema.Resource
 	d.Set("project_id", nodeGroup.ProjectID)
 	d.Set("role", nodeGroup.Role)
 	d.Set("node_count", nodeGroup.NodeCount)
-	d.Set("min_node_count", nodeGroup.NodeCount)
-	d.Set("max_node_count", nodeGroup.NodeCount)
+	d.Set("min_node_count", nodeGroup.MinNodeCount)
+	d.Set("max_node_count", nodeGroup.MaxNodeCount)
 	d.Set("image_id", nodeGroup.ImageID)
 	d.Set("flavor_id", nodeGroup.FlavorID)
 
@@ -276,15 +274,13 @@ func resourceContainerInfraNodeGroupV1Update(ctx context.Context, d *schema.Reso
 	updateOpts := []nodegroups.UpdateOptsBuilder{}
 
 	if d.HasChange("min_node_count") {
-		v := d.Get("min_node_count").(int)
-		minNodeCount := strconv.Itoa(v)
+		minNodeCount := d.Get("min_node_count").(int)
 		updateOpts = containerInfraNodeGroupV1AppendUpdateOpts(
 			updateOpts, "min_node_count", minNodeCount)
 	}
 
 	if d.HasChange("max_node_count") {
-		v := d.Get("max_node_count").(int)
-		maxNodeCount := strconv.Itoa(v)
+		maxNodeCount := d.Get("max_node_count").(int)
 		updateOpts = containerInfraNodeGroupV1AppendUpdateOpts(
 			updateOpts, "max_node_count", maxNodeCount)
 	}
