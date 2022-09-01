@@ -355,7 +355,11 @@ func resourceContainerInfraClusterV1Read(_ context.Context, d *schema.ResourceDa
 
 	labels := s.Labels
 	if d.Get("merge_labels").(bool) {
-		labels = containerInfraV1GetLabelsMerged(s.LabelsAdded, s.LabelsSkipped, s.LabelsOverridden, s.Labels)
+		resourceDataLabels, err := expandContainerInfraV1LabelsMap(d.Get("labels").(map[string]interface{}))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		labels = containerInfraV1GetLabelsMerged(s.LabelsAdded, s.LabelsSkipped, s.LabelsOverridden, s.Labels, resourceDataLabels)
 	}
 	if err := d.Set("labels", labels); err != nil {
 		return diag.Errorf("Unable to set openstack_containerinfra_cluster_v1 labels: %s", err)

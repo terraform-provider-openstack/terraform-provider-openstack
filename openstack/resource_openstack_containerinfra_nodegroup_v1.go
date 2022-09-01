@@ -232,7 +232,11 @@ func resourceContainerInfraNodeGroupV1Read(_ context.Context, d *schema.Resource
 
 	labels := nodeGroup.Labels
 	if d.Get("merge_labels").(bool) {
-		labels = containerInfraV1GetLabelsMerged(nodeGroup.LabelsAdded, nodeGroup.LabelsSkipped, nodeGroup.LabelsOverridden, nodeGroup.Labels)
+		resourceDataLabels, err := expandContainerInfraV1LabelsMap(d.Get("labels").(map[string]interface{}))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		labels = containerInfraV1GetLabelsMerged(nodeGroup.LabelsAdded, nodeGroup.LabelsSkipped, nodeGroup.LabelsOverridden, nodeGroup.Labels, resourceDataLabels)
 	}
 	if err := d.Set("labels", labels); err != nil {
 		return diag.Errorf("Unable to set openstack_containerinfra_nodegroup_v1 labels: %s", err)

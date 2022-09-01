@@ -59,7 +59,7 @@ func expandContainerInfraV1LabelsString(v map[string]interface{}) (string, error
 	return formattedLabels, nil
 }
 
-func containerInfraV1GetLabelsMerged(labelsAdded map[string]string, labelsSkipped map[string]string, labelsOverridden map[string]string, labels map[string]string) map[string]string {
+func containerInfraV1GetLabelsMerged(labelsAdded map[string]string, labelsSkipped map[string]string, labelsOverridden map[string]string, labels map[string]string, resourceDataLabels map[string]string) map[string]string {
 	m := make(map[string]string)
 	for key, val := range labelsAdded {
 		m[key] = val
@@ -70,6 +70,12 @@ func containerInfraV1GetLabelsMerged(labelsAdded map[string]string, labelsSkippe
 	for key := range labelsOverridden {
 		// We have to get the actual value here, not the one overridden
 		m[key] = labels[key]
+	}
+	// If defined resource's labels don't override label (are the same)
+	for key, val := range resourceDataLabels {
+		if _, exist := m[key]; !exist {
+			m[key] = val
+		}
 	}
 	return m
 }
