@@ -248,6 +248,7 @@ func resourceContainerInfraNodeGroupV1Read(_ context.Context, d *schema.Resource
 	d.Set("max_node_count", nodeGroup.NodeCount)
 	d.Set("image_id", nodeGroup.ImageID)
 	d.Set("flavor_id", nodeGroup.FlavorID)
+	d.Set("docker_volume_size", nodeGroup.DockerVolumeSize)
 
 	if err := d.Set("created_at", nodeGroup.CreatedAt.Format(time.RFC3339)); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_containerinfra_nodegroup_v1 created_at: %s", err)
