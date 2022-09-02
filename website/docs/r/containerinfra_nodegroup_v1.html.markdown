@@ -12,7 +12,7 @@ Manages a V1 Magnum node group resource within OpenStack.
 
 ## Example Usage
 
-### Create a Cluster
+### Create a Nodegroup
 
 ```hcl
 resource "openstack_containerinfra_nodegroup_v1" "nodegroup_1" {
@@ -78,8 +78,8 @@ The following attributes are exported:
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `project_id` - See Argument Reference above.
-* `created_at` - The time at which cluster was created.
-* `updated_at` - The time at which cluster was created.
+* `created_at` - The time at which node group was created.
+* `updated_at` - The time at which node group was created.
 * `docker_volume_size` - See Argument Reference above.
 * `role` - See Argument Reference above.
 * `image_id` - See Argument Reference above.
@@ -92,8 +92,8 @@ The following attributes are exported:
 
 ## Import
 
-Node groups can be imported using the `id`, e.g.
+Node groups can be imported using the `id` (cluster_id/nodegroup_id), e.g.
 
 ```
-$ terraform import openstack_containerinfra_nodegroup_v1.nodegroup_1 ce0f9463-dd25-474b-9fe8-94de63e5e42b
+$ terraform import openstack_containerinfra_nodegroup_v1.nodegroup_1 b9a45c5c-cd03-4958-82aa-b80bf93cb922/ce0f9463-dd25-474b-9fe8-94de63e5e42b
 ```
