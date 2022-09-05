@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	octavialoadbalancers "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/loadbalancers"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -28,6 +29,8 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "connection_limit", "-1"),
+					testAccCheckLBV2ListenerHasTag("openstack_lb_loadbalancer_v2.loadbalancer_1", "tag1"),
+					testAccCheckLBV2ListenerTagCount("openstack_lb_loadbalancer_v2.loadbalancer_1", 1),
 				),
 			},
 			{
@@ -218,6 +221,76 @@ func testAccCheckLBV2ListenerExists(n string, listener *listeners.Listener) reso
 	}
 }
 
+func testAccCheckLBV2ListenerHasTag(n, tag string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := testAccProvider.Meta().(*Config)
+		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+		}
+
+		found, err := octavialoadbalancers.Get(lbClient, rs.Primary.ID).Extract()
+		if err != nil {
+			return err
+		}
+
+		if found.ID != rs.Primary.ID {
+			return fmt.Errorf("Loadbalancer not found")
+		}
+
+		for _, v := range found.Tags {
+			if tag == v {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Tag not found: %s", tag)
+	}
+}
+
+func testAccCheckLBV2ListenerTagCount(n string, expected int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := testAccProvider.Meta().(*Config)
+		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+		}
+
+		found, err := octavialoadbalancers.Get(lbClient, rs.Primary.ID).Extract()
+		if err != nil {
+			return err
+		}
+
+		if found.ID != rs.Primary.ID {
+			return fmt.Errorf("Loadbalancer not found")
+		}
+
+		if len(found.Tags) != expected {
+			return fmt.Errorf("Expecting %d tags, found %d", expected, len(found.Tags))
+		}
+
+		return nil
+	}
+}
+
 const testAccLbV2ListenerConfigBasic = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
@@ -255,6 +328,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
   protocol_port = 8080
   default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  tags = ["tag1"]
 
   timeouts {
     create = "5m"

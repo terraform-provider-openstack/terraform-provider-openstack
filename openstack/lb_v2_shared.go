@@ -189,6 +189,11 @@ func chooseLBV2ListenerCreateOpts(d *schema.ResourceData, config *Config) (neutr
 			opts.TimeoutTCPInspect = &timeoutTCPInspect
 		}
 
+		if v, ok := d.GetOk("tags"); ok {
+			tags := v.(*schema.Set).List()
+			opts.Tags = expandToStringSlice(tags)
+		}
+
 		// Get and check insert  headers map.
 		rawHeaders := d.Get("insert_headers").(map[string]interface{})
 		headers, err := expandLBV2ListenerHeadersMap(rawHeaders)
@@ -336,6 +341,17 @@ func chooseLBV2ListenerUpdateOpts(d *schema.ResourceData, config *Config) (neutr
 				}
 			}
 			opts.AllowedCIDRs = &allowedCidrs
+		}
+
+		if d.HasChange("tags") {
+			hasChange = true
+			if v, ok := d.GetOk("tags"); ok {
+				tags := v.(*schema.Set).List()
+				tagsToUpdate := expandToStringSlice(tags)
+				opts.Tags = &tagsToUpdate
+			} else {
+				opts.Tags = &[]string{}
+			}
 		}
 
 		if hasChange {
