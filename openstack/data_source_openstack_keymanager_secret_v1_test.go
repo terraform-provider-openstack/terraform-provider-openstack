@@ -10,7 +10,7 @@ func TestAccKeyManagerSecretV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckKeyManager(t)
-			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckSecretV1Destroy,
@@ -42,7 +42,7 @@ func TestAccKeyManagerSecretV1DataSource_acls(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckKeyManager(t)
-			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckSecretV1Destroy,

@@ -16,7 +16,7 @@ func TestAccKeyManagerSecretV1_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
@@ -41,7 +41,7 @@ func TestAccKeyManagerSecretV1_basicWithMetadata(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
@@ -65,7 +65,7 @@ func TestAccKeyManagerSecretV1_updateMetadata(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
@@ -100,7 +100,7 @@ func TestAccUpdateSecretV1_payload(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
@@ -155,7 +155,7 @@ func TestAccKeyManagerSecretV1_acls(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
@@ -183,7 +183,7 @@ func TestAccKeyManagerSecretV1_acls_update(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
