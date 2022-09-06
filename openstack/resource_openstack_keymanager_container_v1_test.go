@@ -16,7 +16,7 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
@@ -71,7 +71,7 @@ func TestAccKeyManagerContainerV1_acls(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
@@ -98,7 +98,7 @@ func TestAccKeyManagerContainerV1_certificate_type(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
@@ -123,7 +123,7 @@ func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,

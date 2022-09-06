@@ -12,7 +12,7 @@ func TestAccKeyManagerOrderV1_importBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckAdminOnly(t)
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
