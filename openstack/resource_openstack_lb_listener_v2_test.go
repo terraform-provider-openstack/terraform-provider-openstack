@@ -28,8 +28,6 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "connection_limit", "-1"),
-					testAccCheckLBV2ListenerHasTag("openstack_lb_loadbalancer_v2.loadbalancer_1", "tag1"),
-					testAccCheckLBV2ListenerTagCount("openstack_lb_loadbalancer_v2.loadbalancer_1", 1),
 				),
 			},
 			{
@@ -62,6 +60,8 @@ func TestAccLBV2Listener_octavia(t *testing.T) {
 				Config: testAccLbV2ListenerConfigOctavia,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_listener_v2.listener_1", "tags", "[\"tag1\"]"),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "connection_limit", "5"),
 					resource.TestCheckResourceAttr(
@@ -215,76 +215,6 @@ func testAccCheckLBV2ListenerExists(n string, listener *listeners.Listener) reso
 		}
 
 		*listener = *found
-
-		return nil
-	}
-}
-
-func testAccCheckLBV2ListenerHasTag(n, tag string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-
-		config := testAccProvider.Meta().(*Config)
-		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
-		if err != nil {
-			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
-		}
-
-		found, err := listeners.Get(lbClient, rs.Primary.ID).Extract()
-		if err != nil {
-			return err
-		}
-
-		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Loadbalancer not found")
-		}
-
-		for _, v := range found.Tags {
-			if tag == v {
-				return nil
-			}
-		}
-
-		return fmt.Errorf("Tag not found: %s", tag)
-	}
-}
-
-func testAccCheckLBV2ListenerTagCount(n string, expected int) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-
-		config := testAccProvider.Meta().(*Config)
-		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
-		if err != nil {
-			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
-		}
-
-		found, err := listeners.Get(lbClient, rs.Primary.ID).Extract()
-		if err != nil {
-			return err
-		}
-
-		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Loadbalancer not found")
-		}
-
-		if len(found.Tags) != expected {
-			return fmt.Errorf("Expecting %d tags, found %d", expected, len(found.Tags))
-		}
 
 		return nil
 	}
