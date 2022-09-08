@@ -80,6 +80,11 @@ func resourceDatabaseConfigurationV1() *schema.Resource {
 							Required: true,
 							ForceNew: true,
 						},
+						"string_type": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							ForceNew: true,
+						},
 					},
 				},
 			},
