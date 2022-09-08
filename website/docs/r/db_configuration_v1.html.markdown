@@ -56,6 +56,7 @@ The `configuration` block supports:
 
 * `name` - (Optional) Configuration parameter name. Changing this creates a new resource.
 * `value` - (Optional) Configuration parameter value. Changing this creates a new resource.
+* `string_type` - (Optional) Whether or not to store configuration parameter value as string. Changing this creates a new resource. See the below note for more information.
 
 
 ## Attributes Reference
@@ -69,3 +70,12 @@ The following attributes are exported:
 * `datastore/version` - See Argument Reference above.
 * `configuration/name` - See Argument Reference above.
 * `configuration/value` - See Argument Reference above.
+* `configuration/string_type` - See Argument Reference above.
+
+## Types of configuration parameter values
+
+Openstack API requires to store some database configuration parameter's values as strings, even if they contain numbers.
+To force store their values as strings set `string_type` to `true`. Otherwise Terraform will try to store them as number what can cause error from Openstack API like below:
+```
+"The value provided for the configuration parameter log_min_duration_statement is not of type string."
+```

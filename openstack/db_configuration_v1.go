@@ -26,10 +26,16 @@ func expandDatabaseConfigurationV1Values(rawValues []interface{}) map[string]int
 		v := rawValue.(map[string]interface{})
 		name := v["name"].(string)
 		value := v["value"]
+		isStringType := v["string_type"].(bool)
 
-		// check if value can be converted into int
-		if valueInt, err := strconv.Atoi(value.(string)); err == nil {
-			value = valueInt
+		if !isStringType {
+			// check if value can be converted into int
+			if valueInt, err := strconv.Atoi(value.(string)); err == nil {
+				value = valueInt
+				// check if value can be converted into bool
+			} else if valueBool, err := strconv.ParseBool(value.(string)); err == nil {
+				value = valueBool
+			}
 		}
 
 		values[name] = value
