@@ -9,6 +9,7 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
+	"github.com/gophercloud/gophercloud/pagination"
 )
 
 func dataSourceComputeFlavorV2() *schema.Resource {
@@ -87,6 +88,12 @@ func dataSourceComputeFlavorV2() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			// Computed values
 			"extra_specs": {
 				Type:     schema.TypeMap,
@@ -106,12 +113,20 @@ func dataSourceComputeFlavorV2Read(ctx context.Context, d *schema.ResourceData, 
 
 	var allFlavors []flavors.Flavor
 	if v := d.Get("flavor_id").(string); v != "" {
-		flavor, err := flavors.Get(computeClient, v).Extract()
+		var flavor *flavors.Flavor
+		// try and read flavor using microversion that includes description
+		computeClient.Microversion = computeV2FlavorDescriptionMicroversion
+		flavor, err = flavors.Get(computeClient, v).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
-				return diag.Errorf("No Flavor found")
+			// reset microversion to 2.1 and try again
+			computeClient.Microversion = "2.1"
+			flavor, err = flavors.Get(computeClient, v).Extract()
+			if err != nil {
+				if _, ok := err.(gophercloud.ErrDefault404); ok {
+					return diag.Errorf("No Flavor found")
+				}
+				return diag.Errorf("Unable to retrieve OpenStack %s flavor: %s", v, err)
 			}
-			return diag.Errorf("Unable to retrieve OpenStack %s flavor: %s", v, err)
 		}
 
 		allFlavors = append(allFlavors, *flavor)
@@ -134,9 +149,17 @@ func dataSourceComputeFlavorV2Read(ctx context.Context, d *schema.ResourceData, 
 
 		log.Printf("[DEBUG] openstack_compute_flavor_v2 ListOpts: %#v", listOpts)
 
-		allPages, err := flavors.ListDetail(computeClient, listOpts).AllPages()
+		var allPages pagination.Page
+		// try and read flavor using microversion that includes description
+		computeClient.Microversion = computeV2FlavorDescriptionMicroversion
+		allPages, err = flavors.ListDetail(computeClient, listOpts).AllPages()
 		if err != nil {
-			return diag.Errorf("Unable to query OpenStack flavors: %s", err)
+			// reset microversion to 2.1 and try again
+			computeClient.Microversion = "2.1"
+			allPages, err = flavors.ListDetail(computeClient, listOpts).AllPages()
+			if err != nil {
+				return diag.Errorf("Unable to query OpenStack flavors: %s", err)
+			}
 		}
 
 		allFlavors, err = flavors.ExtractFlavors(allPages)
@@ -151,6 +174,12 @@ func dataSourceComputeFlavorV2Read(ctx context.Context, d *schema.ResourceData, 
 		for _, flavor := range allFlavors {
 			if v := d.Get("name").(string); v != "" {
 				if flavor.Name != v {
+					continue
+				}
+			}
+
+			if v := d.Get("description").(string); v != "" {
+				if flavor.Description != v {
 					continue
 				}
 			}
@@ -212,6 +241,7 @@ func dataSourceComputeFlavorV2Attributes(d *schema.ResourceData, computeClient *
 
 	d.SetId(flavor.ID)
 	d.Set("name", flavor.Name)
+	d.Set("description", flavor.Description)
 	d.Set("flavor_id", flavor.ID)
 	d.Set("disk", flavor.Disk)
 	d.Set("ram", flavor.RAM)

@@ -72,6 +72,8 @@ func TestAccComputeV2Flavor_extraSpecs(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorExists("openstack_compute_flavor_v2.flavor_1", &flavor),
 					resource.TestCheckResourceAttr(
+						"openstack_compute_flavor_v2.flavor_1", "description", "foo"),
+					resource.TestCheckResourceAttr(
 						"openstack_compute_flavor_v2.flavor_1", "extra_specs.%", "2"),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_flavor_v2.flavor_1", "extra_specs.hw:cpu_policy", "CPU-POLICY"),
@@ -83,6 +85,8 @@ func TestAccComputeV2Flavor_extraSpecs(t *testing.T) {
 				Config: testAccComputeV2FlavorExtraSpecs2(flavorName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorExists("openstack_compute_flavor_v2.flavor_1", &flavor),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_flavor_v2.flavor_1", "description", "bar"),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_flavor_v2.flavor_1", "extra_specs.%", "1"),
 					resource.TestCheckResourceAttr(
@@ -180,6 +184,7 @@ func testAccComputeV2FlavorExtraSpecs1(flavorName string) string {
       ram = 2048
       vcpus = 2
       disk = 5
+      description = "foo"
 
       is_public = true
 
@@ -198,6 +203,7 @@ func testAccComputeV2FlavorExtraSpecs2(flavorName string) string {
       ram = 2048
       vcpus = 2
       disk = 5
+      description = "bar"
 
       is_public = true
 

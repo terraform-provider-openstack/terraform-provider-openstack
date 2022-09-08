@@ -41,6 +41,11 @@ func resourceComputeFlavorV2() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"ram": {
 				Type:     schema.TypeInt,
 				Required: true,
@@ -117,6 +122,13 @@ func resourceComputeFlavorV2Create(ctx context.Context, d *schema.ResourceData, 
 		Ephemeral:  &ephemeral,
 	}
 
+	// description requires nova microversion 2.55. Only set when specified.
+	if v, ok := d.GetOk("description"); ok {
+		description := v.(string)
+		createOpts.Description = description
+		computeClient.Microversion = computeV2FlavorDescriptionMicroversion
+	}
+
 	log.Printf("[DEBUG] openstack_compute_flavor_v2 create options: %#v", createOpts)
 	fl, err := flavors.Create(computeClient, &createOpts).Extract()
 	if err != nil {
@@ -145,14 +157,24 @@ func resourceComputeFlavorV2Read(_ context.Context, d *schema.ResourceData, meta
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	fl, err := flavors.Get(computeClient, d.Id()).Extract()
+	var fl *flavors.Flavor
+
+	// try and read flavor using microversion that includes description
+	computeClient.Microversion = computeV2FlavorDescriptionMicroversion
+	fl, err = flavors.Get(computeClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_flavor_v2"))
+		// reset microversion to 2.1 and try again
+		computeClient.Microversion = "2.1"
+		fl, err = flavors.Get(computeClient, d.Id()).Extract()
+		if err != nil {
+			return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_flavor_v2"))
+		}
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_flavor_v2 %s: %#v", d.Id(), fl)
 
 	d.Set("name", fl.Name)
+	d.Set("description", fl.Description)
 	d.Set("ram", fl.RAM)
 	d.Set("vcpus", fl.VCPUs)
 	d.Set("disk", fl.Disk)
@@ -180,6 +202,24 @@ func resourceComputeFlavorV2Update(ctx context.Context, d *schema.ResourceData, 
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
+	}
+
+	var hasChange bool
+	var updateOpts flavors.UpdateOpts
+
+	if d.HasChange("description") {
+		hasChange = true
+		description := d.Get("description").(string)
+		updateOpts.Description = description
+		computeClient.Microversion = computeV2FlavorDescriptionMicroversion
+	}
+
+	if hasChange {
+		log.Printf("[DEBUG] openstack_compute_flavor_v2 %s update options: %#v", d.Id(), updateOpts)
+		_, err = flavors.Update(computeClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return diag.Errorf("Error openstack_compute_flavor_v2 %s: %s", d.Id(), err)
+		}
 	}
 
 	if d.HasChange("extra_specs") {

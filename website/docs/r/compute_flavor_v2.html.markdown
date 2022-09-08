@@ -38,6 +38,9 @@ The following arguments are supported:
 * `name` - (Required) A unique name for the flavor. Changing this creates a new
     flavor.
 
+* `description` - (Optional) The description of the flavor. Changing this
+    updates the description of the flavor. Requires microversion >= 2.55.
+
 * `ram` - (Required) The amount of RAM to use, in megabytes. Changing this
     creates a new flavor.
 
@@ -70,6 +73,7 @@ The following attributes are exported:
 
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
+* `description` - See Argument Reference above.
 * `ram` - See Argument Reference above.
 * `vcpus` - See Argument Reference above.
 * `disk` - See Argument Reference above.
