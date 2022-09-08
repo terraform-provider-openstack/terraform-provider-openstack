@@ -41,6 +41,8 @@ data "openstack_compute_flavor_v2" "small" {
 
 * `vcpus` - (Optional) The amount of VCPUs.
 
+* `description` - (Optional) The description of the flavor.
+
 * `swap` - (Optional) The amount of swap (in gigabytes).
 
 * `rx_tx_factor` - (Optional) The `rx_tx_factor` of the flavor.
