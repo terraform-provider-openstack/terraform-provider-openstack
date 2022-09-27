@@ -1,3 +1,26 @@
+## 1.49.0 (Not released yet)
+
+FEATURES
+
+* Updated `Gophercloud` to `1.0.0` ([#1441](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1441))
+
+IMPROVEMENTS
+
+* Added `service_types` argument to `networking_subnet_v2` resource ([#1445](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1445))
+* Added `service_types` argument to `networking_subnet_v2` data source ([#1445](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1445))
+* Added `description` argument to `compute_flavor_v2` resource ([#1441](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1441))
+* Added `created` and `updated` attribute to compute_instance_v2 resource ([#1423](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1423))
+* Added `created` and `updated` attribute to compute_instance_v2 data source ([#1423](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1423))
+* Update docs for `containerinfra_nodegroup_v1` ([#1426](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1426) and [#1436](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1436))
+
+BUG FIXES
+
+* Fixed setting `docker_volume_size` on `containerinfra_nodegroup_v1` ([#1437](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1437))
+* Fixed update for `node_count` on `containerinfra_cluster_v1` ([#1431](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1431))
+* Fixed `min_node_count` and `max_node_count` on `containerinfra_nodegroup_v1` ([#1431](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1431))
+* Fixed `merge_labels` on `containerinfra_cluster_v1` ([#1435](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1435))
+* Fixed `configuration/value` type mismatch on `db_configuration_v1` ([#1440](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1440))
+
 ## 1.48.0 (31 July, 2022)
 
 FEATURES
