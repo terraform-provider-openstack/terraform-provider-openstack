@@ -116,6 +116,12 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
+			"service_types": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
 			"host_routes": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -283,6 +289,10 @@ func dataSourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceDat
 
 	if err := d.Set("dns_nameservers", subnet.DNSNameservers); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_networking_subnet_v2 dns_nameservers: %s", err)
+	}
+
+	if err := d.Set("service_types", subnet.ServiceTypes); err != nil {
+		log.Printf("[DEBUG] Unable to set openstack_networking_subnet_v2 service_types: %s", err)
 	}
 
 	if err := d.Set("host_routes", subnet.HostRoutes); err != nil {

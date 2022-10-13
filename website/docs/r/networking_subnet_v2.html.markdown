@@ -91,6 +91,9 @@ The following arguments are supported:
     in this subnet. Changing this updates the DNS name servers for the existing
     subnet.
 
+* `service_types` - (Optional) An array of service types used by the subnet.
+    Changing this updates the service types for the existing subnet.
+
 * `host_routes` - (**Deprecated** - use `openstack_networking_subnet_route_v2`
     instead) An array of routes that should be used by devices
     with IPs from this subnet (not including local subnet route). The host_route
@@ -136,6 +139,7 @@ The following attributes are exported:
 * `gateway_ip` - See Argument Reference above.
 * `enable_dhcp` - See Argument Reference above.
 * `dns_nameservers` - See Argument Reference above.
+* `service_types` - See Argument Reference above.
 * `host_routes` - See Argument Reference above.
 * `subnetpool_id` - See Argument Reference above.
 * `tags` - See Argument Reference above.

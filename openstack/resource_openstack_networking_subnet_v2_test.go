@@ -337,6 +337,37 @@ func TestAccNetworkingV2Subnet_clearDNSNameservers(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Subnet_ServiceTypes(t *testing.T) {
+	var subnet subnets.Subnet
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2SubnetServiceTypes,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2SubnetDNSConsistency("openstack_networking_subnet_v2.subnet_1", &subnet),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "service_types.#", "1"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2SubnetServiceTypesUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_networking_subnet_v2.subnet_1", "service_types.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2SubnetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.NetworkingV2Client(osRegionName)
@@ -745,5 +776,35 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
     start = "192.168.199.100"
     end = "192.168.199.200"
   }
+}
+`
+
+const testAccNetworkingV2SubnetServiceTypes = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  service_types = ["network:distributed"]
+}
+`
+
+const testAccNetworkingV2SubnetServiceTypesUpdate = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+
+  service_types = []
 }
 `
