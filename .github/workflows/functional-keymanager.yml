@@ -11,6 +11,7 @@ on:
       - '.github/workflows/functional-keymanager.yml'
       - '**keymanager**'
       - 'CHANGELOG.md'
+      - 'scripts/*'
   schedule:
     - cron: '0 0 * * *'
 jobs:

@@ -8,6 +8,7 @@ on:
       - '.github/workflows/functional-loadbalancer.yml'
       - '**_lb_**'
       - 'CHANGELOG.md'
+      - 'scripts/*'
   schedule:
     - cron: '0 0 * * *'
 jobs:

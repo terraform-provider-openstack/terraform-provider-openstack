@@ -8,6 +8,7 @@ on:
       - '.github/workflows/functional-vpnaas.yml'
       - '**vpnaas**'
       - 'CHANGELOG.md'
+      - 'scripts/*'
   schedule:
     - cron: '0 0 * * *'
 jobs:
