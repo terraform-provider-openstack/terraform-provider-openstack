@@ -218,6 +218,14 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
+			"service_types": {
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: false,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
 			"all_tags": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -260,6 +268,7 @@ func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceDat
 			IPv6RAMode:      d.Get("ipv6_ra_mode").(string),
 			AllocationPools: expandNetworkingSubnetV2AllocationPools(allocationPool),
 			DNSNameservers:  expandToStringSlice(d.Get("dns_nameservers").([]interface{})),
+			ServiceTypes:    expandToStringSlice(d.Get("service_types").([]interface{})),
 			HostRoutes:      expandNetworkingSubnetV2HostRoutes(d.Get("host_routes").([]interface{})),
 			SubnetPoolID:    d.Get("subnetpool_id").(string),
 			IPVersion:       gophercloud.IPVersion(d.Get("ip_version").(int)),
@@ -362,6 +371,7 @@ func resourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceData,
 	d.Set("description", s.Description)
 	d.Set("tenant_id", s.TenantID)
 	d.Set("dns_nameservers", s.DNSNameservers)
+	d.Set("service_types", s.ServiceTypes)
 	d.Set("enable_dhcp", s.EnableDHCP)
 	d.Set("network_id", s.NetworkID)
 	d.Set("ipv6_address_mode", s.IPv6AddressMode)
@@ -439,6 +449,12 @@ func resourceNetworkingSubnetV2Update(ctx context.Context, d *schema.ResourceDat
 		hasChange = true
 		nameservers := expandToStringSlice(d.Get("dns_nameservers").([]interface{}))
 		updateOpts.DNSNameservers = &nameservers
+	}
+
+	if d.HasChange("service_types") {
+		hasChange = true
+		serviceTypes := expandToStringSlice(d.Get("service_types").([]interface{}))
+		updateOpts.ServiceTypes = &serviceTypes
 	}
 
 	if d.HasChange("host_routes") {

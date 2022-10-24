@@ -60,6 +60,7 @@ are exported:
 * `allocation_pools` - Allocation pools of the subnet.
 * `enable_dhcp` - Whether the subnet has DHCP enabled or not.
 * `dns_nameservers` - DNS Nameservers of the subnet.
+* `service_types` - Service types of the subnet.
 * `host_routes` - Host Routes of the subnet.
 * `region` - See Argument Reference above.
 * `all_tags` - A set of string tags applied on the subnet.
