@@ -25,7 +25,7 @@ fi
 source `dirname $0`/stackenv.sh admin
 
 for acceptance_test in "${ACCEPTANCE_TESTS[@]}"; do
-  OS_DEBUG=1 TF_LOG=DEBUG TF_ACC=1 go test ./openstack -v -timeout 120m -run $(echo "$acceptance_test" | tr " " "|") |& tee -a ${LOG_DIR}/acceptance_tests.log
+  OS_DEBUG=1 TF_LOG=DEBUG TF_ACC=1 TF_ACC_TERRAFORM_VERSION=1.2.9 go test ./openstack -v -timeout 120m -run $(echo "$acceptance_test" | tr " " "|") |& tee -a ${LOG_DIR}/acceptance_tests.log
   # Check the error code after each suite, but do not exit early if a suite failed.
   if [[ $? != 0 ]]; then
     failed=1
@@ -36,7 +36,7 @@ done
 source `dirname $0`/stackenv.sh demo
 
 for acceptance_test in "${ACCEPTANCE_TESTS[@]}"; do
-  OS_DEBUG=1 TF_LOG=DEBUG TF_ACC=1 go test ./openstack -v -timeout 120m -run $(echo "$acceptance_test" | tr " " "|") |& tee -a ${LOG_DIR}/acceptance_tests.log
+  OS_DEBUG=1 TF_LOG=DEBUG TF_ACC=1 TF_ACC_TERRAFORM_VERSION=1.2.9 go test ./openstack -v -timeout 120m -run $(echo "$acceptance_test" | tr " " "|") |& tee -a ${LOG_DIR}/acceptance_tests.log
   # Check the error code after each suite, but do not exit early if a suite failed.
   if [[ $? != 0 ]]; then
     failed=1

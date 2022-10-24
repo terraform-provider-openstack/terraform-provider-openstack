@@ -8,6 +8,7 @@ on:
       - '.github/workflows/functional-orchestration.yml'
       - '**orchestration**'
       - 'CHANGELOG.md'
+      - 'scripts/*'
   schedule:
     - cron: '0 0 * * *'
 jobs:

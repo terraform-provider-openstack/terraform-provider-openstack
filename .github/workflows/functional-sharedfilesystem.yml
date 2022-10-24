@@ -8,6 +8,7 @@ on:
       - '.github/workflows/functional-sharedfilesystem.yml'
       - '**sharedfilesystem**'
       - 'CHANGELOG.md'
+      - 'scripts/*'
   schedule:
     - cron: '0 0 * * *'
 jobs:

@@ -11,6 +11,7 @@ on:
       - '!**v2**'
       - '!**v1**'
       - 'CHANGELOG.md'
+      - 'scripts/*'
   schedule:
     - cron: '0 0 * * *'
 jobs:

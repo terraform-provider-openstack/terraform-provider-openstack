@@ -9,6 +9,7 @@ on:
       - '.github/workflows/functional-images.yml'
       - '**images**'
       - 'CHANGELOG.md'
+      - 'scripts/*'
   schedule:
     - cron: '0 0 * * *'
 jobs:
