@@ -1,4 +1,4 @@
-## 1.49.0 (Not released yet)
+## 1.49.0 (26 October, 2022)
 
 FEATURES
 
