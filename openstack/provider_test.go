@@ -45,8 +45,8 @@ var (
 	osHypervisorEnvironment      = os.Getenv("OS_HYPERVISOR_HOSTNAME")
 	osPortForwardingEnvironment  = os.Getenv("OS_PORT_FORWARDING_ENVIRONMENT")
 	osBlockStorageV2             = os.Getenv("OS_BLOCKSTORAGE_V2")
-	osMagnumHttpProxy            = os.Getenv("OS_MAGNUM_HTTP_PROXY")
-	osMagnumHttpsProxy           = os.Getenv("OS_MAGNUM_HTTPS_PROXY")
+	osMagnumHTTPProxy            = os.Getenv("OS_MAGNUM_HTTP_PROXY")
+	osMagnumHTTPSProxy           = os.Getenv("OS_MAGNUM_HTTPS_PROXY")
 	osMagnumNoProxy              = os.Getenv("OS_MAGNUM_NO_PROXY")
 )
 

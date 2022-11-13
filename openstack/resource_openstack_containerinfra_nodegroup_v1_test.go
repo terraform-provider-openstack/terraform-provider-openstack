@@ -152,5 +152,5 @@ resource "openstack_containerinfra_nodegroup_v1" "nodegroup_1" {
   cluster_id           = "${openstack_containerinfra_cluster_v1.cluster_1.id}"
   node_count           = %d
 }
-`, keypairName, clusterTemplateName, osMagnumImage, osMagnumFlavor, osMagnumFlavor, osExtGwID, osMagnumHttpProxy, osMagnumHttpsProxy, osMagnumNoProxy, clusterName, nodeGroupName, nodeCount)
+`, keypairName, clusterTemplateName, osMagnumImage, osMagnumFlavor, osMagnumFlavor, osExtGwID, osMagnumHTTPProxy, osMagnumHTTPSProxy, osMagnumNoProxy, clusterName, nodeGroupName, nodeCount)
 }
