@@ -120,10 +120,23 @@ resource "openstack_compute_keypair_v2" "keypair_1" {
 }
 
 resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
-  name       = "%s"
-  image      = "%s"
-  coe        = "kubernetes"
-  http_proxy = "127.0.0.1:8801"
+  name                  = "%s"
+  image                 = "%s"
+  coe                   = "kubernetes"
+  master_flavor         = "%s"
+  flavor                = "%s"
+  floating_ip_enabled   = true
+  volume_driver         = "cinder"
+  docker_storage_driver = "overlay2"
+  docker_volume_size    = 5
+  external_network_id   = "%s"
+  network_driver        = "flannel"
+  http_proxy            = "%s"
+  https_proxy           = "%s"
+  no_proxy              = "%s"
+  labels = {
+    kubescheduler_options = "log-flush-frequency=1m",
+  }
 }
 
 resource "openstack_containerinfra_cluster_v1" "cluster_1" {
@@ -139,5 +152,5 @@ resource "openstack_containerinfra_nodegroup_v1" "nodegroup_1" {
   cluster_id           = "${openstack_containerinfra_cluster_v1.cluster_1.id}"
   node_count           = %d
 }
-`, keypairName, clusterTemplateName, osMagnumImage, clusterName, nodeGroupName, nodeCount)
+`, keypairName, clusterTemplateName, osMagnumImage, osMagnumFlavor, osMagnumFlavor, osExtGwID, osMagnumHttpProxy, osMagnumHttpsProxy, osMagnumNoProxy, clusterName, nodeGroupName, nodeCount)
 }
