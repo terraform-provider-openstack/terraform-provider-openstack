@@ -122,11 +122,15 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   flavor                = "%s"
   floating_ip_enabled   = true
   volume_driver         = "cinder"
-  docker_storage_driver = "devicemapper"
+  docker_storage_driver = "overlay2"
+  docker_volume_size    = 5
   external_network_id   = "%s"
   network_driver        = "flannel"
+  http_proxy            = "%s"
+  https_proxy           = "%s"
+  no_proxy              = "%s"
   labels = {
-    kubescheduler_options = "log-flush-frequency=1m"
+    kubescheduler_options = "log-flush-frequency=1m",
   }
 }
 
@@ -137,7 +141,7 @@ resource "openstack_containerinfra_cluster_v1" "cluster_1" {
   node_count           = 1
   keypair              = "${openstack_compute_keypair_v2.keypair_1.name}"
 }
-`, keypairName, clusterTemplateName, osMagnumImage, osMagnumFlavor, osMagnumFlavor, osExtGwID, clusterName)
+`, keypairName, clusterTemplateName, osMagnumImage, osMagnumFlavor, osMagnumFlavor, osExtGwID, osMagnumHttpProxy, osMagnumHttpsProxy, osMagnumNoProxy, clusterName)
 }
 
 func testAccContainerInfraV1ClusterUpdate(keypairName, clusterTemplateName, clusterName string) string {
@@ -152,11 +156,17 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   coe                   = "kubernetes"
   master_flavor         = "%s"
   flavor                = "%s"
-  floating_ip_enabled   = false
+  floating_ip_enabled   = true
+  volume_driver         = "cinder"
+  docker_storage_driver = "overlay2"
+  docker_volume_size    = 5
   external_network_id   = "%s"
   network_driver        = "flannel"
+  http_proxy            = "%s"
+  https_proxy           = "%s"
+  no_proxy              = "%s"
   labels = {
-    kubescheduler_options = "log-flush-frequency=1m"
+    kubescheduler_options = "log-flush-frequency=1m",
   }
 }
 
@@ -167,5 +177,5 @@ resource "openstack_containerinfra_cluster_v1" "cluster_1" {
   node_count           = 2
   keypair              = "${openstack_compute_keypair_v2.keypair_1.name}"
 }
-`, keypairName, clusterTemplateName, osMagnumImage, osMagnumFlavor, osMagnumFlavor, osExtGwID, clusterName)
+`, keypairName, clusterTemplateName, osMagnumImage, osMagnumFlavor, osMagnumFlavor, osExtGwID, osMagnumHttpProxy, osMagnumHttpsProxy, osMagnumNoProxy, clusterName)
 }
