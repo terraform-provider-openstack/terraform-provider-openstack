@@ -30,8 +30,8 @@ func TestExpandContainerInfraV1LabelsString(t *testing.T) {
 		"bar": "baz",
 	}
 
-	expectedLabels1 := "foo=bar,bar=baz"
-	expectedLabels2 := "bar=baz,foo=bar"
+	expectedLabels1 := "{'foo':'bar','bar':'baz'}"
+	expectedLabels2 := "{'bar':'baz','foo':'bar'}"
 
 	actualLabels, err := expandContainerInfraV1LabelsString(labels)
 	assert.Equal(t, err, nil)

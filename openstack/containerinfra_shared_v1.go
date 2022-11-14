@@ -51,12 +51,12 @@ func expandContainerInfraV1LabelsString(v map[string]interface{}) (string, error
 		}
 		formattedLabels = strings.Join([]string{
 			formattedLabels,
-			fmt.Sprintf("%s=%s", key, labelValue),
+			fmt.Sprintf("'%s':'%s'", key, labelValue),
 		}, ",")
 	}
 	formattedLabels = strings.Trim(formattedLabels, ",")
 
-	return formattedLabels, nil
+	return fmt.Sprintf("{%s}", formattedLabels), nil
 }
 
 func containerInfraV1GetLabelsMerged(labelsAdded map[string]string, labelsSkipped map[string]string, labelsOverridden map[string]string, labels map[string]string, resourceDataLabels map[string]string) map[string]string {
