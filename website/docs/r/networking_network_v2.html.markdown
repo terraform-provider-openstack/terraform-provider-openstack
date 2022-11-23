@@ -44,8 +44,8 @@ resource "openstack_networking_port_v2" "port_1" {
   security_group_ids = ["${openstack_compute_secgroup_v2.secgroup_1.id}"]
 
   fixed_ip {
-    "subnet_id"  = "${openstack_networking_subnet_v2.subnet_1.id}"
-    "ip_address" = "192.168.199.10"
+    subnet_id  = "${openstack_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.199.10"
   }
 }
 

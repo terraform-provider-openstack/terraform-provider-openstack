@@ -757,7 +757,7 @@ resource "openstack_compute_instance_v2" "boot-from-volume" {
   name            = "boot-from-volume"
   flavor_id       = "<flavor_id"
   key_pair        = "<keyname>"
-  image_id        = <image_id>
+  image_id        = "<image_id>"
   security_groups = ["default"]
 
   network {
