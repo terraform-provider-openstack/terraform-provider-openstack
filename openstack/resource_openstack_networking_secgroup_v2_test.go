@@ -84,6 +84,28 @@ func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2SecGroup_rule(t *testing.T) {
+	var securityGroup groups.SecGroup
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			//testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2SecGroupRule,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2SecGroupExists("openstack_networking_secgroup_v2.secgroup_1", &securityGroup),
+					testAccCheckNetworkingV2SecGroupRuleCount(&securityGroup, 2),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2SecGroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.NetworkingV2Client(osRegionName)
@@ -177,6 +199,30 @@ resource "openstack_networking_secgroup_v2" "secgroup_1" {
 
   timeouts {
     delete = "5m"
+  }
+}
+`
+const testAccNetworkingV2SecGroupRule = `
+resource "openstack_networking_secgroup_v2" "secgroup_1" {
+  name = "security_group"
+	delete_default_rules = true
+
+  rule {
+    port_range_min   = 22
+    port_range_max   = 22
+    protocol         = "tcp"
+	  ethertype        = "IPv4"
+	  direction        = "ingress"
+    remote_ip_prefix = "0.0.0.0/0"
+  }
+
+  rule {
+    port_range_min   = 80
+    port_range_max   = 80
+    protocol         = "tcp"
+	  ethertype        = "IPv4"
+	  direction        = "ingress"
+    remote_ip_prefix = "0.0.0.0/0"
   }
 }
 `

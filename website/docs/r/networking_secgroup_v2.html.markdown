@@ -12,12 +12,32 @@ Manages a V2 neutron security group resource within OpenStack.
 Unlike Nova security groups, neutron separates the group from the rules
 and also allows an admin to target a specific tenant_id.
 
+~> **NOTE on Security Groups and Security Group Rules:** We currently support the
+definition of security group rules with both, openstack_networking_secgroup_v2 and
+openstack_networking_secgroup_rule_v2. It is at this time not possible to mix
+the usage of both resource. Doing so will lead to unpredictable behavior.
+
 ## Example Usage
 
 ```hcl
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
   name        = "secgroup_1"
   description = "My neutron security group"
+}
+```
+
+```hcl
+resource "openstack_networking_secgroup_v2" "secgroup_2" {
+  name        = "secgroup_2"
+
+  rule {
+    port_range_min   = 22
+    port_range_max   = 22
+    protocol         = "tcp"
+    ethertype        = "IPv4"
+    direction        = "ingress"
+    remote_ip_prefix = "0.0.0.0/0"
+  }
 }
 ```
 
@@ -44,6 +64,65 @@ The following arguments are supported:
 
 * `tags` - (Optional) A set of string tags for the security group.
 
+* `rule` - (Optional) A configuration block of security group rules. Can be specified
+    multiple times for each security group rule. The structure is documented below.
+
+The `rule` block supports:
+
+* `description` - (Optional) A description of the rule. Changing this creates a
+    new security group rule.
+
+* `direction` - (Required) The direction of the rule, valid values are **ingress**
+    or **egress**. Changing this creates a new security group rule.
+
+* `ethertype` - (Required) The layer 3 protocol type, valid values are **IPv4**
+    or **IPv6**. Changing this creates a new security group rule.
+
+* `protocol` - (Optional) The layer 4 protocol type, valid values are following.
+    This is required if you want to specify a port range. Changing this creates
+    a new security group rule.
+  * **tcp**
+  * **udp**
+  * **icmp**
+  * **ah**
+  * **dccp**
+  * **egp**
+  * **esp**
+  * **gre**
+  * **igmp**
+  * **ipv6-encap**
+  * **ipv6-frag**
+  * **ipv6-icmp**
+  * **ipv6-nonxt**
+  * **ipv6-opts**
+  * **ipv6-route**
+  * **ospf**
+  * **pgm**
+  * **rsvp**
+  * **sctp**
+  * **udplite**
+  * **vrrp**
+
+* `port_range_min` - (Required) The lower part of the allowed port range, valid
+    integer value needs to be between 1 and 65535. Changing this creates a new
+    security group rule.
+
+* `port_range_max` - (Required) The higher part of the allowed port range, valid
+    integer value needs to be between 1 and 65535. Changing this creates a new
+    security group rule.
+
+* `remote_ip_prefix` - (Optional) The remote CIDR, the value needs to be a valid
+    CIDR (i.e. 192.168.0.0/16). Changing this creates a new security group rule.
+
+* `remote_group_id` - (Optional) The remote group id, the value needs to be an
+    Openstack ID of a security group in the same tenant. Changing this creates
+    a new security group rule.
+
+* `self` - (Optional) Required if `remote_ip_prefix` and `remote_group_id` is
+    empty. If true, the security group itself will be added as a source to this
+    security group rule. Cannot be combined with `remote_ip_prefix` or
+    `remote_group_id`.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -53,6 +132,7 @@ The following attributes are exported:
 * `description` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
 * `tags` - See Argument Reference above.
+* `rule` - See Argument Reference above.
 * `all_tags` - The collection of tags assigned on the security group, which have
   been explicitly and implicitly added.
 
