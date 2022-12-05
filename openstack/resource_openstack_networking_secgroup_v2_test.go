@@ -211,8 +211,8 @@ resource "openstack_networking_secgroup_v2" "secgroup_1" {
     port_range_min   = 22
     port_range_max   = 22
     protocol         = "tcp"
-	  ethertype        = "IPv4"
-	  direction        = "ingress"
+    ethertype        = "IPv4"
+    direction        = "ingress"
     remote_ip_prefix = "0.0.0.0/0"
   }
 
@@ -220,8 +220,8 @@ resource "openstack_networking_secgroup_v2" "secgroup_1" {
     port_range_min   = 80
     port_range_max   = 80
     protocol         = "tcp"
-	  ethertype        = "IPv4"
-	  direction        = "ingress"
+    ethertype        = "IPv4"
+    direction        = "ingress"
     remote_ip_prefix = "0.0.0.0/0"
   }
 }
