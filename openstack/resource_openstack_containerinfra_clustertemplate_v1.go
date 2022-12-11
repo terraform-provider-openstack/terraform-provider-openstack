@@ -376,8 +376,7 @@ func resourceContainerInfraClusterTemplateV1Update(ctx context.Context, d *schem
 	}
 
 	if d.HasChange("apiserver_port") {
-		v := d.Get("apiserver_port").(int)
-		apiServerPort := strconv.Itoa(v)
+		apiServerPort := d.Get("apiserver_port").(int)
 		updateOpts = containerInfraClusterTemplateV1AppendUpdateOpts(
 			updateOpts, "apiserver_port", apiServerPort)
 	}
