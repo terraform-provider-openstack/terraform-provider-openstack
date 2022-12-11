@@ -48,6 +48,7 @@ var (
 	osMagnumHTTPProxy            = os.Getenv("OS_MAGNUM_HTTP_PROXY")
 	osMagnumHTTPSProxy           = os.Getenv("OS_MAGNUM_HTTPS_PROXY")
 	osMagnumNoProxy              = os.Getenv("OS_MAGNUM_NO_PROXY")
+	osMagnumLabels               = os.Getenv("OS_MAGNUM_LABELS")
 )
 
 var (
@@ -185,6 +186,14 @@ func testAccPreCheckContainerInfra(t *testing.T) {
 
 	if osContainerInfraEnvironment == "" {
 		t.Skip("This environment does not support Container Infra tests")
+	}
+
+	if osMagnumImage == "" {
+		t.Fatal("OS_MAGNUM_IMAGE must be set for acceptance tests")
+	}
+
+	if osMagnumFlavor == "" {
+		t.Fatal("OS_MAGNUM_FLAVOR must be set for acceptance tests")
 	}
 }
 
