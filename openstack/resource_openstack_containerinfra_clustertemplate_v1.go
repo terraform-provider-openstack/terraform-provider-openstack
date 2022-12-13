@@ -376,8 +376,7 @@ func resourceContainerInfraClusterTemplateV1Update(ctx context.Context, d *schem
 	}
 
 	if d.HasChange("apiserver_port") {
-		v := d.Get("apiserver_port").(int)
-		apiServerPort := strconv.Itoa(v)
+		apiServerPort := d.Get("apiserver_port").(int)
 		updateOpts = containerInfraClusterTemplateV1AppendUpdateOpts(
 			updateOpts, "apiserver_port", apiServerPort)
 	}
@@ -403,8 +402,7 @@ func resourceContainerInfraClusterTemplateV1Update(ctx context.Context, d *schem
 	}
 
 	if d.HasChange("docker_volume_size") {
-		v := d.Get("docker_volume_size").(int)
-		dockerVolumeSize := strconv.Itoa(v)
+		dockerVolumeSize := d.Get("docker_volume_size").(int)
 		updateOpts = containerInfraClusterTemplateV1AppendUpdateOpts(
 			updateOpts, "docker_volume_size", dockerVolumeSize)
 	}

@@ -371,7 +371,10 @@ func resourceContainerInfraClusterV1Read(_ context.Context, d *schema.ResourceDa
 		nodeCount = s.NodeCount
 	}
 
+	d.Set("region", GetRegion(d, config))
 	d.Set("name", s.Name)
+	d.Set("project_id", s.ProjectID)
+	d.Set("user_id", s.UserID)
 	d.Set("api_address", s.APIAddress)
 	d.Set("coe_version", s.COEVersion)
 	d.Set("cluster_template_id", s.ClusterTemplateID)

@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -10,7 +11,7 @@ import (
 )
 
 func TestAccContainerInfraV1ClusterDataSource_basic(t *testing.T) {
-	resourceName := "openstack_containerinfra_cluster_v1.cluster_1"
+	resourceName := "data.openstack_containerinfra_cluster_v1.cluster_1"
 	clusterName := acctest.RandomWithPrefix("tf-acc-cluster")
 	keypairName := acctest.RandomWithPrefix("tf-acc-keypair")
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
@@ -24,17 +25,37 @@ func TestAccContainerInfraV1ClusterDataSource_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName),
+				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, 1),
 			},
 			{
 				Config: testAccContainerInfraV1ClusterDataSourceBasic(
-					testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName),
+					testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, 1),
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1ClusterDataSourceID(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "region", osRegionName),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
+					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "user_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
+					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
+					resource.TestCheckResourceAttrSet(resourceName, "api_address"),
+					resource.TestCheckResourceAttrSet(resourceName, "coe_version"),
+					resource.TestCheckResourceAttrSet(resourceName, "cluster_template_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "container_version"),
+					resource.TestCheckResourceAttrSet(resourceName, "create_timeout"),
+					resource.TestCheckResourceAttrSet(resourceName, "discovery_url"),
+					resource.TestCheckResourceAttrSet(resourceName, "docker_volume_size"),
+					resource.TestCheckResourceAttr(resourceName, "flavor", osMagnumFlavor),
+					resource.TestCheckResourceAttr(resourceName, "master_flavor", osMagnumFlavor),
+					resource.TestCheckResourceAttr(resourceName, "keypair", keypairName),
+					resource.TestCheckResourceAttrSet(resourceName, "labels.%"),
 					resource.TestCheckResourceAttr(resourceName, "master_count", "1"),
 					resource.TestCheckResourceAttr(resourceName, "node_count", "1"),
+					resource.TestCheckResourceAttr(resourceName, "master_addresses.#", strconv.Itoa(1)),
+					resource.TestCheckResourceAttr(resourceName, "node_addresses.#", strconv.Itoa(1)),
+					resource.TestCheckResourceAttrSet(resourceName, "stack_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "floating_ip_enabled"),
 				),
 			},
 		},

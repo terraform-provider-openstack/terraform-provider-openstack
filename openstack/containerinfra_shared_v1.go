@@ -80,7 +80,7 @@ func containerInfraV1GetLabelsMerged(labelsAdded map[string]string, labelsSkippe
 	return m
 }
 
-func containerInfraClusterTemplateV1AppendUpdateOpts(updateOpts []clustertemplates.UpdateOptsBuilder, attribute, value string) []clustertemplates.UpdateOptsBuilder {
+func containerInfraClusterTemplateV1AppendUpdateOpts(updateOpts []clustertemplates.UpdateOptsBuilder, attribute string, value interface{}) []clustertemplates.UpdateOptsBuilder {
 	if value == "" {
 		updateOpts = append(updateOpts, clustertemplates.UpdateOpts{
 			Op:   clustertemplates.RemoveOp,

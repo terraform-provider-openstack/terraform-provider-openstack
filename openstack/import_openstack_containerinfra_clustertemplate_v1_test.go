@@ -1,7 +1,6 @@
 package openstack
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -10,8 +9,7 @@ import (
 
 func TestAccContainerInfraV1ClusterTemplateImportBasic(t *testing.T) {
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
-	imageName := acctest.RandomWithPrefix("tf-acc-image")
-	resourceName := fmt.Sprintf("openstack_containerinfra_clustertemplate_v1.%s", clusterTemplateName)
+	resourceName := "openstack_containerinfra_clustertemplate_v1.clustertemplate_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -23,13 +21,12 @@ func TestAccContainerInfraV1ClusterTemplateImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckContainerInfraV1ClusterTemplateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerInfraV1ClusterTemplateBasic(clusterTemplateName, imageName),
+				Config: testAccContainerInfraV1ClusterTemplateBasic(clusterTemplateName),
 			},
 			{
-				ResourceName:            resourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"image"},
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

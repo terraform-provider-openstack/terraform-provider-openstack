@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccContainerInfraV1NodeGroupDataSource_basic(t *testing.T) {
-	resourceName := "openstack_containerinfra_nodegroup_v1.nodegroup_1"
+	resourceName := "data.openstack_containerinfra_nodegroup_v1.nodegroup_1"
 	nodeGroupName := acctest.RandomWithPrefix("tf-acc-nodegroup")
 	clusterName := acctest.RandomWithPrefix("tf-acc-cluster")
 	keypairName := acctest.RandomWithPrefix("tf-acc-keypair")
@@ -25,16 +25,28 @@ func TestAccContainerInfraV1NodeGroupDataSource_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerInfraV1NodeGroupUpdate(keypairName, clusterTemplateName, clusterName, nodeGroupName, 1),
+				Config: testAccContainerInfraV1NodeGroupBasic(keypairName, clusterTemplateName, clusterName, nodeGroupName, 1),
 			},
 			{
 				Config: testAccContainerInfraV1NodeGroupDataSourceBasic(
-					testAccContainerInfraV1NodeGroupUpdate(keypairName, clusterTemplateName, clusterName, nodeGroupName, 1),
+					testAccContainerInfraV1NodeGroupBasic(keypairName, clusterTemplateName, clusterName, nodeGroupName, 1),
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1NodeGroupDataSourceID(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "region", osRegionName),
+					resource.TestCheckResourceAttrSet(resourceName, "cluster_id"),
 					resource.TestCheckResourceAttr(resourceName, "name", nodeGroupName),
+					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
+					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
+					resource.TestCheckResourceAttrSet(resourceName, "docker_volume_size"),
+					resource.TestCheckResourceAttrSet(resourceName, "labels.%"),
+					resource.TestCheckResourceAttrSet(resourceName, "role"),
 					resource.TestCheckResourceAttr(resourceName, "node_count", "1"),
+					resource.TestCheckResourceAttrSet(resourceName, "min_node_count"),
+					resource.TestCheckResourceAttrSet(resourceName, "max_node_count"),
+					resource.TestCheckResourceAttr(resourceName, "image", osMagnumImage),
+					resource.TestCheckResourceAttr(resourceName, "flavor", osMagnumFlavor),
 				),
 			},
 		},

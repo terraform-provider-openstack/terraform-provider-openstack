@@ -12,7 +12,6 @@ import (
 func TestAccContainerInfraV1ClusterTemplateDataSource_basic(t *testing.T) {
 	resourceName := "data.openstack_containerinfra_clustertemplate_v1.clustertemplate_1"
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
-	imageName := acctest.RandomWithPrefix("tf-acc-image")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -23,23 +22,49 @@ func TestAccContainerInfraV1ClusterTemplateDataSource_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckContainerInfraV1ClusterTemplateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerInfraV1ClusterTemplateDataSource(clusterTemplateName, imageName),
+				Config: testAccContainerInfraV1ClusterTemplateBasic(clusterTemplateName),
 			},
 			{
 				Config: testAccContainerInfraV1ClusterTemplateDataSourceBasic(
-					testAccContainerInfraV1ClusterTemplateDataSource(clusterTemplateName, imageName),
+					testAccContainerInfraV1ClusterTemplateBasic(clusterTemplateName),
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1ClusterTemplateDataSourceID(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "region", osRegionName),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterTemplateName),
+					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "user_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
+					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
+					resource.TestCheckResourceAttr(resourceName, "apiserver_port", "8888"),
 					resource.TestCheckResourceAttr(resourceName, "coe", "kubernetes"),
-					resource.TestCheckResourceAttr(resourceName, "http_proxy", "127.0.0.1:8801"),
-					resource.TestCheckResourceAttr(resourceName, "labels.kube_tag", "1.11.1"),
-					resource.TestCheckResourceAttr(resourceName, "docker_storage_driver", "devicemapper"),
+					resource.TestCheckResourceAttrSet(resourceName, "cluster_distro"),
+					resource.TestCheckResourceAttr(resourceName, "dns_nameserver", "8.8.8.8"),
+					resource.TestCheckResourceAttr(resourceName, "docker_storage_driver", "overlay2"),
 					resource.TestCheckResourceAttr(resourceName, "docker_volume_size", "5"),
+					resource.TestCheckResourceAttr(resourceName, "external_network_id", osExtGwID),
+					resource.TestCheckResourceAttr(resourceName, "fixed_network", "cluster-network"),
+					resource.TestCheckResourceAttr(resourceName, "fixed_subnet", "cluster-network-subnet"),
+					resource.TestCheckResourceAttr(resourceName, "flavor", osMagnumFlavor),
+					resource.TestCheckResourceAttr(resourceName, "master_flavor", osMagnumFlavor),
+					resource.TestCheckResourceAttr(resourceName, "floating_ip_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "http_proxy", osMagnumHTTPProxy),
+					resource.TestCheckResourceAttr(resourceName, "https_proxy", osMagnumHTTPSProxy),
+					resource.TestCheckResourceAttr(resourceName, "image", osMagnumImage),
+					resource.TestCheckResourceAttr(resourceName, "insecure_registry", "registry.example.com"),
+					resource.TestCheckResourceAttr(resourceName, "keypair_id", "my-keypair"),
+					resource.TestCheckResourceAttr(resourceName, "labels.kube_tag", "1.11.1"),
 					resource.TestCheckResourceAttr(resourceName, "labels.prometheus_monitoring", "true"),
 					resource.TestCheckResourceAttr(resourceName, "labels.influx_grafana_dashboard_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "labels.kube_dashboard_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "master_lb_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network_driver", "flannel"),
+					resource.TestCheckResourceAttr(resourceName, "no_proxy", osMagnumNoProxy),
+					resource.TestCheckResourceAttrSet(resourceName, "public"),
+					resource.TestCheckResourceAttr(resourceName, "registry_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "server_type", "vm"),
+					resource.TestCheckResourceAttr(resourceName, "tls_disabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "volume_driver", "cinder"),
 				),
 			},
 		},
@@ -59,39 +84,6 @@ func testAccCheckContainerInfraV1ClusterTemplateDataSourceID(n string) resource.
 
 		return nil
 	}
-}
-
-func testAccContainerInfraV1ClusterTemplateDataSource(clusterTemplateName, imageName string) string {
-	return fmt.Sprintf(`
-resource "openstack_images_image_v2" "image_1" {
-  name             = "%s"
-  image_source_url = "https://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img"
-  container_format = "bare"
-  disk_format      = "raw"
-  properties = {
-    os_distro = "fedora-atomic"
-  }
-
-  timeouts {
-    create = "10m"
-  }
-}
-
-resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
-  name       = "%s"
-  image      = "${openstack_images_image_v2.image_1.id}"
-  coe        = "kubernetes"
-  http_proxy = "127.0.0.1:8801"
-  docker_storage_driver = "devicemapper"
-  docker_volume_size = 5
-  labels = {
-    kube_tag                         = "1.11.1"
-    prometheus_monitoring            = "true"
-    influx_grafana_dashboard_enabled = "true"
-    kube_dashboard_enabled           = "true"
-  }
-}
-`, imageName, clusterTemplateName)
 }
 
 func testAccContainerInfraV1ClusterTemplateDataSourceBasic(clusterTemplateResource string) string {
