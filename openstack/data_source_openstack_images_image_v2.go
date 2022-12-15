@@ -90,11 +90,13 @@ func dataSourceImagesImageV2() *schema.Resource {
 					"asc", "desc",
 				}, false),
 			},
+
 			"tag": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
+
 			"most_recent": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -175,6 +177,7 @@ func dataSourceImagesImageV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"tags": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -197,11 +200,12 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 	visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
 	memberStatus := resourceImagesImageV2MemberStatusFromString(d.Get("member_status").(string))
 
-	var tags []string
-	tag_list := d.Get("tags").(*schema.Set).List()
-	for _, v := range tag_list {
+	tags := []string{}
+	tagList := d.Get("tags").(*schema.Set).List()
+	for _, v := range tagList {
 		tags = append(tags, fmt.Sprint(v))
 	}
+
 	tag := d.Get("tag").(string)
 	if tag != "" {
 		tags = append(tags, tag)
