@@ -53,6 +53,9 @@ data "openstack_images_image_v2" "ubuntu" {
 
 * `tag` - (Optional) Search for images with a specific tag.
 
+* `tags` - (Optional) A list of tags required to be set on the image 
+      (all specified tags must be in the images tag list for it to be matched).
+
 * `visibility` - (Optional) The visibility of the image. Must be one of
    "public", "private", "community", or "shared". Defaults to "private".
 
