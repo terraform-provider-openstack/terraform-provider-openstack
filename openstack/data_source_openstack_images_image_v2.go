@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"sort"
 	"time"
@@ -180,6 +181,7 @@ func dataSourceImagesImageV2() *schema.Resource {
 			"tags": {
 				Type:     schema.TypeSet,
 				Computed: true,
+				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
@@ -198,7 +200,12 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 	visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
 	memberStatus := resourceImagesImageV2MemberStatusFromString(d.Get("member_status").(string))
 
-	var tags []string
+	tags := []string{}
+	tagList := d.Get("tags").(*schema.Set).List()
+	for _, v := range tagList {
+		tags = append(tags, fmt.Sprint(v))
+	}
+
 	tag := d.Get("tag").(string)
 	if tag != "" {
 		tags = append(tags, tag)
