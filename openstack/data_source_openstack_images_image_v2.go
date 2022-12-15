@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"sort"
 	"time"
@@ -89,13 +90,11 @@ func dataSourceImagesImageV2() *schema.Resource {
 					"asc", "desc",
 				}, false),
 			},
-
 			"tag": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-
 			"most_recent": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -176,10 +175,10 @@ func dataSourceImagesImageV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"tags": {
 				Type:     schema.TypeSet,
 				Computed: true,
+				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
@@ -199,6 +198,10 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 	memberStatus := resourceImagesImageV2MemberStatusFromString(d.Get("member_status").(string))
 
 	var tags []string
+	tag_list := d.Get("tags").(*schema.Set).List()
+	for _, v := range tag_list {
+		tags = append(tags, fmt.Sprint(v))
+	}
 	tag := d.Get("tag").(string)
 	if tag != "" {
 		tags = append(tags, tag)
