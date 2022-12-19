@@ -20,10 +20,10 @@ state](https://www.terraform.io/docs/language/state/sensitive-data.html).
 
 ```hcl
 resource "openstack_db_user_v1" "basic" {
-  name      = "basic"
-  instance  = "${openstack_db_instance_v1.basic.id}"
-  password  = "password"
-  databases = ["testdb"]
+  name         = "basic"
+  instance_id  = "${openstack_db_instance_v1.basic.id}"
+  password     = "password"
+  databases    = ["testdb"]
 }
 ```
 
@@ -33,7 +33,7 @@ The following arguments are supported:
 
 * `name` - (Required) A unique name for the resource.
 
-* `instance` - (Required) The ID for the database instance.
+* `instance_id` - (Required) The ID for the database instance.
 
 * `password` - (Required) User's password.
 
@@ -45,6 +45,6 @@ The following attributes are exported:
 
 * `region` - Openstack region resource is created in.
 * `name` - See Argument Reference above.
-* `instance` - See Argument Reference above.
+* `instance_id` - See Argument Reference above.
 * `password` - See Argument Reference above.
 * `databases` - See Argument Reference above.
