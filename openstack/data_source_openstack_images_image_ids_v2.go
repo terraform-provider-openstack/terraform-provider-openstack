@@ -122,6 +122,13 @@ func dataSourceImagesImageIDsV2() *schema.Resource {
 				ConflictsWith: []string{"name"},
 			},
 
+			"tags": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
+
 			// Computed values
 			"ids": {
 				Type:     schema.TypeList,
@@ -160,8 +167,14 @@ func dataSourceImagesImageIdsV2Read(ctx context.Context, d *schema.ResourceData,
 	properties := resourceImagesImageV2ExpandProperties(
 		d.Get("properties").(map[string]interface{}))
 
-	var tags []string
-	if tag := d.Get("tag").(string); tag != "" {
+	tags := []string{}
+	tagList := d.Get("tags").(*schema.Set).List()
+	for _, v := range tagList {
+		tags = append(tags, fmt.Sprint(v))
+	}
+
+	tag := d.Get("tag").(string)
+	if tag != "" {
 		tags = append(tags, tag)
 	}
 

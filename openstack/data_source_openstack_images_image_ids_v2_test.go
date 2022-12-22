@@ -53,6 +53,16 @@ func TestAccOpenStackImagesV2ImageIDsDataSource_basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccOpenStackImagesV2ImageIDsDataSourceTagList(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"data.openstack_images_image_ids_v2.images_by_tag", "ids.#", "1"),
+					resource.TestCheckResourceAttrPair(
+						"data.openstack_images_image_ids_v2.images_by_tag", "ids.0",
+						"openstack_images_image_v2.image_1", "id"),
+				),
+			},
+			{
 				Config: testAccOpenStackImagesV2ImageIDsDataSourceProperties(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -133,6 +143,17 @@ func testAccOpenStackImagesV2ImageIDsDataSourceTag() string {
 
 data "openstack_images_image_ids_v2" "images_by_tag" {
 	tag = "cirros-tf_1"
+	visibility = "private"
+}
+`, testAccOpenStackImagesV2ImageIDsDataSourceCirros)
+}
+
+func testAccOpenStackImagesV2ImageIDsDataSourceTagList() string {
+	return fmt.Sprintf(`
+%s
+
+data "openstack_images_image_ids_v2" "images_by_tag" {
+	tags = ["cirros-tf_1"]
 	visibility = "private"
 }
 `, testAccOpenStackImagesV2ImageIDsDataSourceCirros)
