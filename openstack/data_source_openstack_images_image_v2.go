@@ -27,9 +27,10 @@ func dataSourceImagesImageV2() *schema.Resource {
 			},
 
 			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"name_regex"},
 			},
 
 			"visibility": {
@@ -115,6 +116,14 @@ func dataSourceImagesImageV2() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 				Default:  false,
+			},
+
+			"name_regex": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ValidateFunc:  validation.StringIsValidRegExp,
+				ConflictsWith: []string{"name"},
 			},
 
 			// Computed values
@@ -245,6 +254,12 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 		allImages = imagesFilterByProperties(allImages, properties)
 
 		log.Printf("[DEBUG] Image list filtered by properties: %#v", properties)
+	}
+
+	nameRegex, nameRegexOk := d.GetOk("name_regex")
+	if nameRegexOk {
+		allImages = imagesFilterByRegex(allImages, nameRegex.(string))
+		log.Printf("[DEBUG] Image list filtered by regex: %s", d.Get("name_regex"))
 	}
 
 	if len(allImages) < 1 {
