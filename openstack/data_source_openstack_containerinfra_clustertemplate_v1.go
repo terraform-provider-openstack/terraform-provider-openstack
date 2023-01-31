@@ -175,6 +175,11 @@ func dataSourceContainerInfraClusterTemplateV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
+			"hidden": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -222,6 +227,7 @@ func dataSourceContainerInfraClusterTemplateV1Read(ctx context.Context, d *schem
 	d.Set("server_type", ct.ServerType)
 	d.Set("tls_disabled", ct.TLSDisabled)
 	d.Set("volume_driver", ct.VolumeDriver)
+	d.Set("hidden", ct.Hidden)
 
 	if err := d.Set("created_at", ct.CreatedAt.Format(time.RFC3339)); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_containerinfra_clustertemplate_v1 created_at: %s", err)

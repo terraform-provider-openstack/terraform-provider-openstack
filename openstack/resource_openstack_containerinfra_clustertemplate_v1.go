@@ -228,6 +228,12 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
+
+			"hidden": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: false,
+			},
 		},
 	}
 }
@@ -245,6 +251,7 @@ func resourceContainerInfraClusterTemplateV1Create(ctx context.Context, d *schem
 	public := d.Get("public").(bool)
 	registryEnabled := d.Get("registry_enabled").(bool)
 	tlsDisabled := d.Get("tls_disabled").(bool)
+	hidden := d.Get("hidden").(bool)
 
 	// Get and check labels map.
 	rawLabels := d.Get("labels").(map[string]interface{})
@@ -278,6 +285,7 @@ func resourceContainerInfraClusterTemplateV1Create(ctx context.Context, d *schem
 		ServerType:          d.Get("server_type").(string),
 		TLSDisabled:         &tlsDisabled,
 		VolumeDriver:        d.Get("volume_driver").(string),
+		Hidden:              &hidden,
 	}
 
 	// Set int parameters that will be passed by reference.
@@ -350,6 +358,7 @@ func resourceContainerInfraClusterTemplateV1Read(_ context.Context, d *schema.Re
 	d.Set("name", s.Name)
 	d.Set("project_id", s.ProjectID)
 	d.Set("user_id", s.UserID)
+	d.Set("hidden", s.Hidden)
 
 	if err := d.Set("created_at", s.CreatedAt.Format(time.RFC3339)); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_containerinfra_clustertemplate_v1 created_at: %s", err)
@@ -517,6 +526,12 @@ func resourceContainerInfraClusterTemplateV1Update(ctx context.Context, d *schem
 	if d.HasChange("volume_driver") {
 		v := d.Get("volume_driver").(string)
 		updateOpts = containerInfraClusterTemplateV1AppendUpdateOpts(updateOpts, "volume_driver", v)
+	}
+
+	if d.HasChange("hidden") {
+		v := d.Get("hidden").(bool)
+		hidden := strconv.FormatBool(v)
+		updateOpts = containerInfraClusterTemplateV1AppendUpdateOpts(updateOpts, "hidden", hidden)
 	}
 
 	log.Printf(

@@ -101,6 +101,8 @@ github.com/gophercloud/gophercloud v1.0.1-0.20220908162354-a75271e0e3ad h1:SJD7B
 github.com/gophercloud/gophercloud v1.0.1-0.20220908162354-a75271e0e3ad/go.mod h1:Q8fZtyi5zZxPS/j9aj3sSxtvj41AdQMDwyo1myduD5c=
 github.com/gophercloud/gophercloud v1.0.1-0.20220927110532-5c912b0995dc h1:sP3Vvq6K7Ql2HjD5svT9q5GfzvIbwSuAYhECS/ktLxU=
 github.com/gophercloud/gophercloud v1.0.1-0.20220927110532-5c912b0995dc/go.mod h1:Q8fZtyi5zZxPS/j9aj3sSxtvj41AdQMDwyo1myduD5c=
+github.com/gophercloud/gophercloud v1.2.0 h1:1oXyj4g54KBg/kFtCdMM6jtxSzeIyg8wv4z1HoGPp1E=
+github.com/gophercloud/gophercloud v1.2.0/go.mod h1:aAVqcocTSXh2vYFZ1JTvx4EQmfgzxRcNupUfxZbBNDM=
 github.com/gophercloud/utils v0.0.0-20220307143606-8e7800759d16 h1:slt/exMiitZNY+5OrKJ6ZvSogqN+SyzeYzAtyI6db9A=
 github.com/gophercloud/utils v0.0.0-20220307143606-8e7800759d16/go.mod h1:qOGlfG6OIJ193/c3Xt/XjOfHataNZdQcVgiu93LxBUM=
 github.com/grpc-ecosystem/grpc-gateway v1.16.0/go.mod h1:BDjrQk3hbvj6Nolgz8mAMFbcEtjT1g+wF4CSlocrBnw=
@@ -275,6 +277,8 @@ golang.org/x/crypto v0.0.0-20211202192323-5770296d904e h1:MUP6MR3rJ7Gk9LEia0LP2y
 golang.org/x/crypto v0.0.0-20211202192323-5770296d904e/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
 golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e h1:T8NU3HyQ8ClP4SEE+KbFlg6n0NhuTsN4MyznaarGsZM=
 golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
+golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 h1:Y/gsMcFOcR+6S6f3YeMKl5g+dZMEWqcz5Czj/GWYbkM=
+golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/lint v0.0.0-20181026193005-c67002cb31c3/go.mod h1:UVdnD1Gm6xHRNCYTkRU2/jEulfH38KcIWyp/GAMgvoE=
 golang.org/x/lint v0.0.0-20190227174305-5b3e6a55c961/go.mod h1:wehouNa3lNwaWXcvxsM5YxQ5yQlVC4a0KAMCusXpPoU=

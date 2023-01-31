@@ -109,3 +109,5 @@ attributes are exported:
 
 * `volume_driver` - The name of the driver that is used for the volumes of the
     cluster nodes.
+
+* `hidden` - Indicates whether the ClusterTemplate is hidden or not.

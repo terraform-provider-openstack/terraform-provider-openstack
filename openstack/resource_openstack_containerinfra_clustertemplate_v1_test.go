@@ -65,6 +65,7 @@ func TestAccContainerInfraV1ClusterTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "server_type", "vm"),
 					resource.TestCheckResourceAttr(resourceName, "tls_disabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "volume_driver", "cinder"),
+					resource.TestCheckResourceAttr(resourceName, "hidden", "false"),
 				),
 			},
 			{
@@ -105,6 +106,7 @@ func TestAccContainerInfraV1ClusterTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "server_type", "vm"),
 					resource.TestCheckResourceAttr(resourceName, "tls_disabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "volume_driver", "cinder"),
+					resource.TestCheckResourceAttr(resourceName, "hidden", "true"),
 				),
 			},
 		},
@@ -197,7 +199,8 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   registry_enabled      = "true"
   server_type           = "vm"
   tls_disabled          = "false"
-  volume_driver         = "cinder"  
+  volume_driver         = "cinder"
+	hidden								= "false"
 }
 `, osRegionName, clusterTemplateName, osExtGwID, osMagnumFlavor, osMagnumFlavor, osMagnumHTTPProxy, osMagnumHTTPSProxy, osMagnumImage, osMagnumNoProxy)
 }
@@ -235,7 +238,8 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   registry_enabled      = "false"
   server_type           = "vm"
   tls_disabled          = "true"
-  volume_driver         = "cinder"  
+  volume_driver         = "cinder"
+	hidden								= "true"
 }
 `, osRegionName, clusterTemplateName, osExtGwID, osMagnumFlavor, osMagnumFlavor, osMagnumImage)
 }
