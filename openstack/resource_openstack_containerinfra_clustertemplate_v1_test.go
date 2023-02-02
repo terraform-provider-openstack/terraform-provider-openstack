@@ -200,7 +200,7 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   server_type           = "vm"
   tls_disabled          = "false"
   volume_driver         = "cinder"
-	hidden								= "false"
+	hidden                = "false"
 }
 `, osRegionName, clusterTemplateName, osExtGwID, osMagnumFlavor, osMagnumFlavor, osMagnumHTTPProxy, osMagnumHTTPSProxy, osMagnumImage, osMagnumNoProxy)
 }
@@ -239,7 +239,7 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   server_type           = "vm"
   tls_disabled          = "true"
   volume_driver         = "cinder"
-	hidden								= "true"
+	hidden                = "true"
 }
 `, osRegionName, clusterTemplateName, osExtGwID, osMagnumFlavor, osMagnumFlavor, osMagnumImage)
 }
