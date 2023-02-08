@@ -65,6 +65,7 @@ func TestAccContainerInfraV1ClusterTemplateDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "server_type", "vm"),
 					resource.TestCheckResourceAttr(resourceName, "tls_disabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "volume_driver", "cinder"),
+					resource.TestCheckResourceAttr(resourceName, "hidden", "false"),
 				),
 			},
 		},

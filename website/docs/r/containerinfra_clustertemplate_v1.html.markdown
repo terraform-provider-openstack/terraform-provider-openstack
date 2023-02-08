@@ -159,6 +159,10 @@ The following arguments are supported:
     volumes of the cluster nodes. Changing this updates the volume driver of
     the existing cluster template.
 
+* `hidden` - (Optional) Indicates whether the ClusterTemplate is hidden or not.
+    Changing this updates the hidden attribute of the existing cluster
+    template.
+
 ## Attributes reference
 
 The following attributes are exported:
@@ -195,6 +199,7 @@ The following attributes are exported:
 * `server_type` - See Argument Reference above.
 * `tls_disabled` - See Argument Reference above.
 * `volume_driver` - See Argument Reference above.
+* `hidden` - See Argument Reference above.
 
 ## Import
 
