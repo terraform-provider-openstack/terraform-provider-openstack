@@ -26,6 +26,9 @@ resource "openstack_identity_ec2_credential_v3" "ec2_key1" {}
 
 ### EC2 credential in pre-defined project scope
 
+This allows administrative users to create EC2 credentials for a scope different
+from the current auth scope.
+
 ```hcl
 resource "openstack_identity_ec2_credential_v3" "ec2_key1" {
     project_id = "f7ac731cc11f40efbc03a9f9e1d1d21f"
@@ -41,8 +44,11 @@ The following arguments are supported:
    creates a new EC2 credential.
 * `project_id` - (Optional) The ID of the project the EC2 credential is created
    for and that authentication requests using this EC2 credential will
-   be scoped to.
+   be scoped to. Only administrative users can specify a project ID different
+   from the current auth scope.
 * `user_id` - (Optional) The ID of the user the EC2 credential is created for.
+   Only administrative users can specify a user ID different from the current
+   auth scope.
 
 ## Attributes Reference
 
