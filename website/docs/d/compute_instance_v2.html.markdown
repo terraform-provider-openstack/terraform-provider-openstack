@@ -6,7 +6,7 @@ description: |-
   Get information on an OpenStack Instance
 ---
 
-# openstack\_compute\_flavor\_v2
+# openstack\_compute\_instance\_v2
 
 Use this data source to get the details of a running server
 
