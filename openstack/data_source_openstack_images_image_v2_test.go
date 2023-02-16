@@ -52,6 +52,12 @@ func TestAccOpenStackImagesV2ImageDataSource_testQueries(t *testing.T) {
 				Config: testAccOpenStackImagesV2ImageDataSourceCirros,
 			},
 			{
+				Config: testAccOpenStackImagesV2ImageDataSourceNameRegex(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_2"),
+				),
+			},
+			{
 				Config: testAccOpenStackImagesV2ImageDataSourceQueryTag(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
@@ -158,6 +164,16 @@ data "openstack_images_image_v2" "image_1" {
 `, testAccOpenStackImagesV2ImageDataSourceCirros)
 }
 
+func testAccOpenStackImagesV2ImageDataSourceNameRegex() string {
+	return fmt.Sprintf(`
+%s
+
+data "openstack_images_image_v2" "image_2" {
+	most_recent = true
+	name_regex = "^.+tf_2$"
+}
+`, testAccOpenStackImagesV2ImageDataSourceCirros)
+}
 func testAccOpenStackImagesV2ImageDataSourceQueryTag() string {
 	return fmt.Sprintf(`
 %s

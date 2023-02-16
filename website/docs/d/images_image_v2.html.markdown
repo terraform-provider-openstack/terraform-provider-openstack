@@ -33,7 +33,13 @@ data "openstack_images_image_v2" "ubuntu" {
 * `most_recent` - (Optional) If more than one result is returned, use the most
   recent image.
 
-* `name` - (Optional) The name of the image.
+* `name` - (Optional) The name of the image. Cannot be used simultaneously
+    with `name_regex`.
+
+* `name_regex` - (Optional) The regular expressian of the name of the image.
+    Cannot be used simultaneously with `name`. Unlike filtering by `name` the
+    `name_regex` filtering does by client on the result of OpenStack search
+    query.
 
 * `owner` - (Optional) The owner (UUID) of the image.
 
