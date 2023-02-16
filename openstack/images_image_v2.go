@@ -1,6 +1,8 @@
 package openstack
 
 import (
+	"compress/bzip2"
+	"compress/gzip"
 	"context"
 	"crypto/md5"
 	"encoding/hex"
@@ -127,7 +129,28 @@ func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.Reso
 
 			defer resp.Body.Close()
 
-			if _, err = io.Copy(file, resp.Body); err != nil {
+			reader := resp.Body
+			decompress := d.Get("decompress").(bool)
+
+			if decompress {
+				// If we're here "Content-Encoding" in not filled, we'll read
+				// "Content-Type" to select format
+				switch resp.Header.Get("Content-Type") {
+				case "gzip", "application/gzip":
+					reader, err = gzip.NewReader(resp.Body)
+					if err != nil {
+						return "", fmt.Errorf("Error decompressing gzip image: %s", err)
+					}
+				case "bzip2", "application/bzip2", "application/x-bzip2":
+					bz2Reader := bzip2.NewReader(resp.Body)
+					reader = io.NopCloser(bz2Reader)
+				default:
+					return "", fmt.Errorf("Error decompressing image, format %s is not supported", resp.Header.Get("Content-Type"))
+				}
+				defer reader.Close()
+			}
+
+			if _, err = io.Copy(file, reader); err != nil {
 				return "", fmt.Errorf("Error downloading image %q to file %q: %s", furl, filename, err)
 			}
 			return filename, nil
