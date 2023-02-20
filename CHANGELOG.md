@@ -1,3 +1,9 @@
+## 1.50.0 (not released yet)
+
+IMPROVEMENTS
+
+* Added `name_regex` argument to `openstack_images_image_v2` data source ([#1469](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1469))
+
 ## 1.49.0 (26 October, 2022)
 
 FEATURES
