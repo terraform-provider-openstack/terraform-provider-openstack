@@ -1,8 +1,15 @@
-## 1.50.0 (not released yet)
+## 1.50.0 (Unreleased)
 
 IMPROVEMENTS
 
 * Added `name_regex` argument to `openstack_images_image_v2` data source ([#1469](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1469))
+* Added ability to provide a list of tags into `openstack_images_image_v2`, `openstack_images_image_ids_v2` data sources ([#1462](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1462)), ([#1468](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1468))
+* Added `name_regex` attribute to `openstack_images_image_v2` data source ([#1469](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1469))
+* Added `hidden` attribute to `containerinfra_clustertemplate_v1` data source ([#1472](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1472))
+
+BUG FIXES
+
+* Fixed `containerinfra_clustertemplate_v1` labels update ([#1455](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1455))
 
 ## 1.49.0 (26 October, 2022)
 
