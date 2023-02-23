@@ -179,32 +179,33 @@ resource "openstack_blockstorage_quotaset_v3" "quotaset_1" {
 `
 
 // NOTE: __DEFAULT__ and lvmdriver-1 types were added while migrating to SDK V2 since we had errors like
-//     TestAccBlockStorageQuotasetV3_basic: resource_openstack_blockstorage_quotaset_v3_test.go:23: Step 2/3 error: After applying this test step, the plan was not empty.
-//         stdout:
+//
+//	TestAccBlockStorageQuotasetV3_basic: resource_openstack_blockstorage_quotaset_v3_test.go:23: Step 2/3 error: After applying this test step, the plan was not empty.
+//	    stdout:
 //
 //
-//         Terraform used the selected providers to generate the following execution
-//         plan. Resource actions are indicated with the following symbols:
-//           ~ update in-place
+//	    Terraform used the selected providers to generate the following execution
+//	    plan. Resource actions are indicated with the following symbols:
+//	      ~ update in-place
 //
-//         Terraform will perform the following actions:
+//	    Terraform will perform the following actions:
 //
-//           # openstack_blockstorage_quotaset_v3.quotaset_1 will be updated in-place
-//           ~ resource "openstack_blockstorage_quotaset_v3" "quotaset_1" {
-//                 id                   = "c16b6831bca24f3ea568639501806d80/RegionOne"
-//               ~ volume_type_quota    = {
-//                   - "gigabytes___DEFAULT__" = "-1" -> null
-//                   - "gigabytes_lvmdriver-1" = "-1" -> null
-//                   - "snapshots___DEFAULT__" = "-1" -> null
-//                   - "snapshots_lvmdriver-1" = "-1" -> null
-//                   - "volumes___DEFAULT__"   = "-1" -> null
-//                   - "volumes_lvmdriver-1"   = "-1" -> null
-//                     # (3 unchanged elements hidden)
-//                 }
-//                 # (9 unchanged attributes hidden)
-//             }
+//	      # openstack_blockstorage_quotaset_v3.quotaset_1 will be updated in-place
+//	      ~ resource "openstack_blockstorage_quotaset_v3" "quotaset_1" {
+//	            id                   = "c16b6831bca24f3ea568639501806d80/RegionOne"
+//	          ~ volume_type_quota    = {
+//	              - "gigabytes___DEFAULT__" = "-1" -> null
+//	              - "gigabytes_lvmdriver-1" = "-1" -> null
+//	              - "snapshots___DEFAULT__" = "-1" -> null
+//	              - "snapshots_lvmdriver-1" = "-1" -> null
+//	              - "volumes___DEFAULT__"   = "-1" -> null
+//	              - "volumes_lvmdriver-1"   = "-1" -> null
+//	                # (3 unchanged elements hidden)
+//	            }
+//	            # (9 unchanged attributes hidden)
+//	        }
 //
-//         Plan: 0 to add, 1 to change, 0 to destroy.
+//	    Plan: 0 to add, 1 to change, 0 to destroy.
 const testAccBlockStorageQuotasetV3Update1 = `
 resource "openstack_identity_project_v3" "project_1" {
   name = "project_1"

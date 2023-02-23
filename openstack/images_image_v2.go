@@ -275,6 +275,7 @@ func imagesFilterByRegex(imageArr []images.Image, nameRegex string) []images.Ima
 
 // v - slice of images to filter
 // p - field "properties" of schema.Resource from dataSourceImagesImageIDsV2
+//
 //	or dataSourceImagesImageV2. If p is empty no filtering applies and the
 //	function returns the v.
 func imagesFilterByProperties(v []images.Image, p map[string]string) []images.Image {
