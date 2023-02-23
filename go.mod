@@ -1,6 +1,6 @@
 module github.com/terraform-provider-openstack/terraform-provider-openstack
 
-go 1.19
+go 1.20
 
 require (
 	github.com/gophercloud/gophercloud v1.2.0

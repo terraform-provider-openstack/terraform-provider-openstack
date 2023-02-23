@@ -2,7 +2,7 @@
 
 FEATURES
 
-* Updated Go to `1.19`
+* Updated Go to `1.20`
 
 IMPROVEMENTS
 
