@@ -1,6 +1,6 @@
 module github.com/terraform-provider-openstack/terraform-provider-openstack
 
-go 1.17
+go 1.19
 
 require (
 	github.com/gophercloud/gophercloud v1.2.0
@@ -51,7 +51,7 @@ require (
 	github.com/vmihailenco/msgpack/v4 v4.3.12 // indirect
 	github.com/vmihailenco/tagparser v0.1.2 // indirect
 	github.com/zclconf/go-cty v1.10.0 // indirect
-	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 // indirect
+	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect

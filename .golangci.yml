@@ -3,9 +3,9 @@ run:
 
 linters-settings:
   staticcheck:
-    go: 1.17
+    go: 1.19
   stylecheck:
-    go: 1.17
+    go: 1.19
   gci:
     local-prefixes: github.com/gophercloud
   goimports:
