@@ -2,7 +2,8 @@
 
 FEATURES
 
-* Updated Go to `1.20`
+* Updated Go to `1.20` ([#1488](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1488))
+* Updated Golangci-lint to `v1.51.2` ([#1488](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1488))
 
 IMPROVEMENTS
 
