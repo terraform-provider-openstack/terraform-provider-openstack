@@ -47,7 +47,7 @@ jobs:
       - name: Checkout go
         uses: actions/setup-go@v3
         with:
-          go-version: '^1.17'
+          go-version: '^1.20'
       - name: Run TPO acceptance tests
         run: OS_DNS_ENVIRONMENT=True ./scripts/acceptancetest.sh
         env:
