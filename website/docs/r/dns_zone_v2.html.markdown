@@ -15,7 +15,7 @@ Manages a DNS zone in the OpenStack DNS Service.
 ### Automatically detect the correct network
 
 ```hcl
-resource "openstack_dns_zone_v2" "example.com" {
+resource "openstack_dns_zone_v2" "example_com" {
   name        = "example.com."
   email       = "jdoe@example.com"
   description = "An example zone"
