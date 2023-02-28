@@ -31,6 +31,7 @@ func TestAccImagesImageV2_importBasic(t *testing.T) {
 					"image_cache_path",
 					"image_source_url",
 					"verify_checksum",
+					"decompress",
 				},
 			},
 		},
