@@ -26,6 +26,15 @@ func resourceObjectStorageContainerV1() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceObjectStorageContainerV1V0().CoreConfigSchema().ImpliedType(),
+				Upgrade: resourceObjectStorageContainerStateUpgradeV0,
+				Version: 0,
+			},
+		},
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -64,6 +73,12 @@ func resourceObjectStorageContainerV1() *schema.Resource {
 				ForceNew: false,
 			},
 			"versioning": {
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Default:       false,
+				ConflictsWith: []string{"versioning_legacy"},
+			},
+			"versioning_legacy": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				MaxItems: 1,
@@ -82,6 +97,8 @@ func resourceObjectStorageContainerV1() *schema.Resource {
 						},
 					},
 				},
+				ConflictsWith: []string{"versioning"},
+				Deprecated:    "Use newer \"versioning\" implementation",
 			},
 			"metadata": {
 				Type:     schema.TypeMap,
@@ -119,10 +136,11 @@ func resourceObjectStorageContainerV1Create(ctx context.Context, d *schema.Resou
 		ContainerWrite:   d.Get("container_write").(string),
 		ContentType:      d.Get("content_type").(string),
 		StoragePolicy:    d.Get("storage_policy").(string),
+		VersionsEnabled:  d.Get("versioning").(bool),
 		Metadata:         resourceContainerMetadataV2(d),
 	}
 
-	versioning := d.Get("versioning").(*schema.Set)
+	versioning := d.Get("versioning_legacy").(*schema.Set)
 	if versioning.Len() > 0 {
 		vParams := versioning.List()[0]
 		if vRaw, ok := vParams.(map[string]interface{}); ok {
@@ -188,7 +206,7 @@ func resourceObjectStorageContainerV1Read(ctx context.Context, d *schema.Resourc
 		d.Set("storage_policy", headers.StoragePolicy)
 	}
 
-	versioningResource := resourceObjectStorageContainerV1().Schema["versioning"].Elem.(*schema.Resource)
+	versioningResource := resourceObjectStorageContainerV1().Schema["versioning_legacy"].Elem.(*schema.Resource)
 
 	if headers.VersionsLocation != "" && headers.HistoryLocation != "" {
 		return diag.Errorf("error reading versioning headers for objectstorage_container_v1 '%s': found location for both exclusive types, versions ('%s') and history ('%s')", d.Id(), headers.VersionsLocation, headers.HistoryLocation)
@@ -199,7 +217,7 @@ func resourceObjectStorageContainerV1Read(ctx context.Context, d *schema.Resourc
 			"type":     "versions",
 			"location": headers.VersionsLocation,
 		}
-		if err := d.Set("versioning", schema.NewSet(schema.HashResource(versioningResource), []interface{}{versioning})); err != nil {
+		if err := d.Set("versioning_legacy", schema.NewSet(schema.HashResource(versioningResource), []interface{}{versioning})); err != nil {
 			return diag.Errorf("error setting 'versions' versioning for objectstorage_container_v1 '%s': %s", d.Id(), err)
 		}
 	}
@@ -209,11 +227,12 @@ func resourceObjectStorageContainerV1Read(ctx context.Context, d *schema.Resourc
 			"type":     "history",
 			"location": headers.HistoryLocation,
 		}
-		if err := d.Set("versioning", schema.NewSet(schema.HashResource(versioningResource), []interface{}{versioning})); err != nil {
+		if err := d.Set("versioning_legacy", schema.NewSet(schema.HashResource(versioningResource), []interface{}{versioning})); err != nil {
 			return diag.Errorf("error setting 'history' versioning for objectstorage_container_v1 '%s': %s", d.Id(), err)
 		}
 	}
 
+	d.Set("versioning", headers.VersionsEnabled)
 	d.Set("region", GetRegion(d, config))
 
 	return nil
@@ -241,7 +260,12 @@ func resourceObjectStorageContainerV1Update(ctx context.Context, d *schema.Resou
 	}
 
 	if d.HasChange("versioning") {
-		versioning := d.Get("versioning").(*schema.Set)
+		versioning := d.Get("versioning").(bool)
+		updateOpts.VersionsEnabled = &versioning
+	}
+
+	if d.HasChange("versioning_legacy") {
+		versioning := d.Get("versioning_legacy").(*schema.Set)
 		if versioning.Len() == 0 {
 			updateOpts.RemoveVersionsLocation = "true"
 			updateOpts.RemoveHistoryLocation = "true"
@@ -259,6 +283,31 @@ func resourceObjectStorageContainerV1Update(ctx context.Context, d *schema.Resou
 					updateOpts.HistoryLocation = vRaw["location"].(string)
 				}
 			}
+		}
+	}
+
+	// remove legacy versioning first, before enabling the new versioning
+	if updateOpts.VersionsEnabled != nil && *updateOpts.VersionsEnabled == true &&
+		(updateOpts.RemoveVersionsLocation == "true" || updateOpts.RemoveHistoryLocation == "true") {
+		opts := containers.UpdateOpts{
+			RemoveVersionsLocation: "true",
+			RemoveHistoryLocation:  "true",
+		}
+		_, err = containers.Update(objectStorageClient, d.Id(), opts).Extract()
+		if err != nil {
+			return diag.Errorf("error updating objectstorage_container_v1 '%s': %s", d.Id(), err)
+		}
+	}
+
+	// remove new versioning first, before enabling the legacy versioning
+	if (updateOpts.VersionsLocation != "" || updateOpts.HistoryLocation != "") &&
+		updateOpts.VersionsEnabled != nil && *updateOpts.VersionsEnabled == false {
+		opts := containers.UpdateOpts{
+			VersionsEnabled: updateOpts.VersionsEnabled,
+		}
+		_, err = containers.Update(objectStorageClient, d.Id(), opts).Extract()
+		if err != nil {
+			return diag.Errorf("error updating objectstorage_container_v1 '%s': %s", d.Id(), err)
 		}
 	}
 
@@ -290,20 +339,28 @@ func resourceObjectStorageContainerV1Delete(ctx context.Context, d *schema.Resou
 
 			container := d.Id()
 			opts := &objects.ListOpts{
-				Full: false,
+				Full:     true,
+				Versions: true,
 			}
 			// Retrieve a pager (i.e. a paginated collection)
 			pager := objects.List(objectStorageClient, container, opts)
 			// Define an anonymous function to be executed on each page's iteration
 			err := pager.EachPage(func(page pagination.Page) (bool, error) {
-				objectList, err := objects.ExtractNames(page)
+				objectList, err := objects.ExtractInfo(page)
 				if err != nil {
 					return false, fmt.Errorf("error extracting names from objects from page for objectstorage_container_v1 '%s': %+v", container, err)
 				}
 				for _, object := range objectList {
-					_, err = objects.Delete(objectStorageClient, container, object, objects.DeleteOpts{}).Extract()
+					opts := objects.DeleteOpts{
+						ObjectVersionID: object.VersionID,
+					}
+					_, err = objects.Delete(objectStorageClient, container, object.Name, opts).Extract()
 					if err != nil {
-						return false, fmt.Errorf("error deleting object '%s' from objectstorage_container_v1 '%s': %+v", object, container, err)
+						latest := "latest"
+						if !object.IsLatest && object.VersionID != "" {
+							latest = object.VersionID
+						}
+						return false, fmt.Errorf("error deleting object '%s@%s' from objectstorage_container_v1 '%s': %+v", object.Name, latest, container, err)
 					}
 				}
 				return true, nil
