@@ -1,15 +1,18 @@
 ## 1.50.0 (Unreleased)
 
+NOTES
+
+* `objectstorage_container_v1` resource has been updated to support the new versioning. The `versioning` argument is now `Boolean` while the legacy versioning can be enabled via `versioning_legacy` which follows the old schema and is deprecated. State will be updated automatically but users need to update their resource definition ([#1498](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1498))
+
 FEATURES
 
 * Updated Go to `1.20` ([#1488](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1488))
 * Updated Golangci-lint to `v1.51.2` ([#1488](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1488))
 * Updated Terraform SDK to `v2.25.0` ([#1490](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1490))
 
-FEATURES
-
 IMPROVEMENTS
 
+* Added `PROMETHEUS` protocol to `openstack_lb_listener_v2` resource ([#1494](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1494))
 * Added `decompress` argument to `images_image_v2` resource ([#1482](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1482))
 * Added `name_regex` argument to `openstack_images_image_v2` data source ([#1469](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1469))
 * Added ability to provide a list of tags into `openstack_images_image_v2`, `openstack_images_image_ids_v2` data sources ([#1462](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1462)), ([#1468](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1468))
