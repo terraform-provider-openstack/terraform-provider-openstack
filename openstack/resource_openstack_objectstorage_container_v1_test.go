@@ -50,7 +50,6 @@ func TestAccObjectStorageV1Container_versioning(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSwift(t)
-			testAccSkipReleasesBelow(t, "stable/ussuri")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckObjectStorageV1ContainerDestroy,
