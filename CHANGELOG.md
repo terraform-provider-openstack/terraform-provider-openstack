@@ -6,8 +6,11 @@ FEATURES
 * Updated Golangci-lint to `v1.51.2` ([#1488](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1488))
 * Updated Terraform SDK to `v2.25.0` ([#1490](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1490))
 
+FEATURES
+
 IMPROVEMENTS
 
+* Added `decompress` argument to `images_image_v2` resource ([#1482](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1482))
 * Added `name_regex` argument to `openstack_images_image_v2` data source ([#1469](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1469))
 * Added ability to provide a list of tags into `openstack_images_image_v2`, `openstack_images_image_ids_v2` data sources ([#1462](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1462)), ([#1468](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1468))
 * Added `name_regex` attribute to `openstack_images_image_v2` data source ([#1469](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1469))
@@ -16,6 +19,8 @@ IMPROVEMENTS
 BUG FIXES
 
 * Fixed `containerinfra_clustertemplate_v1` labels update ([#1455](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1455))
+
+BUG FIXES
 
 ## 1.49.0 (26 October, 2022)
 
@@ -473,8 +478,8 @@ IMPROVEMENTS
 
 BUG FIXES
 
-* Fixed the bug with unchecked errors in initialization of Identity V3 client in `identity_auth_scope_v3` data source [[#878](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/878)] 
-* Fixed the bug with unchecked errors in initialization of Compute V2 client in `compute_floatingip_associate_v2` resource [[#878](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/878)] 
+* Fixed the bug with unchecked errors in initialization of Identity V3 client in `identity_auth_scope_v3` data source [[#878](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/878)]
+* Fixed the bug with unchecked errors in initialization of Compute V2 client in `compute_floatingip_associate_v2` resource [[#878](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/878)]
 * Fixed the bug with 404 errors handling while getting statuses tree in `openstack_lb_loadbalancer_v2` resource ([#883](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/883))
 * Fixed the bug where is was unable to remove TLS references in `openstack_lb_listener_v2` resource ([#891](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/891))
 * Fixed the bug where empty `scheduler_hints` list caused a panic in `openstack_compute_instance_v2` resource ([#885](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/885))
@@ -755,11 +760,11 @@ IMPROVEMENTS
 * Added `transparent_vlan` to `openstack_networking_network_v2` data source ([#538](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/538))
 * Added `max_retries` to the provider options ([#413](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/413))
 * Added the ability to override catalog endpoints ([#501](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/501))
-* Changed the `segments` attribute of the `openstack_networking_network_v2` to `TypeSet` [[#578](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/578)] 
+* Changed the `segments` attribute of the `openstack_networking_network_v2` to `TypeSet` [[#578](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/578)]
 
 BUG FIXES
 
-* `openstack_compute_interface_attach_v2` now correctly sets the `instance_id` [[#557](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/557)] 
+* `openstack_compute_interface_attach_v2` now correctly sets the `instance_id` [[#557](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/557)]
 * `openstack_networking_port_v2` will now correctly set the `admin_state_up` to `true/UP` if left omitted ([#594](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/594))
 * Fixed out of range panic in `openstack_compute_instance_v2` when no IP addresses were detected ([#539](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/539))
 
@@ -1008,7 +1013,7 @@ BUG FIXES
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
-* The way IP addresses for `allowed_address_pairs` in the `openstack_networking_port_v2` resource are stored in the Terraform state has changed. 
+* The way IP addresses for `allowed_address_pairs` in the `openstack_networking_port_v2` resource are stored in the Terraform state has changed.
 * The `external_gateway` argument in the `openstack_networking_router_v2` has been deprecated in favor of the more appropriately named `external_network_id`.
 
 FEATURES
@@ -1102,7 +1107,7 @@ IMPROVEMENTS
  * Added `status` field to `openstack_networking_network_v2` data source ([#105](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/105))
  * `openstack_networking_router_v2` can now be imported ([#111](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/111))
  * `openstack_networking_router_interface_v2` can now be imported ([#112](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/112))
- 
+
 BUG FIXES
 
 * `openstack_lb_listener_v2`: Don't send `connection_limit` unless it has been set ([#90](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/90))
@@ -1155,7 +1160,7 @@ BUG FIXES:
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
-* You can now specify `region` in the provider block. All resources will inherit this region setting, or you can override it in the resource-level `region`. Make sure to do a `plan` before an `apply` to make sure the resource is not destroyed due to incorrectly determining the region! If you see this happening, either explicitly set the `region` in the resource or use `lifecycle.ignore_changes`. 
+* You can now specify `region` in the provider block. All resources will inherit this region setting, or you can override it in the resource-level `region`. Make sure to do a `plan` before an `apply` to make sure the resource is not destroyed due to incorrectly determining the region! If you see this happening, either explicitly set the `region` in the resource or use `lifecycle.ignore_changes`.
 * `floating_ip` has been removed from `openstack_compute_instance_v2`. You must now use `openstack_compute_floatingip_associate_v2` to associate a Floating IP with an Instance.
 * `volume` has been removed from `openstack_compute_instance_v2`. You must now use `openstack_compute_volume_attach_v2` to attach a Volume with an Instance.
 * `member` has been removed from `openstack_lb_pool_v1`. You must now use `openstack_lb_member_v1` to add a LBaaS v1 Member to a Pool.

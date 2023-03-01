@@ -255,6 +255,7 @@ func TestAccImagesImageV2_webdownload(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckGlanceImport(t)
+			t.Skip("OpenStack dev env seems to not support web-download anymore")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckImagesImageV2Destroy,

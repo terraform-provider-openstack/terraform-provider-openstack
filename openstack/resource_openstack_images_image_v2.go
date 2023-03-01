@@ -176,6 +176,13 @@ func resourceImagesImageV2() *schema.Resource {
 				ConflictsWith: []string{"local_file_path", "verify_checksum"},
 			},
 
+			"decompress": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  false,
+			},
+
 			// Computed-only
 			"checksum": {
 				Type:     schema.TypeString,

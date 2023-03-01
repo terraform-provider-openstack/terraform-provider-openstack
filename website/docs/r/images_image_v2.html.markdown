@@ -64,7 +64,7 @@ The following arguments are supported:
 
 * `name` - (Required) The name of the image.
 
-* `image_id` - (Optional) Unique ID (valid UUID) of image to create. Changing 
+* `image_id` - (Optional) Unique ID (valid UUID) of image to create. Changing
     this creates a new image.
 
 * `properties` - (Optional) A map of key/value pairs to set freeform
@@ -96,6 +96,11 @@ The following arguments are supported:
 * `web_download` - (Optional) If true, the "web-download" import method will
     be used to let Openstack download the image directly from the remote source.
     Conflicts with `local_file_path`. Defaults to false.
+
+* `decompress` - (Optional) If true, this provider will decompress downloaded
+    image before uploading it to OpenStack. Decompression algorithm is chosen by
+    checking "Content-Type" header, supported algorithm are: gzip, bzip2.
+    Defaults to false. Changing this creates a new Image.
 
 ## Attributes Reference
 
