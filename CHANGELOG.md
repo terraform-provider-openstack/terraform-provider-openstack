@@ -1,4 +1,4 @@
-## 1.50.0 (Unreleased)
+## 1.50.0 (1 March, 2023)
 
 NOTES
 
