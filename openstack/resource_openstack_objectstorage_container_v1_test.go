@@ -44,6 +44,35 @@ func TestAccObjectStorageV1Container_basic(t *testing.T) {
 	})
 }
 
+func TestAccObjectStorageV1Container_versioning(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckSwift(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckObjectStorageV1ContainerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObjectStorageV1ContainerVersioning,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_container_v1.container_1", "name", "container_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_container_v1.container_1", "versioning", "true"),
+					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_container_v1.container_1", "metadata.test", "true"),
+					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_container_v1.container_1", "metadata.upperTest", "true"),
+					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_container_v1.container_1", "content_type", "application/json"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccObjectStorageV1Container_storagePolicy(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -113,10 +142,24 @@ resource "openstack_objectstorage_container_v1" "container_1" {
     upperTest = "true"
   }
   content_type = "application/json"
-  versioning {
+  versioning_legacy {
     type = "versions"
     location = "othercontainer"
   }
+  container_read = ".r:*,.rlistings"
+  container_write = "*"
+}
+`
+
+const testAccObjectStorageV1ContainerVersioning = `
+resource "openstack_objectstorage_container_v1" "container_1" {
+  name = "container_1"
+  metadata = {
+    test = "true"
+    upperTest = "true"
+  }
+  content_type = "application/json"
+  versioning = true
   container_read = ".r:*,.rlistings"
   container_write = "*"
 }
