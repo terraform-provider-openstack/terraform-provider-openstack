@@ -54,6 +54,7 @@ func TestAccKeyManagerSecretV1_basicWithMetadata(t *testing.T) {
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "payload", "foobar"),
 				),
 			},
 		},
@@ -78,6 +79,7 @@ func TestAccKeyManagerSecretV1_updateMetadata(t *testing.T) {
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "payload", "foobar"),
 					testAccCheckMetadataEquals("foo", "bar", &secret),
 				),
 			},
@@ -88,6 +90,7 @@ func TestAccKeyManagerSecretV1_updateMetadata(t *testing.T) {
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "payload", "foobar"),
 					testAccCheckMetadataEquals("foo", "update", &secret),
 				),
 			},
@@ -95,7 +98,7 @@ func TestAccKeyManagerSecretV1_updateMetadata(t *testing.T) {
 	})
 }
 
-func TestAccUpdateSecretV1_payload(t *testing.T) {
+func TestAccKeyManagerSecretV1_updatePayload(t *testing.T) {
 	var secret secrets.Secret
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -107,22 +110,13 @@ func TestAccUpdateSecretV1_payload(t *testing.T) {
 		CheckDestroy:      testAccCheckSecretV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKeyManagerSecretV1NoPayload,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSecretV1Exists(
-						"openstack_keymanager_secret_v1.secret_1", &secret),
-					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
-					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
-					testAccCheckPayloadEquals("", &secret),
-				),
-			},
-			{
 				Config: testAccKeyManagerSecretV1Update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSecretV1Exists(
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "payload", "updatedfoobar"),
 					testAccCheckPayloadEquals("updatedfoobar", &secret),
 				),
 			},
@@ -133,6 +127,7 @@ func TestAccUpdateSecretV1_payload(t *testing.T) {
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "payload", "updatedfoobar"),
 					testAccCheckPayloadEquals("updatedfoobar", &secret),
 				),
 			},
@@ -143,7 +138,8 @@ func TestAccUpdateSecretV1_payload(t *testing.T) {
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
-					testAccCheckPayloadEquals("base64foobar ", &secret),
+					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "payload", "cDOycRBFnh4="),
+					testAccCheckPayloadEquals("p3\xb2q\x10E\x9e\x1e", &secret),
 				),
 			},
 		},
@@ -291,13 +287,13 @@ func testAccCheckPayloadEquals(payload string, secret *secrets.Secret) resource.
 		}
 
 		opts := secrets.GetPayloadOpts{
-			PayloadContentType: "text/plain",
+			PayloadContentType: secret.ContentTypes["default"],
 		}
 
 		uuid := keyManagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
 		secretPayload, _ := secrets.GetPayload(kmClient, uuid, opts).Extract()
 		if string(secretPayload) != payload {
-			return fmt.Errorf("Payloads do not match. Expected %v but got %v", payload, secretPayload)
+			return fmt.Errorf("Payloads do not match. Expected %s but got %s", payload, secretPayload)
 		}
 		return nil
 	}
@@ -317,7 +313,7 @@ func testAccCheckMetadataEquals(key string, value string, secret *secrets.Secret
 			return err
 		}
 		if metadatum.Value != value {
-			return fmt.Errorf("Metadata does not match. Expected %v but got %v", metadatum, value)
+			return fmt.Errorf("Metadata does not match. Expected %s but got %s", metadatum, value)
 		}
 
 		return nil
@@ -363,16 +359,6 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   }
 }`
 
-const testAccKeyManagerSecretV1NoPayload = `
-resource "openstack_keymanager_secret_v1" "secret_1" {
-  algorithm = "aes"
-  bit_length = 256
-  mode = "cbc"
-  name = "mysecret"
-  secret_type = "passphrase"
-  payload = ""
-}`
-
 const testAccKeyManagerSecretV1Update = `
 resource "openstack_keymanager_secret_v1" "secret_1" {
   algorithm = "aes"
@@ -403,7 +389,8 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   bit_length = 256
   mode = "cbc"
   name = "mysecret"
-  payload = "${base64encode("base64foobar ")}"
+  # base64 encoded random binary data
+  payload = "cDOycRBFnh4="
   payload_content_type = "application/octet-stream"
   payload_content_encoding = "base64"
   secret_type = "passphrase"
@@ -415,7 +402,8 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   bit_length = 256
   mode = "cbc"
   name = "mysecret"
-  payload = "${base64encode("base64foobar ")}"
+  # base64 encoded random binary data
+  payload = "cDOycRBFnh4="
   payload_content_type = "application/octet-stream"
   payload_content_encoding = "base64"
   secret_type = "passphrase"
@@ -448,7 +436,8 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   bit_length = 256
   mode = "cbc"
   name = "mysecret"
-  payload = "${base64encode("base64foobar ")}"
+  # base64 encoded random binary data
+  payload = "cDOycRBFnh4="
   payload_content_type = "application/octet-stream"
   payload_content_encoding = "base64"
   secret_type = "passphrase"
@@ -490,7 +479,8 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
   bit_length = 256
   mode = "cbc"
   name = "mysecret"
-  payload = "${base64encode("base64foobar ")}"
+  # base64 encoded random binary data
+  payload = "cDOycRBFnh4="
   payload_content_type = "application/octet-stream"
   payload_content_encoding = "base64"
   secret_type = "passphrase"

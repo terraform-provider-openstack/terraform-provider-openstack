@@ -97,32 +97,18 @@ func keyManagerSecretMetadataV1WaitForSecretMetadataCreation(kmClient *gopherclo
 	}
 }
 
-func keyManagerSecretV1GetPayload(kmClient *gophercloud.ServiceClient, id string) string {
-	payload, err := secrets.GetPayload(kmClient, id, nil).Extract()
+func keyManagerSecretV1GetPayload(kmClient *gophercloud.ServiceClient, id, contentType string) string {
+	opts := secrets.GetPayloadOpts{
+		PayloadContentType: contentType,
+	}
+	payload, err := secrets.GetPayload(kmClient, id, opts).Extract()
 	if err != nil {
 		log.Printf("[DEBUG] Could not retrieve payload for secret with id %s: %s", id, err)
 	}
-	return string(payload)
-}
 
-func resourceSecretV1PayloadBase64CustomizeDiff(diff *schema.ResourceDiff) error {
-	encoding := diff.Get("payload_content_encoding").(string)
-	if diff.Id() != "" && diff.HasChange("payload") && encoding == "base64" {
-		o, n := diff.GetChange("payload")
-		oldPayload := o.(string)
-		newPayload := n.(string)
-
-		v, err := base64.StdEncoding.DecodeString(newPayload)
-		if err != nil {
-			return fmt.Errorf("The Payload is not in the defined base64 format: %s", err)
-		}
-		newPayloadDecoded := string(v)
-
-		if oldPayload == newPayloadDecoded {
-			log.Printf("[DEBUG] payload has not changed. clearing diff")
-			return diff.Clear("payload")
-		}
+	if !strings.HasPrefix(contentType, "text/") {
+		return base64.StdEncoding.EncodeToString(payload)
 	}
 
-	return nil
+	return string(payload)
 }

@@ -233,7 +233,7 @@ func dataSourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceDat
 	payloadContentType := secret.ContentTypes["default"]
 	d.Set("payload_content_type", payloadContentType)
 
-	d.Set("payload", keyManagerSecretV1GetPayload(kmClient, d.Id()))
+	d.Set("payload", keyManagerSecretV1GetPayload(kmClient, d.Id(), payloadContentType))
 	metadataMap, err := secrets.GetMetadata(kmClient, d.Id()).Extract()
 	if err != nil {
 		log.Printf("[DEBUG] Unable to get %s secret metadata: %s", uuid, err)
