@@ -37,6 +37,12 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
 
 ### Secret with whitespaces
 
+~> **Note** If you want to store payload with leading or trailing whitespaces,
+it's recommended to store it in a base64 encoding. Plain text payload can also
+work, but further addind or removing of the leading or trailing whitespaces
+won't be detected as a state change, e.g. changing plain text payload from
+`password ` to `password` won't recreate the secret.
+
 ```hcl
 resource "openstack_keymanager_secret_v1" "secret_1" {
   name                     = "password"
