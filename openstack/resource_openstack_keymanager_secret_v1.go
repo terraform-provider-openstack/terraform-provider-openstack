@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -98,7 +97,6 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 				Optional:  true,
 				Sensitive: true,
 				ForceNew:  true,
-				Computed:  true,
 				DiffSuppressFunc: func(k, o, n string, d *schema.ResourceData) bool {
 					return strings.TrimSpace(o) == strings.TrimSpace(n)
 				},
@@ -162,13 +160,6 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 				Computed: true,
 			},
 		},
-
-		CustomizeDiff: customdiff.Sequence(
-			// Clear the diff if the source payload is base64 encoded.
-			func(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
-				return resourceSecretV1PayloadBase64CustomizeDiff(diff)
-			},
-		),
 	}
 
 	elem := &schema.Resource{
@@ -320,7 +311,7 @@ func resourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceData,
 	payloadContentType := secret.ContentTypes["default"]
 	d.Set("payload_content_type", payloadContentType)
 
-	d.Set("payload", keyManagerSecretV1GetPayload(kmClient, d.Id()))
+	d.Set("payload", keyManagerSecretV1GetPayload(kmClient, d.Id(), payloadContentType))
 	metadataMap, err := secrets.GetMetadata(kmClient, d.Id()).Extract()
 	if err != nil {
 		log.Printf("[DEBUG] Unable to get %s secret metadata: %s", d.Id(), err)
