@@ -168,15 +168,22 @@ func resourceOrchestrationStackV1Create(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack Orchestration client: %s", err)
 	}
+	templateOpts, err := buildTemplateOpts(d)
+	if err != nil {
+		return diag.Errorf("Error building openstack_orchestration_stack_v1 template options: %s", err)
+	}
 	createOpts := &stacks.CreateOpts{
 		Name:         d.Get("name").(string),
-		TemplateOpts: buildTemplateOpts(d),
+		TemplateOpts: templateOpts,
 	}
 	if d.Get("disable_rollback") != nil {
 		disableRollback := d.Get("disable_rollback").(bool)
 		createOpts.DisableRollback = &disableRollback
 	}
-	env := buildEnvironmentOpts(d)
+	env, err := buildEnvironmentOpts(d)
+	if err != nil {
+		return diag.Errorf("Error building openstack_orchestration_stack_v1 environment options: %s", err)
+	}
 	if env != nil {
 		createOpts.EnvironmentOpts = env
 	}
@@ -301,10 +308,17 @@ func resourceOrchestrationStackV1Update(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("Error creating OpenStack Orchestration client: %s", err)
 	}
 
-	updateOpts := &stacks.UpdateOpts{
-		TemplateOpts: buildTemplateOpts(d),
+	templateOpts, err := buildTemplateOpts(d)
+	if err != nil {
+		return diag.Errorf("Error building openstack_orchestration_stack_v1 template options: %s", err)
 	}
-	env := buildEnvironmentOpts(d)
+	updateOpts := &stacks.UpdateOpts{
+		TemplateOpts: templateOpts,
+	}
+	env, err := buildEnvironmentOpts(d)
+	if err != nil {
+		return diag.Errorf("Error building openstack_orchestration_stack_v1 environment options: %s", err)
+	}
 	if env != nil {
 		updateOpts.EnvironmentOpts = env
 	}
