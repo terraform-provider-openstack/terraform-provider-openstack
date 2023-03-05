@@ -90,6 +90,9 @@ The following arguments are supported:
     state of the existing network.
 
 * `segments` - (Optional) An array of one or more provider segment objects.
+  Note: most Networking plug-ins (e.g. ML2 Plugin) and drivers do not support
+  updating any provider related segments attributes. Check your plug-in whether
+  it supports updating.
 
 * `value_specs` - (Optional) Map of additional options.
 
@@ -144,6 +147,7 @@ The following attributes are exported:
 * `all_tags` - The collection of tags assigned on the network, which have been
   explicitly and implicitly added.
 * `transparent_vlan` - See Argument Reference above.
+* `segments` - An array of one or more provider segment objects.
 * `port_security_enabled` - See Argument Reference above.
 * `mtu` - See Argument Reference above.
 * `dns_domain` - See Argument Reference above.

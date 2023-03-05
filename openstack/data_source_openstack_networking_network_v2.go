@@ -81,6 +81,27 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
+			"segments": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"physical_network": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"network_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"segmentation_id": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+					},
+				},
+			},
+
 			"transparent_vlan": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -239,6 +260,7 @@ func dataSourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceDa
 	d.Set("shared", strconv.FormatBool(network.Shared))
 	d.Set("external", network.External)
 	d.Set("tenant_id", network.TenantID)
+	d.Set("segments", flattenNetworkingNetworkSegmentsV2(network))
 	d.Set("transparent_vlan", network.VLANTransparent)
 	d.Set("subnets", network.Subnets)
 	d.Set("all_tags", network.Tags)

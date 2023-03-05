@@ -3,7 +3,7 @@ module github.com/terraform-provider-openstack/terraform-provider-openstack
 go 1.20
 
 require (
-	github.com/gophercloud/gophercloud v1.2.1-0.20230228142905-95364c20a5d5
+	github.com/gophercloud/gophercloud v1.2.1-0.20230309142102-36ac4a411ba7
 	github.com/gophercloud/utils v0.0.0-20220307143606-8e7800759d16
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.25.0
 	github.com/mitchellh/go-homedir v1.1.0
