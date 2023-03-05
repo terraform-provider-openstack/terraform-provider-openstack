@@ -731,8 +731,7 @@ resource "openstack_networking_network_v2" "network_1" {
   admin_state_up = "true"
 
   segments {
-	segmentation_id = 2
-    network_type = "vxlan"
+    network_type = "local"
   }
 }
 `

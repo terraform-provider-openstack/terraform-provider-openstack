@@ -88,23 +88,20 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 			"segments": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				ForceNew: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"physical_network": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 						},
 						"network_type": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 						},
 						"segmentation_id": {
 							Type:     schema.TypeInt,
 							Optional: true,
-							ForceNew: true,
 						},
 					},
 				},
@@ -326,6 +323,7 @@ func resourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceData
 	d.Set("shared", network.Shared)
 	d.Set("external", network.External)
 	d.Set("tenant_id", network.TenantID)
+	d.Set("segments", flattenNetworkingNetworkSegmentsV2(network))
 	d.Set("transparent_vlan", network.VLANTransparent)
 	d.Set("port_security_enabled", network.PortSecurityEnabled)
 	d.Set("mtu", network.MTU)
@@ -426,6 +424,14 @@ func resourceNetworkingNetworkV2Update(ctx context.Context, d *schema.ResourceDa
 		finalUpdateOpts = policies.NetworkUpdateOptsExt{
 			UpdateOptsBuilder: finalUpdateOpts,
 			QoSPolicyID:       &qosPolicyID,
+		}
+	}
+
+	if d.HasChange("segments") {
+		segments := expandNetworkingNetworkSegmentsV2(d.Get("segments").(*schema.Set))
+		finalUpdateOpts = provider.UpdateOptsExt{
+			UpdateOptsBuilder: finalUpdateOpts,
+			Segments:          &segments,
 		}
 	}
 

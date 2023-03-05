@@ -62,6 +62,7 @@ are exported:
    tenant or not.
 * `availability_zone_hints` - The availability zone candidates for the network.
 * `transparent_vlan` - See Argument Reference above.
+* `segments` - An array of one or more provider segment objects.
 * `mtu` - See Argument Reference above.
 * `dns_domain` - The network DNS domain. Available, when Neutron DNS extension
   is enabled
