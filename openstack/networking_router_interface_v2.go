@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"log"
+	"net"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -9,6 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
 
 func resourceNetworkingRouterInterfaceV2StateRefreshFunc(networkingClient *gophercloud.ServiceClient, portID string) resource.StateRefreshFunc {
@@ -60,6 +62,43 @@ func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(networkingClient *goph
 				return r, "DELETED", nil
 			}
 			if _, ok := err.(gophercloud.ErrDefault409); ok {
+				if ok && d.Get("force_destroy").(bool) {
+					// The router may have routes preventing the interface to be deleted.
+					// Check which routes correspond to a particular router interface.
+					var updateRoutes []routers.Route
+					if removeOpts.SubnetID != "" {
+						// get subnet CIDR
+						subnet, err := subnets.Get(networkingClient, removeOpts.SubnetID).Extract()
+						if err != nil {
+							return r, "ACTIVE", err
+						}
+						_, cidr, err := net.ParseCIDR(subnet.CIDR)
+						if err != nil {
+							return r, "ACTIVE", err
+						}
+						// determine which routes must be removed
+						router, err := routers.Get(networkingClient, routerID).Extract()
+						if err != nil {
+							return r, "ACTIVE", err
+						}
+						for _, route := range router.Routes {
+							if ip := net.ParseIP(route.NextHop); ip != nil && !cidr.Contains(ip) {
+								updateRoutes = append(updateRoutes, route)
+							}
+						}
+					}
+
+					log.Printf("[DEBUG] Attempting to forceDestroy openstack_networking_router_interface_v2 '%s': %+v", d.Id(), err)
+
+					opts := &routers.UpdateOpts{
+						Routes: &updateRoutes,
+					}
+					_, err := routers.Update(networkingClient, routerID, opts).Extract()
+					if err != nil {
+						return r, "ACTIVE", err
+					}
+				}
+
 				log.Printf("[DEBUG] openstack_networking_router_interface_v2 %s is still in use", routerInterfaceID)
 				return r, "ACTIVE", nil
 			}
