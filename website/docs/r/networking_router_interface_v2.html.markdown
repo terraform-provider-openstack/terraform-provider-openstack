@@ -53,6 +53,10 @@ The following arguments are supported:
 * `port_id` - ID of the port this interface connects to. Changing
     this creates a new router interface.
 
+* `force_destroy` - A boolean indicating whether the routes from the
+  corresponding router ID should be deleted so that the router interface can
+  be destroyed without any errors. The default value is `false`.
+
 ## Attributes Reference
 
 The following attributes are exported:

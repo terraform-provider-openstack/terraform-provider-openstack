@@ -39,6 +39,34 @@ func TestAccNetworkingV2RouterInterface_basic_subnet(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2RouterInterface_force_destroy(t *testing.T) {
+	var network networks.Network
+	var router routers.Router
+	var subnet subnets.Subnet
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2RouterInterfaceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2RouterInterfaceForceDestroy,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
+					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
+					resource.TestCheckResourceAttr("openstack_networking_router_interface_v2.int_1", "force_destroy", "true"),
+					testAccCheckNetworkingV2RouterInterfaceAddExtraRoutes("openstack_networking_router_interface_v2.int_1"),
+				),
+			},
+		},
+	})
+}
+
 // TestAccNetworkingV2RouterInterface_v6_subnet tests that multiple router interfaces for IPv6 subnets
 // which are attached to the same port are handled properly.
 func TestAccNetworkingV2RouterInterface_v6_subnet(t *testing.T) {
@@ -181,6 +209,51 @@ func testAccCheckNetworkingV2RouterInterfaceExists(n string) resource.TestCheckF
 	}
 }
 
+func testAccCheckNetworkingV2RouterInterfaceAddExtraRoutes(n string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := testAccProvider.Meta().(*Config)
+		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		}
+
+		found, err := ports.Get(networkingClient, rs.Primary.ID).Extract()
+		if err != nil {
+			return err
+		}
+
+		if found.ID != rs.Primary.ID {
+			return fmt.Errorf("Router interface not found")
+		}
+
+		// add extra routes to the router
+		routes := []routers.Route{
+			{
+				DestinationCIDR: "10.0.0.0/24",
+				NextHop:         "192.168.199.200",
+			},
+		}
+		opts := routers.UpdateOpts{
+			Routes: &routes,
+		}
+		_, err = routers.Update(networkingClient, found.DeviceID, opts).Extract()
+		if err != nil {
+			return fmt.Errorf("Router cannot be updated: %v", err)
+		}
+
+		return nil
+	}
+}
+
 const testAccNetworkingV2RouterInterfaceBasicSubnet = `
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
@@ -190,6 +263,30 @@ resource "openstack_networking_router_v2" "router_1" {
 resource "openstack_networking_router_interface_v2" "int_1" {
   subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
   router_id = "${openstack_networking_router_v2.router_1.id}"
+}
+
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+}
+`
+
+const testAccNetworkingV2RouterInterfaceForceDestroy = `
+resource "openstack_networking_router_v2" "router_1" {
+  name = "router_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_router_interface_v2" "int_1" {
+  subnet_id     = "${openstack_networking_subnet_v2.subnet_1.id}"
+  router_id     = "${openstack_networking_router_v2.router_1.id}"
+  force_destroy = true
 }
 
 resource "openstack_networking_network_v2" "network_1" {

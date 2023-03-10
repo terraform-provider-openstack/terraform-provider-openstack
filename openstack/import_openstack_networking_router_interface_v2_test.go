@@ -25,6 +25,9 @@ func TestAccNetworkingV2RouterInterface_importBasic_port(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+				},
 			},
 		},
 	})
@@ -49,6 +52,9 @@ func TestAccNetworkingV2RouterInterface_importBasic_subnet(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+				},
 			},
 		},
 	})
