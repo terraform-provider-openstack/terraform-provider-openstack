@@ -18,6 +18,7 @@ func resourceNetworkingRouterInterfaceV2() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceNetworkingRouterInterfaceV2Create,
 		ReadContext:   resourceNetworkingRouterInterfaceV2Read,
+		UpdateContext: resourceNetworkingRouterInterfaceV2Update,
 		DeleteContext: resourceNetworkingRouterInterfaceV2Delete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -54,6 +55,12 @@ func resourceNetworkingRouterInterfaceV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
+			},
+
+			"force_destroy": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 		},
 	}
@@ -133,6 +140,10 @@ func resourceNetworkingRouterInterfaceV2Read(ctx context.Context, d *schema.Reso
 		d.Set("subnet_id", r.FixedIPs[0].SubnetID)
 	}
 
+	return nil
+}
+
+func resourceNetworkingRouterInterfaceV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return nil
 }
 
