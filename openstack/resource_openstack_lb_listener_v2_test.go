@@ -61,7 +61,7 @@ func TestAccLBV2Listener_octavia(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
-						"openstack_lb_listener_v2.listener_1", "tags", "[\"tag1\"]"),
+						"openstack_lb_listener_v2.listener_1", "tags.#", "1"),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "connection_limit", "5"),
 					resource.TestCheckResourceAttr(
@@ -79,6 +79,8 @@ func TestAccLBV2Listener_octavia(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "name", "listener_1_updated"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_listener_v2.listener_1", "tags.#", "2"),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "connection_limit", "100"),
 					resource.TestCheckResourceAttr(
@@ -257,7 +259,6 @@ resource "openstack_lb_listener_v2" "listener_1" {
   protocol_port = 8080
   default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
-  tags = ["tag1"]
 
   timeouts {
     create = "5m"
@@ -349,6 +350,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
   timeout_tcp_inspect = 4000
   default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  tags = ["tag1"]
 
   timeouts {
     create = "5m"
@@ -401,6 +403,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
   admin_state_up = "true"
   default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
   loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  tags = ["tag1", "tag2"]
 
   timeouts {
     create = "5m"
