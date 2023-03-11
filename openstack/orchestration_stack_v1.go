@@ -12,40 +12,60 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/orchestration/v1/stacks"
 )
 
-func buildTE(t map[string]interface{}) stacks.TE {
+func buildTE(t map[string]interface{}) (*stacks.TE, error) {
 	log.Printf("[DEBUG] Start to build TE structure")
-	te := stacks.TE{}
+	te := &stacks.TE{}
 	if t["Bin"] != nil {
-		te.Bin = []byte(t["Bin"].(string))
+		if v, ok := t["Bin"].(string); ok {
+			te.Bin = []byte(v)
+		} else {
+			return nil, fmt.Errorf("Bin value is expected to be a string")
+		}
 	}
 	if t["URL"] != nil {
-		te.URL = t["URL"].(string)
+		if v, ok := t["URL"].(string); ok {
+			te.URL = v
+		} else {
+			return nil, fmt.Errorf("URL value is expected to be a string")
+		}
 	}
 	if t["Files"] != nil {
-		te.Files = t["Files"].(map[string]string)
+		if v, ok := t["Files"].(map[string]string); ok {
+			te.Files = v
+		} else {
+			return nil, fmt.Errorf("URL value is expected to be a map of string")
+		}
 	}
 	log.Printf("[DEBUG] TE structure builded")
-	return te
+	return te, nil
 }
 
-func buildTemplateOpts(d *schema.ResourceData) *stacks.Template {
+func buildTemplateOpts(d *schema.ResourceData) (*stacks.Template, error) {
 	log.Printf("[DEBUG] Start building TemplateOpts")
-	template := &stacks.Template{}
-	template.TE = buildTE(d.Get("template_opts").(map[string]interface{}))
+	te, err := buildTE(d.Get("template_opts").(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
 	log.Printf("[DEBUG] Return TemplateOpts")
-	return template
+	return &stacks.Template{
+		TE: *te,
+	}, nil
 }
 
-func buildEnvironmentOpts(d *schema.ResourceData) *stacks.Environment {
+func buildEnvironmentOpts(d *schema.ResourceData) (*stacks.Environment, error) {
 	log.Printf("[DEBUG] Start building EnvironmentOpts")
-	environment := &stacks.Environment{}
 	if d.Get("environment_opts") != nil {
 		t := d.Get("environment_opts").(map[string]interface{})
-		environment.TE = buildTE(t)
+		te, err := buildTE(t)
+		if err != nil {
+			return nil, err
+		}
 		log.Printf("[DEBUG] Return EnvironmentOpts")
-		return environment
+		return &stacks.Environment{
+			TE: *te,
+		}, nil
 	}
-	return nil
+	return nil, nil
 }
 
 func orchestrationStackV1StateRefreshFunc(client *gophercloud.ServiceClient, stackID string, isdelete bool) resource.StateRefreshFunc {
