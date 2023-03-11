@@ -73,15 +73,24 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 			},
 
 			"fixed_ip": {
-				Type:     schema.TypeList,
-				Optional: true,
-				ForceNew: false,
-				Computed: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  validation.IsIPAddress,
+				ConflictsWith: []string{"fixed_ips"},
+			},
+
+			"fixed_ips": {
+				Type:          schema.TypeSet,
+				Optional:      true,
+				ForceNew:      true,
+				Computed:      true,
+				Set:           resourceNetworkingPortV2FixedIPsHash,
+				ConflictsWith: []string{"fixed_ip"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"subnet_id": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 						},
 						"ip_address": {
 							Type:     schema.TypeString,
@@ -268,6 +277,8 @@ func dataSourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData,
 		listOpts.DeviceID = v.(string)
 	}
 
+	listOpts.FixedIPs = expandNetworkingPortFixedIPFilterV2(d)
+
 	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		listOpts.Tags = strings.Join(tags, ",")
@@ -298,32 +309,11 @@ func dataSourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("No openstack_networking_port_v2 found")
 	}
 
-	var portsList []portExtended
-
-	// Filter returned Fixed IPs by a "fixed_ip".
-	if v, ok := d.GetOk("fixed_ip"); ok {
-		for _, p := range allPorts {
-			for _, ipObject := range p.FixedIPs {
-				if v.(string) == ipObject.IPAddress {
-					portsList = append(portsList, p)
-				}
-			}
-		}
-
-		if len(portsList) == 0 {
-			log.Printf("No openstack_networking_port_v2 found after the 'fixed_ip' filter")
-
-			return diag.Errorf("No openstack_networking_port_v2 found")
-		}
-	} else {
-		portsList = allPorts
-	}
-
 	securityGroups := expandToStringSlice(d.Get("security_group_ids").(*schema.Set).List())
 	if len(securityGroups) > 0 {
 		var sgPorts []portExtended
 
-		for _, p := range portsList {
+		for _, p := range allPorts {
 			for _, sg := range p.SecurityGroups {
 				if strSliceContains(securityGroups, sg) {
 					sgPorts = append(sgPorts, p)
@@ -337,14 +327,14 @@ func dataSourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData,
 			return diag.Errorf("No openstack_networking_port_v2 found")
 		}
 
-		portsList = sgPorts
+		allPorts = sgPorts
 	}
 
-	if len(portsList) > 1 {
-		return diag.Errorf("More than one openstack_networking_port_v2 found (%d)", len(portsList))
+	if len(allPorts) > 1 {
+		return diag.Errorf("More than one openstack_networking_port_v2 found (%d)", len(allPorts))
 	}
 
-	port := portsList[0]
+	port := allPorts[0]
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_port_v2 %s: %+v", port.ID, port)
 	d.SetId(port.ID)
@@ -362,8 +352,8 @@ func dataSourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData,
 	d.Set("region", GetRegion(d, config))
 	d.Set("all_tags", port.Tags)
 	d.Set("all_security_group_ids", port.SecurityGroups)
-	d.Set("all_fixed_ips", expandNetworkingPortFixedIPToStringSlice(port.FixedIPs))
-	d.Set("fixed_ip", formatFixedIpsToSubnetIdsAndIPs(port.FixedIPs))
+	d.Set("all_fixed_ips", flattenNetworkingPortFixedIPToStringSlice(port.FixedIPs))
+	d.Set("fixed_ips", flattenNetworkingPortFixedIPsV2(port.FixedIPs))
 	d.Set("allowed_address_pairs", flattenNetworkingPortAllowedAddressPairsV2(port.MACAddress, port.AllowedAddressPairs))
 	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDHCPOptsExt))
 	d.Set("binding", flattenNetworkingPortBindingV2(port))

@@ -155,7 +155,7 @@ func flattenNetworkingPortAllowedAddressPairsV2(mac string, allowedAddressPairs 
 	return pairs
 }
 
-func expandNetworkingPortFixedIPV2(d *schema.ResourceData) any {
+func expandNetworkingPortFixedIPV2(d *schema.ResourceData) []ports.IP {
 	// If no_fixed_ip was specified, then just return an empty array.
 	// Since no_fixed_ip is mutually exclusive to fixed_ip,
 	// we can safely do this.
@@ -163,10 +163,10 @@ func expandNetworkingPortFixedIPV2(d *schema.ResourceData) any {
 	// Since we're only concerned about no_fixed_ip being set to "true",
 	// GetOk is used.
 	if _, ok := d.GetOk("no_fixed_ip"); ok {
-		return []any{}
+		return []ports.IP{}
 	}
 
-	rawIP := d.Get("fixed_ip").([]any)
+	rawIP := d.Get("fixed_ip").(*schema.Set).List()
 
 	if len(rawIP) == 0 {
 		return nil
@@ -203,7 +203,7 @@ func expandNetworkingPortFixedIPFilterV2(d *schema.ResourceData) []ports.FixedIP
 		}}
 	}
 
-	rawIP := d.Get("fixed_ips").([]any)
+	rawIP := d.Get("fixed_ips").(*schema.Set).List()
 	if len(rawIP) == 0 {
 		return nil
 	}
@@ -226,6 +226,15 @@ func resourceNetworkingPortV2AllowedAddressPairsHash(v any) int {
 
 	m := v.(map[string]any)
 	buf.WriteString(fmt.Sprintf("%s-%s", m["ip_address"].(string), m["mac_address"].(string)))
+
+	return hashcode.String(buf.String())
+}
+
+func resourceNetworkingPortV2FixedIPsHash(v any) int {
+	var buf bytes.Buffer
+
+	m := v.(map[string]any)
+	buf.WriteString(fmt.Sprintf("%s-%s", m["subnet_id"].(string), m["ip_address"].(string)))
 
 	return hashcode.String(buf.String())
 }
