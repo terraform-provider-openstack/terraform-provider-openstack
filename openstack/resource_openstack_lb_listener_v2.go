@@ -141,6 +141,13 @@ func resourceListenerV2() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+
+			"tags": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
 		},
 	}
 }
@@ -223,6 +230,7 @@ func resourceListenerV2Read(ctx context.Context, d *schema.ResourceData, meta in
 		d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
 		d.Set("allowed_cidrs", listener.AllowedCIDRs)
 		d.Set("region", GetRegion(d, config))
+		d.Set("tags", listener.Tags)
 
 		// Required by import.
 		if len(listener.Loadbalancers) > 0 {
