@@ -26,7 +26,7 @@ resource "openstack_compute_servergroup_v2" "test-sg" {
 ```hcl
 resource "openstack_compute_servergroup_v2" "test-sg" {
   name     = "my-sg"
-  policy   = "anti-affinity"
+  policies = ["anti-affinity"]
   rules {
       max_server_per_host = 3
   }
@@ -38,25 +38,20 @@ resource "openstack_compute_servergroup_v2" "test-sg" {
 The following arguments are supported:
 
 * `region` - (Optional) The region in which to obtain the V2 Compute client.
-    If omitted, the `region` argument of the provider is used. Changing
-    this creates a new server group.
+  If omitted, the `region` argument of the provider is used. Changing
+  this creates a new server group.
 
 * `name` - (Required) A unique name for the server group. Changing this creates
-    a new server group.
+  a new server group.
 
-* `policies` - (Optional) The set of policies for the server group. All policies
-    are mutually exclusive. See the Policies section for more information.
-    Changing this creates a new server group. This field should only be used
-    with Compute service API 2.63 or below.
+* `policies` - (Optional) A list of exactly one policy name to associate with
+  the server group. See the Policies section for more information. Changing this
+  creates a new server group.
 
 * `value_specs` - (Optional) Map of additional options.
 
-* `policy` - (Optional) The policy to be applied to the server group. This argument
-    replaces the `policies` argument (the `policies` and `policy` fields are mutually 
-    exclusive), and should only be used with Compute service API 2.64 or above.
-
-* `rules` - (Optional) The rules which are applied to specified `policy`. Currently, 
-    only the `max_server_per_host` rule is supported for the `anti-affinity` policy.
+* `rules` - (Optional) The rules which are applied to specified `policy`. Currently,
+  only the `max_server_per_host` rule is supported for the `anti-affinity` policy.
 
 ## Policies
 
@@ -84,7 +79,6 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `policies` - See Argument Reference above.
 * `members` - The instances that are part of this server group.
-* `policy` - See Argument Reference above.
 * `rules` - See Argument Reference above.
 
 ## Import

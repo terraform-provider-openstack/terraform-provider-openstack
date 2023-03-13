@@ -53,7 +53,7 @@ func TestAccComputeV2ServerGroup_basic_v2_64(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
 					resource.TestCheckResourceAttr(
-						"openstack_compute_servergroup_v2.sg_1", "policy", "affinity"),
+						"openstack_compute_servergroup_v2.sg_1", "policies.0", "affinity"),
 				),
 			},
 		},
@@ -76,7 +76,7 @@ func TestAccComputeV2ServerGroup_v2_64_anti_affinity(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
 					resource.TestCheckResourceAttr(
-						"openstack_compute_servergroup_v2.sg_1", "policy", "anti-affinity"),
+						"openstack_compute_servergroup_v2.sg_1", "policies.0", "anti-affinity"),
 				),
 			},
 		},
@@ -99,9 +99,9 @@ func TestAccComputeV2ServerGroup_v2_64_with_rules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
 					resource.TestCheckResourceAttr(
-						"openstack_compute_servergroup_v2.sg_1", "policy", "anti-affinity"),
+						"openstack_compute_servergroup_v2.sg_1", "policies.0", "anti-affinity"),
 					resource.TestCheckResourceAttr(
-						"openstack_compute_servergroup_v2.sg_1", "rules.max_server_per_host", "2"),
+						"openstack_compute_servergroup_v2.sg_1", "rules.0.max_server_per_host", "2"),
 				),
 			},
 		},
@@ -119,7 +119,7 @@ func TestAccComputeV2ServerGroup_v2_64_with_invalid_rules(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccComputeV2ServerGroupV264InvalidPolicyRules,
-				ExpectError: regexp.MustCompile(`expected max_server_per_host to be at least 1, got .*`),
+				ExpectError: regexp.MustCompile(`expected rules\.0\.max_server_per_host to be at least \(1\), got .*`),
 			},
 		},
 	})
@@ -172,7 +172,7 @@ func TestAccComputeV2ServerGroup_affinity_v2_64(t *testing.T) {
 					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckComputeV2InstanceInServerGroup(&instance, &sg),
 					resource.TestCheckResourceAttr(
-						"openstack_compute_servergroup_v2.sg_1", "policy", "affinity"),
+						"openstack_compute_servergroup_v2.sg_1", "policies.0", "affinity"),
 				),
 			},
 		},
@@ -284,21 +284,21 @@ resource "openstack_compute_servergroup_v2" "sg_1" {
 const testAccComputeV2ServerGroupV264Policy = `
 resource "openstack_compute_servergroup_v2" "sg_1" {
   name = "sg_1"
-  policy = "affinity"
+  policies = ["affinity"]
 }
 `
 
 const testAccComputeV2ServerGroupV264PolicyAntiAffinity = `
 resource "openstack_compute_servergroup_v2" "sg_1" {
   name = "sg_1"
-  policy = "anti-affinity"
+  policies = ["anti-affinity"]
 }
 `
 
 const testAccComputeV2ServerGroupV264PolicyRules = `
 resource "openstack_compute_servergroup_v2" "sg_1" {
   name = "sg_1"
-  policy = "anti-affinity"
+  policies = ["anti-affinity"]
   rules {
     max_server_per_host = 2
   }
@@ -308,7 +308,7 @@ resource "openstack_compute_servergroup_v2" "sg_1" {
 const testAccComputeV2ServerGroupV264InvalidPolicyRules = `
 resource "openstack_compute_servergroup_v2" "sg_1" {
   name = "sg_1"
-  policy = "anti-affinity"
+  policies = ["anti-affinity"]
   rules {
     max_server_per_host = -1
   }
@@ -359,7 +359,7 @@ func testAccComputeV2ServerGroupAffinityV264() string {
 	return fmt.Sprintf(`
 resource "openstack_compute_servergroup_v2" "sg_1" {
   name = "sg_1"
-  policy = "affinity"
+  policies = ["affinity"]
 }
 
 resource "openstack_compute_instance_v2" "instance_1" {

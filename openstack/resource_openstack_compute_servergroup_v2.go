@@ -39,23 +39,18 @@ func resourceComputeServerGroupV2() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
+				MinItems: 1,
+				MaxItems: 1,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
-			"policy": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"policies"},
-			},
-
 			"rules": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"policies"},
-				MinItems:      1,
-				MaxItems:      1,
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				MinItems: 1,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"max_server_per_host": {
@@ -94,14 +89,42 @@ func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceD
 
 	rawPolicies := d.Get("policies").([]interface{})
 	policies := expandComputeServerGroupV2Policies(computeClient, rawPolicies)
+	var policy string
+	if len(policies) == 1 {
+		policy = policies[0]
+	}
 
-	policy := d.Get("policy").(string)
 	rulesVal, rulesPresent := d.GetOk("rules")
-
 	var createOpts ComputeServerGroupV2CreateOpts
+	computeClient.Microversion = "2.64"
+	if policy == "anti-affinity" && rulesPresent {
+		maxServerPerHost := expandComputeServerGroupV2RulesMaxServerPerHost(rulesVal.([]interface{}))
+		createOpts = ComputeServerGroupV2CreateOpts{
+			servergroups.CreateOpts{
+				Name:   name,
+				Policy: policy,
+				Rules: &servergroups.Rules{
+					MaxServerPerHost: maxServerPerHost,
+				},
+			},
+			MapValueSpecs(d),
+		}
+	} else {
+		createOpts = ComputeServerGroupV2CreateOpts{
+			servergroups.CreateOpts{
+				Name:   name,
+				Policy: policy,
+			},
+			MapValueSpecs(d),
+		}
+	}
 
-	// "policies" is replaced with "policy" and optional "rules" since microversion 2.64
-	if policy == "" {
+	log.Printf("[DEBUG] openstack_compute_servergroup_v2 create options: %#v", createOpts)
+	newSG, err := servergroups.Create(computeClient, createOpts).Extract()
+	if err != nil {
+		log.Printf("[DEBUG] Falling back to legacy API call due to: %#v", err)
+		// fallback to legacy microversion
+		computeClient.Microversion = ""
 		createOpts = ComputeServerGroupV2CreateOpts{
 			servergroups.CreateOpts{
 				Name:     name,
@@ -109,36 +132,11 @@ func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceD
 			},
 			MapValueSpecs(d),
 		}
-	} else {
-		computeClient.Microversion = "2.64"
-
-		if policy == "anti-affinity" && rulesPresent {
-			maxServerPerHost := expandComputeServerGroupV2RulesMaxServerPerHost(rulesVal.([]interface{}))
-			createOpts = ComputeServerGroupV2CreateOpts{
-				servergroups.CreateOpts{
-					Name:   name,
-					Policy: policy,
-					Rules: &servergroups.Rules{
-						MaxServerPerHost: maxServerPerHost,
-					},
-				},
-				MapValueSpecs(d),
-			}
-		} else {
-			createOpts = ComputeServerGroupV2CreateOpts{
-				servergroups.CreateOpts{
-					Name:   name,
-					Policy: policy,
-				},
-				MapValueSpecs(d),
-			}
+		log.Printf("[DEBUG] openstack_compute_servergroup_v2 create options: %#v", createOpts)
+		newSG, err = servergroups.Create(computeClient, createOpts).Extract()
+		if err != nil {
+			return diag.Errorf("Error creating openstack_compute_servergroup_v2 %s: %s", name, err)
 		}
-	}
-
-	log.Printf("[DEBUG] openstack_compute_servergroup_v2 create options: %#v", createOpts)
-	newSG, err := servergroups.Create(computeClient, createOpts).Extract()
-	if err != nil {
-		return diag.Errorf("Error creating openstack_compute_servergroup_v2 %s: %s", name, err)
 	}
 
 	d.SetId(newSG.ID)
@@ -153,39 +151,45 @@ func resourceComputeServerGroupV2Read(_ context.Context, d *schema.ResourceData,
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	// Attempt to read with unset microversion
-	computeClient.Microversion = ""
-
+	// Attempt to read with microversion 2.64
+	computeClient.Microversion = "2.64"
 	sg, err := servergroups.Get(computeClient, d.Id()).Extract()
-	if err == nil {
+	if err != nil {
+		log.Printf("[DEBUG] Falling back to legacy API call due to: %#v", err)
+		// fallback to legacy microversion
+		computeClient.Microversion = ""
+
+		sg, err = servergroups.Get(computeClient, d.Id()).Extract()
+		if err != nil {
+			return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_servergroup_v2"))
+		}
+
 		log.Printf("[DEBUG] Retrieved openstack_compute_servergroup_v2 %s: %#v", d.Id(), sg)
 
 		d.Set("name", sg.Name)
 		d.Set("members", sg.Members)
 		d.Set("region", GetRegion(d, config))
 		d.Set("policies", sg.Policies)
+		d.Set("rules", nil)
 
 		return nil
 	}
 
-	// Attempt to read with microversion 2.64
-	computeClient.Microversion = "2.64"
-
-	sg, err = servergroups.Get(computeClient, d.Id()).Extract()
-	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_servergroup_v2"))
-	}
 	log.Printf("[DEBUG] Retrieved openstack_compute_servergroup_v2 %s: %#v", d.Id(), sg)
 
 	d.Set("name", sg.Name)
 	d.Set("members", sg.Members)
 	d.Set("region", GetRegion(d, config))
-	d.Set("policy", sg.Policy)
-
-	rules := make(map[string]interface{})
-	rules["max_server_per_host"] = sg.Rules.MaxServerPerHost
-	rulesList := []map[string]interface{}{rules}
-	d.Set("rules", rulesList)
+	if sg.Policy != nil {
+		d.Set("policies", []string{*sg.Policy})
+	} else {
+		d.Set("policies", nil)
+	}
+	if sg.Rules != nil {
+		d.Set("rules", []map[string]interface{}{{"max_server_per_host": sg.Rules.MaxServerPerHost}})
+	} else {
+		d.Set("rules", nil)
+	}
 
 	return nil
 }
