@@ -39,3 +39,19 @@ func expandComputeServerGroupV2Policies(client *gophercloud.ServiceClient, raw [
 
 	return policies
 }
+
+func expandComputeServerGroupV2RulesMaxServerPerHost(raw []interface{}) int {
+	for _, raw := range raw {
+		raw, ok := raw.(map[string]interface{})
+		if !ok {
+			return 0
+		}
+		v, ok := raw["max_server_per_host"].(int)
+		if !ok {
+			return 0
+		}
+		//nolint:staticcheck // we need the first element
+		return v
+	}
+	return 0
+}

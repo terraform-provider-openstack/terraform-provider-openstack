@@ -113,19 +113,13 @@ func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceD
 		computeClient.Microversion = "2.64"
 
 		if policy == "anti-affinity" && rulesPresent {
-			rules := rulesVal.([]map[string]interface{})
-
-			var MaxServerPerHost int
-			if v, ok := rules[0]["max_server_per_host"]; ok {
-				MaxServerPerHost = v.(int)
-			}
-
+			maxServerPerHost := expandComputeServerGroupV2RulesMaxServerPerHost(rulesVal.([]interface{}))
 			createOpts = ComputeServerGroupV2CreateOpts{
 				servergroups.CreateOpts{
 					Name:   name,
 					Policy: policy,
 					Rules: &servergroups.Rules{
-						MaxServerPerHost: MaxServerPerHost,
+						MaxServerPerHost: maxServerPerHost,
 					},
 				},
 				MapValueSpecs(d),
