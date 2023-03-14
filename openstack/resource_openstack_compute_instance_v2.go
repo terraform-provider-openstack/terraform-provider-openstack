@@ -1228,7 +1228,7 @@ func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schem
 
 	bds := []map[string]interface{}{}
 	if len(serverWithAttachments.VolumesAttached) > 0 {
-		blockStorageClient, err := config.BlockStorageV2Client(GetRegion(d, config))
+		blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
 		if err == nil {
 			var volMetaData = struct {
 				VolumeImageMetadata map[string]interface{} `json:"volume_image_metadata"`
@@ -1237,7 +1237,7 @@ func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schem
 				Bootable            string                 `json:"bootable"`
 			}{}
 			for i, b := range serverWithAttachments.VolumesAttached {
-				rawVolume := volumesV2.Get(blockStorageClient, b["id"].(string))
+				rawVolume := volumesV3.Get(blockStorageClient, b["id"].(string))
 				if err := rawVolume.ExtractInto(&volMetaData); err != nil {
 					log.Printf("[DEBUG] unable to unmarshal raw struct to volume metadata: %s", err)
 				}
@@ -1260,10 +1260,10 @@ func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schem
 				}
 			}
 		} else {
-			log.Print("[DEBUG] Could not create BlockStorageV2 client, trying BlockStorageV3")
-			blockStorageClient, err := config.BlockStorageV3Client(GetRegion(d, config))
+			log.Print("[DEBUG] Could not create BlockStorageV3 client, trying BlockStorageV2")
+			blockStorageClient, err := config.BlockStorageV2Client(GetRegion(d, config))
 			if err != nil {
-				return nil, fmt.Errorf("Error creating OpenStack volume V3 client: %s", err)
+				return nil, fmt.Errorf("Error creating OpenStack volume V2 client: %s", err)
 			}
 			var volMetaData = struct {
 				VolumeImageMetadata map[string]interface{} `json:"volume_image_metadata"`
@@ -1272,7 +1272,7 @@ func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schem
 				Bootable            string                 `json:"bootable"`
 			}{}
 			for i, b := range serverWithAttachments.VolumesAttached {
-				rawVolume := volumesV3.Get(blockStorageClient, b["id"].(string))
+				rawVolume := volumesV2.Get(blockStorageClient, b["id"].(string))
 				if err := rawVolume.ExtractInto(&volMetaData); err != nil {
 					log.Printf("[DEBUG] unable to unmarshal raw struct to volume metadata: %s", err)
 				}
