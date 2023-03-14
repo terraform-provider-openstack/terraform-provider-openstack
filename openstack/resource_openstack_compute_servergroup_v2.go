@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/servergroups"
 )
@@ -38,7 +39,28 @@ func resourceComputeServerGroupV2() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
+				MinItems: 1,
+				MaxItems: 1,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"rules": {
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				MinItems: 1,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"max_server_per_host": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.IntAtLeast(1),
+						},
+					},
+				},
 			},
 
 			"members": {
@@ -67,19 +89,54 @@ func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceD
 
 	rawPolicies := d.Get("policies").([]interface{})
 	policies := expandComputeServerGroupV2Policies(computeClient, rawPolicies)
+	var policy string
+	if len(policies) == 1 {
+		policy = policies[0]
+	}
 
-	createOpts := ComputeServerGroupV2CreateOpts{
-		servergroups.CreateOpts{
-			Name:     name,
-			Policies: policies,
-		},
-		MapValueSpecs(d),
+	rulesVal, rulesPresent := d.GetOk("rules")
+	var createOpts ComputeServerGroupV2CreateOpts
+	computeClient.Microversion = "2.64"
+	if policy == "anti-affinity" && rulesPresent {
+		maxServerPerHost := expandComputeServerGroupV2RulesMaxServerPerHost(rulesVal.([]interface{}))
+		createOpts = ComputeServerGroupV2CreateOpts{
+			servergroups.CreateOpts{
+				Name:   name,
+				Policy: policy,
+				Rules: &servergroups.Rules{
+					MaxServerPerHost: maxServerPerHost,
+				},
+			},
+			MapValueSpecs(d),
+		}
+	} else {
+		createOpts = ComputeServerGroupV2CreateOpts{
+			servergroups.CreateOpts{
+				Name:   name,
+				Policy: policy,
+			},
+			MapValueSpecs(d),
+		}
 	}
 
 	log.Printf("[DEBUG] openstack_compute_servergroup_v2 create options: %#v", createOpts)
 	newSG, err := servergroups.Create(computeClient, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error creating openstack_compute_servergroup_v2 %s: %s", name, err)
+		log.Printf("[DEBUG] Falling back to legacy API call due to: %#v", err)
+		// fallback to legacy microversion
+		computeClient.Microversion = ""
+		createOpts = ComputeServerGroupV2CreateOpts{
+			servergroups.CreateOpts{
+				Name:     name,
+				Policies: policies,
+			},
+			MapValueSpecs(d),
+		}
+		log.Printf("[DEBUG] openstack_compute_servergroup_v2 create options: %#v", createOpts)
+		newSG, err = servergroups.Create(computeClient, createOpts).Extract()
+		if err != nil {
+			return diag.Errorf("Error creating openstack_compute_servergroup_v2 %s: %s", name, err)
+		}
 	}
 
 	d.SetId(newSG.ID)
@@ -94,18 +151,45 @@ func resourceComputeServerGroupV2Read(_ context.Context, d *schema.ResourceData,
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
+	// Attempt to read with microversion 2.64
+	computeClient.Microversion = "2.64"
 	sg, err := servergroups.Get(computeClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_servergroup_v2"))
+		log.Printf("[DEBUG] Falling back to legacy API call due to: %#v", err)
+		// fallback to legacy microversion
+		computeClient.Microversion = ""
+
+		sg, err = servergroups.Get(computeClient, d.Id()).Extract()
+		if err != nil {
+			return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_servergroup_v2"))
+		}
+
+		log.Printf("[DEBUG] Retrieved openstack_compute_servergroup_v2 %s: %#v", d.Id(), sg)
+
+		d.Set("name", sg.Name)
+		d.Set("members", sg.Members)
+		d.Set("region", GetRegion(d, config))
+		d.Set("policies", sg.Policies)
+		d.Set("rules", nil)
+
+		return nil
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_servergroup_v2 %s: %#v", d.Id(), sg)
 
 	d.Set("name", sg.Name)
-	d.Set("policies", sg.Policies)
 	d.Set("members", sg.Members)
-
 	d.Set("region", GetRegion(d, config))
+	if sg.Policy != nil {
+		d.Set("policies", []string{*sg.Policy})
+	} else {
+		d.Set("policies", nil)
+	}
+	if sg.Rules != nil {
+		d.Set("rules", []map[string]interface{}{{"max_server_per_host": sg.Rules.MaxServerPerHost}})
+	} else {
+		d.Set("rules", nil)
+	}
 
 	return nil
 }

@@ -12,10 +12,24 @@ Manages a V2 Server Group resource within OpenStack.
 
 ## Example Usage
 
+### Compute service API version 2.63 or below:
+
 ```hcl
 resource "openstack_compute_servergroup_v2" "test-sg" {
   name     = "my-sg"
   policies = ["anti-affinity"]
+}
+```
+
+### Compute service API version 2.64 or above:
+
+```hcl
+resource "openstack_compute_servergroup_v2" "test-sg" {
+  name     = "my-sg"
+  policies = ["anti-affinity"]
+  rules {
+      max_server_per_host = 3
+  }
 }
 ```
 
@@ -24,17 +38,20 @@ resource "openstack_compute_servergroup_v2" "test-sg" {
 The following arguments are supported:
 
 * `region` - (Optional) The region in which to obtain the V2 Compute client.
-    If omitted, the `region` argument of the provider is used. Changing
-    this creates a new server group.
+  If omitted, the `region` argument of the provider is used. Changing
+  this creates a new server group.
 
 * `name` - (Required) A unique name for the server group. Changing this creates
-    a new server group.
+  a new server group.
 
-* `policies` - (Required) The set of policies for the server group. All policies
-    are mutually exclusive. See the Policies section for more information.
-    Changing this creates a new server group.
+* `policies` - (Optional) A list of exactly one policy name to associate with
+  the server group. See the Policies section for more information. Changing this
+  creates a new server group.
 
 * `value_specs` - (Optional) Map of additional options.
+
+* `rules` - (Optional) The rules which are applied to specified `policy`. Currently,
+  only the `max_server_per_host` rule is supported for the `anti-affinity` policy.
 
 ## Policies
 
@@ -62,6 +79,7 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `policies` - See Argument Reference above.
 * `members` - The instances that are part of this server group.
+* `rules` - See Argument Reference above.
 
 ## Import
 
