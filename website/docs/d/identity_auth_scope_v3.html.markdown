@@ -12,7 +12,15 @@ Use this data source to get authentication information about the current
 auth scope in use. This can be used as self-discovery or introspection of
 the username or project name currently in use as well as the service catalog.
 
+~> **Important Security Notice** While the `set_token_id` is `true` this data
+source will store an *unencrypted* session token in your Terraform state file.
+**Use of this data source with `set_token_id = true` in production deployments
+is *not* recommended**.
+[Read more about sensitive data in state](https://www.terraform.io/docs/language/state/sensitive-data.html).
+
 ## Example Usage
+
+### Simple
 
 ```hcl
 data "openstack_identity_auth_scope_v3" "scope" {
@@ -33,6 +41,40 @@ locals {
 }
 ```
 
+### In a combination with an http data source provider
+
+See [http](/providers/hashicorp/http/latest/docs/data-sources/http) provider for reference.
+
+```hcl
+data "openstack_identity_auth_scope_v3" "scope" {
+  name = "my_scope"
+}
+```
+
+```hcl
+locals {
+  object_store_service    = [for entry in data.openstack_identity_auth_scope_v3.scope.service_catalog:
+                                 entry if entry.type=="object-store"][0]
+  object_store_endpoint   = [for endpoint in local.object_store_service.endpoints:
+                                 endpoint if (endpoint.interface=="public" && endpoint.region=="region1")][0]
+  object_store_public_url = local.object_store_endpoint.url
+}
+
+data "http" "example" {
+  url = local.object_store_public_url
+
+  request_headers = {
+    "Accept"       = "application/json"
+    "X-Auth-Token" = data.openstack_identity_auth_scope_v3.scope.token_id
+  }
+}
+
+# print object storage containers in JSON format
+output "containers" {
+  value = data.http.example.response_body
+}
+```
+
 ## Argument Reference
 
 * `name` - (Required) The name of the scope. This is an arbitrary name which is
@@ -41,6 +83,13 @@ locals {
 * `region` - (Optional) The region in which to obtain the V3 Identity client.
   A Identity client is needed to retrieve tokens IDs. If omitted, the
   `region` argument of the provider is used.
+
+* `set_token_id` - (Optional) A boolean argument that determines whether to
+  export the current auth scope token ID. When set to `true`, the `token_id`
+  attribute will contain an unencrypted token that can be used for further API
+  calls. **Warning**: please note that the leaked token may allow unauthorized
+  access to other OpenStack services within the current auth scope, so use this
+  option with caution.
 
 ## Attributes Reference
 
@@ -57,6 +106,7 @@ are exported:
 * `project_id` - The project ID of the scope.
 * `project_domain_name` - The domain name of the project.
 * `project_domain_id` - The domain ID of the project.
+* `token_id` - The token ID of the scope.
 * `roles` - A list of roles in the current scope. See reference below.
 * `service_catalog` - A list of service catalog entries returned with the token.
 

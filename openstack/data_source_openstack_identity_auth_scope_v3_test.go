@@ -16,7 +16,6 @@ func TestAccOpenStackIdentityAuthScopeV3DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
@@ -28,6 +27,33 @@ func TestAccOpenStackIdentityAuthScopeV3DataSource_basic(t *testing.T) {
 						"data.openstack_identity_auth_scope_v3.token", "user_name", userName),
 					resource.TestCheckResourceAttr(
 						"data.openstack_identity_auth_scope_v3.token", "project_name", projectName),
+					resource.TestCheckNoResourceAttr(
+						"data.openstack_identity_auth_scope_v3.token", "token_id"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccOpenStackIdentityAuthScopeV3DataSource_token_id(t *testing.T) {
+	userName := os.Getenv("OS_USERNAME")
+	projectName := os.Getenv("OS_PROJECT_NAME")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccOpenStackIdentityAuthScopeV3DataSourceTokenID,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityAuthScopeV3DataSourceID("data.openstack_identity_auth_scope_v3.token"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_identity_auth_scope_v3.token", "user_name", userName),
+					resource.TestCheckResourceAttr(
+						"data.openstack_identity_auth_scope_v3.token", "project_name", projectName),
+					resource.TestCheckResourceAttrSet("data.openstack_identity_auth_scope_v3.token", "token_id"),
 				),
 			},
 		},
@@ -51,6 +77,13 @@ func testAccCheckIdentityAuthScopeV3DataSourceID(n string) resource.TestCheckFun
 
 const testAccOpenStackIdentityAuthScopeV3DataSourceBasic = `
 data "openstack_identity_auth_scope_v3" "token" {
-	name = "my_token"
+  name = "my_token"
+}
+`
+
+const testAccOpenStackIdentityAuthScopeV3DataSourceTokenID = `
+data "openstack_identity_auth_scope_v3" "token" {
+  name         = "my_token"
+  set_token_id = true
 }
 `

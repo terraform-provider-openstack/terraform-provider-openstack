@@ -26,6 +26,18 @@ func dataSourceIdentityAuthScopeV3() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"set_token_id": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"token_id": {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
+
 			// computed attributes
 			"user_id": {
 				Type:     schema.TypeString,
@@ -195,6 +207,10 @@ func dataSourceIdentityAuthScopeV3Read(ctx context.Context, d *schema.ResourceDa
 		if err := d.Set("service_catalog", flatCatalog); err != nil {
 			log.Printf("[DEBUG] Unable to set openstack_identity_auth_scope_v3 service_catalog: %s", err)
 		}
+	}
+
+	if d.Get("set_token_id").(bool) {
+		d.Set("token_id", identityClient.ProviderClient.TokenID)
 	}
 
 	d.Set("region", GetRegion(d, config))
