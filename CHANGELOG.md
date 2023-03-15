@@ -1,3 +1,24 @@
+## 1.51.0 (15 March, 2023)
+
+NOTES
+
+* The `openstack_compute_instance_v2` resource has been updated to use the Cinder V3 API by default instead of the V2 API in resource import logic ([#1514](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1514))
+
+IMPROVEMENTS
+
+* Added support for updating the `segments` argument to the `openstack_networking_network_v2` resource ([#1508](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1508))
+* Added the `segments` attribute to the `openstack_networking_network_v2` data source ([#1508](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1508))
+* Added the `force_destroy` argument to the `openstack_networking_router_interface_v2` resource ([#1512](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1512))
+* Added the `set_token_id` argument and `token_id` attribute to the `openstack_identity_auth_scope_v3` data source ([#1515](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1515))
+* Added the `rules` argument to the `openstack_compute_servergroup_v2` resource ([#1382](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1382))
+* Added the `tags` argument to the `openstack_lb_listener_v2` resource ([#1438](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1438))
+
+BUG FIXES
+
+* Fixed a template type assertion panic in the `openstack_orchestration_stack_v1` resource ([#1509](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1509))
+* Fixed a bug in the `openstack_keymanager_secret_v1` resource and data source that prevented binary data from being retrieved ([#1505](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1505))
+* Fixed the `segments` argument import in the `openstack_networking_network_v2` resource ([#1508](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1508))
+
 ## 1.50.0 (1 March, 2023)
 
 NOTES
@@ -22,8 +43,6 @@ IMPROVEMENTS
 BUG FIXES
 
 * Fixed `containerinfra_clustertemplate_v1` labels update ([#1455](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1455))
-
-BUG FIXES
 
 ## 1.49.0 (26 October, 2022)
 
