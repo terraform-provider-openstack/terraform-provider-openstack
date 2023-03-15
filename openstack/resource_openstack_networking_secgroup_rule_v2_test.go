@@ -106,6 +106,7 @@ func TestAccNetworkingV2SecGroupRule_protocols(t *testing.T) {
 	var secgroupRuleEsp rules.SecGroupRule
 	var secgroupRuleGre rules.SecGroupRule
 	var secgroupRuleIgmp rules.SecGroupRule
+	var secgroupRuleIPIP rules.SecGroupRule
 	var secgroupRuleIPv6Encap rules.SecGroupRule
 	var secgroupRuleIPv6Frag rules.SecGroupRule
 	var secgroupRuleIPv6Icmp rules.SecGroupRule
@@ -145,6 +146,8 @@ func TestAccNetworkingV2SecGroupRule_protocols(t *testing.T) {
 					testAccCheckNetworkingV2SecGroupRuleExists(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_igmp", &secgroupRuleIgmp),
 					testAccCheckNetworkingV2SecGroupRuleExists(
+						"openstack_networking_secgroup_rule_v2.secgroup_rule_ipip", &secgroupRuleIPIP),
+					testAccCheckNetworkingV2SecGroupRuleExists(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_ipv6_encap", &secgroupRuleIPv6Encap),
 					testAccCheckNetworkingV2SecGroupRuleExists(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_ipv6_frag", &secgroupRuleIPv6Frag),
@@ -180,6 +183,8 @@ func TestAccNetworkingV2SecGroupRule_protocols(t *testing.T) {
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_gre", "protocol", "gre"),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_igmp", "protocol", "igmp"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_secgroup_rule_v2.secgroup_rule_ipip", "protocol", "ipip"),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_ipv6_encap", "protocol", "ipv6-encap"),
 					resource.TestCheckResourceAttr(
@@ -430,6 +435,14 @@ resource "openstack_networking_secgroup_rule_v2" "secgroup_rule_igmp" {
   direction = "ingress"
   ethertype = "IPv4"
   protocol = "igmp"
+  remote_ip_prefix = "0.0.0.0/0"
+  security_group_id = "${openstack_networking_secgroup_v2.secgroup_1.id}"
+}
+
+resource "openstack_networking_secgroup_rule_v2" "secgroup_rule_ipip" {
+  direction = "ingress"
+  ethertype = "IPv4"
+  protocol = "ipip"
   remote_ip_prefix = "0.0.0.0/0"
   security_group_id = "${openstack_networking_secgroup_v2.secgroup_1.id}"
 }

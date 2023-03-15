@@ -67,6 +67,7 @@ func TestResourceNetworkingSecGroupRuleV2ProtocolString(t *testing.T) {
 		string(rules.ProtocolGRE):       rules.ProtocolGRE,
 		string(rules.ProtocolICMP):      rules.ProtocolICMP,
 		string(rules.ProtocolIGMP):      rules.ProtocolIGMP,
+		string(rules.ProtocolIPIP):      rules.ProtocolIPIP,
 		string(rules.ProtocolIPv6Encap): rules.ProtocolIPv6Encap,
 		string(rules.ProtocolIPv6Frag):  rules.ProtocolIPv6Frag,
 		string(rules.ProtocolIPv6ICMP):  rules.ProtocolIPv6ICMP,
