@@ -163,16 +163,6 @@ func resourceComputeServerGroupV2Read(_ context.Context, d *schema.ResourceData,
 		if err != nil {
 			return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_servergroup_v2"))
 		}
-
-		log.Printf("[DEBUG] Retrieved openstack_compute_servergroup_v2 %s: %#v", d.Id(), sg)
-
-		d.Set("name", sg.Name)
-		d.Set("members", sg.Members)
-		d.Set("region", GetRegion(d, config))
-		d.Set("policies", sg.Policies)
-		d.Set("rules", nil)
-
-		return nil
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_servergroup_v2 %s: %#v", d.Id(), sg)
@@ -180,10 +170,10 @@ func resourceComputeServerGroupV2Read(_ context.Context, d *schema.ResourceData,
 	d.Set("name", sg.Name)
 	d.Set("members", sg.Members)
 	d.Set("region", GetRegion(d, config))
-	if sg.Policy != nil {
+	if sg.Policy != nil && *sg.Policy != "" {
 		d.Set("policies", []string{*sg.Policy})
 	} else {
-		d.Set("policies", nil)
+		d.Set("policies", sg.Policies)
 	}
 	if sg.Rules != nil {
 		d.Set("rules", []map[string]interface{}{{"max_server_per_host": sg.Rules.MaxServerPerHost}})
