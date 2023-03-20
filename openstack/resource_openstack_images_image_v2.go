@@ -180,7 +180,6 @@ func resourceImagesImageV2() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
-				Default:  false,
 			},
 
 			// Computed-only
