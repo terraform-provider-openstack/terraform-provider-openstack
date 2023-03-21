@@ -1066,8 +1066,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			}
 		}
 
-		var rebuildOpts servers.RebuildOptsBuilder
-		rebuildOpts = &servers.RebuildOpts{
+		var rebuildOpts servers.RebuildOptsBuilder = &servers.RebuildOpts{
 			ImageRef:    newImageID,
 			Personality: resourceInstancePersonalityV2(d),
 		}
