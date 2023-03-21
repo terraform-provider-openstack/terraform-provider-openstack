@@ -1,3 +1,14 @@
+## 1.51.1 (21 March, 2023)
+
+NOTES
+
+* Added more details about the Swift requirements for a new `openstack_objectstorage_container_v1` `versioning` argument in the documentation ([#1526](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1526))
+
+BUG FIXES
+
+* Fixed incorrect microversion setting and response handling for the Nova server groups API in the `openstack_compute_servergroup_v2` resource ([#1524](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1524))
+* Fixed unexpected resource recreation of `openstack_images_image_v2` for existing resources after upgrading the terraform provider version ([#1525](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1525))
+
 ## 1.51.0 (15 March, 2023)
 
 NOTES
