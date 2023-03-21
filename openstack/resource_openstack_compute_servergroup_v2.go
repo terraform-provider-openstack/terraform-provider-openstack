@@ -94,41 +94,36 @@ func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceD
 		policy = policies[0]
 	}
 
+	createOpts := ComputeServerGroupV2CreateOpts{
+		servergroups.CreateOpts{
+			Name:   name,
+			Policy: policy,
+		},
+		MapValueSpecs(d),
+	}
+
 	rulesVal, rulesPresent := d.GetOk("rules")
-	var createOpts ComputeServerGroupV2CreateOpts
-	computeClient.Microversion = "2.64"
 	if policy == "anti-affinity" && rulesPresent {
-		maxServerPerHost := expandComputeServerGroupV2RulesMaxServerPerHost(rulesVal.([]interface{}))
-		createOpts = ComputeServerGroupV2CreateOpts{
-			servergroups.CreateOpts{
-				Name:   name,
-				Policy: policy,
-				Rules: &servergroups.Rules{
-					MaxServerPerHost: maxServerPerHost,
-				},
-			},
-			MapValueSpecs(d),
-		}
-	} else {
-		createOpts = ComputeServerGroupV2CreateOpts{
-			servergroups.CreateOpts{
-				Name:   name,
-				Policy: policy,
-			},
-			MapValueSpecs(d),
+		computeClient.Microversion = "2.64"
+		createOpts.CreateOpts.Rules = &servergroups.Rules{
+			MaxServerPerHost: expandComputeServerGroupV2RulesMaxServerPerHost(rulesVal.([]interface{})),
 		}
 	}
 
 	log.Printf("[DEBUG] openstack_compute_servergroup_v2 create options: %#v", createOpts)
 	newSG, err := servergroups.Create(computeClient, createOpts).Extract()
 	if err != nil {
+		// return an error right away
+		if createOpts.CreateOpts.Rules != nil {
+			return diag.Errorf("Error creating openstack_compute_servergroup_v2 %s: %s", name, err)
+		}
+
 		log.Printf("[DEBUG] Falling back to legacy API call due to: %#v", err)
 		// fallback to legacy microversion
-		computeClient.Microversion = ""
 		createOpts = ComputeServerGroupV2CreateOpts{
 			servergroups.CreateOpts{
 				Name:     name,
-				Policies: policies,
+				Policies: expandComputeServerGroupV2Policies(computeClient, rawPolicies),
 			},
 			MapValueSpecs(d),
 		}
@@ -163,16 +158,6 @@ func resourceComputeServerGroupV2Read(_ context.Context, d *schema.ResourceData,
 		if err != nil {
 			return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_servergroup_v2"))
 		}
-
-		log.Printf("[DEBUG] Retrieved openstack_compute_servergroup_v2 %s: %#v", d.Id(), sg)
-
-		d.Set("name", sg.Name)
-		d.Set("members", sg.Members)
-		d.Set("region", GetRegion(d, config))
-		d.Set("policies", sg.Policies)
-		d.Set("rules", nil)
-
-		return nil
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_compute_servergroup_v2 %s: %#v", d.Id(), sg)
@@ -180,10 +165,10 @@ func resourceComputeServerGroupV2Read(_ context.Context, d *schema.ResourceData,
 	d.Set("name", sg.Name)
 	d.Set("members", sg.Members)
 	d.Set("region", GetRegion(d, config))
-	if sg.Policy != nil {
+	if sg.Policy != nil && *sg.Policy != "" {
 		d.Set("policies", []string{*sg.Policy})
 	} else {
-		d.Set("policies", nil)
+		d.Set("policies", sg.Policies)
 	}
 	if sg.Rules != nil {
 		d.Set("rules", []map[string]interface{}{{"max_server_per_host": sg.Rules.MaxServerPerHost}})
