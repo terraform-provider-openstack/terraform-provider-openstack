@@ -179,6 +179,9 @@ The following arguments are supported:
   client will retry failed HTTP connections and Too Many Requests (429 code)
   HTTP responses with a `Retry-After` header within the specified value.
 
+* `enable_logging` - (Optional) When enabled, generates verbose logs containing
+  all the calls made to and responses received from OpenStack.
+
 ## Overriding Service API Endpoints
 
 There might be a situation in which you want or need to override an API endpoint

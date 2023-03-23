@@ -287,7 +287,7 @@ func resourceObjectStorageContainerV1Update(ctx context.Context, d *schema.Resou
 	}
 
 	// remove legacy versioning first, before enabling the new versioning
-	if updateOpts.VersionsEnabled != nil && *updateOpts.VersionsEnabled == true &&
+	if updateOpts.VersionsEnabled != nil && *updateOpts.VersionsEnabled &&
 		(updateOpts.RemoveVersionsLocation == "true" || updateOpts.RemoveHistoryLocation == "true") {
 		opts := containers.UpdateOpts{
 			RemoveVersionsLocation: "true",
@@ -301,7 +301,7 @@ func resourceObjectStorageContainerV1Update(ctx context.Context, d *schema.Resou
 
 	// remove new versioning first, before enabling the legacy versioning
 	if (updateOpts.VersionsLocation != "" || updateOpts.HistoryLocation != "") &&
-		updateOpts.VersionsEnabled != nil && *updateOpts.VersionsEnabled == false {
+		updateOpts.VersionsEnabled != nil && !*updateOpts.VersionsEnabled {
 		opts := containers.UpdateOpts{
 			VersionsEnabled: updateOpts.VersionsEnabled,
 		}
