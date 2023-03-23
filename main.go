@@ -18,5 +18,6 @@ func main() {
 	plugin.Serve(&plugin.ServeOpts{
 		Debug:        debugMode,
 		ProviderAddr: providerAddr,
-		ProviderFunc: openstack.Provider})
+		ProviderFunc: openstack.Provider,
+	})
 }
