@@ -23,16 +23,11 @@ func expandDatabaseConfigurationV1Values(rawValues []interface{}) map[string]int
 	values := make(map[string]interface{})
 
 	for _, rawValue := range rawValues {
-		var isStringType bool
 		v := rawValue.(map[string]interface{})
 		name := v["name"].(string)
 		value := v["value"]
 
-		if v["string_type"] != nil {
-			isStringType = v["string_type"].(bool)
-		}
-
-		if !isStringType {
+		if isStringType, ok := v["string_type"].(bool); !ok || !isStringType {
 			// check if value can be converted into int
 			if valueInt, err := strconv.Atoi(value.(string)); err == nil {
 				value = valueInt
