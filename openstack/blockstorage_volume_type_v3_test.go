@@ -7,7 +7,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumetypes"
 )
 
-func TestExpandBlockStorageVolumeTypeV3ExtraSpecs(t *testing.T) {
+func TestUnitExpandBlockStorageVolumeTypeV3ExtraSpecs(t *testing.T) {
 	raw := map[string]interface{}{
 		"foo": "foo",
 		"bar": "bar",

@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestComputeInterfaceAttachV2ParseID(t *testing.T) {
+func TestUnitComputeInterfaceAttachV2ParseID(t *testing.T) {
 	id := "foo/bar"
 
 	expectedInstanceID := "foo"

@@ -8,7 +8,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions"
 )
 
-func TestExpandBlockStorageV2AttachMode(t *testing.T) {
+func TestUnitExpandBlockStorageV2AttachMode(t *testing.T) {
 	expected := volumeactions.ReadWrite
 
 	actual, err := expandBlockStorageV2AttachMode("rw")
@@ -16,7 +16,7 @@ func TestExpandBlockStorageV2AttachMode(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestBlockStorageVolumeAttachV2ParseID(t *testing.T) {
+func TestUnitBlockStorageVolumeAttachV2ParseID(t *testing.T) {
 	id := "foo/bar"
 
 	expectedVolumeID := "foo"

@@ -9,7 +9,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/rules"
 )
 
-func TestExpandFWRuleV1IPVersion(t *testing.T) {
+func TestUnitExpandFWRuleV1IPVersion(t *testing.T) {
 	ipv := 4
 
 	expected := gophercloud.IPv4
@@ -17,7 +17,7 @@ func TestExpandFWRuleV1IPVersion(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestExpandFWRuleV1Protocol(t *testing.T) {
+func TestUnitExpandFWRuleV1Protocol(t *testing.T) {
 	proto := "tcp"
 
 	expected := rules.ProtocolTCP

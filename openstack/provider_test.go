@@ -283,7 +283,7 @@ func IsReleasesBelow(t *testing.T, release string) bool {
 	return false
 }
 
-func TestProvider(t *testing.T) {
+func TestUnitProvider(t *testing.T) {
 	if err := Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}

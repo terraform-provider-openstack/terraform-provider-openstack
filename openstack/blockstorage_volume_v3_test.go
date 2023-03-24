@@ -40,7 +40,7 @@ func blockStorageVolumeV3VolumeFixture() volumes.Volume {
 	}
 }
 
-func TestFlattenBlockStorageVolumeV3Attachments(t *testing.T) {
+func TestUnitFlattenBlockStorageVolumeV3Attachments(t *testing.T) {
 	expectedAttachments := []map[string]interface{}{
 		{
 			"id":          "d6cacb1a-8b59-4c88-ad90-d70ebb82bb75",
@@ -53,7 +53,7 @@ func TestFlattenBlockStorageVolumeV3Attachments(t *testing.T) {
 	assert.Equal(t, expectedAttachments, actualAttachments)
 }
 
-func TestBlockStorageVolumeV3AttachmentHash(t *testing.T) {
+func TestUnitBlockStorageVolumeV3AttachmentHash(t *testing.T) {
 	attachments := flattenBlockStorageVolumeV3Attachments(blockStorageVolumeV3VolumeFixture().Attachments)
 
 	expectedHashcode := 236219624

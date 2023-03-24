@@ -10,7 +10,7 @@ import (
 	thclient "github.com/gophercloud/gophercloud/testhelper/client"
 )
 
-func TestComputeServerGroupV2CreateOpts(t *testing.T) {
+func TestUnitComputeServerGroupV2CreateOpts(t *testing.T) {
 	createOpts := ComputeServerGroupV2CreateOpts{
 		servergroups.CreateOpts{
 			Name:     "foo",
@@ -35,7 +35,7 @@ func TestComputeServerGroupV2CreateOpts(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestExpandComputeServerGroupV2PoliciesMicroversions(t *testing.T) {
+func TestUnitExpandComputeServerGroupV2PoliciesMicroversions(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()
 	raw := []interface{}{
@@ -61,7 +61,7 @@ func TestExpandComputeServerGroupV2PoliciesMicroversions(t *testing.T) {
 	assert.Equal(t, expectedPolicies, actualPolicies)
 }
 
-func TestExpandComputeServerGroupV2PoliciesMicroversionsLegacy(t *testing.T) {
+func TestUnitExpandComputeServerGroupV2PoliciesMicroversionsLegacy(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()
 	raw := []interface{}{

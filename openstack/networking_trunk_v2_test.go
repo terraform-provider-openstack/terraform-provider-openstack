@@ -9,7 +9,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/trunks"
 )
 
-func TestFlattenNetworkingTrunkSubportsV2(t *testing.T) {
+func TestUnitFlattenNetworkingTrunkSubportsV2(t *testing.T) {
 	subports := []trunks.Subport{
 		{
 			PortID:           "port_id_1",
@@ -41,7 +41,7 @@ func TestFlattenNetworkingTrunkSubportsV2(t *testing.T) {
 	assert.ElementsMatch(t, expectedSubports, actualSubports)
 }
 
-func TestExpandNetworkingTrunkSubportsV2(t *testing.T) {
+func TestUnitExpandNetworkingTrunkSubportsV2(t *testing.T) {
 	r := resourceNetworkingTrunkV2()
 	d := r.TestResourceData()
 	d.SetId("1")
@@ -76,7 +76,7 @@ func TestExpandNetworkingTrunkSubportsV2(t *testing.T) {
 	assert.ElementsMatch(t, expectedSubports, actualSubports)
 }
 
-func TestExpandNetworkingTrunkSubportsRemoveV2(t *testing.T) {
+func TestUnitExpandNetworkingTrunkSubportsRemoveV2(t *testing.T) {
 	r := resourceNetworkingTrunkV2()
 	d := r.TestResourceData()
 	d.SetId("1")

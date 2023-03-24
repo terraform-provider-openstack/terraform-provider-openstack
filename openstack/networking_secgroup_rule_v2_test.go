@@ -8,7 +8,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules"
 )
 
-func TestResourceNetworkingSecGroupRuleV2DirectionIngress(t *testing.T) {
+func TestUnitResourceNetworkingSecGroupRuleV2DirectionIngress(t *testing.T) {
 	expected := rules.DirIngress
 
 	actual, err := resourceNetworkingSecGroupRuleV2Direction("ingress")
@@ -17,7 +17,7 @@ func TestResourceNetworkingSecGroupRuleV2DirectionIngress(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestResourceNetworkingSecGroupRuleV2DirectionEgress(t *testing.T) {
+func TestUnitResourceNetworkingSecGroupRuleV2DirectionEgress(t *testing.T) {
 	expected := rules.DirEgress
 
 	actual, err := resourceNetworkingSecGroupRuleV2Direction("egress")
@@ -26,14 +26,14 @@ func TestResourceNetworkingSecGroupRuleV2DirectionEgress(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestResourceNetworkingSecGroupRuleV2DirectionUnknown(t *testing.T) {
+func TestUnitResourceNetworkingSecGroupRuleV2DirectionUnknown(t *testing.T) {
 	actual, err := resourceNetworkingSecGroupRuleV2Direction("stuff")
 
 	assert.Error(t, err)
 	assert.Empty(t, actual)
 }
 
-func TestResourceNetworkingSecGroupRuleV2EtherType4(t *testing.T) {
+func TestUnitResourceNetworkingSecGroupRuleV2EtherType4(t *testing.T) {
 	expected := rules.EtherType4
 
 	actual, err := resourceNetworkingSecGroupRuleV2EtherType("IPv4")
@@ -42,7 +42,7 @@ func TestResourceNetworkingSecGroupRuleV2EtherType4(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestResourceNetworkingSecGroupRuleV2EtherType6(t *testing.T) {
+func TestUnitResourceNetworkingSecGroupRuleV2EtherType6(t *testing.T) {
 	expected := rules.EtherType6
 
 	actual, err := resourceNetworkingSecGroupRuleV2EtherType("IPv6")
@@ -51,14 +51,14 @@ func TestResourceNetworkingSecGroupRuleV2EtherType6(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestResourceNetworkingSecGroupRuleV2EtherTypeUnknown(t *testing.T) {
+func TestUnitResourceNetworkingSecGroupRuleV2EtherTypeUnknown(t *testing.T) {
 	actual, err := resourceNetworkingSecGroupRuleV2EtherType("something")
 
 	assert.Error(t, err)
 	assert.Empty(t, actual)
 }
 
-func TestResourceNetworkingSecGroupRuleV2ProtocolString(t *testing.T) {
+func TestUnitResourceNetworkingSecGroupRuleV2ProtocolString(t *testing.T) {
 	protocols := map[string]rules.RuleProtocol{
 		string(rules.ProtocolAH):        rules.ProtocolAH,
 		string(rules.ProtocolDCCP):      rules.ProtocolDCCP,
@@ -91,7 +91,7 @@ func TestResourceNetworkingSecGroupRuleV2ProtocolString(t *testing.T) {
 	}
 }
 
-func TestResourceNetworkingSecGroupRuleV2ProtocolNumber(t *testing.T) {
+func TestUnitResourceNetworkingSecGroupRuleV2ProtocolNumber(t *testing.T) {
 	expected := rules.RuleProtocol("6")
 
 	actual, err := resourceNetworkingSecGroupRuleV2Protocol("6")

@@ -8,7 +8,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/applicationcredentials"
 )
 
-func TestFlattenIdentityApplicationCredentialRolesV3(t *testing.T) {
+func TestUnitFlattenIdentityApplicationCredentialRolesV3(t *testing.T) {
 	role1 := applicationcredentials.Role{
 		ID:   "123",
 		Name: "foo",
@@ -26,7 +26,7 @@ func TestFlattenIdentityApplicationCredentialRolesV3(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestExpandIdentityApplicationCredentialRolesV3(t *testing.T) {
+func TestUnitExpandIdentityApplicationCredentialRolesV3(t *testing.T) {
 	role1 := applicationcredentials.Role{
 		Name: "foo",
 	}

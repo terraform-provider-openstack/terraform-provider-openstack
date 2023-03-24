@@ -2,7 +2,7 @@ package openstack
 
 import "testing"
 
-func TestComputeVolumeAttachV2ParseID(t *testing.T) {
+func TestUnitComputeVolumeAttachV2ParseID(t *testing.T) {
 	id := "foo/bar"
 
 	expectedInstanceID := "foo"

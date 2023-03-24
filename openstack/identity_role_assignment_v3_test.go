@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestIdentityRoleAssignmentV3ID(t *testing.T) {
+func TestUnitIdentityRoleAssignmentV3ID(t *testing.T) {
 	domainID := "domain"
 	projectID := "project"
 	groupID := "group"
@@ -18,7 +18,7 @@ func TestIdentityRoleAssignmentV3ID(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestIdentityRoleAssignmentV3ParseID(t *testing.T) {
+func TestUnitIdentityRoleAssignmentV3ParseID(t *testing.T) {
 	id := "domain/project/group/user/role"
 
 	expectedDomainID := "domain"

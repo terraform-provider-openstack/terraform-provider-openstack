@@ -7,7 +7,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 )
 
-func TestExpandComputeSecGroupV2CreateRules(t *testing.T) {
+func TestUnitExpandComputeSecGroupV2CreateRules(t *testing.T) {
 	r := resourceComputeSecGroupV2()
 	d := r.TestResourceData()
 	d.SetId("1")
@@ -69,7 +69,7 @@ func TestExpandComputeSecGroupV2CreateRules(t *testing.T) {
 	}
 }
 
-func TestExpandComputeSecGroupV2Rule(t *testing.T) {
+func TestUnitExpandComputeSecGroupV2Rule(t *testing.T) {
 	r := resourceComputeSecGroupV2()
 	d := r.TestResourceData()
 	d.SetId("1")
