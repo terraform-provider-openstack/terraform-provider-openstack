@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/utils/terraform/auth"
 	"github.com/gophercloud/utils/terraform/mutexkv"
 )
@@ -157,6 +158,13 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_DEFAULT_DOMAIN", "default"),
 				Description: descriptions["default_domain"],
+			},
+
+			"system_scope": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_SYSTEM_SCOPE", false),
+				Description: descriptions["system_scope"],
 			},
 
 			"insecure": {
@@ -471,6 +479,8 @@ func init() {
 
 		"default_domain": "The name of the Domain ID to scope to if no other domain is specified. Defaults to `default` (Identity v3).",
 
+		"system_scope": "If set to `true`, system scoped authorization will be enabled. Defaults to `false` (Identity v3).",
+
 		"insecure": "Trust self-signed certificates.",
 
 		"cacert_file": "A Custom CA certificate.",
@@ -515,6 +525,10 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 		}
 	}
 
+	authOpts := &gophercloud.AuthOptions{
+		Scope: &gophercloud.AuthScope{System: d.Get("system_scope").(bool)},
+	}
+
 	config := Config{
 		auth.Config{
 			CACertFile:                  d.Get("cacert_file").(string),
@@ -545,6 +559,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 			UseOctavia:                  d.Get("use_octavia").(bool),
 			DelayedAuth:                 d.Get("delayed_auth").(bool),
 			AllowReauth:                 d.Get("allow_reauth").(bool),
+			AuthOpts:                    authOpts,
 			MaxRetries:                  d.Get("max_retries").(int),
 			DisableNoCacheHeader:        d.Get("disable_no_cache_header").(bool),
 			TerraformVersion:            terraformVersion,
