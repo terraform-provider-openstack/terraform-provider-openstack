@@ -126,6 +126,8 @@ The following arguments are supported:
   `OS_DEFAULT_DOMAIN` is checked or a default value of "default" will be
   used.
 
+* `system_scope` - (Optional) Set to `true` to enable system scoped authorization. If omitted, the `OS_SYSTEM_SCOPE` environment variable is used.
+
 * `insecure` - (Optional) Trust self-signed SSL certificates. If omitted, the
   `OS_INSECURE` environment variable is used.
 
