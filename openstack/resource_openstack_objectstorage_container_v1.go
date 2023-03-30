@@ -175,7 +175,6 @@ func resourceObjectStorageContainerV1Read(ctx context.Context, d *schema.Resourc
 	}
 
 	result := containers.Get(objectStorageClient, d.Id(), nil)
-
 	if result.Err != nil {
 		return diag.FromErr(CheckDeleted(d, result.Err, "container"))
 	}
@@ -370,7 +369,7 @@ func resourceObjectStorageContainerV1Delete(ctx context.Context, d *schema.Resou
 			}
 			return resourceObjectStorageContainerV1Delete(ctx, d, meta)
 		}
-		return diag.Errorf("error deleting objectstorage_container_v1 '%s': %s", d.Id(), err)
+		return diag.FromErr(CheckDeleted(d, err, fmt.Sprintf("error deleting objectstorage_container_v1 '%s'", d.Id())))
 	}
 
 	d.SetId("")
