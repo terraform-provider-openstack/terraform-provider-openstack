@@ -261,7 +261,7 @@ func resourceObjectStorageObjectV1Read(ctx context.Context, d *schema.ResourceDa
 	log.Printf("[DEBUG] Get Options: %#v", getOpts)
 	result, err := objects.Get(objectStorageClient, cn, name, getOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error getting OpenStack container object: %s", err)
+		return diag.FromErr(CheckDeleted(d, err, "Error getting OpenStack container object"))
 	}
 
 	log.Printf("[DEBUG] Retrieved OpenStack Object Storage Object: %#v", result)
@@ -392,7 +392,7 @@ func resourceObjectStorageObjectV1Delete(ctx context.Context, d *schema.Resource
 
 	_, err = objects.Delete(objectStorageClient, cn, name, deleteOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error getting OpenStack container object: %s", err)
+		return diag.FromErr(CheckDeleted(d, err, fmt.Sprintf("Error deleting OpenStack container object: %s", name)))
 	}
 	return nil
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
+	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/containers"
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects"
 )
 
@@ -94,6 +95,40 @@ func TestAccObjectStorageV1Object_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_object_v1.myfile", "delete_after", "3600"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccObjectStorageV1Object_basic_check_destroy(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckSwift(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy: func(s *terraform.State) error {
+			return testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test/myfile.txt")
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObjectStorageV1ObjectBasic(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_container_v1.container_1", "name", "tf_test_container_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_objectstorage_object_v1.myfile", "content_type", "text/plain"),
+				),
+			},
+			{
+				Config:             testAccObjectStorageV1ObjectBasic(),
+				ExpectNonEmptyPlan: true,
+				Check:              testAccCheckObjectStorageV1DestroyContainer("tf_test_container_1", "terraform/test/myfile.txt"),
+			},
+			{
+				Config:                    testAccObjectStorageV1ObjectBasic(),
+				Destroy:                   true,
+				PreventPostDestroyRefresh: true,
 			},
 		},
 	})
@@ -298,6 +333,28 @@ func testAccCheckObjectStorageV1ObjectDeleteAtMatches(expected string, object *o
 		}
 
 		return nil
+	}
+}
+
+func testAccCheckObjectStorageV1DestroyContainer(container, object string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
+		objectStorageClient, err := config.ObjectStorageV1Client(osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack object storage client: %s", err)
+		}
+
+		_, err = objects.Delete(objectStorageClient, container, object, nil).Extract()
+		if err != nil {
+			return err
+		}
+
+		_, err = containers.Delete(objectStorageClient, container).Extract()
+		if err != nil {
+			return err
+		}
+
+		return err
 	}
 }
 
