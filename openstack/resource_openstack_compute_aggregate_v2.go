@@ -84,7 +84,7 @@ func resourceComputeAggregateV2Create(_ context.Context, d *schema.ResourceData,
 		for _, host := range hosts.List() {
 			_, err = aggregates.AddHost(computeClient, aggregate.ID, aggregates.AddHostOpts{Host: host.(string)}).Extract()
 			if err != nil {
-				return diag.Errorf("Error adding host %s to Openstack aggregate: %s", host.(string), err)
+				return diag.Errorf("Error adding host %s to OpenStack aggregate: %s", host.(string), err)
 			}
 		}
 	}
@@ -166,7 +166,7 @@ func resourceComputeAggregateV2Update(_ context.Context, d *schema.ResourceData,
 			log.Printf("[DEBUG] Removing host '%s' from aggregate '%s'", host, d.Get("name"))
 			_, err = aggregates.RemoveHost(computeClient, id, aggregates.RemoveHostOpts{Host: host}).Extract()
 			if err != nil {
-				return diag.Errorf("Error deleting host %s from Openstack aggregate: %s", host, err)
+				return diag.Errorf("Error deleting host %s from OpenStack aggregate: %s", host, err)
 			}
 		}
 		for _, h := range hostsToAdd.List() {
@@ -174,7 +174,7 @@ func resourceComputeAggregateV2Update(_ context.Context, d *schema.ResourceData,
 			log.Printf("[DEBUG] Adding host '%s' to aggregate '%s'", host, d.Get("name"))
 			_, err = aggregates.AddHost(computeClient, id, aggregates.AddHostOpts{Host: host}).Extract()
 			if err != nil {
-				return diag.Errorf("Error adding host %s to Openstack aggregate: %s", host, err)
+				return diag.Errorf("Error adding host %s to OpenStack aggregate: %s", host, err)
 			}
 		}
 	}
@@ -203,20 +203,20 @@ func resourceComputeAggregateV2Delete(_ context.Context, d *schema.ResourceData,
 		return diag.Errorf("Can't convert ID to integer: %s", err)
 	}
 
-	// Openstack do not delete the host aggregate if it's not empty
+	// OpenStack do not delete the host aggregate if it's not empty
 	hostsToDelete := d.Get("hosts").(*schema.Set)
 	for _, h := range hostsToDelete.List() {
 		host := h.(string)
 		log.Printf("[DEBUG] Removing host '%s' from aggregate '%s'", host, d.Get("name"))
 		_, err = aggregates.RemoveHost(computeClient, id, aggregates.RemoveHostOpts{Host: host}).Extract()
 		if err != nil {
-			return diag.Errorf("Error deleting host %s from Openstack aggregate: %s", host, err)
+			return diag.Errorf("Error deleting host %s from OpenStack aggregate: %s", host, err)
 		}
 	}
 
 	err = aggregates.Delete(computeClient, id).ExtractErr()
 	if err != nil {
-		return diag.Errorf("Error deleting Openstack aggregate: %s", err)
+		return diag.Errorf("Error deleting OpenStack aggregate: %s", err)
 	}
 
 	return nil
