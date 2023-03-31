@@ -1,5 +1,5 @@
 ---
-layout: "openstack"
+subcategory: "Object Storage / Swift"
 page_title: "OpenStack: openstack_objectstorage_tempurl_v1"
 sidebar_current: "docs-openstack-resource-objectstorage-tempurl-v1"
 description: |-

@@ -1,4 +1,5 @@
 ---
+subcategory: "Networking / Neutron"
 layout: "openstack"
 page_title: "OpenStack: openstack_networking_floatingip_v2"
 sidebar_current: "docs-openstack-resource-networking-floatingip-v2"

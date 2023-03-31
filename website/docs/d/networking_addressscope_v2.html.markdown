@@ -1,4 +1,5 @@
 ---
+subcategory: "Networking / Neutron"
 layout: "openstack"
 page_title: "OpenStack: openstack_networking_addressscope_v2"
 sidebar_current: "docs-openstack-datasource-networking-addressscope-v2"

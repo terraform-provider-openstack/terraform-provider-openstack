@@ -1,4 +1,5 @@
 ---
+subcategory: "Block Storage / Cinder"
 layout: "openstack"
 page_title: "OpenStack: openstack_blockstorage_volume_type_v3"
 sidebar_current: "docs-openstack-resource-blockstorage-volume-type-v3"

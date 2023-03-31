@@ -1,4 +1,5 @@
 ---
+subcategory: "DNS / Designate"
 layout: "openstack"
 page_title: "OpenStack: openstack_dns_transfer_request_v2"
 sidebar_current: "docs-openstack-resource-dns-transfer-request-v2"

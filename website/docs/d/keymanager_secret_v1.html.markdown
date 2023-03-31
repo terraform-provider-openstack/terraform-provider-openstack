@@ -1,4 +1,5 @@
 ---
+subcategory: "Secrets / Barbican"
 layout: "openstack"
 page_title: "OpenStack: openstack_keymanager_secret_v1"
 sidebar_current: "docs-openstack-datasource-keymanager-secret-v1"

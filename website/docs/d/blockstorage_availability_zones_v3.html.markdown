@@ -1,4 +1,5 @@
 ---
+subcategory: "Block Storage / Cinder"
 layout: "openstack"
 page_title: "OpenStack: openstack_blockstorage_availability_zones_v3"
 sidebar_current: "docs-openstack-datasource-blockstorage-availability-zones-v3"

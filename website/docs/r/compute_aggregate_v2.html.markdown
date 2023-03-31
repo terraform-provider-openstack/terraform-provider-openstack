@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute VM / Nova"
 layout: "openstack"
 page_title: "OpenStack: openstack_compute_aggregate_v2"
 sidebar_current: "docs-openstack-resource-compute-aggregate-v2"

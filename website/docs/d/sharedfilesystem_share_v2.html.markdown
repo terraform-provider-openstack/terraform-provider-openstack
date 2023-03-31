@@ -1,4 +1,5 @@
 ---
+subcategory: "Shared Filesystem / Manila"
 layout: "openstack"
 page_title: "OpenStack: openstack_sharedfilesystem_share_v2"
 sidebar_current: "docs-openstack-datasource-sharedfilesystem-share-v2"

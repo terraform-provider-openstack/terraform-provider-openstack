@@ -1,4 +1,5 @@
 ---
+subcategory: "Load Balancing as a Service / Octavia"
 layout: "openstack"
 page_title: "OpenStack: openstack_lb_members_v2"
 sidebar_current: "docs-openstack-resource-lb-members-v2"

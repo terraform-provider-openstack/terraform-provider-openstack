@@ -1,4 +1,5 @@
 ---
+subcategory: "Networking / Neutron"
 layout: "openstack"
 page_title: "OpenStack: openstack_networking_qos_bandwidth_limit_rule_v2"
 sidebar_current: "docs-openstack-datasource-networking-qos-bandwidth-limit-rule-v2"

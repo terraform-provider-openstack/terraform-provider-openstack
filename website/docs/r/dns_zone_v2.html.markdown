@@ -1,4 +1,5 @@
 ---
+subcategory: "DNS / Designate"
 layout: "openstack"
 page_title: "OpenStack: openstack_dns_zone_v2"
 sidebar_current: "docs-openstack-resource-dns-zone-v2"

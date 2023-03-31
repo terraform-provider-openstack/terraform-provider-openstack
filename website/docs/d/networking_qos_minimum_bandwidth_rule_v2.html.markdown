@@ -1,4 +1,5 @@
 ---
+subcategory: "Networking / Neutron"
 layout: "openstack"
 page_title: "OpenStack: openstack_networking_qos_minimum_bandwidth_rule_v2"
 sidebar_current: "docs-openstack-datasource-networking-qos-minimum-bandwidth-rule-v2"

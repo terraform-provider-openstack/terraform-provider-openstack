@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute VM / Nova"
 layout: "openstack"
 page_title: "OpenStack: openstack_compute_availability_zones_v2"
 sidebar_current: "docs-openstack-datasource-compute-availability-zones-v2"
