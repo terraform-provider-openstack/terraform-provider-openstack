@@ -3,7 +3,6 @@ package openstack
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -417,7 +416,7 @@ func envVarFile(varName string) (string, error) {
 		return "", err
 	}
 
-	tmpFile, err := ioutil.TempFile("", varName)
+	tmpFile, err := os.CreateTemp("", varName)
 	if err != nil {
 		return "", fmt.Errorf("Error creating temp file: %s", err)
 	}
