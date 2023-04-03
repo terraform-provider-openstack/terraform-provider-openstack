@@ -1,5 +1,5 @@
 ---
-subcategory: "Compute VM / Nova"
+subcategory: "Compute / Nova"
 layout: "openstack"
 page_title: "OpenStack: openstack_compute_floatingip_associate_v2"
 sidebar_current: "docs-openstack-resource-compute-floatingip-associate-v2"

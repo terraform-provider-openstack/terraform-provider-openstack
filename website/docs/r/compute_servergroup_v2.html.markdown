@@ -1,5 +1,5 @@
 ---
-subcategory: "Compute VM / Nova"
+subcategory: "Compute / Nova"
 layout: "openstack"
 page_title: "OpenStack: openstack_compute_servergroup_v2"
 sidebar_current: "docs-openstack-resource-compute-servergroup-v2"

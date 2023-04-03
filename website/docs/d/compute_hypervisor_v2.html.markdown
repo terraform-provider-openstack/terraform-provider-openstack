@@ -1,5 +1,5 @@
 ---
-subcategory: "Compute VM / Nova"
+subcategory: "Compute / Nova"
 layout: "openstack"
 page_title: "OpenStack: openstack_compute_hypervisor_v2"
 sidebar_current: "docs-openstack-datasource-compute-hypervisor-v2"

@@ -1,5 +1,5 @@
 ---
-subcategory: "Compute VM / Nova"
+subcategory: "Compute / Nova"
 layout: "openstack"
 page_title: "OpenStack: openstack_compute_instance_v2"
 sidebar_current: "docs-openstack-resource-compute-instance-v2"
