@@ -2,7 +2,7 @@ package openstack
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -93,7 +93,7 @@ func testAccCheckObjectstorageTempurlV1Get(n string) resource.TestCheckFunc {
 			return fmt.Errorf("Failed to retrieve tempurl: %s", url)
 		}
 		defer resp.Body.Close()
-		data, err := ioutil.ReadAll(resp.Body)
+		data, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return fmt.Errorf("Failed to read tempurl body: %s", url)
 		}

@@ -119,7 +119,7 @@ func dataSourceNetworkingTrunkV2Read(ctx context.Context, d *schema.ResourceData
 		listOpts.PortID = v.(string)
 	}
 
-	if v, ok := d.GetOkExists("admin_state_up"); ok {
+	if v, ok := d.GetOk("admin_state_up"); ok {
 		asu := v.(bool)
 		listOpts.AdminStateUp = &asu
 	}
