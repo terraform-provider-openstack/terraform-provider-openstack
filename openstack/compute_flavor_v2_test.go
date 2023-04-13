@@ -7,7 +7,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 )
 
-func TestExpandComputeFlavorV2ExtraSpecs(t *testing.T) {
+func TestUnitExpandComputeFlavorV2ExtraSpecs(t *testing.T) {
 	raw := map[string]interface{}{
 		"foo": "bar",
 		"bar": "baz",

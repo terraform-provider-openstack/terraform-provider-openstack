@@ -8,7 +8,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/db/v1/databases"
 )
 
-func TestExpandDatabaseUserV1Databases(t *testing.T) {
+func TestUnitExpandDatabaseUserV1Databases(t *testing.T) {
 	dbs := []interface{}{"db1", "db2"}
 
 	expected := databases.BatchCreateOpts{
@@ -24,7 +24,7 @@ func TestExpandDatabaseUserV1Databases(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestFlattenDatabaseUserV1Databases(t *testing.T) {
+func TestUnitFlattenDatabaseUserV1Databases(t *testing.T) {
 	dbs := []databases.Database{
 		{
 			Name: "db1",

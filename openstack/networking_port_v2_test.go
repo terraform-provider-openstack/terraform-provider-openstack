@@ -11,7 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 )
 
-func TestExpandNetworkingPortDHCPOptsV2Create(t *testing.T) {
+func TestUnitExpandNetworkingPortDHCPOptsV2Create(t *testing.T) {
 	r := resourceNetworkingPortV2()
 	d := r.TestResourceData()
 	d.SetId("1")
@@ -46,7 +46,7 @@ func TestExpandNetworkingPortDHCPOptsV2Create(t *testing.T) {
 	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
-func TestExpandNetworkingPortDHCPOptsEmptyV2Create(t *testing.T) {
+func TestUnitExpandNetworkingPortDHCPOptsEmptyV2Create(t *testing.T) {
 	r := resourceNetworkingPortV2()
 	d := r.TestResourceData()
 	d.SetId("1")
@@ -58,7 +58,7 @@ func TestExpandNetworkingPortDHCPOptsEmptyV2Create(t *testing.T) {
 	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
-func TestExpandNetworkingPortDHCPOptsV2Update(t *testing.T) {
+func TestUnitExpandNetworkingPortDHCPOptsV2Update(t *testing.T) {
 	r := resourceNetworkingPortV2()
 	d := r.TestResourceData()
 	d.SetId("1")
@@ -95,7 +95,7 @@ func TestExpandNetworkingPortDHCPOptsV2Update(t *testing.T) {
 	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
-func TestExpandNetworkingPortDHCPOptsEmptyV2Update(t *testing.T) {
+func TestUnitExpandNetworkingPortDHCPOptsEmptyV2Update(t *testing.T) {
 	r := resourceNetworkingPortV2()
 	d := r.TestResourceData()
 	d.SetId("1")
@@ -107,7 +107,7 @@ func TestExpandNetworkingPortDHCPOptsEmptyV2Update(t *testing.T) {
 	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
-func TestExpandNetworkingPortDHCPOptsV2Delete(t *testing.T) {
+func TestUnitExpandNetworkingPortDHCPOptsV2Delete(t *testing.T) {
 	r := resourceNetworkingPortV2()
 	d := r.TestResourceData()
 	d.SetId("1")
@@ -138,7 +138,7 @@ func TestExpandNetworkingPortDHCPOptsV2Delete(t *testing.T) {
 	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
-func TestFlattenNetworkingPort2DHCPOptionsV2(t *testing.T) {
+func TestUnitFlattenNetworkingPort2DHCPOptionsV2(t *testing.T) {
 	dhcpOptions := extradhcpopts.ExtraDHCPOptsExt{
 		ExtraDHCPOpts: []extradhcpopts.ExtraDHCPOpt{
 			{
@@ -172,7 +172,7 @@ func TestFlattenNetworkingPort2DHCPOptionsV2(t *testing.T) {
 	assert.ElementsMatch(t, expectedDHCPOptions, actualDHCPOptions)
 }
 
-func TestExpandNetworkingPortAllowedAddressPairsV2(t *testing.T) {
+func TestUnitExpandNetworkingPortAllowedAddressPairsV2(t *testing.T) {
 	r := resourceNetworkingPortV2()
 	d := r.TestResourceData()
 	d.SetId("1")
@@ -203,7 +203,7 @@ func TestExpandNetworkingPortAllowedAddressPairsV2(t *testing.T) {
 	assert.ElementsMatch(t, expectedAllowedAddressPairs, actualAllowedAddressPairs)
 }
 
-func TestFlattenNetworkingPortAllowedAddressPairsV2(t *testing.T) {
+func TestUnitFlattenNetworkingPortAllowedAddressPairsV2(t *testing.T) {
 	allowedAddressPairs := []ports.AddressPair{
 		{
 			IPAddress:  "192.0.2.1",
@@ -232,7 +232,7 @@ func TestFlattenNetworkingPortAllowedAddressPairsV2(t *testing.T) {
 	assert.ElementsMatch(t, expectedAllowedAddressPairs, actualAllowedAddressPairs)
 }
 
-func TestExpandNetworkingPortFixedIPV2NoFixedIPs(t *testing.T) {
+func TestUnitExpandNetworkingPortFixedIPV2NoFixedIPs(t *testing.T) {
 	r := resourceNetworkingPortV2()
 	d := r.TestResourceData()
 	d.SetId("1")
@@ -243,7 +243,7 @@ func TestExpandNetworkingPortFixedIPV2NoFixedIPs(t *testing.T) {
 	assert.Empty(t, actualFixedIP)
 }
 
-func TestExpandNetworkingPortFixedIPV2SomeFixedIPs(t *testing.T) {
+func TestUnitExpandNetworkingPortFixedIPV2SomeFixedIPs(t *testing.T) {
 	r := resourceNetworkingPortV2()
 	d := r.TestResourceData()
 	d.SetId("1")

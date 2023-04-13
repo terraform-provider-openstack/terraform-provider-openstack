@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestExpandLBV2ListenerHeadersMap(t *testing.T) {
+func TestUnitExpandLBV2ListenerHeadersMap(t *testing.T) {
 	raw := map[string]interface{}{
 		"header0": "val0",
 		"header1": "val1",
@@ -23,7 +23,7 @@ func TestExpandLBV2ListenerHeadersMap(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestExpandLBV2ListenerHeadersMap_err(t *testing.T) {
+func TestUnitExpandLBV2ListenerHeadersMap_err(t *testing.T) {
 	raw := map[string]interface{}{
 		"header0": "val0",
 		"header1": 1,

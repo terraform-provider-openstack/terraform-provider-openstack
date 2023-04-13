@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestBlockStorageVolumeTypeQuotaConversion(t *testing.T) {
+func TestUnitBlockStorageVolumeTypeQuotaConversion(t *testing.T) {
 	raw := map[string]interface{}{
 		"foo": "42",
 		"bar": "43",
@@ -27,7 +27,7 @@ func TestBlockStorageVolumeTypeQuotaConversion(t *testing.T) {
 	}
 }
 
-func TestBlockStorageVolumeTypeQuotaConversion_err(t *testing.T) {
+func TestUnitBlockStorageVolumeTypeQuotaConversion_err(t *testing.T) {
 	raw := map[string]interface{}{
 		"foo": 100,
 		"bar": 200,
@@ -40,7 +40,7 @@ func TestBlockStorageVolumeTypeQuotaConversion_err(t *testing.T) {
 	}
 }
 
-func TestBlockStorageVolumeTypeQuotaConversion_err2(t *testing.T) {
+func TestUnitBlockStorageVolumeTypeQuotaConversion_err2(t *testing.T) {
 	raw := map[string]interface{}{
 		"foo": "foo",
 		"bar": "bar",

@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestResourceNetworkingQoSRuleV2BuildID(t *testing.T) {
+func TestUnitResourceNetworkingQoSRuleV2BuildID(t *testing.T) {
 	tests := map[string][]string{
 		"2f22cc5f-3807-4433-9230-0558f9539d94/398b1a1c-8254-4ce9-8fc3-9d1994437e9d": {"2f22cc5f-3807-4433-9230-0558f9539d94", "398b1a1c-8254-4ce9-8fc3-9d1994437e9d"},
 		"ecefc62f-b81b-4745-8711-07fc1095baf0/5010886f-d108-47e0-9f82-d43f27891067": {"ecefc62f-b81b-4745-8711-07fc1095baf0", "5010886f-d108-47e0-9f82-d43f27891067"},
@@ -19,7 +19,7 @@ func TestResourceNetworkingQoSRuleV2BuildID(t *testing.T) {
 	}
 }
 
-func TestResourceNetworkingQoSRuleV2ParseID(t *testing.T) {
+func TestUnitResourceNetworkingQoSRuleV2ParseID(t *testing.T) {
 	tests := map[string][]string{
 		"2f22cc5f-3807-4433-9230-0558f9539d94/398b1a1c-8254-4ce9-8fc3-9d1994437e9d": {"2f22cc5f-3807-4433-9230-0558f9539d94", "398b1a1c-8254-4ce9-8fc3-9d1994437e9d"},
 		"ecefc62f-b81b-4745-8711-07fc1095baf0/5010886f-d108-47e0-9f82-d43f27891067": {"ecefc62f-b81b-4745-8711-07fc1095baf0", "5010886f-d108-47e0-9f82-d43f27891067"},

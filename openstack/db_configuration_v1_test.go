@@ -8,7 +8,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/db/v1/configurations"
 )
 
-func TestExpandDatabaseConfigurationV1Datastore(t *testing.T) {
+func TestUnitExpandDatabaseConfigurationV1Datastore(t *testing.T) {
 	datastore := []interface{}{
 		map[string]interface{}{
 			"version": "foo",
@@ -25,7 +25,7 @@ func TestExpandDatabaseConfigurationV1Datastore(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestExpandDatabaseConfigurationV1Values(t *testing.T) {
+func TestUnitExpandDatabaseConfigurationV1Values(t *testing.T) {
 	values := []interface{}{
 		map[string]interface{}{
 			"name":  "collation_server",

@@ -11,7 +11,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
-func TestRead_Path(t *testing.T) {
+func TestUnitRead_Path(t *testing.T) {
 	isPath := true
 	f, cleanup := testTempFile(t)
 	defer cleanup()
@@ -34,7 +34,7 @@ func TestRead_Path(t *testing.T) {
 	}
 }
 
-func TestRead_TildePath(t *testing.T) {
+func TestUnitRead_TildePath(t *testing.T) {
 	isPath := true
 	home, err := homedir.Dir()
 	if err != nil {
@@ -63,7 +63,7 @@ func TestRead_TildePath(t *testing.T) {
 	}
 }
 
-func TestRead_PathNoPermission(t *testing.T) {
+func TestUnitRead_PathNoPermission(t *testing.T) {
 	// This skip condition is intended to get this test out of the way of users
 	// who are building and testing Terraform from within a Linux-based Docker
 	// container, where it is common for processes to be running as effectively
@@ -98,7 +98,7 @@ func TestRead_PathNoPermission(t *testing.T) {
 	}
 }
 
-func TestRead_Contents(t *testing.T) {
+func TestUnitRead_Contents(t *testing.T) {
 	isPath := false
 	input := "hello"
 
@@ -115,7 +115,7 @@ func TestRead_Contents(t *testing.T) {
 	}
 }
 
-func TestRead_TildeContents(t *testing.T) {
+func TestUnitRead_TildeContents(t *testing.T) {
 	isPath := false
 	input := "~/hello/notafile"
 

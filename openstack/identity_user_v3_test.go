@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestExpandIdentityUserV3MFARules(t *testing.T) {
+func TestUnitExpandIdentityUserV3MFARules(t *testing.T) {
 	mfaRule1 := []interface{}{"password", "totp"}
 	mfaRule2 := []interface{}{"password", "custom-auth-method"}
 
@@ -25,7 +25,7 @@ func TestExpandIdentityUserV3MFARules(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestFlattenIdentityUserV3MFARules(t *testing.T) {
+func TestUnitFlattenIdentityUserV3MFARules(t *testing.T) {
 	mfaRule1 := []interface{}{"password", "totp"}
 	mfaRule2 := []interface{}{"password", "custom-auth-method"}
 

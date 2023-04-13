@@ -18,7 +18,7 @@ func blockStorageExtensionsSchedulerHints() schedulerhints.SchedulerHints {
 	}
 }
 
-func TestFlattenBlockStorageExtensionsSchedulerHints(t *testing.T) {
+func TestUnitFlattenBlockStorageExtensionsSchedulerHints(t *testing.T) {
 	expectedSchedulerHints := map[string]interface{}{
 		"same_host":             []interface{}{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
 		"different_host":        []interface{}{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
@@ -31,7 +31,7 @@ func TestFlattenBlockStorageExtensionsSchedulerHints(t *testing.T) {
 	assert.Equal(t, expectedSchedulerHints, actualSchedulerHints)
 }
 
-func TestBlockStorageExtensionsSchedulerHintsHash(t *testing.T) {
+func TestUnitBlockStorageExtensionsSchedulerHintsHash(t *testing.T) {
 	s := expandBlockStorageExtensionsSchedulerHints(blockStorageExtensionsSchedulerHints())
 
 	expectedHashcode := 1530836638

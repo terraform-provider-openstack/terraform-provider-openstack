@@ -8,7 +8,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 )
 
-func TestExpandNetworkingRouterExternalFixedIPsV2(t *testing.T) {
+func TestUnitExpandNetworkingRouterExternalFixedIPsV2(t *testing.T) {
 	r := resourceNetworkingRouterV2()
 	d := r.TestResourceData()
 	d.SetId("1")
@@ -39,7 +39,7 @@ func TestExpandNetworkingRouterExternalFixedIPsV2(t *testing.T) {
 	assert.ElementsMatch(t, expectedExternalFixedIPs, actualExternalFixedIPs)
 }
 
-func TestFlattenNetworkingRouterExternalFixedIPsV2(t *testing.T) {
+func TestUnitFlattenNetworkingRouterExternalFixedIPsV2(t *testing.T) {
 	externalFixedIPs := []routers.ExternalFixedIP{
 		{
 			SubnetID:  "subnet_1",

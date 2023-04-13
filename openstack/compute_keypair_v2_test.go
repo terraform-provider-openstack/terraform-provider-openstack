@@ -7,7 +7,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 )
 
-func TestComputeKeyPairV2CreateOpts(t *testing.T) {
+func TestUnitComputeKeyPairV2CreateOpts(t *testing.T) {
 	createOpts := ComputeKeyPairV2CreateOpts{
 		keypairs.CreateOpts{
 			Name: "kp_1",

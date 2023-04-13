@@ -8,7 +8,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 )
 
-func TestFlattenIdentityAuthScopeV3Roles(t *testing.T) {
+func TestUnitFlattenIdentityAuthScopeV3Roles(t *testing.T) {
 	roles := []tokens.Role{
 		{
 			ID:   "1",
@@ -35,7 +35,7 @@ func TestFlattenIdentityAuthScopeV3Roles(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestFlattenIdentityAuthScopeV3ServiceCatalog(t *testing.T) {
+func TestUnitFlattenIdentityAuthScopeV3ServiceCatalog(t *testing.T) {
 	cinderEndpoints := []tokens.Endpoint{
 		{
 			ID:        "3",

@@ -11,7 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/db/v1/users"
 )
 
-func TestExpandDatabaseInstanceV1Datastore(t *testing.T) {
+func TestUnitExpandDatabaseInstanceV1Datastore(t *testing.T) {
 	datastore := []interface{}{
 		map[string]interface{}{
 			"version": "foo",
@@ -28,7 +28,7 @@ func TestExpandDatabaseInstanceV1Datastore(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestExpandDatabaseInstanceV1Networks(t *testing.T) {
+func TestUnitExpandDatabaseInstanceV1Networks(t *testing.T) {
 	network := []interface{}{
 		map[string]interface{}{
 			"uuid":        "foobar",
@@ -48,7 +48,7 @@ func TestExpandDatabaseInstanceV1Networks(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestExpandDatabaseInstanceV1Databases(t *testing.T) {
+func TestUnitExpandDatabaseInstanceV1Databases(t *testing.T) {
 	dbs := []interface{}{
 		map[string]interface{}{
 			"name":    "testdb1",
@@ -79,7 +79,7 @@ func TestExpandDatabaseInstanceV1Databases(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestExpandDatabaseInstanceV1Users(t *testing.T) {
+func TestUnitExpandDatabaseInstanceV1Users(t *testing.T) {
 	userList := []interface{}{
 		map[string]interface{}{
 			"name":      "testuser",

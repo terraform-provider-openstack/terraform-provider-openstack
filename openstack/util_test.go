@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestExpandToMapStringString(t *testing.T) {
+func TestUnitExpandToMapStringString(t *testing.T) {
 	metadata := map[string]interface{}{
 		"contents": "junk",
 	}
@@ -19,7 +19,7 @@ func TestExpandToMapStringString(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestExpandToStringSlice(t *testing.T) {
+func TestUnitExpandToStringSlice(t *testing.T) {
 	data := []interface{}{"foo", "bar"}
 
 	expected := []string{"foo", "bar"}
@@ -28,7 +28,7 @@ func TestExpandToStringSlice(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestCompatibleMicroversion(t *testing.T) {
+func TestUnitCompatibleMicroversion(t *testing.T) {
 	actual, err := compatibleMicroversion("min", "2.1.0", "2.5")
 	assert.NotNil(t, err)
 	assert.False(t, actual)
@@ -70,7 +70,7 @@ func TestCompatibleMicroversion(t *testing.T) {
 	assert.True(t, actual)
 }
 
-func TestMapDiffWithNilValues(t *testing.T) {
+func TestUnitMapDiffWithNilValues(t *testing.T) {
 	oldData := map[string]interface{}{"a": "1", "b": "2"}
 	newData := map[string]interface{}{"a": "1", "c": "3"}
 
