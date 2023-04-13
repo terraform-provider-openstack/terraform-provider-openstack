@@ -8,7 +8,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clustertemplates"
 )
 
-func TestExpandContainerInfraV1LabelsMap(t *testing.T) {
+func TestUnitExpandContainerInfraV1LabelsMap(t *testing.T) {
 	labels := map[string]interface{}{
 		"foo": "bar",
 		"bar": "baz",
@@ -24,7 +24,7 @@ func TestExpandContainerInfraV1LabelsMap(t *testing.T) {
 	assert.Equal(t, expectedLabels, actualLabels)
 }
 
-func TestExpandContainerInfraV1LabelsString(t *testing.T) {
+func TestUnitExpandContainerInfraV1LabelsString(t *testing.T) {
 	labels := map[string]interface{}{
 		"foo": "bar",
 		"bar": "baz",
@@ -42,7 +42,7 @@ func TestExpandContainerInfraV1LabelsString(t *testing.T) {
 	}
 }
 
-func TestContainerInfraClusterTemplateV1AppendUpdateOpts(t *testing.T) {
+func TestUnitContainerInfraClusterTemplateV1AppendUpdateOpts(t *testing.T) {
 	actualUpdateOpts := []clustertemplates.UpdateOptsBuilder{}
 
 	expectedUpdateOpts := []clustertemplates.UpdateOptsBuilder{

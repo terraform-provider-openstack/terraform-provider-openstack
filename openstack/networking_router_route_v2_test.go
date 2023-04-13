@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestResourceNetworkingRouterRouteV2BuildID(t *testing.T) {
+func TestUnitResourceNetworkingRouterRouteV2BuildID(t *testing.T) {
 	expected := "d190e837-090a-44f2-adcf-07f9fd392931-route-10.11.12.0/24-192.168.0.111"
 
 	actual := resourceNetworkingRouterRouteV2BuildID(
@@ -18,7 +18,7 @@ func TestResourceNetworkingRouterRouteV2BuildID(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestPesourceNetworkingRouterRouteV2ParseValidID(t *testing.T) {
+func TestUnitPesourceNetworkingRouterRouteV2ParseValidID(t *testing.T) {
 	routeID := "40412709-86e2-411a-a66f-16053188ed46-route-192.168.0.0/24-10.11.12.13"
 
 	expectedRouterID := "40412709-86e2-411a-a66f-16053188ed46"
@@ -33,7 +33,7 @@ func TestPesourceNetworkingRouterRouteV2ParseValidID(t *testing.T) {
 	assert.Equal(t, expectedNextHop, actualNextHop)
 }
 
-func TestPesourceNetworkingRouterRouteV2ParseIDInvalidFirstPart(t *testing.T) {
+func TestUnitPesourceNetworkingRouterRouteV2ParseIDInvalidFirstPart(t *testing.T) {
 	routeID := "123-router"
 
 	expectedRouterID := ""
@@ -48,7 +48,7 @@ func TestPesourceNetworkingRouterRouteV2ParseIDInvalidFirstPart(t *testing.T) {
 	assert.Equal(t, expectedNextHop, actualNextHop)
 }
 
-func TestPesourceNetworkingRouterRouteV2ParseIDInvalidLastPart(t *testing.T) {
+func TestUnitPesourceNetworkingRouterRouteV2ParseIDInvalidLastPart(t *testing.T) {
 	routeID := "123-router-bad"
 
 	expectedRouterID := ""

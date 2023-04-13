@@ -10,7 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
 
-func TestNetworkingSubnetV2AllocationPools(t *testing.T) {
+func TestUnitNetworkingSubnetV2AllocationPools(t *testing.T) {
 	allocationPools := []subnets.AllocationPool{
 		{
 			Start: "192.168.0.2",
@@ -38,7 +38,7 @@ func TestNetworkingSubnetV2AllocationPools(t *testing.T) {
 	assert.ElementsMatch(t, expected, actual)
 }
 
-func TestExpandNetworkingSubnetV2AllocationPools(t *testing.T) {
+func TestUnitExpandNetworkingSubnetV2AllocationPools(t *testing.T) {
 	r := resourceNetworkingSubnetV2()
 	d := r.TestResourceData()
 	d.SetId("1")
@@ -72,7 +72,7 @@ func TestExpandNetworkingSubnetV2AllocationPools(t *testing.T) {
 	assert.ElementsMatch(t, expected, actual)
 }
 
-func TestExpandNetworkingSubnetV2HostRoutes(t *testing.T) {
+func TestUnitExpandNetworkingSubnetV2HostRoutes(t *testing.T) {
 	r := resourceNetworkingSubnetV2()
 	d := r.TestResourceData()
 	d.SetId("1")
@@ -106,7 +106,7 @@ func TestExpandNetworkingSubnetV2HostRoutes(t *testing.T) {
 	assert.ElementsMatch(t, expected, actual)
 }
 
-func TestNetworkingSubnetV2AllocationPoolsMatch(t *testing.T) {
+func TestUnitNetworkingSubnetV2AllocationPoolsMatch(t *testing.T) {
 	oldPools := []interface{}{
 		map[string]interface{}{
 			"start": "192.168.199.2",
@@ -206,7 +206,7 @@ func TestNetworkingSubnetV2AllocationPoolsMatch(t *testing.T) {
 	assert.Equal(t, same, false)
 }
 
-func TestNetworkingSubnetV2DNSNameserverAreUnique(t *testing.T) {
+func TestUnitNetworkingSubnetV2DNSNameserverAreUnique(t *testing.T) {
 	tableTest := []struct {
 		input []interface{}
 		err   error

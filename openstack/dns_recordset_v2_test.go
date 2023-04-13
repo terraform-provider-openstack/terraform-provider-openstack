@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDNSRecordSetV2ParseID(t *testing.T) {
+func TestUnitDNSRecordSetV2ParseID(t *testing.T) {
 	id := "foo/bar"
 	expectedZoneID := "foo"
 	expectedRecordSetID := "bar"
@@ -17,7 +17,7 @@ func TestDNSRecordSetV2ParseID(t *testing.T) {
 	assert.Equal(t, expectedRecordSetID, actualRecordSetID)
 }
 
-func TestDNSRecordSetV2RecordsStateFunc(t *testing.T) {
+func TestUnitDNSRecordSetV2RecordsStateFunc(t *testing.T) {
 	data := []interface{}{"foo", "[bar]", "baz"}
 	expected := []string{"foo", "bar", "baz"}
 

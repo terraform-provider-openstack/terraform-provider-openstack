@@ -9,7 +9,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider"
 )
 
-func TestExpandNetworkingNetworkSegmentsV2(t *testing.T) {
+func TestUnitExpandNetworkingNetworkSegmentsV2(t *testing.T) {
 	r := resourceNetworkingNetworkV2()
 	d := r.TestResourceData()
 	d.SetId("1")
