@@ -50,6 +50,7 @@ func resourceComputeKeypairV2() *schema.Resource {
 			"private_key": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Sensitive: true,
 			},
 
 			"fingerprint": {
