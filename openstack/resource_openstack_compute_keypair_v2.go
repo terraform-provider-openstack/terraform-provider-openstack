@@ -48,8 +48,8 @@ func resourceComputeKeypairV2() *schema.Resource {
 
 			// computed-only
 			"private_key": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
 				Sensitive: true,
 			},
 
