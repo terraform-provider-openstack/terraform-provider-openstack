@@ -172,14 +172,14 @@ func resourceComputeInstanceV2() *schema.Resource {
 							Optional:     true,
 							ForceNew:     true,
 							Computed:     true,
-							ValidateFunc: validation.IsIPAddress,
+							ValidateFunc: validation.IsIPv4Address,
 						},
 						"fixed_ip_v6": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ForceNew:     true,
 							Computed:     true,
-							ValidateFunc: validation.IsIPAddress,
+							ValidateFunc: validation.IsIPv6Address,
 						},
 						"floating_ip": {
 							Type:       schema.TypeString,
@@ -220,14 +220,14 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Computed:     true,
 				Optional:     true,
 				ForceNew:     false,
-				ValidateFunc: validation.IsIPAddress,
+				ValidateFunc: validation.IsIPv4Address,
 			},
 			"access_ip_v6": {
 				Type:         schema.TypeString,
 				Computed:     true,
 				Optional:     true,
 				ForceNew:     false,
-				ValidateFunc: validation.IsIPAddress,
+				ValidateFunc: validation.IsIPv6Address,
 			},
 			"key_pair": {
 				Type:     schema.TypeString,
