@@ -37,8 +37,8 @@ The following arguments are supported:
     the `region` argument of the provider is used. Changing this creates a new
     cluster.
 
-* `name` - (Required) The name of the cluster. Changing this updates the name
-    of the existing cluster template.
+* `name` - (Required) The name of the cluster. Changing this creates a new
+    cluster.
 
 * `project_id` - (Optional) The project of the cluster. Required if admin wants
     to create a cluster in another project. Changing this creates a new
@@ -80,8 +80,7 @@ The following arguments are supported:
 * `master_count` - (Optional) The number of master nodes for the cluster.
     Changing this creates a new cluster.
 
-* `node_count` - (Optional) The number of nodes for the cluster. Changing this
-    creates a new cluster.
+* `node_count` - (Optional) The number of nodes for the cluster.
     
 * `fixed_network` - (Optional) The fixed network that will be attached to the
     cluster. Changing this creates a new cluster.
