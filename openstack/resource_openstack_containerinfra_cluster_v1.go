@@ -206,6 +206,13 @@ func resourceContainerInfraClusterV1() *schema.Resource {
 				Computed: true,
 			},
 
+			"master_lb_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
+
 			"kubeconfig": {
 				Type:      schema.TypeMap,
 				Computed:  true,
@@ -245,6 +252,7 @@ func resourceContainerInfraClusterV1Create(ctx context.Context, d *schema.Resour
 
 	// Get boolean parameters that will be passed by reference.
 	floatingIPEnabled := d.Get("floating_ip_enabled").(bool)
+	masterLBEnabled := d.Get("master_lb_enabled").(bool)
 
 	createOpts := clusters.CreateOpts{
 		ClusterTemplateID: d.Get("cluster_template_id").(string),
@@ -257,6 +265,7 @@ func resourceContainerInfraClusterV1Create(ctx context.Context, d *schema.Resour
 		FixedNetwork:      d.Get("fixed_network").(string),
 		FixedSubnet:       d.Get("fixed_subnet").(string),
 		FloatingIPEnabled: &floatingIPEnabled,
+		MasterLBEnabled:   &masterLBEnabled,
 	}
 
 	// Set int parameters that will be passed by reference.
@@ -393,6 +402,8 @@ func resourceContainerInfraClusterV1Read(_ context.Context, d *schema.ResourceDa
 	d.Set("fixed_network", s.FixedNetwork)
 	d.Set("fixed_subnet", s.FixedSubnet)
 	d.Set("floating_ip_enabled", s.FloatingIPEnabled)
+	d.Set("master_lb_enabled", s.MasterLBEnabled)
+	
 
 	kubeconfig, err := flattenContainerInfraV1Kubeconfig(d, containerInfraClient)
 	if err != nil {
