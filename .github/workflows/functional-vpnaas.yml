@@ -10,7 +10,7 @@ on:
       - 'CHANGELOG.md'
       - 'scripts/*'
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 */3 * *'
 jobs:
   functional-vpnaas:
     strategy:
@@ -33,7 +33,7 @@ jobs:
             openstack_version: "stable/xena"
             ubuntu_version: "20.04"
     runs-on: ubuntu-${{ matrix.ubuntu_version }}
-    name: Deploy OpenStack ${{ matrix.name }} with Neutron and run vpnaas acceptance tests
+    name: vpnaas on OpenStack ${{ matrix.name }} with Neutron and run vpnaas acceptance tests
     steps:
       - name: Checkout TPO
         uses: actions/checkout@v3
