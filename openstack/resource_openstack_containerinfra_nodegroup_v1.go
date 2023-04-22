@@ -42,7 +42,7 @@ func resourceContainerInfraNodeGroupV1() *schema.Resource {
 			"cluster_id": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: false,
+				ForceNew: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
