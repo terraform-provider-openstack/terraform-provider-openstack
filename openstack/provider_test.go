@@ -17,7 +17,6 @@ import (
 )
 
 var (
-	osBranch                     = os.Getenv("OS_BRANCH")
 	osDBEnvironment              = os.Getenv("OS_DB_ENVIRONMENT")
 	osDBDatastoreVersion         = os.Getenv("OS_DB_DATASTORE_VERSION")
 	osDBDatastoreType            = os.Getenv("OS_DB_DATASTORE_TYPE")
@@ -262,25 +261,50 @@ func testAccPreCheckHypervisor(t *testing.T) {
 	}
 }
 
-// SkipReleasesBelow will have the test be skipped on releases below a certain
+// testAccSkipReleasesBelow will have the test be skipped on releases below a certain
 // one. Releases are named such as 'stable/mitaka', master, etc.
 func testAccSkipReleasesBelow(t *testing.T, release string) {
-	testAccPreCheckRequiredEnvVars(t)
+	currentBranch := os.Getenv("OS_BRANCH")
 
 	if IsReleasesBelow(t, release) {
-		t.Skipf("this is not supported below %s, testing in %s", release, osBranch)
+		t.Skipf("this is not supported below %s, testing in %s", release, currentBranch)
 	}
 }
 
 // IsReleasesBelow will return true on releases below a certain
 // one. Releases are named such as 'stable/mitaka', master, etc.
 func IsReleasesBelow(t *testing.T, release string) bool {
-	testAccPreCheckRequiredEnvVars(t)
+	currentBranch := os.Getenv("OS_BRANCH")
 
-	if osBranch != "master" && osBranch < release {
+	if currentBranch != "master" && currentBranch < release {
 		return true
 	}
-	t.Logf("Target release %s is above the current branch %s", release, osBranch)
+	t.Logf("Target release %s is above the current branch %s", release, currentBranch)
+	return false
+}
+
+// testAccSkipReleasesAbove will have the test be skipped on releases above a certain
+// one. The test is always skipped on master release. Releases are named such
+// as 'stable/mitaka', master, etc.
+func testAccSkipReleasesAbove(t *testing.T, release string) {
+	currentBranch := os.Getenv("OS_BRANCH")
+
+	if IsReleasesAbove(t, release) {
+		t.Skipf("this is not supported above %s, testing in %s", release, currentBranch)
+	}
+}
+
+// IsReleasesAbove will return true on releases above a certain
+// one. The result is always true on master release. Releases are named such
+// as 'stable/mitaka', master, etc.
+func IsReleasesAbove(t *testing.T, release string) bool {
+	currentBranch := os.Getenv("OS_BRANCH")
+
+	// Assume master is always too new
+	if currentBranch == "master" || currentBranch > release {
+		return true
+	}
+	t.Logf("Target release %s is below the current branch %s", release, currentBranch)
 	return false
 }
 

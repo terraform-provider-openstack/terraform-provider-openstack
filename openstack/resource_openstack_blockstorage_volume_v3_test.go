@@ -105,6 +105,7 @@ func TestAccBlockStorageV3Volume_image_multiattach(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
+			testAccSkipReleasesAbove(t, "stable/wallaby")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
