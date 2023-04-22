@@ -198,7 +198,7 @@ func TestAccNetworkingV2Trunk_tags(t *testing.T) {
 //	})
 //}
 
-func TestAccNetworkingV2Trunk_computeInstance(t *testing.T) {
+func TestAccNetworkingV2Trunk_Instance(t *testing.T) {
 	var instance1 servers.Server
 	var parentPort1, subport1 ports.Port
 	var trunk1 trunks.Trunk
