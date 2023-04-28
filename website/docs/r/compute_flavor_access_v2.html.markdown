@@ -64,5 +64,5 @@ This resource can be imported by specifying all two arguments, separated
 by a forward slash:
 
 ```
-$ terraform import openstack_compute_flavor_access_v2.access_1 <flavor_id>/<tenant_id>
+$ terraform import openstack_compute_flavor_access_v2.access_1 flavor_id/tenant_id
 ```
