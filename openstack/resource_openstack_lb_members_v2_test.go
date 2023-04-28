@@ -39,7 +39,6 @@ func TestAccLBV2Members_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 			testAccPreCheckUseOctavia(t)
-			testAccSkipReleasesBelow(t, "stable/ussuri")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckLBV2MembersDestroy,
