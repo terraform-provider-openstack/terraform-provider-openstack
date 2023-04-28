@@ -276,7 +276,7 @@ func testAccSkipReleasesBelow(t *testing.T, release string) {
 func IsReleasesBelow(t *testing.T, release string) bool {
 	currentBranch := os.Getenv("OS_BRANCH")
 
-	if currentBranch != "master" && currentBranch < release {
+	if SetReleaseNumber(t, currentBranch) < SetReleaseNumber(t, release) {
 		return true
 	}
 	t.Logf("Target release %s is above the current branch %s", release, currentBranch)
@@ -301,11 +301,33 @@ func IsReleasesAbove(t *testing.T, release string) bool {
 	currentBranch := os.Getenv("OS_BRANCH")
 
 	// Assume master is always too new
-	if currentBranch == "master" || currentBranch > release {
+	if SetReleaseNumber(t, currentBranch) > SetReleaseNumber(t, release) {
 		return true
 	}
 	t.Logf("Target release %s is below the current branch %s", release, currentBranch)
 	return false
+}
+
+// SetReleaseNumber returns a number based on the release.
+// This is to allow comparing between releases as with the
+// 2023.1(antelope) release simple string comparisons are
+// not possible.
+func SetReleaseNumber(t *testing.T, release string) int {
+	switch release {
+	case "stable/xena":
+		return 1
+	case "stable/yoga":
+		return 2
+	case "stable/zed":
+		return 3
+	case "stable/2023.1":
+		return 4
+	case "master":
+		return 5
+	default:
+		t.Logf("Release %s is not within the known/expected releases", release)
+		return 0
+	}
 }
 
 func TestUnitProvider(t *testing.T) {
