@@ -16,7 +16,6 @@ func TestAccLBQuotaV2_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckLB(t)
 			testAccPreCheckAdminOnly(t)
-			testAccSkipReleasesBelow(t, "stable/victoria")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckIdentityV3ProjectDestroy,
