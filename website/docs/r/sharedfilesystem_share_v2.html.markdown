@@ -111,5 +111,5 @@ The following arguments are supported:
 This resource can be imported by specifying the ID of the share:
 
 ```
-$ terraform import openstack_sharedfilesystem_share_v2.share_1 <id>
+$ terraform import openstack_sharedfilesystem_share_v2.share_1 id
 ```

@@ -70,5 +70,5 @@ The following attributes are exported:
 This resource can be imported by specifying the transferAccept ID:
 
 ```
-$ terraform import openstack_dns_transfer_accept_v2.accept_1 <accept_id>
+$ terraform import openstack_dns_transfer_accept_v2.accept_1 accept_id
 ```

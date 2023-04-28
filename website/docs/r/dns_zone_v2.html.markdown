@@ -83,6 +83,6 @@ The following attributes are exported:
 This resource can be imported by specifying the zone ID with optional project ID:
 
 ```
-$ terraform import openstack_dns_zone_v2.zone_1 <zone_id>
-$ terraform import openstack_dns_zone_v2.zone_1 <zone_id>:<project_id>
+$ terraform import openstack_dns_zone_v2.zone_1 zone_id
+$ terraform import openstack_dns_zone_v2.zone_1 zone_id/project_id
 ```
