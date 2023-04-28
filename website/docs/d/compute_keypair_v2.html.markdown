@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute / Nova"
 layout: "openstack"
 page_title: "OpenStack: openstack_compute_keypair_v2"
 sidebar_current: "docs-openstack-datasource-compute-keypair-v2"

@@ -1,4 +1,5 @@
 ---
+subcategory: "Networking / Neutron"
 layout: "openstack"
 page_title: "OpenStack: openstack_fw_rule_v1"
 sidebar_current: "docs-openstack-resource-fw-rule-v1"

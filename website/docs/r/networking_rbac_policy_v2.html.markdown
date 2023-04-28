@@ -1,4 +1,5 @@
 ---
+subcategory: "Networking / Neutron"
 layout: "openstack"
 page_title: "OpenStack: openstack_networking_rbac_policy_v2"
 sidebar_current: "docs-openstack-resource-networking-rbac-policy-v2"

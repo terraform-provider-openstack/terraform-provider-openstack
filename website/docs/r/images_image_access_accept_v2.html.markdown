@@ -1,4 +1,5 @@
 ---
+subcategory: "Images / Glance"
 layout: "openstack"
 page_title: "OpenStack: openstack_images_image_access_accept_v2"
 sidebar_current: "docs-openstack-resource-images-image-access-accept-v2"

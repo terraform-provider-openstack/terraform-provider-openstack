@@ -1,4 +1,5 @@
 ---
+subcategory: "Shared Filesystem / Manila"
 layout: "openstack"
 page_title: "OpenStack: openstack_sharedfilesystem_availability_zones_v2"
 sidebar_current: "docs-openstack-datasource-sharedfilesystem-availability-zones-v2"

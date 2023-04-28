@@ -1,4 +1,5 @@
 ---
+subcategory: "Block Storage / Cinder"
 layout: "openstack"
 page_title: "OpenStack: openstack_blockstorage_quotaset_v2"
 sidebar_current: "docs-openstack-resource-blockstorage-quotaset-v2"

@@ -1,4 +1,5 @@
 ---
+subcategory: "Images / Glance"
 layout: "openstack"
 page_title: "OpenStack: openstack_images_image_v2"
 sidebar_current: "docs-openstack-datasource-images-image-v2"
