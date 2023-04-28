@@ -174,5 +174,5 @@ Some attributes can't be imported :
 So you'll have to `terraform plan` and `terraform apply` after the import to fix those missing attributes.
 
 ```
-$ terraform import openstack_objectstorage_container_v1.container_1 <name>
+$ terraform import openstack_objectstorage_container_v1.container_1 container_name
 ```

@@ -731,7 +731,7 @@ resource "openstack_compute_instance_v2" "basic_instance" {
 ```
 Then you execute
 ```
-terraform import openstack_compute_instance_v2.basic_instance <instance_id>
+terraform import openstack_compute_instance_v2.basic_instance instance_id
 ```
 
 ### Importing an instance with multiple emphemeral disks
@@ -830,10 +830,10 @@ To import the instance outlined in the above configuration
 do the following:
 
 ```
-terraform import openstack_compute_instance_v2.instance_2 <instance_id>
-import openstack_blockstorage_volume_v2.volume_1 <volume_id>
+terraform import openstack_compute_instance_v2.instance_2 instance_id
+import openstack_blockstorage_volume_v2.volume_1 volume_id
 terraform import openstack_compute_volume_attach_v2.va_1
-<instance_id>/<volume_id>
+instance_id/volume_id
 ```
 
 * A note on block storage volumes, the importer does not read

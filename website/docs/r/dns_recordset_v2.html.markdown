@@ -89,5 +89,5 @@ This resource can be imported by specifying the zone ID and recordset ID,
 separated by a forward slash.
 
 ```
-$ terraform import openstack_dns_recordset_v2.recordset_1 <zone_id>/<recordset_id>
+$ terraform import openstack_dns_recordset_v2.recordset_1 zone_id/recordset_id
 ```

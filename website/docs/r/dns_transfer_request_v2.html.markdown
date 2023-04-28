@@ -68,5 +68,5 @@ The following attributes are exported:
 This resource can be imported by specifying the transferRequest ID:
 
 ```
-$ terraform import openstack_dns_transfer_request_v2.request_1 <request_id>
+$ terraform import openstack_dns_transfer_request_v2.request_1 request_id
 ```
