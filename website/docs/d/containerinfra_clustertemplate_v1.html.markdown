@@ -1,4 +1,5 @@
 ---
+subcategory: "Container Infra / Magnum"
 layout: "openstack"
 page_title: "OpenStack: openstack_containerinfra_clustertemplate_v1"
 sidebar_current: "docs-openstack-datasource-containerinfra-clustertemplate-v1"

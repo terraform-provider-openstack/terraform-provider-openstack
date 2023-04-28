@@ -1,4 +1,5 @@
 ---
+subcategory: "Databases / Trove"
 layout: "openstack"
 page_title: "OpenStack: openstack_db_configuration_v1"
 sidebar_current: "docs-openstack-resource-db-configuration-v1"

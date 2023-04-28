@@ -1,4 +1,5 @@
 ---
+subcategory: "Block Storage / Cinder"
 layout: "openstack"
 page_title: "OpenStack: openstack_blockstorage_snapshot_v2"
 sidebar_current: "docs-openstack-datasource-blockstorage-snapshot-v2"

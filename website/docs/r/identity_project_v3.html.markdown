@@ -1,4 +1,5 @@
 ---
+subcategory: "Identity / Keystone"
 layout: "openstack"
 page_title: "OpenStack: openstack_identity_project_v3"
 sidebar_current: "docs-openstack-resource-identity-project-v3"

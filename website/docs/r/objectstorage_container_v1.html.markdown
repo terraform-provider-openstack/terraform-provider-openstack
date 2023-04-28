@@ -1,4 +1,5 @@
 ---
+subcategory: "Object Storage / Swift"
 layout: "openstack"
 page_title: "OpenStack: openstack_objectstorage_container_v1"
 sidebar_current: "docs-openstack-resource-objectstorage-container-v1"

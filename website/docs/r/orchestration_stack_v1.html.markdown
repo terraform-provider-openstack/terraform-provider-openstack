@@ -1,4 +1,5 @@
 ---
+subcategory: "Orchestration / Heat"
 layout: "openstack"
 page_title: "OpenStack: openstack_orchestration_stack_v1"
 sidebar_current: "docs-openstack-resource-orchestration-stack-v1"

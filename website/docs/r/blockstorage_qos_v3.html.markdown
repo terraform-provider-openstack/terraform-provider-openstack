@@ -1,4 +1,5 @@
 ---
+subcategory: "Block Storage / Cinder"
 layout: "openstack"
 page_title: "OpenStack: openstack_blockstorage_qos_v3"
 sidebar_current: "docs-openstack-resource-blockstorage-qos-v3"

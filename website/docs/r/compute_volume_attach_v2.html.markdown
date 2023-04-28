@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute / Nova"
 layout: "openstack"
 page_title: "OpenStack: openstack_compute_volume_attach_v2"
 sidebar_current: "docs-openstack-resource-compute-volume-attach-v2"

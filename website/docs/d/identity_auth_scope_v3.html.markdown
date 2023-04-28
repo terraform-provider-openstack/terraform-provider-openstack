@@ -1,4 +1,5 @@
 ---
+subcategory: "Identity / Keystone"
 layout: "openstack"
 page_title: "OpenStack: openstack_identity_auth_scope_v3"
 sidebar_current: "docs-openstack-datasource-identity-auth-scope-v3"

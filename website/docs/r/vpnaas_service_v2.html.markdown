@@ -1,4 +1,5 @@
 ---
+subcategory: "Networking / Neutron"
 layout: "openstack"
 page_title: "OpenStack: openstack_vpnaas_service_v2"
 sidebar_current: "docs-openstack-resource-vpnaas-service-v2"

@@ -1,4 +1,5 @@
 ---
+subcategory: "Load Balancing as a Service / Octavia"
 layout: "openstack"
 page_title: "OpenStack: openstack_lb_l7policy_v2"
 sidebar_current: "docs-openstack-resource-lb-l7policy-v2"

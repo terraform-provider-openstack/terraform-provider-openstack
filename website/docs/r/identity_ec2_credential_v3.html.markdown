@@ -1,4 +1,5 @@
 ---
+subcategory: "Identity / Keystone"
 layout: "openstack"
 page_title: "OpenStack: openstack_identity_ec2_credential_v3"
 sidebar_current: "docs-openstack-resource-identity-ec2-credential-v3"

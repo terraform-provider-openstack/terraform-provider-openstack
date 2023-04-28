@@ -1,4 +1,5 @@
 ---
+subcategory: "Container Infra / Magnum"
 layout: "openstack"
 page_title: "OpenStack: openstack_containerinfra_nodegroup_v1"
 sidebar_current: "docs-openstack-datasource-containerinfra-nodegroup-v1"

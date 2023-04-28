@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute / Nova"
 layout: "openstack"
 page_title: "OpenStack: openstack_compute_flavor_access_v2"
 sidebar_current: "docs-openstack-resource-compute-flavor-access-v2"
