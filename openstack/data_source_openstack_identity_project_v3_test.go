@@ -45,6 +45,42 @@ func TestAccOpenStackIdentityV3ProjectDataSource_basic(t *testing.T) {
 	})
 }
 
+func TestAccOpenStackIdentityV3ProjectDataSource_withProjectID(t *testing.T) {
+	projectName := fmt.Sprintf("tf_test_%s", acctest.RandString(5))
+	projectDescription := acctest.RandString(20)
+	projectTag1 := acctest.RandString(20)
+	projectTag2 := acctest.RandString(20)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccOpenStackIdentityProjectV3DataSourceProject(projectName, projectDescription, projectTag1, projectTag2),
+			},
+			{
+				Config: testAccOpenStackIdentityProjectV3DataSourceWithProjectID(projectName, projectDescription, projectTag1, projectTag2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3ProjectDataSourceID("data.openstack_identity_project_v3.project_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_identity_project_v3.project_1", "name", projectName),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_project_v3.project_1", "description", projectDescription),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_project_v3.project_1", "enabled", "true"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_project_v3.project_1", "is_domain", "false"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_project_v3.project_1", "tags.#", "2"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckIdentityV3ProjectDataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -76,6 +112,16 @@ func testAccOpenStackIdentityProjectV3DataSourceBasic(name, description, tag1, t
 
 	data "openstack_identity_project_v3" "project_1" {
       name = "${openstack_identity_project_v3.project_1.name}"
+	}
+`, testAccOpenStackIdentityProjectV3DataSourceProject(name, description, tag1, tag2))
+}
+
+func testAccOpenStackIdentityProjectV3DataSourceWithProjectID(name, description, tag1, tag2 string) string {
+	return fmt.Sprintf(`
+	%s
+
+	data "openstack_identity_project_v3" "project_1" {
+      project_id = "${openstack_identity_project_v3.project_1.id}"
 	}
 `, testAccOpenStackIdentityProjectV3DataSourceProject(name, description, tag1, tag2))
 }
