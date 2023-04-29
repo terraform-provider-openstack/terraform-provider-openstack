@@ -37,6 +37,9 @@ The following arguments are supported:
 
 * `tags` - (Optional) Tags for the project.
 
+* `project_id` - (Optional) The id of the project. Conflicts with any of the
+  above arguments.
+
 ## Attributes Reference
 
 `id` is set to the ID of the found project. In addition, the following attributes
@@ -49,4 +52,5 @@ are exported:
 * `name` - See Argument Reference above.
 * `parent_id` - See Argument Reference above.
 * `tags` - See Argument Reference above.
+* `project_id` - See Argument Reference above.
 * `region` - The region the project is located in.

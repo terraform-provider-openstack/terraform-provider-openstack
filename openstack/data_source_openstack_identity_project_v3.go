@@ -62,6 +62,15 @@ func dataSourceIdentityProjectV3() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
+
+			"project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				ConflictsWith: []string{
+					"name", "domain_id", "description", "enabled", "is_domain", "parent_id", "tags",
+				},
+			},
 		},
 	}
 }
@@ -85,43 +94,50 @@ func dataSourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
-	enabled := d.Get("enabled").(bool)
-	isDomain := d.Get("is_domain").(bool)
-	listOpts := projects.ListOpts{
-		DomainID: d.Get("domain_id").(string),
-		Enabled:  &enabled,
-		IsDomain: &isDomain,
-		Name:     d.Get("name").(string),
-		ParentID: d.Get("parent_id").(string),
-	}
-
-	var project projects.Project
 	var allProjects []projects.Project
-	allPages, err := projects.List(identityClient, listOpts).AllPages()
-	if err != nil {
-		userID := config.UserID
-		log.Printf("[DEBUG] Will try to find project with users.ListProjects as I am unable to query openstack_identity_project_v3: %s. Trying listing userprojects.", err)
-		if userID == "" {
-			tokenInfo, tokenErr := getTokenInfo(identityClient)
-			if tokenErr != nil {
-				return diag.Errorf("Error when getting token info: %s", err)
-			}
-			userID = tokenInfo.userID
-		}
-		// Search for all the projects using the users.ListProjects API call and filter them
-		allPages, err = users.ListProjects(identityClient, userID).AllPages()
+	if v := d.Get("project_id").(string); v != "" {
+		project, err := projects.Get(identityClient, v).Extract()
 		if err != nil {
 			return diag.Errorf("Unable to query openstack_identity_project_v3: %s", err)
 		}
-		allProjects, err = projects.ExtractProjects(allPages)
-		if err != nil {
-			return diag.Errorf("Unable to retrieve openstack_identity_project_v3: %s", err)
-		}
-		allProjects = filterProjects(allProjects, listOpts)
+		allProjects = append(allProjects, *project)
 	} else {
-		allProjects, err = projects.ExtractProjects(allPages)
+		enabled := d.Get("enabled").(bool)
+		isDomain := d.Get("is_domain").(bool)
+		listOpts := projects.ListOpts{
+			DomainID: d.Get("domain_id").(string),
+			Enabled:  &enabled,
+			IsDomain: &isDomain,
+			Name:     d.Get("name").(string),
+			ParentID: d.Get("parent_id").(string),
+		}
+
+		allPages, err := projects.List(identityClient, listOpts).AllPages()
 		if err != nil {
-			return diag.Errorf("Unable to retrieve openstack_identity_project_v3: %s", err)
+			userID := config.UserID
+			log.Printf("[DEBUG] Will try to find project with users.ListProjects as I am unable to query openstack_identity_project_v3: %s. Trying listing userprojects.", err)
+			if userID == "" {
+				tokenInfo, tokenErr := getTokenInfo(identityClient)
+				if tokenErr != nil {
+					return diag.Errorf("Error when getting token info: %s", err)
+				}
+				userID = tokenInfo.userID
+			}
+			// Search for all the projects using the users.ListProjects API call and filter them
+			allPages, err = users.ListProjects(identityClient, userID).AllPages()
+			if err != nil {
+				return diag.Errorf("Unable to query openstack_identity_project_v3: %s", err)
+			}
+			allProjects, err = projects.ExtractProjects(allPages)
+			if err != nil {
+				return diag.Errorf("Unable to retrieve openstack_identity_project_v3: %s", err)
+			}
+			allProjects = filterProjects(allProjects, listOpts)
+		} else {
+			allProjects, err = projects.ExtractProjects(allPages)
+			if err != nil {
+				return diag.Errorf("Unable to retrieve openstack_identity_project_v3: %s", err)
+			}
 		}
 	}
 
@@ -134,9 +150,7 @@ func dataSourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData
 		return diag.Errorf("Your openstack_identity_project_v3 query returned more than one result %#v", allProjects)
 	}
 
-	project = allProjects[0]
-
-	dataSourceIdentityProjectV3Attributes(d, &project)
+	dataSourceIdentityProjectV3Attributes(d, &allProjects[0])
 
 	return nil
 }
@@ -146,6 +160,7 @@ func dataSourceIdentityProjectV3Attributes(d *schema.ResourceData, project *proj
 	log.Printf("[DEBUG] openstack_identity_project_v3 details: %#v", project)
 
 	d.SetId(project.ID)
+	d.Set("project_id", project.ID)
 	d.Set("is_domain", project.IsDomain)
 	d.Set("description", project.Description)
 	d.Set("domain_id", project.DomainID)
