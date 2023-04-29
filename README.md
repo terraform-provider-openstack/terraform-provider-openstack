@@ -58,6 +58,10 @@ to publish the provider in the Terraform Registry.
 Releases will as drafts. Once marked as published on the GitHub Releases page,
 they will become available via the Terraform Registry.
 
+Before releasing, a PR updating the changelog should be made to trigger the CI 
+for all services and ensure that everything is OK. Moreover, update the example
+on `website/docs/index.html.markdown` to point to the new version.
+
 Thank You
 ---------
 
