@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
@@ -42,16 +43,25 @@ func resourceIPSecPolicyV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"sha1", "sha256", "sha384", "sha512",
+				}, false),
 			},
 			"encapsulation_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"tunnel", "transport",
+				}, false),
 			},
 			"pfs": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"group2", "group5", "group14",
+				}, false),
 			},
 			"encryption_algorithm": {
 				Type:     schema.TypeString,
@@ -66,6 +76,9 @@ func resourceIPSecPolicyV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"esp", "ah", "ah-esp",
+				}, false),
 			},
 
 			"tenant_id": {
