@@ -46,10 +46,10 @@ The following arguments are supported:
 * `encryption_algorithm` - (Optional) The encryption algorithm. Valid values are 3des, aes-128, aes-192 and so on.
     The default value is aes-128. Changing this updates the existing policy.
 
-* `pfs` - (Optional) The perfect forward secrecy mode. Valid values are Group2, Group5 and Group14. Default is Group5.
-    Changing this updates the existing policy.
+* `pfs` - (Optional) The perfect forward secrecy mode. Valid values are group2, group5 and group14. Default 
+    is group5. Changing this updates the existing policy.
 
-* `transform_protocol` - (Optional) The transform protocol. Valid values are ESP, AH and AH-ESP.
+* `transform_protocol` - (Optional) The transform protocol. Valid values are esp, ah and ah-esp.
     Changing this updates the existing policy. Default is ESP.
 
 * `lifetime` - (Optional) The lifetime of the security association. Consists of Unit and Value.
