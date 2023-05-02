@@ -7,6 +7,7 @@ pushd $DEVSTACK_PATH
 source openrc admin admin
 openstack flavor create m1.acctest --id 99 --ram 512 --disk 10 --vcpu 1 --ephemeral 10
 openstack flavor create m1.resize --id 98 --ram 512 --disk 11 --vcpu 1 --ephemeral 10
+openstack flavor create m1.trove --id 97 --ram 1024 --disk 20 --vcpu 1
 openstack keypair create magnum
 
 _NETWORK_ID=$(openstack network show private -c id -f value)
@@ -20,6 +21,7 @@ _MAGNUM_IMAGE_ID=$(openstack image list --format value -c Name -c ID | grep core
 if [ -z "$_MAGNUM_IMAGE_ID" ]; then
         _MAGNUM_IMAGE_ID=$(openstack image list --format value -c Name -c ID | grep -i atomic | cut -d ' ' -f 1)
 fi
+mysql_version=$(openstack datastore version list ${OS_DB_DATASTORE_TYPE} -f value -c Name --sort-column Name |head -n 1)
 
 if [ -n "${OS_LB_ENVIRONMENT}" ]; then
         LB_FP_ID=`openstack loadbalancer flavorprofile create --provider amphora --flavor-data '{"loadbalancer_topology": "SINGLE"}' --name lb.acctest -f value -c id`
@@ -40,6 +42,8 @@ echo export OS_MAGNUM_IMAGE_ID="$_MAGNUM_IMAGE_ID" >> openrc
 echo export OS_MAGNUM_IMAGE="$_MAGNUM_IMAGE_ID" >> openrc
 echo export OS_MAGNUM_FLAVOR=99 >> openrc
 echo export OS_MAGNUM_KEYPAIR=magnum >> openrc
+echo export OS_DB_DATASTORE_TYPE=mysql >> openrc
+echo export OS_DB_DATASTORE_VERSION=${mysql_version} >> openrc
 
 source openrc $1 $1
 popd
