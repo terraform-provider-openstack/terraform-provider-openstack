@@ -1,3 +1,21 @@
+## 1.52.0 (not released yet)
+
+NOTES
+
+* Documentation has been updated with sub-categories for easier browsing
+
+IMPROVEMENTS
+
+* Add validators to `openstack_vpnaas_ipsec_policy_v2` ([#1558](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1558))
+* Add `user_id` to `data_source_openstack_compute_keypair_v2` ([#1554](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1554))
+* Add `project_id` to `data_source_openstack_identity_project_v3` ([#1559](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1559))
+* `private_key` on `openstack_compute_keypair_v2` marked as sensitive ([#1548](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1548))
+
+BUG FIXES
+
+* Fixed `openstack_containerinfra_nodegroup_v1` to create new resource when `cluster_id` changes ([#1551](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1551))
+* Fixed `openstack_objectstorage_container_v1` to not fail when container/objest doesn't exist ([#1535](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1535))
+
 ## 1.51.1 (21 March, 2023)
 
 NOTES
