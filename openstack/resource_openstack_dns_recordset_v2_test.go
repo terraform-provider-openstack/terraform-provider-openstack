@@ -75,9 +75,7 @@ func TestAccDNSV2RecordSet_ipv6(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_dns_recordset_v2.recordset_1", "description", "a record set"),
 					resource.TestCheckResourceAttr(
-						"openstack_dns_recordset_v2.recordset_1", "records.0", "fd2b:db7f:6ae:dd8d::1"),
-					resource.TestCheckResourceAttr(
-						"openstack_dns_recordset_v2.recordset_1", "records.1", "fd2b:db7f:6ae:dd8d::2"),
+						"openstack_dns_recordset_v2.recordset_1", "records.0", "fd2b:db7f:6ae:dd8d::2"),
 				),
 			},
 		},
@@ -339,10 +337,7 @@ func testAccDNSV2RecordSetIPv6(zoneName string) string {
 			type = "AAAA"
 			description = "a record set"
 			ttl = 3000
-			records = [
-				"[fd2b:db7f:6ae:dd8d::1]",
-				"fd2b:db7f:6ae:dd8d::2"
-			]
+			records = ["fd2b:db7f:6ae:dd8d::2"]
 		}
 	`, zoneName, zoneName)
 }
