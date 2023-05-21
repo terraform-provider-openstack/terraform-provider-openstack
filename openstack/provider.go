@@ -362,6 +362,7 @@ func Provider() *schema.Provider {
 			"openstack_identity_group_v3":                        resourceIdentityGroupV3(),
 			"openstack_identity_application_credential_v3":       resourceIdentityApplicationCredentialV3(),
 			"openstack_identity_ec2_credential_v3":               resourceIdentityEc2CredentialV3(),
+			"openstack_identity_registered_limit_v3":             resourceIdentityRegisteredLimitV3(),
 			"openstack_identity_limit_v3":                        resourceIdentityLimitV3(),
 			"openstack_images_image_v2":                          resourceImagesImageV2(),
 			"openstack_images_image_access_v2":                   resourceImagesImageAccessV2(),
