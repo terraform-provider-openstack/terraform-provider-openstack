@@ -188,6 +188,7 @@ func resourceDNSRecordSetV2Read(_ context.Context, d *schema.ResourceData, meta 
 
 	d.Set("name", n.Name)
 	d.Set("description", n.Description)
+	d.Set("records", n.Records)
 	d.Set("ttl", n.TTL)
 	d.Set("type", n.Type)
 	d.Set("zone_id", zoneID)
