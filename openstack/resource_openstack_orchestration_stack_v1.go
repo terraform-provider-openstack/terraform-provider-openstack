@@ -348,6 +348,20 @@ func resourceOrchestrationStackV1Update(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("Error updating openstack_orchestration_stack_v1 %s: %s", d.Id(), result.Err)
 	}
 
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"UPDATE_IN_PROGRESS"},
+		Target:     []string{"UPDATE_COMPLETE"},
+		Refresh:    orchestrationStackV1StateRefreshFunc(orchestrationClient, d.Id(), true),
+		Timeout:    d.Timeout(schema.TimeoutDelete),
+		Delay:      10 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return diag.Errorf("Error waiting for openstack_orchestration_stack_v1 %s to Update:  %s", d.Id(), err)
+	}
+
 	log.Printf("[INFO] openstack_orchestration_stack_v1 %s update complete", d.Id())
 	return resourceOrchestrationStackV1Read(ctx, d, meta)
 }
