@@ -284,6 +284,12 @@ func resourceComputeInstanceV2() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 						},
+						"multiattach": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+							ForceNew: true,
+						},
 					},
 				},
 			},
@@ -552,6 +558,14 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		blockDevices, err := resourceInstanceBlockDevicesV2(d, vL.([]interface{}))
 		if err != nil {
 			return diag.FromErr(err)
+		}
+
+		// Check if Multiattach was set in any of the Block Devices.
+		// If so, set the client's microversion appropriately.
+		for _, bd := range d.Get("block_device").([]interface{}) {
+			if bd.(map[string]interface{})["multiattach"].(bool) {
+				computeClient.Microversion = computeV2InstanceBlockDeviceMultiattachMicroversion
+			}
 		}
 
 		// Check if VolumeType was set in any of the Block Devices.
