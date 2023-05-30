@@ -111,7 +111,7 @@ The following arguments are supported:
   located. If omitted, the `OS_PROJECT_DOMAIN_NAME` environment variable is
   checked.
 
-* `project_domain_id` - (Optional) The domain ID where the project is located
+* `project_domain_id` - (Optional) The domain ID where the project is located.
   If omitted, the `OS_PROJECT_DOMAIN_ID` environment variable is checked.
 
 * `domain_id` - (Optional) The ID of the Domain to scope to (Identity v3). If
