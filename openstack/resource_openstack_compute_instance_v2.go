@@ -480,11 +480,11 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return diag.Errorf("Error creating OpenStack compute client: %w", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 	imageClient, err := config.ImageV2Client(GetRegion(d, config))
 	if err != nil {
-		return diag.Errorf("Error creating OpenStack image client: %w", err)
+		return diag.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
 	var createOpts servers.CreateOptsBuilder
@@ -618,7 +618,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	}
 
 	if err != nil {
-		return diag.Errorf("Error creating OpenStack server: %w", err)
+		return diag.Errorf("Error creating OpenStack server: %s", err)
 	}
 	log.Printf("[INFO] Instance ID: %s", server.ID)
 
@@ -647,13 +647,13 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		return nil
 	})
 	if err != nil {
-		return diag.Errorf("Error waiting for instance (%s) to become ready: %w", server.ID, err)
+		return diag.Errorf("Error waiting for instance (%s) to become ready: %s", server.ID, err)
 	}
 
 	vmState := d.Get("power_state").(string)
 	if strings.ToLower(vmState) == "shutoff" {
 		if err := startstop.Stop(computeClient, d.Id()).ExtractErr(); err != nil {
-			return diag.Errorf("Error stopping OpenStack instance: %w", err)
+			return diag.Errorf("Error stopping OpenStack instance: %s", err)
 		}
 		stopStateConf := &resource.StateChangeConf{
 			//Pending:    []string{"ACTIVE"},
@@ -667,7 +667,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
 		_, err = stopStateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return diag.Errorf("Error waiting for instance (%s) to become inactive(shutoff): %w", d.Id(), err)
+			return diag.Errorf("Error waiting for instance (%s) to become inactive(shutoff): %s", d.Id(), err)
 		}
 	}
 
@@ -678,7 +678,7 @@ func resourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, me
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return diag.Errorf("Error creating OpenStack compute client: %w", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	server, err := servers.Get(computeClient, d.Id()).Extract()
@@ -823,7 +823,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 	config := meta.(*Config)
 	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 	if err != nil {
-		return diag.Errorf("Error creating OpenStack compute client: %w", err)
+		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	var updateOpts servers.UpdateOpts
@@ -834,7 +834,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 	if updateOpts != (servers.UpdateOpts{}) {
 		_, err := servers.Update(computeClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return diag.Errorf("Error updating OpenStack server: %w", err)
+			return diag.Errorf("Error updating OpenStack server: %s", err)
 		}
 	}
 
@@ -859,12 +859,12 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			log.Printf("[DEBUG] Waiting for instance (%s) to shelve", d.Id())
 			_, err = shelveStateConf.WaitForStateContext(ctx)
 			if err != nil {
-				return diag.Errorf("Error waiting for instance (%s) to become shelve: %w", d.Id(), err)
+				return diag.Errorf("Error waiting for instance (%s) to become shelve: %s", d.Id(), err)
 			}
 		}
 		if strings.ToLower(powerStateNew) == "shutoff" {
 			if err := startstop.Stop(computeClient, d.Id()).ExtractErr(); err != nil {
-				return diag.Errorf("Error stopping OpenStack instance: %w", err)
+				return diag.Errorf("Error stopping OpenStack instance: %s", err)
 			}
 			stopStateConf := &resource.StateChangeConf{
 				//Pending:    []string{"ACTIVE"},
@@ -878,7 +878,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
 			_, err = stopStateConf.WaitForStateContext(ctx)
 			if err != nil {
-				return diag.Errorf("Error waiting for instance (%s) to become inactive(shutoff): %w", d.Id(), err)
+				return diag.Errorf("Error waiting for instance (%s) to become inactive(shutoff): %s", d.Id(), err)
 			}
 		}
 		if strings.ToLower(powerStateNew) == "active" {
@@ -887,11 +887,11 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 					AvailabilityZone: d.Get("availability_zone").(string),
 				}
 				if err := shelveunshelve.Unshelve(computeClient, d.Id(), unshelveOpt).ExtractErr(); err != nil {
-					return diag.Errorf("Error unshelving OpenStack instance: %w", err)
+					return diag.Errorf("Error unshelving OpenStack instance: %s", err)
 				}
 			} else {
 				if err := startstop.Start(computeClient, d.Id()).ExtractErr(); err != nil {
-					return diag.Errorf("Error starting OpenStack instance: %w", err)
+					return diag.Errorf("Error starting OpenStack instance: %s", err)
 				}
 			}
 			startStateConf := &resource.StateChangeConf{
@@ -906,7 +906,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			log.Printf("[DEBUG] Waiting for instance (%s) to start/unshelve", d.Id())
 			_, err = startStateConf.WaitForStateContext(ctx)
 			if err != nil {
-				return diag.Errorf("Error waiting for instance (%s) to become active: %w", d.Id(), err)
+				return diag.Errorf("Error waiting for instance (%s) to become active: %s", d.Id(), err)
 			}
 		}
 	}
@@ -932,7 +932,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 
 		for _, key := range metadataToDelete {
 			if err := servers.DeleteMetadatum(computeClient, d.Id(), key).ExtractErr(); err != nil {
-				return diag.Errorf("Error deleting metadata (%s) from server (%s): %w", key, d.Id(), err)
+				return diag.Errorf("Error deleting metadata (%s) from server (%s): %s", key, d.Id(), err)
 			}
 		}
 
@@ -944,7 +944,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 
 		_, err := servers.UpdateMetadata(computeClient, d.Id(), metadataOpts).Extract()
 		if err != nil {
-			return diag.Errorf("Error updating OpenStack server (%s) metadata: %w", d.Id(), err)
+			return diag.Errorf("Error updating OpenStack server (%s) metadata: %s", d.Id(), err)
 		}
 	}
 
@@ -966,7 +966,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 					continue
 				}
 
-				return diag.Errorf("Error removing security group (%s) from OpenStack server (%s): %w", g, d.Id(), err)
+				return diag.Errorf("Error removing security group (%s) from OpenStack server (%s): s", g, d.Id(), err)
 			}
 			log.Printf("[DEBUG] Removed security group (%s) from instance (%s)", g, d.Id())
 		}
@@ -974,7 +974,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 		for _, g := range secgroupsToAdd.List() {
 			err := secgroups.AddServer(computeClient, d.Id(), g.(string)).ExtractErr()
 			if err != nil && err.Error() != "EOF" {
-				return diag.Errorf("Error adding security group (%s) to OpenStack server (%s): %w", g, d.Id(), err)
+				return diag.Errorf("Error adding security group (%s) to OpenStack server (%s): %s", g, d.Id(), err)
 			}
 			log.Printf("[DEBUG] Added security group (%s) to instance (%s)", g, d.Id())
 		}
@@ -983,7 +983,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 	if d.HasChange("admin_pass") {
 		if newPwd, ok := d.Get("admin_pass").(string); ok {
 			if err := servers.ChangeAdminPassword(computeClient, d.Id(), newPwd).ExtractErr(); err != nil {
-				return diag.Errorf("Error changing admin password of OpenStack server (%s): %w", d.Id(), err)
+				return diag.Errorf("Error changing admin password of OpenStack server (%s): %s", d.Id(), err)
 			}
 		}
 	}
@@ -1014,7 +1014,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 		}
 		log.Printf("[DEBUG] Resize configuration: %#v", resizeOpts)
 		if err := servers.Resize(computeClient, d.Id(), resizeOpts).ExtractErr(); err != nil {
-			return diag.Errorf("Error resizing OpenStack server: %w", err)
+			return diag.Errorf("Error resizing OpenStack server: %s", err)
 		}
 
 		// Wait for the instance to finish resizing.
@@ -1033,7 +1033,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 
 			_, err = stateConf.WaitForStateContext(ctx)
 			if err != nil {
-				return diag.Errorf("Error waiting for instance (%s) to resize: %w", d.Id(), err)
+				return diag.Errorf("Error waiting for instance (%s) to resize: %s", d.Id(), err)
 			}
 		} else {
 			stateConf := &resource.StateChangeConf{
@@ -1047,13 +1047,13 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 
 			_, err = stateConf.WaitForStateContext(ctx)
 			if err != nil {
-				return diag.Errorf("Error waiting for instance (%s) to resize: %w", d.Id(), err)
+				return diag.Errorf("Error waiting for instance (%s) to resize: %s", d.Id(), err)
 			}
 
 			// Confirm resize.
 			log.Printf("[DEBUG] Confirming resize")
 			if err := servers.ConfirmResize(computeClient, d.Id()).ExtractErr(); err != nil {
-				return diag.Errorf("Error confirming resize of OpenStack server: %w", err)
+				return diag.Errorf("Error confirming resize of OpenStack server: %s", err)
 			}
 
 			stateConf = &resource.StateChangeConf{
@@ -1067,7 +1067,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 
 			_, err = stateConf.WaitForStateContext(ctx)
 			if err != nil {
-				return diag.Errorf("Error waiting for instance (%s) to confirm resize: %w", d.Id(), err)
+				return diag.Errorf("Error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
 			}
 		}
 	}
@@ -1076,7 +1076,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 		var newImageID string
 		imageClient, err := config.ImageV2Client(GetRegion(d, config))
 		if err != nil {
-			return diag.Errorf("Error creating OpenStack image client: %w", err)
+			return diag.Errorf("Error creating OpenStack image client: %s", err)
 		}
 
 		if d.HasChange("image_id") {
@@ -1102,7 +1102,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 		log.Printf("[DEBUG] Rebuild configuration: %#v", rebuildOpts)
 		_, err = servers.Rebuild(computeClient, d.Id(), rebuildOpts).Extract()
 		if err != nil {
-			return diag.Errorf("Error rebuilding OpenStack server: %w", err)
+			return diag.Errorf("Error rebuilding OpenStack server: %s", err)
 		}
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"REBUILD"},
@@ -1114,7 +1114,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 		}
 		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return diag.Errorf("Error waiting for instance (%s) to rebuild: %w", d.Id(), err)
+			return diag.Errorf("Error waiting for instance (%s) to rebuild: %s", d.Id(), err)
 		}
 	}
 
@@ -1183,7 +1183,7 @@ func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData
 						MinTimeout: 5 * time.Second,
 					}
 					if _, err = stateConf.WaitForStateContext(ctx); err != nil {
-						return diag.Errorf("Error detaching openstack_compute_instance_v2 %s: %w", d.Id(), err)
+						return diag.Errorf("Error detaching openstack_compute_instance_v2 %s: %s", d.Id(), err)
 					}
 				}
 			}
@@ -1215,7 +1215,7 @@ func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return diag.Errorf("Error waiting for instance (%s) to Delete: %w", d.Id(), err)
+		return diag.Errorf("Error waiting for instance (%s) to Delete: %s", d.Id(), err)
 	}
 
 	return nil
