@@ -737,9 +737,9 @@ func resourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, me
 		})
 	}
 
-	var secGrpNames []string
-	for _, sg := range server.SecurityGroups {
-		secGrpNames = append(secGrpNames, sg["name"].(string))
+	secGrpNames := make([]string, len(server.SecurityGroups))
+	for i, sg := range server.SecurityGroups {
+		secGrpNames[i] = sg["name"].(string)
 	}
 	mErr = multierror.Append(mErr,
 		d.Set("all_metadata", server.Metadata),
