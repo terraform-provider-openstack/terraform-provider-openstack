@@ -91,6 +91,8 @@ func resourceNetworkingSecGroupRuleV2Protocol(protocol string) (rules.RuleProtoc
 		return rules.ProtocolUDPLite, nil
 	case string(rules.ProtocolVRRP):
 		return rules.ProtocolVRRP, nil
+	case string(rules.ProtocolAny):
+		return rules.ProtocolAny, nil
 	}
 
 	// If the protocol wasn't matched above, see if it's an integer.

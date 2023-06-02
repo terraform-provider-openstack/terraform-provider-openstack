@@ -71,6 +71,7 @@ The following arguments are supported:
   * __sctp__
   * __udplite__
   * __vrrp__
+  * __any__
 
 * `port_range_min` - (Optional) The lower part of the allowed port range, valid
     integer value needs to be between 1 and 65535. Changing this creates a new
