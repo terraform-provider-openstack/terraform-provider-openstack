@@ -42,15 +42,9 @@ data "openstack_fw_policy_v2" "policy" {
 The following attributes are exported:
 
 * `region` - See Argument Reference above.
-
 * `name` - See Argument Reference above.
-
 * `policy_id` - See Argument Reference above.
-
 * `tenant_id` - See Argument Reference above.
-
 * `shared` - The sharing status of the firewall policy.
-
 * `audited` - The audit status of the firewall policy.
-
 * `rules` - The array of one or more firewall rules that comprise the policy.

@@ -129,10 +129,10 @@ func resourceFWPolicyV2Read(_ context.Context, d *schema.ResourceData, meta inte
 
 	d.Set("name", policy.Name)
 	d.Set("description", policy.Description)
-	d.Set("shared", policy.Shared)
-	d.Set("audited", policy.Audited)
 	d.Set("tenant_id", policy.TenantID)
 	d.Set("rules", policy.Rules)
+	d.Set("audited", policy.Audited)
+	d.Set("shared", policy.Shared)
 	d.Set("region", GetRegion(d, config))
 
 	return nil

@@ -30,8 +30,8 @@ resource "openstack_fw_rule_v2" "rule_2" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the v2 Compute client.
-    A Compute client is needed to create a firewall rule. If omitted, the
+* `region` - (Optional) The region in which to obtain the v2 networking client.
+    A networking client is needed to create a firewall rule. If omitted, the
     `region` argument of the provider is used. Changing this creates a new
     firewall rule.
 
@@ -41,16 +41,21 @@ The following arguments are supported:
 * `description` - (Optional) A description for the firewall rule. Changing this
     updates the `description` of an existing firewall rule.
 
-* `protocol` - (Required) The protocol type on which the firewall rule operates.
+* `tenant_id` - (Optional) The owner of the firewall rule. Required if admin
+    wants to create a firewall rule for another tenant. Changing this creates a
+    new firewall rule.
+
+* `protocol` - (Optional; Required if `source_port` or `destination_port` is not
+    empty) The protocol type on which the firewall rule operates.
     Valid values are: `tcp`, `udp`, `icmp`, and `any`. Changing this updates the
-    `protocol` of an existing firewall rule.
+    `protocol` of an existing firewall rule. Default is `any`.
 
-* `action` - (Required) Action to be taken ( must be "allow" or "deny") when the
-    firewall rule matches. Changing this updates the `action` of an existing
-    firewall rule.
+* `action` - (Optional) Action to be taken (must be "allow", "deny" or "reject")
+    when the firewall rule matches. Changing this updates the `action` of an
+    existing firewall rule. Default is `deny`.
 
-* `ip_version` - (Optional) IP version, either 4 (default) or 6. Changing this
-    updates the `ip_version` of an existing firewall rule.
+* `ip_version` - (Optional) IP version, either 4 or 6. Changing this
+    updates the `ip_version` of an existing firewall rule. Default is `4`.
 
 * `source_ip_address` - (Optional) The source IP address on which the firewall
     rule operates. Changing this updates the `source_ip_address` of an existing
@@ -62,21 +67,20 @@ The following arguments are supported:
 
 * `source_port` - (Optional) The source port on which the firewall
     rule operates. Changing this updates the `source_port` of an existing
-    firewall rule.
+    firewall rule. Require not `any` or empty protocol.
 
 * `destination_port` - (Optional) The destination port on which the firewall
     rule operates. Changing this updates the `destination_port` of an existing
-    firewall rule.
+    firewall rule. Require not `any` or empty protocol.
+
+* `shared` - (Optional) Sharing status of the firewall rule (must be "true"
+    or "false" if provided). If this is "true" the policy is visible to, and
+    can be used in, firewalls in other tenants. Changing this updates the
+    `shared` status of an existing firewall policy. On
 
 * `enabled` - (Optional) Enabled status for the firewall rule (must be "true"
     or "false" if provided - defaults to "true"). Changing this updates the
     `enabled` status of an existing firewall rule.
-
-* `tenant_id` - (Optional) The owner of the firewall rule. Required if admin
-    wants to create a firewall rule for another tenant. Changing this creates a
-    new firewall rule.
-
-* `value_specs` - (Optional) Map of additional options.
 
 ## Attributes Reference
 
@@ -85,6 +89,7 @@ The following attributes are exported:
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
+* `tenant_id` - See Argument Reference above.
 * `protocol` - See Argument Reference above.
 * `action` - See Argument Reference above.
 * `ip_version` - See Argument Reference above.
@@ -92,8 +97,8 @@ The following attributes are exported:
 * `destination_ip_address` - See Argument Reference above.
 * `source_port` - See Argument Reference above.
 * `destination_port` - See Argument Reference above.
+* `shared` - See Argument Reference above.
 * `enabled` - See Argument Reference above.
-* `tenant_id` - See Argument Reference above.
 
 ## Import
 

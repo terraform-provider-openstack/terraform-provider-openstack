@@ -46,25 +46,14 @@ data "openstack_fw_group_v2" "group" {
 The following attributes are exported:
 
 * `region` - See Argument Reference above.
-
 * `name` - See Argument Reference above.
-
 * `description` - See Argument Reference above.
-
 * `group_id` - See Argument Reference above.
-
 * `tenant_id` - See Argument Reference above.
-
 * `project_id` - See Argument Reference above.
-
 * `shared` - See Argument Reference above.
-
 * `admin_state_up` - Administrative up/down status for the firewall group.
-
 * `status` - Enabled status for the firewall group.
-
 * `ingress_firewall_policy_id` - See Argument Reference above.
-
 * `egress_firewall_policy_id` - See Argument Reference above.
-
 * `ports` - Port(s) to associate this firewall group with.

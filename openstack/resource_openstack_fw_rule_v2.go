@@ -159,16 +159,16 @@ func resourceFWRuleV2Read(_ context.Context, d *schema.ResourceData, meta interf
 
 	log.Printf("[DEBUG] Retrieved openstack_fw_rule_v2 %s: %#v", d.Id(), rule)
 
-	d.Set("action", rule.Action)
 	d.Set("name", rule.Name)
 	d.Set("description", rule.Description)
+	d.Set("action", rule.Action)
 	d.Set("ip_version", rule.IPVersion)
 	d.Set("source_ip_address", rule.SourceIPAddress)
 	d.Set("destination_ip_address", rule.DestinationIPAddress)
 	d.Set("source_port", rule.SourcePort)
 	d.Set("destination_port", rule.DestinationPort)
-	d.Set("enabled", rule.Enabled)
 	d.Set("shared", rule.Shared)
+	d.Set("enabled", rule.Enabled)
 
 	if rule.Protocol == "" {
 		d.Set("protocol", "any")

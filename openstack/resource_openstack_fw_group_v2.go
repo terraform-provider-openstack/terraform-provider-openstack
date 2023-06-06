@@ -46,23 +46,6 @@ func resourceFWGroupV2() *schema.Resource {
 				Optional: true,
 			},
 
-			"shared": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-
-			"admin_state_up": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
-
-			"status": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-
 			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -87,6 +70,18 @@ func resourceFWGroupV2() *schema.Resource {
 				Optional: true,
 			},
 
+			"admin_state_up": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+
+			"status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
 			"ports": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -94,6 +89,11 @@ func resourceFWGroupV2() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+
+			"shared": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 
 			"value_specs": {
@@ -181,14 +181,14 @@ func resourceFWGroupV2Read(_ context.Context, d *schema.ResourceData, meta inter
 
 	d.Set("name", group.Name)
 	d.Set("description", group.Description)
-	d.Set("shared", group.Shared)
-	d.Set("admin_state_up", group.AdminStateUp)
-	d.Set("status", group.Status)
 	d.Set("tenant_id", group.TenantID)
 	d.Set("project_id", group.ProjectID)
 	d.Set("ingress_firewall_policy_id", group.IngressFirewallPolicyID)
 	d.Set("egress_firewall_policy_id", group.EgressFirewallPolicyID)
+	d.Set("admin_state_up", group.AdminStateUp)
+	d.Set("status", group.Status)
 	d.Set("ports", group.Ports)
+	d.Set("shared", group.Shared)
 	d.Set("region", GetRegion(d, config))
 
 	return nil
