@@ -113,7 +113,7 @@ func resourceFWGroupV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	shared := d.Get("shared").(bool)
-	is_admin_state_up := d.Get("admin_state_up").(bool)
+	isAdminStateUp := d.Get("admin_state_up").(bool)
 	createOpts := GroupCreateOpts{
 		groups.CreateOpts{
 			Name:                    d.Get("name").(string),
@@ -122,7 +122,7 @@ func resourceFWGroupV2Create(ctx context.Context, d *schema.ResourceData, meta i
 			IngressFirewallPolicyID: d.Get("ingress_firewall_policy_id").(string),
 			EgressFirewallPolicyID:  d.Get("egress_firewall_policy_id").(string),
 			Shared:                  &shared,
-			AdminStateUp:            &is_admin_state_up,
+			AdminStateUp:            &isAdminStateUp,
 		},
 		MapValueSpecs(d),
 	}
@@ -148,7 +148,7 @@ func resourceFWGroupV2Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
-		Target:     []string{"ACTIVE", "INACTIVE", "DOWn"},
+		Target:     []string{"ACTIVE", "INACTIVE", "DOWN"},
 		Refresh:    fwGroupV2RefreshFunc(networkingClient, group.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      0,
@@ -250,8 +250,8 @@ func resourceFWGroupV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	if d.HasChange("admin_state_up") {
-		admin_state_up := d.Get("admin_state_up").(bool)
-		updateOpts.AdminStateUp = &admin_state_up
+		adminStateUp := d.Get("admin_state_up").(bool)
+		updateOpts.AdminStateUp = &adminStateUp
 	}
 
 	var portIds []string

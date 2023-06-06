@@ -3,9 +3,10 @@ package openstack
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/groups"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 // GroupCreateOpts represents the attributes used when creating a new firewall group.
