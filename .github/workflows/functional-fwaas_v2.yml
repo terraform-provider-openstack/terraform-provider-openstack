@@ -19,20 +19,34 @@ jobs:
       matrix:
         name: ["master"]
         openstack_version: ["master"]
-        ubuntu_version: ["22.04"]
+        ubuntu_version: ["20.04"]
         include:
           - name: "antelope"
             openstack_version: "stable/2023.1"
-            ubuntu_version: "22.04"
+            ubuntu_version: "20.04"
             devstack_conf_overrides: |
               enable_plugin neutron-fwaas https://opendev.org/openstack/neutron-fwaas stable/2023.1
               enable_plugin neutron-fwaas-dashboard https://opendev.org/openstack/neutron-fwaas-dashboard stable/2023.1
+              disable_service ovn
+              disable_service ovn-controller
+              disable_service ovn-northd
+              disable_service q-ovn-metadata-agent
+              disable_service cinder c-sch c-api c-vol
+              disable_service tempest
+              disable_service swift
           - name: "zed"
             openstack_version: "stable/zed"
-            ubuntu_version: "22.04"
+            ubuntu_version: "20.04"
             devstack_conf_overrides: |
               enable_plugin neutron-fwaas https://opendev.org/openstack/neutron-fwaas stable/zed
               enable_plugin neutron-fwaas-dashboard https://opendev.org/openstack/neutron-fwaas-dashboard stable/zed
+              disable_service ovn
+              disable_service ovn-controller
+              disable_service ovn-northd
+              disable_service q-ovn-metadata-agent
+              disable_service cinder c-sch c-api c-vol
+              disable_service tempest
+              disable_service swift
     runs-on: ubuntu-${{ matrix.ubuntu_version }}
     name: fwaas_v2 on OpenStack ${{ matrix.name }} with defaults and run basic acceptance tests
     steps:
@@ -49,7 +63,6 @@ jobs:
             Q_ML2_TENANT_NETWORK_TYPE=vxlan
             Q_TUNNEL_TYPES=vxlan,gre
           enabled_services: 'q-svc,q-agt,q-dhcp,q-l3,q-meta,q-fwaas-v2'
-          disabled_services: 'ovn,ovn-controller,ovn-northd,q-ovn-metadata-agent,cinder,c-sch,c-api,c-vol,horizon,tempest,swift'
       - name: Checkout go
         uses: actions/setup-go@v3
         with:
