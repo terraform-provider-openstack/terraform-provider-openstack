@@ -21,6 +21,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/members"
+	"github.com/ulikunitz/xz"
 )
 
 func resourceImagesImageV2MemberStatusFromString(v string) images.ImageMemberStatus {
@@ -119,7 +120,7 @@ func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.Reso
 
 			resp, err := client.Do(request)
 			if err != nil {
-				return "", fmt.Errorf("Error downloading image from %q", furl)
+				return "", fmt.Errorf("Error downloading image from %q: %s", furl, err)
 			}
 
 			// check for credential error among other errors
@@ -144,6 +145,12 @@ func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.Reso
 				case "bzip2", "application/bzip2", "application/x-bzip2":
 					bz2Reader := bzip2.NewReader(resp.Body)
 					reader = io.NopCloser(bz2Reader)
+				case "xz", "application/xz", "application/x-xz":
+					xzReader, err := xz.NewReader(resp.Body)
+					if err != nil {
+						return "", fmt.Errorf("Error decompressing xz image: %s", err)
+					}
+					reader = io.NopCloser(xzReader)
 				default:
 					return "", fmt.Errorf("Error decompressing image, format %s is not supported", resp.Header.Get("Content-Type"))
 				}
