@@ -221,6 +221,20 @@ func resourceFWGroupV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	if d.HasChange("ingress_firewall_policy_id") {
 		ingressFirewallPolicyID := d.Get("ingress_firewall_policy_id").(string)
 		if ingressFirewallPolicyID == "" {
+			stateConf := &resource.StateChangeConf{
+				Pending:    []string{"PENDING_CREATE", "PENDING_UPDATE"},
+				Target:     []string{"ACTIVE", "INACTIVE", "DOWN"},
+				Refresh:    fwGroupV2RefreshFunc(networkingClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      0,
+				MinTimeout: 2 * time.Second,
+			}
+
+			_, err = stateConf.WaitForStateContext(ctx)
+			if err != nil {
+				return diag.Errorf("Error waiting for openstack_fw_group_v2 %s to become active: %s", d.Id(), err)
+			}
+
 			_, err := groups.RemoveIngressPolicy(networkingClient, group.ID).Extract()
 			if err != nil {
 				return diag.Errorf("Error removing ingress firewall policy from openstack_fw_group_v2 %s: %s", d.Id(), err)
@@ -234,6 +248,20 @@ func resourceFWGroupV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	if d.HasChange("egress_firewall_policy_id") {
 		egressFirewallPolicyID := d.Get("egress_firewall_policy_id").(string)
 		if egressFirewallPolicyID == "" {
+			stateConf := &resource.StateChangeConf{
+				Pending:    []string{"PENDING_CREATE", "PENDING_UPDATE"},
+				Target:     []string{"ACTIVE", "INACTIVE", "DOWN"},
+				Refresh:    fwGroupV2RefreshFunc(networkingClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      0,
+				MinTimeout: 2 * time.Second,
+			}
+
+			_, err = stateConf.WaitForStateContext(ctx)
+			if err != nil {
+				return diag.Errorf("Error waiting for openstack_fw_group_v2 %s to become active: %s", d.Id(), err)
+			}
+
 			_, err := groups.RemoveEgressPolicy(networkingClient, group.ID).Extract()
 			if err != nil {
 				return diag.Errorf("Error removing ingress firewall policy from openstack_fw_group_v2 %s: %s", d.Id(), err)
