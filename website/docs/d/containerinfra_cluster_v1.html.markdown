@@ -79,3 +79,15 @@ attributes are exported:
 * `node_addresses` - IP addresses of the node of the cluster.
 
 * `stack_id` - UUID of the Orchestration service stack.
+
+* `kubeconfig` - The Kubernetes cluster's credentials
+
+  * `raw_config` - The raw kubeconfig file
+
+  * `host` - The cluster's API server URL
+
+  * `cluster_ca_certificate` - The cluster's CA certificate
+
+  * `client_key` - The client's RSA key
+  
+  * `client_certificate` - The client's certificate
