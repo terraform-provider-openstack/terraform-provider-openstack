@@ -3,7 +3,6 @@ package openstack
 import (
 	"fmt"
 	"log"
-	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -59,31 +58,4 @@ func dnsRecordSetV2ParseID(id string) (string, string, error) {
 	recordsetID := idParts[1]
 
 	return zoneID, recordsetID, nil
-}
-
-func expandDNSRecordSetV2Records(v []interface{}) []string {
-	records := make([]string, len(v))
-
-	// Strip out any [ ] characters in the address.
-	// This is to format IPv6 records in a way that DNSaaS / Designate wants.
-	re := regexp.MustCompile("[][]")
-	for i, rawRecord := range v {
-		record := rawRecord.(string)
-		record = re.ReplaceAllString(record, "")
-		records[i] = record
-	}
-
-	return records
-}
-
-// dnsRecordSetV2RecordsStateFunc will strip brackets from IPv6 addresses.
-func dnsRecordSetV2RecordsStateFunc(v interface{}) string {
-	if addr, ok := v.(string); ok {
-		re := regexp.MustCompile("[][]")
-		addr = re.ReplaceAllString(addr, "")
-
-		return addr
-	}
-
-	return ""
 }

@@ -297,7 +297,7 @@ func testAccDNSV2RecordSetUpdate(zoneName string) string {
 			type = "A"
 			description = "an updated record set"
 			ttl = 6000
-			records = ["10.1.0.1"]
+			records = ["10.1.0.2", "10.1.0.1"]
 		}
 	`, zoneName, zoneName)
 }
@@ -337,7 +337,7 @@ func testAccDNSV2RecordSetIPv6(zoneName string) string {
 			type = "AAAA"
 			description = "a record set"
 			ttl = 3000
-			records = ["fd2b:db7f:6ae:dd8d::2"]
+			records = ["fd2b:db7f:6ae:dd8d::2", "fd2b:db7f:6ae:dd8d::1"]
 		}
 	`, zoneName, zoneName)
 }

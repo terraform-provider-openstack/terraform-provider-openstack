@@ -16,13 +16,3 @@ func TestUnitDNSRecordSetV2ParseID(t *testing.T) {
 	assert.Equal(t, expectedZoneID, actualZoneID)
 	assert.Equal(t, expectedRecordSetID, actualRecordSetID)
 }
-
-func TestUnitDNSRecordSetV2RecordsStateFunc(t *testing.T) {
-	data := []interface{}{"foo", "[bar]", "baz"}
-	expected := []string{"foo", "bar", "baz"}
-
-	for i, record := range data {
-		actual := dnsRecordSetV2RecordsStateFunc(record)
-		assert.Equal(t, expected[i], actual)
-	}
-}
