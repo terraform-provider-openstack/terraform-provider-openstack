@@ -35,8 +35,8 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
 					resource.TestCheckResourceAttr(
 						"openstack_dns_recordset_v2.recordset_1", "description", "a record set"),
-					resource.TestCheckResourceAttr(
-						"openstack_dns_recordset_v2.recordset_1", "records.0", "10.1.0.0"),
+					resource.TestCheckTypeSetElemAttr(
+						"openstack_dns_recordset_v2.recordset_1", "records.*", "10.1.0.0"),
 				),
 			},
 			{
@@ -47,8 +47,10 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_dns_recordset_v2.recordset_1", "type", "A"),
 					resource.TestCheckResourceAttr(
 						"openstack_dns_recordset_v2.recordset_1", "description", "an updated record set"),
-					resource.TestCheckResourceAttr(
-						"openstack_dns_recordset_v2.recordset_1", "records.0", "10.1.0.1"),
+					resource.TestCheckTypeSetElemAttr(
+						"openstack_dns_recordset_v2.recordset_1", "records.*", "10.1.0.1"),
+					resource.TestCheckTypeSetElemAttr(
+						"openstack_dns_recordset_v2.recordset_1", "records.*", "10.1.0.2"),
 				),
 			},
 		},
@@ -74,8 +76,10 @@ func TestAccDNSV2RecordSet_ipv6(t *testing.T) {
 					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
 					resource.TestCheckResourceAttr(
 						"openstack_dns_recordset_v2.recordset_1", "description", "a record set"),
-					resource.TestCheckResourceAttr(
-						"openstack_dns_recordset_v2.recordset_1", "records.0", "fd2b:db7f:6ae:dd8d::2"),
+					resource.TestCheckTypeSetElemAttr(
+						"openstack_dns_recordset_v2.recordset_1", "records.*", "fd2b:db7f:6ae:dd8d::1"),
+					resource.TestCheckTypeSetElemAttr(
+						"openstack_dns_recordset_v2.recordset_1", "records.*", "fd2b:db7f:6ae:dd8d::2"),
 				),
 			},
 		},
@@ -124,8 +128,8 @@ func TestAccDNSV2RecordSet_ensureSameTTL(t *testing.T) {
 				Config: testAccDNSV2RecordSetEnsureSameTTL1(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
-					resource.TestCheckResourceAttr(
-						"openstack_dns_recordset_v2.recordset_1", "records.0", "10.1.0.1"),
+					resource.TestCheckTypeSetElemAttr(
+						"openstack_dns_recordset_v2.recordset_1", "records.*", "10.1.0.1"),
 					resource.TestCheckResourceAttr(
 						"openstack_dns_recordset_v2.recordset_1", "ttl", "3000"),
 				),
@@ -133,8 +137,8 @@ func TestAccDNSV2RecordSet_ensureSameTTL(t *testing.T) {
 			{
 				Config: testAccDNSV2RecordSetEnsureSameTTL2(zoneName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"openstack_dns_recordset_v2.recordset_1", "records.0", "10.1.0.2"),
+					resource.TestCheckTypeSetElemAttr(
+						"openstack_dns_recordset_v2.recordset_1", "records.*", "10.1.0.2"),
 					resource.TestCheckResourceAttr(
 						"openstack_dns_recordset_v2.recordset_1", "ttl", "3000"),
 				),
@@ -160,8 +164,8 @@ func TestAccDNSV2RecordSet_sudoProjectID(t *testing.T) {
 				Config: testAccDNSV2RecordSetSudoProjectID(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2RecordSetExists("openstack_dns_recordset_v2.recordset_1", &recordset),
-					resource.TestCheckResourceAttr(
-						"openstack_dns_recordset_v2.recordset_1", "records.0", "10.1.0.1"),
+					resource.TestCheckTypeSetElemAttr(
+						"openstack_dns_recordset_v2.recordset_1", "records.*", "10.1.0.1"),
 				),
 			},
 		},
