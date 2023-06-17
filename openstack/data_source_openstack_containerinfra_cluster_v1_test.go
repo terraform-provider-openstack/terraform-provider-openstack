@@ -56,6 +56,7 @@ func TestAccContainerInfraV1ClusterDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "node_addresses.#", strconv.Itoa(1)),
 					resource.TestCheckResourceAttrSet(resourceName, "stack_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "floating_ip_enabled"),
+					resource.TestCheckResourceAttrSet(resourceName, "kubeconfig"),
 				),
 			},
 		},

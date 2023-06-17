@@ -142,6 +142,12 @@ func dataSourceContainerInfraCluster() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"kubeconfig": {
+				Type:      schema.TypeMap,
+				Computed:  true,
+				Sensitive: true,
+				Elem:      &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -181,6 +187,11 @@ func dataSourceContainerInfraClusterRead(ctx context.Context, d *schema.Resource
 	d.Set("fixed_network", c.FixedNetwork)
 	d.Set("fixed_subnet", c.FixedSubnet)
 	d.Set("floating_ip_enabled", c.FloatingIPEnabled)
+	kubeconfig, err := flattenContainerInfraV1Kubeconfig(d, containerInfraClient)
+	if err != nil {
+		return diag.Errorf("Error building kubeconfig for openstack_containerinfra_cluster_v1 %s: %s", d.Id(), err)
+	}
+	d.Set("kubeconfig", kubeconfig)
 
 	if err := d.Set("labels", c.Labels); err != nil {
 		log.Printf("[DEBUG] Unable to set labels for openstack_containerinfra_cluster_v1 %s: %s", c.UUID, err)
