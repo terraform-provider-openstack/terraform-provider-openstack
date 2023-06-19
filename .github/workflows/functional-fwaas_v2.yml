@@ -10,6 +10,7 @@ on:
       - '**_fw_**'
       - '!**v1**'
       - 'CHANGELOG.md'
+      - 'scripts/*'
   schedule:
     - cron: '0 0 */3 * *'
 jobs:

@@ -3,12 +3,12 @@ package openstack
 import (
 	"context"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/policies"
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/rules"
 )
 
@@ -49,25 +49,28 @@ func resourceFWRuleV2() *schema.Resource {
 			"protocol": {
 				Type:     schema.TypeString,
 				Optional: true,
-				StateFunc: func(val any) string {
-					return strings.ToLower(val.(string))
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"any", "icmp", "tcp", "udp",
+				}, true),
 				Default: "any",
 			},
 
 			"action": {
 				Type:     schema.TypeString,
 				Optional: true,
-				StateFunc: func(val any) string {
-					return strings.ToLower(val.(string))
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"allow", "deny", "reject",
+				}, true),
 				Default: "deny",
 			},
 
 			"ip_version": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default:  4,
+				ValidateFunc: validation.IntInSlice([]int{
+					4, 6,
+				}),
+				Default: 4,
 			},
 
 			"source_ip_address": {
@@ -119,9 +122,9 @@ func resourceFWRuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	ruleCreateOpts := rules.CreateOpts{
 		Name:                 d.Get("name").(string),
 		Description:          d.Get("description").(string),
-		Protocol:             expandFWRuleV2Protocol(d.Get("protocol").(string)),
-		Action:               expandFWRuleV2Action(d.Get("action").(string)),
-		IPVersion:            expandFWRuleV2IPVersion(d.Get("ip_version").(int)),
+		Protocol:             rules.Protocol((d.Get("protocol").(string))),
+		Action:               rules.Action((d.Get("action").(string))),
+		IPVersion:            gophercloud.IPVersion(d.Get("ip_version").(int)),
 		SourceIPAddress:      d.Get("source_ip_address").(string),
 		DestinationIPAddress: d.Get("destination_ip_address").(string),
 		SourcePort:           d.Get("source_port").(string),
@@ -200,17 +203,17 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if d.HasChange("protocol") {
-		protocol := expandFWRuleV2Protocol(d.Get("protocol").(string))
+		protocol := rules.Protocol(d.Get("protocol").(string))
 		updateOpts.Protocol = &protocol
 	}
 
 	if d.HasChange("action") {
-		action := expandFWRuleV2Action(d.Get("action").(string))
+		action := rules.Action(d.Get("action").(string))
 		updateOpts.Action = &action
 	}
 
 	if d.HasChange("ip_version") {
-		ipVersion := expandFWRuleV2IPVersion(d.Get("ip_version").(int))
+		ipVersion := gophercloud.IPVersion(d.Get("ip_version").(int))
 		updateOpts.IPVersion = &ipVersion
 	}
 
@@ -219,7 +222,7 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		updateOpts.SourceIPAddress = &sourceIPAddress
 
 		// Also include the ip_version.
-		ipVersion := expandFWRuleV2IPVersion(d.Get("ip_version").(int))
+		ipVersion := gophercloud.IPVersion(d.Get("ip_version").(int))
 		updateOpts.IPVersion = &ipVersion
 	}
 
@@ -231,7 +234,7 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		updateOpts.SourcePort = &sourcePort
 
 		// Also include the protocol.
-		protocol := expandFWRuleV2Protocol(d.Get("protocol").(string))
+		protocol := rules.Protocol(d.Get("protocol").(string))
 		updateOpts.Protocol = &protocol
 	}
 
@@ -240,7 +243,7 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		updateOpts.DestinationIPAddress = &destinationIPAddress
 
 		// Also include the ip_version.
-		ipVersion := expandFWRuleV2IPVersion(d.Get("ip_version").(int))
+		ipVersion := gophercloud.IPVersion(d.Get("ip_version").(int))
 		updateOpts.IPVersion = &ipVersion
 	}
 
@@ -253,7 +256,7 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		updateOpts.DestinationPort = &destinationPort
 
 		// Also include the protocol.
-		protocol := expandFWRuleV2Protocol(d.Get("protocol").(string))
+		protocol := rules.Protocol(d.Get("protocol").(string))
 		updateOpts.Protocol = &protocol
 	}
 
@@ -281,21 +284,6 @@ func resourceFWRuleV2Delete(_ context.Context, d *schema.ResourceData, meta inte
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
-	}
-
-	rule, err := rules.Get(networkingClient, d.Id()).Extract()
-	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_fw_rule_v2"))
-	}
-
-	if len(rule.FirewallPolicyID) > 0 {
-		for _, firewallPolicyID := range rule.FirewallPolicyID {
-			log.Printf("[DEBUG] openstack_fw_rule_v2 %s associate with openstack_fw_policy_v2: %#v", d.Id(), firewallPolicyID)
-			_, err := policies.RemoveRule(networkingClient, firewallPolicyID, rule.ID).Extract()
-			if err != nil {
-				return diag.Errorf("Error removing openstack_fw_rule_v2 %s from policy %s: %s", d.Id(), firewallPolicyID, err)
-			}
-		}
 	}
 
 	err = rules.Delete(networkingClient, d.Id()).ExtractErr()

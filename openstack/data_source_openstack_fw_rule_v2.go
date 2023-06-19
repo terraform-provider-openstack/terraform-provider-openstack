@@ -3,10 +3,10 @@ package openstack
 import (
 	"context"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/rules"
 )
@@ -47,19 +47,25 @@ func dataSourceFWRuleV2() *schema.Resource {
 			"protocol": {
 				Type:     schema.TypeString,
 				Optional: true,
-				StateFunc: func(val any) string {
-					return strings.ToLower(val.(string))
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"icmp", "tcp", "udp",
+				}, true),
 			},
 
 			"action": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"allow", "deny", "reject",
+				}, true),
 			},
 
 			"ip_version": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				ValidateFunc: validation.IntInSlice([]int{
+					4, 6,
+				}),
 			},
 
 			"source_ip_address": {
@@ -132,11 +138,11 @@ func dataSourceFWRuleV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if v, ok := d.GetOk("protocol"); ok {
-		listOpts.Protocol = expandFWRuleV2Protocol(v.(string))
+		listOpts.Protocol = rules.Protocol(v.(string))
 	}
 
 	if v, ok := d.GetOk("action"); ok {
-		listOpts.Action = expandFWRuleV2Action(v.(string))
+		listOpts.Action = rules.Action(v.(string))
 	}
 
 	if v, ok := d.GetOk("ip_version"); ok {
