@@ -20,7 +20,7 @@ func resourceDNSRecordSetV2() *schema.Resource {
 		UpdateContext: resourceDNSRecordSetV2Update,
 		DeleteContext: resourceDNSRecordSetV2Delete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceDNSRecordSetV2Import,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -56,13 +56,10 @@ func resourceDNSRecordSetV2() *schema.Resource {
 			},
 
 			"records": {
-				Type:     schema.TypeList,
-				Optional: true,
+				Type:     schema.TypeSet,
+				Required: true,
 				ForceNew: false,
-				Elem: &schema.Schema{
-					Type:      schema.TypeString,
-					StateFunc: dnsRecordSetV2RecordsStateFunc,
-				},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
 			"ttl": {
@@ -112,7 +109,12 @@ func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, m
 		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
-	records := expandDNSRecordSetV2Records(d.Get("records").([]interface{}))
+	records := []string{}
+	if v, ok := d.GetOk("records"); ok {
+		for _, vv := range v.(*schema.Set).List() {
+			records = append(records, vv.(string))
+		}
+	}
 
 	createOpts := RecordSetCreateOpts{
 		recordsets.CreateOpts{
@@ -152,12 +154,6 @@ func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, m
 	id := fmt.Sprintf("%s/%s", zoneID, n.ID)
 	d.SetId(id)
 
-	// This is a workaround to store the modified IP addresses in the state
-	// because we don't want to make records computed or change it to TypeSet
-	// in order to retain backwards compatibility.
-	// Because of the StateFunc, this will not cause issues.
-	d.Set("records", records)
-
 	log.Printf("[DEBUG] Created openstack_dns_recordset_v2 %s: %#v", n.ID, n)
 	return resourceDNSRecordSetV2Read(ctx, d, meta)
 }
@@ -188,7 +184,11 @@ func resourceDNSRecordSetV2Read(_ context.Context, d *schema.ResourceData, meta 
 
 	d.Set("name", n.Name)
 	d.Set("description", n.Description)
-	d.Set("records", n.Records)
+	records := []interface{}{}
+	for _, c := range n.Records {
+		records = append(records, c)
+	}
+	d.Set("records", schema.NewSet(schema.HashString, records))
 	d.Set("ttl", n.TTL)
 	d.Set("type", n.Type)
 	d.Set("zone_id", zoneID)
@@ -218,7 +218,12 @@ func resourceDNSRecordSetV2Update(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if d.HasChange("records") {
-		records := expandDNSRecordSetV2Records(d.Get("records").([]interface{}))
+		records := []string{}
+		if v, ok := d.GetOk("records"); ok {
+			for _, vv := range v.(*schema.Set).List() {
+				records = append(records, vv.(string))
+			}
+		}
 		updateOpts.Records = records
 		changed = true
 	}
@@ -307,25 +312,4 @@ func resourceDNSRecordSetV2Delete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	return nil
-}
-
-func resourceDNSRecordSetV2Import(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
-	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
-	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenStack DNS client: %s", err)
-	}
-
-	zoneID, recordsetID, err := dnsRecordSetV2ParseID(d.Id())
-	if err != nil {
-		return nil, err
-	}
-
-	n, err := recordsets.Get(dnsClient, zoneID, recordsetID).Extract()
-	if err != nil {
-		return nil, fmt.Errorf("Error retrieving openstack_dns_recordset_v2 %s: %s", d.Id(), err)
-	}
-
-	d.Set("records", n.Records)
-	return []*schema.ResourceData{d}, nil
 }

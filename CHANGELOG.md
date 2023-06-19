@@ -3,6 +3,7 @@
 NOTES
 
 * Documentation has been updated with sub-categories for easier browsing
+* '[]' stripping for IPv6 addresses removed from `openstack_dns_recordset_v2` resource
 
 IMPROVEMENTS
 
@@ -10,6 +11,7 @@ IMPROVEMENTS
 * Add `user_id` to `data_source_openstack_compute_keypair_v2` ([#1554](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1554))
 * Add `project_id` to `data_source_openstack_identity_project_v3` ([#1559](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1559))
 * `private_key` on `openstack_compute_keypair_v2` marked as sensitive ([#1548](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1548))
+* `openstack_dns_recordset_v2` now refreshes record values and ignores record order for individual record values within the same resource
 
 BUG FIXES
 
