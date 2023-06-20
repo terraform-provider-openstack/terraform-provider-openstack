@@ -173,13 +173,14 @@ func resourceImagesImageV2() *schema.Resource {
 				Type:          schema.TypeBool,
 				Optional:      true,
 				ForceNew:      false,
-				ConflictsWith: []string{"local_file_path", "verify_checksum"},
+				ConflictsWith: []string{"local_file_path", "verify_checksum", "decompress"},
 			},
 
 			"decompress": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeBool,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"web_download"},
 			},
 
 			// Computed-only
@@ -279,7 +280,21 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 
 	var fileChecksum string
 	useWebDownload := d.Get("web_download").(bool)
-	if !useWebDownload {
+	if useWebDownload {
+		// import
+		imgURL := d.Get("image_source_url").(string)
+
+		importOpts := &imageimport.CreateOpts{
+			Name: imageimport.WebDownloadMethod,
+			URI:  imgURL,
+		}
+
+		log.Printf("[DEBUG] Import Options: %#v", importOpts)
+		res := imageimport.Create(imageClient, d.Id(), importOpts)
+		if res.Err != nil {
+			return diag.Errorf("Error while importing url %q: %s", imgURL, res.Err)
+		}
+	} else {
 		// variable declaration
 		var err error
 		var imgFilePath string
@@ -307,20 +322,6 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 		res := imagedata.Upload(imageClient, d.Id(), imgFile)
 		if res.Err != nil {
 			return diag.Errorf("Error while uploading file %q: %s", imgFilePath, res.Err)
-		}
-	} else {
-		// import
-		imgURL := d.Get("image_source_url").(string)
-
-		importOpts := &imageimport.CreateOpts{
-			Name: imageimport.WebDownloadMethod,
-			URI:  imgURL,
-		}
-
-		log.Printf("[DEBUG] Import Options: %#v", importOpts)
-		res := imageimport.Create(imageClient, d.Id(), importOpts)
-		if res.Err != nil {
-			return diag.Errorf("Error while importing url %q: %s", imgURL, res.Err)
 		}
 	}
 
