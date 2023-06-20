@@ -2,21 +2,23 @@
 
 NOTES
 
-* Documentation has been updated with sub-categories for easier browsing
-* '[]' stripping for IPv6 addresses removed from `openstack_dns_recordset_v2` resource
+* Documentation has been updated with sub-categories for easier browsing ([#1540](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1540))
+* `[]` stripping for IPv6 addresses was removed from `openstack_dns_recordset_v2` resource ([#1581](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1581))
 
 IMPROVEMENTS
 
-* Add validators to `openstack_vpnaas_ipsec_policy_v2` ([#1558](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1558))
-* Add `user_id` to `data_source_openstack_compute_keypair_v2` ([#1554](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1554))
-* Add `project_id` to `data_source_openstack_identity_project_v3` ([#1559](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1559))
-* `private_key` on `openstack_compute_keypair_v2` marked as sensitive ([#1548](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1548))
-* `openstack_dns_recordset_v2` now refreshes record values and ignores record order for individual record values within the same resource
+* Add validators to the `openstack_vpnaas_ipsec_policy_v2` resource ([#1558](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1558))
+* Add `user_id` argument to the `openstack_compute_keypair_v2` data source ([#1554](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1554))
+* Add `project_id` argument to the `openstack_identity_project_v3` data source ([#1559](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1559))
+* The `private_key` attribute in the `openstack_compute_keypair_v2` resource is now marked as sensitive ([#1548](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1548))
+* The `openstack_dns_recordset_v2` resource now refreshes record values and ignores record order for individual record values within the same resource ([#1581](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1581))
+* The `openstack_sharedfilesystem_share_access_v2` resource now prefers to use the GET method for share access rules retriving ([#1583](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1583))
+* Add `multiattach` argument to the `openstack_compute_instance_v2` resource ([#1542](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1542))
 
 BUG FIXES
 
-* Fixed `openstack_containerinfra_nodegroup_v1` to create new resource when `cluster_id` changes ([#1551](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1551))
-* Fixed `openstack_objectstorage_container_v1` to not fail when container/objest doesn't exist ([#1535](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1535))
+* Force new `openstack_containerinfra_nodegroup_v1` resource when `cluster_id` changes ([#1551](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1551))
+* Fixed `openstack_objectstorage_container_v1` resource to not fail when container/objest doesn't exist ([#1535](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1535))
 
 ## 1.51.1 (21 March, 2023)
 
