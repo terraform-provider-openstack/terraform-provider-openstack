@@ -89,10 +89,8 @@ github.com/google/go-cmp v0.5.9/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeN
 github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/google/uuid v1.1.2/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gophercloud/gophercloud v1.1.1/go.mod h1:aAVqcocTSXh2vYFZ1JTvx4EQmfgzxRcNupUfxZbBNDM=
-github.com/gophercloud/gophercloud v1.2.1-0.20230309142102-36ac4a411ba7 h1:wDr3jLA3vAtpH5DvqdTHtn34Uo15qA7F6EdEIJtm7+s=
-github.com/gophercloud/gophercloud v1.2.1-0.20230309142102-36ac4a411ba7/go.mod h1:aAVqcocTSXh2vYFZ1JTvx4EQmfgzxRcNupUfxZbBNDM=
-github.com/gophercloud/gophercloud v1.3.1-0.20230517135124-33412becb1d0 h1:NSIQAuPoktKrxJryRQRmiNbYD2udN3w267oJalbW0zw=
-github.com/gophercloud/gophercloud v1.3.1-0.20230517135124-33412becb1d0/go.mod h1:aAVqcocTSXh2vYFZ1JTvx4EQmfgzxRcNupUfxZbBNDM=
+github.com/gophercloud/gophercloud v1.4.0 h1:RqEu43vaX0lb0LanZr5BylK5ICVxjpFFoc0sxivyuHU=
+github.com/gophercloud/gophercloud v1.4.0/go.mod h1:aAVqcocTSXh2vYFZ1JTvx4EQmfgzxRcNupUfxZbBNDM=
 github.com/gophercloud/utils v0.0.0-20230324070755-05e9e7f5ea4d h1:AfRlf5NnsYsHIW5nNxhYp+99Bmj/fLeOYwD5Z4CMlzw=
 github.com/gophercloud/utils v0.0.0-20230324070755-05e9e7f5ea4d/go.mod h1:z4Dey7xsTUXgcB1C8elMvGRKTjV1ez0eoYQlMrduG1g=
 github.com/grpc-ecosystem/grpc-gateway v1.16.0/go.mod h1:BDjrQk3hbvj6Nolgz8mAMFbcEtjT1g+wF4CSlocrBnw=
