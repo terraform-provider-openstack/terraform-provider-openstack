@@ -257,19 +257,19 @@ func resourceKeyManagerContainerV1Update(ctx context.Context, d *schema.Resource
 
 		// delete old references first
 		for _, delRef := range expandKeyManagerContainerV1SecretRefs(delRefs) {
-			res := containers.DeleteSecretRef(kmClient, d.Id(), delRef)
-			if res.Err != nil {
-				if _, ok := res.Err.(gophercloud.ErrDefault404); !ok {
-					return diag.Errorf("Error removing old %s secret reference from the %s container: %s", delRef.Name, d.Id(), res.Err)
+			err := containers.DeleteSecretRef(kmClient, d.Id(), delRef).ExtractErr()
+			if err != nil {
+				if _, ok := err.(gophercloud.ErrDefault404); !ok {
+					return diag.Errorf("Error removing old %s secret reference from the %s container: %s", delRef.Name, d.Id(), err)
 				}
 			}
 		}
 
 		// then add new ones
 		for _, addRef := range expandKeyManagerContainerV1SecretRefs(addRefs) {
-			res := containers.CreateSecretRef(kmClient, d.Id(), addRef)
-			if res.Err != nil {
-				return diag.Errorf("Error adding new %s secret reference to the %s container: %s", addRef.Name, d.Id(), res.Err)
+			_, err := containers.CreateSecretRef(kmClient, d.Id(), addRef).Extract()
+			if err != nil {
+				return diag.Errorf("Error adding new %s secret reference to the %s container: %s", addRef.Name, d.Id(), err)
 			}
 		}
 	}
