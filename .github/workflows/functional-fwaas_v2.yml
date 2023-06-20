@@ -1,0 +1,66 @@
+# Functional testing for fwaas_v2
+name: functional-fwaas_v2
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/functional-fwaas.yml'
+      - '**_fw_**'
+      - '!**v1**'
+      - 'CHANGELOG.md'
+      - 'scripts/*'
+  schedule:
+    - cron: '0 0 */3 * *'
+jobs:
+  functional-basic:
+    strategy:
+      fail-fast: false
+      matrix:
+        name: ["master"]
+        openstack_version: ["master"]
+        ubuntu_version: ["22.04"]
+        include:
+          - name: "antelope"
+            openstack_version: "stable/2023.1"
+            ubuntu_version: "22.04"
+          - name: "zed"
+            openstack_version: "stable/zed"
+            ubuntu_version: "22.04"
+    runs-on: ubuntu-${{ matrix.ubuntu_version }}
+    name: fwaas_v2 on OpenStack ${{ matrix.name }} with defaults and run basic acceptance tests
+    steps:
+      - name: Checkout TPO
+        uses: actions/checkout@v3
+      - name: Deploy devstack
+        uses: EmilienM/devstack-action@v0.11
+        with:
+          branch: ${{ matrix.openstack_version }}
+          conf_overrides: |
+            enable_plugin neutron-fwaas https://opendev.org/openstack/neutron-fwaas ${{ matrix.openstack_version }}
+            Q_AGENT=openvswitch
+            Q_ML2_PLUGIN_MECHANISM_DRIVERS=openvswitch,l2population
+            Q_ML2_PLUGIN_TYPE_DRIVERS=flat,gre,vlan,vxlan
+            Q_ML2_TENANT_NETWORK_TYPE=vxlan
+            Q_TUNNEL_TYPES=vxlan,gre
+          enabled_services: 'q-svc,q-agt,q-dhcp,q-l3,q-meta,q-fwaas-v2,-cinder,-horizon,-tempest,-swift,-c-sch,-c-api,-c-vol,-c-bak,-ovn,-ovn-controller,-ovn-northd,-q-ovn-metadata-agent'
+      - name: Checkout go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.20'
+      - name: Run TPO acceptance tests
+        run: OS_FW_ENVIRONMENT="1" ./scripts/acceptancetest.sh
+        env:
+          DEVSTACK_PATH: ${{ github.workspace }}/devstack
+          ACCEPTANCE_TESTS_FILTER: "^.*FW.*V2.*$"
+          OS_BRANCH: ${{ matrix.openstack_version }}
+      - name: Generate logs on failure
+        run: ./scripts/collectlogs.sh
+        if: failure()
+      - name: Upload logs artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: functional-fwaas_v2-${{ matrix.name }}
+          path: /tmp/devstack-logs/*
