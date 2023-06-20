@@ -102,14 +102,26 @@ func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.Reso
 	}
 
 	filename := filepath.Join(dir, fmt.Sprintf("%x.img", md5.Sum([]byte(furl))))
-	_, err := os.Stat(filename)
-	if err == nil {
-		log.Printf("[DEBUG] File exists %s", filename)
-		return filename, nil
+	// a cleanup func to delete a failed file
+	delFile := func() {
+		if err := os.Remove(filename); err != nil {
+			log.Printf("[DEBUG] failed to cleanup the %q file: %s", filename, err)
+		}
 	}
 
-	if !os.IsNotExist(err) {
+	info, err := os.Stat(filename)
+	if err != nil && !os.IsNotExist(err) {
 		return "", fmt.Errorf("Error while trying to access file %q: %s", filename, err)
+	}
+
+	// check if the file size is zero
+	if info != nil {
+		if info.Size() != 0 {
+			log.Printf("[DEBUG] File exists %s", filename)
+			return filename, nil
+		}
+		// delete the zero size file
+		delFile()
 	}
 
 	log.Printf("[DEBUG] File doens't exists %s. will download from %s", filename, furl)
@@ -118,13 +130,6 @@ func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.Reso
 		return "", fmt.Errorf("Error creating file %q: %s", filename, err)
 	}
 	defer file.Close()
-
-	// a cleanup func to delete a failed file
-	delFile := func() {
-		if err := os.Remove(filename); err != nil {
-			log.Printf("[DEBUG] failed to cleanup the %q file: %s", filename, err)
-		}
-	}
 
 	httpClient := &client.ProviderClient.HTTPClient
 	request, err := http.NewRequest("GET", furl, nil)
