@@ -302,7 +302,7 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 		var imgFile *os.File
 
 		// downloading/getting image file props
-		imgFilePath, err = resourceImagesImageV2File(imageClient, d)
+		imgFilePath, err = resourceImagesImageV2File(imageClient, d, config.MutexKV)
 		if err != nil {
 			return diag.Errorf("Error opening file for Image: %s", err)
 		}

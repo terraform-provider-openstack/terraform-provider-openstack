@@ -17,11 +17,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/ulikunitz/xz"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/members"
-	"github.com/ulikunitz/xz"
+	"github.com/gophercloud/utils/terraform/mutexkv"
 )
 
 func resourceImagesImageV2MemberStatusFromString(v string) images.ImageMemberStatus {
@@ -86,7 +87,7 @@ func resourceImagesImageV2FileProps(filename string) (int64, string, error) {
 	return filesize, filechecksum, nil
 }
 
-func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.ResourceData) (string, error) {
+func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.ResourceData, mutexKV *mutexkv.MutexKV) (string, error) {
 	if filename := d.Get("local_file_path").(string); filename != "" {
 		return filename, nil
 	}
@@ -101,7 +102,12 @@ func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.Reso
 		return "", fmt.Errorf("unable to create dir %s: %s", dir, err)
 	}
 
-	filename := filepath.Join(dir, fmt.Sprintf("%x.img", md5.Sum([]byte(furl))))
+	// calculate the hashsum and create a lock to prevent simultaneous file access
+	md5sum := fmt.Sprintf("%x", md5.Sum([]byte(furl)))
+	mutexKV.Lock(md5sum)
+	defer mutexKV.Unlock(md5sum)
+
+	filename := filepath.Join(dir, fmt.Sprintf("%s.img", md5sum))
 	// a cleanup func to delete a failed file
 	delFile := func() {
 		if err := os.Remove(filename); err != nil {
@@ -115,6 +121,7 @@ func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.Reso
 	}
 
 	// check if the file size is zero
+	// it could be a leftover from older provider versions
 	if info != nil {
 		if info.Size() != 0 {
 			log.Printf("[DEBUG] File exists %s", filename)
