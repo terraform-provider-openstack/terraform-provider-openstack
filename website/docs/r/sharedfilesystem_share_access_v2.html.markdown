@@ -148,6 +148,7 @@ The following arguments are supported:
 * `access_to` - See Argument Reference above.
 * `access_level` - See Argument Reference above.
 * `access_key` - The access credential of the entity granted access.
+* `state` - The share access state.
 
 ## Import
 
