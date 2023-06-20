@@ -13,8 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/apiversions"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/errors"
+	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shareaccessrules"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
 )
 
@@ -75,6 +75,11 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 				Type:      schema.TypeString,
 				Computed:  true,
 				Sensitive: true,
+			},
+
+			"state": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -152,52 +157,38 @@ func resourceSharedFilesystemShareAccessV2Read(ctx context.Context, d *schema.Re
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	// Set the client to the minimum supported microversion.
-	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
-
-	// Now check and see if the OpenStack environment supports microversion 2.21.
-	// If so, use that for the API request for access_key support.
-	apiInfo, err := apiversions.Get(sfsClient, "v2").Extract()
-	if err != nil {
-		return diag.Errorf("Unable to query API endpoint for openstack_sharedfilesystem_share_access_v2: %s", err)
-	}
-
-	compatible, err := compatibleMicroversion("min", "2.21", apiInfo.Version)
-	if err != nil {
-		return diag.Errorf("Error comparing microversions for openstack_sharedfilesystem_share_access_v2 %s: %s", d.Id(), err)
-	}
-
-	if compatible {
-		sfsClient.Microversion = sharedFilesystemV2SharedAccessMinMicroversion
-	}
-
 	shareID := d.Get("share_id").(string)
-	access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
+	access, _, err := sharedFilesystemShareAccessV2StateRefreshFunc(sfsClient, shareID, d.Id())()
 	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_sharedfilesystem_share_access_v2"))
+		return diag.FromErr(CheckDeleted(d, err, "Failed to retrieve openstack_sharedfilesystem_share_access_v2"))
 	}
 
-	for _, v := range access {
-		if v.ID == d.Id() {
-			log.Printf("[DEBUG] Retrieved openstack_sharedfilesystem_share_access_v2 %s: %#v", d.Id(), v)
+	log.Printf("[DEBUG] Retrieved openstack_sharedfilesystem_share_access_v2 %s: %#v", d.Id(), access)
+	switch access := access.(type) {
+	case shareaccessrules.ShareAccess:
+		d.Set("access_type", access.AccessType)
+		d.Set("access_to", access.AccessTo)
+		d.Set("access_level", access.AccessLevel)
+		d.Set("region", GetRegion(d, config))
+		d.Set("access_key", access.AccessKey)
+		d.Set("state", access.State)
 
-			d.Set("access_type", v.AccessType)
-			d.Set("access_to", v.AccessTo)
-			d.Set("access_level", v.AccessLevel)
-			d.Set("region", GetRegion(d, config))
+		return nil
+	case shares.AccessRight:
+		d.Set("access_type", access.AccessType)
+		d.Set("access_to", access.AccessTo)
+		d.Set("access_level", access.AccessLevel)
+		d.Set("region", GetRegion(d, config))
+		d.Set("state", access.State)
 
-			// This will only be set if the Shared Filesystem environment supports
-			// microversion 2.21.
-			d.Set("access_key", v.AccessKey)
+		// This will only be set if the Shared Filesystem environment supports
+		// microversion 2.21.
+		d.Set("access_key", access.AccessKey)
 
-			return nil
-		}
+		return nil
 	}
 
-	log.Printf("[DEBUG] Unable to find openstack_sharedfilesystem_share_access_v2 %s", d.Id())
-	d.SetId("")
-
-	return nil
+	return diag.Errorf("Unknown share access rules type: %T", access)
 }
 
 func resourceSharedFilesystemShareAccessV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
