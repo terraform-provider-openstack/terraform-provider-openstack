@@ -79,17 +79,20 @@ func resourceFWPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	audited := d.Get("audited").(bool)
 	opts := policies.CreateOpts{
 		Name:          d.Get("name").(string),
 		Description:   d.Get("description").(string),
-		Audited:       &audited,
 		TenantID:      d.Get("tenant_id").(string),
 		FirewallRules: expandToStringSlice(d.Get("rules").([]interface{})),
 	}
 
-	if r, ok := d.GetOk("shared"); ok {
-		shared := r.(bool)
+	if v, ok := d.GetOk("audited"); ok {
+		audited := v.(bool)
+		opts.Audited = &audited
+	}
+
+	if v, ok := d.GetOk("shared"); ok {
+		shared := v.(bool)
 		opts.Shared = &shared
 	}
 

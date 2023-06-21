@@ -79,9 +79,6 @@ The following arguments are supported:
     `shared` status of an existing firewall policy. Only administrative users
     can specify if the policy should be shared.
 
-* `value_specs` - (Optional) Map of additional options. Changing this creates a
-    new firewall policy.
-
 ## Attributes Reference
 
 The following attributes are exported:

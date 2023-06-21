@@ -166,11 +166,13 @@ func dataSourceFWRuleV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if v, ok := d.GetOk("shared"); ok {
-		listOpts.Shared = v.(*bool)
+		shared := v.(bool)
+		listOpts.Shared = &shared
 	}
 
 	if v, ok := d.GetOk("enabled"); ok {
-		listOpts.Enabled = v.(*bool)
+		enabled := v.(bool)
+		listOpts.Enabled = &enabled
 	}
 
 	pages, err := rules.List(networkingClient, listOpts).AllPages()

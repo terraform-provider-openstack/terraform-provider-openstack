@@ -1,6 +1,8 @@
 package openstack
 
 import (
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/gophercloud/gophercloud"
@@ -14,12 +16,17 @@ func fwPolicyV2DeleteFunc(networkingClient *gophercloud.ServiceClient, id string
 			return "", "DELETED", nil
 		}
 
-		if _, ok := err.(gophercloud.ErrDefault409); ok {
-			// This error usually means that the policy is attached
-			// to a firewall. At this point, the firewall is probably
-			// being delete. So, we retry a few times.
-
-			return nil, "ACTIVE", nil
+		if err != nil {
+			switch err.(type) {
+			case gophercloud.ErrDefault404:
+				// This error usually means that the policy was deleted manually
+				log.Printf("[DEBUG] Unable to find openstack_fw_policy_v2 %s: %s", id, err)
+				return "", "DELETED", nil
+			case gophercloud.ErrDefault409:
+				// This error usually means that the policy is attached to a firewall.
+				log.Printf("[DEBUG] Error to delete openstack_fw_policy_v2 %s: %s", id, err)
+				return nil, "ACTIVE", nil
+			}
 		}
 
 		return nil, "ACTIVE", err

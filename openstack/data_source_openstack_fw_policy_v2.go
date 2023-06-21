@@ -91,11 +91,13 @@ func dataSourceFWPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if v, ok := d.GetOk("shared"); ok {
-		listOpts.Shared = v.(*bool)
+		shared := v.(bool)
+		listOpts.Shared = &shared
 	}
 
 	if v, ok := d.GetOk("audited"); ok {
-		listOpts.Audited = v.(*bool)
+		audited := v.(bool)
+		listOpts.Audited = &audited
 	}
 
 	pages, err := policies.List(networkingClient, listOpts).AllPages()
