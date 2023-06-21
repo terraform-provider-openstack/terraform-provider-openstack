@@ -68,12 +68,6 @@ func resourceFWPolicyV2() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-
-			"value_specs": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				ForceNew: true,
-			},
 		},
 	}
 }
@@ -145,28 +139,36 @@ func resourceFWPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	var updateOpts policies.UpdateOpts
+	var (
+		hasChange  bool
+		updateOpts policies.UpdateOpts
+	)
 
 	if d.HasChange("name") {
+		hasChange = true
 		name := d.Get("name").(string)
 		updateOpts.Name = &name
 	}
 
 	if d.HasChange("description") {
+		hasChange = true
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
 	}
 
 	if d.HasChange("rules") {
+		hasChange = true
 		rules := expandToStringSlice(d.Get("rules").([]interface{}))
 		updateOpts.FirewallRules = &rules
 	}
 
-	log.Printf("[DEBUG] openstack_fw_policy_v2 %s update options: %#v", d.Id(), updateOpts)
+	if hasChange {
+		log.Printf("[DEBUG] openstack_fw_policy_v2 %s update options: %#v", d.Id(), updateOpts)
 
-	err = policies.Update(networkingClient, d.Id(), updateOpts).Err
-	if err != nil {
-		return diag.Errorf("Error updating openstack_fw_policy_v2 %s: %s", d.Id(), err)
+		err = policies.Update(networkingClient, d.Id(), updateOpts).Err
+		if err != nil {
+			return diag.Errorf("Error updating openstack_fw_policy_v2 %s: %s", d.Id(), err)
+		}
 	}
 
 	return resourceFWPolicyV2Read(ctx, d, meta)

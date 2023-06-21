@@ -191,33 +191,43 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	var updateOpts rules.UpdateOpts
+	var (
+		hasChange  bool
+		updateOpts rules.UpdateOpts
+	)
+
 	if d.HasChange("name") {
+		hasChange = true
 		name := d.Get("name").(string)
 		updateOpts.Name = &name
 	}
 
 	if d.HasChange("description") {
+		hasChange = true
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
 	}
 
 	if d.HasChange("protocol") {
+		hasChange = true
 		protocol := rules.Protocol(d.Get("protocol").(string))
 		updateOpts.Protocol = &protocol
 	}
 
 	if d.HasChange("action") {
+		hasChange = true
 		action := rules.Action(d.Get("action").(string))
 		updateOpts.Action = &action
 	}
 
 	if d.HasChange("ip_version") {
+		hasChange = true
 		ipVersion := gophercloud.IPVersion(d.Get("ip_version").(int))
 		updateOpts.IPVersion = &ipVersion
 	}
 
 	if d.HasChange("source_ip_address") {
+		hasChange = true
 		sourceIPAddress := d.Get("source_ip_address").(string)
 		updateOpts.SourceIPAddress = &sourceIPAddress
 
@@ -227,6 +237,7 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if d.HasChange("source_port") {
+		hasChange = true
 		sourcePort := d.Get("source_port").(string)
 		if sourcePort == "" {
 			sourcePort = "0"
@@ -239,6 +250,7 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if d.HasChange("destination_ip_address") {
+		hasChange = true
 		destinationIPAddress := d.Get("destination_ip_address").(string)
 		updateOpts.DestinationIPAddress = &destinationIPAddress
 
@@ -248,6 +260,7 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if d.HasChange("destination_port") {
+		hasChange = true
 		destinationPort := d.Get("destination_port").(string)
 		if destinationPort == "" {
 			destinationPort = "0"
@@ -261,19 +274,24 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if d.HasChange("enabled") {
+		hasChange = true
 		enabled := d.Get("enabled").(bool)
 		updateOpts.Enabled = &enabled
 	}
 
 	if d.HasChange("shared") {
+		hasChange = true
 		shared := d.Get("shared").(bool)
 		updateOpts.Enabled = &shared
 	}
 
-	log.Printf("[DEBUG] openstack_fw_rule_v2 %s update options: %#v", d.Id(), updateOpts)
-	err = rules.Update(networkingClient, d.Id(), updateOpts).Err
-	if err != nil {
-		return diag.Errorf("Error updating openstack_fw_rule_v2 %s: %s", d.Id(), err)
+	if hasChange {
+		log.Printf("[DEBUG] openstack_fw_rule_v2 %s update options: %#v", d.Id(), updateOpts)
+
+		err = rules.Update(networkingClient, d.Id(), updateOpts).Err
+		if err != nil {
+			return diag.Errorf("Error updating openstack_fw_rule_v2 %s: %s", d.Id(), err)
+		}
 	}
 
 	return resourceFWRuleV2Read(ctx, d, meta)

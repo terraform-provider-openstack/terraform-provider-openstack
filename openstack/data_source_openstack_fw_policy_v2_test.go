@@ -13,6 +13,7 @@ func TestAccFWPolicyV2DataSource_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckFW(t)
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
@@ -43,6 +44,7 @@ func TestAccFWPolicyV2DataSource_FWPolicyID(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckFW(t)
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
@@ -78,8 +80,8 @@ func testAccCheckFWPolicyV2DataSourceID(n string) resource.TestCheckFunc {
 
 const testAccFWPolicyV2DataSourceBasic = `
 resource "openstack_fw_policy_v2" "policy_1" {
-    name        = "policy_1"
-	description = "My firewall policy"
+  name        = "policy_1"
+  description = "My firewall policy"
 }
 `
 
@@ -88,11 +90,11 @@ func testAccFWPolicyV2DataSourceName() string {
 %s
 
 data "openstack_fw_policy_v2" "policy_1" {
-	name        = "policy_1"
-	description = "My firewall policy"
-	tenant_id   = "${openstack_fw_policy_v2.policy_1.tenant_id}"
-	shared      = false
-	audited     = false
+  name        = "policy_1"
+  description = "My firewall policy"
+  tenant_id   = "${openstack_fw_policy_v2.policy_1.tenant_id}"
+  shared      = false
+  audited     = false
 }
 `, testAccFWPolicyV2DataSourceBasic)
 }
@@ -102,7 +104,7 @@ func testAccFWPolicyV2DataSourcePolicyID() string {
 %s
 
 data "openstack_fw_policy_v2" "policy_1" {
-	policy_id = "${openstack_fw_policy_v2.policy_1.id}"
+  policy_id = "${openstack_fw_policy_v2.policy_1.id}"
 }
 `, testAccFWPolicyV2DataSourceBasic)
 }
