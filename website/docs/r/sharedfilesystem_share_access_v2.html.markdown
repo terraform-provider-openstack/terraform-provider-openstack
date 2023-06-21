@@ -31,14 +31,14 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name       = "subnet_1"
   cidr       = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   name              = "test_sharenetwork"
   description       = "test share network with security services"
-  neutron_net_id    = "${openstack_networking_network_v2.network_1.id}"
-  neutron_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  neutron_net_id    = openstack_networking_network_v2.network_1.id
+  neutron_subnet_id = openstack_networking_subnet_v2.subnet_1.id
 }
 
 resource "openstack_sharedfilesystem_share_v2" "share_1" {
@@ -46,11 +46,11 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
   description      = "test share description"
   share_proto      = "NFS"
   size             = 1
-  share_network_id = "${openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1.id}"
+  share_network_id = openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1.id
 }
 
 resource "openstack_sharedfilesystem_share_access_v2" "share_access_1" {
-  share_id     = "${openstack_sharedfilesystem_share_v2.share_1.id}"
+  share_id     = openstack_sharedfilesystem_share_v2.share_1.id
   access_type  = "ip"
   access_to    = "192.168.199.10"
   access_level = "rw"
@@ -69,7 +69,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name       = "subnet_1"
   cidr       = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
@@ -87,10 +87,10 @@ resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   name              = "test_sharenetwork_secure"
   description       = "share the secure love"
-  neutron_net_id    = "${openstack_networking_network_v2.network_1.id}"
-  neutron_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  neutron_net_id    = openstack_networking_network_v2.network_1.id
+  neutron_subnet_id = openstack_networking_subnet_v2.subnet_1.id
   security_service_ids = [
-    "${openstack_sharedfilesystem_securityservice_v2.securityservice_1.id}",
+    openstack_sharedfilesystem_securityservice_v2.securityservice_1.id,
   ]
 }
 
@@ -98,25 +98,25 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
   name             = "cifs_share"
   share_proto      = "CIFS"
   size             = 1
-  share_network_id = "${openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1.id}"
+  share_network_id = openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1.id
 }
 
 resource "openstack_sharedfilesystem_share_access_v2" "share_access_1" {
-  share_id     = "${openstack_sharedfilesystem_share_v2.share_1.id}"
+  share_id     = openstack_sharedfilesystem_share_v2.share_1.id
   access_type  = "user"
   access_to    = "windows"
   access_level = "ro"
 }
 
 resource "openstack_sharedfilesystem_share_access_v2" "share_access_2" {
-  share_id     = "${openstack_sharedfilesystem_share_v2.share_1.id}"
+  share_id     = openstack_sharedfilesystem_share_v2.share_1.id
   access_type  = "user"
   access_to    = "linux"
   access_level = "rw"
 }
 
 output "export_locations" {
-  value = "${openstack_sharedfilesystem_share_v2.share_1.export_locations}"
+  value = openstack_sharedfilesystem_share_v2.share_1.export_locations
 }
 ```
 

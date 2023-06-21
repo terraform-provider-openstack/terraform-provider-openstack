@@ -39,8 +39,8 @@ resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name          = "subnet_1"
   cidr          = "10.11.12.0/25"
-  network_id    = "${openstack_networking_network_v2.network_1.id}"
-  subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+  network_id    = openstack_networking_network_v2.network_1.id
+  subnetpool_id = openstack_networking_subnetpool_v2.subnetpool_1.id
 }
 ```
 

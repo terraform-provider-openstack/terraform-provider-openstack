@@ -29,8 +29,8 @@ resource "openstack_networking_floatingip_v2" "fip_1" {
 }
 
 resource "openstack_compute_floatingip_associate_v2" "fip_1" {
-  floating_ip = "${openstack_networking_floatingip_v2.fip_1.address}"
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+  floating_ip = openstack_networking_floatingip_v2.fip_1.address
+  instance_id = openstack_compute_instance_v2.instance_1.id
 }
 ```
 
@@ -58,9 +58,9 @@ resource "openstack_networking_floatingip_v2" "fip_1" {
 }
 
 resource "openstack_compute_floatingip_associate_v2" "fip_1" {
-  floating_ip = "${openstack_networking_floatingip_v2.fip_1.address}"
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  fixed_ip    = "${openstack_compute_instance_v2.instance_1.network.1.fixed_ip_v4}"
+  floating_ip = openstack_networking_floatingip_v2.fip_1.address
+  instance_id = openstack_compute_instance_v2.instance_1.id
+  fixed_ip    = openstack_compute_instance_v2.instance_1.network.1.fixed_ip_v4
 }
 ```
 

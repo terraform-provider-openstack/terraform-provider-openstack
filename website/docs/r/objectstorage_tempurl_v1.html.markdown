@@ -28,14 +28,14 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 }
 
 resource "openstack_objectstorage_object_v1" "object_1" {
-  container_name = "${openstack_objectstorage_container_v1.container_1.name}"
+  container_name = openstack_objectstorage_container_v1.container_1.name
   name           = "test"
   content        = "Hello, world!"
 }
 
 resource "openstack_objectstorage_tempurl_v1" "obj_tempurl" {
-  container = "${openstack_objectstorage_container_v1.container_1.name}"
-  object    = "${openstack_objectstorage_object_v1.object_1.name}"
+  container = openstack_objectstorage_container_v1.container_1.name
+  object    = openstack_objectstorage_object_v1.object_1.name
   method    = "post"
   ttl       = 20
 }

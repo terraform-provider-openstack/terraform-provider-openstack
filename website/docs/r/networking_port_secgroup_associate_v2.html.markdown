@@ -32,9 +32,9 @@ data "openstack_networking_secgroup_v2" "secgroup" {
 }
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
-  port_id = "${data.openstack_networking_port_v2.system_port.id}"
+  port_id = data.openstack_networking_port_v2.system_port.id
   security_group_ids = [
-    "${data.openstack_networking_secgroup_v2.secgroup.id}",
+    data.openstack_networking_secgroup_v2.secgroup.id,
   ]
 }
 ```
@@ -51,10 +51,10 @@ data "openstack_networking_secgroup_v2" "secgroup" {
 }
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
-  port_id = "${data.openstack_networking_port_v2.system_port.id}"
+  port_id = data.openstack_networking_port_v2.system_port.id
   enforce = "true"
   security_group_ids = [
-    "${data.openstack_networking_secgroup_v2.secgroup.id}",
+    data.openstack_networking_secgroup_v2.secgroup.id,
   ]
 }
 ```
@@ -67,7 +67,7 @@ data "openstack_networking_port_v2" "system_port" {
 }
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
-  port_id            = "${data.openstack_networking_port_v2.system_port.id}"
+  port_id            = data.openstack_networking_port_v2.system_port.id
   enforce            = "true"
   security_group_ids = []
 }

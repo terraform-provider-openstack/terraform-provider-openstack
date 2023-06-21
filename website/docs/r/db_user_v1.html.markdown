@@ -22,7 +22,7 @@ state](https://www.terraform.io/docs/language/state/sensitive-data.html).
 ```hcl
 resource "openstack_db_user_v1" "basic" {
   name         = "basic"
-  instance_id  = "${openstack_db_instance_v1.basic.id}"
+  instance_id  = openstack_db_instance_v1.basic.id
   password     = "password"
   databases    = ["testdb"]
 }

@@ -25,7 +25,7 @@ resource "openstack_dns_zone_v2" "example_zone" {
 }
 
 resource "openstack_dns_recordset_v2" "rs_example_com" {
-  zone_id     = "${openstack_dns_zone_v2.example_zone.id}"
+  zone_id     = openstack_dns_zone_v2.example_zone.id
   name        = "rs.example.com."
   description = "An example record set"
   ttl         = 3000

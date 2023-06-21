@@ -47,7 +47,7 @@ won't be detected as a state change, e.g. changing plain text payload from
 ```hcl
 resource "openstack_keymanager_secret_v1" "secret_1" {
   name                     = "password"
-  payload                  = "${base64encode("password with the whitespace at the end ")}"
+  payload                  = base64encode("password with the whitespace at the end ")
   secret_type              = "passphrase"
   payload_content_type     = "application/octet-stream"
   payload_content_encoding = "base64"
@@ -59,10 +59,10 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
 ```hcl
 resource "openstack_keymanager_secret_v1" "secret_1" {
   name                 = "certificate"
-  payload              = "${file("certificate.pem")}"
+  payload              = file("certificate.pem")
   secret_type          = "certificate"
   payload_content_type = "text/plain"
-  expiration           = "${timeadd(timestamp(), format("%dh", 8760))}" # one year in hours
+  expiration           = timeadd(timestamp(), format("%dh", 8760)) # one year in hours
 
   lifecycle {
     ignore_changes = [
@@ -79,7 +79,7 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
 ```hcl
 resource "openstack_keymanager_secret_v1" "secret_1" {
   name                 = "certificate"
-  payload              = "${file("certificate.pem")}"
+  payload              = file("certificate.pem")
   secret_type          = "certificate"
   payload_content_type = "text/plain"
 
