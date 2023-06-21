@@ -24,7 +24,7 @@ data "openstack_images_image_v2" "rancheros" {
 }
 
 resource "openstack_images_image_access_accept_v2" "rancheros_member" {
-  image_id = "${data.openstack_images_image_v2.rancheros.id}"
+  image_id = data.openstack_images_image_v2.rancheros.id
   status   = "accepted"
 }
 ```

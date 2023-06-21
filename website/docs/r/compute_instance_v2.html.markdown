@@ -58,8 +58,8 @@ resource "openstack_compute_instance_v2" "myinstance" {
 }
 
 resource "openstack_compute_volume_attach_v2" "attached" {
-  instance_id = "${openstack_compute_instance_v2.myinstance.id}"
-  volume_id   = "${openstack_blockstorage_volume_v2.myvol.id}"
+  instance_id = openstack_compute_instance_v2.myinstance.id
+  volume_id   = openstack_blockstorage_volume_v2.myvol.id
 }
 ```
 
@@ -103,7 +103,7 @@ resource "openstack_compute_instance_v2" "boot-from-volume" {
   security_groups = ["default"]
 
   block_device {
-    uuid                  = "${openstack_blockstorage_volume_v1.myvol.id}"
+    uuid                  = openstack_blockstorage_volume_v1.myvol.id
     source_type           = "volume"
     boot_index            = 0
     destination_type      = "volume"
@@ -168,7 +168,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 
   block_device {
-    uuid                  = "${openstack_blockstorage_volume_v2.volume_1.id}"
+    uuid                  = openstack_blockstorage_volume_v2.volume_1.id
     source_type           = "volume"
     destination_type      = "volume"
     boot_index            = 1
@@ -201,9 +201,9 @@ resource "openstack_compute_instance_v2" "multi-net" {
 }
 
 resource "openstack_compute_floatingip_associate_v2" "myip" {
-  floating_ip = "${openstack_networking_floatingip_v2.myip.address}"
-  instance_id = "${openstack_compute_instance_v2.multi-net.id}"
-  fixed_ip    = "${openstack_compute_instance_v2.multi-net.network.1.fixed_ip_v4}"
+  floating_ip = openstack_networking_floatingip_v2.myip.address
+  instance_id = openstack_compute_instance_v2.multi-net.id
+  fixed_ip    = openstack_compute_instance_v2.multi-net.network.1.fixed_ip_v4
 }
 ```
 
@@ -278,7 +278,7 @@ resource "openstack_compute_flavor_v2" "flavor-with-swap" {
 
 resource "openstack_compute_instance_v2" "vm-swap" {
   name            = "vm_swap"
-  flavor_id       = "${openstack_compute_flavor_v2.flavor-with-swap.id}"
+  flavor_id       = openstack_compute_flavor_v2.flavor-with-swap.id
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
 
@@ -620,7 +620,7 @@ resource "openstack_networking_secgroup_v2" "sg_1" {
 
 resource "openstack_compute_instance_v2" "foo" {
   name            = "terraform-test"
-  security_groups = ["${openstack_networking_secgroup_v2.sg_1.name}"]
+  security_groups = [openstack_networking_secgroup_v2.sg_1.name]
 }
 ```
 
@@ -664,12 +664,12 @@ resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
 
   network {
-    port = "${openstack_networking_port_v2.port_1.id}"
+    port = openstack_networking_port_v2.port_1.id
   }
 
   connection {
     user        = "root"
-    host        = "${openstack_networking_port_v2.port_1.fixed_ip.0.ip_address}"
+    host        = openstack_networking_port_v2.port_1.fixed_ip.0.ip_address
     private_key = "~/path/to/key"
   }
 
@@ -825,8 +825,8 @@ resource "openstack_blockstorage_volume_v2" "volume_1" {
   name = "<vol_name>"
 }
 resource "openstack_compute_volume_attach_v2" "va_1" {
-  volume_id   = "${openstack_blockstorage_volume_v2.volume_1.id}"
-  instance_id = "${openstack_compute_instance_v2.instance_2.id}"
+  volume_id   = openstack_blockstorage_volume_v2.volume_1.id
+  instance_id = openstack_compute_instance_v2.instance_2.id
 }
 ```
 To import the instance outlined in the above configuration

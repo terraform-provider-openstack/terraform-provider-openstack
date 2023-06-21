@@ -35,7 +35,7 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
 }
 
 resource "openstack_blockstorage_volume_attach_v3" "va_1" {
-  volume_id  = "${openstack_blockstorage_volume_v3.volume_1.id}"
+  volume_id  = openstack_blockstorage_volume_v3.volume_1.id
   device     = "auto"
   host_name  = "devstack"
   ip_address = "192.168.255.10"

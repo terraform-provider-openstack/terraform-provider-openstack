@@ -25,7 +25,7 @@ resource "openstack_dns_zone_v2" "example_zone" {
 }
 
 resource "openstack_dns_transfer_request_v2" "request_1" {
-  zone_id           = "${openstack_dns_zone_v2.example_zone.id}"
+  zone_id           = openstack_dns_zone_v2.example_zone.id
   description       = "a transfer request"
 }
 ```

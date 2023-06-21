@@ -28,8 +28,8 @@ resource "openstack_compute_instance_v2" "instance_1" {
 }
 
 resource "openstack_compute_interface_attach_v2" "ai_1" {
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  network_id  = "${openstack_networking_port_v2.network_1.id}"
+  instance_id = openstack_compute_instance_v2.instance_1.id
+  network_id  = openstack_networking_port_v2.network_1.id
 }
 
 ```
@@ -48,8 +48,8 @@ resource "openstack_compute_instance_v2" "instance_1" {
 }
 
 resource "openstack_compute_interface_attach_v2" "ai_1" {
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  network_id  = "${openstack_networking_port_v2.network_1.id}"
+  instance_id = openstack_compute_instance_v2.instance_1.id
+  network_id  = openstack_networking_port_v2.network_1.id
   fixed_ip    = "10.0.10.10"
 }
 
@@ -66,7 +66,7 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_port_v2" "port_1" {
   name           = "port_1"
-  network_id     = "${openstack_networking_network_v2.network_1.id}"
+  network_id     = openstack_networking_network_v2.network_1.id
   admin_state_up = "true"
 }
 
@@ -77,8 +77,8 @@ resource "openstack_compute_instance_v2" "instance_1" {
 }
 
 resource "openstack_compute_interface_attach_v2" "ai_1" {
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  port_id     = "${openstack_networking_port_v2.port_1.id}"
+  instance_id = openstack_compute_instance_v2.instance_1.id
+  port_id     = openstack_networking_port_v2.port_1.id
 }
 
 ```
@@ -93,8 +93,8 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_port_v2" "ports" {
   count          = 2
-  name           = "${format("port-%02d", count.index + 1)}"
-  network_id     = "${openstack_networking_network_v2.network_1.id}"
+  name           = format("port-%02d", count.index + 1)
+  network_id     = openstack_networking_network_v2.network_1.id
   admin_state_up = "true"
 }
 
@@ -105,8 +105,8 @@ resource "openstack_compute_instance_v2" "instance_1" {
 
 resource "openstack_compute_interface_attach_v2" "attachments" {
   count       = 2
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
   port_id     = "${openstack_networking_port_v2.ports.*.id[count.index]}"
+  instance_id = openstack_compute_instance_v2.instance_1.id
 }
 ```
 
@@ -125,8 +125,8 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_port_v2" "ports" {
   count          = 2
-  name           = "${format("port-%02d", count.index + 1)}"
-  network_id     = "${openstack_networking_network_v2.network_1.id}"
+  name           = format("port-%02d", count.index + 1)
+  network_id     = openstack_networking_network_v2.network_1.id
   admin_state_up = "true"
 }
 
@@ -136,12 +136,12 @@ resource "openstack_compute_instance_v2" "instance_1" {
 }
 
 resource "openstack_compute_interface_attach_v2" "ai_1" {
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+  instance_id = openstack_compute_instance_v2.instance_1.id
   port_id     = "${openstack_networking_port_v2.ports.*.id[0]}"
 }
 
 resource "openstack_compute_interface_attach_v2" "ai_2" {
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+  instance_id = openstack_compute_instance_v2.instance_1.id
   port_id     = "${openstack_networking_port_v2.ports.*.id[1]}"
 }
 ```

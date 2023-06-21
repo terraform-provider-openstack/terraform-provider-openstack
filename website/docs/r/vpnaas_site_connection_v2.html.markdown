@@ -16,13 +16,13 @@ Manages a V2 Neutron IPSec site connection resource within OpenStack.
 ```hcl
 resource "openstack_vpnaas_site_connection_v2" "conn_1" {
   name              = "connection_1"
-  ikepolicy_id      = "${openstack_vpnaas_ike_policy_v2.policy_2.id}"
-  ipsecpolicy_id    = "${openstack_vpnaas_ipsec_policy_v2.policy_1.id}"
-  vpnservice_id     = "${openstack_vpnaas_service_v2.service_1.id}"
+  ikepolicy_id      = openstack_vpnaas_ike_policy_v2.policy_2.id
+  ipsecpolicy_id    = openstack_vpnaas_ipsec_policy_v2.policy_1.id
+  vpnservice_id     = openstack_vpnaas_service_v2.service_1.id
   psk               = "secret"
   peer_address      = "192.168.10.1"
-  local_ep_group_id = "${openstack_vpnaas_endpoint_group_v2.group_2.id}"
-  peer_ep_group_id  = "${openstack_vpnaas_endpoint_group_v2.group_1.id}"
+  local_ep_group_id = openstack_vpnaas_endpoint_group_v2.group_2.id
+  peer_ep_group_id  = openstack_vpnaas_endpoint_group_v2.group_1.id
   dpd {
     action   = "restart"
     timeout  = 42

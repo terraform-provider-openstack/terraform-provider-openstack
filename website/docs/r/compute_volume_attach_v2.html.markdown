@@ -28,8 +28,8 @@ resource "openstack_compute_instance_v2" "instance_1" {
 }
 
 resource "openstack_compute_volume_attach_v2" "va_1" {
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  volume_id   = "${openstack_blockstorage_volume_v2.volume_1.id}"
+  instance_id = openstack_compute_instance_v2.instance_1.id
+  volume_id   = openstack_blockstorage_volume_v2.volume_1.id
 }
 ```
 
@@ -38,7 +38,7 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
 ```hcl
 resource "openstack_blockstorage_volume_v2" "volumes" {
   count = 2
-  name  = "${format("vol-%02d", count.index + 1)}"
+  name  = format("vol-%02d", count.index + 1)
   size  = 1
 }
 
@@ -49,7 +49,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
 
 resource "openstack_compute_volume_attach_v2" "attachments" {
   count       = 2
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+  instance_id = openstack_compute_instance_v2.instance_1.id
   volume_id   = "${openstack_blockstorage_volume_v2.volumes.*.id[count.index]}"
 }
 
@@ -68,7 +68,7 @@ explicit dependencies between the volumes, such as:
 ```hcl
 resource "openstack_blockstorage_volume_v2" "volumes" {
   count = 2
-  name  = "${format("vol-%02d", count.index + 1)}"
+  name  = format("vol-%02d", count.index + 1)
   size  = 1
 }
 
@@ -78,13 +78,13 @@ resource "openstack_compute_instance_v2" "instance_1" {
 }
 
 resource "openstack_compute_volume_attach_v2" "attach_1" {
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  volume_id   = "${openstack_blockstorage_volume_v2.volumes.0.id}"
+  instance_id = openstack_compute_instance_v2.instance_1.id
+  volume_id   = openstack_blockstorage_volume_v2.volumes.0.id
 }
 
 resource "openstack_compute_volume_attach_v2" "attach_2" {
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  volume_id   = "${openstack_blockstorage_volume_v2.volumes.1.id}"
+  instance_id = openstack_compute_instance_v2.instance_1.id
+  volume_id   = openstack_blockstorage_volume_v2.volumes.1.id
 
   depends_on = ["openstack_compute_volume_attach_v2.attach_1"]
 }
@@ -117,14 +117,14 @@ resource "openstack_compute_instance_v2" "instance_2" {
 }
 
 resource "openstack_compute_volume_attach_v2" "va_1" {
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  volume_id   = "${openstack_blockstorage_volume_v2.volume_1.id}"
+  instance_id = openstack_compute_instance_v2.instance_1.id
+  volume_id   = openstack_blockstorage_volume_v2.volume_1.id
   multiattach = true
 }
 
 resource "openstack_compute_volume_attach_v2" "va_2" {
-  instance_id = "${openstack_compute_instance_v2.instance_2.id}"
-  volume_id   = "${openstack_blockstorage_volume_v2.volume_1.id}"
+  instance_id = openstack_compute_instance_v2.instance_2.id
+  volume_id   = openstack_blockstorage_volume_v2.volume_1.id
   multiattach = true
 
   depends_on = ["openstack_compute_volume_attach_v2.va_1"]

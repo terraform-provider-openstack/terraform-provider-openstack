@@ -29,7 +29,7 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 
 resource "openstack_objectstorage_object_v1" "doc_1" {
   region         = "RegionOne"
-  container_name = "${openstack_objectstorage_container_v1.container_1.name}"
+  container_name = openstack_objectstorage_container_v1.container_1.name
   name           = "test/default.json"
   metadata {
     test = "true"
@@ -61,7 +61,7 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 
 resource "openstack_objectstorage_object_v1" "doc_1" {
   region         = "RegionOne"
-  container_name = "${openstack_objectstorage_container_v1.container_1.name}"
+  container_name = openstack_objectstorage_container_v1.container_1.name
   name           = "test/default.json"
   metadata {
     test = "true"

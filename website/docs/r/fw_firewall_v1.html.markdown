@@ -35,14 +35,14 @@ resource "openstack_fw_rule_v1" "rule_2" {
 resource "openstack_fw_policy_v1" "policy_1" {
   name = "my-policy"
 
-  rules = ["${openstack_fw_rule_v1.rule_1.id}",
-    "${openstack_fw_rule_v1.rule_2.id}",
+  rules = [openstack_fw_rule_v1.rule_1.id,
+    openstack_fw_rule_v1.rule_2.id,
   ]
 }
 
 resource "openstack_fw_firewall_v1" "firewall_1" {
   name      = "my-firewall"
-  policy_id = "${openstack_fw_policy_v1.policy_1.id}"
+  policy_id = openstack_fw_policy_v1.policy_1.id
 }
 ```
 

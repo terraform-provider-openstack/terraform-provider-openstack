@@ -27,7 +27,7 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_blockstorage_quotaset_v2" "quotaset_1" {
-  project_id           = "${openstack_identity_project_v3.project_1.id}"
+  project_id           = openstack_identity_project_v3.project_1.id
   volumes              = 10
   snapshots            = 4
   gigabytes            = 100
