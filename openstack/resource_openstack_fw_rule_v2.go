@@ -282,7 +282,7 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	if d.HasChange("shared") {
 		hasChange = true
 		shared := d.Get("shared").(bool)
-		updateOpts.Enabled = &shared
+		updateOpts.Shared = &shared
 	}
 
 	if hasChange {

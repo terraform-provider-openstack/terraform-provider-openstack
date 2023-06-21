@@ -162,6 +162,18 @@ func resourceFWPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 		updateOpts.FirewallRules = &rules
 	}
 
+	if d.HasChange("audited") {
+		hasChange = true
+		audited := d.Get("audited").(bool)
+		updateOpts.Audited = &audited
+	}
+
+	if d.HasChange("shared") {
+		hasChange = true
+		shared := d.Get("shared").(bool)
+		updateOpts.Shared = &shared
+	}
+
 	if hasChange {
 		log.Printf("[DEBUG] openstack_fw_policy_v2 %s update options: %#v", d.Id(), updateOpts)
 
