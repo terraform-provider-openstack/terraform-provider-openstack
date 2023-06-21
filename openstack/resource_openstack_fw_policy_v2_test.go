@@ -73,12 +73,70 @@ func TestAccFWPolicyV2_addRules(t *testing.T) {
 		CheckDestroy:      testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
+				Config: testAccFWPolicyV2Basic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWPolicyV2Exists(
+						"openstack_fw_policy_v2.policy_1", &policy),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_policy_v2.policy_1", "rules.#", "0"),
+				),
+			},
+			{
 				Config: testAccFWPolicyV2AddRules,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWPolicyV2Exists(
 						"openstack_fw_policy_v2.policy_1", &policy),
 					resource.TestCheckResourceAttr(
-						"openstack_fw_policy_v2.policy_1", "audited", "true"),
+						"openstack_fw_policy_v2.policy_1", "rules.#", "2"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccFWPolicyV2_clearFields(t *testing.T) {
+	var policy policies.Policy
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckFW(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckFWPolicyV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFWPolicyV2Basic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWPolicyV2Exists(
+						"openstack_fw_policy_v2.policy_1", &policy),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_policy_v2.policy_1", "name", ""),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_policy_v2.policy_1", "description", ""),
+				),
+			},
+			{
+				Config: testAccFWPolicyV2FillOutFields,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWPolicyV2Exists(
+						"openstack_fw_policy_v2.policy_1", &policy),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_policy_v2.policy_1", "name", "policy_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_policy_v2.policy_1", "description", "terraform acceptance test"),
+				),
+			},
+			{
+				Config: testAccFWPolicyV2ClearFields,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWPolicyV2Exists(
+						"openstack_fw_policy_v2.policy_1", &policy),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_policy_v2.policy_1", "name", ""),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_policy_v2.policy_1", "description", ""),
 				),
 			},
 		},
@@ -98,10 +156,30 @@ func TestAccFWPolicyV2_deleteRules(t *testing.T) {
 		CheckDestroy:      testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
+				Config: testAccFWPolicyV2AddRules,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWPolicyV2Exists(
+						"openstack_fw_policy_v2.policy_1", &policy),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_policy_v2.policy_1", "rules.#", "2"),
+				),
+			},
+			{
 				Config: testAccFWPolicyV2DeleteRules,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWPolicyV2Exists(
 						"openstack_fw_policy_v2.policy_1", &policy),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_policy_v2.policy_1", "rules.#", "1"),
+				),
+			},
+			{
+				Config: testAccFWPolicyV2Basic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWPolicyV2Exists(
+						"openstack_fw_policy_v2.policy_1", &policy),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_policy_v2.policy_1", "rules.#", "0"),
 				),
 			},
 		},
@@ -147,13 +225,13 @@ func TestAccFWPolicyV2_rulesOrder(t *testing.T) {
 					testAccCheckFWPolicyV2Exists("openstack_fw_policy_v2.policy_1", &policy),
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_fw_policy_v2.policy_1", "rules.0",
-						"openstack_fw_rule_v2.rule_1", "id"),
+						"openstack_fw_rule_v2.rule_4", "id"),
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_fw_policy_v2.policy_1", "rules.1",
 						"openstack_fw_rule_v2.rule_2", "id"),
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_fw_policy_v2.policy_1", "rules.2",
-						"openstack_fw_rule_v2.rule_4", "id"),
+						"openstack_fw_rule_v2.rule_1", "id"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_fw_policy_v2.policy_1", "rules.#", "3"),
 				),
@@ -228,13 +306,13 @@ func TestAccFWPolicyV2_rulesOrder(t *testing.T) {
 					testAccCheckFWPolicyV2Exists("openstack_fw_policy_v2.policy_1", &policy),
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_fw_policy_v2.policy_1", "rules.0",
-						"openstack_fw_rule_v2.rule_1", "id"),
+						"openstack_fw_rule_v2.rule_4", "id"),
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_fw_policy_v2.policy_1", "rules.1",
 						"openstack_fw_rule_v2.rule_2", "id"),
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_fw_policy_v2.policy_1", "rules.2",
-						"openstack_fw_rule_v2.rule_4", "id"),
+						"openstack_fw_rule_v2.rule_1", "id"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_fw_policy_v2.policy_1", "rules.#", "3"),
 				),
@@ -334,16 +412,6 @@ resource "openstack_fw_policy_v2" "policy_1" {
 `
 
 const testAccFWPolicyV2AddRules = `
-resource "openstack_fw_policy_v2" "policy_1" {
-  name        = "policy_1"
-  description = "terraform acceptance test"
-  audited     = true
-  rules       = [
-    "${openstack_fw_rule_v2.udp_deny.id}",
-    "${openstack_fw_rule_v2.tcp_allow.id}"
-  ]
-}
-
 resource "openstack_fw_rule_v2" "tcp_allow" {
   protocol = "tcp"
   action   = "allow"
@@ -353,20 +421,44 @@ resource "openstack_fw_rule_v2" "udp_deny" {
   protocol = "udp"
   action   = "deny"
 }
+
+resource "openstack_fw_policy_v2" "policy_1" {
+  name        = "policy_1"
+  description = "terraform acceptance test"
+  audited     = true
+  rules       = [
+    "${openstack_fw_rule_v2.udp_deny.id}",
+    "${openstack_fw_rule_v2.tcp_allow.id}"
+  ]
+}
+`
+
+const testAccFWPolicyV2FillOutFields = `
+resource "openstack_fw_policy_v2" "policy_1" {
+  name        = "policy_1"
+  description = "terraform acceptance test"
+}
+`
+
+const testAccFWPolicyV2ClearFields = `
+resource "openstack_fw_policy_v2" "policy_1" {
+  name        = ""
+  description = ""
+}
 `
 
 const testAccFWPolicyV2DeleteRules = `
+resource "openstack_fw_rule_v2" "udp_deny" {
+  protocol = "udp"
+  action   = "deny"
+}
+
 resource "openstack_fw_policy_v2" "policy_1" {
   name        = "policy_1"
   description = "terraform acceptance test"
   rules       = [
     "${openstack_fw_rule_v2.udp_deny.id}"
   ]
-}
-
-resource "openstack_fw_rule_v2" "udp_deny" {
-  protocol = "udp"
-  action   = "deny"
 }
 `
 
@@ -432,9 +524,9 @@ resource "openstack_fw_policy_v2" "policy_1" {
   name        = "policy_1"
   description = "terraform acceptance test"
   rules       = [
-    "${openstack_fw_rule_v2.rule_1.id}",
+    "${openstack_fw_rule_v2.rule_4.id}",
 	"${openstack_fw_rule_v2.rule_2.id}",
-	"${openstack_fw_rule_v2.rule_4.id}"
+	"${openstack_fw_rule_v2.rule_1.id}"
   ]
 }
 

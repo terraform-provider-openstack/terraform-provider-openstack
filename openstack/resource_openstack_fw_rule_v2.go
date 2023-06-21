@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/policies"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/rules"
 )
 
@@ -302,6 +303,21 @@ func resourceFWRuleV2Delete(_ context.Context, d *schema.ResourceData, meta inte
 	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
+	}
+
+	rule, err := rules.Get(networkingClient, d.Id()).Extract()
+	if err != nil {
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_fw_rule_v2"))
+	}
+
+	if len(rule.FirewallPolicyID) > 0 {
+		for _, firewallPolicyID := range rule.FirewallPolicyID {
+			log.Printf("[DEBUG] openstack_fw_rule_v2 %s associate with openstack_fw_policy_v2: %#v", d.Id(), firewallPolicyID)
+			_, err := policies.RemoveRule(networkingClient, firewallPolicyID, rule.ID).Extract()
+			if err != nil {
+				return diag.Errorf("Error removing openstack_fw_rule_v2 %s from policy %s: %s", d.Id(), firewallPolicyID, err)
+			}
+		}
 	}
 
 	err = rules.Delete(networkingClient, d.Id()).ExtractErr()
