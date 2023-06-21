@@ -33,7 +33,7 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_rbac_policy_v2" "rbac_policy_1" {
   action        = "access_as_shared"
-  object_id     = "${openstack_networking_network_v2.network_1.id}"
+  object_id     = openstack_networking_network_v2.network_1.id
   object_type   = "network"
   target_tenant = "20415a973c9e45d3917f078950644697"
 }

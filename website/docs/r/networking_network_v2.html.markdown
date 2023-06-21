@@ -21,7 +21,7 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name       = "subnet_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   cidr       = "192.168.199.0/24"
   ip_version = 4
 }
@@ -40,22 +40,22 @@ resource "openstack_compute_secgroup_v2" "secgroup_1" {
 
 resource "openstack_networking_port_v2" "port_1" {
   name               = "port_1"
-  network_id         = "${openstack_networking_network_v2.network_1.id}"
+  network_id         = openstack_networking_network_v2.network_1.id
   admin_state_up     = "true"
-  security_group_ids = ["${openstack_compute_secgroup_v2.secgroup_1.id}"]
+  security_group_ids = [openstack_compute_secgroup_v2.secgroup_1.id]
 
   fixed_ip {
-    subnet_id  = "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id  = openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.10"
   }
 }
 
 resource "openstack_compute_instance_v2" "instance_1" {
   name            = "instance_1"
-  security_groups = ["${openstack_compute_secgroup_v2.secgroup_1.name}"]
+  security_groups = [openstack_compute_secgroup_v2.secgroup_1.name]
 
   network {
-    port = "${openstack_networking_port_v2.port_1.id}"
+    port = openstack_networking_port_v2.port_1.id
   }
 }
 ```

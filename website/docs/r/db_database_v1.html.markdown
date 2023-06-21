@@ -18,7 +18,7 @@ Manages a V1 DB database resource within OpenStack.
 ```hcl
 resource "openstack_db_database_v1" "mydb" {
   name        = "mydb"
-  instance_id = "${openstack_db_instance_v1.basic.id}"
+  instance_id = openstack_db_instance_v1.basic.id
 }
 ```
 
