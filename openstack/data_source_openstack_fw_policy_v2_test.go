@@ -50,6 +50,9 @@ func TestAccFWPolicyV2DataSource_shared(t *testing.T) {
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
+				Config: testAccFWPolicyV2DataSourceBasic,
+			},
+			{
 				Config: testAccFWPolicyV2DataSourceShared,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWPolicyV2DataSourceID("data.openstack_fw_policy_v2.policy_1"),
