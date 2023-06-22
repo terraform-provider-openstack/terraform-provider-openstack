@@ -8,6 +8,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.25.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.7.2
+	github.com/ulikunitz/xz v0.5.11
 	gopkg.in/yaml.v2 v2.4.0
 )
 
