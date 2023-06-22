@@ -17,10 +17,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/ulikunitz/xz"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/members"
+	"github.com/gophercloud/utils/terraform/mutexkv"
 )
 
 func resourceImagesImageV2MemberStatusFromString(v string) images.ImageMemberStatus {
@@ -85,81 +87,119 @@ func resourceImagesImageV2FileProps(filename string) (int64, string, error) {
 	return filesize, filechecksum, nil
 }
 
-func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.ResourceData) (string, error) {
+func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.ResourceData, mutexKV *mutexkv.MutexKV) (string, error) {
 	if filename := d.Get("local_file_path").(string); filename != "" {
 		return filename, nil
-	} else if furl := d.Get("image_source_url").(string); furl != "" {
-		dir := d.Get("image_cache_path").(string)
-		if err := os.MkdirAll(dir, 0700); err != nil {
-			return "", fmt.Errorf("unable to create dir %s: %s", dir, err)
-		}
-		filename := filepath.Join(dir, fmt.Sprintf("%x.img", md5.Sum([]byte(furl))))
+	}
 
-		if _, err := os.Stat(filename); err != nil {
-			if !os.IsNotExist(err) {
-				return "", fmt.Errorf("Error while trying to access file %q: %s", filename, err)
-			}
-			log.Printf("[DEBUG] File doens't exists %s. will download from %s", filename, furl)
-			file, err := os.Create(filename)
-			if err != nil {
-				return "", fmt.Errorf("Error creating file %q: %s", filename, err)
-			}
-			defer file.Close()
-			client := &client.ProviderClient.HTTPClient
-			request, err := http.NewRequest("GET", furl, nil)
-			if err != nil {
-				return "", fmt.Errorf("Error create a new request")
-			}
-
-			username := d.Get("image_source_username").(string)
-			password := d.Get("image_source_password").(string)
-			if username != "" && password != "" {
-				request.SetBasicAuth(username, password)
-			}
-
-			resp, err := client.Do(request)
-			if err != nil {
-				return "", fmt.Errorf("Error downloading image from %q", furl)
-			}
-
-			// check for credential error among other errors
-			if resp.StatusCode != http.StatusOK {
-				return "", fmt.Errorf("Error downloading image from %q, statusCode is %d", furl, resp.StatusCode)
-			}
-
-			defer resp.Body.Close()
-
-			reader := resp.Body
-			decompress := d.Get("decompress").(bool)
-
-			if decompress {
-				// If we're here "Content-Encoding" in not filled, we'll read
-				// "Content-Type" to select format
-				switch resp.Header.Get("Content-Type") {
-				case "gzip", "application/gzip":
-					reader, err = gzip.NewReader(resp.Body)
-					if err != nil {
-						return "", fmt.Errorf("Error decompressing gzip image: %s", err)
-					}
-				case "bzip2", "application/bzip2", "application/x-bzip2":
-					bz2Reader := bzip2.NewReader(resp.Body)
-					reader = io.NopCloser(bz2Reader)
-				default:
-					return "", fmt.Errorf("Error decompressing image, format %s is not supported", resp.Header.Get("Content-Type"))
-				}
-				defer reader.Close()
-			}
-
-			if _, err = io.Copy(file, reader); err != nil {
-				return "", fmt.Errorf("Error downloading image %q to file %q: %s", furl, filename, err)
-			}
-			return filename, nil
-		}
-		log.Printf("[DEBUG] File exists %s", filename)
-		return filename, nil
-	} else {
+	furl := d.Get("image_source_url").(string)
+	if furl == "" {
 		return "", fmt.Errorf("Error in config. no file specified")
 	}
+
+	dir := d.Get("image_cache_path").(string)
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return "", fmt.Errorf("unable to create dir %s: %s", dir, err)
+	}
+
+	// calculate the hashsum and create a lock to prevent simultaneous file access
+	md5sum := fmt.Sprintf("%x", md5.Sum([]byte(furl)))
+	mutexKV.Lock(md5sum)
+	defer mutexKV.Unlock(md5sum)
+
+	filename := filepath.Join(dir, fmt.Sprintf("%s.img", md5sum))
+	// a cleanup func to delete a failed file
+	delFile := func() {
+		if err := os.Remove(filename); err != nil {
+			log.Printf("[DEBUG] failed to cleanup the %q file: %s", filename, err)
+		}
+	}
+
+	info, err := os.Stat(filename)
+	if err != nil && !os.IsNotExist(err) {
+		return "", fmt.Errorf("Error while trying to access file %q: %s", filename, err)
+	}
+
+	// check if the file size is zero
+	// it could be a leftover from older provider versions
+	if info != nil {
+		if info.Size() != 0 {
+			log.Printf("[DEBUG] File exists %s", filename)
+			return filename, nil
+		}
+		// delete the zero size file
+		delFile()
+	}
+
+	log.Printf("[DEBUG] File doens't exists %s. will download from %s", filename, furl)
+	file, err := os.Create(filename)
+	if err != nil {
+		return "", fmt.Errorf("Error creating file %q: %s", filename, err)
+	}
+	defer file.Close()
+
+	httpClient := &client.ProviderClient.HTTPClient
+	request, err := http.NewRequest("GET", furl, nil)
+	if err != nil {
+		delFile()
+		return "", fmt.Errorf("Error creating a new request: %s", err)
+	}
+
+	username := d.Get("image_source_username").(string)
+	password := d.Get("image_source_password").(string)
+	if username != "" && password != "" {
+		request.SetBasicAuth(username, password)
+	}
+
+	resp, err := httpClient.Do(request)
+	if err != nil {
+		delFile()
+		return "", fmt.Errorf("Error downloading image from %q: %s", furl, err)
+	}
+
+	// check for credential error among other errors
+	if resp.StatusCode != http.StatusOK {
+		delFile()
+		return "", fmt.Errorf("Error downloading image from %q, statusCode is %d", furl, resp.StatusCode)
+	}
+
+	defer resp.Body.Close()
+	reader := resp.Body
+
+	decompress := d.Get("decompress").(bool)
+	if decompress {
+		// If we're here "Content-Encoding" in not filled, we'll read
+		// "Content-Type" to select format
+		switch resp.Header.Get("Content-Type") {
+		case "gzip", "application/gzip":
+			reader, err = gzip.NewReader(resp.Body)
+			if err != nil {
+				delFile()
+				return "", fmt.Errorf("Error decompressing gzip image: %s", err)
+			}
+		case "bzip2", "application/bzip2", "application/x-bzip2":
+			bz2Reader := bzip2.NewReader(resp.Body)
+			reader = io.NopCloser(bz2Reader)
+		case "xz", "application/xz", "application/x-xz":
+			xzReader, err := xz.NewReader(resp.Body)
+			if err != nil {
+				delFile()
+				return "", fmt.Errorf("Error decompressing xz image: %s", err)
+			}
+			reader = io.NopCloser(xzReader)
+		default:
+			delFile()
+			return "", fmt.Errorf("Error decompressing image, format %s is not supported", resp.Header.Get("Content-Type"))
+		}
+		defer reader.Close()
+	}
+
+	if _, err = io.Copy(file, reader); err != nil {
+		delFile()
+		return "", fmt.Errorf("Error downloading image %q to file %q: %s", furl, filename, err)
+	}
+
+	return filename, nil
 }
 
 func resourceImagesImageV2RefreshFunc(client *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
