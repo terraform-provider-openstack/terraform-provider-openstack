@@ -290,9 +290,9 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 		}
 
 		log.Printf("[DEBUG] Import Options: %#v", importOpts)
-		res := imageimport.Create(imageClient, d.Id(), importOpts)
-		if res.Err != nil {
-			return diag.Errorf("Error while importing url %q: %s", imgURL, res.Err)
+		err = imageimport.Create(imageClient, d.Id(), importOpts).ExtractErr()
+		if err != nil {
+			return diag.Errorf("Error while importing url %q: %s", imgURL, err)
 		}
 	} else {
 		// variable declaration
@@ -319,9 +319,9 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 		defer imgFile.Close()
 		log.Printf("[WARN] Uploading image %s (%d bytes). This can be pretty long.", d.Id(), fileSize)
 
-		res := imagedata.Upload(imageClient, d.Id(), imgFile)
-		if res.Err != nil {
-			return diag.Errorf("Error while uploading file %q: %s", imgFilePath, res.Err)
+		err = imagedata.Upload(imageClient, d.Id(), imgFile).ExtractErr()
+		if err != nil {
+			return diag.Errorf("Error while uploading file %q: %s", imgFilePath, err)
 		}
 	}
 
