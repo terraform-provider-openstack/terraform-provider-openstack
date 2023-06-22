@@ -99,7 +99,6 @@ func resourceFWRuleV2() *schema.Resource {
 			"shared": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 
 			"enabled": {
@@ -118,8 +117,6 @@ func resourceFWRuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	shared := d.Get("shared").(bool)
-	enabled := d.Get("enabled").(bool)
 	ruleCreateOpts := rules.CreateOpts{
 		Name:                 d.Get("name").(string),
 		Description:          d.Get("description").(string),
@@ -130,9 +127,17 @@ func resourceFWRuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 		DestinationIPAddress: d.Get("destination_ip_address").(string),
 		SourcePort:           d.Get("source_port").(string),
 		DestinationPort:      d.Get("destination_port").(string),
-		Shared:               &shared,
-		Enabled:              &enabled,
 		TenantID:             d.Get("tenant_id").(string),
+	}
+
+	if v, ok := d.GetOk("shared"); ok {
+		shared := v.(bool)
+		ruleCreateOpts.Shared = &shared
+	}
+
+	if v, ok := d.GetOk("enabled"); ok {
+		enabled := v.(bool)
+		ruleCreateOpts.Enabled = &enabled
 	}
 
 	log.Printf("[DEBUG] openstack_fw_rule_v2 create options: %#v", ruleCreateOpts)

@@ -102,7 +102,7 @@ func dataSourceFWPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta 
 
 	pages, err := policies.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("Unable to list openstack_fw_policy_v2 policies: %s", err)
 	}
 
 	allFWPolicies, err := policies.ExtractPolicies(pages)

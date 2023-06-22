@@ -177,7 +177,7 @@ func dataSourceFWRuleV2Read(ctx context.Context, d *schema.ResourceData, meta in
 
 	pages, err := rules.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("Unable to list openstack_fw_rule_v2 rules: %s", err)
 	}
 
 	allFWRules, err := rules.ExtractRules(pages)

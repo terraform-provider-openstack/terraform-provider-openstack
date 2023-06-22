@@ -55,7 +55,6 @@ func resourceFWPolicyV2() *schema.Resource {
 			"audited": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 
 			"shared": {
