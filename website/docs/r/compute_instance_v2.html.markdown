@@ -410,8 +410,9 @@ The following arguments are supported:
     forcefully deleted. This is useful for environments that have reclaim / soft
     deletion enabled.
 
-* `power_state` - (Optional) Provide the VM state. Only 'active' and 'shutoff'
-    are supported values. *Note*: If the initial power_state is the shutoff
+* `power_state` - (Optional) Provide the VM state. Only 'active', 'shutoff'
+    and 'shelved_offloaded' are supported values.
+    *Note*: If the initial power_state is the shutoff
     the VM will be stopped immediately after build and the provisioners like
     remote-exec or files are not supported.
 
