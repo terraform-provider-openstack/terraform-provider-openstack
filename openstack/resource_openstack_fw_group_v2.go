@@ -119,8 +119,8 @@ func resourceFWGroupV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	if r, ok := d.GetOk("admin_state_up"); ok {
-		admin_state_up := r.(bool)
-		groupcreateOpts.AdminStateUp = &admin_state_up
+		adminStateUp := r.(bool)
+		groupcreateOpts.AdminStateUp = &adminStateUp
 	}
 
 	associatedPortsRaw := d.Get("ports").(*schema.Set).List()
