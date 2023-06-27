@@ -150,6 +150,40 @@ func TestAccFWRuleV2_basic(t *testing.T) {
 	})
 }
 
+func TestAccFWRuleV2_shared(t *testing.T) {
+	var rule rules.Rule
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+			testAccPreCheckFW(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckFWRuleV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFWRuleV2Shared,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWRuleV2Exists("openstack_fw_rule_v2.rule_1", &rule),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v2.rule_1", "name", "shared_rule"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v2.rule_1", "protocol", "any"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v2.rule_1", "action", "deny"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v2.rule_1", "ip_version", "4"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v2.rule_1", "enabled", "true"),
+					resource.TestCheckResourceAttr(
+						"openstack_fw_rule_v2.rule_1", "shared", "true"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccFWRuleV2_anyProtocol(t *testing.T) {
 	var rule rules.Rule
 
@@ -317,110 +351,117 @@ func testAccCheckFWRuleV2Exists(n string, rule *rules.Rule) resource.TestCheckFu
 
 const testAccFWRuleV2Basic1 = `
 resource "openstack_fw_rule_v2" "rule_1" {
-	name = "rule_1"
-	protocol = "udp"
-	action = "deny"
+  name     = "rule_1"
+  protocol = "udp"
+  action   = "deny"
+}
+`
+
+const testAccFWRuleV2Shared = `
+resource "openstack_fw_rule_v2" "rule_1" {
+  name     = "shared_rule"
+  shared   = true
 }
 `
 
 const testAccFWRuleV2Basic2 = `
 resource "openstack_fw_rule_v2" "rule_1" {
-	name = "rule_1"
-	description = "Terraform accept test"
-	protocol = "udp"
-	action = "deny"
-	ip_version = 4
-	source_ip_address = "1.2.3.4"
-	destination_ip_address = "4.3.2.0/24"
-	source_port = "444"
-	destination_port = "555"
-	enabled = true
-	shared = false
+  name                   = "rule_1"
+  description            = "Terraform accept test"
+  protocol               = "udp"
+  action                 = "deny"
+  ip_version             = 4
+  source_ip_address      = "1.2.3.4"
+  destination_ip_address = "4.3.2.0/24"
+  source_port            = "444"
+  destination_port       = "555"
+  enabled                = true
+  shared                 = false
 }
 `
 
 const testAccFWRuleV2Basic3 = `
 resource "openstack_fw_rule_v2" "rule_1" {
-	name = "rule_1"
-	description = "Terraform accept test updated"
-	protocol = "tcp"
-	action = "allow"
-	ip_version = 4
-	source_ip_address = "1.2.3.0/24"
-	destination_ip_address = "4.3.2.8"
-	source_port = "666"
-	destination_port = "777"
-	enabled = false
+  name                   = "rule_1"
+  description            = "Terraform accept test updated"
+  protocol               = "tcp"
+  action                 = "allow"
+  ip_version             = 4
+  source_ip_address      = "1.2.3.0/24"
+  destination_ip_address = "4.3.2.8"
+  source_port            = "666"
+  destination_port       = "777"
+  enabled                = false
 }
 `
 
 const testAccFWRuleV2Basic4 = `
 resource "openstack_fw_rule_v2" "rule_1" {
-	name = "rule_1"
-	description = "Terraform accept test updated"
-	protocol = "udp"
-	action = "allow"
-	ip_version = 4
-	source_ip_address = "1.2.3.0/24"
-	destination_ip_address = "4.3.2.8"
-	source_port = "666"
-	destination_port = "777"
-	enabled = false
+  name                   = "rule_1"
+  description            = "Terraform accept test updated"
+  protocol               = "udp"
+  action                 = "allow"
+  ip_version             = 4
+  source_ip_address      = "1.2.3.0/24"
+  destination_ip_address = "4.3.2.8"
+  source_port            = "666"
+  destination_port       = "777"
+  enabled                = false
 }
 `
 
 const testAccFWRuleV2Basic5 = `
 resource "openstack_fw_rule_v2" "rule_1" {
-	name = "rule_1"
-	description = "Terraform accept test updated"
-	protocol = "udp"
-	action = "allow"
-	ip_version = 4
-	source_ip_address = "1.2.3.0/24"
-	destination_ip_address = "4.3.2.8"
-	source_port = "666"
-	enabled = false
+  name                   = "rule_1"
+  description            = "Terraform accept test updated"
+  protocol               = "udp"
+  action                 = "allow"
+  ip_version             = 4
+  source_ip_address      = "1.2.3.0/24"
+  destination_ip_address = "4.3.2.8"
+  source_port            = "666"
+  enabled                = false
 }
 `
 
 const testAccFWRuleV2AnyProtocol = `
 resource "openstack_fw_rule_v2" "rule_1" {
-	name = "rule_1"
-	description = "Allow any protocol"
-	protocol = "any"
-	action = "allow"
-	ip_version = 4
-	source_ip_address = "192.168.199.0/24"
-	enabled = true
+  name              = "rule_1"
+  description       = "Allow any protocol"
+  protocol          = "any"
+  action            = "allow"
+  ip_version        = 4
+  source_ip_address = "192.168.199.0/24"
+  enabled           = true
 }
 `
 
 const testAccFWRuleV2UpdateName1 = `
 resource "openstack_fw_rule_v2" "rule_1" {
-	name = "rule_1"
-	description = "Terraform accept test"
-	protocol = "udp"
-	action = "deny"
-	ip_version = 4
-	source_ip_address = "1.2.3.4"
-	destination_ip_address = "4.3.2.0/24"
-	source_port = "444"
-	destination_port = "555"
-	enabled = true
+  name                   = "rule_1"
+  description            = "Terraform accept test"
+  protocol               = "udp"
+  action                 = "deny"
+  ip_version             = 4
+  source_ip_address      = "1.2.3.4"
+  destination_ip_address = "4.3.2.0/24"
+  source_port            = "444"
+  destination_port       = "555"
+  enabled                = true
 }
 `
 
 const testAccFWRuleV2UpdateName2 = `
 resource "openstack_fw_rule_v2" "rule_1" {
-	name = "updated_rule_1"
-	description = "Terraform accept test"
-	protocol = "udp"
-	action = "deny"
-	ip_version = 4
-	source_ip_address = "1.2.3.4"
-	destination_ip_address = "4.3.2.0/24"
-	source_port = "444"
-	destination_port = "555"
-	enabled = true
+  name                   = "updated_rule_1"
+  description            = "Terraform accept test"
+  protocol               = "udp"
+  action                 = "deny"
+  ip_version             = 4
+  source_ip_address      = "1.2.3.4"
+  destination_ip_address = "4.3.2.0/24"
+  source_port            = "444"
+  destination_port       = "555"
+  enabled                = true
 }
 `

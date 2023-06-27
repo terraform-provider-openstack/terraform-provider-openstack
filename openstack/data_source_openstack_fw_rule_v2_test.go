@@ -13,6 +13,7 @@ func TestAccFWRuleV2DataSource_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckFW(t)
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
@@ -56,6 +57,7 @@ func TestAccFWRuleV2DataSource_FWRuleID(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckFW(t)
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
@@ -127,7 +129,7 @@ func testAccFWRuleV2DataSourceRuleID() string {
 %s
 
 data "openstack_fw_rule_v2" "rule_1" {
-	rule_id = "${openstack_fw_rule_v2.rule_1.id}"
+  rule_id = "${openstack_fw_rule_v2.rule_1.id}"
 }
 `, testAccFWRuleV2DataSourceBasic)
 }
