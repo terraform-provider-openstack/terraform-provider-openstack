@@ -73,6 +73,7 @@ func resourceFWGroupV2() *schema.Resource {
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  true,
 			},
 
 			"status": {
