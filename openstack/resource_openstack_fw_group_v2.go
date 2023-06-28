@@ -76,12 +76,6 @@ func resourceFWGroupV2() *schema.Resource {
 				Default:  true,
 			},
 
-			"status": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-
 			"ports": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -94,6 +88,11 @@ func resourceFWGroupV2() *schema.Resource {
 			"shared": {
 				Type:     schema.TypeBool,
 				Optional: true,
+			},
+
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -109,6 +108,7 @@ func resourceFWGroupV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	groupcreateOpts := groups.CreateOpts{
 		Name:                    d.Get("name").(string),
 		TenantID:                d.Get("tenant_id").(string),
+		ProjectID:               d.Get("project_id").(string),
 		Description:             d.Get("description").(string),
 		IngressFirewallPolicyID: d.Get("ingress_firewall_policy_id").(string),
 		EgressFirewallPolicyID:  d.Get("egress_firewall_policy_id").(string),
@@ -356,7 +356,7 @@ func resourceFWGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return diag.Errorf("Error waiting for openstack_fw_firewall_v2 %s to Delete:  %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_fw_firewall_v2 %s to delete:  %s", d.Id(), err)
 	}
 
 	return nil

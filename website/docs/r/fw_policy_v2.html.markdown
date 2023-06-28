@@ -38,8 +38,8 @@ resource "openstack_fw_policy_v2" "policy_1" {
   name = "firewall_policy"
 
   rules = [
-    "${openstack_fw_rule_v2.rule_1.id}",
-    "${openstack_fw_rule_v2.rule_2.id}",
+    openstack_fw_rule_v2.rule_1.id,
+    openstack_fw_rule_v2.rule_2.id,
   ]
 }
 ```

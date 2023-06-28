@@ -38,7 +38,7 @@ resource "openstack_fw_policy_v2" "policy_1" {
   name = "firewall_ingress_policy"
 
   rules = [
-    "${openstack_fw_rule_v2.rule_1.id}",
+    openstack_fw_rule_v2.rule_1.id,
   ]
 }
 
@@ -46,14 +46,14 @@ resource "openstack_fw_policy_v2" "policy_2" {
   name = "firewall_egress_policy"
 
   rules = [
-    "${openstack_fw_rule_v2.rule_2.id}",
+    openstack_fw_rule_v2.rule_2.id,
   ]
 }
 
 resource "openstack_fw_group_v2" "group_1" {
   name      = "firewall_group"
-  ingress_firewall_policy_id = "${openstack_fw_policy_v2.policy_1.id}"
-  egress_firewall_policy_id = "${openstack_fw_policy_v2.policy_2.id}"
+  ingress_firewall_policy_id = openstack_fw_policy_v2.policy_1.id
+  egress_firewall_policy_id = openstack_fw_policy_v2.policy_2.id
 }
 ```
 
@@ -72,13 +72,15 @@ The following arguments are supported:
 * `description` - (Optional) A description for the firewall group. Changing this
     updates the `description` of an existing firewall group.
 
-* `tenant_id` - (Optional) The owner of the firewall group. Required if admin
-    wants to create a firewall group for another tenant. Changing this creates
-    a new firewall group.
+* `tenant_id` - (Optional) The owner of the firewall group. This argument is
+    interchangeable with `project_id`. Required if admin wants to create a
+    firewall group for another tenant. Changing this creates a new firewall
+    group.
 
-* `project_id` - (Optional) The owner of the firewall group. Required if admin
-    wants to create a firewall group for another tenant. Changing this creates
-    a new firewall group.
+* `project_id` - (Optional) The owner of the firewall group. This argument is
+    interchangeable with `tenant_id`. Required if admin wants to create a
+    firewall group for another tenant. Changing this creates a new firewall
+    group.
 
 * `ingress_firewall_policy_id` - (Optional) The ingress firewall policy resource
     id for the firewall group. Changing this updates the
@@ -100,12 +102,6 @@ The following arguments are supported:
     with. Must be a list of strings. Changing this updates the associated ports
     of an existing firewall group.
 
-* `shared` - (Optional) Sharing status of the firewall group (must be "true"
-    or "false" if provided). If this is "true" the firewall group is visible to,
-    and can be used in, firewalls in other tenants. Changing this updates the
-    `shared` status of an existing firewall group. Only administrative users
-    can specify if the firewall group should be shared.
-
 ## Attributes Reference
 
 The following attributes are exported:
@@ -118,9 +114,9 @@ The following attributes are exported:
 * `ingress_firewall_policy_id` - See Argument Reference above.
 * `egress_firewall_policy_id` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
-* `status` - See Argument Reference above.
 * `ports` - See Argument Reference above.
 * `shared` - See Argument Reference above.
+* `status` - The status of the firewall group.
 
 ## Import
 
