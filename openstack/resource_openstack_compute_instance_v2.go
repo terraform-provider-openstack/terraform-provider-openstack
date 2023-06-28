@@ -66,10 +66,9 @@ func resourceComputeInstanceV2() *schema.Resource {
 				ForceNew: false,
 			},
 			"image_id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.IsUUID,
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
 			},
 			"image_name": {
 				Type:     schema.TypeString,
@@ -812,11 +811,7 @@ func resourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, me
 		computeV2InstanceReadTags(d, instanceTags)
 	}
 
-	if err := mErr.ErrorOrNil(); err != nil {
-		return diag.FromErr(err)
-	}
-
-	return nil
+	return diag.FromErr(mErr.ErrorOrNil())
 }
 
 func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -1415,29 +1410,33 @@ func resourceInstanceBlockDevicesV2(_ *schema.ResourceData, bds []interface{}) (
 func resourceInstanceSchedulerHintsV2(_ *schema.ResourceData, schedulerHintsRaw map[string]interface{}) schedulerhints.SchedulerHints {
 	var differentHost []string
 	if v, ok := schedulerHintsRaw["different_host"].([]interface{}); ok {
-		for _, dh := range v {
-			differentHost = append(differentHost, dh.(string))
+		differentHost = make([]string, len(v))
+		for i, dh := range v {
+			differentHost[i] = dh.(string)
 		}
 	}
 
 	var sameHost []string
 	if v, ok := schedulerHintsRaw["same_host"].([]interface{}); ok {
-		for _, sh := range v {
-			sameHost = append(sameHost, sh.(string))
+		sameHost = make([]string, len(v))
+		for i, sh := range v {
+			sameHost[i] = sh.(string)
 		}
 	}
 
 	var query []interface{}
 	if v, ok := schedulerHintsRaw["query"].([]interface{}); ok {
-		for _, q := range v {
-			query = append(query, q.(string))
+		query = make([]interface{}, len(v))
+		for i, q := range v {
+			query[i] = q.(string)
 		}
 	}
 
 	var differentCell []string
 	if v, ok := schedulerHintsRaw["different_cell"].([]interface{}); ok {
-		for _, dh := range v {
-			differentCell = append(differentCell, dh.(string))
+		differentHost = make([]string, len(v))
+		for i, dh := range v {
+			differentCell[i] = dh.(string)
 		}
 	}
 
@@ -1495,7 +1494,7 @@ func getImageIDFromConfig(imageClient *gophercloud.ServiceClient, d *schema.Reso
 		return imageID, nil
 	}
 
-	return "", fmt.Errorf("neither a boot device, image ID, or image name were able to be determined")
+	return "", fmt.Errorf("neither a boot device, image ID, nor image name could be determined")
 }
 
 func setImageInformation(computeClient *gophercloud.ServiceClient, server *servers.Server, d *schema.ResourceData) error {
@@ -1562,7 +1561,7 @@ func getFlavorID(computeClient *gophercloud.ServiceClient, d *schema.ResourceDat
 		return flavorID, nil
 	}
 
-	return "", fmt.Errorf("neither a flavor_id or flavor_name could be determined")
+	return "", fmt.Errorf("neither a flavor ID nor a flavor name could be determined")
 }
 
 func resourceComputeSchedulerHintsHash(v interface{}) int {
