@@ -15,9 +15,7 @@ import (
 
 func fwGroupV2RefreshFunc(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		var group groups.Group
-
-		err := groups.Get(networkingClient, id).ExtractIntoStructPtr(&group, "firewall_group")
+		group, err := groups.Get(networkingClient, id).Extract()
 		if err != nil {
 			return nil, "", err
 		}
