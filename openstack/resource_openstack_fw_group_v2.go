@@ -283,7 +283,7 @@ func resourceFWGroupV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	if hasChange {
 		log.Printf("[DEBUG] openstack_fw_group_v2 %s update options: %#v", d.Id(), updateOpts)
 
-		err = groups.Update(networkingClient, d.Id(), updateOpts).Err
+		_, err = groups.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_fw_group_v2 %s: %s", d.Id(), err)
 		}

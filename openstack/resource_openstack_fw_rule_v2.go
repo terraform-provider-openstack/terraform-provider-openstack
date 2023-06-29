@@ -294,7 +294,7 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	if hasChange {
 		log.Printf("[DEBUG] openstack_fw_rule_v2 %s update options: %#v", d.Id(), updateOpts)
 
-		err = rules.Update(networkingClient, d.Id(), updateOpts).Err
+		_, err = rules.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_fw_rule_v2 %s: %s", d.Id(), err)
 		}
