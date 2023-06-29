@@ -31,7 +31,11 @@ data "openstack_fw_rule_v2" "rule" {
 
 * `description` - (Optional) The description of the firewall rule.
 
-* `tenant_id` - (Optional) The owner of the firewall policy.
+* `tenant_id` - (Optional) - This argument conflicts and is interchangeable
+    with `project_id`. The owner of the firewall rule.
+
+* `project_id` - (Optional) - This argument conflicts and is interchangeable
+    with `tenant_id`. The owner of the firewall rule.
 
 * `protocol` - (Optional) The protocol type on which the firewall rule operates.
 
@@ -64,6 +68,7 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
+* `project_id` - See Argument Reference above.
 * `protocol` - See Argument Reference above.
 * `action` - See Argument Reference above.
 * `ip_version` - See Argument Reference above.
