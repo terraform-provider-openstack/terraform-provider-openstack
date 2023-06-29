@@ -1,5 +1,5 @@
 ---
-subcategory: "FWaaS / Neutron"
+subcategory: "Deprecated"
 layout: "openstack"
 page_title: "OpenStack: openstack_fw_policy_v1"
 sidebar_current: "docs-openstack-datasource-fw-policy-v1"
