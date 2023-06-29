@@ -81,6 +81,7 @@ func dataSourceFWGroupV2() *schema.Resource {
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Optional: true,
 			},
 		},
 	}
@@ -133,6 +134,10 @@ func dataSourceFWGroupV2Read(ctx context.Context, d *schema.ResourceData, meta i
 		listOpts.EgressFirewallPolicyID = v.(string)
 	}
 
+	if v, ok := d.GetOk("status"); ok {
+		listOpts.Status = v.(string)
+	}
+
 	pages, err := groups.List(networkingClient, listOpts).AllPages()
 	if err != nil {
 		return diag.Errorf("Unable to list openstack_fw_group_v2 groups: %s", err)
@@ -153,7 +158,7 @@ func dataSourceFWGroupV2Read(ctx context.Context, d *schema.ResourceData, meta i
 
 	group := allGroups[0]
 
-	log.Printf("[DEBUG] Retrieved Group %s: %+v", group.ID, group)
+	log.Printf("[DEBUG] Retrieved openstack_fw_policy_v2 %s: %+v", group.ID, group)
 
 	d.SetId(group.ID)
 
