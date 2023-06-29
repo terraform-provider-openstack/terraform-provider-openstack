@@ -94,13 +94,15 @@ The following arguments are supported:
     group (must be "true" or "false" if provided - defaults to "true").
     Changing this updates the `admin_state_up` of an existing firewall group.
 
-* `status` - (Optional) Administrative up/down status for the firewall
-    group (must be "true" or "false" if provided - defaults to "true").
-    Changing this updates the `admin_state_up` of an existing firewall group.
-
 * `ports` - (Optional) Port(s) to associate this firewall group
     with. Must be a list of strings. Changing this updates the associated ports
     of an existing firewall group.
+
+* `shared` - (Optional) Sharing status of the firewall group (must be "true"
+    or "false" if provided). If this is "true" the firewall group is visible to,
+    and can be used in, firewalls in other tenants. Changing this updates the
+    `shared` status of an existing firewall group. Only administrative users
+    can specify if the firewall group should be shared.
 
 ## Attributes Reference
 
