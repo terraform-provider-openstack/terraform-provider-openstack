@@ -129,8 +129,11 @@ func dataSourceFWPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta 
 	d.Set("description", policy.Description)
 	d.Set("shared", policy.Shared)
 	d.Set("audited", policy.Audited)
-	d.Set("rules", policy.Rules)
 	d.Set("region", GetRegion(d, config))
+
+	if err := d.Set("rules", policy.Rules); err != nil {
+		diag.Errorf("Unable to set ports for openstack_fw_policy_v2 %s: %s", policy.ID, err)
+	}
 
 	return nil
 }

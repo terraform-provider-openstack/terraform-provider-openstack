@@ -170,9 +170,12 @@ func dataSourceFWGroupV2Read(ctx context.Context, d *schema.ResourceData, meta i
 	d.Set("admin_state_up", group.AdminStateUp)
 	d.Set("ingress_firewall_policy_id", group.IngressFirewallPolicyID)
 	d.Set("egress_firewall_policy_id", group.EgressFirewallPolicyID)
-	d.Set("ports", group.Ports)
 	d.Set("status", group.Status)
 	d.Set("region", GetRegion(d, config))
+
+	if err := d.Set("ports", group.Ports); err != nil {
+		diag.Errorf("Unable to set ports for openstack_fw_group_v2 %s: %s", group.ID, err)
+	}
 
 	return nil
 }
