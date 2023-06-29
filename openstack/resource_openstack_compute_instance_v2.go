@@ -236,7 +236,6 @@ func resourceComputeInstanceV2() *schema.Resource {
 			"block_device": {
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"source_type": {
