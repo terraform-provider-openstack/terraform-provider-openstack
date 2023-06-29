@@ -15,7 +15,7 @@ Use this data source to get information of an available OpenStack firewall group
 
 ```hcl
 data "openstack_fw_group_v2" "group" {
-  name        = "tf_test_group"
+  name = "tf_test_group"
 }
 ```
 
@@ -39,6 +39,8 @@ data "openstack_fw_group_v2" "group" {
 
 * `shared` - (Optional) The sharing status of the firewall group.
 
+* `admin_state_up` - (Optional) Administrative up/down status for the firewall group.
+
 * `ingress_firewall_policy_id` - (Optional) The ingress policy ID of the firewall group.
 
 * `egress_firewall_policy_id` - (Optional) The egress policy ID of the firewall group.
@@ -56,8 +58,8 @@ The following attributes are exported:
 * `tenant_id` - See Argument Reference above.
 * `project_id` - See Argument Reference above.
 * `shared` - See Argument Reference above.
-* `admin_state_up` - Administrative up/down status for the firewall group.
+* `admin_state_up` - See Argument Reference above.
 * `ingress_firewall_policy_id` - See Argument Reference above.
 * `egress_firewall_policy_id` - See Argument Reference above.
-* `ports` - Port(s) to associate this firewall group with.
+* `ports` - Ports associated with the firewall group.
 * `status` - See Argument Reference above.
