@@ -34,9 +34,17 @@ func dataSourceFWRuleV2() *schema.Resource {
 			},
 
 			"tenant_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:          schema.TypeString,
+				Computed:      true,
+				Optional:      true,
+				ConflictsWith: []string{"project_id"},
+			},
+
+			"project_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"tenant_id"},
 			},
 
 			"description": {
@@ -137,6 +145,10 @@ func dataSourceFWRuleV2Read(ctx context.Context, d *schema.ResourceData, meta in
 		listOpts.TenantID = v.(string)
 	}
 
+	if v, ok := d.GetOk("project_id"); ok {
+		listOpts.ProjectID = v.(string)
+	}
+
 	if v, ok := d.GetOk("protocol"); ok {
 		listOpts.Protocol = rules.Protocol(v.(string))
 	}
@@ -202,6 +214,7 @@ func dataSourceFWRuleV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	d.Set("name", rule.Name)
 	d.Set("description", rule.Description)
 	d.Set("tenant_id", rule.TenantID)
+	d.Set("project_id", rule.ProjectID)
 	d.Set("action", rule.Action)
 	d.Set("ip_version", rule.IPVersion)
 	d.Set("source_ip_address", rule.SourceIPAddress)

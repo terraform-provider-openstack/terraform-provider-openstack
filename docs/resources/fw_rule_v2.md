@@ -41,9 +41,15 @@ The following arguments are supported:
 * `description` - (Optional) A description for the firewall rule. Changing this
     updates the `description` of an existing firewall rule.
 
-* `tenant_id` - (Optional) The owner of the firewall rule. Required if admin
-    wants to create a firewall rule for another tenant. Changing this creates a
-    new firewall rule.
+* `tenant_id` - (Optional) - This argument conflicts and is interchangeable
+    with `project_id`. The owner of the firewall rule. Required if admin wants
+    to create a firewall rule for another tenant. Changing this creates a new
+    firewall rule.
+
+* `project_id` - (Optional) - This argument conflicts and is interchangeable
+    with `tenant_id`. The owner of the firewall rule. Required if admin wants
+    to create a firewall rule for another project. Changing this creates a new
+    firewall rule.
 
 * `protocol` - (Optional; Required if `source_port` or `destination_port` is not
     empty) The protocol type on which the firewall rule operates.
@@ -90,6 +96,7 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
+* `project_id` - See Argument Reference above.
 * `protocol` - See Argument Reference above.
 * `action` - See Argument Reference above.
 * `ip_version` - See Argument Reference above.

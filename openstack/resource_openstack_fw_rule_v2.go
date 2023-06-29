@@ -42,9 +42,19 @@ func resourceFWRuleV2() *schema.Resource {
 			},
 
 			"tenant_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				Computed:      true,
+				ConflictsWith: []string{"project_id"},
+			},
+
+			"project_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				Computed:      true,
+				ConflictsWith: []string{"tenant_id"},
 			},
 
 			"protocol": {
@@ -128,6 +138,7 @@ func resourceFWRuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 		SourcePort:           d.Get("source_port").(string),
 		DestinationPort:      d.Get("destination_port").(string),
 		TenantID:             d.Get("tenant_id").(string),
+		ProjectID:            d.Get("project_id").(string),
 	}
 
 	if v, ok := d.GetOk("shared"); ok {
@@ -178,6 +189,8 @@ func resourceFWRuleV2Read(_ context.Context, d *schema.ResourceData, meta interf
 	d.Set("destination_port", rule.DestinationPort)
 	d.Set("shared", rule.Shared)
 	d.Set("enabled", rule.Enabled)
+	d.Set("tenant_id", rule.TenantID)
+	d.Set("project_id", rule.ProjectID)
 
 	if rule.Protocol == "" {
 		d.Set("protocol", "any")

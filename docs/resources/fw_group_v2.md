@@ -72,14 +72,14 @@ The following arguments are supported:
 * `description` - (Optional) A description for the firewall group. Changing this
     updates the `description` of an existing firewall group.
 
-* `tenant_id` - (Optional) - This argument conflict and interchangeable with
+* `tenant_id` - (Optional) - This argument conflicts and is interchangeable with
     `project_id`. The owner of the firewall group. Required if admin wants to
     create a firewall group for another tenant. Changing this creates a new
     firewall group.
 
-* `project_id` - (Optional) - This argument conflict and interchangeable with
-    `tenant_id`. The owner of the firewall group. Required if admin wants to
-    create a firewall group for another project. Changing this creates a new
+* `project_id` - (Optional) - This argument conflicts and  is interchangeable
+    with `tenant_id`. The owner of the firewall group. Required if admin wants
+    to create a firewall group for another project. Changing this creates a new
     firewall group.
 
 * `ingress_firewall_policy_id` - (Optional) The ingress firewall policy resource
