@@ -74,14 +74,13 @@ func dataSourceFWGroupV2() *schema.Resource {
 
 			"ports": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
 			},
 		},
 	}
@@ -109,7 +108,7 @@ func dataSourceFWGroupV2Read(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	if v, ok := d.GetOk("tenant_id"); ok {
-		listOpts.ProjectID = v.(string)
+		listOpts.TenantID = v.(string)
 	}
 
 	if v, ok := d.GetOk("project_id"); ok {
@@ -136,20 +135,20 @@ func dataSourceFWGroupV2Read(ctx context.Context, d *schema.ResourceData, meta i
 
 	pages, err := groups.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return diag.Errorf("Unable to list Groups: %s", err)
+		return diag.Errorf("Unable to list openstack_fw_group_v2 groups: %s", err)
 	}
 
 	allGroups, err := groups.ExtractGroups(pages)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve Groups: %s", err)
+		return diag.Errorf("Unable to retrieve openstack_fw_group_v2: %s", err)
 	}
 
 	if len(allGroups) < 1 {
-		return diag.Errorf("No Group found")
+		return diag.Errorf("Your openstack_fw_group_v2 query returned no results")
 	}
 
 	if len(allGroups) > 1 {
-		return diag.Errorf("More than one Group found")
+		return diag.Errorf("Your openstack_fw_group_v2 query returned more than one result")
 	}
 
 	group := allGroups[0]

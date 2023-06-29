@@ -32,10 +32,10 @@ data "openstack_fw_group_v2" "group" {
 * `group_id` - (Optional) The ID of the firewall group.
 
 * `tenant_id` - (Optional) - This argument conflict and interchangeable with
-    `project_id`.The owner of the firewall group.
+    `project_id`. The owner of the firewall group.
 
 * `project_id` - (Optional) - This argument conflict and interchangeable with
-    `tenant_id`.The owner of the firewall group.
+    `tenant_id`. The owner of the firewall group.
 
 * `shared` - (Optional) The sharing status of the firewall group.
 
