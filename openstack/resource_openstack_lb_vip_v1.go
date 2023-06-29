@@ -29,6 +29,7 @@ func resourceLBVipV1() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		DeprecationMessage: "openstack_lb_vip_v1 is deprecated. Consider using LBaaS v2 / Octavia resources",
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
