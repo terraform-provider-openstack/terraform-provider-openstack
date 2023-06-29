@@ -10,6 +10,7 @@ IMPROVEMENTS
 * Added a new `openstack_fw_rule_v2` resource and data source ([#1577](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1577))
 * Added a new `openstack_fw_policy_v2` resource and data source ([#1584](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1584))
 * Added a new `openstack_fw_group_v2` resource and data source ([#1588](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1588) [#1589](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1589))
+* Added a new `openstack_identity_inherit_role_assignment_v3` resource ([#1567](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1567))
 * Added validators to the `openstack_vpnaas_ipsec_policy_v2` resource ([#1558](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1558))
 * Added `user_id` argument to the `openstack_compute_keypair_v2` data source ([#1554](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1554))
 * Added `project_id` argument to the `openstack_identity_project_v3` data source ([#1559](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1559))
