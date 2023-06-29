@@ -1,5 +1,5 @@
 ---
-subcategory: "Networking / Neutron"
+subcategory: "VPNaaS / Neutron"
 layout: "openstack"
 page_title: "OpenStack: openstack_vpnaas_ipsec_policy_v2"
 sidebar_current: "docs-openstack-resource-vpnaas-ipsec-policy-v2"

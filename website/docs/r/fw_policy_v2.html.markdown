@@ -1,5 +1,5 @@
 ---
-subcategory: "Networking / Neutron"
+subcategory: "FWaaS / Neutron"
 layout: "openstack"
 page_title: "OpenStack: openstack_fw_policy_v2"
 sidebar_current: "docs-openstack-resource-fw-policy-v2"
