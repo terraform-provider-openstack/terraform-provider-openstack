@@ -1,4 +1,4 @@
-## 1.52.0 (not released yet)
+## 1.52.0 (29 June, 2023)
 
 NOTES
 
@@ -17,11 +17,13 @@ IMPROVEMENTS
 * The `openstack_dns_recordset_v2` resource now refreshes record values and ignores record order for individual record values within the same resource ([#1581](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1581))
 * The `openstack_sharedfilesystem_share_access_v2` resource now prefers to use the GET method for share access rules retriving ([#1583](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1583))
 * Added `multiattach` argument to the `openstack_compute_instance_v2` resource ([#1542](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1542))
+* Added `xz` decompression support to the `openstack_images_image_v2` resource ([#1579](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1579))
 
 BUG FIXES
 
 * Force new `openstack_containerinfra_nodegroup_v1` resource when `cluster_id` changes ([#1551](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1551))
 * Fixed `openstack_objectstorage_container_v1` resource to not fail when container/objest doesn't exist ([#1535](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1535))
+* Fixed a bug in the `openstack_images_image_v2` resource where simultaneous image downloads could cause a broken resulting image in the cache ([#1579](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1579))
 
 ## 1.51.1 (21 March, 2023)
 
