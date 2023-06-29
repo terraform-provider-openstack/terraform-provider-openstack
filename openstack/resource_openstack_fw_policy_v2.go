@@ -179,7 +179,7 @@ func resourceFWPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_fw_policy_v2 %s update options: %#v", d.Id(), updateOpts)
 
-		err = policies.Update(networkingClient, d.Id(), updateOpts).Err
+		_, err = policies.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_fw_policy_v2 %s: %s", d.Id(), err)
 		}

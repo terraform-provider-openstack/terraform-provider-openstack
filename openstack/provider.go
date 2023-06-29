@@ -355,6 +355,7 @@ func Provider() *schema.Provider {
 			"openstack_dns_transfer_request_v2":                  resourceDNSTransferRequestV2(),
 			"openstack_dns_transfer_accept_v2":                   resourceDNSTransferAcceptV2(),
 			"openstack_fw_firewall_v1":                           resourceFWFirewallV1(),
+			"openstack_fw_group_v2":                              resourceFWGroupV2(),
 			"openstack_fw_policy_v1":                             resourceFWPolicyV1(),
 			"openstack_fw_policy_v2":                             resourceFWPolicyV2(),
 			"openstack_fw_rule_v1":                               resourceFWRuleV1(),
