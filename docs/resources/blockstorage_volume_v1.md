@@ -1,5 +1,5 @@
 ---
-subcategory: "Block Storage / Cinder"
+subcategory: "Deprecated"
 layout: "openstack"
 page_title: "OpenStack: openstack_blockstorage_volume_v1"
 sidebar_current: "docs-openstack-resource-blockstorage-volume-v1"
