@@ -7,13 +7,16 @@ NOTES
 
 IMPROVEMENTS
 
-* Add validators to the `openstack_vpnaas_ipsec_policy_v2` resource ([#1558](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1558))
-* Add `user_id` argument to the `openstack_compute_keypair_v2` data source ([#1554](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1554))
-* Add `project_id` argument to the `openstack_identity_project_v3` data source ([#1559](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1559))
+* Added a new `openstack_fw_rule_v2` resource and data source ([#1577](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1577))
+* Added a new `openstack_fw_policy_v2` resource and data source ([#1584](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1584))
+* Added a new `openstack_fw_group_v2` resource ([#1588](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1588))
+* Added validators to the `openstack_vpnaas_ipsec_policy_v2` resource ([#1558](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1558))
+* Added `user_id` argument to the `openstack_compute_keypair_v2` data source ([#1554](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1554))
+* Added `project_id` argument to the `openstack_identity_project_v3` data source ([#1559](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1559))
 * The `private_key` attribute in the `openstack_compute_keypair_v2` resource is now marked as sensitive ([#1548](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1548))
 * The `openstack_dns_recordset_v2` resource now refreshes record values and ignores record order for individual record values within the same resource ([#1581](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1581))
 * The `openstack_sharedfilesystem_share_access_v2` resource now prefers to use the GET method for share access rules retriving ([#1583](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1583))
-* Add `multiattach` argument to the `openstack_compute_instance_v2` resource ([#1542](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1542))
+* Added `multiattach` argument to the `openstack_compute_instance_v2` resource ([#1542](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1542))
 
 BUG FIXES
 
