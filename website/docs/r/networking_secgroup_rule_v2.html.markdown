@@ -59,6 +59,7 @@ The following arguments are supported:
   * __esp__
   * __gre__
   * __igmp__
+  * __ipip__
   * __ipv6-encap__
   * __ipv6-frag__
   * __ipv6-icmp__
