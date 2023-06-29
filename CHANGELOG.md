@@ -1,3 +1,9 @@
+## 1.52.1 (29 June, 2023)
+
+NOTES
+
+* Added subcategories for VPNaaS and FWaaS documentation ([#1590](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1590))
+
 ## 1.52.0 (29 June, 2023)
 
 NOTES
