@@ -283,6 +283,7 @@ func Provider() *schema.Provider {
 			"openstack_containerinfra_clustertemplate_v1":        dataSourceContainerInfraClusterTemplateV1(),
 			"openstack_containerinfra_cluster_v1":                dataSourceContainerInfraCluster(),
 			"openstack_dns_zone_v2":                              dataSourceDNSZoneV2(),
+			"openstack_fw_group_v2":                              dataSourceFWGroupV2(),
 			"openstack_fw_policy_v1":                             dataSourceFWPolicyV1(),
 			"openstack_fw_policy_v2":                             dataSourceFWPolicyV2(),
 			"openstack_fw_rule_v2":                               dataSourceFWRuleV2(),
