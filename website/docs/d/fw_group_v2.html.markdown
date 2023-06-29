@@ -43,6 +43,8 @@ data "openstack_fw_group_v2" "group" {
 
 * `egress_firewall_policy_id` - (Optional) The egress policy ID of the firewall group.
 
+* `status` - (Optional) Enabled status for the firewall group.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -58,4 +60,4 @@ The following attributes are exported:
 * `ingress_firewall_policy_id` - See Argument Reference above.
 * `egress_firewall_policy_id` - See Argument Reference above.
 * `ports` - Port(s) to associate this firewall group with.
-* `status` - Enabled status for the firewall group.
+* `status` - See Argument Reference above.
