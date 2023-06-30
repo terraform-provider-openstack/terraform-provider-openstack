@@ -55,6 +55,8 @@ data "openstack_fw_rule_v2" "rule" {
 
 * `enabled` - Enabled status for the firewall rule.
 
+* `firewall_policy_id` - The ID of the firewall policy the rule belongs to.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -73,4 +75,4 @@ The following attributes are exported:
 * `destination_port` - See Argument Reference above.
 * `shared` - See Argument Reference above.
 * `enabled` - See Argument Reference above.
-* `firewall_policy_id` - The ID of the firewall policy the rule belongs to.
+* `firewall_policy_id` - See Argument Reference above.

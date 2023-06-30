@@ -101,12 +101,9 @@ func dataSourceFWRuleV2() *schema.Resource {
 			},
 
 			"firewall_policy_id": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
 			},
 		},
 	}
@@ -163,6 +160,10 @@ func dataSourceFWRuleV2Read(ctx context.Context, d *schema.ResourceData, meta in
 
 	if v, ok := d.GetOk("destination_port"); ok {
 		listOpts.DestinationPort = v.(string)
+	}
+
+	if v, ok := d.GetOk("firewall_policy_id"); ok {
+		listOpts.FirewallPolicyID = v.(string)
 	}
 
 	if v, ok := d.GetOk("shared"); ok {
