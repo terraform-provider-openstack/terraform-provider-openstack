@@ -46,10 +46,19 @@ func resourceFWPolicyV2() *schema.Resource {
 			},
 
 			"tenant_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				Computed:      true,
+				ConflictsWith: []string{"project_id"},
+			},
+
+			"project_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				Computed:      true,
+				ConflictsWith: []string{"tenant_id"},
 			},
 
 			"audited": {
@@ -82,6 +91,7 @@ func resourceFWPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		Name:          d.Get("name").(string),
 		Description:   d.Get("description").(string),
 		TenantID:      d.Get("tenant_id").(string),
+		ProjectID:     d.Get("project_id").(string),
 		FirewallRules: expandToStringSlice(d.Get("rules").([]interface{})),
 	}
 
@@ -126,6 +136,7 @@ func resourceFWPolicyV2Read(_ context.Context, d *schema.ResourceData, meta inte
 	d.Set("name", policy.Name)
 	d.Set("description", policy.Description)
 	d.Set("tenant_id", policy.TenantID)
+	d.Set("project_id", policy.ProjectID)
 	d.Set("rules", policy.Rules)
 	d.Set("audited", policy.Audited)
 	d.Set("shared", policy.Shared)

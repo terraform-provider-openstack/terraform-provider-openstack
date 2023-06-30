@@ -33,10 +33,17 @@ func dataSourceFWPolicyV2() *schema.Resource {
 			},
 
 			"tenant_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:          schema.TypeString,
+				Computed:      true,
+				Optional:      true,
+				ConflictsWith: []string{"project_id"},
+			},
+
+			"project_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"tenant_id"},
 			},
 
 			"description": {
@@ -90,6 +97,10 @@ func dataSourceFWPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta 
 		listOpts.TenantID = v.(string)
 	}
 
+	if v, ok := d.GetOk("project_id"); ok {
+		listOpts.ProjectID = v.(string)
+	}
+
 	if v, ok := d.GetOk("shared"); ok {
 		shared := v.(bool)
 		listOpts.Shared = &shared
@@ -126,6 +137,7 @@ func dataSourceFWPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta 
 
 	d.Set("name", policy.Name)
 	d.Set("tenant_id", policy.TenantID)
+	d.Set("project_id", policy.ProjectID)
 	d.Set("description", policy.Description)
 	d.Set("shared", policy.Shared)
 	d.Set("audited", policy.Audited)
