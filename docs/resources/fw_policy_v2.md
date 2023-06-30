@@ -59,9 +59,15 @@ The following arguments are supported:
 * `description` - (Optional) A description for the firewall policy. Changing
     this updates the `description` of an existing firewall policy.
 
-* `tenant_id` - (Optional) The owner of the firewall policy. Required if admin
-    wants to create a firewall policy for another tenant. Changing this
-    creates a new firewall policy.
+* `tenant_id` - (Optional) - This argument conflicts and is interchangeable
+    with `project_id`. The owner of the firewall policy. Required if admin wants
+    to create a firewall policy for another tenant. Changing this creates a new
+    firewall policy.
+
+* `project_id` - (Optional) - This argument conflicts and is interchangeable
+    with `tenant_id`. The owner of the firewall policy. Required if admin wants
+    to create a firewall policy for another project. Changing this creates a new
+    firewall policy.
 
 * `rules` - (Optional) An array of one or more firewall rules that comprise
     the policy. Changing this results in adding/removing rules from the
@@ -86,6 +92,7 @@ The following attributes are exported:
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
+* `project_id` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `rules` - See Argument Reference above.
 * `audited` - See Argument Reference above.

@@ -31,7 +31,11 @@ data "openstack_fw_policy_v2" "policy" {
 
 * `policy_id` - (Optional) The ID of the firewall policy.
 
-* `tenant_id` - (Optional) The owner of the firewall policy.
+* `tenant_id` - (Optional) - This argument conflicts and is interchangeable
+    with `project_id`. The owner of the firewall policy.
+
+* `project_id` - (Optional) - This argument conflicts and is interchangeable
+    with `tenant_id`. The owner of the firewall policy.
 
 * `shared` - (Optional) Whether this policy is shared across all projects.
 
@@ -45,6 +49,7 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `policy_id` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
+* `project_id` - See Argument Reference above.
 * `shared` - The sharing status of the firewall policy.
 * `audited` - The audit status of the firewall policy.
 * `rules` - The array of one or more firewall rules that comprise the policy.
