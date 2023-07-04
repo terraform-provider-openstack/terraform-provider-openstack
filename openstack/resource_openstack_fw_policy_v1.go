@@ -27,6 +27,7 @@ func resourceFWPolicyV1() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		DeprecationMessage: "use openstack_fw_policy_v2 resource instead",
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,

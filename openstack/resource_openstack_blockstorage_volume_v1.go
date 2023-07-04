@@ -29,6 +29,7 @@ func resourceBlockStorageVolumeV1() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		DeprecationMessage: "use openstack_blockstorage_volume_v3 resource instead",
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,

@@ -14,6 +14,7 @@ func dataSourceBlockStorageSnapshotV2() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceBlockStorageSnapshotV2Read,
 
+		DeprecationMessage: "use openstack_blockstorage_snapshot_v3 data-source instead",
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,

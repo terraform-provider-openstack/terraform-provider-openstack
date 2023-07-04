@@ -29,6 +29,7 @@ func resourceLBMonitorV1() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		DeprecationMessage: "use openstack_lb_monitor_v2 resource instead",
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
