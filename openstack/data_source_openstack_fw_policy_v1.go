@@ -14,6 +14,7 @@ func dataSourceFWPolicyV1() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceFWPolicyV1Read,
 
+		DeprecationMessage: "use openstack_fw_policy_v2 data-source instead",
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
