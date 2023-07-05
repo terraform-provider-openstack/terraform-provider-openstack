@@ -1,3 +1,16 @@
+## 1.53.0 ( Not released yet)
+
+NOTES
+
+* Marked various resources as deprecated and added a deprecation warning for the user ([#1591](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1591))
+
+IMPROVEMENTS
+
+* Added `project_id` argument to the `openstack_fw_rule_v2` data source ([#1594](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1594))
+* Added `project_id` argument to the `openstack_fw_rule_v2` resource ([#1594](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1594))
+* Added `project_id` argument to the `openstack_fw_policy_v2` data source ([#1594](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1594))
+* Added `project_id` argument to the `openstack_fw_policy_v2` resource ([#1594](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1594))
+
 ## 1.52.1 (29 June, 2023)
 
 NOTES
