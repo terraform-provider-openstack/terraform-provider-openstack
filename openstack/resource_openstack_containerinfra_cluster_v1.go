@@ -423,6 +423,7 @@ func resourceContainerInfraClusterV1Update(ctx context.Context, d *schema.Resour
 			ClusterTemplate: clusterTemplateID,
 		}
 
+		containerInfraClient.Microversion = containerInfraV1ClusterUpgradeMinMicroversion
 		_, err = clusters.Upgrade(containerInfraClient, d.Id(), upgradeOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error upgrading openstack_containerinfra_cluster_v1 %s: %s", d.Id(), err)
