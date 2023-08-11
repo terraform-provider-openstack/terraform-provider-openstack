@@ -105,7 +105,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
 
 resource "openstack_compute_interface_attach_v2" "attachments" {
   count       = 2
-  port_id     = "${openstack_networking_port_v2.ports.*.id[count.index]}"
+  port_id     = openstack_networking_port_v2.ports[count.index].id
   instance_id = openstack_compute_instance_v2.instance_1.id
 }
 ```
@@ -137,12 +137,12 @@ resource "openstack_compute_instance_v2" "instance_1" {
 
 resource "openstack_compute_interface_attach_v2" "ai_1" {
   instance_id = openstack_compute_instance_v2.instance_1.id
-  port_id     = "${openstack_networking_port_v2.ports.*.id[0]}"
+  port_id     = openstack_networking_port_v2.ports[0].id
 }
 
 resource "openstack_compute_interface_attach_v2" "ai_2" {
   instance_id = openstack_compute_instance_v2.instance_1.id
-  port_id     = "${openstack_networking_port_v2.ports.*.id[1]}"
+  port_id     = openstack_networking_port_v2.ports[1].id
 }
 ```
 
