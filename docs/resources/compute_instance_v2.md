@@ -40,7 +40,7 @@ resource "openstack_compute_instance_v2" "basic" {
 ### Instance With Attached Volume
 
 ```hcl
-resource "openstack_blockstorage_volume_v2" "myvol" {
+resource "openstack_blockstorage_volume_v3" "myvol" {
   name = "myvol"
   size = 1
 }
@@ -59,7 +59,7 @@ resource "openstack_compute_instance_v2" "myinstance" {
 
 resource "openstack_compute_volume_attach_v2" "attached" {
   instance_id = openstack_compute_instance_v2.myinstance.id
-  volume_id   = openstack_blockstorage_volume_v2.myvol.id
+  volume_id   = openstack_blockstorage_volume_v3.myvol.id
 }
 ```
 
@@ -90,7 +90,7 @@ resource "openstack_compute_instance_v2" "boot-from-volume" {
 ### Boot From an Existing Volume
 
 ```hcl
-resource "openstack_blockstorage_volume_v1" "myvol" {
+resource "openstack_blockstorage_volume_v3" "myvol" {
   name     = "myvol"
   size     = 5
   image_id = "<image-id>"
@@ -103,7 +103,7 @@ resource "openstack_compute_instance_v2" "boot-from-volume" {
   security_groups = ["default"]
 
   block_device {
-    uuid                  = openstack_blockstorage_volume_v1.myvol.id
+    uuid                  = openstack_blockstorage_volume_v3.myvol.id
     source_type           = "volume"
     boot_index            = 0
     destination_type      = "volume"
@@ -147,7 +147,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
 ### Boot Instance and Attach Existing Volume as a Block Device
 
 ```hcl
-resource "openstack_blockstorage_volume_v2" "volume_1" {
+resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   size = 1
 }
@@ -168,7 +168,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 
   block_device {
-    uuid                  = openstack_blockstorage_volume_v2.volume_1.id
+    uuid                  = openstack_blockstorage_volume_v3.volume_1.id
     source_type           = "volume"
     destination_type      = "volume"
     boot_index            = 1
@@ -799,7 +799,7 @@ configuration accordingly.
 We have an instance with two block storage volumes, one bootable and one
 non-bootable.
 Note that we only configure the bootable device as block_device.
-The other volumes can be specified as `openstack_blockstorage_volume_v2`
+The other volumes can be specified as `openstack_blockstorage_volume_v3`
 
 ```hcl
 resource "openstack_compute_instance_v2" "instance_2" {
@@ -821,12 +821,12 @@ resource "openstack_compute_instance_v2" "instance_2" {
     name = "<network_name>"
   }
 }
-resource "openstack_blockstorage_volume_v2" "volume_1" {
+resource "openstack_blockstorage_volume_v3" "volume_1" {
   size = 1
   name = "<vol_name>"
 }
 resource "openstack_compute_volume_attach_v2" "va_1" {
-  volume_id   = openstack_blockstorage_volume_v2.volume_1.id
+  volume_id   = openstack_blockstorage_volume_v3.volume_1.id
   instance_id = openstack_compute_instance_v2.instance_2.id
 }
 ```
@@ -835,7 +835,7 @@ do the following:
 
 ```
 terraform import openstack_compute_instance_v2.instance_2 instance_id
-import openstack_blockstorage_volume_v2.volume_1 volume_id
+import openstack_blockstorage_volume_v3.volume_1 volume_id
 terraform import openstack_compute_volume_attach_v2.va_1
 instance_id/volume_id
 ```
