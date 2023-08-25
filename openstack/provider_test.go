@@ -262,6 +262,13 @@ func testAccPreCheckHypervisor(t *testing.T) {
 	}
 }
 
+func testAccPreCheckSystemScopeOnly(t *testing.T) {
+	v := os.Getenv("OS_SYSTEM_SCOPE")
+	if v != "true" {
+		t.Skip("Skipping test because it requires the system scope")
+	}
+}
+
 // testAccSkipReleasesBelow will have the test be skipped on releases below a certain
 // one. Releases are named such as 'stable/mitaka', master, etc.
 func testAccSkipReleasesBelow(t *testing.T, release string) {
