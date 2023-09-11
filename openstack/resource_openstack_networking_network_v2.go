@@ -102,6 +102,7 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 						"segmentation_id": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
