@@ -26,8 +26,9 @@ const (
 	rsaPrivateKeyBlockType      = "RSA PRIVATE KEY"
 	certificateRequestBlockType = "CERTIFICATE REQUEST"
 
-	containerInfraV1NodeGroupMinMicroversion  = "1.9"
-	containerInfraV1ZeroNodeCountMicroversion = "1.10"
+	containerInfraV1ClusterUpgradeMinMicroversion = "1.8"
+	containerInfraV1NodeGroupMinMicroversion      = "1.9"
+	containerInfraV1ZeroNodeCountMicroversion     = "1.10"
 )
 
 func expandContainerInfraV1LabelsMap(v map[string]interface{}) (map[string]string, error) {
