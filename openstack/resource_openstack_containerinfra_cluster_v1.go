@@ -86,7 +86,7 @@ func resourceContainerInfraClusterV1() *schema.Resource {
 			"cluster_template_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
+				ForceNew:    false,
 				DefaultFunc: schema.EnvDefaultFunc("OS_MAGNUM_CLUSTER_TEMPLATE", nil),
 			},
 
@@ -415,6 +415,33 @@ func resourceContainerInfraClusterV1Update(ctx context.Context, d *schema.Resour
 	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack container infra client: %s", err)
+	}
+
+	if d.HasChange("cluster_template_id") {
+		clusterTemplateID := d.Get("cluster_template_id").(string)
+		upgradeOpts := clusters.UpgradeOpts{
+			ClusterTemplate: clusterTemplateID,
+		}
+
+		containerInfraClient.Microversion = containerInfraV1ClusterUpgradeMinMicroversion
+		_, err = clusters.Upgrade(containerInfraClient, d.Id(), upgradeOpts).Extract()
+		if err != nil {
+			return diag.Errorf("Error upgrading openstack_containerinfra_cluster_v1 %s: %s", d.Id(), err)
+		}
+
+		stateConf := &resource.StateChangeConf{
+			Pending:      []string{"UPDATE_IN_PROGRESS"},
+			Target:       []string{"UPDATE_COMPLETE"},
+			Refresh:      containerInfraClusterV1StateRefreshFunc(containerInfraClient, d.Id()),
+			Timeout:      d.Timeout(schema.TimeoutUpdate),
+			Delay:        1 * time.Minute,
+			PollInterval: 20 * time.Second,
+		}
+		_, err = stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return diag.Errorf(
+				"Error waiting for openstack_containerinfra_cluster_v1 %s to upgrade: %s", d.Id(), err)
+		}
 	}
 
 	updateOpts := []clusters.UpdateOptsBuilder{}
