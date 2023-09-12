@@ -56,6 +56,8 @@ github.com/google/uuid v1.1.2/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+
 github.com/gophercloud/gophercloud v1.1.1/go.mod h1:aAVqcocTSXh2vYFZ1JTvx4EQmfgzxRcNupUfxZbBNDM=
 github.com/gophercloud/gophercloud v1.5.1-0.20230630055749-157270b09bb3 h1:NX1ukZLZGM034ZaXYcf5uEUxsuP4pImVpIxv0dhdvRQ=
 github.com/gophercloud/gophercloud v1.5.1-0.20230630055749-157270b09bb3/go.mod h1:aAVqcocTSXh2vYFZ1JTvx4EQmfgzxRcNupUfxZbBNDM=
+github.com/gophercloud/gophercloud v1.6.0 h1:JwJN1bauRnWPba5ueWs9IluONHteXPWjjK+MvfM4krY=
+github.com/gophercloud/gophercloud v1.6.0/go.mod h1:aAVqcocTSXh2vYFZ1JTvx4EQmfgzxRcNupUfxZbBNDM=
 github.com/gophercloud/utils v0.0.0-20230324070755-05e9e7f5ea4d h1:AfRlf5NnsYsHIW5nNxhYp+99Bmj/fLeOYwD5Z4CMlzw=
 github.com/gophercloud/utils v0.0.0-20230324070755-05e9e7f5ea4d/go.mod h1:z4Dey7xsTUXgcB1C8elMvGRKTjV1ez0eoYQlMrduG1g=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
