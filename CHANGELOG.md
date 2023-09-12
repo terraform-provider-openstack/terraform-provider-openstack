@@ -11,6 +11,10 @@ IMPROVEMENTS
 * Added `project_id` argument to the `openstack_fw_policy_v2` data source ([#1594](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1594))
 * Added `project_id` argument to the `openstack_fw_policy_v2` resource ([#1594](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1594))
 
+BUG FIXES
+
+* Fixed `segmentation_id` on `openstack_networking_network_v2` to allow neutron to dynamically set it ([#1600](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1600))
+* Fixed an issue to allow `cluster_template_id` on `openstack_containerinfra_cluster_v1` to be updated without triggering a new cluster creation ([#1598](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1598))
 ## 1.52.1 (29 June, 2023)
 
 NOTES
