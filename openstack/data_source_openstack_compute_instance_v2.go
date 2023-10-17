@@ -140,6 +140,10 @@ func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
+	imageClient, err := config.ImageV2Client(GetRegion(d, config))
+	if err != nil {
+		return diag.Errorf("Error creating OpenStack image client: %s", err)
+	}
 
 	id := d.Get("id").(string)
 	log.Printf("[DEBUG] Attempting to retrieve server %s", id)
@@ -207,7 +211,7 @@ func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData
 	d.Set("flavor_name", flavor.Name)
 
 	// Set the instance's image information appropriately
-	if err := setImageInformation(computeClient, server, d); err != nil {
+	if err := setImageInformation(imageClient, server, d); err != nil {
 		return diag.FromErr(err)
 	}
 
