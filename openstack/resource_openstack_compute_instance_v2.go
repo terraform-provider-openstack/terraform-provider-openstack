@@ -29,8 +29,8 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/startstop"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tags"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	flavorsutils "github.com/gophercloud/utils/openstack/compute/v2/flavors"
 	imagesutils "github.com/gophercloud/utils/openstack/imageservice/v2/images"
 	"github.com/gophercloud/utils/terraform/hashcode"
@@ -672,6 +672,10 @@ func resourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, me
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
+	imageClient, err := config.ImageV2Client(GetRegion(d, config))
+	if err != nil {
+		return diag.Errorf("Error creating OpenStack image client: %s", err)
+	}
 
 	server, err := servers.Get(computeClient, d.Id()).Extract()
 	if err != nil {
@@ -756,7 +760,7 @@ func resourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, me
 	}
 
 	// Set the instance's image information appropriately
-	if err := setImageInformation(computeClient, server, d); err != nil {
+	if err := setImageInformation(imageClient, server, d); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -1487,7 +1491,7 @@ func getImageIDFromConfig(imageClient *gophercloud.ServiceClient, d *schema.Reso
 	return "", fmt.Errorf("Neither a boot device, image ID, or image name were able to be determined")
 }
 
-func setImageInformation(computeClient *gophercloud.ServiceClient, server *servers.Server, d *schema.ResourceData) error {
+func setImageInformation(imageClient *gophercloud.ServiceClient, server *servers.Server, d *schema.ResourceData) error {
 	// If block_device was used, an Image does not need to be specified, unless an image/local
 	// combination was used. This emulates normal boot behavior. Otherwise, ignore the image altogether.
 	if vL, ok := d.GetOk("block_device"); ok {
@@ -1508,7 +1512,7 @@ func setImageInformation(computeClient *gophercloud.ServiceClient, server *serve
 		imageID := server.Image["id"].(string)
 		if imageID != "" {
 			d.Set("image_id", imageID)
-			image, err := images.Get(computeClient, imageID).Extract()
+			image, err := images.Get(imageClient, imageID).Extract()
 			if err != nil {
 				if _, ok := err.(gophercloud.ErrDefault404); ok {
 					// If the image name can't be found, set the value to "Image not found".
