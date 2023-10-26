@@ -1,4 +1,4 @@
-## 1.53.0 ( Not released yet)
+## 1.53.0 ( 26 October, 2023)
 
 NOTES
 
@@ -10,6 +10,8 @@ IMPROVEMENTS
 * Added `project_id` argument to the `openstack_fw_rule_v2` resource ([#1594](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1594))
 * Added `project_id` argument to the `openstack_fw_policy_v2` data source ([#1594](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1594))
 * Added `project_id` argument to the `openstack_fw_policy_v2` resource ([#1594](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1594))
+* Updated `openstack_compute_instance_v2` to use Glance client instead of deprecated Nova client for images ([#1615](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1615))
+
 
 BUG FIXES
 
