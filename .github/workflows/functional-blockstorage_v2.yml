@@ -8,7 +8,8 @@ on:
   pull_request:
     paths:
       - '.github/workflows/functional-blockstorage_v2.yml'
-      - '**blockstorage**'
+      - 'go.mod'
+      - 'openstack/**blockstorage**'
       - '!**v3**'
 jobs:
   functional-basic:

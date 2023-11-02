@@ -6,7 +6,8 @@ on:
   pull_request:
     paths:
       - '.github/workflows/functional-vpnaas.yml'
-      - '**vpnaas**'
+      - 'go.mod'
+      - 'openstack/**vpnaas**'
       - 'CHANGELOG.md'
       - 'scripts/*'
   schedule:

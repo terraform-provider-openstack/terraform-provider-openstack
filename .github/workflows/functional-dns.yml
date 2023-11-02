@@ -6,7 +6,8 @@ on:
   pull_request:
     paths:
       - '.github/workflows/functional-dns.yml'
-      - '**dns**'
+      - 'go.mod'
+      - 'openstack/**dns**'
       - 'CHANGELOG.md'
       - 'scripts/*'
   schedule:

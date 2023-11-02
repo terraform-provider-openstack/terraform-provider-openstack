@@ -9,7 +9,8 @@ on:
   pull_request:
     paths:
       - '.github/workflows/functional-keymanager.yml'
-      - '**keymanager**'
+      - 'go.mod'
+      - 'openstack/**keymanager**'
       - 'CHANGELOG.md'
       - 'scripts/*'
   schedule:

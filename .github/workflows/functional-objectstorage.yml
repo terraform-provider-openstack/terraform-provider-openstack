@@ -6,7 +6,8 @@ on:
   pull_request:
     paths:
       - '.github/workflows/functional-objectstorage.yml'
-      - '**objectstorage**'
+      - 'go.mod'
+      - 'openstack/**objectstorage**'
       - 'CHANGELOG.md'
       - 'scripts/*'
   schedule:
