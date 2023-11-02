@@ -6,7 +6,8 @@ on:
   pull_request:
     paths:
       - '.github/workflows/functional-sharedfilesystem.yml'
-      - '**sharedfilesystem**'
+      - 'go.mod'
+      - 'openstack/**sharedfilesystem**'
       - 'CHANGELOG.md'
       - 'scripts/*'
   schedule:
