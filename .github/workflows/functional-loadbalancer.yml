@@ -6,7 +6,8 @@ on:
   pull_request:
     paths:
       - '.github/workflows/functional-loadbalancer.yml'
-      - '**_lb_**'
+      - 'go.mod'
+      - 'openstack/**_lb_**'
       - 'CHANGELOG.md'
       - 'scripts/*'
   schedule:
