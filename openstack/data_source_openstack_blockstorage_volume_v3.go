@@ -73,6 +73,28 @@ func dataSourceBlockStorageVolumeV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+
+			"attachment": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"instance_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"device": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+				Set: blockStorageVolumeV3AttachmentHash,
+			},
 		},
 	}
 }
@@ -133,4 +155,12 @@ func dataSourceBlockStorageVolumeV3Attributes(d *schema.ResourceData, volume Vol
 	if err := d.Set("metadata", volume.Metadata); err != nil {
 		log.Printf("[DEBUG] Unable to set metadata for openstack_blockstorage_volume_v3 %s: %s", volume.ID, err)
 	}
+
+	attachments := flattenBlockStorageVolumeV3Attachments(volume.Attachments)
+	log.Printf("[DEBUG] openstack_blockstorage_volume_v3 %s attachments: %#v", d.Id(), attachments)
+	if err := d.Set("attachment", attachments); err != nil {
+		log.Printf(
+			"[DEBUG] unable to set openstack_blockstorage_volume_v3 %s attachments: %s", d.Id(), err)
+	}
+
 }
