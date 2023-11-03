@@ -162,5 +162,4 @@ func dataSourceBlockStorageVolumeV3Attributes(d *schema.ResourceData, volume Vol
 		log.Printf(
 			"[DEBUG] unable to set openstack_blockstorage_volume_v3 %s attachments: %s", d.Id(), err)
 	}
-
 }
