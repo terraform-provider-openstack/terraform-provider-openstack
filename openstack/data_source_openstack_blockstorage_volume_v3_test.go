@@ -135,7 +135,7 @@ func TestAccBlockStorageV3VolumeDataSource_attachment(t *testing.T) {
 			{
 				Config: testAccBlockStorageV3VolumeDataSourceAttachment(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair("data.openstack_blockstorage_volume_v3.volume_1", "attachment", "openstack_blockstorage_volume_v3.data_1", "attachment"),
+					resource.TestCheckResourceAttrPair("data.openstack_blockstorage_volume_v3.volume_1", "attachment", "openstack_blockstorage_volume_v3.volume_1", "attachment"),
 				),
 			},
 		},
