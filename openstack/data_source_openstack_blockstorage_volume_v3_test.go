@@ -122,3 +122,50 @@ func testAccBlockStorageV3VolumeDataSourceBasic(snapshotName string) string {
     }
   `, snapshotName)
 }
+
+func TestAccBlockStorageV3VolumeDataSource_attachment(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBlockStorageV3VolumeDataSourceAttachment(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair("data.openstack_blockstorage_volume_v3.volume_1", "attachment", "openstack_blockstorage_volume_v3.data_1", "attachment"),
+				),
+			},
+		},
+	})
+}
+
+func testAccBlockStorageV3VolumeDataSourceAttachment() string {
+	return fmt.Sprintf(`
+resource "openstack_blockstorage_volume_v3" "volume_1" {
+  name = "volume_1"
+  size = 1
+}
+
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
+}
+
+resource "openstack_compute_volume_attach_v2" "va_1" {
+  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+  volume_id = "${openstack_blockstorage_volume_v3.volume_1.id}"
+  device = "/dev/vdc"
+}
+
+data "openstack_blockstorage_volume_v3" "volume_1" {
+  name = "volume_1"
+  depends_on = [ openstack_compute_volume_attach_v2.va_1 ]
+}
+`, osNetworkID)
+}
