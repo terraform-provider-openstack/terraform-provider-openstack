@@ -11,6 +11,12 @@ description: |-
 
 Manages a V2 port resource within OpenStack.
 
+~> **Note:** Ports do not get an IP if the network they are attached
+to does not have a subnet. If you create the subnet resource in the
+same run as the port, make sure to use `fixed_ip.subnet_id` or 
+`depends_on` to enforce the subnet resource creation before the port
+creation is triggered. More info [here](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/1606#issuecomment-1790945191)
+
 ## Example Usage
 
 ### Simple port
@@ -25,6 +31,31 @@ resource "openstack_networking_port_v2" "port_1" {
   name           = "port_1"
   network_id     = openstack_networking_network_v2.network_1.id
   admin_state_up = "true"
+}
+```
+
+### Port defining fixed_ip.subnet_id
+
+```hcl
+resource "openstack_networking_network_v2" "network_1" {
+  name           = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name       = "subnet_1"
+  network_id = openstack_networking_network_v2.network_1.id
+  cidr       = "192.168.199.0/24"
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name           = "port_1"
+  network_id     = openstack_networking_network_v2.network_1.id
+  admin_state_up = "true"
+
+  fixed_ip {
+    subnet_id = openstack_networking_subnet_v2.subnet_1.id
+  }
 }
 ```
 
