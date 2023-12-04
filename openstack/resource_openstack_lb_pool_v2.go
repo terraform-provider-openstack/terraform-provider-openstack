@@ -67,9 +67,10 @@ func resourcePoolV2() *schema.Resource {
 
 			// One of loadbalancer_id or listener_id must be provided
 			"loadbalancer_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"loadbalancer_id", "listener_id"},
 			},
 
 			// One of loadbalancer_id or listener_id must be provided
@@ -193,7 +194,7 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 				"Error waiting for openstack_lb_loadbalancer_v2 %s to become active: %s", lbID, err)
 		}
 	} else {
-		return diag.Errorf("One of loadbalancer_id or listener_id must be provided.")
+		return diag.Errorf("Either listener_id or loadbalancer_id must be specified")
 	}
 
 	log.Printf("[DEBUG] Attempting to create pool")
