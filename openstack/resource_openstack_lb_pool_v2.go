@@ -186,12 +186,14 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 			return diag.Errorf(
 				"Error waiting for openstack_lb_listener_v2 %s to become active: %s", listenerID, err)
 		}
-	} else {
+	} else if lbID != "" {
 		waitErr := waitForLBV2LoadBalancer(ctx, lbClient, lbID, "ACTIVE", getLbPendingStatuses(), timeout)
 		if waitErr != nil {
 			return diag.Errorf(
 				"Error waiting for openstack_lb_loadbalancer_v2 %s to become active: %s", lbID, err)
 		}
+	} else {
+		return diag.Errorf("One of loadbalancer_id or listener_id must be provided.")
 	}
 
 	log.Printf("[DEBUG] Attempting to create pool")
