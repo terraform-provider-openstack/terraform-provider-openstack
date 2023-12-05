@@ -113,8 +113,9 @@ func resourceBlockStorageVolumeV3() *schema.Resource {
 			},
 
 			"multiattach": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:       schema.TypeBool,
+				Optional:   true,
+				Deprecated: "multiattach parameter has been deprecated and removed on Openstack Bobcat. The default behavior is to use multiattach enabled volume types",
 			},
 
 			"attachment": {
