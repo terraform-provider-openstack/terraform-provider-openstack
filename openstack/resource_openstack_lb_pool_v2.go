@@ -67,16 +67,18 @@ func resourcePoolV2() *schema.Resource {
 
 			// One of loadbalancer_id or listener_id must be provided
 			"loadbalancer_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"loadbalancer_id", "listener_id"},
 			},
 
 			// One of loadbalancer_id or listener_id must be provided
 			"listener_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"loadbalancer_id", "listener_id"},
 			},
 
 			"lb_method": {
