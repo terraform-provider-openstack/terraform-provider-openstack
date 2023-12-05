@@ -211,7 +211,7 @@ The `binding` block supports:
 
 * `vnic_type` - (Optional) VNIC type for the port. Can either be `direct`,
     `direct-physical`, `macvtap`, `normal`, `baremetal` or `virtio-forwarder`.
-    Default value is `normal`.
+    Default value is `normal`. It can be updated on unbound ports only.
 
 * `vif_details` - (Computed) A map of JSON strings containing additional
     details for this specific binding.
