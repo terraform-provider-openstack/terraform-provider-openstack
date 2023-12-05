@@ -65,7 +65,7 @@ The following arguments are supported:
 * `volume_type` - (Optional) The type of volume to create.
     Changing this creates a new volume.
 
-* `multiattach` - (Optional) Allow the volume to be attached to more than one Compute instance.
+* `multiattach` - (**Deprecated** - use multiattach enabled volume types instead) (Optional) Allow the volume to be attached to more than one Compute instance.
 
 * `scheduler_hints` - (Optional) Provide the Cinder scheduler with hints on where
     to instantiate a volume in the OpenStack cloud. The available hints are described below.
