@@ -103,6 +103,7 @@ func TestAccBlockStorageV3Volume_image_multiattach(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
+			t.Skip("Multiattach volumes has been deprecated and removed. Multiattach enabled volume types should be used instead")
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccSkipReleasesAbove(t, "stable/wallaby")
