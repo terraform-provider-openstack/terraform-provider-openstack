@@ -32,6 +32,9 @@ resource "openstack_networking_secgroup_rule_v2" "secgroup_rule_1" {
 }
 ```
 
+~> **Note:** To expose the full port-range 1:65535, use `0` for `port_range_min`
+and `port_range_max`.
+
 ## Argument Reference
 
 The following arguments are supported:
