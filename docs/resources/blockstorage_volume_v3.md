@@ -48,6 +48,9 @@ The following arguments are supported:
 * `image_id` - (Optional) The image ID from which to create the volume.
     Changing this creates a new volume.
 
+* `backup_id` - (Optional) The backup ID from which to create the volume.
+    Supported by Cinder API 3.47 or later.
+
 * `metadata` - (Optional) Metadata key/value pairs to associate with the volume.
     Changing this updates the existing volume metadata.
 

@@ -93,6 +93,11 @@ func resourceBlockStorageVolumeV3() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"backup_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"volume_type": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -193,6 +198,7 @@ func resourceBlockStorageVolumeV3Create(ctx context.Context, d *schema.ResourceD
 		ConsistencyGroupID: d.Get("consistency_group_id").(string),
 		Description:        d.Get("description").(string),
 		ImageID:            d.Get("image_id").(string),
+		BackupID:           d.Get("backup_id").(string),
 		Metadata:           expandToMapStringString(metadata),
 		Name:               d.Get("name").(string),
 		Size:               d.Get("size").(int),
