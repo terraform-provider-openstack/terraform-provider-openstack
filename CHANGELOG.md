@@ -2,7 +2,17 @@
 
 NOTES
 
+* Added deprecation notice for `multiattach` on `openstack_blockstorage_volume_v3` ([#1629](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1629))
+
+
 IMPROVEMENTS
+
+* Updated Terraform SDK to `v2.30.0` ([#1631](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1631))
+* Updated Gophercloud to `v1.8.0` ([#1631](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1631))
+* Updated docs of `openstack_networking_port_v2` to note ip allocation depedency with subnet ([#1622](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1622))
+* Updated docs of `openstack_networking_secgroup_rule_v2` for port-range exception ([#1632](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1632))
+* Added extra validations on `openstack_lb_pool_v2` ([#1628](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1628))
+
 
 BUG FIXES
 
