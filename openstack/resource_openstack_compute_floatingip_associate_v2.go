@@ -28,6 +28,7 @@ func resourceComputeFloatingIPAssociateV2() *schema.Resource {
 			Create: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		DeprecationMessage: "use openstack_networking_floatingip_associate_v2 resource instead",
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,

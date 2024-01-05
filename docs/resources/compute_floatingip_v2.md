@@ -1,5 +1,5 @@
 ---
-subcategory: "Compute / Nova"
+subcategory: "Deprecated"
 layout: "openstack"
 page_title: "OpenStack: openstack_compute_floatingip_v2"
 sidebar_current: "docs-openstack-resource-compute-floatingip-v2"

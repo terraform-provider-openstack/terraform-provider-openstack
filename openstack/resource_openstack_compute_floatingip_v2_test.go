@@ -17,6 +17,7 @@ func TestAccComputeV2FloatingIP_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
+			testAccSkipReleasesAbove(t, "stable/newton")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckComputeV2FloatingIPDestroy,
