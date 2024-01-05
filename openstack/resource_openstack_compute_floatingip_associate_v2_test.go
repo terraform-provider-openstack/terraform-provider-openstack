@@ -20,6 +20,7 @@ func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
+			testAccSkipReleasesAbove(t, "stable/newton")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
@@ -52,6 +53,7 @@ func TestAccComputeV2FloatingIPAssociate_fixedIP(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
+			testAccSkipReleasesAbove(t, "stable/newton")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
@@ -122,6 +124,7 @@ func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
+			testAccSkipReleasesAbove(t, "stable/newton")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
@@ -156,6 +159,7 @@ func TestAccComputeV2FloatingIPAssociate_waitUntilAssociated(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
+			testAccSkipReleasesAbove(t, "stable/newton")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
