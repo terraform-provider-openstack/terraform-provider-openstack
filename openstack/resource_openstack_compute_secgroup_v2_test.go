@@ -17,6 +17,7 @@ func TestAccComputeV2SecGroup_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
+			testAccSkipReleasesAbove(t, "stable/newton")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckComputeV2SecGroupDestroy,
@@ -38,6 +39,7 @@ func TestAccComputeV2SecGroup_update(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
+			testAccSkipReleasesAbove(t, "stable/newton")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckComputeV2SecGroupDestroy,
@@ -63,7 +65,11 @@ func TestAccComputeV2SecGroup_groupID(t *testing.T) {
 	var secgroup1, secgroup2, secgroup3 secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccSkipReleasesAbove(t, "stable/newton")
+		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
