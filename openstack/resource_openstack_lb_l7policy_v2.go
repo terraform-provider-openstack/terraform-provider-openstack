@@ -33,6 +33,7 @@ func resourceL7PolicyV2() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		DeprecationMessage: "Support for neutron-lbaas will be removed. Make sure to use Octavia",
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
