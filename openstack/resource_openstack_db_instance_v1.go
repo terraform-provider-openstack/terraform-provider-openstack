@@ -53,6 +53,12 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"availability_zone": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			"datastore": {
 				Type:     schema.TypeList,
 				Required: true,
