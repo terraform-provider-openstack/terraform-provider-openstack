@@ -17,6 +17,7 @@ import (
 )
 
 var (
+	osBackupID                   = os.Getenv("OS_BACKUP_ID")
 	osDBEnvironment              = os.Getenv("OS_DB_ENVIRONMENT")
 	osDBDatastoreVersion         = os.Getenv("OS_DB_DATASTORE_VERSION")
 	osDBDatastoreType            = os.Getenv("OS_DB_DATASTORE_TYPE")
