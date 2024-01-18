@@ -19,7 +19,7 @@ func TestAccBlockStorageV3VolumeDataSource_basic(t *testing.T) {
 	volumeName := acctest.RandomWithPrefix("tf-acc-volume")
 
 	var volumeID string
-	if os.Getenv("TF_ACC") != "" {
+	if os.Getenv("TF_ACC") != "" && os.Getenv("OS_SYSTEM_SCOPE") != "true" {
 		var err error
 		volumeID, err = testAccBlockStorageV3CreateVolume(volumeName)
 		if err != nil {

@@ -16,6 +16,7 @@ func TestAccOpenStackIdentityAuthScopeV3DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
@@ -42,6 +43,7 @@ func TestAccOpenStackIdentityAuthScopeV3DataSource_token_id(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{

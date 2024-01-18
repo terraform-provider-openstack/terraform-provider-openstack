@@ -21,8 +21,11 @@ if [[ -z $ACCEPTANCE_TESTS ]]; then
     exit 0
 fi
 
+# Prepare environment and add env vars to openrc
+source `dirname $0`/stackenv.sh
+
 # Source credentials as admin
-source `dirname $0`/stackenv.sh admin
+source $DEVSTACK_PATH/openrc admin admin
 
 for acceptance_test in "${ACCEPTANCE_TESTS[@]}"; do
   OS_DEBUG=1 TF_LOG=DEBUG TF_ACC=1 go test ./openstack -v -timeout 120m -run $(echo "$acceptance_test" | tr " " "|") |& tee -a ${LOG_DIR}/acceptance_tests.log
@@ -33,7 +36,23 @@ for acceptance_test in "${ACCEPTANCE_TESTS[@]}"; do
 done
 
 # Source credentials as user (demo)
-source `dirname $0`/stackenv.sh demo
+source $DEVSTACK_PATH/openrc demo demo
+
+for acceptance_test in "${ACCEPTANCE_TESTS[@]}"; do
+  OS_DEBUG=1 TF_LOG=DEBUG TF_ACC=1 go test ./openstack -v -timeout 120m -run $(echo "$acceptance_test" | tr " " "|") |& tee -a ${LOG_DIR}/acceptance_tests.log
+  # Check the error code after each suite, but do not exit early if a suite failed.
+  if [[ $? != 0 ]]; then
+    failed=1
+  fi
+done
+
+# Source credentials as admin and enable system scope
+source $DEVSTACK_PATH/openrc admin admin
+export OS_SYSTEM_SCOPE=true
+unset OS_PROJECT_NAME
+unset OS_TENANT_NAME
+unset OS_PROJECT_DOMAIN_ID
+
 
 for acceptance_test in "${ACCEPTANCE_TESTS[@]}"; do
   OS_DEBUG=1 TF_LOG=DEBUG TF_ACC=1 go test ./openstack -v -timeout 120m -run $(echo "$acceptance_test" | tr " " "|") |& tee -a ${LOG_DIR}/acceptance_tests.log

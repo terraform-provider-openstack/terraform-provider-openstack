@@ -17,7 +17,7 @@ import (
 func TestAccSFSV2SnapshotDataSource_basic(t *testing.T) {
 	var shareID string
 
-	if os.Getenv("TF_ACC") != "" {
+	if os.Getenv("TF_ACC") != "" && os.Getenv("OS_SYSTEM_SCOPE") != "true" {
 		snapshot, err := testAccSFSV2SnapshotCreate(t, "test_snapshot")
 		if err != nil {
 			t.Fatal(err)

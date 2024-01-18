@@ -14,6 +14,7 @@ func TestAccDNSV2TransferAccept_importBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckDNS(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{

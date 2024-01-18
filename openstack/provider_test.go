@@ -241,12 +241,20 @@ func testAccPreCheckAdminOnly(t *testing.T) {
 	if v != "admin" {
 		t.Skip("Skipping test because it requires the admin user")
 	}
+	v = os.Getenv("OS_SYSTEM_SCOPE")
+	if v == "true" {
+		t.Skip("Skipping test because system scope should be disabled")
+	}
 }
 
 func testAccPreCheckNonAdminOnly(t *testing.T) {
 	v := os.Getenv("OS_USERNAME")
 	if v != "demo" {
 		t.Skip("Skipping test because it requires the demo (non-admin) user")
+	}
+	v = os.Getenv("OS_SYSTEM_SCOPE")
+	if v == "true" {
+		t.Skip("Skipping test because system scope should be disabled")
 	}
 }
 
@@ -262,10 +270,16 @@ func testAccPreCheckHypervisor(t *testing.T) {
 	}
 }
 
-func testAccPreCheckSystemScopeOnly(t *testing.T) {
+// testAccPreCheckSystemScopeAdmin will have the test be skipped if system scope
+// is not enabled OR the user is not admin.
+func testAccPreCheckSystemScopeAdmin(t *testing.T) {
 	v := os.Getenv("OS_SYSTEM_SCOPE")
 	if v != "true" {
-		t.Skip("Skipping test because it requires the system scope")
+		t.Skip("Skipping test because it requires system scope enabled")
+	}
+	v = os.Getenv("OS_USERNAME")
+	if v != "admin" {
+		t.Skip("Skipping test because it requires the admin user")
 	}
 }
 

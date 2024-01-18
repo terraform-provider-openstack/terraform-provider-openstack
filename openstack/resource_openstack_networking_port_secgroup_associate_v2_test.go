@@ -17,7 +17,7 @@ import (
 func TestAccNetworkingV2PortSecGroupAssociate_update(t *testing.T) {
 	var port ports.Port
 
-	if os.Getenv("TF_ACC") != "" {
+	if os.Getenv("TF_ACC") != "" && os.Getenv("OS_SYSTEM_SCOPE") != "true" {
 		hiddenPort, err := testAccCheckNetworkingV2PortSecGroupCreatePort(t, "hidden_port", true)
 		if err != nil {
 			t.Fatal(err)

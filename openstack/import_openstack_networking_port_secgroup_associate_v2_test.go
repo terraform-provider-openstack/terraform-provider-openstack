@@ -10,7 +10,7 @@ import (
 func TestAccNetworkingV2PortSecgroupAssociate_import(t *testing.T) {
 	resourceName := "openstack_networking_port_secgroup_associate_v2.port_1"
 
-	if os.Getenv("TF_ACC") != "" {
+	if os.Getenv("TF_ACC") != "" && os.Getenv("OS_SYSTEM_SCOPE") != "true" {
 		hiddenPort, err := testAccCheckNetworkingV2PortSecGroupCreatePort(t, "hidden_port", true)
 		if err != nil {
 			t.Fatal(err)

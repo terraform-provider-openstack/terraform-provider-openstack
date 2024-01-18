@@ -16,8 +16,7 @@ func TestAccIdentityV3RegisteredLimit_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckAdminOnly(t)
-			testAccPreCheckSystemScopeOnly(t)
+			testAccPreCheckSystemScopeAdmin(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckIdentityV3RegisteredLimitDestroy,
@@ -56,7 +55,6 @@ func TestAccIdentityV3RegisteredLimit_basic(t *testing.T) {
 
 func testAccCheckIdentityV3RegisteredLimitDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	config.AuthOpts.Scope.System = true
 	identityClient, err := config.IdentityV3Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
@@ -88,7 +86,6 @@ func testAccCheckIdentityV3RegisteredLimitExists(n string, service *services.Ser
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		config.AuthOpts.Scope.System = true
 		identityClient, err := config.IdentityV3Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)

@@ -1,5 +1,5 @@
 # Prep the testing environment by creating the required testing resources and
-# environment variables. This env is for theopenlab CI jobs, you might need
+# environment variables. This env is for GitHub Actions CI jobs, you might need
 # to modify this according to your setup
 
 DEVSTACK_PATH=${DEVSTACK_PATH:-/opt/stack/new/devstack}
@@ -33,5 +33,4 @@ echo export OS_DOMAIN_ID=default >> openrc
 echo export OS_MAGNUM_IMAGE_ID="$_MAGNUM_IMAGE_ID" >> openrc
 echo export OS_MAGNUM_KEYPAIR=magnum >> openrc
 
-source openrc $1 $1
 popd

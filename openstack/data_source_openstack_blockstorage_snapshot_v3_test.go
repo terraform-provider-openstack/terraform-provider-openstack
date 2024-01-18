@@ -20,7 +20,7 @@ func TestAccBlockStorageV3SnapshotDataSource_basic(t *testing.T) {
 	snapshotName := acctest.RandomWithPrefix("tf-acc-snapshot")
 
 	var volumeID, snapshotID string
-	if os.Getenv("TF_ACC") != "" {
+	if os.Getenv("TF_ACC") != "" && os.Getenv("OS_SYSTEM_SCOPE") != "true" {
 		var err error
 		volumeID, snapshotID, err = testAccBlockStorageV3CreateVolumeAndSnapshot(volumeName, snapshotName)
 		if err != nil {

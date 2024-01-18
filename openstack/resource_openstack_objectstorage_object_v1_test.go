@@ -103,6 +103,7 @@ func TestAccObjectStorageV1Object_basic_check_destroy(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSwift(t)
 		},
 		ProviderFactories: testAccProviders,

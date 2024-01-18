@@ -240,7 +240,11 @@ func TestAccDNSV2RecordSet_ignoreStatusCheck(t *testing.T) {
 	zoneName := randomZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheckDNS(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckDNS(t)
+		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{

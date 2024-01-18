@@ -45,7 +45,10 @@ func TestAccOpenStackImagesV2ImageDataSource_basic(t *testing.T) {
 
 func TestAccOpenStackImagesV2ImageDataSource_testQueries(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{

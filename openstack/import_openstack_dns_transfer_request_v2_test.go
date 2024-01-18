@@ -14,6 +14,7 @@ func TestAccDNSV2TransferRequest_importBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckDNS(t)
+			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckDNSV2TransferRequestDestroy,

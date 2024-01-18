@@ -123,7 +123,11 @@ func TestAccComputeV2SecGroup_icmpZero(t *testing.T) {
 	var secgroup secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccSkipReleasesAbove(t, "stable/newton")
+		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
