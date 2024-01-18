@@ -201,6 +201,11 @@ func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceDat
 	}
 	createOpts.Datastore = &datastore
 
+	// availability_zone
+	if v, ok := d.GetOkExists("availability_zone"); ok {
+		availabilityZone = v.(string)
+	}
+
 	// networks
 	var networks []instances.NetworkOpts
 	if v, ok := d.GetOk("network"); ok {
