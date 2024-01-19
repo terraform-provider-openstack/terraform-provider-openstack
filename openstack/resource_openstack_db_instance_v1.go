@@ -200,17 +200,17 @@ func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceDat
 		Size:      d.Get("size").(int),
 	}
 
+	// availability_zone
+	if v, ok := d.GetOkExists("availability_zone"); ok {
+		createOpts.AvailabilityZone = v.(string)
+	}
+
 	// datastore
 	var datastore instances.DatastoreOpts
 	if v, ok := d.GetOk("datastore"); ok {
 		datastore = expandDatabaseInstanceV1Datastore(v.([]interface{}))
 	}
 	createOpts.Datastore = &datastore
-
-	// availability_zone
-	if v, ok := d.GetOkExists("availability_zone"); ok {
-		availabilityZone = v.(string)
-	}
 
 	// networks
 	var networks []instances.NetworkOpts
