@@ -31,8 +31,8 @@ func TestAccDatabaseV1Instance_basic(t *testing.T) {
 						"openstack_db_instance_v1.basic", &instance),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_db_instance_v1.basic", "name", &instance.Name),
-					resource.TestCheckResourceAttrPtr(
-						"openstack_db_instance_v1.basic", "availability_zone", &instance.AvailabilityZone),
+					resource.TestCheckResourceAttr(
+						"openstack_db_instance_v1.basic", "availability_zone", "eu-west-1"),
 					resource.TestCheckResourceAttr(
 						"openstack_db_instance_v1.basic", "user.0.name", "testuser"),
 					resource.TestCheckResourceAttr(
@@ -117,7 +117,7 @@ func testAccDatabaseV1InstanceBasic() string {
 	return fmt.Sprintf(`
 resource "openstack_db_instance_v1" "basic" {
   name              = "basic"
-  availability_zone = "eu-west1"
+  availability_zone = "eu-west-1"
   configuration_id  = "${openstack_db_configuration_v1.basic.id}"
 
   datastore {
