@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -161,7 +162,7 @@ func TestAccBlockStorageV3Volume_attachment(t *testing.T) {
 				Config: testAccBlockStorageV3VolumeAttachment(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
-					testAccCheckBlockStorageV3VolumeAttachment(&volume, "dev/vdc"),
+					testAccCheckBlockStorageV3VolumeAttachment(&volume, *regexp.MustCompile(`\/dev\/.dc`)),
 				),
 			},
 		},
@@ -245,7 +246,7 @@ func testAccCheckBlockStorageV3VolumeMetadata(
 }
 
 func testAccCheckBlockStorageV3VolumeAttachment(
-	volume *volumes.Volume, v string) resource.TestCheckFunc {
+	volume *volumes.Volume, r regexp.Regexp) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if volume.Attachments == nil {
 			return fmt.Errorf("No Attachment information")
@@ -257,7 +258,8 @@ func testAccCheckBlockStorageV3VolumeAttachment(
 			return fmt.Errorf("Volume shows being attached to more Instances than expected")
 		}
 
-		if volume.Attachments[0].Device == v {
+		match := r.MatchString(volume.Attachments[0].Device)
+		if match {
 			return nil
 		} else {
 			return fmt.Errorf("Volume shows other mountpoint than expected")

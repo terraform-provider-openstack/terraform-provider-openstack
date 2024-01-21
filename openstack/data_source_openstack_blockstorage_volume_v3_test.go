@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -124,6 +125,8 @@ func testAccBlockStorageV3VolumeDataSourceBasic(snapshotName string) string {
 }
 
 func TestAccBlockStorageV3VolumeDataSource_attachment(t *testing.T) {
+	var dataVolume volumes.Volume
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -135,7 +138,9 @@ func TestAccBlockStorageV3VolumeDataSource_attachment(t *testing.T) {
 			{
 				Config: testAccBlockStorageV3VolumeDataSourceAttachment(),
 				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBlockStorageV3VolumeExists("data.openstack_blockstorage_volume_v3.volume_1", &dataVolume),
 					resource.TestCheckResourceAttrPair("data.openstack_blockstorage_volume_v3.volume_1", "attachment", "openstack_blockstorage_volume_v3.volume_1", "attachment"),
+					testAccCheckBlockStorageV3VolumeAttachment(&dataVolume, *regexp.MustCompile(`\/dev\/.dc`)),
 				),
 			},
 		},
