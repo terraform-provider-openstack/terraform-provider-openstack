@@ -119,6 +119,7 @@ resource "openstack_db_instance_v1" "basic" {
   name              = "basic"
   availability_zone = "nova"
   configuration_id  = "${openstack_db_configuration_v1.basic.id}"
+  flavor_id         = 97
 
   datastore {
     version = "%[1]s"
@@ -129,7 +130,7 @@ resource "openstack_db_instance_v1" "basic" {
     uuid = "%[3]s"
   }
 
-  size = 10
+  size = 5
 
   database {
     name    = "testdb1"

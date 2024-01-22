@@ -1,0 +1,56 @@
+name: functional-db
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/functional-db.yml'
+      - '**_db_**'
+      - 'CHANGELOG.md'
+      - 'scripts/*'      
+  schedule:
+    - cron: '0 0 */3 * *'
+jobs:
+  functional-db:
+    strategy:
+      fail-fast: false
+      matrix:
+        name: ["master"]
+        openstack_version: ["master"]
+        ubuntu_version: ["22.04"]
+        include:
+          - name: "bobcat"
+            openstack_version: "stable/2023.2"
+            ubuntu_version: "22.04"
+          - name: "antelope"
+            openstack_version: "stable/2023.1"
+            ubuntu_version: "22.04"        
+    runs-on: ubuntu-${{ matrix.ubuntu_version }}
+    name: db on OpenStack ${{ matrix.name }} with Trove and run db acceptance tests
+    steps:
+      - name: Checkout TPO
+        uses: actions/checkout@v3
+      - name: Deploy devstack
+        uses: EmilienM/devstack-action@v0.11
+        with:
+          branch: ${{ matrix.openstack_version }}
+          conf_overrides: |
+            sudo apt-get autoremove python3-pexpect -y
+            enable_plugin trove https://opendev.org/openstack/trove ${{ matrix.openstack_version }}
+          enabled_services: 's-account,s-container,s-object,s-proxy'
+      - name: Checkout go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.20'
+      - name: Run TPO acceptance tests
+        run: OS_DB_ENVIRONMENT=True ./scripts/acceptancetest.sh
+        env:
+          DEVSTACK_PATH: ${{ github.workspace }}/devstack
+          ACCEPTANCE_TESTS_FILTER: "database"
+      - name: Generate logs on failure
+        run: ./scripts/collectlogs.sh
+        if: failure()
+      - name: Upload logs artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: functional-db-${{ matrix.name }}
+          path: /tmp/devstack-logs/*
