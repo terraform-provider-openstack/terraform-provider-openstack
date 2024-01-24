@@ -201,7 +201,7 @@ func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceDat
 	}
 
 	// volume_type
-	if v, ok := d.GetOkExists("volume_type"); ok {
+	if v, ok := d.GetOk("volume_type"); ok {
 		createOpts.VolumeType = v.(string)
 	}
 
