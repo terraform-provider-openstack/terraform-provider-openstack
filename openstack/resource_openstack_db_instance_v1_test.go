@@ -32,6 +32,8 @@ func TestAccDatabaseV1Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPtr(
 						"openstack_db_instance_v1.basic", "name", &instance.Name),
 					resource.TestCheckResourceAttr(
+						"openstack_db_instance_v1.basic", "volume_type", "lvmdriver-1"),
+					resource.TestCheckResourceAttr(
 						"openstack_db_instance_v1.basic", "availability_zone", "nova"),
 					resource.TestCheckResourceAttr(
 						"openstack_db_instance_v1.basic", "user.0.name", "testuser"),
@@ -130,6 +132,7 @@ resource "openstack_db_instance_v1" "basic" {
   }
 
   size = 10
+  volume_type = "lvmdriver-1"
 
   database {
     name    = "testdb1"
