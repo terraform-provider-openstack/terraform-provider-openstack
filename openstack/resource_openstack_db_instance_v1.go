@@ -48,10 +48,10 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 			},
 
 			"size": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Type:         schema.TypeInt,
+				Required:     true,
 				RequiredWith: []string{"volume_type"},
-				ForceNew: true,
+				ForceNew:     true,
 			},
 
 			"volume_type": {
