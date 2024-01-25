@@ -201,7 +201,7 @@ func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceDat
 	}
 
 	// availability_zone
-	if v, ok := d.GetOk("availability_zone"); ok {
+	if v, ok := d.GetOkExists("availability_zone"); ok {
 		createOpts.AvailabilityZone = v.(string)
 	}
 
