@@ -35,6 +35,7 @@ var (
 	osRegionName                 = os.Getenv("OS_REGION_NAME")
 	osSwiftEnvironment           = os.Getenv("OS_SWIFT_ENVIRONMENT")
 	osLbEnvironment              = os.Getenv("OS_LB_ENVIRONMENT")
+	osLbFlavorName               = os.Getenv("OS_LB_FLAVOR_NAME")
 	osFwEnvironment              = os.Getenv("OS_FW_ENVIRONMENT")
 	osVpnEnvironment             = os.Getenv("OS_VPN_ENVIRONMENT")
 	osUseOctavia                 = os.Getenv("OS_USE_OCTAVIA")
@@ -138,6 +139,10 @@ func testAccPreCheckLB(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
 	if osLbEnvironment == "" {
+		t.Skip("This environment does not support LB tests")
+	}
+
+	if osLbFlavorName == "" {
 		t.Skip("This environment does not support LB tests")
 	}
 }
