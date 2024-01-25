@@ -54,8 +54,6 @@ The following arguments are supported:
 
 * `size` - (Required) Specifies the volume size in GB. Changing this creates new instance.
 
-* `availability_zone` - (Optional) The availability zone of the instance.
-
 * `datastore` - (Required) An array of database engine type and version. The datastore
     object structure is documented below. Changing this creates a new instance.
 
@@ -121,7 +119,6 @@ The following attributes are exported:
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `size` - See Argument Reference above.
-* `availability_zone` - See Argument Reference above.
 * `flavor_id` - See Argument Reference above.
 * `configuration_id` - See Argument Reference above.
 * `datastore/type` - See Argument Reference above.

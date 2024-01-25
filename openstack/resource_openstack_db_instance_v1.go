@@ -53,12 +53,6 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"availability_zone": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-
 			"datastore": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -198,11 +192,6 @@ func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceDat
 		FlavorRef: d.Get("flavor_id").(string),
 		Name:      d.Get("name").(string),
 		Size:      d.Get("size").(int),
-	}
-
-	// availability_zone
-	if v, ok := d.GetOkExists("availability_zone"); ok {
-		createOpts.AvailabilityZone = v.(string)
 	}
 
 	// datastore

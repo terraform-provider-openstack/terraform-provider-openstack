@@ -32,8 +32,6 @@ func TestAccDatabaseV1Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPtr(
 						"openstack_db_instance_v1.basic", "name", &instance.Name),
 					resource.TestCheckResourceAttr(
-						"openstack_db_instance_v1.basic", "availability_zone", "nova"),
-					resource.TestCheckResourceAttr(
 						"openstack_db_instance_v1.basic", "user.0.name", "testuser"),
 					resource.TestCheckResourceAttr(
 						"openstack_db_instance_v1.basic", "user.0.password", "testpassword"),
@@ -116,9 +114,8 @@ func testAccCheckDatabaseV1InstanceDestroy(s *terraform.State) error {
 func testAccDatabaseV1InstanceBasic() string {
 	return fmt.Sprintf(`
 resource "openstack_db_instance_v1" "basic" {
-  name              = "basic"
-  availability_zone = "nova"
-  configuration_id  = "${openstack_db_configuration_v1.basic.id}"
+  name             = "basic"
+  configuration_id = "${openstack_db_configuration_v1.basic.id}"
 
   datastore {
     version = "%[1]s"
