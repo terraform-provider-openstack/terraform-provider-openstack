@@ -169,6 +169,33 @@ func TestAccBlockStorageV3Volume_attachment(t *testing.T) {
 	})
 }
 
+// Test fails as devstack does not configure backup service properly
+// It can be tested locally by creating a backup from a volume first
+// and then exporting its ID to `OS_BACKUP_ID` env var.
+func TestAccBlockStorageV3VolumeFromBackup(t *testing.T) {
+	var volume volumes.Volume
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			t.Skip("Currently Cinder Backup is not configured properly on GH-A devstack")
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBlockStorageV3VolumeFromBackup(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_volume_v3.volume_1", "name", "volume_1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckBlockStorageV3VolumeDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	blockStorageClient, err := config.BlockStorageV3Client(osRegionName)
@@ -388,4 +415,14 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
   device = "/dev/vdc"
 }
 `, osNetworkID)
+}
+
+func testAccBlockStorageV3VolumeFromBackup() string {
+	return fmt.Sprintf(`
+resource "openstack_blockstorage_volume_v3" "volume_1" {
+  name = "volume_1"
+  backup_id = "%s"
+  size = 2
+}
+`, osBackupID)
 }

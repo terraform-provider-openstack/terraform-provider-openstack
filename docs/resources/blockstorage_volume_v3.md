@@ -45,22 +45,29 @@ The following arguments are supported:
 * `description` - (Optional) A description of the volume. Changing this updates
     the volume's description.
 
-* `image_id` - (Optional) The image ID from which to create the volume.
-    Changing this creates a new volume.
-
 * `metadata` - (Optional) Metadata key/value pairs to associate with the volume.
     Changing this updates the existing volume metadata.
 
 * `name` - (Optional) A unique name for the volume. Changing this updates the
     volume's name.
 
-* `snapshot_id` - (Optional) The snapshot ID from which to create the volume.
-    Changing this creates a new volume.
-
 * `source_replica` - (Optional) The volume ID to replicate with.
 
+* `snapshot_id` - (Optional) The snapshot ID from which to create the volume.
+    Conflicts with `source_vol_id`, `image_id`, `backup_id`. Changing this
+    creates a new volume.
+
 * `source_vol_id` - (Optional) The volume ID from which to create the volume.
-    Changing this creates a new volume.
+    Conflicts with `snapshot_id`, `image_id`, `backup_id`. Changing this
+    creates a new volume.
+
+* `image_id` - (Optional) The image ID from which to create the volume.
+    Conflicts with `snapshot_id`, `source_vol_id`, `backup_id`. Changing this
+    creates a new volume.
+
+* `backup_id` - (Optional) The backup ID from which to create the volume.
+    Conflicts with `snapshot_id`, `source_vol_id`, `image_id`. Changing this
+    creates a new volume. Requires microversion >= 3.47.
 
 * `volume_type` - (Optional) The type of volume to create.
     Changing this creates a new volume.
@@ -107,6 +114,7 @@ The following attributes are exported:
 * `image_id` - See Argument Reference above.
 * `source_vol_id` - See Argument Reference above.
 * `snapshot_id` - See Argument Reference above.
+* `backup_id` - See Argument Reference above.
 * `metadata` - See Argument Reference above.
 * `volume_type` - See Argument Reference above.
 * `attachment` - If a volume is attached to an instance, this attribute will
