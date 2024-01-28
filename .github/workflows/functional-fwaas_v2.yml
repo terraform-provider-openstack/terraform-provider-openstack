@@ -36,7 +36,7 @@ jobs:
     name: fwaas_v2 on OpenStack ${{ matrix.name }} with defaults and run basic acceptance tests
     steps:
       - name: Checkout TPO
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Deploy devstack
         uses: EmilienM/devstack-action@v0.11
         with:
@@ -50,7 +50,7 @@ jobs:
             Q_TUNNEL_TYPES=vxlan,gre
           enabled_services: 'q-svc,q-agt,q-dhcp,q-l3,q-meta,q-fwaas-v2,-cinder,-horizon,-tempest,-swift,-c-sch,-c-api,-c-vol,-c-bak,-ovn,-ovn-controller,-ovn-northd,-q-ovn-metadata-agent'
       - name: Checkout go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: '^1.20'
       - name: Run TPO acceptance tests
@@ -64,7 +64,7 @@ jobs:
         if: failure()
       - name: Upload logs artifacts on failure
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: functional-fwaas_v2-${{ matrix.name }}
           path: /tmp/devstack-logs/*

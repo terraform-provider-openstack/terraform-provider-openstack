@@ -38,7 +38,7 @@ jobs:
     name: networking on OpenStack ${{ matrix.name }} with defaults and run basic acceptance tests
     steps:
       - name: Checkout TPO
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Deploy devstack
         uses: EmilienM/devstack-action@v0.11
         with:
@@ -48,7 +48,7 @@ jobs:
             enable_plugin neutron-dynamic-routing https://github.com/openstack/neutron-dynamic-routing ${{ matrix.openstack_version }}
           enabled_services: 'neutron-dhcp,neutron-dns,neutron-qos,neutron-segments,neutron-trunk,neutron-uplink-status-propagation,neutron-network-segment-range,neutron-port-forwarding'
       - name: Checkout go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: '^1.20'
       - name: Run TPO acceptance tests
@@ -62,7 +62,7 @@ jobs:
         if: failure()
       - name: Upload logs artifacts on failure
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: functional-basic-${{ matrix.name }}
           path: /tmp/devstack-logs/*
