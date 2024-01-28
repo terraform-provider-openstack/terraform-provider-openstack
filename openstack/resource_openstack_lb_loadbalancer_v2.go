@@ -29,6 +29,7 @@ func resourceLoadBalancerV2() *schema.Resource {
 			Delete: schema.DefaultTimeout(5 * time.Minute),
 		},
 
+		DeprecationMessage: "Support for neutron-lbaas will be removed. Make sure to use Octavia",
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
