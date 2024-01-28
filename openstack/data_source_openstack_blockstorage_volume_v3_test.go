@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -121,4 +122,55 @@ func testAccBlockStorageV3VolumeDataSourceBasic(snapshotName string) string {
       name = "%s"
     }
   `, snapshotName)
+}
+
+func TestAccBlockStorageV3VolumeDataSource_attachment(t *testing.T) {
+	var dataVolume volumes.Volume
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBlockStorageV3VolumeDataSourceAttachment(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBlockStorageV3VolumeExists("data.openstack_blockstorage_volume_v3.volume_1", &dataVolume),
+					resource.TestCheckResourceAttrPair("data.openstack_blockstorage_volume_v3.volume_1", "attachment", "openstack_blockstorage_volume_v3.volume_1", "attachment"),
+					testAccCheckBlockStorageV3VolumeAttachment(&dataVolume, *regexp.MustCompile(`\/dev\/.dc`)),
+				),
+			},
+		},
+	})
+}
+
+func testAccBlockStorageV3VolumeDataSourceAttachment() string {
+	return fmt.Sprintf(`
+resource "openstack_blockstorage_volume_v3" "volume_1" {
+  name = "volume_1"
+  size = 1
+}
+
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
+}
+
+resource "openstack_compute_volume_attach_v2" "va_1" {
+  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+  volume_id = "${openstack_blockstorage_volume_v3.volume_1.id}"
+  device = "/dev/vdc"
+}
+
+data "openstack_blockstorage_volume_v3" "volume_1" {
+  name = "volume_1"
+  depends_on = [ openstack_compute_volume_attach_v2.va_1 ]
+}
+`, osNetworkID)
 }
