@@ -76,21 +76,31 @@ func resourceBlockStorageVolumeV3() *schema.Resource {
 			},
 
 			"snapshot_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"source_vol_id", "image_id", "backup_id"},
 			},
 
 			"source_vol_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"snapshot_id", "image_id", "backup_id"},
 			},
 
 			"image_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"snapshot_id", "source_vol_id", "backup_id"},
+			},
+
+			"backup_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"snapshot_id", "source_vol_id", "image_id"},
 			},
 
 			"volume_type": {
@@ -216,6 +226,11 @@ func resourceBlockStorageVolumeV3Create(ctx context.Context, d *schema.ResourceD
 		SchedulerHints:          schedulerHints,
 	}
 
+	if v := d.Get("backup_id").(string); v != "" {
+		blockStorageClient.Microversion = blockstorageV3VolumeFromBackupMicroversion
+		volumeCreateOpts.BackupID = v
+	}
+
 	log.Printf("[DEBUG] openstack_blockstorage_volume_v3 create options: %#v", createOpts)
 
 	v, err := volumes.Create(blockStorageClient, createOpts).Extract()
@@ -262,6 +277,7 @@ func resourceBlockStorageVolumeV3Read(_ context.Context, d *schema.ResourceData,
 	d.Set("availability_zone", v.AvailabilityZone)
 	d.Set("name", v.Name)
 	d.Set("snapshot_id", v.SnapshotID)
+	d.Set("backup_id", v.BackupID)
 	d.Set("source_vol_id", v.SourceVolID)
 	d.Set("volume_type", v.VolumeType)
 	d.Set("metadata", v.Metadata)
@@ -312,7 +328,7 @@ func resourceBlockStorageVolumeV3Update(ctx context.Context, d *schema.ResourceD
 					see enable_online_resize option`, d.Id())
 			}
 
-			blockStorageClient.Microversion = "3.42"
+			blockStorageClient.Microversion = blockstorageV3ResizeOnlineInUse
 		}
 
 		extendOpts := volumeactions.ExtendSizeOpts{

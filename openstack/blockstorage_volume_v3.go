@@ -11,6 +11,9 @@ import (
 	"github.com/gophercloud/utils/terraform/hashcode"
 )
 
+const blockstorageV3VolumeFromBackupMicroversion = "3.47"
+const blockstorageV3ResizeOnlineInUse = "3.42"
+
 func flattenBlockStorageVolumeV3Attachments(v []volumes.Attachment) []map[string]interface{} {
 	attachments := make([]map[string]interface{}, len(v))
 	for i, attachment := range v {
