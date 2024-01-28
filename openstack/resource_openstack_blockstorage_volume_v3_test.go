@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -146,6 +147,28 @@ func TestAccBlockStorageV3Volume_timeout(t *testing.T) {
 	})
 }
 
+func TestAccBlockStorageV3Volume_attachment(t *testing.T) {
+	var volume volumes.Volume
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBlockStorageV3VolumeAttachment(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
+					testAccCheckBlockStorageV3VolumeAttachment(&volume, *regexp.MustCompile(`\/dev\/.dc`)),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckBlockStorageV3VolumeDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	blockStorageClient, err := config.BlockStorageV3Client(osRegionName)
@@ -219,6 +242,28 @@ func testAccCheckBlockStorageV3VolumeMetadata(
 		}
 
 		return fmt.Errorf("Metadata not found: %s", k)
+	}
+}
+
+func testAccCheckBlockStorageV3VolumeAttachment(
+	volume *volumes.Volume, r regexp.Regexp) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if volume.Attachments == nil {
+			return fmt.Errorf("No Attachment information")
+		}
+
+		if len(volume.Attachments) == 0 {
+			return fmt.Errorf("Volume shows not being attached to any Instance")
+		} else if len(volume.Attachments) > 1 {
+			return fmt.Errorf("Volume shows being attached to more Instances than expected")
+		}
+
+		match := r.MatchString(volume.Attachments[0].Device)
+		if match {
+			return nil
+		} else {
+			return fmt.Errorf("Volume shows other mountpoint than expected")
+		}
 	}
 }
 
@@ -321,3 +366,26 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   }
 }
 `
+
+func testAccBlockStorageV3VolumeAttachment() string {
+	return fmt.Sprintf(`
+resource "openstack_blockstorage_volume_v3" "volume_1" {
+  name = "volume_1"
+  size = 1
+}
+
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
+}
+
+resource "openstack_compute_volume_attach_v2" "va_1" {
+  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
+  volume_id = "${openstack_blockstorage_volume_v3.volume_1.id}"
+  device = "/dev/vdc"
+}
+`, osNetworkID)
+}

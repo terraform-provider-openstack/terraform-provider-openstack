@@ -45,3 +45,6 @@ are exported:
 * `source_volume_id` - The ID of the volume from which the current volume was created.
 * `multiattach` - Indicates if the volume can be attached to more then one server.
 * `host` - The OpenStack host on which the volume is located.
+* `attachment` - If a volume is attached to an instance, this attribute will
+    display the Attachment ID, Instance ID, and the Device as the Instance
+    sees it.
