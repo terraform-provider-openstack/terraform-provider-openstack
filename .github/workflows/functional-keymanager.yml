@@ -40,7 +40,7 @@ jobs:
     name: keymanager on OpenStack ${{ matrix.name }} with Barbican and run keymanager acceptance tests
     steps:
       - name: Checkout TPO
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Deploy devstack
         uses: EmilienM/devstack-action@v0.11
         with:
@@ -49,7 +49,7 @@ jobs:
             enable_plugin barbican https://github.com/openstack/barbican ${{ matrix.openstack_version }}
           enabled_services: 'barbican-svc,barbican-retry,barbican-keystone-listener'
       - name: Checkout go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: '^1.20'
       - name: Run TPO acceptance tests
@@ -63,7 +63,7 @@ jobs:
         if: failure()
       - name: Upload logs artifacts on failure
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: functional-keymanager-${{ matrix.name }}
           path: /tmp/devstack-logs/*

@@ -3,7 +3,6 @@ package openstack
 import (
 	"crypto/md5"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -136,7 +135,7 @@ func TestAccObjectStorageV1Object_basic_check_destroy(t *testing.T) {
 
 func TestAccObjectStorageV1Object_fromSource(t *testing.T) {
 	content := []byte("foo")
-	tmpfile, err := ioutil.TempFile("", "tf_test_objectstorage_object")
+	tmpfile, err := os.CreateTemp("", "tf_test_objectstorage_object")
 	if err != nil {
 		log.Fatal(err)
 	}

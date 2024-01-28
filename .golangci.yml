@@ -10,6 +10,16 @@ linters-settings:
     local-prefixes: github.com/gophercloud
   goimports:
     local-prefixes: github.com/gophercloud
+  depguard:
+    rules:
+      prevent_unmaintained_packages:
+        list-mode: lax 
+        files:
+          - $all
+          - "!$test"
+        deny:
+          - pkg: io/ioutil
+            desc: "replaced by io and os packages since Go 1.16: https://tip.golang.org/doc/go1.16#ioutil"
 
 linters:
   fast: false
