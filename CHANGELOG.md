@@ -1,3 +1,13 @@
+## 2.0.0 (Not released yet)
+
+BREAKING CHANGES
+
+NOTES
+
+IMPROVEMENTS
+
+BUG FIXES
+
 ## 1.54.0 ( 29 January, 2024)
 
 NOTES
