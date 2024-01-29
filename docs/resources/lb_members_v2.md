@@ -14,10 +14,6 @@ Manages a V2 members resource within OpenStack (batch members update).
 ~> **Note:** This resource has attributes that depend on octavia minor versions.
 Please ensure your Openstack cloud supports the required [minor version](../#octavia-api-versioning).
 
-~> **Note:** This resource works only within [Octavia API](../#use_octavia). For
-legacy Neutron LBaaS v2 extension please use
-[openstack_lb_member_v2](lb_member_v2.html) resource.
-
 ## Example Usage
 
 ```hcl
