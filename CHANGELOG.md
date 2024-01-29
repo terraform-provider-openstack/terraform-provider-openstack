@@ -1,8 +1,10 @@
-## 1.54.0 ( Not released yet)
+## 1.54.0 ( 29 January, 2024)
 
 NOTES
 
-* Added deprecation notice for `multiattach` on `openstack_blockstorage_volume_v3` ([#1629](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1629))
+* **Support for neutron-lbaas will be removed on next major release.** Only `octavia` will be supported. Related resources and data-sources marked with a deprecation notice([#1640](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1640)).
+* Added deprecation notice for `multiattach` on `openstack_blockstorage_volume_v3` ([#1629](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1629)). Support for it **will be removed on next major release**.
+* Added deprecation notice for various nova resources. Support for them will **not** be removed, but users are notified to use the new resources instead ([#1639](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1639)).
 
 
 IMPROVEMENTS
@@ -12,6 +14,8 @@ IMPROVEMENTS
 * Updated docs of `openstack_networking_port_v2` to note ip allocation depedency with subnet ([#1622](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1622))
 * Updated docs of `openstack_networking_secgroup_rule_v2` for port-range exception ([#1632](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1632))
 * Added extra validations on `openstack_lb_pool_v2` ([#1628](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1628))
+* Added attachment information on `data_source_blockstorage_volume_v3` ([#1624](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1624))
+* Added `backup_id` to `openstack_blockstorage_volume_v3` ([#1641](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1641))
 
 
 BUG FIXES
@@ -35,6 +39,7 @@ BUG FIXES
 
 * Fixed `segmentation_id` on `openstack_networking_network_v2` to allow neutron to dynamically set it ([#1600](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1600))
 * Fixed an issue to allow `cluster_template_id` on `openstack_containerinfra_cluster_v1` to be updated without triggering a new cluster creation ([#1598](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1598))
+
 ## 1.52.1 (29 June, 2023)
 
 NOTES
