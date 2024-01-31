@@ -1,12 +1,8 @@
-## 2.0.0 (Not released yet)
-
-BREAKING CHANGES
+## 1.54.1 (31 January, 2024)
 
 NOTES
 
-IMPROVEMENTS
-
-BUG FIXES
+* Clarify provider deprecation message for option `use_octavia`. Add info on how various users will be affected ([#1665](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1665)).
 
 ## 1.54.0 ( 29 January, 2024)
 
