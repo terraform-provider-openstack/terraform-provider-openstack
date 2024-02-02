@@ -133,7 +133,6 @@ The following attributes are exported:
    or "saving".
 * `tags` - See Argument Reference above.
 * `updated_at` - The date the image was last updated.
-* `update_at` - (**Deprecated** - use `updated_at` instead)
 * `visibility` - See Argument Reference above.
 
 ## Notes
