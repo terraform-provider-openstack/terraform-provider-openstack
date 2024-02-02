@@ -219,12 +219,6 @@ func resourceImagesImageV2() *schema.Resource {
 				Computed: true,
 			},
 
-			"update_at": {
-				Type:       schema.TypeString,
-				Computed:   true,
-				Deprecated: "Use updated_at instead",
-			},
-
 			"updated_at": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -391,9 +385,6 @@ func resourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, meta
 	d.Set("tags", img.Tags)
 	d.Set("visibility", img.Visibility)
 	d.Set("region", GetRegion(d, config))
-
-	// Deprecated
-	d.Set("update_at", img.UpdatedAt.Format(time.RFC3339))
 
 	properties := resourceImagesImageV2ExpandProperties(img.Properties)
 	if err := d.Set("properties", properties); err != nil {
