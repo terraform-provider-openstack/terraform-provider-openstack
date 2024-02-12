@@ -41,7 +41,6 @@ func TestAccBlockStorageV3VolumeDataSource_basic(t *testing.T) {
 					testAccCheckBlockStorageV3VolumeDataSourceID(resourceName, volumeID),
 					resource.TestCheckResourceAttr(resourceName, "name", volumeName),
 					resource.TestCheckResourceAttr(resourceName, "size", "1"),
-					resource.TestCheckResourceAttr(resourceName, "multiattach", "false"),
 				),
 			},
 		},

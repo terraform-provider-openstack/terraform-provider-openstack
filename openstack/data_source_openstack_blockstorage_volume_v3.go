@@ -63,11 +63,6 @@ func dataSourceBlockStorageVolumeV3() *schema.Resource {
 				Computed: true,
 			},
 
-			"multiattach": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-
 			"host": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -149,7 +144,6 @@ func dataSourceBlockStorageVolumeV3Attributes(d *schema.ResourceData, volume Vol
 	d.Set("volume_type", volume.VolumeType)
 	d.Set("size", volume.Size)
 	d.Set("source_volume_id", volume.SourceVolID)
-	d.Set("multiattach", volume.Multiattach)
 	d.Set("host", volume.Host)
 
 	if err := d.Set("metadata", volume.Metadata); err != nil {

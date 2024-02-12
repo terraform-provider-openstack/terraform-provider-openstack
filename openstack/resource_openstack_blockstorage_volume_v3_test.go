@@ -99,33 +99,6 @@ func TestAccBlockStorageV3Volume_image(t *testing.T) {
 	})
 }
 
-func TestAccBlockStorageV3Volume_image_multiattach(t *testing.T) {
-	var volume volumes.Volume
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			t.Skip("Multiattach volumes has been deprecated and removed. Multiattach enabled volume types should be used instead")
-			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
-			testAccSkipReleasesAbove(t, "stable/wallaby")
-		},
-		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccBlockStorageV3VolumeImageMultiattach(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
-					resource.TestCheckResourceAttr(
-						"openstack_blockstorage_volume_v3.volume_1", "name", "volume_1"),
-					resource.TestCheckResourceAttr(
-						"openstack_blockstorage_volume_v3.volume_1", "multiattach", "true"),
-				),
-			},
-		},
-	})
-}
-
 func TestAccBlockStorageV3Volume_timeout(t *testing.T) {
 	var volume volumes.Volume
 
@@ -366,17 +339,6 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   size = 5
   image_id = "%s"
-}
-`, osImageID)
-}
-
-func testAccBlockStorageV3VolumeImageMultiattach() string {
-	return fmt.Sprintf(`
-resource "openstack_blockstorage_volume_v3" "volume_1" {
-  name = "volume_1"
-  size = 5
-  image_id = "%s"
-  multiattach = true
 }
 `, osImageID)
 }
