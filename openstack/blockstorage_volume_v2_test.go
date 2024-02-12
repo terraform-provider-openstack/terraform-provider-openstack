@@ -29,7 +29,6 @@ func blockStorageVolumeV2VolumeFixture() volumes.Volume {
 		Description:        "",
 		Encrypted:          false,
 		Metadata:           map[string]string{"foo": "bar"},
-		Multiattach:        false,
 		ReplicationStatus:  "disabled",
 		Size:               75,
 		SnapshotID:         "",

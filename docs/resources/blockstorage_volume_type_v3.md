@@ -16,6 +16,8 @@ Manages a V3 block storage volume type resource within OpenStack.
 
 ## Example Usage
 
+### Basic Volume Type
+
 ```hcl
 resource "openstack_blockstorage_volume_type_v3" "volume_type_1" {
   name        = "volume_type_1"
@@ -28,6 +30,18 @@ resource "openstack_blockstorage_volume_type_v3" "volume_type_1" {
 
 ```
 
+### Volume Type with multiattach enabled
+
+```hcl
+resource "openstack_blockstorage_volume_type_v3" "multiattach" {
+  name        = "multiattach"
+  description = "Multiattach-enabled volume type"
+  extra_specs = {
+      multiattach = "<is> True"
+  }
+}
+
+```
 ## Argument Reference
 
 The following arguments are supported:

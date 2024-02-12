@@ -122,7 +122,7 @@ func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.Resource
 
 	multiattach := d.Get("multiattach").(bool)
 	if multiattach {
-		computeClient.Microversion = "2.60"
+		computeClient.Microversion = computeV2InstanceBlockDeviceMultiattachMicroversion
 	}
 
 	var attachment *volumeattach.VolumeAttachment
