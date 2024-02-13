@@ -18,6 +18,7 @@ import (
 // Config struct.
 type Config struct {
 	auth.Config
+	UseMutex bool
 }
 
 // Provider returns a schema.Provider for OpenStack.
@@ -262,6 +263,13 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				Default:     false,
 				Description: descriptions["enable_logging"],
+			},
+
+			"use_mutex": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: descriptions["use_mutex"],
 			},
 		},
 
@@ -519,6 +527,9 @@ func init() {
 		"max_retries": "How many times HTTP connection should be retried until giving up.",
 
 		"enable_logging": "Outputs very verbose logs with all calls made to and responses from OpenStack",
+
+		"use_mutex": "If set to `true`, attempt to workaround race conditions\n" +
+			"in some API endpoints by using mutex. Defaults to `true`.",
 	}
 }
 
@@ -538,7 +549,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 	}
 
 	config := Config{
-		auth.Config{
+		Config: auth.Config{
 			CACertFile:                  d.Get("cacert_file").(string),
 			ClientCertFile:              d.Get("cert").(string),
 			ClientKeyFile:               d.Get("key").(string),
@@ -575,6 +586,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 			MutexKV:                     mutexkv.NewMutexKV(),
 			EnableLogger:                enableLogging,
 		},
+		UseMutex:                            d.Get("use_mutex").(bool),
 	}
 
 	v, ok := d.GetOkExists("insecure")
