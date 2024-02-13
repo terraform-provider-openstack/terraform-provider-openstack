@@ -164,6 +164,9 @@ The following arguments are supported:
   service (Octavia) instead of the Networking service (Neutron).
   If omitted, the `OS_USE_OCTAVIA` environment variable is checked.
 
+* `use_mutex` - (Optional) If set to `true`, attempt to workaround race conditions
+  in some API endpoints by using a mutex. Defaults to `true`.
+
 * `disable_no_cache_header` - (Optional) If set to `true`, the HTTP
   `Cache-Control: no-cache` header will not be added by default to all API requests.
   If omitted this header is added to all API requests to force HTTP caches (if any)
