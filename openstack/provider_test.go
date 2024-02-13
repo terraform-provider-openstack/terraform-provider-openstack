@@ -526,6 +526,7 @@ func testAccAuthFromEnv() (*Config, error) {
 			AuthOpts:                    authOpts,
 			MutexKV:                     mutexkv.NewMutexKV(),
 		},
+		UseMutex:                            true,
 	}
 
 	if err := config.LoadAndValidate(); err != nil {
