@@ -387,8 +387,10 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 	}
 
 	routerID := d.Id()
-	config.MutexKV.Lock(routerID)
-	defer config.MutexKV.Unlock(routerID)
+	if config.UseMutex {
+		config.MutexKV.Lock(routerID)
+		defer config.MutexKV.Unlock(routerID)
+	}
 
 	var hasChange bool
 	var updateOpts routers.UpdateOpts
