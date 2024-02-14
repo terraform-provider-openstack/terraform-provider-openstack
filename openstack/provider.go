@@ -586,7 +586,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 			MutexKV:                     mutexkv.NewMutexKV(),
 			EnableLogger:                enableLogging,
 		},
-		UseMutex:                            d.Get("use_mutex").(bool),
+		UseMutex: d.Get("use_mutex").(bool),
 	}
 
 	v, ok := d.GetOkExists("insecure")
