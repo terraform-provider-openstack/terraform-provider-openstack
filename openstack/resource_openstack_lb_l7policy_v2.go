@@ -12,9 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
+	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/l7policies"
+	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
+	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
 )
 
 func resourceL7PolicyV2() *schema.Resource {
@@ -33,7 +33,6 @@ func resourceL7PolicyV2() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
-		DeprecationMessage: "Support for neutron-lbaas will be removed. Make sure to use Octavia",
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -110,7 +109,7 @@ func resourceL7PolicyV2() *schema.Resource {
 
 func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -129,7 +128,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	adminStateUp := d.Get("admin_state_up").(bool)
 	createOpts := l7policies.CreateOpts{
-		TenantID:       d.Get("tenant_id").(string),
+		ProjectID:      d.Get("tenant_id").(string),
 		Name:           d.Get("name").(string),
 		Description:    d.Get("description").(string),
 		Action:         l7policies.Action(action),
@@ -154,7 +153,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 			return diag.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
 		}
 
-		err = waitForLBV2Pool(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
+		err = waitForLBV2PoolOctavia(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -167,7 +166,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for parent Listener to become active before continuing.
-	err = waitForLBV2Listener(ctx, lbClient, parentListener, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2ListenerOctavia(ctx, lbClient, parentListener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -187,7 +186,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7PolicyOctavia(ctx, lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -199,7 +198,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceL7PolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -213,7 +212,7 @@ func resourceL7PolicyV2Read(ctx context.Context, d *schema.ResourceData, meta in
 
 	d.Set("action", l7Policy.Action)
 	d.Set("description", l7Policy.Description)
-	d.Set("tenant_id", l7Policy.TenantID)
+	d.Set("tenant_id", l7Policy.ProjectID)
 	d.Set("name", l7Policy.Name)
 	d.Set("position", int(l7Policy.Position))
 	d.Set("redirect_url", l7Policy.RedirectURL)
@@ -226,7 +225,7 @@ func resourceL7PolicyV2Read(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -281,7 +280,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 			return diag.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
 		}
 
-		err = waitForLBV2Pool(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
+		err = waitForLBV2PoolOctavia(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -300,13 +299,13 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for parent Listener to become active before continuing.
-	err = waitForLBV2Listener(ctx, lbClient, parentListener, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2ListenerOctavia(ctx, lbClient, parentListener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Wait for L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7PolicyOctavia(ctx, lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -325,7 +324,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7PolicyOctavia(ctx, lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -335,7 +334,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -356,7 +355,7 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for Listener to become active before continuing.
-	err = waitForLBV2Listener(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2ListenerOctavia(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -374,7 +373,7 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting L7 Policy"))
 	}
 
-	err = waitForLBV2L7Policy(ctx, lbClient, listener, l7Policy, "DELETED", getLbPendingDeleteStatuses(), timeout)
+	err = waitForLBV2L7PolicyOctavia(ctx, lbClient, listener, l7Policy, "DELETED", getLbPendingDeleteStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -384,7 +383,7 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceL7PolicyV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return nil, fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
