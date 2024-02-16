@@ -54,9 +54,11 @@ data "openstack_images_image_v2" "ubuntu" {
 
 * `size_max` - (Optional) The maximum size (in bytes) of the image to return.
 
-* `sort_direction` - (Optional) Order the results in either `asc` or `desc`.
-
-* `sort_key` - (Optional) Sort images based on a certain key. Defaults to `name`.
+* `sort` - (Optional) Sorts the response by one or more attribute and sort
+    direction combinations. You can also set multiple sort keys and directions.
+    Default direction is `desc`. Use the comma (,) character to separate
+    multiple values. For example expression `sort = "name:asc,status"`
+    sorts ascending by name and descending by status.
 
 * `tag` - (Optional) Search for images with a specific tag.
 

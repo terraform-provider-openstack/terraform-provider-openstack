@@ -372,3 +372,42 @@ func imagesFilterByProperties(v []images.Image, p map[string]string) []images.Im
 
 	return result
 }
+
+// dataSourceValidateImageSortFilter checks that the sorting filter passed
+// by a user follows the glance API definition of "sort_key:sort_dir,sort_key:sort_dir:.."
+// where sort_dir is optional. For more details, check the glance api docs
+// https://docs.openstack.org/api-ref/image/v2/index.html#list-images
+// at the `sorting` section.
+func dataSourceValidateImageSortFilter(v interface{}, k string) (ws []string, errors []error) {
+	validSortKeys := []string{
+		"name",
+		"owner",
+		"protected",
+		"status",
+		"tag",
+		"visibility",
+		"container_format",
+		"disk_format",
+		"os_hidden",
+		"member_status",
+		"created_at",
+		"updated_at",
+	}
+	validSortDirections := []string{
+		"asc",
+		"desc",
+	}
+
+	sortPairs := strings.Split(v.(string), ",")
+	for _, sortPair := range sortPairs {
+		parts := strings.Split(sortPair, ":")
+		if !strSliceContains(validSortKeys, parts[0]) {
+			errors = append(errors, fmt.Errorf("Invalid sorting key: %s. Has to be one of: %+q", parts[0], validSortKeys))
+		}
+		if len(parts) > 1 && !strSliceContains(validSortDirections, parts[1]) {
+			errors = append(errors, fmt.Errorf("Invalid sorting direction: %s. Has to be one of: %+q", parts[0], validSortDirections))
+		}
+	}
+
+	return ws, errors
+}

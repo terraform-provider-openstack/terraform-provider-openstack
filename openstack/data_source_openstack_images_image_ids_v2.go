@@ -76,30 +76,11 @@ func dataSourceImagesImageIDsV2() *schema.Resource {
 			},
 
 			"sort": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				Default:       "name:asc",
-				ConflictsWith: []string{"sort_key"},
-			},
-
-			"sort_key": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"sort"},
-				Deprecated:    "Use option 'sort' instead.",
-			},
-
-			"sort_direction": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				Deprecated:   "Use option 'sort' instead.",
-				RequiredWith: []string{"sort_key"},
-				ValidateFunc: validation.StringInSlice([]string{
-					"asc", "desc",
-				}, false),
+				Default:      "name:asc",
+				ValidateFunc: dataSourceValidateImageSortFilter,
 			},
 
 			"tag": {
@@ -147,19 +128,6 @@ func dataSourceImagesImageIdsV2Read(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
-	sortValue := d.Get("sort")
-	sortKeyValue, sortKeyOk := d.GetOk("sort_key")
-
-	if sortKeyOk {
-		direction, ok := d.GetOk("sort_direction")
-
-		if !ok {
-			direction = "asc"
-		}
-
-		sortValue = fmt.Sprintf("%s:%s", sortKeyValue, direction)
-	}
-
 	visibility := resourceImagesImageV2VisibilityFromString(
 		d.Get("visibility").(string))
 	memberStatus := resourceImagesImageV2MemberStatusFromString(
@@ -185,7 +153,7 @@ func dataSourceImagesImageIdsV2Read(ctx context.Context, d *schema.ResourceData,
 		Status:       images.ImageStatusActive,
 		SizeMin:      int64(d.Get("size_min").(int)),
 		SizeMax:      int64(d.Get("size_max").(int)),
-		Sort:         sortValue.(string),
+		Sort:         d.Get("sort").(string),
 		Tags:         tags,
 		MemberStatus: memberStatus,
 	}
