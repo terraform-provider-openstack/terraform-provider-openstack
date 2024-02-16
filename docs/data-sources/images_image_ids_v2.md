@@ -57,16 +57,7 @@ data "openstack_images_image_ids_v2" "images" {
     direction combinations. You can also set multiple sort keys and directions.
     Default direction is `desc`. Use the comma (,) character to separate
     multiple values. For example expression `sort = "name:asc,status"`
-    sorts ascending by name and descending by status. `sort` cannot be used
-    simultaneously with `sort_key`. If both are present in a configuration
-    then only `sort` will be used.
-
-* `sort_direction` - (Optional) Order the results in either `asc` or `desc`.
-    Can be applied only with `sort_key`. Defaults to `asc`
-
-* `sort_key` - (Optional) Sort images based on a certain key. Defaults to
-    `name`. `sort_key` cannot be used simultaneously with `sort`. If both
-    are present in a configuration then only `sort` will be used.
+    sorts ascending by name and descending by status.
 
 * `tag` - (Optional) Search for images with a specific tag.
 

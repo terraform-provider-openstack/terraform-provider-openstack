@@ -75,21 +75,12 @@ func dataSourceImagesImageV2() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"sort_key": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "name",
-			},
-
-			"sort_direction": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "asc",
-				ValidateFunc: validation.StringInSlice([]string{
-					"asc", "desc",
-				}, false),
+			"sort": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "name:asc",
+				ValidateFunc: dataSourceValidateImageSortFilter,
 			},
 
 			"tag": {
@@ -228,8 +219,7 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 		Status:       images.ImageStatusActive,
 		SizeMin:      int64(d.Get("size_min").(int)),
 		SizeMax:      int64(d.Get("size_max").(int)),
-		SortKey:      d.Get("sort_key").(string),
-		SortDir:      d.Get("sort_direction").(string),
+		Sort:         d.Get("sort").(string),
 		Tags:         tags,
 		MemberStatus: memberStatus,
 	}
