@@ -441,3 +441,56 @@ func resourceLBV2MemberRefreshFuncOctavia(lbClient *gophercloud.ServiceClient, l
 		return member, member.ProvisioningStatus, nil
 	}
 }
+
+func waitForLBV2MonitorOctavia(ctx context.Context, lbClient *gophercloud.ServiceClient, parentPool *pools.Pool, monitor *monitors.Monitor, target string, pending []string, timeout time.Duration) error {
+	log.Printf("[DEBUG] Waiting for openstack_lb_monitor_v2 %s to become %s.", monitor.ID, target)
+
+	lbID, err := lbV2FindLBIDviaPoolOctavia(lbClient, parentPool)
+	if err != nil {
+		return err
+	}
+
+	stateConf := &resource.StateChangeConf{
+		Target:     []string{target},
+		Pending:    pending,
+		Refresh:    resourceLBV2MonitorRefreshFuncOctavia(lbClient, lbID, monitor),
+		Timeout:    timeout,
+		Delay:      1 * time.Second,
+		MinTimeout: 1 * time.Second,
+	}
+
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if target == "DELETED" {
+				return nil
+			}
+		}
+		return fmt.Errorf("Error waiting for openstack_lb_monitor_v2 %s to become %s: %s", monitor.ID, target, err)
+	}
+
+	return nil
+}
+
+func resourceLBV2MonitorRefreshFuncOctavia(lbClient *gophercloud.ServiceClient, lbID string, monitor *monitors.Monitor) resource.StateRefreshFunc {
+	if monitor.ProvisioningStatus == "" {
+		return resourceLBV2LoadBalancerStatusRefreshFuncOctavia(lbClient, lbID, "monitor", monitor.ID, "")
+	}
+
+	return func() (interface{}, string, error) {
+		lb, status, err := resourceLBV2LoadBalancerRefreshFunc(lbClient, lbID)()
+		if err != nil {
+			return lb, status, err
+		}
+		if !strSliceContains(getLbSkipStatuses(), status) {
+			return lb, status, nil
+		}
+
+		monitor, err := monitors.Get(lbClient, monitor.ID).Extract()
+		if err != nil {
+			return nil, "", err
+		}
+
+		return monitor, monitor.ProvisioningStatus, nil
+	}
+}
