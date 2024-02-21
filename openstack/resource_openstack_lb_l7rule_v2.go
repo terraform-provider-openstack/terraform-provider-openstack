@@ -12,8 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
+	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/l7policies"
+	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
 )
 
 func resourceL7RuleV2() *schema.Resource {
@@ -32,7 +32,6 @@ func resourceL7RuleV2() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
-		DeprecationMessage: "Support for neutron-lbaas will be removed. Make sure to use Octavia",
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -108,7 +107,7 @@ func resourceL7RuleV2() *schema.Resource {
 
 func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -128,7 +127,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	createOpts := l7policies.CreateRuleOpts{
-		TenantID:     d.Get("tenant_id").(string),
+		ProjectID:    d.Get("tenant_id").(string),
 		RuleType:     l7policies.RuleType(ruleType),
 		CompareType:  l7policies.CompareType(compareType),
 		Value:        d.Get("value").(string),
@@ -151,7 +150,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 		listenerID = parentL7Policy.ListenerID
 	} else {
 		// Fallback for the Neutron LBaaSv2 extension
-		listenerID, err = getListenerIDForL7Policy(lbClient, l7policyID)
+		listenerID, err = getListenerIDForL7PolicyOctavia(lbClient, l7policyID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -164,7 +163,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7PolicyOctavia(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -184,7 +183,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for L7 Rule to become active before continuing
-	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7RuleOctavia(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -197,7 +196,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceL7RuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -214,7 +213,7 @@ func resourceL7RuleV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 	d.Set("l7policy_id", l7policyID)
 	d.Set("type", l7Rule.RuleType)
 	d.Set("compare_type", l7Rule.CompareType)
-	d.Set("tenant_id", l7Rule.TenantID)
+	d.Set("tenant_id", l7Rule.ProjectID)
 	d.Set("value", l7Rule.Value)
 	d.Set("key", l7Rule.Key)
 	d.Set("invert", l7Rule.Invert)
@@ -225,7 +224,7 @@ func resourceL7RuleV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 
 func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -282,13 +281,13 @@ func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7PolicyOctavia(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Wait for L7 Rule to become active before continuing
-	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7RuleOctavia(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -307,7 +306,7 @@ func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for L7 Rule to become active before continuing
-	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7RuleOctavia(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -317,7 +316,7 @@ func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -346,7 +345,7 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7PolicyOctavia(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -364,7 +363,7 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting L7 Rule"))
 	}
 
-	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "DELETED", getLbPendingDeleteStatuses(), timeout)
+	err = waitForLBV2L7RuleOctavia(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "DELETED", getLbPendingDeleteStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -380,7 +379,7 @@ func resourceL7RuleV2Import(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return nil, fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -399,7 +398,7 @@ func resourceL7RuleV2Import(ctx context.Context, d *schema.ResourceData, meta in
 		listenerID = parentL7Policy.ListenerID
 	} else {
 		// Fallback for the Neutron LBaaSv2 extension
-		listenerID, err = getListenerIDForL7Policy(lbClient, l7policyID)
+		listenerID, err = getListenerIDForL7PolicyOctavia(lbClient, l7policyID)
 		if err != nil {
 			return nil, err
 		}
