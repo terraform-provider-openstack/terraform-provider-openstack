@@ -122,23 +122,6 @@ func expandNetworkingSubnetV2HostRoutes(rawHostRoutes []interface{}) []subnets.H
 	return result
 }
 
-func networkingSubnetV2AllocationPoolsCustomizeDiff(diff *schema.ResourceDiff) error {
-	if diff.Id() != "" && diff.HasChange("allocation_pools") {
-		o, n := diff.GetChange("allocation_pools")
-		oldPools := o.([]interface{})
-		newPools := n.([]interface{})
-
-		samePools := networkingSubnetV2AllocationPoolsMatch(oldPools, newPools)
-
-		if samePools {
-			log.Printf("[DEBUG] allocation_pools have not changed. clearing diff")
-			return diff.Clear("allocation_pools")
-		}
-	}
-
-	return nil
-}
-
 func networkingSubnetV2AllocationPoolsMatch(oldPools, newPools []interface{}) bool {
 	if len(oldPools) != len(newPools) {
 		return false
