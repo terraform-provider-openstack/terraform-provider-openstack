@@ -370,7 +370,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 				ForceNew: false,
 				Default:  "active",
 				ValidateFunc: validation.StringInSlice([]string{
-					"active", "shutoff", "shelved_offloaded", "paused",
+					"active", "shutoff", "shelved_offloaded", "paused", "rescue",
 				}, true),
 				DiffSuppressFunc: suppressPowerStateDiffs,
 			},
@@ -403,6 +403,14 @@ func resourceComputeInstanceV2() *schema.Resource {
 						},
 					},
 				},
+			},
+			"rescue_image": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"rescue_password": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"created": {
 				Type:     schema.TypeString,
@@ -745,7 +753,7 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 	// Set the current power_state
 	currentStatus := strings.ToLower(server.Status)
 	switch currentStatus {
-	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved", "build", "paused":
+	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved", "build", "paused", "rescue":
 		d.Set("power_state", currentStatus)
 	default:
 		return diag.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
@@ -850,6 +858,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			}
 		}
 		if strings.ToLower(powerStateNew) == "active" {
+			log.Printf("[DEBUG] Switching power state of instance (%s) from (%s) to (%s)", d.Id(), powerStateOld, powerStateNew)
 			if strings.ToLower(powerStateOld) == "shelved" || strings.ToLower(powerStateOld) == "shelved_offloaded" {
 				unshelveOpt := &servers.UnshelveOpts{
 					AvailabilityZone: d.Get("availability_zone").(string),
@@ -863,12 +872,18 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				if err != nil {
 					return diag.Errorf("Error resuming OpenStack instance: %s", err)
 				}
+			} else if strings.ToLower(powerStateOld) == "rescue" {
+				err = servers.Unrescue(ctx, computeClient, d.Id()).ExtractErr()
+				if err != nil {
+					return diag.Errorf("Error unrescuing OpenStack instance: %s", err)
+				}
 			} else if strings.ToLower(powerStateOld) != "build" {
 				err = servers.Start(ctx, computeClient, d.Id()).ExtractErr()
 				if err != nil {
 					return diag.Errorf("Error starting OpenStack instance: %s", err)
 				}
 			}
+
 			startStateConf := &retry.StateChangeConf{
 				//Pending:    []string{"SHUTOFF"},
 				Target:     []string{"ACTIVE"},
@@ -878,10 +893,35 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				MinTimeout: 3 * time.Second,
 			}
 
-			log.Printf("[DEBUG] Waiting for instance (%s) to start/unshelve/resume", d.Id())
+			log.Printf("[DEBUG] Waiting for instance (%s) to start/unshelve/resume/unrescue", d.Id())
 			_, err = startStateConf.WaitForStateContext(ctx)
 			if err != nil {
 				return diag.Errorf("Error waiting for instance (%s) to become active: %s", d.Id(), err)
+			}
+		}
+		if strings.ToLower(powerStateNew) == "rescue" {
+			rescueOpts := &servers.RescueOpts{
+				RescueImageRef: d.Get("rescue_image").(string),
+				AdminPass:      d.Get("rescue_password").(string),
+			}
+
+			_, err = servers.Rescue(ctx, computeClient, d.Id(), rescueOpts).Extract()
+			if err != nil {
+				return diag.Errorf("Error rescuing OpenStack instance: %s", err)
+			}
+			rescueStateConf := &retry.StateChangeConf{
+				//Pending:    []string{"ACTIVE"},
+				Target:     []string{"RESCUE"},
+				Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
+
+			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
+			_, err = rescueStateConf.WaitForStateContext(ctx)
+			if err != nil {
+				return diag.Errorf("Error waiting for instance (%s) to become inactive(shutoff): %s", d.Id(), err)
 			}
 		}
 	}

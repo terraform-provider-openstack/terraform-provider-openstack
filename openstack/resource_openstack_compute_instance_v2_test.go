@@ -213,6 +213,48 @@ func TestAccComputeV2Instance_initialPaused(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2Instance_initalRescue(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			//testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2InstanceStateActive(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "power_state", "active"),
+					testAccCheckComputeV2InstanceState(&instance, "active"),
+				),
+			},
+			{
+				Config: testAccComputeV2InstanceStateRescue(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "power_state", "rescue"),
+					testAccCheckComputeV2InstanceState(&instance, "rescue"),
+				),
+			},
+			{
+				Config: testAccComputeV2InstanceStateActive(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "power_state", "active"),
+					testAccCheckComputeV2InstanceState(&instance, "active"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeV2Instance_bootFromVolumeImage(t *testing.T) {
 	var instance servers.Server
 
@@ -1703,6 +1745,19 @@ resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   power_state = "paused"
+  network {
+    uuid = "%s"
+  }
+}
+`, osNetworkID)
+}
+
+func testAccComputeV2InstanceStateRescue() string {
+	return fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  power_state = "rescue"
   network {
     uuid = "%s"
   }

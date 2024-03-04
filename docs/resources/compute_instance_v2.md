@@ -415,8 +415,8 @@ The following arguments are supported:
     forcefully deleted. This is useful for environments that have reclaim / soft
     deletion enabled.
 
-* `power_state` - (Optional) Provide the VM state. Only 'active', 'shutoff', 'paused'
-    and 'shelved_offloaded' are supported values.
+* `power_state` - (Optional) Provide the VM state. Only 'active', 'shutoff', 'paused',
+    'shelved_offloaded' and 'rescue' are supported values.
     *Note*: If the initial power_state is the shutoff or paused
     the VM will be stopped immediately after build and the provisioners like
     remote-exec or files are not supported.
@@ -433,6 +433,12 @@ The following arguments are supported:
   specified host. Note: This option requires administrative privileges and a
   Nova microversion of 2.74 or later. Conflicts with `personality`. Changing
   this value forces a new instance to be created.
+
+* `rescue_image` - (Optional) Image (name or ID) to use for the rescue mode.
+    Defaults to the currently used one. Only used with `power_state = 'rescue'`
+
+* `rescue_password` - (Optional) Set the password on the rescued instance.
+    This option requires cloud support. Only used with `power_state = 'rescue'`
 
 The `network` block supports:
 
