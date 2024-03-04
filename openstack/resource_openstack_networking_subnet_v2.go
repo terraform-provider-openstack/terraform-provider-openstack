@@ -139,25 +139,6 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
-			"host_routes": {
-				Type:       schema.TypeList,
-				Optional:   true,
-				ForceNew:   false,
-				Deprecated: "Use openstack_networking_subnet_route_v2 instead",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"destination_cidr": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"next_hop": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
-			},
-
 			"ipv6_address_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -240,7 +221,6 @@ func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceDat
 			AllocationPools: expandNetworkingSubnetV2AllocationPools(allocationPool),
 			DNSNameservers:  expandToStringSlice(d.Get("dns_nameservers").([]interface{})),
 			ServiceTypes:    expandToStringSlice(d.Get("service_types").([]interface{})),
-			HostRoutes:      expandNetworkingSubnetV2HostRoutes(d.Get("host_routes").([]interface{})),
 			SubnetPoolID:    d.Get("subnetpool_id").(string),
 			IPVersion:       gophercloud.IPVersion(d.Get("ip_version").(int)),
 		},
@@ -423,12 +403,6 @@ func resourceNetworkingSubnetV2Update(ctx context.Context, d *schema.ResourceDat
 		hasChange = true
 		serviceTypes := expandToStringSlice(d.Get("service_types").([]interface{}))
 		updateOpts.ServiceTypes = &serviceTypes
-	}
-
-	if d.HasChange("host_routes") {
-		hasChange = true
-		newHostRoutes := expandNetworkingSubnetV2HostRoutes(d.Get("host_routes").([]interface{}))
-		updateOpts.HostRoutes = &newHostRoutes
 	}
 
 	if d.HasChange("enable_dhcp") {

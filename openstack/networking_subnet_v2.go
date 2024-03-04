@@ -107,21 +107,6 @@ func flattenNetworkingSubnetV2AllocationPools(allocationPools []subnets.Allocati
 	return result
 }
 
-// expandNetworkingSubnetV2HostRoutes returns a slice of HostRoute structures.
-func expandNetworkingSubnetV2HostRoutes(rawHostRoutes []interface{}) []subnets.HostRoute {
-	result := make([]subnets.HostRoute, len(rawHostRoutes))
-	for i, raw := range rawHostRoutes {
-		rawMap := raw.(map[string]interface{})
-
-		result[i] = subnets.HostRoute{
-			DestinationCIDR: rawMap["destination_cidr"].(string),
-			NextHop:         rawMap["next_hop"].(string),
-		}
-	}
-
-	return result
-}
-
 func networkingSubnetV2AllocationPoolsMatch(oldPools, newPools []interface{}) bool {
 	if len(oldPools) != len(newPools) {
 		return false
