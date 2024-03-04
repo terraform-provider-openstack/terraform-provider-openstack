@@ -27,7 +27,7 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2SubnetDNSConsistency("openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_subnet_v2.subnet_1", "allocation_pools.0.start", "192.168.199.100"),
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.0.start", "192.168.199.100"),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "description", "my subnet description"),
 				),
@@ -42,7 +42,7 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "enable_dhcp", "true"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_subnet_v2.subnet_1", "allocation_pools.0.start", "192.168.199.150"),
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.0.start", "192.168.199.150"),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "description", ""),
 				),
@@ -245,21 +245,21 @@ func TestAccNetworkingV2Subnet_multipleAllocationPools(t *testing.T) {
 				Config: testAccNetworkingV2SubnetMultipleAllocationPools1,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"openstack_networking_subnet_v2.subnet_1", "allocation_pools.#", "2"),
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.#", "2"),
 				),
 			},
 			{
 				Config: testAccNetworkingV2SubnetMultipleAllocationPools2,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"openstack_networking_subnet_v2.subnet_1", "allocation_pools.#", "2"),
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.#", "2"),
 				),
 			},
 			{
 				Config: testAccNetworkingV2SubnetMultipleAllocationPools3,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"openstack_networking_subnet_v2.subnet_1", "allocation_pools.#", "2"),
+						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.#", "2"),
 				),
 			},
 		},
@@ -455,7 +455,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 
   dns_nameservers = ["10.0.16.4", "213.186.33.99"]
 
-  allocation_pools {
+  allocation_pool {
     start = "192.168.199.100"
     end = "192.168.199.200"
   }
@@ -476,7 +476,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 
   dns_nameservers = ["10.0.16.4", "213.186.33.99"]
 
-  allocation_pools {
+  allocation_pool {
     start = "192.168.199.150"
     end = "192.168.199.200"
   }
@@ -548,7 +548,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
   network_id = "${openstack_networking_network_v2.network_1.id}"
 
-  allocation_pools {
+  allocation_pool {
     start = "192.168.199.100"
     end = "192.168.199.200"
   }
@@ -638,12 +638,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   cidr = "10.3.0.0/16"
   network_id = "${openstack_networking_network_v2.network_1.id}"
 
-  allocation_pools {
+  allocation_pool {
     start = "10.3.0.2"
     end = "10.3.0.255"
   }
 
-  allocation_pools {
+  allocation_pool {
     start = "10.3.255.0"
     end = "10.3.255.254"
   }
@@ -661,12 +661,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   cidr = "10.3.0.0/16"
   network_id = "${openstack_networking_network_v2.network_1.id}"
 
-  allocation_pools {
+  allocation_pool {
     start = "10.3.255.0"
     end = "10.3.255.254"
   }
 
-  allocation_pools {
+  allocation_pool {
     start = "10.3.0.2"
     end = "10.3.0.255"
   }
@@ -684,12 +684,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   cidr = "10.3.0.0/16"
   network_id = "${openstack_networking_network_v2.network_1.id}"
 
-  allocation_pools {
+  allocation_pool {
     start = "10.3.255.10"
     end = "10.3.255.154"
   }
 
-  allocation_pools {
+  allocation_pool {
     start = "10.3.0.2"
     end = "10.3.0.255"
   }
@@ -754,7 +754,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 
   dns_nameservers = ["10.0.16.4", "213.186.33.99"]
 
-  allocation_pools {
+  allocation_pool {
     start = "192.168.199.100"
     end = "192.168.199.200"
   }
@@ -772,7 +772,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
   network_id = "${openstack_networking_network_v2.network_1.id}"
 
-  allocation_pools {
+  allocation_pool {
     start = "192.168.199.100"
     end = "192.168.199.200"
   }

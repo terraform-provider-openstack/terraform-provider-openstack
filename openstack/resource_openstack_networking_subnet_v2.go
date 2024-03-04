@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -84,31 +83,10 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				Computed: true,
 			},
 
-			"allocation_pools": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				Computed:      true,
-				ConflictsWith: []string{"allocation_pool"},
-				Deprecated:    "use allocation_pool instead",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"start": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"end": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
-			},
-
 			"allocation_pool": {
-				Type:          schema.TypeSet,
-				Optional:      true,
-				Computed:      true,
-				ConflictsWith: []string{"allocation_pools"},
+				Type:     schema.TypeSet,
+				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"start": {
@@ -232,13 +210,6 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
-
-		CustomizeDiff: customdiff.Sequence(
-			// Clear the diff if the old and new allocation_pools are the same.
-			func(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
-				return networkingSubnetV2AllocationPoolsCustomizeDiff(diff)
-			},
-		),
 	}
 }
 
@@ -255,7 +226,7 @@ func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceDat
 	}
 
 	// Get raw allocation pool value.
-	allocationPool := networkingSubnetV2GetRawAllocationPoolsValueToExpand(d)
+	allocationPool := d.Get("allocation_pool").(*schema.Set).List()
 
 	// Set basic options.
 	createOpts := SubnetCreateOpts{
@@ -380,11 +351,8 @@ func resourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceData,
 
 	networkingV2ReadAttributesTags(d, s.Tags)
 
-	// Set the allocation_pools, allocation_pool attributes.
+	// Set the allocation_pool attribute
 	allocationPools := flattenNetworkingSubnetV2AllocationPools(s.AllocationPools)
-	if err := d.Set("allocation_pools", allocationPools); err != nil {
-		log.Printf("[DEBUG] Unable to set openstack_networking_subnet_v2 allocation_pools: %s", err)
-	}
 	if err := d.Set("allocation_pool", allocationPools); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_networking_subnet_v2 allocation_pool: %s", err)
 	}
@@ -472,9 +440,6 @@ func resourceNetworkingSubnetV2Update(ctx context.Context, d *schema.ResourceDat
 	if d.HasChange("allocation_pool") {
 		hasChange = true
 		updateOpts.AllocationPools = expandNetworkingSubnetV2AllocationPools(d.Get("allocation_pool").(*schema.Set).List())
-	} else if d.HasChange("allocation_pools") {
-		hasChange = true
-		updateOpts.AllocationPools = expandNetworkingSubnetV2AllocationPools(d.Get("allocation_pools").([]interface{}))
 	}
 
 	if hasChange {
