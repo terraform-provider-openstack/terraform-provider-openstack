@@ -195,7 +195,7 @@ resource "openstack_networking_router_interface_v2" "router_interface_1" {
 
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
-  external_gateway = "%s"
+  external_network_id = "%s"
 }
 
 resource "openstack_networking_port_v2" "port_1" {
@@ -243,7 +243,7 @@ resource "openstack_networking_router_interface_v2" "router_interface_1" {
 
 resource "openstack_networking_router_v2" "router_1" {
   name = "router_1"
-  external_gateway = "%s"
+  external_network_id = "%s"
 }
 
 resource "openstack_networking_port_v2" "port_1" {
