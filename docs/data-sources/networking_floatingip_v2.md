@@ -29,7 +29,7 @@ data "openstack_networking_floatingip_v2" "floatingip_1" {
 
 * `address` - (Optional) The IP address of the floating IP.
 
-* `pool` - (Optional) The name of the pool from which the floating IP belongs to.
+* `pool` - (Optional) The ID of the network from which the floating IP belongs to.
 
 * `port_id` - (Optional) The ID of the port the floating IP is attached.
 
