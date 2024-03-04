@@ -142,10 +142,6 @@ resource "openstack_objectstorage_container_v1" "container_1" {
     upperTest = "true"
   }
   content_type = "application/json"
-  versioning_legacy {
-    type = "versions"
-    location = "othercontainer"
-  }
   container_read = ".r:*,.rlistings"
   container_write = "*"
 }

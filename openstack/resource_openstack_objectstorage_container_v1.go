@@ -8,7 +8,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/containers"
@@ -73,32 +72,9 @@ func resourceObjectStorageContainerV1() *schema.Resource {
 				ForceNew: false,
 			},
 			"versioning": {
-				Type:          schema.TypeBool,
-				Optional:      true,
-				Default:       false,
-				ConflictsWith: []string{"versioning_legacy"},
-			},
-			"versioning_legacy": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeBool,
 				Optional: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"type": {
-							Type:     schema.TypeString,
-							Required: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"versions", "history",
-							}, true),
-						},
-						"location": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
-				ConflictsWith: []string{"versioning"},
-				Deprecated:    "Use newer \"versioning\" implementation",
+				Default:  false,
 			},
 			"metadata": {
 				Type:     schema.TypeMap,
@@ -138,19 +114,6 @@ func resourceObjectStorageContainerV1Create(ctx context.Context, d *schema.Resou
 		StoragePolicy:    d.Get("storage_policy").(string),
 		VersionsEnabled:  d.Get("versioning").(bool),
 		Metadata:         resourceContainerMetadataV2(d),
-	}
-
-	versioning := d.Get("versioning_legacy").(*schema.Set)
-	if versioning.Len() > 0 {
-		vParams := versioning.List()[0]
-		if vRaw, ok := vParams.(map[string]interface{}); ok {
-			switch vRaw["type"].(string) {
-			case "versions":
-				createOpts.VersionsLocation = vRaw["location"].(string)
-			case "history":
-				createOpts.HistoryLocation = vRaw["location"].(string)
-			}
-		}
 	}
 
 	log.Printf("[DEBUG] Create Options for objectstorage_container_v1: %#v", createOpts)
@@ -205,30 +168,8 @@ func resourceObjectStorageContainerV1Read(ctx context.Context, d *schema.Resourc
 		d.Set("storage_policy", headers.StoragePolicy)
 	}
 
-	versioningResource := resourceObjectStorageContainerV1().Schema["versioning_legacy"].Elem.(*schema.Resource)
-
 	if headers.VersionsLocation != "" && headers.HistoryLocation != "" {
 		return diag.Errorf("error reading versioning headers for objectstorage_container_v1 '%s': found location for both exclusive types, versions ('%s') and history ('%s')", d.Id(), headers.VersionsLocation, headers.HistoryLocation)
-	}
-
-	if headers.VersionsLocation != "" {
-		versioning := map[string]interface{}{
-			"type":     "versions",
-			"location": headers.VersionsLocation,
-		}
-		if err := d.Set("versioning_legacy", schema.NewSet(schema.HashResource(versioningResource), []interface{}{versioning})); err != nil {
-			return diag.Errorf("error setting 'versions' versioning for objectstorage_container_v1 '%s': %s", d.Id(), err)
-		}
-	}
-
-	if headers.HistoryLocation != "" {
-		versioning := map[string]interface{}{
-			"type":     "history",
-			"location": headers.HistoryLocation,
-		}
-		if err := d.Set("versioning_legacy", schema.NewSet(schema.HashResource(versioningResource), []interface{}{versioning})); err != nil {
-			return diag.Errorf("error setting 'history' versioning for objectstorage_container_v1 '%s': %s", d.Id(), err)
-		}
 	}
 
 	d.Set("versioning", headers.VersionsEnabled)
@@ -261,53 +202,6 @@ func resourceObjectStorageContainerV1Update(ctx context.Context, d *schema.Resou
 	if d.HasChange("versioning") {
 		versioning := d.Get("versioning").(bool)
 		updateOpts.VersionsEnabled = &versioning
-	}
-
-	if d.HasChange("versioning_legacy") {
-		versioning := d.Get("versioning_legacy").(*schema.Set)
-		if versioning.Len() == 0 {
-			updateOpts.RemoveVersionsLocation = "true"
-			updateOpts.RemoveHistoryLocation = "true"
-		} else {
-			vParams := versioning.List()[0]
-			if vRaw, ok := vParams.(map[string]interface{}); ok {
-				if len(vRaw["location"].(string)) == 0 || len(vRaw["type"].(string)) == 0 {
-					updateOpts.RemoveVersionsLocation = "true"
-					updateOpts.RemoveHistoryLocation = "true"
-				}
-				switch vRaw["type"].(string) {
-				case "versions":
-					updateOpts.VersionsLocation = vRaw["location"].(string)
-				case "history":
-					updateOpts.HistoryLocation = vRaw["location"].(string)
-				}
-			}
-		}
-	}
-
-	// remove legacy versioning first, before enabling the new versioning
-	if updateOpts.VersionsEnabled != nil && *updateOpts.VersionsEnabled &&
-		(updateOpts.RemoveVersionsLocation == "true" || updateOpts.RemoveHistoryLocation == "true") {
-		opts := containers.UpdateOpts{
-			RemoveVersionsLocation: "true",
-			RemoveHistoryLocation:  "true",
-		}
-		_, err = containers.Update(objectStorageClient, d.Id(), opts).Extract()
-		if err != nil {
-			return diag.Errorf("error updating objectstorage_container_v1 '%s': %s", d.Id(), err)
-		}
-	}
-
-	// remove new versioning first, before enabling the legacy versioning
-	if (updateOpts.VersionsLocation != "" || updateOpts.HistoryLocation != "") &&
-		updateOpts.VersionsEnabled != nil && !*updateOpts.VersionsEnabled {
-		opts := containers.UpdateOpts{
-			VersionsEnabled: updateOpts.VersionsEnabled,
-		}
-		_, err = containers.Update(objectStorageClient, d.Id(), opts).Extract()
-		if err != nil {
-			return diag.Errorf("error updating objectstorage_container_v1 '%s': %s", d.Id(), err)
-		}
 	}
 
 	if d.HasChange("metadata") {
