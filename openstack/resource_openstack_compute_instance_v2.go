@@ -86,12 +86,6 @@ func resourceComputeInstanceV2() *schema.Resource {
 				ForceNew: false,
 				Computed: true,
 			},
-			"floating_ip": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				ForceNew:   false,
-				Deprecated: "Use the openstack_compute_floatingip_associate_v2 resource instead",
-			},
 			"user_data": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -175,12 +169,6 @@ func resourceComputeInstanceV2() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 							Computed: true,
-						},
-						"floating_ip": {
-							Type:       schema.TypeString,
-							Optional:   true,
-							Computed:   true,
-							Deprecated: "Use the openstack_compute_floatingip_associate_v2 resource instead",
 						},
 						"mac": {
 							Type:     schema.TypeString,
