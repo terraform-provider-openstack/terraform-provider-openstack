@@ -86,7 +86,7 @@ func TestAccNetworkingV2Router_vendor_opts(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_router_v2.router_1", "external_gateway", osExtGwID),
+						"openstack_networking_router_v2.router_1", "external_network_id", osExtGwID),
 				),
 			},
 		},
@@ -111,7 +111,7 @@ func TestAccNetworkingV2Router_vendor_opts_no_snat(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_router_v2.router_1", "external_gateway", osExtGwID),
+						"openstack_networking_router_v2.router_1", "external_network_id", osExtGwID),
 				),
 			},
 		},
@@ -122,7 +122,6 @@ func TestAccNetworkingV2Router_extFixedIPs(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			// (rule:create_router and (rule:create_router:external_gateway_info and (rule:create_router:external_gateway_info:network_id and rule:create_router:external_gateway_info:external_fixed_ips))) is disallowed by policy
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
@@ -147,7 +146,6 @@ func TestAccNetworkingV2Router_extSubnetIDs(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			// (rule:create_router and (rule:create_router:external_gateway_info and (rule:create_router:external_gateway_info:network_id and rule:create_router:external_gateway_info:external_fixed_ips))) is disallowed by policy
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
