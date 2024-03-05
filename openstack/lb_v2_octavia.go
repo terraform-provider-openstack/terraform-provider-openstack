@@ -387,3 +387,57 @@ func resourceLBV2L7PolicyRefreshFuncOctavia(lbClient *gophercloud.ServiceClient,
 		return l7policy, l7policy.ProvisioningStatus, nil
 	}
 }
+
+func waitForLBV2MemberOctavia(ctx context.Context, lbClient *gophercloud.ServiceClient, parentPool *pools.Pool, member *pools.Member, target string, pending []string, timeout time.Duration) error {
+	log.Printf("[DEBUG] Waiting for member %s to become %s.", member.ID, target)
+
+	lbID, err := lbV2FindLBIDviaPoolOctavia(lbClient, parentPool)
+	if err != nil {
+		return err
+	}
+
+	stateConf := &resource.StateChangeConf{
+		Target:     []string{target},
+		Pending:    pending,
+		Refresh:    resourceLBV2MemberRefreshFuncOctavia(lbClient, lbID, parentPool.ID, member),
+		Timeout:    timeout,
+		Delay:      1 * time.Second,
+		MinTimeout: 1 * time.Second,
+	}
+
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if target == "DELETED" {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Error waiting for member %s to become %s: %s", member.ID, target, err)
+	}
+
+	return nil
+}
+
+func resourceLBV2MemberRefreshFuncOctavia(lbClient *gophercloud.ServiceClient, lbID string, poolID string, member *pools.Member) resource.StateRefreshFunc {
+	if member.ProvisioningStatus == "" {
+		return resourceLBV2LoadBalancerStatusRefreshFuncOctavia(lbClient, lbID, "member", member.ID, poolID)
+	}
+
+	return func() (interface{}, string, error) {
+		lb, status, err := resourceLBV2LoadBalancerRefreshFunc(lbClient, lbID)()
+		if err != nil {
+			return lb, status, err
+		}
+		if !strSliceContains(getLbSkipStatuses(), status) {
+			return lb, status, nil
+		}
+
+		member, err := pools.GetMember(lbClient, poolID, member.ID).Extract()
+		if err != nil {
+			return nil, "", err
+		}
+
+		return member, member.ProvisioningStatus, nil
+	}
+}
