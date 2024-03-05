@@ -90,7 +90,7 @@ func resourceLoadBalancerQuotaV2() *schema.Resource {
 
 func resourceLoadBalancerQuotaV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
@@ -143,7 +143,7 @@ func resourceLoadBalancerQuotaV2Create(ctx context.Context, d *schema.ResourceDa
 func resourceLoadBalancerQuotaV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
@@ -177,7 +177,7 @@ func resourceLoadBalancerQuotaV2Read(ctx context.Context, d *schema.ResourceData
 
 func resourceLoadBalancerQuotaV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
