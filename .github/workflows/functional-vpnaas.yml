@@ -30,16 +30,13 @@ jobs:
           - name: "zed"
             openstack_version: "stable/zed"
             ubuntu_version: "20.04"
-          - name: "yoga"
-            openstack_version: "stable/yoga"
-            ubuntu_version: "20.04"
     runs-on: ubuntu-${{ matrix.ubuntu_version }}
     name: vpnaas on OpenStack ${{ matrix.name }} with Neutron and run vpnaas acceptance tests
     steps:
       - name: Checkout TPO
         uses: actions/checkout@v4
       - name: Deploy devstack
-        uses: EmilienM/devstack-action@v0.12
+        uses: EmilienM/devstack-action@v0.14
         with:
           branch: ${{ matrix.openstack_version }}
           conf_overrides: |
