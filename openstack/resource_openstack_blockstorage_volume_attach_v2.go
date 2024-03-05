@@ -41,13 +41,6 @@ func resourceBlockStorageVolumeAttachV2() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"instance_id": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				ForceNew:   true,
-				Deprecated: "instance_id is no longer used in this resource",
-			},
-
 			"host_name": {
 				Type:     schema.TypeString,
 				Required: true,
