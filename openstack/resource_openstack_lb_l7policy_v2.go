@@ -399,7 +399,7 @@ func resourceL7PolicyV2Import(d *schema.ResourceData, meta interface{}) ([]*sche
 		d.Set("listener_id", l7Policy.ListenerID)
 	} else {
 		// Fallback for the Neutron LBaaSv2 extension
-		listenerID, err := getListenerIDForL7Policy(lbClient, d.Id())
+		listenerID, err := getListenerIDForL7PolicyOctavia(lbClient, d.Id())
 		if err != nil {
 			return nil, err
 		}

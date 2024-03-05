@@ -16,6 +16,90 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
 )
 
+func getListenerIDForL7PolicyOctavia(lbClient *gophercloud.ServiceClient, id string) (string, error) {
+	log.Printf("[DEBUG] Trying to get Listener ID associated with the %s L7 Policy ID", id)
+	lbsPages, err := loadbalancers.List(lbClient, loadbalancers.ListOpts{}).AllPages()
+	if err != nil {
+		return "", fmt.Errorf("No Load Balancers were found: %s", err)
+	}
+
+	lbs, err := loadbalancers.ExtractLoadBalancers(lbsPages)
+	if err != nil {
+		return "", fmt.Errorf("Unable to extract Load Balancers list: %s", err)
+	}
+
+	for _, lb := range lbs {
+		statuses, err := loadbalancers.GetStatuses(lbClient, lb.ID).Extract()
+		if err != nil {
+			return "", fmt.Errorf("Failed to get Load Balancer statuses: %s", err)
+		}
+		for _, listener := range statuses.Loadbalancer.Listeners {
+			for _, l7policy := range listener.L7Policies {
+				if l7policy.ID == id {
+					return listener.ID, nil
+				}
+			}
+		}
+	}
+
+	return "", fmt.Errorf("Unable to find Listener ID associated with the %s L7 Policy ID", id)
+}
+
+func waitForLBV2L7RuleOctavia(ctx context.Context, lbClient *gophercloud.ServiceClient, parentListener *listeners.Listener, parentL7policy *l7policies.L7Policy, l7rule *l7policies.Rule, target string, pending []string, timeout time.Duration) error {
+	log.Printf("[DEBUG] Waiting for l7rule %s to become %s.", l7rule.ID, target)
+
+	if len(parentListener.Loadbalancers) == 0 {
+		return fmt.Errorf("Unable to determine loadbalancer ID from listener %s", parentListener.ID)
+	}
+
+	lbID := parentListener.Loadbalancers[0].ID
+
+	stateConf := &resource.StateChangeConf{
+		Target:     []string{target},
+		Pending:    pending,
+		Refresh:    resourceLBV2L7RuleRefreshFuncOctavia(lbClient, lbID, parentL7policy.ID, l7rule),
+		Timeout:    timeout,
+		Delay:      1 * time.Second,
+		MinTimeout: 1 * time.Second,
+	}
+
+	_, err := stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if target == "DELETED" {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Error waiting for l7rule %s to become %s: %s", l7rule.ID, target, err)
+	}
+
+	return nil
+}
+
+func resourceLBV2L7RuleRefreshFuncOctavia(lbClient *gophercloud.ServiceClient, lbID string, l7policyID string, l7rule *l7policies.Rule) resource.StateRefreshFunc {
+	if l7rule.ProvisioningStatus == "" {
+		return resourceLBV2LoadBalancerStatusRefreshFuncOctavia(lbClient, lbID, "l7rule", l7rule.ID, l7policyID)
+	}
+
+	return func() (interface{}, string, error) {
+		lb, status, err := resourceLBV2LoadBalancerRefreshFunc(lbClient, lbID)()
+		if err != nil {
+			return lb, status, err
+		}
+		if !strSliceContains(getLbSkipStatuses(), status) {
+			return lb, status, nil
+		}
+
+		l7rule, err := l7policies.GetRule(lbClient, l7policyID, l7rule.ID).Extract()
+		if err != nil {
+			return nil, "", err
+		}
+
+		return l7rule, l7rule.ProvisioningStatus, nil
+	}
+}
+
 func resourceLBV2ListenerRefreshFuncOctavia(lbClient *gophercloud.ServiceClient, lbID string, listener *listeners.Listener) resource.StateRefreshFunc {
 	if listener.ProvisioningStatus == "" {
 		return resourceLBV2LoadBalancerStatusRefreshFuncOctavia(lbClient, lbID, "listener", listener.ID, "")
