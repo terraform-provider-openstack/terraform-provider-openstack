@@ -144,26 +144,6 @@ The following arguments are supported:
 * `monitor_ids` - (Optional) A list of IDs of monitors to associate with the
     pool.
 
-* `member` - (Optional) An existing node to add to the pool. Changing this
-    updates the members of the pool. The member object structure is documented
-    below. Please note that the `member` block is deprecated in favor of the
-    `openstack_lb_member_v1` resource.
-
-The `member` block supports:
-
-* `address` - (Required) The IP address of the member. Changing this creates a
-new member.
-
-* `port` - (Required) An integer representing the port on which the member is
-hosted. Changing this creates a new member.
-
-* `admin_state_up` - (Required) The administrative state of the member.
-Acceptable values are 'true' and 'false'. Changing this value updates the
-state of the existing member.
-
-* `tenant_id` - (Optional) The owner of the member. Required if admin wants to
-create a pool member for another tenant. Changing this creates a new member.
-
 ## Attributes Reference
 
 The following attributes are exported:
@@ -176,11 +156,7 @@ The following attributes are exported:
 * `lb_provider` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
 * `monitor_id` - See Argument Reference above.
-* `member` - See Argument Reference above.
 
-## Notes
-
-The `member` block is deprecated in favor of the `openstack_lb_member_v1` resource.
 
 ## Import
 

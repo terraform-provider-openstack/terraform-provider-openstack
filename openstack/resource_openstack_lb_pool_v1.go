@@ -69,12 +69,6 @@ func resourceLBPoolV1() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 			},
-			"member": {
-				Type:       schema.TypeSet,
-				Elem:       &schema.Schema{Type: schema.TypeString},
-				Optional:   true,
-				Deprecated: "Use openstack_lb_member_v1 instead",
-			},
 			"monitor_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
