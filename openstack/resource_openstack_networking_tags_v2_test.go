@@ -125,7 +125,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 
   dns_nameservers = ["10.0.16.4", "213.186.33.99"]
 
-  allocation_pools {
+  allocation_pool {
     start = "192.168.199.100"
     end = "192.168.199.200"
   }

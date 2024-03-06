@@ -1253,7 +1253,7 @@ resource "openstack_networking_subnet_v2" "vrrp_subnet" {
   ip_version = 4
   network_id = "${openstack_networking_network_v2.vrrp_network.id}"
 
-  allocation_pools {
+  allocation_pool {
     start = "10.0.0.2"
     end = "10.0.0.200"
   }
@@ -1325,7 +1325,7 @@ resource "openstack_networking_subnet_v2" "vrrp_subnet" {
   ip_version = 4
   network_id = "${openstack_networking_network_v2.vrrp_network.id}"
 
-  allocation_pools {
+  allocation_pool {
     start = "10.0.0.2"
     end = "10.0.0.200"
   }
@@ -1396,7 +1396,7 @@ resource "openstack_networking_subnet_v2" "vrrp_subnet" {
   ip_version = 4
   network_id = "${openstack_networking_network_v2.vrrp_network.id}"
 
-  allocation_pools {
+  allocation_pool {
     start = "10.0.0.2"
     end = "10.0.0.200"
   }
@@ -1468,7 +1468,7 @@ resource "openstack_networking_subnet_v2" "vrrp_subnet" {
   ip_version = 4
   network_id = "${openstack_networking_network_v2.vrrp_network.id}"
 
-  allocation_pools {
+  allocation_pool {
     start = "10.0.0.2"
     end = "10.0.0.200"
   }
@@ -1535,7 +1535,7 @@ resource "openstack_networking_subnet_v2" "vrrp_subnet" {
   ip_version = 4
   network_id = "${openstack_networking_network_v2.vrrp_network.id}"
 
-  allocation_pools {
+  allocation_pool {
     start = "10.0.0.2"
     end = "10.0.0.200"
   }
@@ -2022,7 +2022,7 @@ resource "openstack_networking_subnet_v2" "vrrp_subnet" {
   ip_version = 4
   network_id = "${openstack_networking_network_v2.vrrp_network.id}"
 
-  allocation_pools {
+  allocation_pool {
     start = "10.0.0.2"
     end = "10.0.0.200"
   }
