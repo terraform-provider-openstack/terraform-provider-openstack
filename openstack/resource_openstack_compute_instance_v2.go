@@ -422,6 +422,19 @@ func resourceComputeInstanceV2() *schema.Resource {
 			customdiff.ForceNewIfChange("flavor_name", func(ctx context.Context, old, new, meta interface{}) bool {
 				return old.(string) == ""
 			}),
+			func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+				currentState, _ := d.GetChange("power_state")
+				if currentState == "build" {
+					// In "build" state, network and security groups are not yet available
+					if err := d.Clear("network"); err != nil {
+						return err
+					}
+					if err := d.Clear("security_groups"); err != nil {
+						return err
+					}
+				}
+				return nil
+			},
 		),
 	}
 }
@@ -748,7 +761,7 @@ func resourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, me
 	// Set the current power_state
 	currentStatus := strings.ToLower(server.Status)
 	switch currentStatus {
-	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved":
+	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved", "build":
 		d.Set("power_state", currentStatus)
 	default:
 		return diag.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
@@ -838,7 +851,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				if err != nil {
 					return diag.Errorf("Error unshelving OpenStack instance: %s", err)
 				}
-			} else {
+			} else if strings.ToLower(powerStateOld) != "build" {
 				err = startstop.Start(computeClient, d.Id()).ExtractErr()
 				if err != nil {
 					return diag.Errorf("Error starting OpenStack instance: %s", err)
