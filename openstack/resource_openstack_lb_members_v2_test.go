@@ -103,7 +103,7 @@ func TestAccLBV2Members_basic(t *testing.T) {
 
 func testAccCheckLBV2MembersDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
+	lbClient, err := config.LoadBalancerV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -148,7 +148,7 @@ func testAccCheckLBV2MembersExists(n string, members *[]pools.Member) resource.T
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}

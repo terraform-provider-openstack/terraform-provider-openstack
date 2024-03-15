@@ -161,7 +161,7 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	timeout := d.Timeout(schema.TimeoutCreate)
 
 	// Wait for LoadBalancer to become active before continuing.
-	err = waitForLBV2LoadBalancerOctavia(ctx, lbClient, d.Get("loadbalancer_id").(string), "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2LoadBalancer(ctx, lbClient, d.Get("loadbalancer_id").(string), "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -250,7 +250,7 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for the listener to become ACTIVE.
-	err = waitForLBV2ListenerOctavia(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Listener(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -319,7 +319,7 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	// Wait for the listener to become ACTIVE.
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2ListenerOctavia(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Listener(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -452,7 +452,7 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for the listener to become ACTIVE.
-	err = waitForLBV2ListenerOctavia(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Listener(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -489,7 +489,7 @@ func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for the listener to become DELETED.
-	err = waitForLBV2ListenerOctavia(ctx, lbClient, listener, "DELETED", getLbPendingDeleteStatuses(), timeout)
+	err = waitForLBV2Listener(ctx, lbClient, listener, "DELETED", getLbPendingDeleteStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}

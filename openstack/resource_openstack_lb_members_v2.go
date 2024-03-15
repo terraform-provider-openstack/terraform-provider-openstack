@@ -129,7 +129,7 @@ func resourceMembersV2Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	// Wait for parent pool to become active before continuing
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2PoolOctavia(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -148,7 +148,7 @@ func resourceMembersV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	// Wait for parent pool to become active before continuing
-	err = waitForLBV2PoolOctavia(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -202,7 +202,7 @@ func resourceMembersV2Update(ctx context.Context, d *schema.ResourceData, meta i
 
 		// Wait for parent pool to become active before continuing.
 		timeout := d.Timeout(schema.TimeoutUpdate)
-		err = waitForLBV2PoolOctavia(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
+		err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -221,7 +221,7 @@ func resourceMembersV2Update(ctx context.Context, d *schema.ResourceData, meta i
 		}
 
 		// Wait for parent pool to become active before continuing
-		err = waitForLBV2PoolOctavia(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
+		err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -245,7 +245,7 @@ func resourceMembersV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 
 	// Wait for parent pool to become active before continuing.
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = waitForLBV2PoolOctavia(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error waiting for the members' pool status"))
 	}
@@ -264,7 +264,7 @@ func resourceMembersV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	// Wait for parent pool to become active before continuing.
-	err = waitForLBV2PoolOctavia(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error waiting for the members' pool status"))
 	}
