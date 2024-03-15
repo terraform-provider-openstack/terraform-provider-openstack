@@ -38,8 +38,8 @@ The following arguments are supported:
     Listener.
 
 * `protocol` - (Required) The protocol - can either be TCP, HTTP, HTTPS,
-  TERMINATED_HTTPS, UDP (supported only in Octavia), SCTP (supported only
-  in **Octavia minor version >= 2.23**) or PROMETHEUS (supported only in 
+  TERMINATED_HTTPS, UDP, SCTP (supported only in 
+  **Octavia minor version >= 2.23**) or PROMETHEUS (supported only in 
   **Octavia minor version >=2.25**). Changing this creates a new Listener.
 
 * `protocol_port` - (Required) The port on which to listen for client traffic.
