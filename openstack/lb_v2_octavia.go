@@ -494,3 +494,56 @@ func resourceLBV2MonitorRefreshFuncOctavia(lbClient *gophercloud.ServiceClient, 
 		return monitor, monitor.ProvisioningStatus, nil
 	}
 }
+
+func waitForLBV2LoadBalancerOctavia(ctx context.Context, lbClient *gophercloud.ServiceClient, lbID string, target string, pending []string, timeout time.Duration) error {
+	log.Printf("[DEBUG] Waiting for loadbalancer %s to become %s.", lbID, target)
+
+	stateConf := &resource.StateChangeConf{
+		Target:     []string{target},
+		Pending:    pending,
+		Refresh:    resourceLBV2LoadBalancerRefreshFuncOctavia(lbClient, lbID),
+		Timeout:    timeout,
+		Delay:      0,
+		MinTimeout: 1 * time.Second,
+	}
+
+	_, err := stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		if _, ok := err.(gophercloud.ErrDefault404); ok {
+			switch target {
+			case "DELETED":
+				return nil
+			default:
+				return fmt.Errorf("Error: loadbalancer %s not found: %s", lbID, err)
+			}
+		}
+		return fmt.Errorf("Error waiting for loadbalancer %s to become %s: %s", lbID, target, err)
+	}
+
+	return nil
+}
+
+func resourceLBV2LoadBalancerRefreshFuncOctavia(lbClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		lb, err := loadbalancers.Get(lbClient, id).Extract()
+		if err != nil {
+			return nil, "", err
+		}
+
+		return lb, lb.ProvisioningStatus, nil
+	}
+}
+
+func expandLBV2ListenerHeadersMap(raw map[string]interface{}) (map[string]string, error) {
+	m := make(map[string]string, len(raw))
+	for key, val := range raw {
+		labelValue, ok := val.(string)
+		if !ok {
+			return nil, fmt.Errorf("label %s value should be string", key)
+		}
+
+		m[key] = labelValue
+	}
+
+	return m, nil
+}
