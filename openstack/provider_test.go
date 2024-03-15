@@ -38,7 +38,6 @@ var (
 	osLbFlavorName               = os.Getenv("OS_LB_FLAVOR_NAME")
 	osFwEnvironment              = os.Getenv("OS_FW_ENVIRONMENT")
 	osVpnEnvironment             = os.Getenv("OS_VPN_ENVIRONMENT")
-	osUseOctavia                 = os.Getenv("OS_USE_OCTAVIA")
 	osContainerInfraEnvironment  = os.Getenv("OS_CONTAINER_INFRA_ENVIRONMENT")
 	osSfsEnvironment             = os.Getenv("OS_SFS_ENVIRONMENT")
 	osTransparentVlanEnvironment = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
@@ -152,14 +151,6 @@ func testAccPreCheckBlockStorageV2(t *testing.T) {
 
 	if osBlockStorageV2 == "" {
 		t.Skip("This environment does not support BlockStorageV2 tests")
-	}
-}
-
-func testAccPreCheckUseOctavia(t *testing.T) {
-	testAccPreCheckRequiredEnvVars(t)
-
-	if osUseOctavia == "" {
-		t.Skip("This environment does not support Octavia tests")
 	}
 }
 
@@ -522,10 +513,10 @@ func testAccAuthFromEnv() (*Config, error) {
 			UserDomainName:              os.Getenv("OS_USER_DOMAIN_NAME"),
 			Username:                    os.Getenv("OS_USERNAME"),
 			UserID:                      os.Getenv("OS_USER_ID"),
+			UseOctavia:                  true,
 			ApplicationCredentialID:     os.Getenv("OS_APPLICATION_CREDENTIAL_ID"),
 			ApplicationCredentialName:   os.Getenv("OS_APPLICATION_CREDENTIAL_NAME"),
 			ApplicationCredentialSecret: os.Getenv("OS_APPLICATION_CREDENTIAL_SECRET"),
-			UseOctavia:                  testGetenvBool("OS_USE_OCTAVIA"),
 			DelayedAuth:                 testGetenvBool("OS_DELAYED_AUTH"),
 			AllowReauth:                 testGetenvBool("OS_ALLOW_REAUTH"),
 			AuthOpts:                    authOpts,

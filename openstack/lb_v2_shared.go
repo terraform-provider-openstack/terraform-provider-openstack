@@ -18,8 +18,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 )
 
-const octaviaLBClientType = "load-balancer"
-
 const (
 	lbPendingCreate = "PENDING_CREATE"
 	lbPendingUpdate = "PENDING_UPDATE"

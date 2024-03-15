@@ -38,7 +38,6 @@ func TestAccLBV2Members_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
-			testAccPreCheckUseOctavia(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckLBV2MembersDestroy,

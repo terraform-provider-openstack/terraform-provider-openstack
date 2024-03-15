@@ -208,14 +208,6 @@ func Provider() *schema.Provider {
 				Description: descriptions["swauth"],
 			},
 
-			"use_octavia": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_USE_OCTAVIA", true),
-				Description: descriptions["use_octavia"],
-				Deprecated:  "Users not using loadbalancer resources can ignore this message. Support for neutron-lbaas will be removed on next major release. Octavia will be the only supported method for loadbalancer resources. Users using octavia will have to remove 'use_octavia' option from the provider configuration block. Users using neutron-lbaas will have to migrate/upgrade to octavia.",
-			},
-
 			"delayed_auth": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -506,9 +498,6 @@ func init() {
 		"swauth": "Use Swift's authentication system instead of Keystone. Only used for\n" +
 			"interaction with Swift.",
 
-		"use_octavia": "If set to `true`, API requests will go the Load Balancer\n" +
-			"service (Octavia) instead of the Networking service (Neutron).",
-
 		"disable_no_cache_header": "If set to `true`, the HTTP `Cache-Control: no-cache` header will not be added by default to all API requests.",
 
 		"delayed_auth": "If set to `false`, OpenStack authorization will be perfomed,\n" +
@@ -562,10 +551,10 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 			UserDomainName:              d.Get("user_domain_name").(string),
 			Username:                    d.Get("user_name").(string),
 			UserID:                      d.Get("user_id").(string),
+			UseOctavia:                  true,
 			ApplicationCredentialID:     d.Get("application_credential_id").(string),
 			ApplicationCredentialName:   d.Get("application_credential_name").(string),
 			ApplicationCredentialSecret: d.Get("application_credential_secret").(string),
-			UseOctavia:                  d.Get("use_octavia").(bool),
 			DelayedAuth:                 d.Get("delayed_auth").(bool),
 			AllowReauth:                 d.Get("allow_reauth").(bool),
 			AuthOpts:                    authOpts,

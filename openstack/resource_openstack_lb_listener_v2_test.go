@@ -51,7 +51,6 @@ func TestAccLBV2Listener_octavia(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
-			testAccPreCheckUseOctavia(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
@@ -105,7 +104,6 @@ func TestAccLBV2Listener_octavia_udp(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
-			testAccPreCheckUseOctavia(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
@@ -130,7 +128,6 @@ func TestAccLBV2ListenerConfig_octavia_insert_headers(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
-			testAccPreCheckUseOctavia(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
