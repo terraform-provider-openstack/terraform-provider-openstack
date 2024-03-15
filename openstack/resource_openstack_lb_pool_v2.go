@@ -183,13 +183,13 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 			return diag.Errorf("Unable to get openstack_lb_listener_v2 %s: %s", listenerID, err)
 		}
 
-		waitErr := waitForLBV2ListenerOctavia(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
+		waitErr := waitForLBV2Listener(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
 		if waitErr != nil {
 			return diag.Errorf(
 				"Error waiting for openstack_lb_listener_v2 %s to become active: %s", listenerID, err)
 		}
 	} else {
-		waitErr := waitForLBV2LoadBalancerOctavia(ctx, lbClient, lbID, "ACTIVE", getLbPendingStatuses(), timeout)
+		waitErr := waitForLBV2LoadBalancer(ctx, lbClient, lbID, "ACTIVE", getLbPendingStatuses(), timeout)
 		if waitErr != nil {
 			return diag.Errorf(
 				"Error waiting for openstack_lb_loadbalancer_v2 %s to become active: %s", lbID, err)
@@ -212,7 +212,7 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 
 	// Pool was successfully created
 	// Wait for pool to become active before continuing
-	err = waitForLBV2PoolOctavia(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Pool(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -281,7 +281,7 @@ func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// Wait for pool to become active before continuing
-	err = waitForLBV2PoolOctavia(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Pool(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -300,7 +300,7 @@ func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// Wait for pool to become active before continuing
-	err = waitForLBV2PoolOctavia(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Pool(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -337,7 +337,7 @@ func resourcePoolV2Delete(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// Wait for Pool to delete
-	err = waitForLBV2PoolOctavia(ctx, lbClient, pool, "DELETED", getLbPendingDeleteStatuses(), timeout)
+	err = waitForLBV2Pool(ctx, lbClient, pool, "DELETED", getLbPendingDeleteStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -143,7 +143,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 
 func testAccCheckLBV2L7RuleDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
+	lbClient, err := config.LoadBalancerV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -186,7 +186,7 @@ func testAccCheckLBV2L7RuleExists(n string, l7rule *l7policies.Rule) resource.Te
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}

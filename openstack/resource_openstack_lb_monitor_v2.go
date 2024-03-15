@@ -148,7 +148,7 @@ func resourceMonitorV2Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	// Wait for parent pool to become active before continuing.
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2PoolOctavia(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -168,7 +168,7 @@ func resourceMonitorV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	// Wait for monitor to become active before continuing
-	err = waitForLBV2MonitorOctavia(ctx, lbClient, parentPool, monitor, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Monitor(ctx, lbClient, parentPool, monitor, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -282,13 +282,13 @@ func resourceMonitorV2Update(ctx context.Context, d *schema.ResourceData, meta i
 
 	// Wait for parent pool to become active before continuing.
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2PoolOctavia(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Wait for monitor to become active before continuing.
-	err = waitForLBV2MonitorOctavia(ctx, lbClient, parentPool, monitor, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Monitor(ctx, lbClient, parentPool, monitor, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -307,7 +307,7 @@ func resourceMonitorV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	// Wait for monitor to become active before continuing
-	err = waitForLBV2MonitorOctavia(ctx, lbClient, parentPool, monitor, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Monitor(ctx, lbClient, parentPool, monitor, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -338,7 +338,7 @@ func resourceMonitorV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 
 	// Wait for parent pool to become active before continuing
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2PoolOctavia(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -357,7 +357,7 @@ func resourceMonitorV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	// Wait for monitor to become DELETED
-	err = waitForLBV2MonitorOctavia(ctx, lbClient, parentPool, monitor, "DELETED", getLbPendingDeleteStatuses(), timeout)
+	err = waitForLBV2Monitor(ctx, lbClient, parentPool, monitor, "DELETED", getLbPendingDeleteStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
