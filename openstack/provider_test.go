@@ -320,13 +320,13 @@ func IsReleasesAbove(t *testing.T, release string) bool {
 // not possible.
 func SetReleaseNumber(t *testing.T, release string) int {
 	switch release {
-	case "stable/xena":
-		return 1
-	case "stable/yoga":
-		return 2
 	case "stable/zed":
-		return 3
+		return 1
 	case "stable/2023.1":
+		return 2
+	case "stable/2023.2":
+		return 3
+	case "stable/2024.1":
 		return 4
 	case "master":
 		return 5
