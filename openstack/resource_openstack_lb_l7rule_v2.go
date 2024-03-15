@@ -150,7 +150,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 		listenerID = parentL7Policy.ListenerID
 	} else {
 		// Fallback for the Neutron LBaaSv2 extension
-		listenerID, err = getListenerIDForL7PolicyOctavia(lbClient, l7policyID)
+		listenerID, err = getListenerIDForL7Policy(lbClient, l7policyID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -163,7 +163,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
-	err = waitForLBV2L7PolicyOctavia(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -183,7 +183,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for L7 Rule to become active before continuing
-	err = waitForLBV2L7RuleOctavia(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -281,13 +281,13 @@ func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
-	err = waitForLBV2L7PolicyOctavia(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Wait for L7 Rule to become active before continuing
-	err = waitForLBV2L7RuleOctavia(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -306,7 +306,7 @@ func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for L7 Rule to become active before continuing
-	err = waitForLBV2L7RuleOctavia(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -345,7 +345,7 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
-	err = waitForLBV2L7PolicyOctavia(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -363,7 +363,7 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting L7 Rule"))
 	}
 
-	err = waitForLBV2L7RuleOctavia(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "DELETED", getLbPendingDeleteStatuses(), timeout)
+	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "DELETED", getLbPendingDeleteStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -398,7 +398,7 @@ func resourceL7RuleV2Import(ctx context.Context, d *schema.ResourceData, meta in
 		listenerID = parentL7Policy.ListenerID
 	} else {
 		// Fallback for the Neutron LBaaSv2 extension
-		listenerID, err = getListenerIDForL7PolicyOctavia(lbClient, l7policyID)
+		listenerID, err = getListenerIDForL7Policy(lbClient, l7policyID)
 		if err != nil {
 			return nil, err
 		}

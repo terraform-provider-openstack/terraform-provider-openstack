@@ -171,7 +171,7 @@ func TestAccLBV2ListenerConfig_octavia_insert_headers(t *testing.T) {
 
 func testAccCheckLBV2ListenerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
+	lbClient, err := config.LoadBalancerV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -202,7 +202,7 @@ func testAccCheckLBV2ListenerExists(n string, listener *listeners.Listener) reso
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}

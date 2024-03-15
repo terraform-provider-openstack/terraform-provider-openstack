@@ -64,7 +64,7 @@ func TestAccLBV2Pool_octavia_udp(t *testing.T) {
 
 func testAccCheckLBV2PoolDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
+	lbClient, err := config.LoadBalancerV2Client(osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -95,7 +95,7 @@ func testAccCheckLBV2PoolExists(n string, pool *pools.Pool) resource.TestCheckFu
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := chooseLBV2AccTestClient(config, osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}

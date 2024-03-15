@@ -153,7 +153,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 			return diag.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
 		}
 
-		err = waitForLBV2PoolOctavia(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
+		err = waitForLBV2Pool(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -166,7 +166,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for parent Listener to become active before continuing.
-	err = waitForLBV2ListenerOctavia(ctx, lbClient, parentListener, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Listener(ctx, lbClient, parentListener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -186,7 +186,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for L7 Policy to become active before continuing
-	err = waitForLBV2L7PolicyOctavia(ctx, lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -280,7 +280,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 			return diag.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
 		}
 
-		err = waitForLBV2PoolOctavia(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
+		err = waitForLBV2Pool(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -299,13 +299,13 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for parent Listener to become active before continuing.
-	err = waitForLBV2ListenerOctavia(ctx, lbClient, parentListener, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Listener(ctx, lbClient, parentListener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Wait for L7 Policy to become active before continuing
-	err = waitForLBV2L7PolicyOctavia(ctx, lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -324,7 +324,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for L7 Policy to become active before continuing
-	err = waitForLBV2L7PolicyOctavia(ctx, lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, l7Policy, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -355,7 +355,7 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for Listener to become active before continuing.
-	err = waitForLBV2ListenerOctavia(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2Listener(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -373,7 +373,7 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting L7 Policy"))
 	}
 
-	err = waitForLBV2L7PolicyOctavia(ctx, lbClient, listener, l7Policy, "DELETED", getLbPendingDeleteStatuses(), timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, listener, l7Policy, "DELETED", getLbPendingDeleteStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -399,7 +399,7 @@ func resourceL7PolicyV2Import(d *schema.ResourceData, meta interface{}) ([]*sche
 		d.Set("listener_id", l7Policy.ListenerID)
 	} else {
 		// Fallback for the Neutron LBaaSv2 extension
-		listenerID, err := getListenerIDForL7PolicyOctavia(lbClient, d.Id())
+		listenerID, err := getListenerIDForL7Policy(lbClient, d.Id())
 		if err != nil {
 			return nil, err
 		}
