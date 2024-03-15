@@ -120,7 +120,6 @@ func TestAccLBV2LoadBalancer_vip_network(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
-			testAccPreCheckUseOctavia(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
@@ -144,7 +143,6 @@ func TestAccLBV2LoadBalancer_vip_port_id(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
-			testAccPreCheckUseOctavia(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
