@@ -495,6 +495,15 @@ func resourceLBV2MonitorRefreshFuncOctavia(lbClient *gophercloud.ServiceClient, 
 	}
 }
 
+func flattenLBPoolPersistenceV2(p pools.SessionPersistence) []map[string]interface{} {
+	return []map[string]interface{}{
+		{
+			"type":        p.Type,
+			"cookie_name": p.CookieName,
+		},
+	}
+}
+
 func waitForLBV2LoadBalancerOctavia(ctx context.Context, lbClient *gophercloud.ServiceClient, lbID string, target string, pending []string, timeout time.Duration) error {
 	log.Printf("[DEBUG] Waiting for loadbalancer %s to become %s.", lbID, target)
 
