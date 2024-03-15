@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
+	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
+	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
 )
 
 func resourcePoolV2() *schema.Resource {
@@ -31,7 +31,6 @@ func resourcePoolV2() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
-		DeprecationMessage: "Support for neutron-lbaas will be removed. Make sure to use Octavia",
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -127,9 +126,9 @@ func resourcePoolV2() *schema.Resource {
 
 func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
-		return diag.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -158,7 +157,7 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	createOpts := pools.CreateOpts{
-		TenantID:       d.Get("tenant_id").(string),
+		ProjectID:      d.Get("tenant_id").(string),
 		Name:           d.Get("name").(string),
 		Description:    d.Get("description").(string),
 		Protocol:       pools.Protocol(d.Get("protocol").(string)),
@@ -184,13 +183,13 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 			return diag.Errorf("Unable to get openstack_lb_listener_v2 %s: %s", listenerID, err)
 		}
 
-		waitErr := waitForLBV2Listener(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
+		waitErr := waitForLBV2ListenerOctavia(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
 		if waitErr != nil {
 			return diag.Errorf(
 				"Error waiting for openstack_lb_listener_v2 %s to become active: %s", listenerID, err)
 		}
 	} else {
-		waitErr := waitForLBV2LoadBalancer(ctx, lbClient, lbID, "ACTIVE", getLbPendingStatuses(), timeout)
+		waitErr := waitForLBV2LoadBalancerOctavia(ctx, lbClient, lbID, "ACTIVE", getLbPendingStatuses(), timeout)
 		if waitErr != nil {
 			return diag.Errorf(
 				"Error waiting for openstack_lb_loadbalancer_v2 %s to become active: %s", lbID, err)
@@ -213,7 +212,7 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 
 	// Pool was successfully created
 	// Wait for pool to become active before continuing
-	err = waitForLBV2Pool(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2PoolOctavia(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -225,9 +224,9 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 
 func resourcePoolV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
-		return diag.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
 	pool, err := pools.Get(lbClient, d.Id()).Extract()
@@ -240,7 +239,7 @@ func resourcePoolV2Read(ctx context.Context, d *schema.ResourceData, meta interf
 	d.Set("lb_method", pool.LBMethod)
 	d.Set("protocol", pool.Protocol)
 	d.Set("description", pool.Description)
-	d.Set("tenant_id", pool.TenantID)
+	d.Set("tenant_id", pool.ProjectID)
 	d.Set("admin_state_up", pool.AdminStateUp)
 	d.Set("name", pool.Name)
 	d.Set("persistence", flattenLBPoolPersistenceV2(pool.Persistence))
@@ -251,9 +250,9 @@ func resourcePoolV2Read(ctx context.Context, d *schema.ResourceData, meta interf
 
 func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
-		return diag.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
 	var updateOpts pools.UpdateOpts
@@ -282,7 +281,7 @@ func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// Wait for pool to become active before continuing
-	err = waitForLBV2Pool(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2PoolOctavia(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -301,7 +300,7 @@ func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// Wait for pool to become active before continuing
-	err = waitForLBV2Pool(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
+	err = waitForLBV2PoolOctavia(ctx, lbClient, pool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -311,9 +310,9 @@ func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta inte
 
 func resourcePoolV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
-		return diag.Errorf("Error creating OpenStack networking client: %s", err)
+		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
@@ -338,7 +337,7 @@ func resourcePoolV2Delete(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// Wait for Pool to delete
-	err = waitForLBV2Pool(ctx, lbClient, pool, "DELETED", getLbPendingDeleteStatuses(), timeout)
+	err = waitForLBV2PoolOctavia(ctx, lbClient, pool, "DELETED", getLbPendingDeleteStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -348,9 +347,9 @@ func resourcePoolV2Delete(ctx context.Context, d *schema.ResourceData, meta inte
 
 func resourcePoolV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return nil, fmt.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
 	pool, err := pools.Get(lbClient, d.Id()).Extract()

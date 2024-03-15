@@ -47,8 +47,8 @@ The following arguments are supported:
 * `description` - (Optional) Human-readable description for the pool.
 
 * `protocol` - (Required) The protocol - can either be TCP, HTTP, HTTPS, PROXY,
-  UDP (supported only in Octavia), PROXYV2 (**Octavia minor version >= 2.22**)
-  or SCTP (**Octavia minor version >= 2.23**). Changing this creates a new pool.
+  UDP, PROXYV2 (**Octavia minor version >= 2.22**) or SCTP 
+  (**Octavia minor version >= 2.23**). Changing this creates a new pool.
 
 * `loadbalancer_id` - (Optional) The load balancer on which to provision this
     pool. Changing this creates a new pool.
@@ -60,8 +60,7 @@ The following arguments are supported:
 
 * `lb_method` - (Required) The load balancing algorithm to
     distribute traffic to the pool's members. Must be one of
-    ROUND_ROBIN, LEAST_CONNECTIONS, SOURCE_IP, or SOURCE_IP_PORT (supported only
-    in Octavia).
+    ROUND_ROBIN, LEAST_CONNECTIONS, SOURCE_IP, or SOURCE_IP_PORT.
 
 * `persistence` - Omit this field to prevent session persistence.  Indicates
     whether connections in the same session will be processed by the same Pool
