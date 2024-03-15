@@ -160,10 +160,6 @@ The following arguments are supported:
   Finally, set `auth_url` as the location of the Swift service. Note that this
   will only work when used with the OpenStack Object Storage resources.
 
-* `use_octavia` - (Optional) If set to `true`, API requests will go the Load Balancer
-  service (Octavia) instead of the Networking service (Neutron).
-  If omitted, the `OS_USE_OCTAVIA` environment variable is checked.
-
 * `disable_no_cache_header` - (Optional) If set to `true`, the HTTP
   `Cache-Control: no-cache` header will not be added by default to all API requests.
   If omitted this header is added to all API requests to force HTTP caches (if any)

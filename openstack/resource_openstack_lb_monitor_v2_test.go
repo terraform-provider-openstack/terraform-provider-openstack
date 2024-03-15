@@ -49,7 +49,6 @@ func TestAccLBV2Monitor_octavia(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
-			testAccPreCheckUseOctavia(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckLBV2MonitorDestroy,
@@ -81,7 +80,6 @@ func TestAccLBV2Monitor_octavia_udp(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
-			testAccPreCheckUseOctavia(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckLBV2MonitorDestroy,

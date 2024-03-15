@@ -95,10 +95,6 @@ func resourceLoadBalancerQuotaV2Create(ctx context.Context, d *schema.ResourceDa
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
-	if lbClient.Type != octaviaLBClientType {
-		return diag.Errorf("Error creating openstack_lb_quota_v2: Only available when using octavia")
-	}
-
 	region := GetRegion(d, config)
 	projectID := d.Get("project_id").(string)
 	loadbalancer := d.Get("loadbalancer").(int)
@@ -148,10 +144,6 @@ func resourceLoadBalancerQuotaV2Read(ctx context.Context, d *schema.ResourceData
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
-	if lbClient.Type != octaviaLBClientType {
-		return diag.Errorf("Error creating openstack_lb_quota_v2: Only available when using octavia")
-	}
-
 	// Pase projectID from resource id that is <project_id>/<region>
 	projectID := strings.Split(d.Id(), "/")[0]
 
@@ -180,10 +172,6 @@ func resourceLoadBalancerQuotaV2Update(ctx context.Context, d *schema.ResourceDa
 	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
-	}
-
-	if lbClient.Type != octaviaLBClientType {
-		return diag.Errorf("Error creating openstack_lb_quota_v2: Only available when using octavia")
 	}
 
 	var (

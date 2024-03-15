@@ -13,7 +13,7 @@ func TestAccLBV2FlavorDataSource_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
-			testAccPreCheckUseOctavia(t)
+			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{

@@ -13,7 +13,7 @@ func TestAccLBV2Members_importBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
-			testAccPreCheckUseOctavia(t)
+			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckLBV2MembersDestroy,
