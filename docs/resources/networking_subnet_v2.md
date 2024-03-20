@@ -64,11 +64,6 @@ The following arguments are supported:
 * `tenant_id` - (Optional) The owner of the subnet. Required if admin wants to
     create a subnet for another tenant. Changing this creates a new subnet.
 
-* `allocation_pools` - (**Deprecated** - use `allocation_pool` instead)
-    A block declaring the start and end range of the IP addresses available for
-    use with DHCP in this subnet.
-    The `allocation_pools` block is documented below.
-
 * `allocation_pool` - (Optional) A block declaring the start and end range of
     the IP addresses available for use with DHCP in this subnet. Multiple
     `allocation_pool` blocks can be declared, providing the subnet with more
@@ -95,35 +90,17 @@ The following arguments are supported:
 * `service_types` - (Optional) An array of service types used by the subnet.
     Changing this updates the service types for the existing subnet.
 
-* `host_routes` - (**Deprecated** - use `openstack_networking_subnet_route_v2`
-    instead) An array of routes that should be used by devices
-    with IPs from this subnet (not including local subnet route). The host_route
-    object structure is documented below. Changing this updates the host routes
-    for the existing subnet.
-
 * `subnetpool_id` - (Optional) The ID of the subnetpool associated with the subnet.
 
 * `value_specs` - (Optional) Map of additional options.
 
 * `tags` - (Optional) A set of string tags for the subnet.
 
-The deprecated `allocation_pools` block supports:
-
-* `start` - (Required) The starting address.
-
-* `end` - (Required) The ending address.
-
 The `allocation_pool` block supports:
 
 * `start` - (Required) The starting address.
 
 * `end` - (Required) The ending address.
-
-The `host_routes` block supports:
-
-* `destination_cidr` - (Required) The destination CIDR.
-
-* `next_hop` - (Required) The next hop in the route.
 
 ## Attributes Reference
 
@@ -136,12 +113,11 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
-* `allocation_pools` - See Argument Reference above.
+* `allocation_pool` - See Argument Reference above.
 * `gateway_ip` - See Argument Reference above.
 * `enable_dhcp` - See Argument Reference above.
 * `dns_nameservers` - See Argument Reference above.
 * `service_types` - See Argument Reference above.
-* `host_routes` - See Argument Reference above.
 * `subnetpool_id` - See Argument Reference above.
 * `tags` - See Argument Reference above.
 * `all_tags` - The collection of ags assigned on the subnet, which have been

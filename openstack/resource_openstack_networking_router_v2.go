@@ -74,21 +74,11 @@ func resourceNetworkingRouterV2() *schema.Resource {
 				Computed: true,
 			},
 
-			"external_gateway": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      false,
-				Computed:      true,
-				Deprecated:    "use external_network_id instead",
-				ConflictsWith: []string{"external_network_id"},
-			},
-
 			"external_network_id": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      false,
-				Computed:      true,
-				ConflictsWith: []string{"external_gateway"},
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+				Computed: true,
 			},
 
 			"enable_snat": {
@@ -215,10 +205,6 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 	// Gateway settings
 	var externalNetworkID string
 	var gatewayInfo routers.GatewayInfo
-	if v := d.Get("external_gateway").(string); v != "" {
-		externalNetworkID = v
-		gatewayInfo.NetworkID = externalNetworkID
-	}
 
 	if v := d.Get("external_network_id").(string); v != "" {
 		externalNetworkID = v
@@ -312,7 +298,6 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 		var updateOpts routers.UpdateOpts
 		updateOpts.GatewayInfo = &gatewayInfo
 
-		log.Printf("[DEBUG] Assigning external_gateway to openstack_networking_router_v2 %s with options: %#v", r.ID, updateOpts)
 		_, err = routers.Update(networkingClient, r.ID, updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_networking_router_v2: %s", err)
@@ -367,7 +352,6 @@ func resourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData,
 	}
 
 	// Gateway settings.
-	d.Set("external_gateway", r.GatewayInfo.NetworkID)
 	d.Set("external_network_id", r.GatewayInfo.NetworkID)
 	d.Set("enable_snat", r.GatewayInfo.EnableSNAT)
 
@@ -414,20 +398,12 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 	var externalNetworkID string
 	gatewayInfo := routers.GatewayInfo{}
 
-	if v := d.Get("external_gateway").(string); v != "" {
-		externalNetworkID = v
-	}
-
 	if v := d.Get("external_network_id").(string); v != "" {
 		externalNetworkID = v
 	}
 
 	if externalNetworkID != "" {
 		gatewayInfo.NetworkID = externalNetworkID
-	}
-
-	if d.HasChange("external_gateway") {
-		updateGatewaySettings = true
 	}
 
 	if d.HasChange("external_network_id") {

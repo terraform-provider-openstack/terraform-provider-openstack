@@ -109,7 +109,7 @@ func testAccOpenStackImagesV2ImageIDsDataSourceEmpty() string {
 %s
 
 data "openstack_images_image_ids_v2" "images_empty" {
-        name = "non-existed-image"
+    name = "non-existed-image"
 	visibility = "private"
 }
 `, testAccOpenStackImagesV2ImageIDsDataSourceCirros)

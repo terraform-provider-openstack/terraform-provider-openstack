@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
@@ -62,21 +61,6 @@ func networkingSubnetV2StateRefreshFuncDelete(networkingClient *gophercloud.Serv
 	}
 }
 
-// networkingSubnetV2GetRawAllocationPoolsValueToExpand selects the resource argument to populate
-// the allocations pool value.
-func networkingSubnetV2GetRawAllocationPoolsValueToExpand(d *schema.ResourceData) []interface{} {
-	// First check allocation_pool since that is the new argument.
-	result := d.Get("allocation_pool").(*schema.Set).List()
-
-	if len(result) == 0 {
-		// If no allocation_pool was specified, check allocation_pools
-		// which is the older legacy argument.
-		result = d.Get("allocation_pools").([]interface{})
-	}
-
-	return result
-}
-
 // expandNetworkingSubnetV2AllocationPools returns a slice of subnets.AllocationPool structs.
 func expandNetworkingSubnetV2AllocationPools(allocationPools []interface{}) []subnets.AllocationPool {
 	result := make([]subnets.AllocationPool, len(allocationPools))
@@ -105,38 +89,6 @@ func flattenNetworkingSubnetV2AllocationPools(allocationPools []subnets.Allocati
 	}
 
 	return result
-}
-
-// expandNetworkingSubnetV2HostRoutes returns a slice of HostRoute structures.
-func expandNetworkingSubnetV2HostRoutes(rawHostRoutes []interface{}) []subnets.HostRoute {
-	result := make([]subnets.HostRoute, len(rawHostRoutes))
-	for i, raw := range rawHostRoutes {
-		rawMap := raw.(map[string]interface{})
-
-		result[i] = subnets.HostRoute{
-			DestinationCIDR: rawMap["destination_cidr"].(string),
-			NextHop:         rawMap["next_hop"].(string),
-		}
-	}
-
-	return result
-}
-
-func networkingSubnetV2AllocationPoolsCustomizeDiff(diff *schema.ResourceDiff) error {
-	if diff.Id() != "" && diff.HasChange("allocation_pools") {
-		o, n := diff.GetChange("allocation_pools")
-		oldPools := o.([]interface{})
-		newPools := n.([]interface{})
-
-		samePools := networkingSubnetV2AllocationPoolsMatch(oldPools, newPools)
-
-		if samePools {
-			log.Printf("[DEBUG] allocation_pools have not changed. clearing diff")
-			return diff.Clear("allocation_pools")
-		}
-	}
-
-	return nil
 }
 
 func networkingSubnetV2AllocationPoolsMatch(oldPools, newPools []interface{}) bool {

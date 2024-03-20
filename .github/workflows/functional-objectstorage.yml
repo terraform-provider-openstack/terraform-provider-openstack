@@ -29,9 +29,6 @@ jobs:
             ubuntu_version: "22.04"
           - name: "zed"
             openstack_version: "stable/zed"
-            ubuntu_version: "20.04"        
-          - name: "yoga"
-            openstack_version: "stable/yoga"
             ubuntu_version: "20.04"
     runs-on: ubuntu-${{ matrix.ubuntu_version }}
     name: objectstorage OpenStack ${{ matrix.name }} with Swift and run objectstorage acceptance tests
@@ -39,7 +36,7 @@ jobs:
       - name: Checkout Gophercloud
         uses: actions/checkout@v4
       - name: Deploy devstack
-        uses: EmilienM/devstack-action@v0.12
+        uses: EmilienM/devstack-action@v0.15
         with:
           branch: ${{ matrix.openstack_version }}
           conf_overrides: |

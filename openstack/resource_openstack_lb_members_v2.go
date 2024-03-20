@@ -11,8 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	octaviapools "github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
-	neutronpools "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
+	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
 )
 
 func resourceMembersV2() *schema.Resource {
@@ -113,7 +112,7 @@ func resourceMembersV2() *schema.Resource {
 
 func resourceMembersV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -123,7 +122,7 @@ func resourceMembersV2Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
-	parentPool, err := neutronpools.Get(lbClient, poolID).Extract()
+	parentPool, err := pools.Get(lbClient, poolID).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to retrieve parent pool %s: %s", poolID, err)
 	}
@@ -137,7 +136,7 @@ func resourceMembersV2Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Attempting to create members")
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		err = octaviapools.BatchUpdateMembers(lbClient, poolID, createOpts).ExtractErr()
+		err = pools.BatchUpdateMembers(lbClient, poolID, createOpts).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -161,17 +160,17 @@ func resourceMembersV2Create(ctx context.Context, d *schema.ResourceData, meta i
 
 func resourceMembersV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	allPages, err := octaviapools.ListMembers(lbClient, d.Id(), octaviapools.ListMembersOpts{}).AllPages()
+	allPages, err := pools.ListMembers(lbClient, d.Id(), pools.ListMembersOpts{}).AllPages()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_lb_members_v2"))
 	}
 
-	members, err := octaviapools.ExtractMembers(allPages)
+	members, err := pools.ExtractMembers(allPages)
 	if err != nil {
 		return diag.Errorf("Unable to retrieve openstack_lb_members_v2: %s", err)
 	}
@@ -187,7 +186,7 @@ func resourceMembersV2Read(ctx context.Context, d *schema.ResourceData, meta int
 
 func resourceMembersV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -196,7 +195,7 @@ func resourceMembersV2Update(ctx context.Context, d *schema.ResourceData, meta i
 		updateOpts := expandLBMembersV2(d.Get("member").(*schema.Set), lbClient)
 
 		// Get a clean copy of the parent pool.
-		parentPool, err := neutronpools.Get(lbClient, d.Id()).Extract()
+		parentPool, err := pools.Get(lbClient, d.Id()).Extract()
 		if err != nil {
 			return diag.Errorf("Unable to retrieve parent pool %s: %s", d.Id(), err)
 		}
@@ -210,7 +209,7 @@ func resourceMembersV2Update(ctx context.Context, d *schema.ResourceData, meta i
 
 		log.Printf("[DEBUG] Updating %s pool members with options: %#v", d.Id(), updateOpts)
 		err = resource.Retry(timeout, func() *resource.RetryError {
-			err = octaviapools.BatchUpdateMembers(lbClient, d.Id(), updateOpts).ExtractErr()
+			err = pools.BatchUpdateMembers(lbClient, d.Id(), updateOpts).ExtractErr()
 			if err != nil {
 				return checkForRetryableError(err)
 			}
@@ -233,13 +232,13 @@ func resourceMembersV2Update(ctx context.Context, d *schema.ResourceData, meta i
 
 func resourceMembersV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	// Get a clean copy of the parent pool.
-	parentPool, err := neutronpools.Get(lbClient, d.Id()).Extract()
+	parentPool, err := pools.Get(lbClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, fmt.Sprintf("Unable to retrieve parent pool (%s) for the member", d.Id())))
 	}
@@ -253,7 +252,7 @@ func resourceMembersV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Attempting to delete %s pool members", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		err = octaviapools.BatchUpdateMembers(lbClient, d.Id(), []octaviapools.BatchUpdateMemberOpts{}).ExtractErr()
+		err = pools.BatchUpdateMembers(lbClient, d.Id(), []pools.BatchUpdateMemberOpts{}).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}

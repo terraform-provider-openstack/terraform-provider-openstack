@@ -9,10 +9,7 @@ import (
 func TestAccLBV2LoadBalancer_importBasic(t *testing.T) {
 	resourceName := "openstack_lb_loadbalancer_v2.loadbalancer_1"
 
-	lbProvider := "haproxy"
-	if osUseOctavia != "" {
-		lbProvider = "octavia"
-	}
+	lbProvider := "octavia"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

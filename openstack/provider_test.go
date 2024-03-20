@@ -35,9 +35,9 @@ var (
 	osRegionName                 = os.Getenv("OS_REGION_NAME")
 	osSwiftEnvironment           = os.Getenv("OS_SWIFT_ENVIRONMENT")
 	osLbEnvironment              = os.Getenv("OS_LB_ENVIRONMENT")
+	osLbFlavorName               = os.Getenv("OS_LB_FLAVOR_NAME")
 	osFwEnvironment              = os.Getenv("OS_FW_ENVIRONMENT")
 	osVpnEnvironment             = os.Getenv("OS_VPN_ENVIRONMENT")
-	osUseOctavia                 = os.Getenv("OS_USE_OCTAVIA")
 	osContainerInfraEnvironment  = os.Getenv("OS_CONTAINER_INFRA_ENVIRONMENT")
 	osSfsEnvironment             = os.Getenv("OS_SFS_ENVIRONMENT")
 	osTransparentVlanEnvironment = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
@@ -140,6 +140,10 @@ func testAccPreCheckLB(t *testing.T) {
 	if osLbEnvironment == "" {
 		t.Skip("This environment does not support LB tests")
 	}
+
+	if osLbFlavorName == "" {
+		t.Skip("This environment does not support LB tests")
+	}
 }
 
 func testAccPreCheckBlockStorageV2(t *testing.T) {
@@ -147,14 +151,6 @@ func testAccPreCheckBlockStorageV2(t *testing.T) {
 
 	if osBlockStorageV2 == "" {
 		t.Skip("This environment does not support BlockStorageV2 tests")
-	}
-}
-
-func testAccPreCheckUseOctavia(t *testing.T) {
-	testAccPreCheckRequiredEnvVars(t)
-
-	if osUseOctavia == "" {
-		t.Skip("This environment does not support Octavia tests")
 	}
 }
 
@@ -315,13 +311,13 @@ func IsReleasesAbove(t *testing.T, release string) bool {
 // not possible.
 func SetReleaseNumber(t *testing.T, release string) int {
 	switch release {
-	case "stable/xena":
-		return 1
-	case "stable/yoga":
-		return 2
 	case "stable/zed":
-		return 3
+		return 1
 	case "stable/2023.1":
+		return 2
+	case "stable/2023.2":
+		return 3
+	case "stable/2024.1":
 		return 4
 	case "master":
 		return 5
@@ -517,10 +513,10 @@ func testAccAuthFromEnv() (*Config, error) {
 			UserDomainName:              os.Getenv("OS_USER_DOMAIN_NAME"),
 			Username:                    os.Getenv("OS_USERNAME"),
 			UserID:                      os.Getenv("OS_USER_ID"),
+			UseOctavia:                  true,
 			ApplicationCredentialID:     os.Getenv("OS_APPLICATION_CREDENTIAL_ID"),
 			ApplicationCredentialName:   os.Getenv("OS_APPLICATION_CREDENTIAL_NAME"),
 			ApplicationCredentialSecret: os.Getenv("OS_APPLICATION_CREDENTIAL_SECRET"),
-			UseOctavia:                  testGetenvBool("OS_USE_OCTAVIA"),
 			DelayedAuth:                 testGetenvBool("OS_DELAYED_AUTH"),
 			AllowReauth:                 testGetenvBool("OS_ALLOW_REAUTH"),
 			AuthOpts:                    authOpts,

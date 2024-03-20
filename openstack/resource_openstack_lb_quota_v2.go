@@ -90,13 +90,9 @@ func resourceLoadBalancerQuotaV2() *schema.Resource {
 
 func resourceLoadBalancerQuotaV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
-	}
-
-	if lbClient.Type != octaviaLBClientType {
-		return diag.Errorf("Error creating openstack_lb_quota_v2: Only available when using octavia")
 	}
 
 	region := GetRegion(d, config)
@@ -143,13 +139,9 @@ func resourceLoadBalancerQuotaV2Create(ctx context.Context, d *schema.ResourceDa
 func resourceLoadBalancerQuotaV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
-	}
-
-	if lbClient.Type != octaviaLBClientType {
-		return diag.Errorf("Error creating openstack_lb_quota_v2: Only available when using octavia")
 	}
 
 	// Pase projectID from resource id that is <project_id>/<region>
@@ -177,13 +169,9 @@ func resourceLoadBalancerQuotaV2Read(ctx context.Context, d *schema.ResourceData
 
 func resourceLoadBalancerQuotaV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := chooseLBV2Client(d, config)
+	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
-	}
-
-	if lbClient.Type != octaviaLBClientType {
-		return diag.Errorf("Error creating openstack_lb_quota_v2: Only available when using octavia")
 	}
 
 	var (

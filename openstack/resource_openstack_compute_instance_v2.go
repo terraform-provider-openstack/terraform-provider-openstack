@@ -18,8 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
-	volumesV2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
-	volumesV3 "github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
@@ -86,12 +85,6 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
-			},
-			"floating_ip": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				ForceNew:   false,
-				Deprecated: "Use the openstack_compute_floatingip_associate_v2 resource instead",
 			},
 			"user_data": {
 				Type:     schema.TypeString,
@@ -176,12 +169,6 @@ func resourceComputeInstanceV2() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 							Computed: true,
-						},
-						"floating_ip": {
-							Type:       schema.TypeString,
-							Optional:   true,
-							Computed:   true,
-							Deprecated: "Use the openstack_compute_floatingip_associate_v2 resource instead",
 						},
 						"mac": {
 							Type:     schema.TypeString,
@@ -289,29 +276,6 @@ func resourceComputeInstanceV2() *schema.Resource {
 							Optional: true,
 							Default:  false,
 							ForceNew: true,
-						},
-					},
-				},
-			},
-			"volume": {
-				Type:       schema.TypeSet,
-				Optional:   true,
-				Deprecated: "Use block_device or openstack_compute_volume_attach_v2 instead",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"volume_id": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"device": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
 						},
 					},
 				},
@@ -1254,7 +1218,7 @@ func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schem
 				Bootable            string                 `json:"bootable"`
 			}{}
 			for i, b := range serverWithAttachments.VolumesAttached {
-				rawVolume := volumesV3.Get(blockStorageClient, b["id"].(string))
+				rawVolume := volumes.Get(blockStorageClient, b["id"].(string))
 				if err := rawVolume.ExtractInto(&volMetaData); err != nil {
 					log.Printf("[DEBUG] unable to unmarshal raw struct to volume metadata: %s", err)
 				}
@@ -1289,7 +1253,7 @@ func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schem
 				Bootable            string                 `json:"bootable"`
 			}{}
 			for i, b := range serverWithAttachments.VolumesAttached {
-				rawVolume := volumesV2.Get(blockStorageClient, b["id"].(string))
+				rawVolume := volumes.Get(blockStorageClient, b["id"].(string))
 				if err := rawVolume.ExtractInto(&volMetaData); err != nil {
 					log.Printf("[DEBUG] unable to unmarshal raw struct to volume metadata: %s", err)
 				}

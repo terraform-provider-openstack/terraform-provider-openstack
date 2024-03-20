@@ -30,16 +30,13 @@ jobs:
           - name: "zed"
             openstack_version: "stable/zed"
             ubuntu_version: "20.04"
-          - name: "yoga"
-            openstack_version: "stable/yoga"
-            ubuntu_version: "20.04"
     runs-on: ubuntu-${{ matrix.ubuntu_version }}
     name: loadbalancing for OpenStack ${{ matrix.name }} with Octavia and run loadbalancer acceptance tests
     steps:
       - name: Checkout TPO
         uses: actions/checkout@v4
       - name: Deploy devstack
-        uses: EmilienM/devstack-action@v0.12
+        uses: EmilienM/devstack-action@v0.15
         with:
           branch: ${{ matrix.openstack_version }}
           conf_overrides: |
@@ -51,7 +48,7 @@ jobs:
         with:
           go-version: '^1.20'
       - name: Run TPO acceptance tests
-        run: OS_LB_ENVIRONMENT=true OS_USE_OCTAVIA=true ./scripts/acceptancetest.sh
+        run: OS_LB_ENVIRONMENT=true ./scripts/acceptancetest.sh
         env:
           DEVSTACK_PATH: ${{ github.workspace }}/devstack
           ACCEPTANCE_TESTS_FILTER: "lb.*v2|v2.*lb"

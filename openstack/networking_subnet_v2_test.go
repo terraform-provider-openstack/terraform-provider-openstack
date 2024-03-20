@@ -72,40 +72,6 @@ func TestUnitExpandNetworkingSubnetV2AllocationPools(t *testing.T) {
 	assert.ElementsMatch(t, expected, actual)
 }
 
-func TestUnitExpandNetworkingSubnetV2HostRoutes(t *testing.T) {
-	r := resourceNetworkingSubnetV2()
-	d := r.TestResourceData()
-	d.SetId("1")
-
-	hostRoutes := []map[string]interface{}{
-		{
-			"destination_cidr": "192.168.0.0/24",
-			"next_hop":         "10.0.0.1",
-		},
-		{
-			"destination_cidr": "10.0.0.0/8",
-			"next_hop":         "192.168.0.1",
-		},
-	}
-
-	d.Set("host_routes", hostRoutes)
-
-	expected := []subnets.HostRoute{
-		{
-			DestinationCIDR: "192.168.0.0/24",
-			NextHop:         "10.0.0.1",
-		},
-		{
-			DestinationCIDR: "10.0.0.0/8",
-			NextHop:         "192.168.0.1",
-		},
-	}
-
-	actual := expandNetworkingSubnetV2HostRoutes(d.Get("host_routes").([]interface{}))
-
-	assert.ElementsMatch(t, expected, actual)
-}
-
 func TestUnitNetworkingSubnetV2AllocationPoolsMatch(t *testing.T) {
 	oldPools := []interface{}{
 		map[string]interface{}{
