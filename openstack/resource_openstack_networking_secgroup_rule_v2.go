@@ -115,8 +115,10 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 	}
 
 	securityGroupID := d.Get("security_group_id").(string)
-	config.MutexKV.Lock(securityGroupID)
-	defer config.MutexKV.Unlock(securityGroupID)
+	if config.UseMutex {
+		config.MutexKV.Lock(securityGroupID)
+		defer config.MutexKV.Unlock(securityGroupID)
+	}
 
 	portRangeMin := d.Get("port_range_min").(int)
 	portRangeMax := d.Get("port_range_max").(int)
@@ -212,8 +214,10 @@ func resourceNetworkingSecGroupRuleV2Delete(ctx context.Context, d *schema.Resou
 	}
 
 	securityGroupID := d.Get("security_group_id").(string)
-	config.MutexKV.Lock(securityGroupID)
-	defer config.MutexKV.Unlock(securityGroupID)
+	if config.UseMutex {
+		config.MutexKV.Lock(securityGroupID)
+		defer config.MutexKV.Unlock(securityGroupID)
+	}
 
 	if err := rules.Delete(networkingClient, d.Id()).ExtractErr(); err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_secgroup_rule_v2"))
