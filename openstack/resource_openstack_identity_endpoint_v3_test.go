@@ -152,7 +152,7 @@ resource "openstack_identity_endpoint_v3" "endpoint_1" {
   name = "%s"
   service_id = "${openstack_identity_service_v3.service_1.id}"
   endpoint_region = "${openstack_identity_service_v3.service_1.region}"
-  url = "http://myservice.local"
+  url = "http://myservice.local/v1.0/%%(tenant_id)s"
 }
   `, endpointName)
 }
@@ -168,7 +168,7 @@ resource "openstack_identity_endpoint_v3" "endpoint_1" {
   name = "%s"
   service_id = "${openstack_identity_service_v3.service_1.id}"
   endpoint_region = "interstate76"
-  url = "http://my-new-service.local"
+  url = "http://my-new-service/v1.0/%%(tenant_id)s"
 }
   `, endpointName)
 }
