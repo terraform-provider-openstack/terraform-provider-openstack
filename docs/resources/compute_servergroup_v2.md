@@ -10,6 +10,8 @@ description: |-
 # openstack\_compute\_servergroup\_v2
 
 Manages a V2 Server Group resource within OpenStack.
+See [reference](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/compute_instance_v2)
+for details on using servergroups as compute_instance scheduler_hints
 
 ## Example Usage
 
