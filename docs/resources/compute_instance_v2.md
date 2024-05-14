@@ -397,8 +397,6 @@ The following arguments are supported:
 
 * `scheduler_hints` - (Optional) Provide the Nova scheduler with hints on how
     the instance should be launched. The available hints are described below.
-    See [reference](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/compute_servergroup_v2)
-    for details on managing servergroup resources
 
 * `personality` - (Optional) Customize the personality of an instance by
     defining one or more files and their contents. The personality structure
@@ -489,7 +487,8 @@ The `block_device` block supports:
 The `scheduler_hints` block supports:
 
 * `group` - (Optional) A UUID of a Server Group. The instance will be placed
-    into that group.
+    into that group. See [reference](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/compute_servergroup_v2)
+    for details on managing servergroup resources
 
 * `different_host` - (Optional) A list of instance UUIDs. The instance will
     be scheduled on a different host than all other instances.
