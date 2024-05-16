@@ -20,6 +20,20 @@ resource "openstack_compute_servergroup_v2" "test-sg" {
   name     = "my-sg"
   policies = ["anti-affinity"]
 }
+
+resource "openstack_compute_instance_v2" "test-instance" {
+  name      = "my-instance"
+  image_id  = "ad091b52-742f-469e-8f3c-fd81cadf0743"
+  flavor_id = "3"
+
+  scheduler_hints {
+    group = openstack_compute_servergroup_v2.test-sg.id
+  }
+
+  network {
+    name = "my_network"
+  }
+}
 ```
 
 ### Compute service API version 2.64 or above:
@@ -30,6 +44,20 @@ resource "openstack_compute_servergroup_v2" "test-sg" {
   policies = ["anti-affinity"]
   rules {
       max_server_per_host = 3
+  }
+}
+
+resource "openstack_compute_instance_v2" "test-instance" {
+  name      = "my-instance"
+  image_id  = "ad091b52-742f-469e-8f3c-fd81cadf0743"
+  flavor_id = "3"
+
+  scheduler_hints {
+    group = openstack_compute_servergroup_v2.test-sg.id
+  }
+
+  network {
+    name = "my_network"
   }
 }
 ```
