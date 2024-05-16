@@ -63,6 +63,7 @@ func resourceL7PolicyV2() *schema.Resource {
 				Required: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"REDIRECT_TO_POOL", "REDIRECT_TO_URL", "REJECT",
+					"REDIRECT_PREFIX",
 				}, true),
 			},
 
@@ -78,15 +79,21 @@ func resourceL7PolicyV2() *schema.Resource {
 				Computed: true,
 			},
 
+			"redirect_prefix": {
+				Type:          schema.TypeString,
+				ConflictsWith: []string{"redirect_url", "redirect_pool_id"},
+				Optional:      true,
+			},
+
 			"redirect_pool_id": {
 				Type:          schema.TypeString,
-				ConflictsWith: []string{"redirect_url"},
+				ConflictsWith: []string{"redirect_url", "redirect_prefix"},
 				Optional:      true,
 			},
 
 			"redirect_url": {
 				Type:          schema.TypeString,
-				ConflictsWith: []string{"redirect_pool_id"},
+				ConflictsWith: []string{"redirect_pool_id", "redirect_prefix"},
 				Optional:      true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					value := v.(string)
@@ -96,6 +103,14 @@ func resourceL7PolicyV2() *schema.Resource {
 					}
 					return
 				},
+			},
+
+			"redirect_http_code": {
+				Type:          schema.TypeInt,
+				ConflictsWith: []string{"redirect_url", "redirect_pool_id"},
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.IntInSlice([]int{301, 302, 303, 307, 308}),
 			},
 
 			"admin_state_up": {
@@ -119,23 +134,28 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	action := d.Get("action").(string)
 	redirectPoolID := d.Get("redirect_pool_id").(string)
 	redirectURL := d.Get("redirect_url").(string)
+	redirectPrefix := d.Get("redirect_prefix").(string)
+	redirectHTTPCodeInt := d.Get("redirect_http_code").(int)
+	redirectHTTPCode := int32(redirectHTTPCodeInt)
 
 	// Ensure the right combination of options have been specified.
-	err = checkL7PolicyAction(action, redirectURL, redirectPoolID)
+	err = checkL7PolicyAction(action, redirectURL, redirectPoolID, redirectPrefix)
 	if err != nil {
 		return diag.Errorf("Unable to create L7 Policy: %s", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
 	createOpts := l7policies.CreateOpts{
-		ProjectID:      d.Get("tenant_id").(string),
-		Name:           d.Get("name").(string),
-		Description:    d.Get("description").(string),
-		Action:         l7policies.Action(action),
-		ListenerID:     listenerID,
-		RedirectPoolID: redirectPoolID,
-		RedirectURL:    redirectURL,
-		AdminStateUp:   &adminStateUp,
+		ProjectID:        d.Get("tenant_id").(string),
+		Name:             d.Get("name").(string),
+		Description:      d.Get("description").(string),
+		Action:           l7policies.Action(action),
+		ListenerID:       listenerID,
+		RedirectPoolID:   redirectPoolID,
+		RedirectURL:      redirectURL,
+		RedirectPrefix:   redirectPrefix,
+		RedirectHttpCode: redirectHTTPCode,
+		AdminStateUp:     &adminStateUp,
 	}
 
 	if v, ok := d.GetOk("position"); ok {
@@ -217,6 +237,8 @@ func resourceL7PolicyV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	d.Set("position", int(l7Policy.Position))
 	d.Set("redirect_url", l7Policy.RedirectURL)
 	d.Set("redirect_pool_id", l7Policy.RedirectPoolID)
+	d.Set("redirect_prefix", l7Policy.RedirectPrefix)
+	d.Set("redirect_http_code", l7Policy.RedirectHttpCode)
 	d.Set("region", GetRegion(d, config))
 	d.Set("admin_state_up", l7Policy.AdminStateUp)
 
@@ -235,6 +257,9 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	action := d.Get("action").(string)
 	redirectPoolID := d.Get("redirect_pool_id").(string)
 	redirectURL := d.Get("redirect_url").(string)
+	redirectPrefix := d.Get("redirect_prefix").(string)
+	redirectHTTPCodeInt := d.Get("redirect_http_code").(int)
+	redirectHTTPCode := int32(redirectHTTPCodeInt)
 
 	var updateOpts l7policies.UpdateOpts
 
@@ -250,13 +275,16 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 		updateOpts.Description = &description
 	}
 	if d.HasChange("redirect_pool_id") {
-		redirectPoolID = d.Get("redirect_pool_id").(string)
-
 		updateOpts.RedirectPoolID = &redirectPoolID
 	}
 	if d.HasChange("redirect_url") {
-		redirectURL = d.Get("redirect_url").(string)
 		updateOpts.RedirectURL = &redirectURL
+	}
+	if d.HasChange("redirect_prefix") {
+		updateOpts.RedirectPrefix = &redirectPrefix
+	}
+	if d.HasChange("redirect_http_code") {
+		updateOpts.RedirectHttpCode = redirectHTTPCode
 	}
 	if d.HasChange("position") {
 		updateOpts.Position = int32(d.Get("position").(int))
@@ -267,7 +295,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Ensure the right combination of options have been specified.
-	err = checkL7PolicyAction(action, redirectURL, redirectPoolID)
+	err = checkL7PolicyAction(action, redirectURL, redirectPoolID, redirectPrefix)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -409,20 +437,24 @@ func resourceL7PolicyV2Import(d *schema.ResourceData, meta interface{}) ([]*sche
 	return []*schema.ResourceData{d}, nil
 }
 
-func checkL7PolicyAction(action, redirectURL, redirectPoolID string) error {
+func checkL7PolicyAction(action, redirectURL, redirectPoolID, redirectPrefix string) error {
 	if action == "REJECT" {
-		if redirectURL != "" || redirectPoolID != "" {
+		if redirectURL != "" || redirectPoolID != "" || redirectPrefix != "" {
 			return fmt.Errorf(
-				"redirect_url and redirect_pool_id must be empty when action is set to %s", action)
+				"redirect_url/pool_id/prefix must be empty when action is set to %s", action)
 		}
 	}
 
-	if action == "REDIRECT_TO_POOL" && redirectURL != "" {
-		return fmt.Errorf("redirect_url must be empty when action is set to %s", action)
+	if action == "REDIRECT_TO_POOL" && (redirectURL != "" || redirectPrefix != "") {
+		return fmt.Errorf("redirect_url/prefix must be empty when action is set to %s", action)
 	}
 
-	if action == "REDIRECT_TO_URL" && redirectPoolID != "" {
-		return fmt.Errorf("redirect_pool_id must be empty when action is set to %s", action)
+	if action == "REDIRECT_TO_URL" && (redirectPoolID != "" || redirectPrefix != "") {
+		return fmt.Errorf("redirect_pool_id/prefix must be empty when action is set to %s", action)
+	}
+
+	if action == "REDIRECT_TO_PREFIX" && (redirectPoolID != "" || redirectURL != "") {
+		return fmt.Errorf("redirect_pool_id/url must be empty when action is set to %s", action)
 	}
 
 	return nil
