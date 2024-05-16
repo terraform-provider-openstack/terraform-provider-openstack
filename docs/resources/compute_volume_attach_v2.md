@@ -156,6 +156,10 @@ The following arguments are supported:
 
 * `multiattach` - (Optional) Enable attachment of multiattach-capable volumes.
 
+* `tag` - (Optional) Add a device role tag that is applied to the volume when
+  attaching it to the VM. Changing this creates a new volume attachment with
+  the new tag. Requires microversion >= 2.49.
+
 * `vendor_options` - (Optional) Map of additional vendor-specific options.
   Supported options are described below.
 
