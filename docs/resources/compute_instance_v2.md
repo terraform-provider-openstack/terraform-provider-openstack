@@ -487,7 +487,8 @@ The `block_device` block supports:
 The `scheduler_hints` block supports:
 
 * `group` - (Optional) A UUID of a Server Group. The instance will be placed
-    into that group.
+    into that group. See [reference](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/compute_servergroup_v2)
+    for details on managing servergroup resources
 
 * `different_host` - (Optional) A list of instance UUIDs. The instance will
     be scheduled on a different host than all other instances.
