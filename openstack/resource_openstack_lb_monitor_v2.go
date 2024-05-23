@@ -63,7 +63,8 @@ func resourceMonitorV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"TCP", "UDP-CONNECT", "HTTP", "HTTPS", "TLS-HELLO", "PING",
+					"HTTP", "HTTPS", "PING", "SCTP", "TCP",
+					"TLS-HELLO", "UDP-CONNECT",
 				}, false),
 			},
 
