@@ -373,6 +373,7 @@ func Provider() *schema.Provider {
 			"openstack_lb_monitor_v1":                            resourceLBMonitorV1(),
 			"openstack_lb_pool_v1":                               resourceLBPoolV1(),
 			"openstack_lb_vip_v1":                                resourceLBVipV1(),
+			"openstack_lb_flavorprofile_v2":                      resourceLoadBalancerFlavorProfileV2(),
 			"openstack_lb_loadbalancer_v2":                       resourceLoadBalancerV2(),
 			"openstack_lb_listener_v2":                           resourceListenerV2(),
 			"openstack_lb_pool_v2":                               resourcePoolV2(),
