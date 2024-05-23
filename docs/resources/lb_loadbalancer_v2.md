@@ -34,17 +34,18 @@ The following arguments are supported:
 * `vip_subnet_id` - (Optional) The subnet on which to allocate the
     Loadbalancer's address. A tenant can only create Loadbalancers on networks
     authorized by policy (e.g. networks that belong to them or networks that
-    are shared).  Changing this creates a new loadbalancer.
-    It is required to Neutron LBaaS but optional for Octavia.
+    are shared).  Changing this creates a new loadbalancer. Exactly one of 
+    `vip_subnet_id`, `vip_network_id` or `vip_port_id` has to be defined.
 
 * `vip_network_id` - (Optional) The network on which to allocate the
     Loadbalancer's address. A tenant can only create Loadbalancers on networks
     authorized by policy (e.g. networks that belong to them or networks that
-    are shared).  Changing this creates a new loadbalancer.
-    It is available only for Octavia.
+    are shared).  Changing this creates a new loadbalancer. Exactly one of 
+    `vip_subnet_id`, `vip_network_id` or `vip_port_id` has to be defined.
 
 * `vip_port_id` - (Optional) The port UUID that the loadbalancer will use.
-  Changing this creates a new loadbalancer. It is available only for Octavia.
+    Changing this creates a new loadbalancer. Exactly one of 
+    `vip_subnet_id`, `vip_network_id` or `vip_port_id` has to be defined.
 
 * `name` - (Optional) Human-readable name for the Loadbalancer. Does not have
     to be unique.
@@ -57,6 +58,9 @@ The following arguments are supported:
 
 * `vip_address` - (Optional) The ip address of the load balancer.
     Changing this creates a new loadbalancer.
+
+* `vip_qos_policy_id` - (Optional) The ID of the QoS Policy which will 
+    be applied to the Virtual IP (VIP).
 
 * `admin_state_up` - (Optional) The administrative state of the Loadbalancer.
     A valid value is true (UP) or false (DOWN).
@@ -85,6 +89,7 @@ The following attributes are exported:
 * `region` - See Argument Reference above.
 * `vip_subnet_id` - See Argument Reference above.
 * `vip_network_id` - See Argument Reference above.
+* `vip_port_id` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
@@ -95,7 +100,7 @@ The following attributes are exported:
 * `availability_zone` - See Argument Reference above.
 * `security_group_ids` - See Argument Reference above.
 * `tags` - See Argument Reference above.
-* `vip_port_id` - The Port ID of the Load Balancer IP.
+* `vip_qos_policy_id`: See Argument Reference above.
 
 ## Import
 
