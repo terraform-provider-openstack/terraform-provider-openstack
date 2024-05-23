@@ -93,6 +93,9 @@ The following arguments are supported:
 * `allowed_cidrs` - (Optional) A list of CIDR blocks that are permitted to connect to this listener, denying
     all other source addresses. If not present, defaults to allow all.
 
+* `tags` - (Optional) A list of simple strings assigned to the pool. Available
+    for Octavia **minor version 2.5 or later**.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -114,6 +117,8 @@ The following attributes are exported:
 * `admin_state_up` - See Argument Reference above.
 * `insert_headers` - See Argument Reference above.
 * `allowed_cidrs` - See Argument Reference above.
+* `tags` - See Argument Reference above.
+
 
 ## Import
 
