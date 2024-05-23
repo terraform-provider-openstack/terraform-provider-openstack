@@ -1,3 +1,19 @@
+## 2.1.0 ( TBD )
+
+
+
+IMPROVEMENTS
+
+* Added `vip_qos_policy_id` on `openstack_lb_loadbalancer_v2` ([#1721](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1721))
+* Added support for `SCTP` type on `openstack_lb_monitor_v2` ([#1723](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1723))
+* Added support for `redirect_prefix` on `openstack_lb_l7_policy_v2` ([#1717](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1717))
+* Added support for `redirect_http_code` on `openstack_lb_l7_policy_v2` ([#1717](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1717))
+
+
+BUG FIXES
+
+* Fixed a bug when updating node_count to 0 on `openstack_containerinfra_cluster_v1` ([#1719](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1719))
+
 ## 2.0.0 ( 16 May, 2024 )
 
 The upgrade guide to version 2 offers more detailed information on the changes and required steps before the upgrade.
