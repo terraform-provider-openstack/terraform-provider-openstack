@@ -41,8 +41,8 @@ The following arguments are supported:
     other than their own. Changing this creates a new monitor.
 
 * `type` - (Required) The type of probe, which is PING, TCP, HTTP, HTTPS,
-  TLS-HELLO or UDP-CONNECT (supported only in Octavia), that is sent by the load
-  balancer to verify the member state. Changing this creates a new monitor.
+  TLS-HELLO, SCTP or UDP-CONNECT, that is sent by the loadbalancer to 
+  verify the member state. Changing this creates a new monitor.
 
 * `delay` - (Required) The time, in seconds, between sending probes to members.
 
