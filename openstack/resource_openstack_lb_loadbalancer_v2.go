@@ -51,6 +51,8 @@ func resourceLoadBalancerV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
+				AtLeastOneOf: []string{"vip_network_id",
+					"vip_subnet_id", "vip_port_id"},
 			},
 
 			"vip_subnet_id": {
@@ -58,6 +60,17 @@ func resourceLoadBalancerV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
+				AtLeastOneOf: []string{"vip_network_id",
+					"vip_subnet_id", "vip_port_id"},
+			},
+
+			"vip_port_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				AtLeastOneOf: []string{"vip_network_id",
+					"vip_subnet_id", "vip_port_id"},
 			},
 
 			"tenant_id": {
@@ -72,13 +85,6 @@ func resourceLoadBalancerV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
-			},
-
-			"vip_port_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
 			},
 
 			"admin_state_up": {
@@ -114,6 +120,12 @@ func resourceLoadBalancerV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
+
+			"vip_qos_policy_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -144,16 +156,17 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 	adminStateUp := d.Get("admin_state_up").(bool)
 
 	createOpts := loadbalancers.CreateOpts{
-		Name:         d.Get("name").(string),
-		Description:  d.Get("description").(string),
-		VipNetworkID: d.Get("vip_network_id").(string),
-		VipSubnetID:  d.Get("vip_subnet_id").(string),
-		VipPortID:    d.Get("vip_port_id").(string),
-		ProjectID:    d.Get("tenant_id").(string),
-		VipAddress:   d.Get("vip_address").(string),
-		AdminStateUp: &adminStateUp,
-		FlavorID:     d.Get("flavor_id").(string),
-		Provider:     lbProvider,
+		Name:           d.Get("name").(string),
+		Description:    d.Get("description").(string),
+		VipNetworkID:   d.Get("vip_network_id").(string),
+		VipSubnetID:    d.Get("vip_subnet_id").(string),
+		VipPortID:      d.Get("vip_port_id").(string),
+		ProjectID:      d.Get("tenant_id").(string),
+		VipAddress:     d.Get("vip_address").(string),
+		AdminStateUp:   &adminStateUp,
+		FlavorID:       d.Get("flavor_id").(string),
+		Provider:       lbProvider,
+		VipQosPolicyID: d.Get("vip_qos_policy_id").(string),
 	}
 
 	// availability_zone requires octavia minor version 2.14. Only set when specified.
@@ -226,6 +239,7 @@ func resourceLoadBalancerV2Read(ctx context.Context, d *schema.ResourceData, met
 	d.Set("availability_zone", lb.AvailabilityZone)
 	d.Set("region", GetRegion(d, config))
 	d.Set("tags", lb.Tags)
+	d.Set("vip_qos_policy_id", lb.VipQosPolicyID)
 
 	vipPortID = lb.VipPortID
 
@@ -267,6 +281,11 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 		hasChange = true
 		asu := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &asu
+	}
+	if d.HasChange("vip_qos_policy_id") {
+		hasChange = true
+		vipQosPolicyID := d.Get("vip_qos_policy_id").(string)
+		updateOpts.Description = &vipQosPolicyID
 	}
 
 	if d.HasChange("tags") {
