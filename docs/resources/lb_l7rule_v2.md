@@ -78,7 +78,7 @@ The following arguments are supported:
 * `description` - (Optional) Human-readable description for the L7 Rule.
 
 * `type` - (Required) The L7 Rule type - can either be COOKIE, FILE\_TYPE, HEADER,
-    HOST\_NAME or PATH.
+    HOST\_NAME, PATH, SSL\_CONN\_HAS\_CERT, SSL\_VERIFY\_RESULT or SSL\_DN\_FIELD.
 
 * `compare_type` - (Required) The comparison type for the L7 rule - can either be
     CONTAINS, STARTS\_WITH, ENDS_WITH, EQUAL_TO or REGEX
