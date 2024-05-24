@@ -8,6 +8,9 @@ IMPROVEMENTS
 * Added support for `SCTP` type on `openstack_lb_monitor_v2` ([#1723](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1723))
 * Added support for `redirect_prefix` on `openstack_lb_l7_policy_v2` ([#1717](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1717))
 * Added support for `redirect_http_code` on `openstack_lb_l7_policy_v2` ([#1717](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1717))
+* Added support for `tags` on `openstack_lb_member_v2` ([#1726](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1726))
+* Added support for `tags` on `openstack_lb_pool_v2` ([#1725](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1725))
+* Added validations on `openstack_lb_monitor_v2` ([#1724](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1724))
 
 
 BUG FIXES
