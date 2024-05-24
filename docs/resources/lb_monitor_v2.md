@@ -54,20 +54,21 @@ The following arguments are supported:
     changing the member's status to INACTIVE. Must be a number between 1
     and 10.
     
-* `max_retries_down` - (Optional) Number of permissible ping failures befor changing the member's
-    status to ERROR. Must be a number between 1 and 10 (supported only in Octavia).
-    Changing this updates the max_retries_down of the existing monitor.
+* `max_retries_down` - (Optional) Number of permissible ping failures before 
+    changing the member's status to ERROR. Must be a number between 1 and 10. 
+    The default is 3. Changing this updates the max_retries_down of the 
+    existing monitor.
 
 * `url_path` - (Optional) Required for HTTP(S) types. URI path that will be
-    accessed if monitor type is HTTP or HTTPS.
+    accessed if monitor type is HTTP or HTTPS. Default is `/`.
 
-*  `http_method` - (Optional) Required for HTTP(S) types. The HTTP method used
-    for requests by the monitor. If this attribute is not specified, it
-    defaults to "GET".
+*  `http_method` - (Optional) Required for HTTP(S) types. The HTTP method that 
+    the health monitor uses for requests. One of CONNECT, DELETE, GET, HEAD, 
+    OPTIONS, PATCH, POST, PUT, or TRACE. The default is GET
 
 * `expected_codes` - (Optional) Required for HTTP(S) types. Expected HTTP codes
     for a passing HTTP(S) monitor. You can either specify a single status like
-    "200", or a range like "200-202".
+    "200", a list like "200, 202" or a range like "200-202". Default is "200".
 
 * `admin_state_up` - (Optional) The administrative state of the monitor.
     A valid value is true (UP) or false (DOWN).
