@@ -108,6 +108,13 @@ func resourceMemberV2() *schema.Resource {
 				ForceNew:     false,
 				ValidateFunc: validation.IntBetween(1, 65535),
 			},
+
+			"tags": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
 		},
 	}
 }
@@ -155,6 +162,11 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	if v, ok := d.GetOk("backup"); ok {
 		backup := v.(bool)
 		createOpts.Backup = &backup
+	}
+
+	if v, ok := d.GetOk("tags"); ok {
+		tags := v.(*schema.Set).List()
+		createOpts.Tags = expandToStringSlice(tags)
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -226,6 +238,7 @@ func resourceMemberV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 	d.Set("monitor_address", member.MonitorAddress)
 	d.Set("monitor_port", member.MonitorPort)
 	d.Set("backup", member.Backup)
+	d.Set("tags", member.Tags)
 
 	return nil
 }
@@ -261,6 +274,16 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	if d.HasChange("backup") {
 		backup := d.Get("backup").(bool)
 		updateOpts.Backup = &backup
+	}
+
+	if d.HasChange("tags") {
+		if v, ok := d.GetOk("tags"); ok {
+			tags := v.(*schema.Set).List()
+			tagsToUpdate := expandToStringSlice(tags)
+			updateOpts.Tags = tagsToUpdate
+		} else {
+			updateOpts.Tags = []string{}
+		}
 	}
 
 	// Get a clean copy of the parent pool.

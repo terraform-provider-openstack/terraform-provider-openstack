@@ -64,6 +64,9 @@ The following arguments are supported:
 * `backup` - (Optional) Boolean that indicates whether that member works as a backup or not. Available 
   only for Octavia >= 2.1.
 
+* `tags` - (Optional) A list of simple strings assigned to the member.
+    Available only for Octavia >= 2.5.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -80,6 +83,7 @@ The following attributes are exported:
 * `monitor_address` - See Argument reference above.
 * `monitor_port` - See Argument reference above.
 * `backup` - See Argument reference above.
+* `tags` - See Argument Reference above.
 
 ## Import
 
