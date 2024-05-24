@@ -215,6 +215,7 @@ func testAccCheckLBV2LoadBalancerExists(
 		return nil
 	}
 }
+
 func testAccCheckLBV2LoadBalancerHasTag(n, tag string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
