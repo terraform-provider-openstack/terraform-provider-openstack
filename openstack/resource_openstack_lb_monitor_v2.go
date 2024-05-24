@@ -79,14 +79,16 @@ func resourceMonitorV2() *schema.Resource {
 			},
 
 			"max_retries": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Type:         schema.TypeInt,
+				Required:     true,
+				ValidateFunc: validation.IntBetween(1, 10),
 			},
 
 			"max_retries_down": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(1, 10),
+				Computed:     true,
 			},
 
 			"url_path": {
@@ -98,6 +100,10 @@ func resourceMonitorV2() *schema.Resource {
 			"http_method": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"CONNECT", "DELETE", "GET", "HEAD", "OPTIONS",
+					"PATCH", "POST", "PUT", "TRACE",
+				}, false),
 				Computed: true,
 			},
 
