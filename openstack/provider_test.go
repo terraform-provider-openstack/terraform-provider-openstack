@@ -492,7 +492,7 @@ func testAccAuthFromEnv() (*Config, error) {
 	}
 
 	config := Config{
-		auth.Config{
+		Config: auth.Config{
 			CACertFile:                  os.Getenv("OS_CACERT"),
 			ClientCertFile:              os.Getenv("OS_CERT"),
 			ClientKeyFile:               os.Getenv("OS_KEY"),
@@ -522,6 +522,7 @@ func testAccAuthFromEnv() (*Config, error) {
 			AuthOpts:                    authOpts,
 			MutexKV:                     mutexkv.NewMutexKV(),
 		},
+		UseMutex: true,
 	}
 
 	if err := config.LoadAndValidate(); err != nil {
