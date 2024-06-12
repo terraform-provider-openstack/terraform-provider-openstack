@@ -18,6 +18,7 @@ func TestAccContainerInfraV1ClusterDataSource_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
+			t.Skip("Currently failing in GH-A: cant deploy cluster")
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckContainerInfra(t)
 		},
