@@ -22,6 +22,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/rescueunrescue"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/schedulerhints"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/shelveunshelve"
@@ -370,7 +371,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 				ForceNew: false,
 				Default:  "active",
 				ValidateFunc: validation.StringInSlice([]string{
-					"active", "shutoff", "shelved_offloaded",
+					"active", "shutoff", "shelved_offloaded", "rescue",
 				}, true),
 				DiffSuppressFunc: suppressPowerStateDiffs,
 			},
@@ -403,6 +404,14 @@ func resourceComputeInstanceV2() *schema.Resource {
 						},
 					},
 				},
+			},
+			"rescue_image": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"rescue_password": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"created": {
 				Type:     schema.TypeString,
@@ -748,7 +757,7 @@ func resourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, me
 	// Set the current power_state
 	currentStatus := strings.ToLower(server.Status)
 	switch currentStatus {
-	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved":
+	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved", "rescue":
 		d.Set("power_state", currentStatus)
 	default:
 		return diag.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
@@ -838,6 +847,11 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				if err != nil {
 					return diag.Errorf("Error unshelving OpenStack instance: %s", err)
 				}
+			} else if strings.ToLower(powerStateOld) == "rescue" {
+				err = rescueunrescue.Unrescue(computeClient, d.Id()).ExtractErr()
+				if err != nil {
+					return diag.Errorf("Error unrescuing OpenStack instance: %s", err)
+				}
 			} else {
 				err = startstop.Start(computeClient, d.Id()).ExtractErr()
 				if err != nil {
@@ -857,6 +871,31 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			_, err = startStateConf.WaitForStateContext(ctx)
 			if err != nil {
 				return diag.Errorf("Error waiting for instance (%s) to become active: %s", d.Id(), err)
+			}
+		}
+		if strings.ToLower(powerStateNew) == "rescue" {
+			rescueOpts := &rescueunrescue.RescueOpts{
+				RescueImageRef: d.Get("rescue_image").(string),
+				AdminPass:      d.Get("rescue_password").(string),
+			}
+
+			_, err = rescueunrescue.Rescue(computeClient, d.Id(), rescueOpts).Extract()
+			if err != nil {
+				return diag.Errorf("Error rescuing OpenStack instance: %s", err)
+			}
+			rescueStateConf := &resource.StateChangeConf{
+				//Pending:    []string{"ACTIVE"},
+				Target:     []string{"RESCUE"},
+				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
+
+			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
+			_, err = rescueStateConf.WaitForStateContext(ctx)
+			if err != nil {
+				return diag.Errorf("Error waiting for instance (%s) to become inactive(shutoff): %s", d.Id(), err)
 			}
 		}
 	}

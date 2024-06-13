@@ -411,7 +411,7 @@ The following arguments are supported:
     deletion enabled.
 
 * `power_state` - (Optional) Provide the VM state. Only 'active', 'shutoff'
-    and 'shelved_offloaded' are supported values.
+    , 'shelved_offloaded' and 'rescue' are supported values.
     *Note*: If the initial power_state is the shutoff
     the VM will be stopped immediately after build and the provisioners like
     remote-exec or files are not supported.
@@ -421,6 +421,12 @@ The following arguments are supported:
 
 * `vendor_options` - (Optional) Map of additional vendor-specific options.
     Supported options are described below.
+
+* `rescue_image` - (Optional) Image (name or ID) to use for the rescue mode.
+    Defaults to the currently used one. Only used with `power_state = 'rescue'`
+
+* `rescue_password` - (Optional) Set the password on the rescued instance.
+    This option requires cloud support. Only used with `power_state = 'rescue'`
 
 The `network` block supports:
 
