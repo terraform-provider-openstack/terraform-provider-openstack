@@ -51,7 +51,9 @@ func resourceL7RuleV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"COOKIE", "FILE_TYPE", "HEADER", "HOST_NAME", "PATH",
+					"COOKIE", "FILE_TYPE", "HEADER", "HOST_NAME",
+					"PATH", "SSL_CONN_HAS_CERT", "SSL_VERIFY_RESULT",
+					"SSL_DN_FIELD",
 				}, true),
 			},
 
