@@ -598,11 +598,11 @@ func flattenLBPoolPersistenceV2(p pools.SessionPersistence) []map[string]interfa
 	}
 }
 
-func waitForLBV2LoadBalancer(ctx context.Context, lbClient *gophercloud.ServiceClient, lbID string, target string, pending []string, timeout time.Duration) error {
-	log.Printf("[DEBUG] Waiting for loadbalancer %s to become %s.", lbID, target)
+func waitForLBV2LoadBalancer(ctx context.Context, lbClient *gophercloud.ServiceClient, lbID string, targets []string, pending []string, timeout time.Duration) error {
+	log.Printf("[DEBUG] Waiting for loadbalancer %s to become %+q.", lbID, targets)
 
 	stateConf := &resource.StateChangeConf{
-		Target:     []string{target},
+		Target:     targets,
 		Pending:    pending,
 		Refresh:    resourceLBV2LoadBalancerRefreshFunc(lbClient, lbID),
 		Timeout:    timeout,
@@ -613,14 +613,14 @@ func waitForLBV2LoadBalancer(ctx context.Context, lbClient *gophercloud.ServiceC
 	_, err := stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); ok {
-			switch target {
-			case "DELETED":
-				return nil
-			default:
-				return fmt.Errorf("Error: loadbalancer %s not found: %s", lbID, err)
+			for _, e := range targets {
+				if e == "DELETED" {
+					return nil
+				}
 			}
+			return fmt.Errorf("Error: loadbalancer %s not found: %s", lbID, err)
 		}
-		return fmt.Errorf("Error waiting for loadbalancer %s to become %s: %s", lbID, target, err)
+		return fmt.Errorf("Error waiting for loadbalancer %s to become %+q: %s", lbID, targets, err)
 	}
 
 	return nil
