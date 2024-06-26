@@ -161,7 +161,7 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	timeout := d.Timeout(schema.TimeoutCreate)
 
 	// Wait for LoadBalancer to become active before continuing.
-	err = waitForLBV2LoadBalancer(ctx, lbClient, d.Get("loadbalancer_id").(string), []string{"ACTIVE"}, getLbPendingStatuses(), timeout)
+	err = waitForLBV2LoadBalancer(ctx, lbClient, d.Get("loadbalancer_id").(string), "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}

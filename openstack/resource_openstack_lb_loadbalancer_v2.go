@@ -188,9 +188,9 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 	lbID = lb.ID
 	vipPortID = lb.VipPortID
 
-	// Wait for load-balancer to become active before continuing. Allow Error state to keep load-balancer in the state.
+	// Wait for load-balancer to become active before continuing.
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2LoadBalancer(ctx, lbClient, lbID, []string{"ACTIVE", "ERROR"}, getLbPendingStatuses(), timeout)
+	err = waitForLBV2LoadBalancer(ctx, lbClient, lbID, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -302,7 +302,7 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 	if hasChange {
 		// Wait for load-balancer to become active before continuing.
 		timeout := d.Timeout(schema.TimeoutUpdate)
-		err = waitForLBV2LoadBalancer(ctx, lbClient, d.Id(), []string{"ACTIVE"}, getLbPendingStatuses(), timeout)
+		err = waitForLBV2LoadBalancer(ctx, lbClient, d.Id(), "ACTIVE", getLbPendingStatuses(), timeout)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -321,7 +321,7 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 		}
 
 		// Wait for load-balancer to become active before continuing.
-		err = waitForLBV2LoadBalancer(ctx, lbClient, d.Id(), []string{"ACTIVE"}, getLbPendingStatuses(), timeout)
+		err = waitForLBV2LoadBalancer(ctx, lbClient, d.Id(), "ACTIVE", getLbPendingStatuses(), timeout)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -364,7 +364,7 @@ func resourceLoadBalancerV2Delete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	// Wait for load-balancer to become deleted.
-	err = waitForLBV2LoadBalancer(ctx, lbClient, d.Id(), []string{"DELETED"}, getLbPendingDeleteStatuses(), timeout)
+	err = waitForLBV2LoadBalancer(ctx, lbClient, d.Id(), "DELETED", getLbPendingDeleteStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
