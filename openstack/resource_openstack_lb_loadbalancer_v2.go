@@ -188,6 +188,9 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 	lbID = lb.ID
 	vipPortID = lb.VipPortID
 
+	// Store the ID now
+	d.SetId(lbID)
+
 	// Wait for load-balancer to become active before continuing.
 	timeout := d.Timeout(schema.TimeoutCreate)
 	err = waitForLBV2LoadBalancer(ctx, lbClient, lbID, "ACTIVE", getLbPendingStatuses(), timeout)
@@ -204,8 +207,6 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 	if err := resourceLoadBalancerV2SetSecurityGroups(networkingClient, vipPortID, d); err != nil {
 		return diag.Errorf("Error setting openstack_lb_loadbalancer_v2 security groups: %s", err)
 	}
-
-	d.SetId(lbID)
 
 	return resourceLoadBalancerV2Read(ctx, d, meta)
 }
