@@ -1,6 +1,6 @@
 # Functional testing for compute
 name: functional-compute
-concurrency: 
+concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 on:
@@ -10,7 +10,7 @@ on:
       - 'go.mod'
       - 'openstack/**compute**'
       - 'CHANGELOG.md'
-      - 'scripts/*'      
+      - 'scripts/*'
   schedule:
     - cron: '0 0 */3 * *'
 jobs:
@@ -41,7 +41,7 @@ jobs:
         with:
           branch: ${{ matrix.openstack_version }}
           conf_overrides: |
-            CINDER_ISCSI_HELPER=lioadm          
+            CINDER_ISCSI_HELPER=lioadm
           enabled_services: 's-account,s-container,s-object,s-proxy'
       - name: Checkout go
         uses: actions/setup-go@v5
