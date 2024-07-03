@@ -96,6 +96,40 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 						regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
 				),
 			},
+			{
+				Config: testAccCheckLbV2L7PolicyConfigUpdate4(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_l7policy_v2.l7policy_1", "name", "test_updated"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_l7policy_v2.l7policy_1", "description", ""),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_l7policy_v2.l7policy_1", "action", "REDIRECT_PREFIX"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_l7policy_v2.l7policy_1", "position", "1"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_l7policy_v2.l7policy_1", "redirect_prefix", "https://foo.bar"),
+				),
+			},
+			{
+				Config: testAccCheckLbV2L7PolicyConfigUpdate5(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_l7policy_v2.l7policy_1", "name", "test_updated"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_l7policy_v2.l7policy_1", "description", ""),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_l7policy_v2.l7policy_1", "action", "REDIRECT_PREFIX"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_l7policy_v2.l7policy_1", "position", "1"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_l7policy_v2.l7policy_1", "redirect_prefix", "https://foo.bar.baz"),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_l7policy_v2.l7policy_1", "redirect_http_code", "307"),
+				),
+			},
 		},
 	})
 }
@@ -251,6 +285,49 @@ resource "openstack_lb_l7policy_v2" "l7policy_1" {
   action           = "REJECT"
   position         = 1
   listener_id      = "${openstack_lb_listener_v2.listener_1.id}"
+}
+`, testAccCheckLbV2L7PolicyConfig)
+}
+
+func testAccCheckLbV2L7PolicyConfigUpdate4() string {
+	return fmt.Sprintf(`
+%s
+
+resource "openstack_lb_pool_v2" "pool_1" {
+  name            = "pool_1"
+  protocol        = "HTTP"
+  lb_method       = "ROUND_ROBIN"
+  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+}
+
+resource "openstack_lb_l7policy_v2" "l7policy_1" {
+  name             = "test_updated"
+  action           = "REDIRECT_PREFIX"
+  position         = 1
+  listener_id      = "${openstack_lb_listener_v2.listener_1.id}"
+  redirect_prefix  = "https://foo.bar"
+}
+`, testAccCheckLbV2L7PolicyConfig)
+}
+
+func testAccCheckLbV2L7PolicyConfigUpdate5() string {
+	return fmt.Sprintf(`
+%s
+
+resource "openstack_lb_pool_v2" "pool_1" {
+  name            = "pool_1"
+  protocol        = "HTTP"
+  lb_method       = "ROUND_ROBIN"
+  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+}
+
+resource "openstack_lb_l7policy_v2" "l7policy_1" {
+  name               = "test_updated"
+  action             = "REDIRECT_PREFIX"
+  position           = 1
+  listener_id        = "${openstack_lb_listener_v2.listener_1.id}"
+  redirect_prefix    = "https://foo.bar.baz"
+  redirect_http_code = 307
 }
 `, testAccCheckLbV2L7PolicyConfig)
 }

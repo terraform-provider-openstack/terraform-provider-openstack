@@ -98,7 +98,11 @@ func resourceObjectStorageContainerV1() *schema.Resource {
 					},
 				},
 				ConflictsWith: []string{"versioning"},
-				Deprecated:    "Use newer \"versioning\" implementation",
+				// This method is not actually deprecated on Openstack layer. They
+				// are strongly advising to use the method through `versioning`.
+				// Deprecation notice is to drive users to use it as well but might
+				// not be removed if it's not removed from upstream Openstack first
+				Deprecated: "Use newer \"versioning\" implementation",
 			},
 			"metadata": {
 				Type:     schema.TypeMap,

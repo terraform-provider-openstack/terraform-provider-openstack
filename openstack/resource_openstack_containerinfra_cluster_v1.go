@@ -448,6 +448,11 @@ func resourceContainerInfraClusterV1Update(ctx context.Context, d *schema.Resour
 
 	if d.HasChange("node_count") {
 		nodeCount := d.Get("node_count").(int)
+
+		if nodeCount == 0 {
+			containerInfraClient.Microversion = containerInfraV1ZeroNodeCountMicroversion
+		}
+
 		updateOpts = append(updateOpts, clusters.UpdateOpts{
 			Op:    clusters.ReplaceOp,
 			Path:  strings.Join([]string{"/", "node_count"}, ""),

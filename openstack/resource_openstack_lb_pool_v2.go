@@ -120,6 +120,13 @@ func resourcePoolV2() *schema.Resource {
 				Default:  true,
 				Optional: true,
 			},
+
+			"tags": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
 		},
 	}
 }
@@ -165,6 +172,11 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 		ListenerID:     listenerID,
 		LBMethod:       pools.LBMethod(d.Get("lb_method").(string)),
 		AdminStateUp:   &adminStateUp,
+	}
+
+	if v, ok := d.GetOk("tags"); ok {
+		tags := v.(*schema.Set).List()
+		createOpts.Tags = expandToStringSlice(tags)
 	}
 
 	// Must omit if not set
@@ -244,6 +256,7 @@ func resourcePoolV2Read(ctx context.Context, d *schema.ResourceData, meta interf
 	d.Set("name", pool.Name)
 	d.Set("persistence", flattenLBPoolPersistenceV2(pool.Persistence))
 	d.Set("region", GetRegion(d, config))
+	d.Set("tags", pool.Tags)
 
 	return nil
 }
@@ -270,6 +283,16 @@ func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta inte
 	if d.HasChange("admin_state_up") {
 		asu := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &asu
+	}
+
+	if d.HasChange("tags") {
+		if v, ok := d.GetOk("tags"); ok {
+			tags := v.(*schema.Set).List()
+			tagsToUpdate := expandToStringSlice(tags)
+			updateOpts.Tags = &tagsToUpdate
+		} else {
+			updateOpts.Tags = &[]string{}
+		}
 	}
 
 	timeout := d.Timeout(schema.TimeoutUpdate)

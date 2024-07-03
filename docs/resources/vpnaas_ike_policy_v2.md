@@ -49,7 +49,7 @@ The following arguments are supported:
 * `phase1_negotiation_mode` - (Optional) The IKE mode. A valid value is main, which is the default.
     Changing this updates the existing policy.
 
-* `ike_version` - (Optional) The IKE mode. A valid value is v1 or v2. Default is v1.
+* `ike_version` - (Optional) The IKE version. A valid value is v1 or v2. Default is v1.
     Changing this updates the existing policy.
 
 * `lifetime` - (Optional) The lifetime of the security association. Consists of Unit and Value.

@@ -60,6 +60,12 @@ func resourceComputeVolumeAttachV2() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"tag": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			"vendor_options": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -116,6 +122,13 @@ func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.Resource
 	attachOpts := volumeattach.CreateOpts{
 		Device:   device,
 		VolumeID: volumeID,
+	}
+
+	// tag requires nova microversion 2.49. Only set when specified.
+	if v, ok := d.GetOk("tag"); ok {
+		tag := v.(string)
+		attachOpts.Tag = tag
+		computeClient.Microversion = computeV2InstanceBlockDeviceVolumeAttachTagsMicroversion
 	}
 
 	log.Printf("[DEBUG] openstack_compute_volume_attach_v2 attach options %s: %#v", instanceID, attachOpts)

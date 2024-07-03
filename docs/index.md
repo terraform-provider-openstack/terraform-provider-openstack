@@ -392,6 +392,61 @@ a Gophercloud but, please ask.
 If you require pulling in changes from an external package, such as Gophercloud,
 this provider uses [Go Modules](https://github.com/golang/go/wiki/Modules).
 
+### Ad-hoc testing against existing cloud
+
+If there is access to an existing cloud, developers can test changes on resources
+against that cloud. In order to do so:
+- Build the provider with your changes
+
+Build locally the provider including your changes with:
+```
+go build .
+```
+this should generate a `terraform-provider-openstack` binary.
+
+- Remove the Terraform Lock File 
+
+If there is already a terraform lock file, remove it with:
+```
+rm .terraform.lock.hcl
+```
+
+- Create or edit `.terraform.rc` as shown below:
+
+```
+provider_installation {
+  dev_overrides {
+    "registry.terraform.io/terraform-provider-openstack/openstack" = "/path/to/directory/where/the/provider/binary/is"
+  }
+  direct {}
+}
+```
+This configuration tells Terraform to use the provider binary at the specified path 
+instead of the one from the Terraform Registry. The direct {} block tells Terraform 
+to use the provider from the Terraform Registry if it’s not available locally. 
+Any other providers not specified in dev_overrides will still be downloaded from the 
+Terraform Registry.
+
+- Set Environment Variable for Terraform Configuration
+
+```
+export TF_CLI_CONFIG_FILE=~/.terraform.rc
+```
+
+- Run terraform
+
+```
+❯ terraform plan
+
+│ Warning: Provider development overrides are in effect
+│ 
+│ The following provider development overrides are set in the CLI configuration:
+│  - terraform-provider-openstack/openstack in /path/to/directory/where/the/provider/binary/is
+│ 
+| The behavior may therefore not match any released version of the provider and applying changes may cause the state to become incompatible with published releases.
+
+```
+
 ### Acceptance Tests
 
 Acceptance Tests are a crucial part of adding features or fixing a bug. Please

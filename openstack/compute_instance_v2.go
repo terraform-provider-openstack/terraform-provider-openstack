@@ -28,6 +28,7 @@ const (
 	computeV2InstanceCreateServerWithTagsMicroversion        = "2.52"
 	computeV2TagsExtensionMicroversion                       = "2.26"
 	computeV2InstanceBlockDeviceVolumeTypeMicroversion       = "2.67"
+	computeV2InstanceBlockDeviceVolumeAttachTagsMicroversion = "2.49"
 	computeV2InstanceBlockDeviceMultiattachMicroversion      = "2.60"
 )
 

@@ -26,16 +26,90 @@ func TestAccLBV2Pool_basic(t *testing.T) {
 				Config: TestAccLbV2PoolConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2PoolExists("openstack_lb_pool_v2.pool_1", &pool),
+					testAccCheckLBV2PoolHasTag("openstack_lb_pool_v2.pool_1", "foo"),
+					testAccCheckLBV2PoolTagCount("openstack_lb_pool_v2.pool_1", 1),
 				),
 			},
 			{
 				Config: TestAccLbV2PoolConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "name", "pool_1_updated"),
+					testAccCheckLBV2PoolHasTag("openstack_lb_pool_v2.pool_1", "bar"),
+					testAccCheckLBV2PoolTagCount("openstack_lb_pool_v2.pool_1", 1),
 				),
 			},
 		},
 	})
+}
+
+func testAccCheckLBV2PoolHasTag(n, tag string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := testAccProvider.Meta().(*Config)
+		lbClient, err := config.LoadBalancerV2Client(osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+		}
+
+		found, err := pools.Get(lbClient, rs.Primary.ID).Extract()
+		if err != nil {
+			return err
+		}
+
+		if found.ID != rs.Primary.ID {
+			return fmt.Errorf("Pool not found")
+		}
+
+		for _, v := range found.Tags {
+			if tag == v {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Tag not found: %s", tag)
+	}
+}
+
+func testAccCheckLBV2PoolTagCount(n string, expected int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := testAccProvider.Meta().(*Config)
+		lbClient, err := config.LoadBalancerV2Client(osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+		}
+
+		found, err := pools.Get(lbClient, rs.Primary.ID).Extract()
+		if err != nil {
+			return err
+		}
+
+		if found.ID != rs.Primary.ID {
+			return fmt.Errorf("Pool not found")
+		}
+
+		if len(found.Tags) != expected {
+			return fmt.Errorf("Expecting %d tags, found %d", expected, len(found.Tags))
+		}
+
+		return nil
+	}
 }
 
 func TestAccLBV2Pool_octavia_udp(t *testing.T) {
@@ -150,6 +224,7 @@ resource "openstack_lb_pool_v2" "pool_1" {
   protocol = "HTTP"
   lb_method = "ROUND_ROBIN"
   listener_id = "${openstack_lb_listener_v2.listener_1.id}"
+  tags = ["foo"]
 
   timeouts {
     create = "5m"
@@ -196,6 +271,7 @@ resource "openstack_lb_pool_v2" "pool_1" {
   lb_method = "LEAST_CONNECTIONS"
   admin_state_up = "true"
   listener_id = "${openstack_lb_listener_v2.listener_1.id}"
+  tags = ["bar"]
 
   timeouts {
     create = "5m"
