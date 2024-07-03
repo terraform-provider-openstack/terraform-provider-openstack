@@ -1,5 +1,5 @@
 name: functional-dns
-concurrency: 
+concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 on:
@@ -40,7 +40,7 @@ jobs:
         with:
           branch: ${{ matrix.openstack_version }}
           conf_overrides: |
-            enable_plugin designate https://github.com/openstack/designate ${{ matrix.openstack_version }}         
+            enable_plugin designate https://github.com/openstack/designate ${{ matrix.openstack_version }}
           enabled_services: 'designate,designate-central,designate-api,designate-worker,designate-producer,designate-mdns'
       - name: Checkout go
         uses: actions/setup-go@v5

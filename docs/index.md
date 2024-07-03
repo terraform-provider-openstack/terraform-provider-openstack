@@ -494,10 +494,10 @@ the feature or bug you're testing:
 * `OS_FW_ENVIRONMENT` - Required if you're working on the `openstack_fw_*`
   resources. Set this value to "1" to enable testing these resources.
 
-* `OS_VPN_ENVIRONMENT` - Required if your'e working on the `openstack_vpn_*`
+* `OS_VPN_ENVIRONMENT` - Required if you're working on the `openstack_vpn_*`
   resources. Set this value to "1" to enable testing these resources.
 
-* `OS_SFS_ENVIRONMENT` - Required if your'e working on the `openstack_openstack_sharedfilesystem_*`
+* `OS_SFS_ENVIRONMENT` - Required if you're working on the `openstack_sharedfilesystem_*`
   resources. Set this value to "1" to enable testing these resources.
 
 * `OS_HYPERVISOR_HOSTNAME` - Required if you're working on the `openstack_compute_hypervisor_v2`

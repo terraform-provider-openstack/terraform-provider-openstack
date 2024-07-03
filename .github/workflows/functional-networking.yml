@@ -1,6 +1,6 @@
 # Functional testing for networking
 name: functional-networking
-concurrency: 
+concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 on:
@@ -36,6 +36,14 @@ jobs:
     steps:
       - name: Checkout TPO
         uses: actions/checkout@v4
+      - name: Create additional neutron policies
+        run: |
+          mkdir /tmp/neutron-policies
+          cat << EOF >> /tmp/neutron-policies/port_binding.yaml
+          ---
+          "create_port:binding:profile": "rule:admin_only or rule:service_api"
+          "update_port:binding:profile": "rule:admin_only or rule:service_api"
+          EOF
       - name: Deploy devstack
         uses: EmilienM/devstack-action@v0.15
         with:
@@ -43,6 +51,10 @@ jobs:
           conf_overrides: |
             Q_ML2_PLUGIN_EXT_DRIVERS=qos,port_security,dns_domain_keywords
             enable_plugin neutron-dynamic-routing https://github.com/openstack/neutron-dynamic-routing ${{ matrix.openstack_version }}
+
+            [[post-config|\$NEUTRON_CONF]]
+            [oslo_policy]
+            policy_dirs = /tmp/neutron-policies
           enabled_services: 'neutron-dhcp,neutron-dns,neutron-qos,neutron-segments,neutron-trunk,neutron-uplink-status-propagation,neutron-network-segment-range,neutron-port-forwarding'
       - name: Checkout go
         uses: actions/setup-go@v5
