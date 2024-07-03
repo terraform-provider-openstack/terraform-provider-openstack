@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
 	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/nodegroups"
@@ -96,9 +97,10 @@ func resourceContainerInfraNodeGroupV1() *schema.Resource {
 			},
 
 			"node_count": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  1,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(0),
+				Default:      1,
 			},
 
 			"min_node_count": {
@@ -302,10 +304,13 @@ func resourceContainerInfraNodeGroupV1Update(ctx context.Context, d *schema.Reso
 	}
 
 	if d.HasChange("node_count") {
-		v := d.Get("node_count").(int)
+		nodeCount := d.Get("node_count").(int)
 		var resizeOpts = clusters.ResizeOpts{
-			NodeCount: &v,
+			NodeCount: &nodeCount,
 			NodeGroup: nodeGroupID,
+		}
+		if nodeCount == 0 {
+			containerInfraClient.Microversion = containerInfraV1ZeroNodeCountMicroversion
 		}
 		_, err = clusters.Resize(containerInfraClient, clusterID, resizeOpts).Extract()
 		if err != nil {
