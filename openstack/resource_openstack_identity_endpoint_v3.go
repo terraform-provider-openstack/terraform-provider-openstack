@@ -2,9 +2,7 @@ package openstack
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"net/url"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -46,14 +44,6 @@ func resourceIdentityEndpointV3() *schema.Resource {
 			"url": {
 				Type:     schema.TypeString,
 				Required: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					_, err := url.ParseRequestURI(value)
-					if err != nil {
-						errors = append(errors, fmt.Errorf("URL is not valid: %s", err))
-					}
-					return
-				},
 			},
 
 			"interface": {
