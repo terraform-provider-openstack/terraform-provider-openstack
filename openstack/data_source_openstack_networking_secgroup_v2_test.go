@@ -64,6 +64,41 @@ func TestAccOpenStackNetworkingSecGroupV2DataSource_secGroupID(t *testing.T) {
 	})
 }
 
+func TestAccOpenStackNetworkingSecGroupV2DataSource_stateful(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccOpenStackNetworkingSecGroupV2DataSourceStatefulNotSet,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingSecGroupV2DataSourceID("data.openstack_networking_secgroup_v2.secgroup_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_secgroup_v2.secgroup_1", "stateful", "true"),
+				),
+			},
+			{
+				Config: testAccOpenStackNetworkingSecGroupV2DataSourceStatefulSetFalse,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingSecGroupV2DataSourceID("data.openstack_networking_secgroup_v2.secgroup_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_secgroup_v2.secgroup_1", "stateful", "false"),
+				),
+			},
+			{
+				Config: testAccOpenStackNetworkingSecGroupV2DataSourceStatefulSetTrue,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingSecGroupV2DataSourceID("data.openstack_networking_secgroup_v2.secgroup_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_secgroup_v2.secgroup_1", "stateful", "false"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingSecGroupV2DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -115,3 +150,47 @@ data "openstack_networking_secgroup_v2" "secgroup_1" {
 }
 `, testAccOpenStackNetworkingSecGroupV2DataSourceGroup)
 }
+
+const testAccOpenStackNetworkingSecGroupV2DataSourceStatefulNotSet = `
+resource "openstack_networking_secgroup_v2" "secgroup_1" {
+  name        = "secgroup_not_stateful_1"
+  description = "My neutron security group"
+}
+
+data "openstack_networking_secgroup_v2" "secgroup_1" {
+  name = "${openstack_networking_secgroup_v2.secgroup_1.name}"
+}
+`
+
+const testAccOpenStackNetworkingSecGroupV2DataSourceStatefulSetFalse = `
+resource "openstack_networking_secgroup_v2" "secgroup_1" {
+  name        = "secgroup_not_stateful_1"
+  description = "My neutron security group"
+  stateful    = false
+}
+
+data "openstack_networking_secgroup_v2" "secgroup_1" {
+  name     = "${openstack_networking_secgroup_v2.secgroup_1.name}"
+  stateful = false
+}
+`
+
+const testAccOpenStackNetworkingSecGroupV2DataSourceStatefulSetTrue = `
+resource "openstack_networking_secgroup_v2" "secgroup_1" {
+  name        = "secgroup_stateful_1"
+  description = "My neutron security group"
+  stateful    = true
+}
+
+resource "openstack_networking_secgroup_v2" "secgroup_2" {
+  name        = "secgroup_stateful_1"
+  description = "My neutron security group"
+  stateful    = false
+}
+
+data "openstack_networking_secgroup_v2" "secgroup_1" {
+  name     = "${openstack_networking_secgroup_v2.secgroup_2.name}"
+  description = "${openstack_networking_secgroup_v2.secgroup_1.description}"
+  stateful = false
+}
+`

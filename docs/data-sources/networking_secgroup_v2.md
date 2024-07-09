@@ -35,6 +35,8 @@ data "openstack_networking_secgroup_v2" "secgroup" {
 
 * `tenant_id` - (Optional) The owner of the security group.
 
+* `stateful` - (Optional) Whether the security group is stateful or not.
+
 ## Attributes Reference
 
 `id` is set to the ID of the found security group. In addition, the following
@@ -44,3 +46,4 @@ attributes are exported:
 * `description`- See Argument Reference above.
 * `all_tags` - The set of string tags applied on the security group.
 * `region` - See Argument Reference above.
+* `stateful` - See Argument Reference above.
