@@ -37,7 +37,7 @@ func TestAccIdentityV3Endpoint_basic(t *testing.T) {
 						"openstack_identity_service_v3.service_1", "region",
 						"openstack_identity_endpoint_v3.endpoint_1", "endpoint_region"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_endpoint_v3.endpoint_1", "url", "http://myservice.local/v1.0/%%(tenant_id)s"),
+						"openstack_identity_endpoint_v3.endpoint_1", "url", "http://myservice.local/v1.0/%(tenant_id)s"),
 				),
 			},
 			{
@@ -168,7 +168,7 @@ resource "openstack_identity_endpoint_v3" "endpoint_1" {
   name = "%s"
   service_id = "${openstack_identity_service_v3.service_1.id}"
   endpoint_region = "interstate76"
-  url = "http://my-new-service/v1.0/%(tenant_id)s"
+  url = "http://my-new-service/v1.0/%%(tenant_id)s"
 }
   `, endpointName)
 }
