@@ -53,6 +53,11 @@ func GetRegion(d *schema.ResourceData, config *Config) string {
 func AddValueSpecs(body map[string]interface{}) map[string]interface{} {
 	if body["value_specs"] != nil {
 		for k, v := range body["value_specs"].(map[string]interface{}) {
+			// this hack allows to pass boolean values as strings
+			if v == "true" || v == "false" {
+				body[k] = v == "true"
+				continue
+			}
 			body[k] = v
 		}
 		delete(body, "value_specs")
