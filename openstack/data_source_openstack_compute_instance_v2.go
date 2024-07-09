@@ -235,7 +235,7 @@ func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData
 	// Set the current power_state
 	currentStatus := strings.ToLower(server.Status)
 	switch currentStatus {
-	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved":
+	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved", "paused":
 		d.Set("power_state", currentStatus)
 	default:
 		return diag.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
