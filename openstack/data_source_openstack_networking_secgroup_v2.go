@@ -40,6 +40,11 @@ func dataSourceNetworkingSecGroupV2() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 			},
+			"stateful": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -66,6 +71,10 @@ func dataSourceNetworkingSecGroupV2Read(ctx context.Context, d *schema.ResourceD
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
 		TenantID:    d.Get("tenant_id").(string),
+	}
+	if v, ok := getOkExists(d, "stateful"); ok {
+		v := v.(bool)
+		listOpts.Stateful = &v
 	}
 
 	tags := networkingV2AttributesTags(d)
@@ -99,6 +108,7 @@ func dataSourceNetworkingSecGroupV2Read(ctx context.Context, d *schema.ResourceD
 	d.Set("name", secGroup.Name)
 	d.Set("description", secGroup.Description)
 	d.Set("tenant_id", secGroup.TenantID)
+	d.Set("stateful", secGroup.Stateful)
 	d.Set("all_tags", secGroup.Tags)
 	d.Set("region", GetRegion(d, config))
 

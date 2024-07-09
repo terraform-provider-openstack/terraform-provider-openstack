@@ -26,6 +26,7 @@ func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SecGroupExists("openstack_networking_secgroup_v2.secgroup_1", &securityGroup),
 					testAccCheckNetworkingV2SecGroupRuleCount(&securityGroup, 2),
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "stateful", "true"),
 				),
 			},
 			{
@@ -33,6 +34,7 @@ func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPtr("openstack_networking_secgroup_v2.secgroup_1", "id", &securityGroup.ID),
 					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "name", "security_group_2"),
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "stateful", "false"),
 				),
 			},
 		},
@@ -62,13 +64,91 @@ func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2SecGroup_statefulNotSet(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2SecGroupStatefulNotSet,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "name", "security_group_1"),
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "stateful", "true"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2SecGroupStatefulNotSetUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "name", "security_group_1"),
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "stateful", "false"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2SecGroup_statefulSetTrue(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2SecGroupStatefulSetTrue,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "name", "security_group_1"),
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "stateful", "true"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2SecGroupStatefulSetTrueUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "name", "security_group_1"),
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "stateful", "false"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2SecGroup_statefulSetFalse(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2SecGroupStatefulSetFalse,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "name", "security_group_1"),
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "stateful", "false"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2SecGroupStatefulSetFalseUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "name", "security_group_1"),
+					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "stateful", "true"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 	var securityGroup groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
@@ -159,6 +239,7 @@ const testAccNetworkingV2SecGroupUpdate = `
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
   name = "security_group_2"
   description = "terraform security group acceptance test"
+  stateful    = false
 }
 `
 
@@ -178,5 +259,52 @@ resource "openstack_networking_secgroup_v2" "secgroup_1" {
   timeouts {
     delete = "5m"
   }
+}
+`
+
+const testAccNetworkingV2SecGroupStatefulNotSet = `
+resource "openstack_networking_secgroup_v2" "secgroup_1" {
+  name = "security_group_1"
+  description = "stateful flag not set, expect true"
+}
+`
+
+const testAccNetworkingV2SecGroupStatefulNotSetUpdate = `
+resource "openstack_networking_secgroup_v2" "secgroup_1" {
+  name = "security_group_1"
+  description = "stateful flag updated to false"
+  stateful = false
+}
+`
+
+const testAccNetworkingV2SecGroupStatefulSetTrue = `
+resource "openstack_networking_secgroup_v2" "secgroup_1" {
+  name = "security_group_1"
+  description = "stateful flag set to true"
+  stateful = true
+}
+`
+
+const testAccNetworkingV2SecGroupStatefulSetTrueUpdate = `
+resource "openstack_networking_secgroup_v2" "secgroup_1" {
+  name = "security_group_1"
+  description = "stateful flag updated to false"
+  stateful = false
+}
+`
+
+const testAccNetworkingV2SecGroupStatefulSetFalse = `
+resource "openstack_networking_secgroup_v2" "secgroup_1" {
+  name = "security_group_1"
+  description = "stateful flag explicitly set to false"
+  stateful = false
+}
+`
+
+const testAccNetworkingV2SecGroupStatefulSetFalseUpdate = `
+resource "openstack_networking_secgroup_v2" "secgroup_1" {
+  name = "security_group_1"
+  description = "stateful flag updated to true"
+  stateful = true
 }
 `

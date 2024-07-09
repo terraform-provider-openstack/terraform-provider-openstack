@@ -27,21 +27,26 @@ resource "openstack_networking_secgroup_v2" "secgroup_1" {
 The following arguments are supported:
 
 * `region` - (Optional) The region in which to obtain the V2 networking client.
-    A networking client is needed to create a port. If omitted, the
-    `region` argument of the provider is used. Changing this creates a new
-    security group.
+  A networking client is needed to create a port. If omitted, the
+  `region` argument of the provider is used. Changing this creates a new
+  security group.
 
 * `name` - (Required) A unique name for the security group.
 
 * `description` - (Optional) A unique name for the security group.
 
 * `tenant_id` - (Optional) The owner of the security group. Required if admin
-    wants to create a port for another tenant. Changing this creates a new
-    security group.
+  wants to create a port for another tenant. Changing this creates a new
+  security group.
 
 * `delete_default_rules` - (Optional) Whether or not to delete the default
-    egress security rules. This is `false` by default. See the below note
-    for more information.
+  egress security rules. This is `false` by default. See the below note
+  for more information.
+
+* `stateful` - (Optional) Indicates if the security group is stateful or
+  stateless. Update of the stateful argument is allowed when there is no port
+  associated with the security group. Available only in OpenStack environments
+  with the `stateful-security-group` extension. Defaults to true.
 
 * `tags` - (Optional) A set of string tags for the security group.
 
