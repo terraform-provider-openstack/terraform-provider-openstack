@@ -2,8 +2,6 @@ module github.com/terraform-provider-openstack/terraform-provider-openstack/v2
 
 go 1.22
 
-toolchain go1.22.5
-
 require (
 	github.com/gophercloud/gophercloud/v2 v2.0.0
 	github.com/gophercloud/utils/v2 v2.0.0-20240705071316-780b64d153e3
