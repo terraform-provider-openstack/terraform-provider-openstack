@@ -1,11 +1,13 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/applicationcredentials"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/applicationcredentials"
 )
 
 func flattenIdentityApplicationCredentialRolesV3(roles []applicationcredentials.Role) []string {
@@ -53,23 +55,22 @@ func expandIdentityApplicationCredentialAccessRulesV3(rules []interface{}) []app
 	return res
 }
 
-func applicationCredentialCleanupAccessRulesV3(client *gophercloud.ServiceClient, userID string, id string, rules []applicationcredentials.AccessRule) error {
+func applicationCredentialCleanupAccessRulesV3(ctx context.Context, client *gophercloud.ServiceClient, userID string, id string, rules []applicationcredentials.AccessRule) error {
 	for _, rule := range rules {
 		log.Printf("[DEBUG] Cleaning up %q access rule from the %q application credential", rule.ID, id)
-		err := applicationcredentials.DeleteAccessRule(client, userID, rule.ID).ExtractErr()
+		err := applicationcredentials.DeleteAccessRule(ctx, client, userID, rule.ID).ExtractErr()
 		if err != nil {
-			switch err.(type) {
-			case gophercloud.ErrDefault403:
+			if gophercloud.ResponseCodeIs(err, http.StatusForbidden) {
 				// handle "May not delete access rule in use", when the same access rule is
 				// used by other application credential
 				log.Printf("[DEBUG] Error delete %q access rule from the %q application credential: %s", rule.ID, id, err)
 				continue
-			case gophercloud.ErrDefault404:
+			}
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				// access rule was already deleted
 				continue
-			default:
-				return fmt.Errorf("failed to delete %q access rule from the %q application credential: %s", rule.ID, id, err)
 			}
+			return fmt.Errorf("failed to delete %q access rule from the %q application credential: %s", rule.ID, id, err)
 		}
 	}
 	return nil

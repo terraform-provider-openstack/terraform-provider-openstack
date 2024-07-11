@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/groups"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/groups"
 )
 
 func resourceIdentityGroupV3() *schema.Resource {
@@ -50,7 +50,7 @@ func resourceIdentityGroupV3() *schema.Resource {
 
 func resourceIdentityGroupV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -62,7 +62,7 @@ func resourceIdentityGroupV3Create(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	log.Printf("[DEBUG] openstack_identity_group_v3 create options: %#v", createOpts)
-	group, err := groups.Create(identityClient, createOpts).Extract()
+	group, err := groups.Create(ctx, identityClient, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_identity_group_v3: %s", err)
 	}
@@ -74,12 +74,12 @@ func resourceIdentityGroupV3Create(ctx context.Context, d *schema.ResourceData, 
 
 func resourceIdentityGroupV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
-	group, err := groups.Get(identityClient, d.Id()).Extract()
+	group, err := groups.Get(ctx, identityClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_identity_group_v3"))
 	}
@@ -96,7 +96,7 @@ func resourceIdentityGroupV3Read(ctx context.Context, d *schema.ResourceData, me
 
 func resourceIdentityGroupV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -116,7 +116,7 @@ func resourceIdentityGroupV3Update(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	if hasChange {
-		_, err := groups.Update(identityClient, d.Id(), updateOpts).Extract()
+		_, err := groups.Update(ctx, identityClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_identity_group_v3 %s: %s", d.Id(), err)
 		}
@@ -127,12 +127,12 @@ func resourceIdentityGroupV3Update(ctx context.Context, d *schema.ResourceData, 
 
 func resourceIdentityGroupV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
-	err = groups.Delete(identityClient, d.Id()).ExtractErr()
+	err = groups.Delete(ctx, identityClient, d.Id()).ExtractErr()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_identity_group_v3"))
 	}

@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -8,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumetypes"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumetypes"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
 )
 
 func TestAccBlockstorageV3VolumeTypeAccess_basic(t *testing.T) {
@@ -45,7 +46,7 @@ func TestAccBlockstorageV3VolumeTypeAccess_basic(t *testing.T) {
 
 func testAccCheckBlockstorageV3VolumeTypeAccessDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	blockStorageClient, err := config.BlockStorageV3Client(osRegionName)
+	blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
@@ -60,7 +61,7 @@ func testAccCheckBlockstorageV3VolumeTypeAccessDestroy(s *terraform.State) error
 			return err
 		}
 
-		allPages, err := volumetypes.ListAccesses(blockStorageClient, vtid).AllPages()
+		allPages, err := volumetypes.ListAccesses(blockStorageClient, vtid).AllPages(context.TODO())
 		if err == nil {
 			allAccesses, err := volumetypes.ExtractAccesses(allPages)
 			if err == nil {
@@ -88,7 +89,7 @@ func testAccCheckBlockstorageV3VolumeTypeAccessExists(n string) resource.TestChe
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.BlockStorageV3Client(osRegionName)
+		blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
@@ -98,7 +99,7 @@ func testAccCheckBlockstorageV3VolumeTypeAccessExists(n string) resource.TestChe
 			return err
 		}
 
-		allPages, err := volumetypes.ListAccesses(blockStorageClient, vtid).AllPages()
+		allPages, err := volumetypes.ListAccesses(blockStorageClient, vtid).AllPages(context.TODO())
 		if err != nil {
 			return fmt.Errorf("Error retrieving accesses for vt: %s", vtid)
 		}

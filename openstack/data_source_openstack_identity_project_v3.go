@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/users"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
 )
 
 func dataSourceIdentityProjectV3() *schema.Resource {
@@ -89,14 +89,14 @@ func filterProjects(allProjects []projects.Project, listOpts projects.ListOpts) 
 func dataSourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	var allProjects []projects.Project
 	if v := d.Get("project_id").(string); v != "" {
-		project, err := projects.Get(identityClient, v).Extract()
+		project, err := projects.Get(ctx, identityClient, v).Extract()
 		if err != nil {
 			return diag.Errorf("Unable to query openstack_identity_project_v3: %s", err)
 		}
@@ -112,19 +112,19 @@ func dataSourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData
 			ParentID: d.Get("parent_id").(string),
 		}
 
-		allPages, err := projects.List(identityClient, listOpts).AllPages()
+		allPages, err := projects.List(identityClient, listOpts).AllPages(ctx)
 		if err != nil {
 			userID := config.UserID
 			log.Printf("[DEBUG] Will try to find project with users.ListProjects as I am unable to query openstack_identity_project_v3: %s. Trying listing userprojects.", err)
 			if userID == "" {
-				tokenInfo, tokenErr := getTokenInfo(identityClient)
+				tokenInfo, tokenErr := getTokenInfo(ctx, identityClient)
 				if tokenErr != nil {
 					return diag.Errorf("Error when getting token info: %s", err)
 				}
 				userID = tokenInfo.userID
 			}
 			// Search for all the projects using the users.ListProjects API call and filter them
-			allPages, err = users.ListProjects(identityClient, userID).AllPages()
+			allPages, err = users.ListProjects(identityClient, userID).AllPages(ctx)
 			if err != nil {
 				return diag.Errorf("Unable to query openstack_identity_project_v3: %s", err)
 			}

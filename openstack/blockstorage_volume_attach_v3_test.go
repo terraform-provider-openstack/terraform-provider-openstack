@@ -5,11 +5,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 )
 
 func TestUnitExpandBlockStorageV3AttachMode(t *testing.T) {
-	expected := volumeactions.ReadWrite
+	expected := volumes.ReadWrite
 
 	actual, err := expandBlockStorageV3AttachMode("rw")
 	assert.Equal(t, err, nil)

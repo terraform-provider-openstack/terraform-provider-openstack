@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/limits"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/limits"
 )
 
 func dataSourceComputeLimitsV2() *schema.Resource {
@@ -129,7 +129,7 @@ func dataSourceComputeLimitsV2() *schema.Resource {
 func dataSourceComputeLimitsV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
-	computeClient, err := config.ComputeV2Client(region)
+	computeClient, err := config.ComputeV2Client(ctx, region)
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -139,7 +139,7 @@ func dataSourceComputeLimitsV2Read(ctx context.Context, d *schema.ResourceData, 
 		TenantID: projectID,
 	}
 
-	q, err := limits.Get(computeClient, getOpts).Extract()
+	q, err := limits.Get(ctx, computeClient, getOpts).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_limits_v2"))
 	}

@@ -1,15 +1,17 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/volumeattach"
 )
 
 func computeVolumeAttachV2ParseID(id string) (string, string, error) {
@@ -24,11 +26,11 @@ func computeVolumeAttachV2ParseID(id string) (string, string, error) {
 	return instanceID, attachmentID, nil
 }
 
-func computeVolumeAttachV2AttachFunc(computeClient *gophercloud.ServiceClient, blockStorageClient *gophercloud.ServiceClient, instanceID, attachmentID string, volumeID string) resource.StateRefreshFunc {
+func computeVolumeAttachV2AttachFunc(ctx context.Context, computeClient *gophercloud.ServiceClient, blockStorageClient *gophercloud.ServiceClient, instanceID, attachmentID string, volumeID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		va, err := volumeattach.Get(computeClient, instanceID, attachmentID).Extract()
+		va, err := volumeattach.Get(ctx, computeClient, instanceID, attachmentID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return va, "ATTACHING", nil
 			}
 			return va, "", err
@@ -39,7 +41,7 @@ func computeVolumeAttachV2AttachFunc(computeClient *gophercloud.ServiceClient, b
 			return va, "ATTACHED", nil
 		}
 
-		v, err := volumes.Get(blockStorageClient, volumeID).Extract()
+		v, err := volumes.Get(ctx, blockStorageClient, volumeID).Extract()
 		if err != nil {
 			return va, "", err
 		}
@@ -54,26 +56,26 @@ func computeVolumeAttachV2AttachFunc(computeClient *gophercloud.ServiceClient, b
 	}
 }
 
-func computeVolumeAttachV2DetachFunc(computeClient *gophercloud.ServiceClient, instanceID, attachmentID string) resource.StateRefreshFunc {
+func computeVolumeAttachV2DetachFunc(ctx context.Context, computeClient *gophercloud.ServiceClient, instanceID, attachmentID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] openstack_compute_volume_attach_v2 attempting to detach OpenStack volume %s from instance %s",
 			attachmentID, instanceID)
 
-		va, err := volumeattach.Get(computeClient, instanceID, attachmentID).Extract()
+		va, err := volumeattach.Get(ctx, computeClient, instanceID, attachmentID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return va, "DETACHED", nil
 			}
 			return va, "", err
 		}
 
-		err = volumeattach.Delete(computeClient, instanceID, attachmentID).ExtractErr()
+		err = volumeattach.Delete(ctx, computeClient, instanceID, attachmentID).ExtractErr()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return va, "DETACHED", nil
 			}
 
-			if _, ok := err.(gophercloud.ErrDefault400); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusBadRequest) {
 				return nil, "", nil
 			}
 

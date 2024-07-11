@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/groups"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/fwaas_v2/groups"
 )
 
 func dataSourceFWGroupV2() *schema.Resource {
@@ -89,7 +89,7 @@ func dataSourceFWGroupV2() *schema.Resource {
 
 func dataSourceFWGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -138,7 +138,7 @@ func dataSourceFWGroupV2Read(ctx context.Context, d *schema.ResourceData, meta i
 		listOpts.Status = v.(string)
 	}
 
-	pages, err := groups.List(networkingClient, listOpts).AllPages()
+	pages, err := groups.List(networkingClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to list openstack_fw_group_v2 groups: %s", err)
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/snapshots"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/snapshots"
 )
 
 func dataSourceSharedFilesystemSnapshotV2() *schema.Resource {
@@ -70,7 +70,7 @@ func dataSourceSharedFilesystemSnapshotV2() *schema.Resource {
 
 func dataSourceSharedFilesystemSnapshotV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
+	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem sfsClient: %s", err)
 	}
@@ -84,7 +84,7 @@ func dataSourceSharedFilesystemSnapshotV2Read(ctx context.Context, d *schema.Res
 		Status:      d.Get("status").(string),
 	}
 
-	allPages, err := snapshots.ListDetail(sfsClient, listOpts).AllPages()
+	allPages, err := snapshots.ListDetail(sfsClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query snapshots: %s", err)
 	}

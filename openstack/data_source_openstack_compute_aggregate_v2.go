@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/aggregates"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/aggregates"
 )
 
 func dataSourceComputeAggregateV2() *schema.Resource {
@@ -44,12 +44,12 @@ func dataSourceComputeAggregateV2() *schema.Resource {
 func dataSourceComputeAggregateV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
-	computeClient, err := config.ComputeV2Client(region)
+	computeClient, err := config.ComputeV2Client(ctx, region)
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	allPages, err := aggregates.List(computeClient).AllPages()
+	allPages, err := aggregates.List(computeClient).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Error listing compute aggregates: %s", err)
 	}

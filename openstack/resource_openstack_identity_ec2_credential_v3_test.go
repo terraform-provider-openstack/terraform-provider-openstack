@@ -1,14 +1,15 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/extensions/ec2credentials"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/ec2credentials"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
 )
 
 func TestAccIdentityV3Ec2Credential_basic(t *testing.T) {
@@ -42,12 +43,12 @@ func TestAccIdentityV3Ec2Credential_basic(t *testing.T) {
 
 func testAccCheckIdentityV3Ec2CredentialDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.IdentityV3Client(osRegionName)
+	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
-	token := tokens.Get(identityClient, config.OsClient.TokenID)
+	token := tokens.Get(context.TODO(), identityClient, config.OsClient.TokenID)
 	if token.Err != nil {
 		return token.Err
 	}
@@ -62,7 +63,7 @@ func testAccCheckIdentityV3Ec2CredentialDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := ec2credentials.Get(identityClient, user.ID, rs.Primary.ID).Extract()
+		_, err := ec2credentials.Get(context.TODO(), identityClient, user.ID, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Ec2Credential still exists")
 		}
@@ -83,12 +84,12 @@ func testAccCheckIdentityV3Ec2CredentialExists(n string, Ec2Credential *ec2crede
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.IdentityV3Client(osRegionName)
+		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
 
-		token := tokens.Get(identityClient, config.OsClient.TokenID)
+		token := tokens.Get(context.TODO(), identityClient, config.OsClient.TokenID)
 		if token.Err != nil {
 			return token.Err
 		}
@@ -98,7 +99,7 @@ func testAccCheckIdentityV3Ec2CredentialExists(n string, Ec2Credential *ec2crede
 			return err
 		}
 
-		found, err := ec2credentials.Get(identityClient, user.ID, rs.Primary.ID).Extract()
+		found, err := ec2credentials.Get(context.TODO(), identityClient, user.ID, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

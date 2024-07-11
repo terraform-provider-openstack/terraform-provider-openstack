@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/snapshots"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/snapshots"
 )
 
 func dataSourceBlockStorageSnapshotV3() *schema.Resource {
@@ -65,7 +65,7 @@ func dataSourceBlockStorageSnapshotV3() *schema.Resource {
 
 func dataSourceBlockStorageSnapshotV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	client, err := config.BlockStorageV3Client(GetRegion(d, config))
+	client, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
@@ -76,7 +76,7 @@ func dataSourceBlockStorageSnapshotV3Read(ctx context.Context, d *schema.Resourc
 		VolumeID: d.Get("volume_id").(string),
 	}
 
-	allPages, err := snapshots.List(client, listOpts).AllPages()
+	allPages, err := snapshots.List(client, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query openstack_blockstorage_snapshots_v3: %s", err)
 	}

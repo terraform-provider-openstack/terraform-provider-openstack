@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/flavors"
 )
 
 func TestAccComputeV2Flavor_basic(t *testing.T) {
@@ -99,7 +100,7 @@ func TestAccComputeV2Flavor_extraSpecs(t *testing.T) {
 
 func testAccCheckComputeV2FlavorDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.ComputeV2Client(osRegionName)
+	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -109,7 +110,7 @@ func testAccCheckComputeV2FlavorDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := flavors.Get(computeClient, rs.Primary.ID).Extract()
+		_, err := flavors.Get(context.TODO(), computeClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Flavor still exists")
 		}
@@ -130,12 +131,12 @@ func testAccCheckComputeV2FlavorExists(n string, flavor *flavors.Flavor) resourc
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(osRegionName)
+		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		found, err := flavors.Get(computeClient, rs.Primary.ID).Extract()
+		found, err := flavors.Get(context.TODO(), computeClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

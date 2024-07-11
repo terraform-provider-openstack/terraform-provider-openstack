@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/osinherit"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/osinherit"
 )
 
 func resourceIdentityInheritRoleAssignmentV3() *schema.Resource {
@@ -66,7 +66,7 @@ func resourceIdentityInheritRoleAssignmentV3() *schema.Resource {
 
 func resourceIdentityInheritRoleAssignmentV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -84,7 +84,7 @@ func resourceIdentityInheritRoleAssignmentV3Create(ctx context.Context, d *schem
 		UserID:    userID,
 	}
 
-	err = osinherit.Assign(identityClient, roleID, opts).ExtractErr()
+	err = osinherit.Assign(ctx, identityClient, roleID, opts).ExtractErr()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_identity_inherit_role_assignment_v3: %s", err)
 	}
@@ -97,7 +97,7 @@ func resourceIdentityInheritRoleAssignmentV3Create(ctx context.Context, d *schem
 
 func resourceIdentityInheritRoleAssignmentV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -114,7 +114,7 @@ func resourceIdentityInheritRoleAssignmentV3Read(ctx context.Context, d *schema.
 		GroupID:   groupID,
 	}
 
-	err = osinherit.Validate(identityClient, roleID, validateOpts).ExtractErr()
+	err = osinherit.Validate(ctx, identityClient, roleID, validateOpts).ExtractErr()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error vaalidatin openstack_identity_inherit_role_assignment_v3"))
 	}
@@ -132,7 +132,7 @@ func resourceIdentityInheritRoleAssignmentV3Read(ctx context.Context, d *schema.
 
 func resourceIdentityInheritRoleAssignmentV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -149,7 +149,7 @@ func resourceIdentityInheritRoleAssignmentV3Delete(ctx context.Context, d *schem
 		UserID:    userID,
 	}
 
-	if err := osinherit.Unassign(identityClient, roleID, opts).ExtractErr(); err != nil {
+	if err := osinherit.Unassign(ctx, identityClient, roleID, opts).ExtractErr(); err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error unassigning openstack_identity_inherit_role_assignment_v3"))
 	}
 

@@ -4,14 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
-	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/flavors"
+	"github.com/gophercloud/gophercloud/v2/pagination"
 )
 
 func resourceComputeFlavorAccessV2() *schema.Resource {
@@ -46,7 +47,7 @@ func resourceComputeFlavorAccessV2() *schema.Resource {
 
 func resourceComputeFlavorAccessV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -59,7 +60,7 @@ func resourceComputeFlavorAccessV2Create(ctx context.Context, d *schema.Resource
 	}
 	log.Printf("[DEBUG] Flavor Access Options: %#v", accessOpts)
 
-	if _, err := flavors.AddAccess(computeClient, flavorID, accessOpts).Extract(); err != nil {
+	if _, err := flavors.AddAccess(ctx, computeClient, flavorID, accessOpts).Extract(); err != nil {
 		return diag.Errorf("Error adding access to tenant %s for flavor %s: %s", tenantID, flavorID, err)
 	}
 
@@ -69,14 +70,14 @@ func resourceComputeFlavorAccessV2Create(ctx context.Context, d *schema.Resource
 	return resourceComputeFlavorAccessV2Read(ctx, d, meta)
 }
 
-func resourceComputeFlavorAccessV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeFlavorAccessV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	flavorAccess, err := getFlavorAccess(computeClient, d)
+	flavorAccess, err := getFlavorAccess(ctx, computeClient, d)
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error getting flavor access"))
 	}
@@ -88,14 +89,14 @@ func resourceComputeFlavorAccessV2Read(_ context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceComputeFlavorAccessV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeFlavorAccessV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	flavorAccess, err := getFlavorAccess(computeClient, d)
+	flavorAccess, err := getFlavorAccess(ctx, computeClient, d)
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error getting flavor access"))
 	}
@@ -103,7 +104,7 @@ func resourceComputeFlavorAccessV2Delete(_ context.Context, d *schema.ResourceDa
 	removeAccessOpts := flavors.RemoveAccessOpts{Tenant: flavorAccess.TenantID}
 	log.Printf("[DEBUG] RemoveAccess Options: %#v", removeAccessOpts)
 
-	if _, err := flavors.RemoveAccess(computeClient, flavorAccess.FlavorID, removeAccessOpts).Extract(); err != nil {
+	if _, err := flavors.RemoveAccess(ctx, computeClient, flavorAccess.FlavorID, removeAccessOpts).Extract(); err != nil {
 		return diag.FromErr(CheckDeleted(d, err, fmt.Sprintf("Error removing tenant %s access from flavor %s", flavorAccess.TenantID, flavorAccess.FlavorID)))
 	}
 
@@ -122,7 +123,7 @@ func parseComputeFlavorAccessID(id string) (string, string, error) {
 	return flavorID, tenantID, nil
 }
 
-func getFlavorAccess(computeClient *gophercloud.ServiceClient, d *schema.ResourceData) (flavors.FlavorAccess, error) {
+func getFlavorAccess(ctx context.Context, computeClient *gophercloud.ServiceClient, d *schema.ResourceData) (flavors.FlavorAccess, error) {
 	var access flavors.FlavorAccess
 	flavorID, tenantID, err := parseComputeFlavorAccessID(d.Id())
 	if err != nil {
@@ -131,7 +132,7 @@ func getFlavorAccess(computeClient *gophercloud.ServiceClient, d *schema.Resourc
 
 	found := false
 	pager := flavors.ListAccesses(computeClient, flavorID)
-	err = pager.EachPage(func(page pagination.Page) (bool, error) {
+	err = pager.EachPage(ctx, func(ctx context.Context, page pagination.Page) (bool, error) {
 		accessList, err := flavors.ExtractAccesses(page)
 		if err != nil {
 			return false, err
@@ -149,7 +150,7 @@ func getFlavorAccess(computeClient *gophercloud.ServiceClient, d *schema.Resourc
 	})
 
 	if !found {
-		return access, gophercloud.ErrDefault404{}
+		return access, gophercloud.ErrUnexpectedResponseCode{Actual: http.StatusNotFound}
 	}
 
 	return access, err

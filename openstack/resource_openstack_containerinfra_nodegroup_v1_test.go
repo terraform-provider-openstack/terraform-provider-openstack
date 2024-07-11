@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"testing"
@@ -9,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/nodegroups"
+	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/nodegroups"
 )
 
 func TestAccContainerInfraV1NodeGroup_basic(t *testing.T) {
@@ -220,7 +221,7 @@ func testAccCheckContainerInfraV1NodeGroupExists(n string, nodeGroup *nodegroups
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		containerInfraClient, err := config.ContainerInfraV1Client(osRegionName)
+		containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
 		}
@@ -230,7 +231,7 @@ func testAccCheckContainerInfraV1NodeGroupExists(n string, nodeGroup *nodegroups
 		if err != nil {
 			return err
 		}
-		found, err := nodegroups.Get(containerInfraClient, clusterID, nodeGroupID).Extract()
+		found, err := nodegroups.Get(context.TODO(), containerInfraClient, clusterID, nodeGroupID).Extract()
 		if err != nil {
 			return err
 		}
@@ -247,7 +248,7 @@ func testAccCheckContainerInfraV1NodeGroupExists(n string, nodeGroup *nodegroups
 
 func testAccCheckContainerInfraV1NodeGroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	containerInfraClient, err := config.ContainerInfraV1Client(osRegionName)
+	containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
@@ -263,7 +264,7 @@ func testAccCheckContainerInfraV1NodeGroupDestroy(s *terraform.State) error {
 			return err
 		}
 
-		_, err = nodegroups.Get(containerInfraClient, clusterID, nodeGroupID).Extract()
+		_, err = nodegroups.Get(context.TODO(), containerInfraClient, clusterID, nodeGroupID).Extract()
 		if err == nil {
 			return fmt.Errorf("node group still exists")
 		}

@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -8,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/qos"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumetypes"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/qos"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumetypes"
 )
 
 func TestAccBlockstorageV3QosAssociation_basic(t *testing.T) {
@@ -45,7 +46,7 @@ func TestAccBlockstorageV3QosAssociation_basic(t *testing.T) {
 
 func testAccCheckBlockstorageV3QosAssociationDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	blockStorageClient, err := config.BlockStorageV3Client(osRegionName)
+	blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
@@ -60,7 +61,7 @@ func testAccCheckBlockstorageV3QosAssociationDestroy(s *terraform.State) error {
 			return err
 		}
 
-		allPages, err := qos.ListAssociations(blockStorageClient, qosID).AllPages()
+		allPages, err := qos.ListAssociations(blockStorageClient, qosID).AllPages(context.TODO())
 		if err == nil {
 			allAssociations, err := qos.ExtractAssociations(allPages)
 			if err == nil {
@@ -88,7 +89,7 @@ func testAccCheckBlockstorageV3QosAssociationExists(n string) resource.TestCheck
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.BlockStorageV3Client(osRegionName)
+		blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
@@ -98,7 +99,7 @@ func testAccCheckBlockstorageV3QosAssociationExists(n string) resource.TestCheck
 			return err
 		}
 
-		allPages, err := qos.ListAssociations(blockStorageClient, qosID).AllPages()
+		allPages, err := qos.ListAssociations(blockStorageClient, qosID).AllPages(context.TODO())
 		if err != nil {
 			return fmt.Errorf("Error retrieving associations for qos: %s", qosID)
 		}

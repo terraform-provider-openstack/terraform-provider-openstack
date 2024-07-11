@@ -4,16 +4,17 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/containers"
-	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects"
-	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/containers"
+	"github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/objects"
+	"github.com/gophercloud/gophercloud/v2/pagination"
 )
 
 func resourceObjectStorageContainerV1() *schema.Resource {
@@ -126,7 +127,7 @@ func resourceObjectStorageContainerV1() *schema.Resource {
 
 func resourceObjectStorageContainerV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	objectStorageClient, err := config.ObjectStorageV1Client(GetRegion(d, config))
+	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("error creating OpenStack object storage client: %s", err)
 	}
@@ -158,7 +159,7 @@ func resourceObjectStorageContainerV1Create(ctx context.Context, d *schema.Resou
 	}
 
 	log.Printf("[DEBUG] Create Options for objectstorage_container_v1: %#v", createOpts)
-	_, err = containers.Create(objectStorageClient, cn, createOpts).Extract()
+	_, err = containers.Create(ctx, objectStorageClient, cn, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("error creating objectstorage_container_v1: %s", err)
 	}
@@ -173,12 +174,12 @@ func resourceObjectStorageContainerV1Create(ctx context.Context, d *schema.Resou
 func resourceObjectStorageContainerV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 
-	objectStorageClient, err := config.ObjectStorageV1Client(GetRegion(d, config))
+	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("error creating OpenStack object storage client: %s", err)
 	}
 
-	result := containers.Get(objectStorageClient, d.Id(), nil)
+	result := containers.Get(ctx, objectStorageClient, d.Id(), nil)
 	if result.Err != nil {
 		return diag.FromErr(CheckDeleted(d, result.Err, "container"))
 	}
@@ -243,7 +244,7 @@ func resourceObjectStorageContainerV1Read(ctx context.Context, d *schema.Resourc
 
 func resourceObjectStorageContainerV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	objectStorageClient, err := config.ObjectStorageV1Client(GetRegion(d, config))
+	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("error creating OpenStack object storage client: %s", err)
 	}
@@ -296,7 +297,7 @@ func resourceObjectStorageContainerV1Update(ctx context.Context, d *schema.Resou
 			RemoveVersionsLocation: "true",
 			RemoveHistoryLocation:  "true",
 		}
-		_, err = containers.Update(objectStorageClient, d.Id(), opts).Extract()
+		_, err = containers.Update(ctx, objectStorageClient, d.Id(), opts).Extract()
 		if err != nil {
 			return diag.Errorf("error updating objectstorage_container_v1 '%s': %s", d.Id(), err)
 		}
@@ -308,7 +309,7 @@ func resourceObjectStorageContainerV1Update(ctx context.Context, d *schema.Resou
 		opts := containers.UpdateOpts{
 			VersionsEnabled: updateOpts.VersionsEnabled,
 		}
-		_, err = containers.Update(objectStorageClient, d.Id(), opts).Extract()
+		_, err = containers.Update(ctx, objectStorageClient, d.Id(), opts).Extract()
 		if err != nil {
 			return diag.Errorf("error updating objectstorage_container_v1 '%s': %s", d.Id(), err)
 		}
@@ -318,7 +319,7 @@ func resourceObjectStorageContainerV1Update(ctx context.Context, d *schema.Resou
 		updateOpts.Metadata = resourceContainerMetadataV2(d)
 	}
 
-	_, err = containers.Update(objectStorageClient, d.Id(), updateOpts).Extract()
+	_, err = containers.Update(ctx, objectStorageClient, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return diag.Errorf("error updating objectstorage_container_v1 '%s': %s", d.Id(), err)
 	}
@@ -328,27 +329,25 @@ func resourceObjectStorageContainerV1Update(ctx context.Context, d *schema.Resou
 
 func resourceObjectStorageContainerV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	objectStorageClient, err := config.ObjectStorageV1Client(GetRegion(d, config))
+	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("error creating OpenStack object storage client: %s", err)
 	}
 
-	_, err = containers.Delete(objectStorageClient, d.Id()).Extract()
+	_, err = containers.Delete(ctx, objectStorageClient, d.Id()).Extract()
 	if err != nil {
-		_, ok := err.(gophercloud.ErrDefault409)
-		if ok && d.Get("force_destroy").(bool) {
+		if gophercloud.ResponseCodeIs(err, http.StatusConflict) && d.Get("force_destroy").(bool) {
 			// Container may have things. Delete them.
 			log.Printf("[DEBUG] Attempting to forceDestroy objectstorage_container_v1 '%s': %+v", d.Id(), err)
 
 			container := d.Id()
 			opts := &objects.ListOpts{
-				Full:     true,
 				Versions: true,
 			}
 			// Retrieve a pager (i.e. a paginated collection)
 			pager := objects.List(objectStorageClient, container, opts)
 			// Define an anonymous function to be executed on each page's iteration
-			err := pager.EachPage(func(page pagination.Page) (bool, error) {
+			err := pager.EachPage(ctx, func(ctx context.Context, page pagination.Page) (bool, error) {
 				objectList, err := objects.ExtractInfo(page)
 				if err != nil {
 					return false, fmt.Errorf("error extracting names from objects from page for objectstorage_container_v1 '%s': %+v", container, err)
@@ -357,7 +356,7 @@ func resourceObjectStorageContainerV1Delete(ctx context.Context, d *schema.Resou
 					opts := objects.DeleteOpts{
 						ObjectVersionID: object.VersionID,
 					}
-					_, err = objects.Delete(objectStorageClient, container, object.Name, opts).Extract()
+					_, err = objects.Delete(ctx, objectStorageClient, container, object.Name, opts).Extract()
 					if err != nil {
 						latest := "latest"
 						if !object.IsLatest && object.VersionID != "" {

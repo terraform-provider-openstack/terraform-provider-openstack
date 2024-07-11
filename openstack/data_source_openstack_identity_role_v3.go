@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/roles"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/roles"
 )
 
 func dataSourceIdentityRoleV3() *schema.Resource {
@@ -39,7 +39,7 @@ func dataSourceIdentityRoleV3() *schema.Resource {
 // dataSourceIdentityRoleV3Read performs the role lookup.
 func dataSourceIdentityRoleV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -52,7 +52,7 @@ func dataSourceIdentityRoleV3Read(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("[DEBUG] openstack_identity_role_v3 list options: %#v", listOpts)
 
 	var role roles.Role
-	allPages, err := roles.List(identityClient, listOpts).AllPages()
+	allPages, err := roles.List(identityClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query openstack_identity_role_v3: %s", err)
 	}

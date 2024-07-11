@@ -12,8 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/acls"
-	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/acls"
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/secrets"
 )
 
 func getDateFilters() [4]string {
@@ -168,7 +168,7 @@ func dataSourceKeyManagerSecretV1() *schema.Resource {
 
 func dataSourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	kmClient, err := config.KeyManagerV1Client(GetRegion(d, config))
+	kmClient, err := config.KeyManagerV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack barbican client: %s", err)
 	}
@@ -189,7 +189,7 @@ func dataSourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceDat
 
 	log.Printf("[DEBUG] %#+v List Options: %#v", dataSourceParseDateFilter(d.Get("updated_at_filter").(string)), listOpts)
 
-	allPages, err := secrets.List(kmClient, listOpts).AllPages()
+	allPages, err := secrets.List(kmClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query openstack_keymanager_secret_v1 secrets: %s", err)
 	}
@@ -233,8 +233,8 @@ func dataSourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceDat
 	payloadContentType := secret.ContentTypes["default"]
 	d.Set("payload_content_type", payloadContentType)
 
-	d.Set("payload", keyManagerSecretV1GetPayload(kmClient, d.Id(), payloadContentType))
-	metadataMap, err := secrets.GetMetadata(kmClient, d.Id()).Extract()
+	d.Set("payload", keyManagerSecretV1GetPayload(ctx, kmClient, d.Id(), payloadContentType))
+	metadataMap, err := secrets.GetMetadata(ctx, kmClient, d.Id()).Extract()
 	if err != nil {
 		log.Printf("[DEBUG] Unable to get %s secret metadata: %s", uuid, err)
 	}
@@ -246,7 +246,7 @@ func dataSourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceDat
 		d.Set("expiration", secret.Expiration.Format(time.RFC3339))
 	}
 
-	acl, err := acls.GetSecretACL(kmClient, d.Id()).Extract()
+	acl, err := acls.GetSecretACL(ctx, kmClient, d.Id()).Extract()
 	if err != nil {
 		log.Printf("[DEBUG] Unable to get %s secret acls: %s", uuid, err)
 	}

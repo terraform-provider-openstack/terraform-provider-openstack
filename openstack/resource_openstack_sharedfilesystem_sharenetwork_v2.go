@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/securityservices"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/sharenetworks"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/securityservices"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/sharenetworks"
 )
 
 func resourceSharedFilesystemShareNetworkV2() *schema.Resource {
@@ -95,7 +95,7 @@ func resourceSharedFilesystemShareNetworkV2() *schema.Resource {
 
 func resourceSharedFilesystemShareNetworkV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
+	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
@@ -110,7 +110,7 @@ func resourceSharedFilesystemShareNetworkV2Create(ctx context.Context, d *schema
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
 	log.Printf("[DEBUG] Attempting to create sharenetwork")
-	sharenetwork, err := sharenetworks.Create(sfsClient, createOpts).Extract()
+	sharenetwork, err := sharenetworks.Create(ctx, sfsClient, createOpts).Extract()
 
 	if err != nil {
 		return diag.Errorf("Error creating sharenetwork: %s", err)
@@ -122,7 +122,7 @@ func resourceSharedFilesystemShareNetworkV2Create(ctx context.Context, d *schema
 	for _, securityServiceID := range securityServiceIDs {
 		log.Printf("[DEBUG] Adding %s security service to sharenetwork %s", securityServiceID, sharenetwork.ID)
 		securityServiceOpts := sharenetworks.AddSecurityServiceOpts{SecurityServiceID: securityServiceID}
-		_, err = sharenetworks.AddSecurityService(sfsClient, sharenetwork.ID, securityServiceOpts).Extract()
+		_, err = sharenetworks.AddSecurityService(ctx, sfsClient, sharenetwork.ID, securityServiceOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error adding %s security service to sharenetwork: %s", securityServiceID, err)
 		}
@@ -133,19 +133,19 @@ func resourceSharedFilesystemShareNetworkV2Create(ctx context.Context, d *schema
 
 func resourceSharedFilesystemShareNetworkV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
+	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
-	sharenetwork, err := sharenetworks.Get(sfsClient, d.Id()).Extract()
+	sharenetwork, err := sharenetworks.Get(ctx, sfsClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "sharenetwork"))
 	}
 
 	log.Printf("[DEBUG] Retrieved sharenetwork %s: %#v", d.Id(), sharenetwork)
 
-	securityServiceIDs, err := resourceSharedFilesystemShareNetworkV2GetSvcByShareNetID(sfsClient, d.Id())
+	securityServiceIDs, err := resourceSharedFilesystemShareNetworkV2GetSvcByShareNetID(ctx, sfsClient, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -169,7 +169,7 @@ func resourceSharedFilesystemShareNetworkV2Read(ctx context.Context, d *schema.R
 
 func resourceSharedFilesystemShareNetworkV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
+	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
@@ -192,7 +192,7 @@ func resourceSharedFilesystemShareNetworkV2Update(ctx context.Context, d *schema
 
 	if updateOpts != (sharenetworks.UpdateOpts{}) {
 		log.Printf("[DEBUG] Updating sharenetwork %s with options: %#v", d.Id(), updateOpts)
-		_, err = sharenetworks.Update(sfsClient, d.Id(), updateOpts).Extract()
+		_, err = sharenetworks.Update(ctx, sfsClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Unable to update sharenetwork %s: %s", d.Id(), err)
 		}
@@ -209,7 +209,7 @@ func resourceSharedFilesystemShareNetworkV2Update(ctx context.Context, d *schema
 			id := newSecurityServiceID.(string)
 			log.Printf("[DEBUG] Adding new %s security service to sharenetwork %s", id, d.Id())
 			securityServiceOpts := sharenetworks.AddSecurityServiceOpts{SecurityServiceID: id}
-			_, err = sharenetworks.AddSecurityService(sfsClient, d.Id(), securityServiceOpts).Extract()
+			_, err = sharenetworks.AddSecurityService(ctx, sfsClient, d.Id(), securityServiceOpts).Extract()
 			if err != nil {
 				return diag.Errorf("Error adding new %s security service to sharenetwork: %s", id, err)
 			}
@@ -218,7 +218,7 @@ func resourceSharedFilesystemShareNetworkV2Update(ctx context.Context, d *schema
 			id := oldSecurityServiceID.(string)
 			log.Printf("[DEBUG] Removing old %s security service from sharenetwork %s", id, d.Id())
 			securityServiceOpts := sharenetworks.RemoveSecurityServiceOpts{SecurityServiceID: id}
-			_, err = sharenetworks.RemoveSecurityService(sfsClient, d.Id(), securityServiceOpts).Extract()
+			_, err = sharenetworks.RemoveSecurityService(ctx, sfsClient, d.Id(), securityServiceOpts).Extract()
 			if err != nil {
 				return diag.Errorf("Error removing old %s security service from sharenetwork: %s", id, err)
 			}
@@ -230,13 +230,13 @@ func resourceSharedFilesystemShareNetworkV2Update(ctx context.Context, d *schema
 
 func resourceSharedFilesystemShareNetworkV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
+	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Attempting to delete sharenetwork %s", d.Id())
-	err = sharenetworks.Delete(sfsClient, d.Id()).ExtractErr()
+	err = sharenetworks.Delete(ctx, sfsClient, d.Id()).ExtractErr()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting sharenetwork"))
 	}
@@ -244,9 +244,9 @@ func resourceSharedFilesystemShareNetworkV2Delete(ctx context.Context, d *schema
 	return nil
 }
 
-func resourceSharedFilesystemShareNetworkV2GetSvcByShareNetID(sfsClient *gophercloud.ServiceClient, shareNetworkID string) ([]string, error) {
+func resourceSharedFilesystemShareNetworkV2GetSvcByShareNetID(ctx context.Context, sfsClient *gophercloud.ServiceClient, shareNetworkID string) ([]string, error) {
 	securityServiceListOpts := securityservices.ListOpts{ShareNetworkID: shareNetworkID}
-	securityServicePages, err := securityservices.List(sfsClient, securityServiceListOpts).AllPages()
+	securityServicePages, err := securityservices.List(sfsClient, securityServiceListOpts).AllPages(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to list security services for sharenetwork %s: %s", shareNetworkID, err)
 	}

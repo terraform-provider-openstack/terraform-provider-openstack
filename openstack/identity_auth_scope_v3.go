@@ -1,12 +1,13 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/identity/v2/tenants"
-	tokens2 "github.com/gophercloud/gophercloud/openstack/identity/v2/tokens"
-	tokens3 "github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v2/tenants"
+	tokens2 "github.com/gophercloud/gophercloud/v2/openstack/identity/v2/tokens"
+	tokens3 "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
 )
 
 func flattenIdentityAuthScopeV3Roles(roles []tokens3.Role) []map[string]string {
@@ -55,7 +56,7 @@ type authScopeTokenDetails struct {
 	roles   []tokens3.Role
 }
 
-func getTokenDetails(sc *gophercloud.ServiceClient) (authScopeTokenDetails, error) {
+func getTokenDetails(ctx context.Context, sc *gophercloud.ServiceClient) (authScopeTokenDetails, error) {
 	var (
 		details authScopeTokenDetails
 		err     error
@@ -106,7 +107,7 @@ func getTokenDetails(sc *gophercloud.ServiceClient) (authScopeTokenDetails, erro
 			return details, err
 		}
 	default:
-		res := tokens3.Get(sc, sc.ProviderClient.TokenID)
+		res := tokens3.Get(ctx, sc, sc.ProviderClient.TokenID)
 		if res.Err != nil {
 			return details, res.Err
 		}
@@ -138,7 +139,7 @@ type authScopeTokenInfo struct {
 	tokenID   string
 }
 
-func getTokenInfo(sc *gophercloud.ServiceClient) (authScopeTokenInfo, error) {
+func getTokenInfo(ctx context.Context, sc *gophercloud.ServiceClient) (authScopeTokenInfo, error) {
 	r := sc.ProviderClient.GetAuthResult()
 	switch r := r.(type) {
 	case tokens2.CreateResult:
@@ -146,7 +147,7 @@ func getTokenInfo(sc *gophercloud.ServiceClient) (authScopeTokenInfo, error) {
 	case tokens3.CreateResult, tokens3.GetResult:
 		return getTokenInfoV3(r)
 	default:
-		token := tokens3.Get(sc, sc.ProviderClient.TokenID)
+		token := tokens3.Get(ctx, sc, sc.ProviderClient.TokenID)
 		if token.Err != nil {
 			return authScopeTokenInfo{}, token.Err
 		}

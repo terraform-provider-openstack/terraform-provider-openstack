@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/trunks"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/trunks"
 )
 
 func dataSourceNetworkingTrunkV2() *schema.Resource {
@@ -96,7 +96,7 @@ func dataSourceNetworkingTrunkV2() *schema.Resource {
 
 func dataSourceNetworkingTrunkV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -137,7 +137,7 @@ func dataSourceNetworkingTrunkV2Read(ctx context.Context, d *schema.ResourceData
 		listOpts.Tags = strings.Join(tags, ",")
 	}
 
-	pages, err := trunks.List(networkingClient, listOpts).AllPages()
+	pages, err := trunks.List(networkingClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to retrieve trunks: %s", err)
 	}

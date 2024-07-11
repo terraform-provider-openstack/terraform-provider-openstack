@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"testing"
@@ -8,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/servergroups"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servergroups"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
 )
 
 func TestAccComputeV2ServerGroup_basic(t *testing.T) {
@@ -209,7 +210,7 @@ func TestAccComputeV2ServerGroup_soft_affinity(t *testing.T) {
 
 func testAccCheckComputeV2ServerGroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.ComputeV2Client(osRegionName)
+	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -219,7 +220,7 @@ func testAccCheckComputeV2ServerGroupDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := servergroups.Get(computeClient, rs.Primary.ID).Extract()
+		_, err := servergroups.Get(context.TODO(), computeClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("ServerGroup still exists")
 		}
@@ -240,12 +241,12 @@ func testAccCheckComputeV2ServerGroupExists(n string, kp *servergroups.ServerGro
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(osRegionName)
+		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		found, err := servergroups.Get(computeClient, rs.Primary.ID).Extract()
+		found, err := servergroups.Get(context.TODO(), computeClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
