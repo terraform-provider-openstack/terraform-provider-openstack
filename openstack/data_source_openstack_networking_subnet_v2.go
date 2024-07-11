@@ -79,6 +79,11 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 				Optional: true,
 			},
 
+			"dns_publish_fixed_ip": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+
 			// Computed values
 			"allocation_pools": {
 				Type:     schema.TypeList,
@@ -230,6 +235,11 @@ func dataSourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceDat
 		listOpts.SubnetPoolID = v.(string)
 	}
 
+	if v, ok := d.GetOk("dns_publish_fixed_ip"); ok {
+		v := v.(bool)
+		listOpts.DNSPublishFixedIP = &v
+	}
+
 	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		listOpts.Tags = strings.Join(tags, ",")
@@ -271,6 +281,7 @@ func dataSourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceDat
 	d.Set("gateway_ip", subnet.GatewayIP)
 	d.Set("enable_dhcp", subnet.EnableDHCP)
 	d.Set("subnetpool_id", subnet.SubnetPoolID)
+	d.Set("dns_publish_fixed_ip", subnet.DNSPublishFixedIP)
 	d.Set("all_tags", subnet.Tags)
 	d.Set("region", GetRegion(d, config))
 
