@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -168,28 +169,10 @@ func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.Reso
 
 	decompress := d.Get("decompress").(bool)
 	if decompress {
-		// If we're here "Content-Encoding" in not filled, we'll read
-		// "Content-Type" to select format
-		switch resp.Header.Get("Content-Type") {
-		case "gzip", "application/gzip":
-			reader, err = gzip.NewReader(resp.Body)
-			if err != nil {
-				delFile()
-				return "", fmt.Errorf("Error decompressing gzip image: %s", err)
-			}
-		case "bzip2", "application/bzip2", "application/x-bzip2":
-			bz2Reader := bzip2.NewReader(resp.Body)
-			reader = io.NopCloser(bz2Reader)
-		case "xz", "application/xz", "application/x-xz":
-			xzReader, err := xz.NewReader(resp.Body)
-			if err != nil {
-				delFile()
-				return "", fmt.Errorf("Error decompressing xz image: %s", err)
-			}
-			reader = io.NopCloser(xzReader)
-		default:
+		reader, err = resourceImagesImageV2DetectCompression(resp)
+		if err != nil {
 			delFile()
-			return "", fmt.Errorf("Error decompressing image, format %s is not supported", resp.Header.Get("Content-Type"))
+			return "", err
 		}
 		defer reader.Close()
 	}
@@ -200,6 +183,46 @@ func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.Reso
 	}
 
 	return filename, nil
+}
+
+func resourceImagesImageV2DetectCompression(resp *http.Response) (io.ReadCloser, error) {
+	ct := resp.Header.Get("Content-Type")
+
+	// extract filename extension from "Content-Disposition" header
+	cd := resp.Header.Get("Content-Disposition")
+	_, p, _ := mime.ParseMediaType(cd)
+	ext := strings.Trim(filepath.Ext(p["filename"]), ".")
+
+	formats := []string{ct, ext}
+	for _, format := range formats {
+		switch format {
+		case "gzip", "application/gzip", "application/x-gzip":
+			reader, err := gzip.NewReader(resp.Body)
+			if err != nil {
+				return nil, fmt.Errorf("Error decompressing gzip image: %s", err)
+			}
+			return reader, nil
+		case "bzip2", "application/bzip2", "application/x-bzip2":
+			bz2Reader := bzip2.NewReader(resp.Body)
+			return io.NopCloser(bz2Reader), nil
+		case "xz", "application/xz", "application/x-xz":
+			xzReader, err := xz.NewReader(resp.Body)
+			if err != nil {
+				return nil, fmt.Errorf("Error decompressing xz image: %s", err)
+			}
+			return io.NopCloser(xzReader), nil
+		case "application/octet-stream":
+			// This is a fallback for cases where the server does not provide
+			// a Content-Type header. In this case, we'll try to detect the
+			// compression based on the Content-Disposition header.
+		case "":
+			// This triggers the error at the end of the function.
+		default:
+			return nil, fmt.Errorf("Error decompressing image, format %s is not supported", format)
+		}
+	}
+
+	return nil, fmt.Errorf("Error decompressing image, detected %q formats are not supported", formats)
 }
 
 func resourceImagesImageV2RefreshFunc(client *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
