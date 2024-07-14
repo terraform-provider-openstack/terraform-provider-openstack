@@ -13,7 +13,7 @@ linters-settings:
   depguard:
     rules:
       prevent_unmaintained_packages:
-        list-mode: lax 
+        list-mode: lax
         files:
           - $all
           - "!$test"
