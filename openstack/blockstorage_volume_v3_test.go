@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 )
 
@@ -57,6 +58,38 @@ func TestUnitBlockStorageVolumeV3AttachmentHash(t *testing.T) {
 
 	expectedHashcode := 236219624
 	actualHashcode := blockStorageVolumeV3AttachmentHash(attachments[0])
+
+	assert.Equal(t, expectedHashcode, actualHashcode)
+}
+
+func blockStorageVolumeV3SchedulerHints() schedulerhints.SchedulerHints {
+	return schedulerhints.SchedulerHints{
+		SameHost:             []string{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
+		DifferentHost:        []string{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
+		LocalToInstance:      "83ec2e3b-4321-422b-8706-a84185f52a0a",
+		Query:                "[“=”, “$backend_id”, “rbd:vol@ceph#cloud”]",
+		AdditionalProperties: map[string]interface{}{},
+	}
+}
+
+func TestUnitFlattenBlockStorageVolumeV3SchedulerHints(t *testing.T) {
+	expectedSchedulerHints := map[string]interface{}{
+		"same_host":             []interface{}{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
+		"different_host":        []interface{}{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
+		"local_to_instance":     "83ec2e3b-4321-422b-8706-a84185f52a0a",
+		"query":                 "[“=”, “$backend_id”, “rbd:vol@ceph#cloud”]",
+		"additional_properties": map[string]interface{}{},
+	}
+
+	actualSchedulerHints := expandBlockStorageVolumeV3SchedulerHints(blockStorageVolumeV3SchedulerHints())
+	assert.Equal(t, expectedSchedulerHints, actualSchedulerHints)
+}
+
+func TestUnitBlockStorageVolumeV3SchedulerHintsHash(t *testing.T) {
+	s := expandBlockStorageVolumeV3SchedulerHints(blockStorageVolumeV3SchedulerHints())
+
+	expectedHashcode := 1530836638
+	actualHashcode := blockStorageVolumeV3SchedulerHintsHash(s)
 
 	assert.Equal(t, expectedHashcode, actualHashcode)
 }

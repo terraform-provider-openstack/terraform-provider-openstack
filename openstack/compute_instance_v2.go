@@ -12,12 +12,10 @@ package openstack
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tenantnetworks"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
@@ -153,111 +151,19 @@ func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]Instanc
 
 // getInstanceNetworkInfo will query for network information in order to make
 // an accurate determination of a network's name and a network's ID.
-//
-// We will try to first query the Neutron network service and fall back to the
-// legacy nova-network service if that fails.
-//
-// If OS_NOVA_NETWORK is set, query nova-network even if Neutron is available.
-// This is to be able to explicitly test the nova-network API.
 func getInstanceNetworkInfo(d *schema.ResourceData, meta interface{}, queryType, queryTerm string) (map[string]interface{}, error) {
 	config := meta.(*Config)
-
-	if _, ok := os.LookupEnv("OS_NOVA_NETWORK"); !ok {
-		networkClient, err := config.NetworkingV2Client(GetRegion(d, config))
-		if err == nil {
-			networkInfo, err := getInstanceNetworkInfoNeutron(networkClient, queryType, queryTerm)
-			if err != nil {
-				return nil, fmt.Errorf("Error trying to get network information from the Network API: %s", err)
-			}
-
-			return networkInfo, nil
-		}
+	networkClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	if err != nil {
+		return nil, fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	log.Printf("[DEBUG] Unable to obtain a network client")
-
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	networkInfo, err := getInstanceNetworkInfoNeutron(networkClient, queryType, queryTerm)
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenStack compute client: %s", err)
-	}
-
-	networkInfo, err := getInstanceNetworkInfoNovaNet(computeClient, queryType, queryTerm)
-	if err != nil {
-		return nil, fmt.Errorf("Error trying to get network information from the Nova API: %s", err)
+		return nil, fmt.Errorf("Error trying to get network information from the Network API: %s", err)
 	}
 
 	return networkInfo, nil
-}
-
-// getInstanceNetworkInfoNovaNet will query the os-tenant-networks API for
-// the network information.
-func getInstanceNetworkInfoNovaNet(client *gophercloud.ServiceClient, queryType, queryTerm string) (map[string]interface{}, error) {
-	// If somehow a port ended up here, we should just error out.
-	if queryType == "port" {
-		return nil, fmt.Errorf(
-			"Unable to query a port (%s) using the Nova API", queryTerm)
-	}
-
-	// test to see if the tenantnetworks api is available
-	log.Printf("[DEBUG] testing for os-tenant-networks")
-	tenantNetworksAvailable := true
-
-	allPages, err := tenantnetworks.List(client).AllPages()
-	if err != nil {
-		switch err.(type) {
-		case gophercloud.ErrDefault404:
-			tenantNetworksAvailable = false
-		case gophercloud.ErrDefault403:
-			tenantNetworksAvailable = false
-		case gophercloud.ErrUnexpectedResponseCode:
-			tenantNetworksAvailable = false
-		default:
-			return nil, fmt.Errorf(
-				"An error occurred while querying the Nova API for network information: %s", err)
-		}
-	}
-
-	if !tenantNetworksAvailable {
-		// we can't query the APIs for more information, but in some cases
-		// the information provided is enough
-		log.Printf("[DEBUG] os-tenant-networks disabled.")
-		return map[string]interface{}{queryType: queryTerm}, nil
-	}
-
-	networkList, err := tenantnetworks.ExtractNetworks(allPages)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"An error occurred while querying the Nova API for network information: %s", err)
-	}
-
-	var networkFound bool
-	var network tenantnetworks.Network
-
-	for _, v := range networkList {
-		if queryType == "id" && v.ID == queryTerm {
-			networkFound = true
-			network = v
-			break
-		}
-
-		if queryType == "name" && v.Name == queryTerm {
-			networkFound = true
-			network = v
-			break
-		}
-	}
-
-	if networkFound {
-		v := map[string]interface{}{
-			"uuid": network.ID,
-			"name": network.Name,
-		}
-
-		log.Printf("[DEBUG] getInstanceNetworkInfoNovaNet: %#v", v)
-		return v, nil
-	}
-
-	return nil, fmt.Errorf("Could not find any matching network for %s %s", queryType, queryTerm)
 }
 
 // getInstanceNetworkInfoNeutron will query the neutron API for the network
