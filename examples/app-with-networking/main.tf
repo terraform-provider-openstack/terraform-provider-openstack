@@ -76,9 +76,14 @@ resource "openstack_compute_instance_v2" "terraform" {
   }
 }
 
-resource "openstack_compute_floatingip_associate_v2" "terraform" {
+data "openstack_networking_port_v2" "port" {
+  device_id  = openstack_compute_instance_v2.terraform.id
+  network_id = openstack_compute_instance_v2.terraform.network.0.uuid
+}
+
+resource "openstack_networking_floatingip_associate_v2" "fip_associate" {
   floating_ip = openstack_networking_floatingip_v2.terraform.address
-  instance_id = openstack_compute_instance_v2.terraform.id
+  port_id     = data.openstack_networking_port_v2.port.id
 
   provisioner "remote-exec" {
     connection {

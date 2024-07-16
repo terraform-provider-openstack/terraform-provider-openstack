@@ -200,10 +200,14 @@ resource "openstack_compute_instance_v2" "multi-net" {
   }
 }
 
-resource "openstack_compute_floatingip_associate_v2" "myip" {
-  floating_ip = openstack_networking_floatingip_v2.myip.address
-  instance_id = openstack_compute_instance_v2.multi-net.id
-  fixed_ip    = openstack_compute_instance_v2.multi-net.network.1.fixed_ip_v4
+data "openstack_networking_port_v2" "vm-port" {
+  device_id  = openstack_compute_instance_v2.multi-net.id
+  network_id = openstack_compute_instance_v2.multi-net.network.1.uuid
+}
+
+resource "openstack_networking_floatingip_associate_v2" "myip" {
+  floating_ip = openstack_networking_floatingip_v2.fip_vm.address
+  port_id     = data.openstack_networking_port_v2.vm-port.id
 }
 ```
 
