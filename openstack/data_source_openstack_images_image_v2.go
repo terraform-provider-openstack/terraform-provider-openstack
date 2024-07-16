@@ -117,17 +117,17 @@ func dataSourceImagesImageV2() *schema.Resource {
 				ConflictsWith: []string{"name"},
 			},
 
-			// Computed values
 			"container_format": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 
 			"disk_format": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 
+			// Computed values
 			"min_disk_gb": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -212,16 +212,18 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	listOpts := images.ListOpts{
-		Name:         d.Get("name").(string),
-		Visibility:   visibility,
-		Hidden:       d.Get("hidden").(bool),
-		Owner:        d.Get("owner").(string),
-		Status:       images.ImageStatusActive,
-		SizeMin:      int64(d.Get("size_min").(int)),
-		SizeMax:      int64(d.Get("size_max").(int)),
-		Sort:         d.Get("sort").(string),
-		Tags:         tags,
-		MemberStatus: memberStatus,
+		Name:            d.Get("name").(string),
+		Visibility:      visibility,
+		Hidden:          d.Get("hidden").(bool),
+		Owner:           d.Get("owner").(string),
+		Status:          images.ImageStatusActive,
+		SizeMin:         int64(d.Get("size_min").(int)),
+		SizeMax:         int64(d.Get("size_max").(int)),
+		Sort:            d.Get("sort").(string),
+		ContainerFormat: d.Get("container_format").(string),
+		DiskFormat:      d.Get("disk_format").(string),
+		Tags:            tags,
+		MemberStatus:    memberStatus,
 	}
 
 	log.Printf("[DEBUG] List Options: %#v", listOpts)
