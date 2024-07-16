@@ -18,6 +18,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/klauspost/compress/zstd"
 	"github.com/ulikunitz/xz"
 
 	"github.com/gophercloud/gophercloud"
@@ -196,7 +197,7 @@ func resourceImagesImageV2DetectCompression(resp *http.Response) (io.ReadCloser,
 	formats := []string{ct, ext}
 	for _, format := range formats {
 		switch format {
-		case "gzip", "application/gzip", "application/x-gzip":
+		case "gz", "gzip", "application/gzip", "application/x-gzip":
 			reader, err := gzip.NewReader(resp.Body)
 			if err != nil {
 				return nil, fmt.Errorf("Error decompressing gzip image: %s", err)
@@ -211,6 +212,12 @@ func resourceImagesImageV2DetectCompression(resp *http.Response) (io.ReadCloser,
 				return nil, fmt.Errorf("Error decompressing xz image: %s", err)
 			}
 			return io.NopCloser(xzReader), nil
+		case "zst", "zstd", "application/zstd", "application/x-zstd":
+			zstdReader, err := zstd.NewReader(resp.Body)
+			if err != nil {
+				return nil, fmt.Errorf("Error decompressing zstd image: %s", err)
+			}
+			return zstdReader.IOReadCloser(), nil
 		case "application/octet-stream":
 			// This is a fallback for cases where the server does not provide
 			// a Content-Type header. In this case, we'll try to detect the

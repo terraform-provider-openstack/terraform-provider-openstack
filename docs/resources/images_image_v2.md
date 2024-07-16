@@ -103,8 +103,8 @@ The following arguments are supported:
 * `decompress` - (Optional) If true, this provider will decompress downloaded
   image before uploading it to OpenStack. Decompression algorithm is chosen by
   checking "Content-Type" or `Content-Disposition` header to detect the
-  filename extension. Supported algorithm are: gzip, bzip2 and xz. Defaults to
-  false. Changing this creates a new Image.
+  filename extension. Supported algorithms are: gzip, bzip2, xz and zst.
+  Defaults to false. Changing this creates a new Image.
 
 ## Attributes Reference
 
