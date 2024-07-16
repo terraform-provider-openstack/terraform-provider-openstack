@@ -1,14 +1,15 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/db/v1/configurations"
-	"github.com/gophercloud/gophercloud/openstack/db/v1/instances"
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/configurations"
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/instances"
 )
 
 func TestAccDatabaseV1Instance_basic(t *testing.T) {
@@ -69,12 +70,12 @@ func testAccCheckDatabaseV1InstanceExists(n string, instance *instances.Instance
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		DatabaseV1Client, err := config.DatabaseV1Client(osRegionName)
+		DatabaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		found, err := instances.Get(DatabaseV1Client, rs.Primary.ID).Extract()
+		found, err := instances.Get(context.TODO(), DatabaseV1Client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -92,7 +93,7 @@ func testAccCheckDatabaseV1InstanceExists(n string, instance *instances.Instance
 func testAccCheckDatabaseV1InstanceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
-	DatabaseV1Client, err := config.DatabaseV1Client(osRegionName)
+	DatabaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -102,7 +103,7 @@ func testAccCheckDatabaseV1InstanceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := instances.Get(DatabaseV1Client, rs.Primary.ID).Extract()
+		_, err := instances.Get(context.TODO(), DatabaseV1Client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Instance still exists")
 		}

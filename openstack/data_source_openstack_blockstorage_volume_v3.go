@@ -7,8 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumehost"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 )
 
 func dataSourceBlockStorageVolumeV3() *schema.Resource {
@@ -94,14 +93,9 @@ func dataSourceBlockStorageVolumeV3() *schema.Resource {
 	}
 }
 
-type VolumeWithHost struct {
-	volumes.Volume
-	volumehost.VolumeHostExt
-}
-
 func dataSourceBlockStorageVolumeV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	client, err := config.BlockStorageV3Client(GetRegion(d, config))
+	client, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
@@ -112,12 +106,12 @@ func dataSourceBlockStorageVolumeV3Read(ctx context.Context, d *schema.ResourceD
 		Status:   d.Get("status").(string),
 	}
 
-	allPages, err := volumes.List(client, listOpts).AllPages()
+	allPages, err := volumes.List(client, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query openstack_blockstorage_volume_v3: %s", err)
 	}
 
-	var allVolumes []VolumeWithHost
+	var allVolumes []volumes.Volume
 	err = volumes.ExtractVolumesInto(allPages, &allVolumes)
 	if err != nil {
 		return diag.Errorf("Unable to retrieve openstack_blockstorage_volume_v3: %s", err)
@@ -136,7 +130,7 @@ func dataSourceBlockStorageVolumeV3Read(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func dataSourceBlockStorageVolumeV3Attributes(d *schema.ResourceData, volume VolumeWithHost) {
+func dataSourceBlockStorageVolumeV3Attributes(d *schema.ResourceData, volume volumes.Volume) {
 	d.SetId(volume.ID)
 	d.Set("name", volume.Name)
 	d.Set("status", volume.Status)

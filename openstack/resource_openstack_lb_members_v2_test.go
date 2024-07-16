@@ -1,15 +1,17 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 )
 
 func testAccCheckLBV2MembersComputeHash(members *[]pools.Member, weight int, address string, idx *int) resource.TestCheckFunc {
@@ -102,7 +104,7 @@ func TestAccLBV2Members_basic(t *testing.T) {
 
 func testAccCheckLBV2MembersDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := config.LoadBalancerV2Client(osRegionName)
+	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -114,9 +116,9 @@ func testAccCheckLBV2MembersDestroy(s *terraform.State) error {
 
 		poolID := rs.Primary.Attributes["pool_id"]
 
-		allPages, err := pools.ListMembers(lbClient, poolID, pools.ListMembersOpts{}).AllPages()
+		allPages, err := pools.ListMembers(lbClient, poolID, pools.ListMembersOpts{}).AllPages(context.TODO())
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return nil
 			}
 			return fmt.Errorf("Error getting openstack_lb_members_v2: %s", err)
@@ -147,13 +149,13 @@ func testAccCheckLBV2MembersExists(n string, members *[]pools.Member) resource.T
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := config.LoadBalancerV2Client(osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
 
 		poolID := rs.Primary.Attributes["pool_id"]
-		allPages, err := pools.ListMembers(lbClient, poolID, pools.ListMembersOpts{}).AllPages()
+		allPages, err := pools.ListMembers(lbClient, poolID, pools.ListMembersOpts{}).AllPages(context.TODO())
 		if err != nil {
 			return fmt.Errorf("Error getting openstack_lb_members_v2: %s", err)
 		}

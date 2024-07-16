@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 )
 
 func TestAccLBV2Member_basic(t *testing.T) {
@@ -101,13 +102,13 @@ func testAccCheckLBV2MemberHasTag(n, tag string) resource.TestCheckFunc {
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := config.LoadBalancerV2Client(osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
 
 		poolID := rs.Primary.Attributes["pool_id"]
-		found, err := pools.GetMember(lbClient, poolID, rs.Primary.ID).Extract()
+		found, err := pools.GetMember(context.TODO(), lbClient, poolID, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -138,13 +139,13 @@ func testAccCheckLBV2MemberTagCount(n string, expected int) resource.TestCheckFu
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := config.LoadBalancerV2Client(osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
 
 		poolID := rs.Primary.Attributes["pool_id"]
-		found, err := pools.GetMember(lbClient, poolID, rs.Primary.ID).Extract()
+		found, err := pools.GetMember(context.TODO(), lbClient, poolID, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -163,7 +164,7 @@ func testAccCheckLBV2MemberTagCount(n string, expected int) resource.TestCheckFu
 
 func testAccCheckLBV2MemberDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := config.LoadBalancerV2Client(osRegionName)
+	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -174,7 +175,7 @@ func testAccCheckLBV2MemberDestroy(s *terraform.State) error {
 		}
 
 		poolID := rs.Primary.Attributes["pool_id"]
-		_, err := pools.GetMember(lbClient, poolID, rs.Primary.ID).Extract()
+		_, err := pools.GetMember(context.TODO(), lbClient, poolID, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Member still exists: %s", rs.Primary.ID)
 		}
@@ -195,13 +196,13 @@ func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestC
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := config.LoadBalancerV2Client(osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
 
 		poolID := rs.Primary.Attributes["pool_id"]
-		found, err := pools.GetMember(lbClient, poolID, rs.Primary.ID).Extract()
+		found, err := pools.GetMember(context.TODO(), lbClient, poolID, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

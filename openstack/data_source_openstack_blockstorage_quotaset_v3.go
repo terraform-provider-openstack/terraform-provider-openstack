@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/quotasets"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/quotasets"
 )
 
 func dataSourceBlockStorageQuotasetV3() *schema.Resource {
@@ -73,14 +73,14 @@ func dataSourceBlockStorageQuotasetV3() *schema.Resource {
 func dataSourceBlockStorageQuotasetV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
-	blockStorageClient, err := config.BlockStorageV3Client(region)
+	blockStorageClient, err := config.BlockStorageV3Client(ctx, region)
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	projectID := d.Get("project_id").(string)
 
-	q, err := quotasets.Get(blockStorageClient, projectID).Extract()
+	q, err := quotasets.Get(ctx, blockStorageClient, projectID).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_blockstorage_quotaset_v3"))
 	}

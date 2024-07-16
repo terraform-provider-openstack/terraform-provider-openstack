@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 )
 
 func dataSourceNetworkingRouterV2() *schema.Resource {
@@ -94,7 +94,7 @@ func dataSourceNetworkingRouterV2() *schema.Resource {
 
 func dataSourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -136,7 +136,7 @@ func dataSourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceDat
 		listOpts.Tags = strings.Join(tags, ",")
 	}
 
-	pages, err := routers.List(networkingClient, listOpts).AllPages()
+	pages, err := routers.List(networkingClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to list Routers: %s", err)
 	}

@@ -1,15 +1,16 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
 )
 
 func TestAccNetworkingV2SubnetRoute_basic(t *testing.T) {
@@ -65,12 +66,12 @@ func testAccCheckNetworkingV2SubnetRouteEmpty(n string) resource.TestCheckFunc {
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		subnet, err := subnets.Get(networkingClient, rs.Primary.ID).Extract()
+		subnet, err := subnets.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -99,12 +100,12 @@ func testAccCheckNetworkingV2SubnetRouteExists(n string) resource.TestCheckFunc 
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		subnet, err := subnets.Get(networkingClient, rs.Primary.Attributes["subnet_id"]).Extract()
+		subnet, err := subnets.Get(context.TODO(), networkingClient, rs.Primary.Attributes["subnet_id"]).Extract()
 		if err != nil {
 			return err
 		}
@@ -129,7 +130,7 @@ func testAccCheckNetworkingV2SubnetRouteExists(n string) resource.TestCheckFunc 
 
 func testAccCheckNetworkingV2SubnetRouteDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(osRegionName)
+	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -141,7 +142,7 @@ func testAccCheckNetworkingV2SubnetRouteDestroy(s *terraform.State) error {
 
 		var routeExists = false
 
-		subnet, err := subnets.Get(networkingClient, rs.Primary.Attributes["subnet_id"]).Extract()
+		subnet, err := subnets.Get(context.TODO(), networkingClient, rs.Primary.Attributes["subnet_id"]).Extract()
 		if err == nil {
 			var rts = subnet.HostRoutes
 			for _, r := range rts {

@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -9,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/applicationcredentials"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/applicationcredentials"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
 )
 
 func TestAccIdentityV3ApplicationCredential_basic(t *testing.T) {
@@ -110,12 +111,12 @@ func TestAccIdentityV3ApplicationCredential_access_rules(t *testing.T) {
 
 func testAccCheckIdentityV3ApplicationCredentialDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.IdentityV3Client(osRegionName)
+	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
-	token := tokens.Get(identityClient, config.OsClient.TokenID)
+	token := tokens.Get(context.TODO(), identityClient, config.OsClient.TokenID)
 	if token.Err != nil {
 		return token.Err
 	}
@@ -130,7 +131,7 @@ func testAccCheckIdentityV3ApplicationCredentialDestroy(s *terraform.State) erro
 			continue
 		}
 
-		_, err := applicationcredentials.Get(identityClient, user.ID, rs.Primary.ID).Extract()
+		_, err := applicationcredentials.Get(context.TODO(), identityClient, user.ID, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("ApplicationCredential still exists")
 		}
@@ -151,12 +152,12 @@ func testAccCheckIdentityV3ApplicationCredentialExists(n string, applicationCred
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.IdentityV3Client(osRegionName)
+		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
 
-		token := tokens.Get(identityClient, config.OsClient.TokenID)
+		token := tokens.Get(context.TODO(), identityClient, config.OsClient.TokenID)
 		if token.Err != nil {
 			return token.Err
 		}
@@ -166,7 +167,7 @@ func testAccCheckIdentityV3ApplicationCredentialExists(n string, applicationCred
 			return err
 		}
 
-		found, err := applicationcredentials.Get(identityClient, user.ID, rs.Primary.ID).Extract()
+		found, err := applicationcredentials.Get(context.TODO(), identityClient, user.ID, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -8,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/db/v1/instances"
-	"github.com/gophercloud/gophercloud/openstack/db/v1/users"
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/instances"
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/users"
 )
 
 func TestAccDatabaseV1User_basic(t *testing.T) {
@@ -57,12 +58,12 @@ func testAccCheckDatabaseV1UserExists(n string, instance *instances.Instance, us
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		DatabaseV1Client, err := config.DatabaseV1Client(osRegionName)
+		DatabaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating cloud database client: %s", err)
 		}
 
-		pages, err := users.List(DatabaseV1Client, instance.ID).AllPages()
+		pages, err := users.List(DatabaseV1Client, instance.ID).AllPages(context.TODO())
 		if err != nil {
 			return fmt.Errorf("Unable to retrieve users: %s", err)
 		}
@@ -86,7 +87,7 @@ func testAccCheckDatabaseV1UserExists(n string, instance *instances.Instance, us
 func testAccCheckDatabaseV1UserDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
-	DatabaseV1Client, err := config.DatabaseV1Client(osRegionName)
+	DatabaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating cloud database client: %s", err)
 	}
@@ -101,7 +102,7 @@ func testAccCheckDatabaseV1UserDestroy(s *terraform.State) error {
 			return fmt.Errorf("Malformed username: %s", rs.Primary.ID)
 		}
 
-		pages, err := users.List(DatabaseV1Client, parts[0]).AllPages()
+		pages, err := users.List(DatabaseV1Client, parts[0]).AllPages(context.TODO())
 		if err != nil {
 			return nil
 		}

@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/sharenetworks"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/sharenetworks"
 )
 
 func dataSourceSharedFilesystemShareNetworkV2() *schema.Resource {
@@ -93,7 +93,7 @@ func dataSourceSharedFilesystemShareNetworkV2() *schema.Resource {
 
 func dataSourceSharedFilesystemShareNetworkV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
+	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem sfsClient: %s", err)
 	}
@@ -115,7 +115,7 @@ func dataSourceSharedFilesystemShareNetworkV2Read(ctx context.Context, d *schema
 		listOpts.SegmentationID = v.(int)
 	}
 
-	allPages, err := sharenetworks.ListDetail(sfsClient, listOpts).AllPages()
+	allPages, err := sharenetworks.ListDetail(sfsClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query share networks: %s", err)
 	}
@@ -139,7 +139,7 @@ func dataSourceSharedFilesystemShareNetworkV2Read(ctx context.Context, d *schema
 
 		log.Printf("[DEBUG] Filtering share networks by a %s security service ID", securityServiceID)
 		for _, shareNetwork := range allShareNetworks {
-			tmp, err := resourceSharedFilesystemShareNetworkV2GetSvcByShareNetID(sfsClient, shareNetwork.ID)
+			tmp, err := resourceSharedFilesystemShareNetworkV2GetSvcByShareNetID(ctx, sfsClient, shareNetwork.ID)
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -165,7 +165,7 @@ func dataSourceSharedFilesystemShareNetworkV2Read(ctx context.Context, d *schema
 
 	// skip extra calls if "security_service_id" filter was already used
 	if securityServiceID == "" {
-		securityServiceIDs, err = resourceSharedFilesystemShareNetworkV2GetSvcByShareNetID(sfsClient, shareNetwork.ID)
+		securityServiceIDs, err = resourceSharedFilesystemShareNetworkV2GetSvcByShareNetID(ctx, sfsClient, shareNetwork.ID)
 		if err != nil {
 			return diag.FromErr(err)
 		}

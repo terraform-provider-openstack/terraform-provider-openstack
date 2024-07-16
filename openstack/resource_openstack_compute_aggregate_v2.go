@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/aggregates"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/aggregates"
 )
 
 func resourceComputeAggregateV2() *schema.Resource {
@@ -61,14 +61,14 @@ func resourceComputeAggregateV2() *schema.Resource {
 	}
 }
 
-func resourceComputeAggregateV2Create(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeAggregateV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	aggregate, err := aggregates.Create(computeClient, aggregates.CreateOpts{
+	aggregate, err := aggregates.Create(ctx, computeClient, aggregates.CreateOpts{
 		Name:             d.Get("name").(string),
 		AvailabilityZone: d.Get("zone").(string),
 	}).Extract()
@@ -82,14 +82,14 @@ func resourceComputeAggregateV2Create(_ context.Context, d *schema.ResourceData,
 	if ok {
 		hosts := h.(*schema.Set)
 		for _, host := range hosts.List() {
-			_, err = aggregates.AddHost(computeClient, aggregate.ID, aggregates.AddHostOpts{Host: host.(string)}).Extract()
+			_, err = aggregates.AddHost(ctx, computeClient, aggregate.ID, aggregates.AddHostOpts{Host: host.(string)}).Extract()
 			if err != nil {
 				return diag.Errorf("Error adding host %s to OpenStack aggregate: %s", host.(string), err)
 			}
 		}
 	}
 
-	_, err = aggregates.SetMetadata(computeClient, aggregate.ID, aggregates.SetMetadataOpts{Metadata: d.Get("metadata").(map[string]interface{})}).Extract()
+	_, err = aggregates.SetMetadata(ctx, computeClient, aggregate.ID, aggregates.SetMetadataOpts{Metadata: d.Get("metadata").(map[string]interface{})}).Extract()
 	if err != nil {
 		return diag.Errorf("Error setting metadata: %s", err)
 	}
@@ -97,9 +97,9 @@ func resourceComputeAggregateV2Create(_ context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceComputeAggregateV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeAggregateV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -109,7 +109,7 @@ func resourceComputeAggregateV2Read(_ context.Context, d *schema.ResourceData, m
 		return diag.Errorf("Can't convert ID to integer: %s", err)
 	}
 
-	aggregate, err := aggregates.Get(computeClient, id).Extract()
+	aggregate, err := aggregates.Get(ctx, computeClient, id).Extract()
 	if err != nil {
 		return diag.Errorf("Error getting host aggregate: %s", err)
 	}
@@ -129,9 +129,9 @@ func resourceComputeAggregateV2Read(_ context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceComputeAggregateV2Update(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeAggregateV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -150,7 +150,7 @@ func resourceComputeAggregateV2Update(_ context.Context, d *schema.ResourceData,
 	}
 
 	if updateOpts != (aggregates.UpdateOpts{}) {
-		_, err = aggregates.Update(computeClient, id, updateOpts).Extract()
+		_, err = aggregates.Update(ctx, computeClient, id, updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating OpenStack aggregate: %s", err)
 		}
@@ -164,7 +164,7 @@ func resourceComputeAggregateV2Update(_ context.Context, d *schema.ResourceData,
 		for _, h := range hostsToDelete.List() {
 			host := h.(string)
 			log.Printf("[DEBUG] Removing host '%s' from aggregate '%s'", host, d.Get("name"))
-			_, err = aggregates.RemoveHost(computeClient, id, aggregates.RemoveHostOpts{Host: host}).Extract()
+			_, err = aggregates.RemoveHost(ctx, computeClient, id, aggregates.RemoveHostOpts{Host: host}).Extract()
 			if err != nil {
 				return diag.Errorf("Error deleting host %s from OpenStack aggregate: %s", host, err)
 			}
@@ -172,7 +172,7 @@ func resourceComputeAggregateV2Update(_ context.Context, d *schema.ResourceData,
 		for _, h := range hostsToAdd.List() {
 			host := h.(string)
 			log.Printf("[DEBUG] Adding host '%s' to aggregate '%s'", host, d.Get("name"))
-			_, err = aggregates.AddHost(computeClient, id, aggregates.AddHostOpts{Host: host}).Extract()
+			_, err = aggregates.AddHost(ctx, computeClient, id, aggregates.AddHostOpts{Host: host}).Extract()
 			if err != nil {
 				return diag.Errorf("Error adding host %s to OpenStack aggregate: %s", host, err)
 			}
@@ -182,7 +182,7 @@ func resourceComputeAggregateV2Update(_ context.Context, d *schema.ResourceData,
 	if d.HasChange("metadata") {
 		oldMetadata, newMetadata := d.GetChange("metadata")
 		metadata := mapDiffWithNilValues(oldMetadata.(map[string]interface{}), newMetadata.(map[string]interface{}))
-		_, err = aggregates.SetMetadata(computeClient, id, aggregates.SetMetadataOpts{Metadata: metadata}).Extract()
+		_, err = aggregates.SetMetadata(ctx, computeClient, id, aggregates.SetMetadataOpts{Metadata: metadata}).Extract()
 		if err != nil {
 			return diag.Errorf("Error setting metadata: %s", err)
 		}
@@ -191,9 +191,9 @@ func resourceComputeAggregateV2Update(_ context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceComputeAggregateV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeAggregateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -208,13 +208,13 @@ func resourceComputeAggregateV2Delete(_ context.Context, d *schema.ResourceData,
 	for _, h := range hostsToDelete.List() {
 		host := h.(string)
 		log.Printf("[DEBUG] Removing host '%s' from aggregate '%s'", host, d.Get("name"))
-		_, err = aggregates.RemoveHost(computeClient, id, aggregates.RemoveHostOpts{Host: host}).Extract()
+		_, err = aggregates.RemoveHost(ctx, computeClient, id, aggregates.RemoveHostOpts{Host: host}).Extract()
 		if err != nil {
 			return diag.Errorf("Error deleting host %s from OpenStack aggregate: %s", host, err)
 		}
 	}
 
-	err = aggregates.Delete(computeClient, id).ExtractErr()
+	err = aggregates.Delete(ctx, computeClient, id).ExtractErr()
 	if err != nil {
 		return diag.Errorf("Error deleting OpenStack aggregate: %s", err)
 	}

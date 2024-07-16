@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/rules"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/rules"
 )
 
 func dataSourceNetworkingQoSMinimumBandwidthRuleV2() *schema.Resource {
@@ -46,7 +46,7 @@ func dataSourceNetworkingQoSMinimumBandwidthRuleV2() *schema.Resource {
 
 func dataSourceNetworkingQoSMinimumBandwidthRuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -59,7 +59,7 @@ func dataSourceNetworkingQoSMinimumBandwidthRuleV2Read(ctx context.Context, d *s
 
 	qosPolicyID := d.Get("qos_policy_id").(string)
 
-	pages, err := rules.ListMinimumBandwidthRules(networkingClient, qosPolicyID, listOpts).AllPages()
+	pages, err := rules.ListMinimumBandwidthRules(networkingClient, qosPolicyID, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to retrieve openstack_networking_qos_minimum_bandwidth_rule_v2: %s", err)
 	}

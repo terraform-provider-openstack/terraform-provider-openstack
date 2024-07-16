@@ -86,7 +86,7 @@ func resourceObjectStorageContainerV1V0() *schema.Resource {
 	}
 }
 
-func resourceObjectStorageContainerStateUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+func resourceObjectStorageContainerStateUpgradeV0(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
 	rawState["versioning_legacy"] = rawState["versioning"]
 	rawState["versioning"] = false
 

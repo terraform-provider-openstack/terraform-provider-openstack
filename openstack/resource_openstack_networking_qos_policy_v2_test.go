@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
 )
 
 func TestAccNetworkingV2QoSPolicyBasic(t *testing.T) {
@@ -58,12 +59,12 @@ func testAccCheckNetworkingV2QoSPolicyExists(n string, policy *policies.Policy) 
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		found, err := policies.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := policies.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -80,7 +81,7 @@ func testAccCheckNetworkingV2QoSPolicyExists(n string, policy *policies.Policy) 
 
 func testAccCheckNetworkingV2QoSPolicyDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(osRegionName)
+	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -90,7 +91,7 @@ func testAccCheckNetworkingV2QoSPolicyDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := policies.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err := policies.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("QoS policy still exists")
 		}

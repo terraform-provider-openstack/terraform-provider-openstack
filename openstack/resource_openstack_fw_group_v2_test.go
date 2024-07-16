@@ -1,15 +1,17 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"testing"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/groups"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/fwaas_v2/groups"
 )
 
 func TestAccFWGroupV2_basic(t *testing.T) {
@@ -188,7 +190,7 @@ func TestAccFWGroupV2_port_remove(t *testing.T) {
 
 func testAccCheckFWGroupV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(osRegionName)
+	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -197,11 +199,11 @@ func testAccCheckFWGroupV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err = groups.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err = groups.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Firewall group (%s) still exists", rs.Primary.ID)
 		}
-		if _, ok := err.(gophercloud.ErrDefault404); !ok {
+		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 	}
@@ -220,12 +222,12 @@ func testAccCheckFWGroupV2Exists(n string, group *groups.Group) resource.TestChe
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Exists) Error creating OpenStack networking client: %s", err)
 		}
 
-		found, err := groups.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := groups.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -262,7 +264,7 @@ func testAccCheckFWGroupV2(n, expectedName, expectedDescription string, IngressF
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Exists) Error creating OpenStack networking client: %s", err)
 		}
@@ -271,9 +273,9 @@ func testAccCheckFWGroupV2(n, expectedName, expectedDescription string, IngressF
 		for i := 0; i < 5; i++ {
 			// Firewall group creation is asynchronous. Retry some times
 			// if we get a 404 error. Fail on any other error.
-			found, err = groups.Get(networkingClient, rs.Primary.ID).Extract()
+			found, err = groups.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 			if err != nil {
-				if _, ok := err.(gophercloud.ErrDefault404); ok {
+				if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 					time.Sleep(time.Second)
 					continue
 				}

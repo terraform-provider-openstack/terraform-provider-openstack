@@ -1,15 +1,16 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/osinherit"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/roles"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/users"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/osinherit"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/roles"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
 )
 
 func TestAccIdentityV3InheritRoleAssignment_basic(t *testing.T) {
@@ -41,7 +42,7 @@ func TestAccIdentityV3InheritRoleAssignment_basic(t *testing.T) {
 
 func testAccCheckIdentityV3InheritRoleAssignmentDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.IdentityV3Client(osRegionName)
+	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -63,7 +64,7 @@ func testAccCheckIdentityV3InheritRoleAssignmentDestroy(s *terraform.State) erro
 			UserID:    userID,
 		}
 
-		err = osinherit.Validate(identityClient, roleID, opts).ExtractErr()
+		err = osinherit.Validate(context.TODO(), identityClient, roleID, opts).ExtractErr()
 		if err == nil {
 			return fmt.Errorf("Inherit Role assignment still exists")
 		}
@@ -84,7 +85,7 @@ func testAccCheckIdentityV3InheritRoleAssignmentExists(n string, role *roles.Rol
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.IdentityV3Client(osRegionName)
+		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
@@ -101,17 +102,17 @@ func testAccCheckIdentityV3InheritRoleAssignmentExists(n string, role *roles.Rol
 			UserID:    userID,
 		}
 
-		err = osinherit.Validate(identityClient, roleID, opts).ExtractErr()
+		err = osinherit.Validate(context.TODO(), identityClient, roleID, opts).ExtractErr()
 		if err != nil {
 			return err
 		}
 
-		u, err := users.Get(identityClient, userID).Extract()
+		u, err := users.Get(context.TODO(), identityClient, userID).Extract()
 		if err != nil {
 			return fmt.Errorf("User not found")
 		}
 		*user = *u
-		r, err := roles.Get(identityClient, roleID).Extract()
+		r, err := roles.Get(context.TODO(), identityClient, roleID).Extract()
 		if err != nil {
 			return fmt.Errorf("Role not found")
 		}

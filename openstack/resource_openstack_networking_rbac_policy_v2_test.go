@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -8,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/rbacpolicies"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/rbacpolicies"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 )
 
 func TestAccNetworkingV2RBACPolicy_basic(t *testing.T) {
@@ -74,7 +75,7 @@ func TestAccNetworkingV2RBACPolicy_basic(t *testing.T) {
 
 func testAccCheckNetworkingV2RBACPolicyDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(osRegionName)
+	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -84,7 +85,7 @@ func testAccCheckNetworkingV2RBACPolicyDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := rbacpolicies.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err := rbacpolicies.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Project still exists")
 		}
@@ -105,12 +106,12 @@ func testAccCheckNetworkingV2RBACPolicyExists(n string, rbac *rbacpolicies.RBACP
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		found, err := rbacpolicies.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := rbacpolicies.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

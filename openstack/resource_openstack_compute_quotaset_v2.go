@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/quotasets"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/quotasets"
 )
 
 func resourceComputeQuotasetV2() *schema.Resource {
@@ -133,7 +133,7 @@ func resourceComputeQuotasetV2() *schema.Resource {
 func resourceComputeQuotasetV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
-	computeClient, err := config.ComputeV2Client(region)
+	computeClient, err := config.ComputeV2Client(ctx, region)
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -199,7 +199,7 @@ func resourceComputeQuotasetV2Create(ctx context.Context, d *schema.ResourceData
 		updateOpts.ServerGroupMembers = &value
 	}
 
-	q, err := quotasets.Update(computeClient, projectID, updateOpts).Extract()
+	q, err := quotasets.Update(ctx, computeClient, projectID, updateOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_compute_quotaset_v2: %s", err)
 	}
@@ -212,10 +212,10 @@ func resourceComputeQuotasetV2Create(ctx context.Context, d *schema.ResourceData
 	return resourceComputeQuotasetV2Read(ctx, d, meta)
 }
 
-func resourceComputeQuotasetV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeQuotasetV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
-	computeClient, err := config.ComputeV2Client(region)
+	computeClient, err := config.ComputeV2Client(ctx, region)
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -225,7 +225,7 @@ func resourceComputeQuotasetV2Read(_ context.Context, d *schema.ResourceData, me
 	// in both cases
 	projectID := strings.Split(d.Id(), "/")[0]
 
-	q, err := quotasets.Get(computeClient, projectID).Extract()
+	q, err := quotasets.Get(ctx, computeClient, projectID).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_quotaset_v2"))
 	}
@@ -254,7 +254,7 @@ func resourceComputeQuotasetV2Read(_ context.Context, d *schema.ResourceData, me
 
 func resourceComputeQuotasetV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -351,7 +351,7 @@ func resourceComputeQuotasetV2Update(ctx context.Context, d *schema.ResourceData
 	if hasChange {
 		log.Printf("[DEBUG] openstack_compute_quotaset_v2 %s update options: %#v", d.Id(), updateOpts)
 		projectID := d.Get("project_id").(string)
-		_, err := quotasets.Update(computeClient, projectID, updateOpts).Extract()
+		_, err := quotasets.Update(ctx, computeClient, projectID, updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_compute_quotaset_v2: %s", err)
 		}

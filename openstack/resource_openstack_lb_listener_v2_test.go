@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/listeners"
 )
 
 func TestAccLBV2Listener_basic(t *testing.T) {
@@ -168,7 +169,7 @@ func TestAccLBV2ListenerConfig_octavia_insert_headers(t *testing.T) {
 
 func testAccCheckLBV2ListenerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := config.LoadBalancerV2Client(osRegionName)
+	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -178,7 +179,7 @@ func testAccCheckLBV2ListenerDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := listeners.Get(lbClient, rs.Primary.ID).Extract()
+		_, err := listeners.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Listener still exists: %s", rs.Primary.ID)
 		}
@@ -199,12 +200,12 @@ func testAccCheckLBV2ListenerExists(n string, listener *listeners.Listener) reso
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := config.LoadBalancerV2Client(osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
 
-		found, err := listeners.Get(lbClient, rs.Primary.ID).Extract()
+		found, err := listeners.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

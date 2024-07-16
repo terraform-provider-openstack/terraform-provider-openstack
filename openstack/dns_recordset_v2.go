@@ -1,14 +1,16 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/recordsets"
 )
 
 // RecordSetCreateOpts represents the attributes used when creating a new DNS record set.
@@ -32,11 +34,11 @@ func (opts RecordSetCreateOpts) ToRecordSetCreateMap() (map[string]interface{}, 
 	return nil, fmt.Errorf("Expected map but got %T", b[""])
 }
 
-func dnsRecordSetV2RefreshFunc(dnsClient *gophercloud.ServiceClient, zoneID, recordsetID string) resource.StateRefreshFunc {
+func dnsRecordSetV2RefreshFunc(ctx context.Context, dnsClient *gophercloud.ServiceClient, zoneID, recordsetID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		recordset, err := recordsets.Get(dnsClient, zoneID, recordsetID).Extract()
+		recordset, err := recordsets.Get(ctx, dnsClient, zoneID, recordsetID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return recordset, "DELETED", nil
 			}
 

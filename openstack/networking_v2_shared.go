@@ -3,10 +3,11 @@ package openstack
 import (
 	"encoding/json"
 	"log"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 func networkingV2ReadAttributesTags(d *schema.ResourceData, tags []string) {
@@ -32,12 +33,17 @@ type neutronError struct {
 }
 
 func retryOn409(err error) bool {
-	switch err := err.(type) {
-	case gophercloud.ErrDefault409:
-		neutronError, e := decodeNeutronError(err.ErrUnexpectedResponseCode.Body)
-		if e != nil {
+	e, ok := err.(gophercloud.ErrUnexpectedResponseCode)
+	if !ok {
+		return false
+	}
+
+	switch e.Actual {
+	case http.StatusConflict: // 409
+		neutronError, err := decodeNeutronError(e.Body)
+		if err != nil {
 			// retry, when error type cannot be detected
-			log.Printf("[DEBUG] failed to decode a neutron error: %s", e)
+			log.Printf("[DEBUG] failed to decode a neutron error: %s", err)
 			return true
 		}
 		if neutronError.Type == "IpAddressGenerationFailure" {
@@ -46,11 +52,11 @@ func retryOn409(err error) bool {
 
 		// don't retry on quota or other errors
 		return false
-	case gophercloud.ErrDefault400:
-		neutronError, e := decodeNeutronError(err.ErrUnexpectedResponseCode.Body)
-		if e != nil {
+	case http.StatusBadRequest: // 400
+		neutronError, err := decodeNeutronError(e.Body)
+		if err != nil {
 			// retry, when error type cannot be detected
-			log.Printf("[DEBUG] failed to decode a neutron error: %s", e)
+			log.Printf("[DEBUG] failed to decode a neutron error: %s", err)
 			return true
 		}
 		if neutronError.Type == "ExternalIpAddressExhausted" {
@@ -59,7 +65,7 @@ func retryOn409(err error) bool {
 
 		// don't retry on quota or other errors
 		return false
-	case gophercloud.ErrDefault404: // this case is handled mostly for functional tests
+	case http.StatusNotFound: // this case is handled mostly for functional tests
 		return true
 	}
 

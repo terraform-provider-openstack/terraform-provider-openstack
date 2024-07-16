@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"testing"
@@ -9,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 )
 
 func TestAccDNSV2Zone_basic(t *testing.T) {
@@ -109,7 +110,7 @@ func TestAccDNSV2Zone_readTTL(t *testing.T) {
 
 func testAccCheckDNSV2ZoneDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	dnsClient, err := config.DNSV2Client(osRegionName)
+	dnsClient, err := config.DNSV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
@@ -119,7 +120,7 @@ func testAccCheckDNSV2ZoneDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := zones.Get(dnsClient, rs.Primary.ID).Extract()
+		_, err := zones.Get(context.TODO(), dnsClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Zone still exists")
 		}
@@ -140,12 +141,12 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		dnsClient, err := config.DNSV2Client(osRegionName)
+		dnsClient, err := config.DNSV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 		}
 
-		found, err := zones.Get(dnsClient, rs.Primary.ID).Extract()
+		found, err := zones.Get(context.TODO(), dnsClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -8,10 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/groups"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
 )
 
 func TestAccNetworkingV2PortSecGroupAssociate_update(t *testing.T) {
@@ -136,7 +137,7 @@ func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName strin
 		return nil, err
 	}
 
-	client, err := config.NetworkingV2Client(osRegionName)
+	client, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +147,7 @@ func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName strin
 		AdminStateUp: gophercloud.Enabled,
 	}
 
-	network, err := networks.Create(client, createNetOpts).Extract()
+	network, err := networks.Create(context.TODO(), client, createNetOpts).Extract()
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +161,7 @@ func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName strin
 			Name: "default_1",
 		}
 
-		secGroup1, err := groups.Create(client, createSecGroupOpts).Extract()
+		secGroup1, err := groups.Create(context.TODO(), client, createSecGroupOpts).Extract()
 		if err != nil {
 			return nil, err
 		}
@@ -169,7 +170,7 @@ func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName strin
 
 		createSecGroupOpts.Name = "default_2"
 
-		secGroup2, err := groups.Create(client, createSecGroupOpts).Extract()
+		secGroup2, err := groups.Create(context.TODO(), client, createSecGroupOpts).Extract()
 		if err != nil {
 			return nil, err
 		}
@@ -189,9 +190,9 @@ func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName strin
 		AdminStateUp:   gophercloud.Enabled,
 	}
 
-	port, err := ports.Create(client, createOpts).Extract()
+	port, err := ports.Create(context.TODO(), client, createOpts).Extract()
 	if err != nil {
-		nErr := networks.Delete(client, network.ID).ExtractErr()
+		nErr := networks.Delete(context.TODO(), client, network.ID).ExtractErr()
 		if nErr != nil {
 			return nil, fmt.Errorf("Unable to create port (%s) and delete network (%s: %s)", err, network.ID, nErr)
 		}
@@ -209,12 +210,12 @@ func testAccCheckNetworkingV2PortSecGroupDeletePort(t *testing.T, port *ports.Po
 		return err
 	}
 
-	client, err := config.NetworkingV2Client(osRegionName)
+	client, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return err
 	}
 
-	err = ports.Delete(client, port.ID).ExtractErr()
+	err = ports.Delete(context.TODO(), client, port.ID).ExtractErr()
 	if err != nil {
 		return err
 	}
@@ -223,14 +224,14 @@ func testAccCheckNetworkingV2PortSecGroupDeletePort(t *testing.T, port *ports.Po
 
 	// delete default security groups
 	for _, secGroupID := range port.SecurityGroups {
-		err = groups.Delete(client, secGroupID).ExtractErr()
+		err = groups.Delete(context.TODO(), client, secGroupID).ExtractErr()
 		if err != nil {
 			return err
 		}
 		t.Logf("Default security group %s deleted", secGroupID)
 	}
 
-	err = networks.Delete(client, port.NetworkID).ExtractErr()
+	err = networks.Delete(context.TODO(), client, port.NetworkID).ExtractErr()
 	if err != nil {
 		return err
 	}
@@ -252,12 +253,12 @@ func testAccCheckNetworkingV2PortSecGroupAssociateExists(n string, port *ports.P
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		found, err := ports.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := ports.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

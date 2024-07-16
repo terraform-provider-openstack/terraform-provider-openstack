@@ -8,10 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tags"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/flavors"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/tags"
 )
 
 func dataSourceComputeInstanceV2() *schema.Resource {
@@ -136,18 +135,18 @@ func dataSourceComputeInstanceV2() *schema.Resource {
 func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	log.Print("[DEBUG] Creating compute client")
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
-	imageClient, err := config.ImageV2Client(GetRegion(d, config))
+	imageClient, err := config.ImageV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
 	id := d.Get("id").(string)
 	log.Printf("[DEBUG] Attempting to retrieve server %s", id)
-	server, err := servers.Get(computeClient, id).Extract()
+	server, err := servers.Get(ctx, computeClient, id).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "server"))
 	}
@@ -162,7 +161,7 @@ func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData
 	d.Set("image_id", server.Image["ID"])
 
 	// Get the instance network and address information
-	networks, err := flattenInstanceNetworks(d, meta)
+	networks, err := flattenInstanceNetworks(ctx, d, meta)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -204,30 +203,19 @@ func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData
 	d.Set("flavor_id", flavorID)
 
 	d.Set("key_pair", server.KeyName)
-	flavor, err := flavors.Get(computeClient, flavorID).Extract()
+	flavor, err := flavors.Get(ctx, computeClient, flavorID).Extract()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	d.Set("flavor_name", flavor.Name)
 
 	// Set the instance's image information appropriately
-	if err := setImageInformation(imageClient, server, d); err != nil {
+	if err := setImageInformation(ctx, imageClient, server, d); err != nil {
 		return diag.FromErr(err)
 	}
 
-	// Build a custom struct for the availability zone extension
-	var serverWithAZ struct {
-		servers.Server
-		availabilityzones.ServerAvailabilityZoneExt
-	}
-
-	// Do another Get so the above work is not disturbed.
-	err = servers.Get(computeClient, d.Id()).ExtractInto(&serverWithAZ)
-	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "server"))
-	}
 	// Set the availability zone
-	d.Set("availability_zone", serverWithAZ.AvailabilityZone)
+	d.Set("availability_zone", server.AvailabilityZone)
 
 	// Set the region
 	d.Set("region", GetRegion(d, config))
@@ -243,7 +231,7 @@ func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData
 
 	// Populate tags.
 	computeClient.Microversion = computeV2TagsExtensionMicroversion
-	instanceTags, err := tags.List(computeClient, server.ID).Extract()
+	instanceTags, err := tags.List(ctx, computeClient, server.ID).Extract()
 	if err != nil {
 		log.Printf("[DEBUG] Unable to get tags for openstack_compute_instance_v2: %s", err)
 	} else {

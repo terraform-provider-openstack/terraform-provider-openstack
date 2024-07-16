@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"testing"
@@ -8,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/l7policies"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/l7policies"
 )
 
 func TestAccLBV2L7Policy_basic(t *testing.T) {
@@ -136,7 +137,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 
 func testAccCheckLBV2L7PolicyDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	lbClient, err := config.LoadBalancerV2Client(osRegionName)
+	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 	}
@@ -146,7 +147,7 @@ func testAccCheckLBV2L7PolicyDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := l7policies.Get(lbClient, rs.Primary.ID).Extract()
+		_, err := l7policies.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("L7 Policy still exists: %s", rs.Primary.ID)
 		}
@@ -167,12 +168,12 @@ func testAccCheckLBV2L7PolicyExists(n string, l7Policy *l7policies.L7Policy) res
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		lbClient, err := config.LoadBalancerV2Client(osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
 		}
 
-		found, err := l7policies.Get(lbClient, rs.Primary.ID).Extract()
+		found, err := l7policies.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

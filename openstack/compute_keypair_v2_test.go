@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/keypairs"
 )
 
 func TestUnitComputeKeyPairV2CreateOpts(t *testing.T) {

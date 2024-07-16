@@ -19,10 +19,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ulikunitz/xz"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
-	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/members"
-	"github.com/gophercloud/utils/terraform/mutexkv"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
+	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/members"
+	"github.com/gophercloud/utils/v2/terraform/mutexkv"
 )
 
 func resourceImagesImageV2MemberStatusFromString(v string) images.ImageMemberStatus {
@@ -202,9 +202,9 @@ func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.Reso
 	return filename, nil
 }
 
-func resourceImagesImageV2RefreshFunc(client *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func resourceImagesImageV2RefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		img, err := images.Get(client, id).Extract()
+		img, err := images.Get(ctx, client, id).Extract()
 		if err != nil {
 			return nil, "", err
 		}
@@ -234,7 +234,7 @@ func resourceImagesImageV2ExpandProperties(v map[string]interface{}) map[string]
 	return properties
 }
 
-func resourceImagesImageV2UpdateComputedAttributes(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+func resourceImagesImageV2UpdateComputedAttributes(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	if diff.HasChange("properties") {
 		// Only check if the image has been created.
 		if diff.Id() != "" {
@@ -296,8 +296,8 @@ func resourceImagesImageAccessV2ParseID(id string) (string, string, error) {
 	return imageID, memberID, nil
 }
 
-func resourceImagesImageAccessV2DetectMemberID(client *gophercloud.ServiceClient, imageID string) (string, error) {
-	allPages, err := members.List(client, imageID).AllPages()
+func resourceImagesImageAccessV2DetectMemberID(ctx context.Context, client *gophercloud.ServiceClient, imageID string) (string, error) {
+	allPages, err := members.List(client, imageID).AllPages(ctx)
 	if err != nil {
 		return "", fmt.Errorf("Unable to list image members: %s", err)
 	}

@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/applicationcredentials"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/applicationcredentials"
 )
 
 func TestUnitFlattenIdentityApplicationCredentialRolesV3(t *testing.T) {

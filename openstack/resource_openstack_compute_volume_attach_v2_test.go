@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/volumeattach"
 )
 
 func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
@@ -76,7 +77,7 @@ func TestAccComputeV2VolumeAttach_ignore_volume_confirmation(t *testing.T) {
 
 func testAccCheckComputeV2VolumeAttachDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.ComputeV2Client(osRegionName)
+	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -91,7 +92,7 @@ func testAccCheckComputeV2VolumeAttachDestroy(s *terraform.State) error {
 			return err
 		}
 
-		_, err = volumeattach.Get(computeClient, instanceID, volumeID).Extract()
+		_, err = volumeattach.Get(context.TODO(), computeClient, instanceID, volumeID).Extract()
 		if err == nil {
 			return fmt.Errorf("Volume attachment still exists")
 		}
@@ -112,7 +113,7 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(osRegionName)
+		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
@@ -122,7 +123,7 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 			return err
 		}
 
-		found, err := volumeattach.Get(computeClient, instanceID, volumeID).Extract()
+		found, err := volumeattach.Get(context.TODO(), computeClient, instanceID, volumeID).Extract()
 		if err != nil {
 			return err
 		}

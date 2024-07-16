@@ -2,13 +2,15 @@ package openstack
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
-	"github.com/gophercloud/utils/terraform/hashcode"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
+	"github.com/gophercloud/utils/v2/terraform/hashcode"
 )
 
 const blockstorageV3VolumeFromBackupMicroversion = "3.47"
@@ -26,11 +28,11 @@ func flattenBlockStorageVolumeV3Attachments(v []volumes.Attachment) []map[string
 	return attachments
 }
 
-func blockStorageVolumeV3StateRefreshFunc(client *gophercloud.ServiceClient, volumeID string) resource.StateRefreshFunc {
+func blockStorageVolumeV3StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, volumeID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		v, err := volumes.Get(client, volumeID).Extract()
+		v, err := volumes.Get(ctx, client, volumeID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return v, "deleted", nil
 			}
 
@@ -54,4 +56,79 @@ func blockStorageVolumeV3AttachmentHash(v interface{}) int {
 		buf.WriteString(fmt.Sprintf("%s-", m["instance_id"].(string)))
 	}
 	return hashcode.String(buf.String())
+}
+
+func expandBlockStorageVolumeV3SchedulerHints(v volumes.SchedulerHintOpts) map[string]interface{} {
+	schedulerHints := make(map[string]interface{})
+
+	differentHost := make([]interface{}, len(v.DifferentHost))
+	for i, dh := range v.DifferentHost {
+		differentHost[i] = dh
+	}
+
+	sameHost := make([]interface{}, len(v.SameHost))
+	for i, sh := range v.SameHost {
+		sameHost[i] = sh
+	}
+
+	schedulerHints["different_host"] = differentHost
+	schedulerHints["same_host"] = sameHost
+	schedulerHints["local_to_instance"] = v.LocalToInstance
+	schedulerHints["query"] = v.Query
+	schedulerHints["additional_properties"] = v.AdditionalProperties
+	return schedulerHints
+}
+
+func blockStorageVolumeV3SchedulerHintsHash(v interface{}) int {
+	var buf bytes.Buffer
+	m := v.(map[string]interface{})
+
+	if m["query"] != nil {
+		buf.WriteString(fmt.Sprintf("%s-", m["query"].(string)))
+	}
+
+	if m["local_to_instance"] != nil {
+		buf.WriteString(fmt.Sprintf("%s-", m["local_to_instance"].(string)))
+	}
+
+	if m["additional_properties"] != nil {
+		for _, v := range m["additional_properties"].(map[string]interface{}) {
+			buf.WriteString(fmt.Sprintf("%s-", v))
+		}
+	}
+
+	buf.WriteString(fmt.Sprintf("%s-", m["different_host"].([]interface{})))
+	buf.WriteString(fmt.Sprintf("%s-", m["same_host"].([]interface{})))
+
+	return hashcode.String(buf.String())
+}
+
+func resourceBlockStorageVolumeV3SchedulerHints(schedulerHintsRaw map[string]interface{}) volumes.SchedulerHintOpts {
+	schedulerHints := volumes.SchedulerHintOpts{
+		Query:                schedulerHintsRaw["query"].(string),
+		LocalToInstance:      schedulerHintsRaw["local_to_instance"].(string),
+		AdditionalProperties: schedulerHintsRaw["additional_properties"].(map[string]interface{}),
+	}
+
+	if v, ok := schedulerHintsRaw["different_host"].([]interface{}); ok {
+		differentHost := make([]string, len(v))
+
+		for i, dh := range v {
+			differentHost[i] = dh.(string)
+		}
+
+		schedulerHints.DifferentHost = differentHost
+	}
+
+	if v, ok := schedulerHintsRaw["same_host"].([]interface{}); ok {
+		sameHost := make([]string, len(v))
+
+		for i, sh := range v {
+			sameHost[i] = sh.(string)
+		}
+
+		schedulerHints.SameHost = sameHost
+	}
+
+	return schedulerHints
 }

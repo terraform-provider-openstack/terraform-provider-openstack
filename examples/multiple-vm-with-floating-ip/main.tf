@@ -20,8 +20,14 @@ resource "openstack_networking_floatingip_v2" "fip" {
   pool  = var.pool
 }
 
-resource "openstack_compute_floatingip_associate_v2" "fip" {
+data "openstack_networking_port_v2" "port" {
+  count      = var.instance_count
+  device_id  = openstack_compute_instance_v2.multi.*.id[count.index]
+  network_id = openstack_compute_instance_v2.multi.*.network.0.uuid[count.index]
+}
+
+resource "openstack_networking_floatingip_associate_v2" "fip" {
   count       = var.instance_count
-  instance_id = openstack_compute_instance_v2.multi.*.id[count.index]
+  port_id     = data.openstack_networking_port_v2.port.*.id[count.index]
   floating_ip = openstack_networking_floatingip_v2.fip.*.address[count.index]
 }
