@@ -29,7 +29,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
 
 resource "openstack_compute_interface_attach_v2" "ai_1" {
   instance_id = openstack_compute_instance_v2.instance_1.id
-  network_id  = openstack_networking_port_v2.network_1.id
+  network_id  = openstack_networking_network_v2.network_1.id
 }
 
 ```
