@@ -95,6 +95,13 @@ func dataSourceImagesImageIDsV2() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"hidden": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: false,
+				Default:  false,
+			},
+
 			"name_regex": {
 				Type:          schema.TypeString,
 				Optional:      true,
@@ -108,6 +115,16 @@ func dataSourceImagesImageIDsV2() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
+			},
+
+			"container_format": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"disk_format": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 
 			// Computed values
@@ -147,15 +164,18 @@ func dataSourceImagesImageIdsV2Read(ctx context.Context, d *schema.ResourceData,
 	}
 
 	listOpts := images.ListOpts{
-		Name:         d.Get("name").(string),
-		Visibility:   visibility,
-		Owner:        d.Get("owner").(string),
-		Status:       images.ImageStatusActive,
-		SizeMin:      int64(d.Get("size_min").(int)),
-		SizeMax:      int64(d.Get("size_max").(int)),
-		Sort:         d.Get("sort").(string),
-		Tags:         tags,
-		MemberStatus: memberStatus,
+		Name:            d.Get("name").(string),
+		Visibility:      visibility,
+		Hidden:          d.Get("hidden").(bool),
+		Owner:           d.Get("owner").(string),
+		Status:          images.ImageStatusActive,
+		SizeMin:         int64(d.Get("size_min").(int)),
+		SizeMax:         int64(d.Get("size_max").(int)),
+		Sort:            d.Get("sort").(string),
+		ContainerFormat: d.Get("container_format").(string),
+		DiskFormat:      d.Get("disk_format").(string),
+		Tags:            tags,
+		MemberStatus:    memberStatus,
 	}
 
 	log.Printf("[DEBUG] List Options in openstack_images_image_ids_v2: %#v", listOpts)
