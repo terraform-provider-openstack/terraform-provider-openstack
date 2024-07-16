@@ -27,45 +27,50 @@ data "openstack_images_image_ids_v2" "images" {
 
 ## Argument Reference
 
-* `region` - (Optional) The region in which to obtain the V2 Glance client.
-    A Glance client is needed to create an Image that can be used with
-    a compute instance. If omitted, the `region` argument of the provider
-    is used.
+* `region` - (Optional) The region in which to obtain the V2 Glance client. A
+  Glance client is needed to create an Image that can be used with a compute
+  instance. If omitted, the `region` argument of the provider is used.
 
 * `member_status` - (Optional) The status of the image. Must be one of
-   "accepted", "pending", "rejected", or "all".
+  "accepted", "pending", "rejected", or "all".
 
-* `name` - (Optional) The name of the image. Cannot be used simultaneously
-    with `name_regex`.
+* `name` - (Optional) The name of the image. Cannot be used simultaneously with
+  `name_regex`.
 
 * `name_regex` - (Optional) The regular expressian of the name of the image.
-    Cannot be used simultaneously with `name`. Unlike filtering by `name` the    
-    `name_regex` filtering does by client on the result of OpenStack search
-    query.
+  Cannot be used simultaneously with `name`. Unlike filtering by `name` the
+  `name_regex` filtering does by client on the result of OpenStack search
+  query.
 
 * `owner` - (Optional) The owner (UUID) of the image.
 
 * `properties` - (Optional) a map of key/value pairs to match an image with.
-    All specified properties must be matched. Unlike other options filtering    
-    by `properties` does by client on the result of OpenStack search query.
+  All specified properties must be matched. Unlike other options filtering by
+  `properties` does by client on the result of OpenStack search query.
 
 * `size_min` - (Optional) The minimum size (in bytes) of the image to return.
 
 * `size_max` - (Optional) The maximum size (in bytes) of the image to return.
 
 * `sort` - (Optional) Sorts the response by one or more attribute and sort
-    direction combinations. You can also set multiple sort keys and directions.
-    Default direction is `desc`. Use the comma (,) character to separate
-    multiple values. For example expression `sort = "name:asc,status"`
-    sorts ascending by name and descending by status.
+  direction combinations. You can also set multiple sort keys and directions.
+  Default direction is `desc`. Use the comma (,) character to separate multiple
+  values. For example expression `sort = "name:asc,status"` sorts ascending by
+  name and descending by status.
 
 * `tag` - (Optional) Search for images with a specific tag.
 
-* `tags` - (Optional) A list of tags required to be set on the image
-      (all specified tags must be in the images tag list for it to be matched).
+* `tags` - (Optional) A list of tags required to be set on the image (all
+  specified tags must be in the images tag list for it to be matched).
 
 * `visibility` - (Optional) The visibility of the image. Must be one of
-   "public", "private", "community", or "shared". Defaults to "private".
+  "public", "private", "community", or "shared". Defaults to "private".
+
+* `hidden` - (Optional) Whether or not the image is hidden from public list.
+
+* `container_format` - (Optional) The container format of the image.
+
+* `disk_format` - (Optional) The disk format of the image.
 
 ## Attributes Reference
 
