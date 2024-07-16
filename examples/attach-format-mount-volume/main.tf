@@ -18,9 +18,14 @@ resource "openstack_networking_floatingip_v2" "fip" {
   pool = var.pool
 }
 
-resource "openstack_compute_floatingip_associate_v2" "fip" {
-  instance_id = openstack_compute_instance_v2.my_instance.id
+data "openstack_networking_port_v2" "port" {
+  device_id  = openstack_compute_instance_v2.my_instance.id
+  network_id = openstack_compute_instance_v2.my_instance.network.0.uuid
+}
+
+resource "openstack_networking_floatingip_associate_v2" "fip_associate" {
   floating_ip = openstack_networking_floatingip_v2.fip.address
+  port_id     = data.openstack_networking_port_v2.port.id
   connection {
     host        = openstack_networking_floatingip_v2.fip.address
     user        = var.ssh_user_name
