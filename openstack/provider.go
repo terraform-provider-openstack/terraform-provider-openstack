@@ -420,6 +420,10 @@ func Provider() *schema.Provider {
 			"openstack_keymanager_secret_v1":                     resourceKeyManagerSecretV1(),
 			"openstack_keymanager_container_v1":                  resourceKeyManagerContainerV1(),
 			"openstack_keymanager_order_v1":                      resourceKeyManagerOrderV1(),
+			"openstack_bgpvpn_v2":                                resourceBGPVPNV2(),
+			"openstack_bgpvpn_network_associate_v2":              resourceBGPVPNNetworkAssociateV2(),
+			"openstack_bgpvpn_router_associate_v2":               resourceBGPVPNRouterAssociateV2(),
+			"openstack_bgpvpn_port_associate_v2":                 resourceBGPVPNPortAssociateV2(),
 		},
 	}
 
