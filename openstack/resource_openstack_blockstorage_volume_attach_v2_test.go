@@ -67,7 +67,7 @@ func testAccCheckBlockStorageVolumeAttachV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		volumeID, attachmentID, err := blockStorageVolumeAttachV2ParseID(rs.Primary.ID)
+		volumeID, attachmentID, err := parsePairedIDs(rs.Primary.ID, "openstack_blockstorage_volume_attach_v2")
 		if err != nil {
 			return err
 		}
@@ -107,7 +107,7 @@ func testAccCheckBlockStorageVolumeAttachV2Exists(n string, va *volumes.Attachme
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
 
-		volumeID, attachmentID, err := blockStorageVolumeAttachV2ParseID(rs.Primary.ID)
+		volumeID, attachmentID, err := parsePairedIDs(rs.Primary.ID, "openstack_blockstorage_volume_attach_v2")
 		if err != nil {
 			return err
 		}

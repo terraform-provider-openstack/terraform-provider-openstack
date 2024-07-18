@@ -170,7 +170,7 @@ func resourceDNSRecordSetV2Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Obtain relevant info from parsing the ID
-	zoneID, recordsetID, err := dnsRecordSetV2ParseID(d.Id())
+	zoneID, recordsetID, err := parsePairedIDs(d.Id(), "openstack_dns_recordset_v2")
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -240,7 +240,7 @@ func resourceDNSRecordSetV2Update(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	// Obtain relevant info from parsing the ID
-	zoneID, recordsetID, err := dnsRecordSetV2ParseID(d.Id())
+	zoneID, recordsetID, err := parsePairedIDs(d.Id(), "openstack_dns_recordset_v2")
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -284,7 +284,7 @@ func resourceDNSRecordSetV2Delete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	// Obtain relevant info from parsing the ID
-	zoneID, recordsetID, err := dnsRecordSetV2ParseID(d.Id())
+	zoneID, recordsetID, err := parsePairedIDs(d.Id(), "openstack_dns_recordset_v2")
 	if err != nil {
 		return diag.FromErr(err)
 	}

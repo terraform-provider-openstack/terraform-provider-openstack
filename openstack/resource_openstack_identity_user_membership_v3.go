@@ -3,7 +3,6 @@ package openstack
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -68,9 +67,9 @@ func resourceIdentityUserMembershipV3Read(ctx context.Context, d *schema.Resourc
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
-	userID, groupID, err := parseUserMembershipID(d.Id())
+	userID, groupID, err := parsePairedIDs(d.Id(), "openstack_identity_user_membership_v3")
 	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "Error parsing ID of openstack_identity_user_membership_v3"))
+		return diag.FromErr(err)
 	}
 
 	userMembership, err := users.IsMemberOfGroup(identityClient, groupID, userID).Extract()
@@ -92,9 +91,9 @@ func resourceIdentityUserMembershipV3Delete(ctx context.Context, d *schema.Resou
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
-	userID, groupID, err := parseUserMembershipID(d.Id())
+	userID, groupID, err := parsePairedIDs(d.Id(), "openstack_identity_user_membership_v3")
 	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "Error parsing ID of openstack_identity_user_membership_v3"))
+		return diag.FromErr(err)
 	}
 
 	if err := users.RemoveFromGroup(identityClient, groupID, userID).ExtractErr(); err != nil {
@@ -102,16 +101,4 @@ func resourceIdentityUserMembershipV3Delete(ctx context.Context, d *schema.Resou
 	}
 
 	return nil
-}
-
-func parseUserMembershipID(id string) (string, string, error) {
-	idParts := strings.Split(id, "/")
-	if len(idParts) < 2 {
-		return "", "", fmt.Errorf("Unable to determine user membership ID %s", id)
-	}
-
-	userID := idParts[0]
-	groupID := idParts[1]
-
-	return userID, groupID, nil
 }

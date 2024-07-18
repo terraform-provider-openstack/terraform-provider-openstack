@@ -275,7 +275,7 @@ func resourceBlockStorageVolumeAttachV2Read(_ context.Context, d *schema.Resourc
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
-	volumeID, attachmentID, err := blockStorageVolumeAttachV2ParseID(d.Id())
+	volumeID, attachmentID, err := parsePairedIDs(d.Id(), "openstack_blockstorage_volume_attach_v2")
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -308,7 +308,7 @@ func resourceBlockStorageVolumeAttachV2Delete(ctx context.Context, d *schema.Res
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
-	volumeID, attachmentID, err := blockStorageVolumeAttachV2ParseID(d.Id())
+	volumeID, attachmentID, err := parsePairedIDs(d.Id(), "openstack_blockstorage_volume_attach_v2")
 	if err != nil {
 		return diag.FromErr(err)
 	}

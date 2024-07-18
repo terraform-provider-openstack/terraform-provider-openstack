@@ -55,7 +55,7 @@ func testAccCheckIdentityV3UserMembershipDestroy(s *terraform.State) error {
 			continue
 		}
 
-		uid, gid, err := parseUserMembershipID(rs.Primary.ID)
+		uid, gid, err := parsePairedIDs(rs.Primary.ID, "openstack_identity_user_membership_v3")
 		if err != nil {
 			return err
 		}
@@ -86,7 +86,7 @@ func testAccCheckIdentityV3UserMembershipExists(n string) resource.TestCheckFunc
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
 
-		uid, gid, err := parseUserMembershipID(rs.Primary.ID)
+		uid, gid, err := parsePairedIDs(rs.Primary.ID, "openstack_identity_user_membership_v3")
 		if err != nil {
 			return err
 		}

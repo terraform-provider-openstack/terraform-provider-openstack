@@ -55,7 +55,7 @@ func testAccCheckBlockstorageV3QosAssociationDestroy(s *terraform.State) error {
 			continue
 		}
 
-		qosID, vtID, err := parseQosAssociationID(rs.Primary.ID)
+		qosID, vtID, err := parsePairedIDs(rs.Primary.ID, "openstack_blockstorage_qos_association_v3")
 		if err != nil {
 			return err
 		}
@@ -93,7 +93,7 @@ func testAccCheckBlockstorageV3QosAssociationExists(n string) resource.TestCheck
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
 
-		qosID, vtID, err := parseQosAssociationID(rs.Primary.ID)
+		qosID, vtID, err := parsePairedIDs(rs.Primary.ID, "openstack_blockstorage_qos_association_v3")
 		if err != nil {
 			return err
 		}

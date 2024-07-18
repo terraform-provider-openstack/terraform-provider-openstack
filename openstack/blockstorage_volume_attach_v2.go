@@ -2,7 +2,6 @@ package openstack
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions"
 )
@@ -23,13 +22,4 @@ func expandBlockStorageV2AttachMode(v string) (volumeactions.AttachMode, error) 
 	}
 
 	return attachMode, attachError
-}
-
-func blockStorageVolumeAttachV2ParseID(id string) (string, string, error) {
-	parts := strings.Split(id, "/")
-	if len(parts) < 2 {
-		return "", "", fmt.Errorf("Unable to determine openstack_blockstorage_volume_attach_v2 ID")
-	}
-
-	return parts[0], parts[1], nil
 }

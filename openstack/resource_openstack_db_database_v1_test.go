@@ -2,7 +2,6 @@ package openstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -51,9 +50,9 @@ func testAccCheckDatabaseV1DatabaseExists(n string, instance *instances.Instance
 			return fmt.Errorf("No ID is set")
 		}
 
-		parts := strings.SplitN(rs.Primary.ID, "/", 2)
-		if len(parts) != 2 {
-			return fmt.Errorf("Malformed database name: %s", rs.Primary.ID)
+		_, userName, err := parsePairedIDs(rs.Primary.ID, "openstack_db_database_v1")
+		if err != nil {
+			return err
 		}
 
 		config := testAccProvider.Meta().(*Config)
@@ -73,7 +72,7 @@ func testAccCheckDatabaseV1DatabaseExists(n string, instance *instances.Instance
 		}
 
 		for _, v := range allDatabases {
-			if v.Name == parts[1] {
+			if v.Name == userName {
 				*db = v
 				return nil
 			}
@@ -96,12 +95,12 @@ func testAccCheckDatabaseV1DatabaseDestroy(s *terraform.State) error {
 			continue
 		}
 
-		parts := strings.SplitN(rs.Primary.ID, "/", 2)
-		if len(parts) != 2 {
-			return fmt.Errorf("Malformed database name: %s", rs.Primary.ID)
+		id, userName, err := parsePairedIDs(rs.Primary.ID, "openstack_db_database_v1")
+		if err != nil {
+			return err
 		}
 
-		pages, err := databases.List(DatabaseV1Client, parts[0]).AllPages()
+		pages, err := databases.List(DatabaseV1Client, id).AllPages()
 		if err != nil {
 			return nil
 		}
@@ -113,7 +112,7 @@ func testAccCheckDatabaseV1DatabaseDestroy(s *terraform.State) error {
 
 		var exists bool
 		for _, v := range allDatabases {
-			if v.Name == parts[1] {
+			if v.Name == userName {
 				exists = true
 			}
 		}

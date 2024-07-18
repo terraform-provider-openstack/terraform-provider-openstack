@@ -2,7 +2,6 @@ package openstack
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
@@ -12,15 +11,6 @@ import (
 
 func resourceNetworkingQoSRuleV2BuildID(qosPolicyID, qosRuleID string) string {
 	return fmt.Sprintf("%s/%s", qosPolicyID, qosRuleID)
-}
-
-func resourceNetworkingQoSRuleV2ParseID(qosRuleID string) (string, string, error) {
-	qosRuleIDParts := strings.Split(qosRuleID, "/")
-	if len(qosRuleIDParts) != 2 {
-		return "", "", fmt.Errorf("invalid ID format: %s", qosRuleID)
-	}
-
-	return qosRuleIDParts[0], qosRuleIDParts[1], nil
 }
 
 func networkingQoSBandwidthLimitRuleV2StateRefreshFunc(client *gophercloud.ServiceClient, policyID, ruleID string) resource.StateRefreshFunc {
