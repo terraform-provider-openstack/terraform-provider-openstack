@@ -33,7 +33,7 @@ The following attributes are exported:
 
 * `region` - See Argument Reference above.
 * `project_id` - See Argument Reference above.
-* `floatingip` -  The number of allowed floating ips.
+* `floatingip` - The number of allowed floating ips.
 * `network` - The number of allowed networks.
 * `port` - The number of allowed ports.
 * `rbac_policy` - The number of allowed rbac policies.

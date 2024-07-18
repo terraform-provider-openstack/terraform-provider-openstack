@@ -64,7 +64,7 @@ are exported:
 * `name` - See Argument Reference above.
 * `default_quota` - See Argument Reference above.
 * `project_id` - See Argument Reference above.
-* `created_at` -  The time at which subnetpool was created.
+* `created_at` - The time at which subnetpool was created.
 * `updated_at` - The time at which subnetpool was created.
 * `prefixes` - See Argument Reference above.
 * `default_prefixlen` - See Argument Reference above.

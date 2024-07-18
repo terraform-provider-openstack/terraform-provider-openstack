@@ -97,7 +97,7 @@ The following arguments are supported:
 
 * `value_specs` - (Optional) Map of additional options.
 
-* `availability_zone_hints` -  (Optional) An availability zone is used to make
+* `availability_zone_hints` - (Optional) An availability zone is used to make
     network resources highly available. Used for resources with high availability
     so that they are scheduled on different availability zones. Changing this
     creates a new network.

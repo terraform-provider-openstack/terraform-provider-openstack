@@ -96,7 +96,7 @@ The following arguments are supported:
     	A valid value is a positive integer.
     	Default is 30.
 
-* `mtu` -  (Optional) The maximum transmission unit (MTU) value to address fragmentation.
+* `mtu` - (Optional) The maximum transmission unit (MTU) value to address fragmentation.
 	Minimum value is 68 for IPv4, and 1280 for IPv6.
 	
 * `value_specs` - (Optional) Map of additional options.
