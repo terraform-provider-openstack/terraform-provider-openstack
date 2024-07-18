@@ -38,6 +38,7 @@ var (
 	osLbFlavorName               = os.Getenv("OS_LB_FLAVOR_NAME")
 	osFwEnvironment              = os.Getenv("OS_FW_ENVIRONMENT")
 	osVpnEnvironment             = os.Getenv("OS_VPN_ENVIRONMENT")
+	osBgpVpnEnvironment          = os.Getenv("OS_BGPVPN_ENVIRONMENT")
 	osContainerInfraEnvironment  = os.Getenv("OS_CONTAINER_INFRA_ENVIRONMENT")
 	osSfsEnvironment             = os.Getenv("OS_SFS_ENVIRONMENT")
 	osTransparentVlanEnvironment = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
@@ -167,6 +168,14 @@ func testAccPreCheckVPN(t *testing.T) {
 
 	if osVpnEnvironment == "" {
 		t.Skip("This environment does not support VPN tests")
+	}
+}
+
+func testAccPreCheckBGPVPN(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if osBgpVpnEnvironment == "" {
+		t.Skip("This environment does not support BGP VPN tests")
 	}
 }
 
