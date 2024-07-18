@@ -503,6 +503,9 @@ the feature or bug you're testing:
 * `OS_HYPERVISOR_HOSTNAME` - Required if you're working on the `openstack_compute_hypervisor_v2`
   data source. Set this value to one valid hypervisor hostname to test this data source.
 
+* `OS_BGPVPN_ENVIRONMENT` - Required if you're working on the `openstack_bgpvpn_*`
+  resources. Set this value to "1" to enable testing these resources.
+
 We recommend only running the acceptance tests related to the feature or bug
 you're working on. To do this, run:
 
