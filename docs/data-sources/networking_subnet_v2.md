@@ -51,6 +51,8 @@ data "openstack_networking_subnet_v2" "subnet_1" {
 
 * `subnetpool_id` - (Optional) The ID of the subnetpool associated with the subnet.
 
+* `dns_publish_fixed_ip` - (Optional) If the subnet publishes DNS records.
+
 * `tags` - (Optional) The list of subnet tags to filter.
 
 ## Attributes Reference
