@@ -47,7 +47,7 @@ func resourceImagesImageV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"ami", "ari", "aki", "bare", "ovf", "ova",
+					"bare", "ovf", "aki", "ari", "ami", "ova", "docker", "compressed",
 				}, false),
 			},
 
@@ -56,7 +56,7 @@ func resourceImagesImageV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"ami", "ari", "aki", "vhd", "vmdk", "raw", "qcow2", "vdi", "iso",
+					"raw", "vhd", "vhdx", "vmdk", "vdi", "iso", "ploop", "qcow2", "aki", "ari", "ami",
 				}, false),
 			},
 
