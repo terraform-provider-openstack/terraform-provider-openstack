@@ -6,6 +6,7 @@ require (
 	github.com/gophercloud/gophercloud v1.13.1-0.20240711153045-e21c5631d2b1
 	github.com/gophercloud/utils v0.0.0-20230324070755-05e9e7f5ea4d
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.30.0
+	github.com/klauspost/compress v1.17.9
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.7.2
 	github.com/ulikunitz/xz v0.5.11

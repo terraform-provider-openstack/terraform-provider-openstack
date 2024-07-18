@@ -278,6 +278,48 @@ func TestAccImagesImageV2_webdownload(t *testing.T) {
 	})
 }
 
+func TestAccImagesImageV2_decompress_xz(t *testing.T) {
+	var image images.Image
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccImagesImageV2DecompressOctetStreamXZ,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_xz", &image),
+				),
+			},
+		},
+	})
+}
+
+func TestAccImagesImageV2_decompress_zst(t *testing.T) {
+	var image images.Image
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccImagesImageV2DecompressOctetStreamZST,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_zst", &image),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckImagesImageV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	imageClient, err := config.ImageV2Client(osRegionName)
@@ -561,4 +603,22 @@ const testAccImagesImageV2Webdownload = `
       timeouts {
         create = "10m"
       }
+  }`
+
+const testAccImagesImageV2DecompressOctetStreamXZ = `
+  resource "openstack_images_image_v2" "image_xz" {
+    name             = "openstack-xz"
+    image_source_url = "https://github.com/siderolabs/talos/releases/download/v1.6.6/openstack-amd64.raw.xz"
+    decompress       = true
+    container_format = "bare"
+    disk_format      = "raw"
+  }`
+
+const testAccImagesImageV2DecompressOctetStreamZST = `
+  resource "openstack_images_image_v2" "image_zst" {
+    name             = "openstack-zst"
+    image_source_url = "https://github.com/siderolabs/talos/releases/download/v1.8.0-alpha.1/openstack-amd64.raw.zst"
+    decompress       = true
+    container_format = "bare"
+    disk_format      = "raw"
   }`
