@@ -416,6 +416,16 @@ The following arguments are supported:
     the VM will be stopped immediately after build and the provisioners like
     remote-exec or files are not supported.
 
+* `task_states_unlock` - (Optional) A list of `task_state` values of the VM to
+  lock the next VM creation or modification until the current VM's `task_state`
+  is in the desired state, such as `spawning` or `rebuild_spawning`. These
+  parameters allow serialized VM creation or modification process. This is
+  useful, for example, to avoid the concurrent creation or modification of VMs
+  that are part of the same anti-affinity server group. Please refer to the
+  upstream OpenStack
+  [documentation](https://docs.openstack.org/nova/latest/reference/vm-states.html)
+  for a list of valid `task_state` values.
+
 * `tags` - (Optional) A set of string tags for the instance. Changing this
     updates the existing instance tags.
 
@@ -424,7 +434,7 @@ The following arguments are supported:
 
 The `network` block supports:
 
-* `uuid` - (Required unless `port`  or `name` is provided) The network UUID to
+* `uuid` - (Required unless `port` or `name` is provided) The network UUID to
     attach to the server. Changing this creates a new server.
 
 * `name` - (Required unless `uuid` or `port` is provided) The human-readable
