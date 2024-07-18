@@ -33,7 +33,7 @@ The following attributes are exported:
 
 * `region` - See Argument Reference above.
 * `project_id` - See Argument Reference above.
-* `volumes` -  The number of volumes that are allowed.
+* `volumes` - The number of volumes that are allowed.
 * `snapshots` - The number of snapshots that are allowed.
 * `gigabytes` - The size (GB) of volumes and snapshots that are allowed.
 * `per_volume_gigabytes` - The size (GB) of volumes that are allowed for each volume.

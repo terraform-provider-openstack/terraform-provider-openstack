@@ -44,7 +44,7 @@ are exported:
 
 * `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
-* `created_at` -  The time at which QoS policy was created.
+* `created_at` - The time at which QoS policy was created.
 * `updated_at` - The time at which QoS policy was created.
 * `shared` - See Argument Reference above.
 * `description` - See Argument Reference above.

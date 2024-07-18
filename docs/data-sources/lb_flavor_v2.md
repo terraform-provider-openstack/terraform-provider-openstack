@@ -43,4 +43,4 @@ are exported:
 
  * `flavor_profile_id` - The ID of the flavor profile.
 
- * `enabled` -  Is the flavor enabled.
+ * `enabled` - Is the flavor enabled.

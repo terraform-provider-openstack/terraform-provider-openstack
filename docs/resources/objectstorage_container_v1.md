@@ -136,7 +136,7 @@ The following arguments are supported:
 * `storage_policy` - (Optional) The storage policy to be used for the container. 
     Changing this creates a new container.
 
-* `force_destroy` -  (Optional, Default:false ) A boolean that indicates all objects should be deleted from the container so that the container can be destroyed without error. These objects are not recoverable.
+* `force_destroy` - (Optional, Default:false ) A boolean that indicates all objects should be deleted from the container so that the container can be destroyed without error. These objects are not recoverable.
 
 The `versioning_legacy` block supports:
 

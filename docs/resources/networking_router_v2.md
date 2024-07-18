@@ -75,7 +75,7 @@ The following arguments are supported:
 * `vendor_options` - (Optional) Map of additional vendor-specific options.
   Supported options are described below.
 
-* `availability_zone_hints` -  (Optional) An availability zone is used to make 
+* `availability_zone_hints` - (Optional) An availability zone is used to make 
   network resources highly available. Used for resources with high availability
   so that they are scheduled on different availability zones. Changing this
   creates a new router.

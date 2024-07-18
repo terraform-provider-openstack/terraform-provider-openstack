@@ -33,7 +33,7 @@ The following attributes are exported:
 
 * `region` - See Argument Reference above.
 * `project_id` - See Argument Reference above.
-* `cores` -  The number of allowed server cores.
+* `cores` - The number of allowed server cores.
 * `instances` - The number of allowed servers.
 * `key_pairs` - The number of allowed key pairs for each user.
 * `metadata_items` - The number of allowed metadata items for each server.
