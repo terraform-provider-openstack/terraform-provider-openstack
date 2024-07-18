@@ -314,3 +314,15 @@ func mapDiffWithNilValues(oldMap, newMap map[string]interface{}) (output map[str
 
 	return
 }
+
+// parsePairedIDs is a helper function that parses a raw ID into two
+// separate IDs. This is useful for resources that have a parent/child
+// relationship.
+func parsePairedIDs(id string, res string) (string, string, error) {
+	parts := strings.SplitN(id, "/", 2)
+	if len(parts) != 2 {
+		return "", "", fmt.Errorf("Unable to determine %s ID from raw ID: %s", res, id)
+	}
+
+	return parts[0], parts[1], nil
+}

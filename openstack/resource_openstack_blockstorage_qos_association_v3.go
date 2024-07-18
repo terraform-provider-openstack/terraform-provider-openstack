@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -76,9 +75,9 @@ func resourceBlockStorageQosAssociationV3Read(ctx context.Context, d *schema.Res
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
-	qosID, vtID, err := parseQosAssociationID(d.Id())
+	qosID, vtID, err := parsePairedIDs(d.Id(), "openstack_blockstorage_qos_association_v3")
 	if err != nil {
-		return diag.Errorf("Error parsing ID of openstack_blockstorage_qos_association_v3 %s: %s", d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	allPages, err := qos.ListAssociations(blockStorageClient, qosID).AllPages()
@@ -117,9 +116,9 @@ func resourceBlockStorageQosAssociationV3Delete(ctx context.Context, d *schema.R
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
-	qosID, vtID, err := parseQosAssociationID(d.Id())
+	qosID, vtID, err := parsePairedIDs(d.Id(), "openstack_blockstorage_qos_association_v3")
 	if err != nil {
-		return diag.Errorf("Error parsing ID of openstack_blockstorage_qos_association_v3 %s: %s", d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	disassociateOpts := qos.DisassociateOpts{
@@ -132,13 +131,4 @@ func resourceBlockStorageQosAssociationV3Delete(ctx context.Context, d *schema.R
 	}
 
 	return nil
-}
-
-func parseQosAssociationID(id string) (string, string, error) {
-	idParts := strings.Split(id, "/")
-	if len(idParts) < 2 {
-		return "", "", fmt.Errorf("Unable to determine qos association ID %s", id)
-	}
-
-	return idParts[0], idParts[1], nil
 }

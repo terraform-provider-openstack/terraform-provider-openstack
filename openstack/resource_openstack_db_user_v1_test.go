@@ -2,7 +2,6 @@ package openstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -51,9 +50,9 @@ func testAccCheckDatabaseV1UserExists(n string, instance *instances.Instance, us
 			return fmt.Errorf("No ID is set")
 		}
 
-		parts := strings.SplitN(rs.Primary.ID, "/", 2)
-		if len(parts) != 2 {
-			return fmt.Errorf("Malformed user name: %s", rs.Primary.ID)
+		_, userName, err := parsePairedIDs(rs.Primary.ID, "openstack_db_user_v1")
+		if err != nil {
+			return err
 		}
 
 		config := testAccProvider.Meta().(*Config)
@@ -73,7 +72,7 @@ func testAccCheckDatabaseV1UserExists(n string, instance *instances.Instance, us
 		}
 
 		for _, u := range allUsers {
-			if u.Name == parts[1] {
+			if u.Name == userName {
 				*user = u
 				return nil
 			}
@@ -96,12 +95,12 @@ func testAccCheckDatabaseV1UserDestroy(s *terraform.State) error {
 			continue
 		}
 
-		parts := strings.SplitN(rs.Primary.ID, "/", 2)
-		if len(parts) != 2 {
-			return fmt.Errorf("Malformed username: %s", rs.Primary.ID)
+		id, userName, err := parsePairedIDs(rs.Primary.ID, "openstack_db_user_v1")
+		if err != nil {
+			return err
 		}
 
-		pages, err := users.List(DatabaseV1Client, parts[0]).AllPages()
+		pages, err := users.List(DatabaseV1Client, id).AllPages()
 		if err != nil {
 			return nil
 		}
@@ -113,7 +112,7 @@ func testAccCheckDatabaseV1UserDestroy(s *terraform.State) error {
 
 		var exists bool
 		for _, v := range allUsers {
-			if v.Name == parts[1] {
+			if v.Name == userName {
 				exists = true
 			}
 		}

@@ -104,3 +104,14 @@ func TestBuildRequestBoolType(t *testing.T) {
 	}
 	assert.Equal(t, expected, req)
 }
+
+func TestUnitparsePairedIDs(t *testing.T) {
+	id := "foo/bar"
+	expectedParentID := "foo"
+	expectedChildID := "bar"
+
+	actualParentID, actualChildID, err := parsePairedIDs(id, "")
+	assert.Equal(t, err, nil)
+	assert.Equal(t, expectedParentID, actualParentID)
+	assert.Equal(t, expectedChildID, actualChildID)
+}

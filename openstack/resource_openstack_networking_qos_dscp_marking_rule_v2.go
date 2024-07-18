@@ -98,9 +98,9 @@ func resourceNetworkingQoSDSCPMarkingRuleV2Read(ctx context.Context, d *schema.R
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
+	qosPolicyID, qosRuleID, err := parsePairedIDs(d.Id(), "openstack_networking_qos_dscp_marking_rule_v2")
 	if err != nil {
-		return diag.Errorf("Error reading openstack_networking_qos_dscp_marking_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	r, err := rules.GetDSCPMarkingRule(networkingClient, qosPolicyID, qosRuleID).ExtractDSCPMarkingRule()
@@ -124,9 +124,9 @@ func resourceNetworkingQoSDSCPMarkingRuleV2Update(ctx context.Context, d *schema
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
+	qosPolicyID, qosRuleID, err := parsePairedIDs(d.Id(), "openstack_networking_qos_dscp_marking_rule_v2")
 	if err != nil {
-		return diag.Errorf("Error reading openstack_networking_qos_dscp_marking_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	if d.HasChange("dscp_mark") {
@@ -151,9 +151,9 @@ func resourceNetworkingQoSDSCPMarkingRuleV2Delete(ctx context.Context, d *schema
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
+	qosPolicyID, qosRuleID, err := parsePairedIDs(d.Id(), "openstack_networking_qos_dscp_marking_rule_v2")
 	if err != nil {
-		return diag.Errorf("Error reading openstack_networking_qos_dscp_marking_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	if err := rules.DeleteDSCPMarkingRule(networkingClient, qosPolicyID, qosRuleID).ExtractErr(); err != nil {

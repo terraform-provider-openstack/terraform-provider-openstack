@@ -55,7 +55,7 @@ func testAccCheckBlockstorageV3VolumeTypeAccessDestroy(s *terraform.State) error
 			continue
 		}
 
-		vtid, pid, err := parseVolumeTypeAccessID(rs.Primary.ID)
+		vtid, pid, err := parsePairedIDs(rs.Primary.ID, "openstack_blockstorage_volume_type_access_v3")
 		if err != nil {
 			return err
 		}
@@ -93,7 +93,7 @@ func testAccCheckBlockstorageV3VolumeTypeAccessExists(n string) resource.TestChe
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
 
-		vtid, pid, err := parseVolumeTypeAccessID(rs.Primary.ID)
+		vtid, pid, err := parsePairedIDs(rs.Primary.ID, "openstack_blockstorage_volume_type_access_v3")
 		if err != nil {
 			return err
 		}

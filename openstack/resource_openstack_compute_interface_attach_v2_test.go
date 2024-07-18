@@ -65,7 +65,7 @@ func testAccCheckComputeV2InterfaceAttachDestroy(s *terraform.State) error {
 			continue
 		}
 
-		instanceID, portID, err := computeInterfaceAttachV2ParseID(rs.Primary.ID)
+		instanceID, portID, err := parsePairedIDs(rs.Primary.ID, "openstack_compute_interface_attach_v2")
 		if err != nil {
 			return err
 		}
@@ -96,7 +96,7 @@ func testAccCheckComputeV2InterfaceAttachExists(n string, ai *attachinterfaces.I
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		instanceID, portID, err := computeInterfaceAttachV2ParseID(rs.Primary.ID)
+		instanceID, portID, err := parsePairedIDs(rs.Primary.ID, "openstack_compute_interface_attach_v2")
 		if err != nil {
 			return err
 		}

@@ -1,9 +1,7 @@
 package openstack
 
 import (
-	"fmt"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
@@ -56,16 +54,4 @@ func computeInterfaceAttachV2DetachFunc(
 		log.Printf("[DEBUG] openstack_compute_interface_attach_v2 %s is still active.", attachmentID)
 		return nil, "", nil
 	}
-}
-
-func computeInterfaceAttachV2ParseID(id string) (string, string, error) {
-	idParts := strings.Split(id, "/")
-	if len(idParts) < 2 {
-		return "", "", fmt.Errorf("Unable to determine openstack_compute_interface_attach_v2 %s ID", id)
-	}
-
-	instanceID := idParts[0]
-	attachmentID := idParts[1]
-
-	return instanceID, attachmentID, nil
 }

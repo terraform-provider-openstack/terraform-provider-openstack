@@ -73,9 +73,9 @@ func testAccCheckNetworkingV2QoSMinimumBandwidthRuleExists(n string, rule *rules
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(rs.Primary.ID)
+		qosPolicyID, qosRuleID, err := parsePairedIDs(rs.Primary.ID, "openstack_networking_qos_minimum_bandwidth_rule_v2")
 		if err != nil {
-			return fmt.Errorf("Error reading openstack_networking_qos_minimum_bandwidth_rule_v2 ID %s: %s", rs.Primary.ID, err)
+			return err
 		}
 
 		found, err := rules.GetMinimumBandwidthRule(networkingClient, qosPolicyID, qosRuleID).ExtractMinimumBandwidthRule()
@@ -107,9 +107,9 @@ func testAccCheckNetworkingV2QoSMinimumBandwidthRuleDestroy(s *terraform.State) 
 			continue
 		}
 
-		qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(rs.Primary.ID)
+		qosPolicyID, qosRuleID, err := parsePairedIDs(rs.Primary.ID, "openstack_networking_qos_minimum_bandwidth_rule_v2")
 		if err != nil {
-			return fmt.Errorf("Error reading openstack_networking_qos_minimum_bandwidth_rule_v2 ID %s: %s", rs.Primary.ID, err)
+			return err
 		}
 
 		_, err = rules.GetMinimumBandwidthRule(networkingClient, qosPolicyID, qosRuleID).ExtractMinimumBandwidthRule()

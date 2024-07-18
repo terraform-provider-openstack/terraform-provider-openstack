@@ -113,9 +113,9 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Read(ctx context.Context, d *schem
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
+	qosPolicyID, qosRuleID, err := parsePairedIDs(d.Id(), "openstack_networking_qos_bandwidth_limit_rule_v2")
 	if err != nil {
-		return diag.Errorf("Error reading openstack_networking_qos_bandwidth_limit_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	r, err := rules.GetBandwidthLimitRule(networkingClient, qosPolicyID, qosRuleID).ExtractBandwidthLimitRule()
@@ -141,9 +141,9 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Update(ctx context.Context, d *sch
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
+	qosPolicyID, qosRuleID, err := parsePairedIDs(d.Id(), "openstack_networking_qos_bandwidth_limit_rule_v2")
 	if err != nil {
-		return diag.Errorf("Error reading openstack_networking_qos_bandwidth_limit_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	var hasChange bool
@@ -184,9 +184,9 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Delete(ctx context.Context, d *sch
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
+	qosPolicyID, qosRuleID, err := parsePairedIDs(d.Id(), "openstack_networking_qos_bandwidth_limit_rule_v2")
 	if err != nil {
-		return diag.Errorf("Error reading openstack_networking_qos_bandwidth_limit_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	if err := rules.DeleteBandwidthLimitRule(networkingClient, qosPolicyID, qosRuleID).ExtractErr(); err != nil {

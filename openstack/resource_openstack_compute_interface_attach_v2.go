@@ -140,7 +140,7 @@ func resourceComputeInterfaceAttachV2Read(_ context.Context, d *schema.ResourceD
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	instanceID, attachmentID, err := computeInterfaceAttachV2ParseID(d.Id())
+	instanceID, attachmentID, err := parsePairedIDs(d.Id(), "openstack_compute_interface_attach_v2")
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -171,7 +171,7 @@ func resourceComputeInterfaceAttachV2Delete(ctx context.Context, d *schema.Resou
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	instanceID, attachmentID, err := computeInterfaceAttachV2ParseID(d.Id())
+	instanceID, attachmentID, err := parsePairedIDs(d.Id(), "openstack_compute_interface_attach_v2")
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -3,7 +3,6 @@ package openstack
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
@@ -11,18 +10,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 )
-
-func computeVolumeAttachV2ParseID(id string) (string, string, error) {
-	parts := strings.Split(id, "/")
-	if len(parts) < 2 {
-		return "", "", fmt.Errorf("unable to determine openstack_compute_volume_attach_v2 ID")
-	}
-
-	instanceID := parts[0]
-	attachmentID := parts[1]
-
-	return instanceID, attachmentID, nil
-}
 
 func computeVolumeAttachV2AttachFunc(computeClient *gophercloud.ServiceClient, blockStorageClient *gophercloud.ServiceClient, instanceID, attachmentID string, volumeID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
