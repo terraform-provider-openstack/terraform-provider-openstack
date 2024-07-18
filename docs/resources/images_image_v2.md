@@ -34,74 +34,76 @@ resource "openstack_images_image_v2" "rancheros" {
 
 The following arguments are supported:
 
-* `container_format` - (Required) The container format. Must be one of
-   "ami", "ari", "aki", "bare", "ovf".
+* `container_format` - (Required) The container format. Must be one of "bare",
+  "ovf", "aki", "ari", "ami", "ova", "docker", "compressed".
 
-* `disk_format` - (Required) The disk format. Must be one of
-   "ami", "ari", "aki", "vhd", "vmdk", "raw", "qcow2", "vdi", "iso".
+* `disk_format` - (Required) The disk format. Must be one of "raw", "vhd",
+  "vhdx", "vmdk", "vdi", "iso", "ploop", "qcow2", "aki", "ari", "ami"
 
 * `local_file_path` - (Optional) This is the filepath of the raw image file
-   that will be uploaded to Glance. Conflicts with `image_source_url` and
-   `web_download`.
+  that will be uploaded to Glance. Conflicts with `image_source_url` and
+  `web_download`.
 
 * `image_cache_path` - (Optional) This is the directory where the images will
-   be downloaded. Images will be stored with a filename corresponding to
-   the url's md5 hash. Defaults to "$HOME/.terraform/image_cache"
+  be downloaded. Images will be stored with a filename corresponding to the
+  url's md5 hash. Defaults to "$HOME/.terraform/image_cache"
 
-* `image_source_url` - (Optional) This is the url of the raw image. If `web_download`
-   is not used, then the image will be downloaded in the `image_cache_path` before
-   being uploaded to Glance.
-   Conflicts with `local_file_path`.
+* `image_source_url` - (Optional) This is the url of the raw image. If
+  `web_download` is not used, then the image will be downloaded in the
+  `image_cache_path` before being uploaded to Glance. Conflicts with
+  `local_file_path`.
 
-* `image_source_username` - (Optional) The username of basic auth to download `image_source_url`.
+* `image_source_username` - (Optional) The username of basic auth to download
+  `image_source_url`.
 
-* `image_source_password` - (Optional) The password of basic auth to download `image_source_url`.
+* `image_source_password` - (Optional) The password of basic auth to download
+  `image_source_url`.
 
-* `min_disk_gb` - (Optional) Amount of disk space (in GB) required to boot image.
-   Defaults to 0.
+* `min_disk_gb` - (Optional) Amount of disk space (in GB) required to boot
+  image. Defaults to 0.
 
 * `min_ram_mb` - (Optional) Amount of ram (in MB) required to boot image.
-   Defauts to 0.
+  Defauts to 0.
 
 * `name` - (Required) The name of the image.
 
 * `image_id` - (Optional) Unique ID (valid UUID) of image to create. Changing
-    this creates a new image.
+  this creates a new image.
 
 * `properties` - (Optional) A map of key/value pairs to set freeform
-    information about an image. See the "Notes" section for further
-    information about properties.
+  information about an image. See the "Notes" section for further information
+  about properties.
 
-* `protected` - (Optional) If true, image will not be deletable.
-   Defaults to false.
+* `protected` - (Optional) If true, image will not be deletable. Defaults to
+  false.
 
 * `hidden` - (Optional) If true, image will be hidden from public list.
-   Defaults to false.
+  Defaults to false.
 
-* `region` - (Optional) The region in which to obtain the V2 Glance client.
-    A Glance client is needed to create an Image that can be used with
-    a compute instance. If omitted, the `region` argument of the provider
-    is used. Changing this creates a new Image.
+* `region` - (Optional) The region in which to obtain the V2 Glance client. A
+  Glance client is needed to create an Image that can be used with a compute
+  instance. If omitted, the `region` argument of the provider is used. Changing
+  this creates a new Image.
 
-* `tags` - (Optional) The tags of the image. It must be a list of strings.
-    At this time, it is not possible to delete all tags of an image.
+* `tags` - (Optional) The tags of the image. It must be a list of strings. At
+  this time, it is not possible to delete all tags of an image.
 
 * `verify_checksum` - (Optional) If false, the checksum will not be verified
-    once the image is finished uploading. Conflicts with `web_download`.
-    Defaults to true when not using `web_download`.
+  once the image is finished uploading. Conflicts with `web_download`. Defaults
+  to true when not using `web_download`.
 
 * `visibility` - (Optional) The visibility of the image. Must be one of
-   "public", "private", "community", or "shared". The ability to set the
-   visibility depends upon the configuration of the OpenStack cloud.
+  "public", "private", "community", or "shared". The ability to set the
+  visibility depends upon the configuration of the OpenStack cloud.
 
-* `web_download` - (Optional) If true, the "web-download" import method will
-    be used to let Openstack download the image directly from the remote source.
-    Conflicts with `local_file_path`. Defaults to false.
+* `web_download` - (Optional) If true, the "web-download" import method will be
+  used to let Openstack download the image directly from the remote source.
+  Conflicts with `local_file_path`. Defaults to false.
 
 * `decompress` - (Optional) If true, this provider will decompress downloaded
-    image before uploading it to OpenStack. Decompression algorithm is chosen by
-    checking "Content-Type" header, supported algorithm are: gzip, bzip2 and xz.
-    Defaults to false. Changing this creates a new Image.
+  image before uploading it to OpenStack. Decompression algorithm is chosen by
+  checking "Content-Type" header, supported algorithm are: gzip, bzip2 and xz.
+  Defaults to false. Changing this creates a new Image.
 
 ## Attributes Reference
 
