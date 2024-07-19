@@ -106,9 +106,9 @@ func resourceNetworkingQoSMinimumBandwidthRuleV2Read(ctx context.Context, d *sch
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
+	qosPolicyID, qosRuleID, err := parsePairedIDs(d.Id(), "openstack_networking_qos_minimum_bandwidth_rule_v2")
 	if err != nil {
-		return diag.Errorf("Error reading openstack_networking_qos_minimum_bandwidth_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	r, err := rules.GetMinimumBandwidthRule(networkingClient, qosPolicyID, qosRuleID).ExtractMinimumBandwidthRule()
@@ -133,9 +133,9 @@ func resourceNetworkingQoSMinimumBandwidthRuleV2Update(ctx context.Context, d *s
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
+	qosPolicyID, qosRuleID, err := parsePairedIDs(d.Id(), "openstack_networking_qos_minimum_bandwidth_rule_v2")
 	if err != nil {
-		return diag.Errorf("Error reading openstack_networking_qos_minimum_bandwidth_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	var hasChange bool
@@ -170,9 +170,9 @@ func resourceNetworkingQoSMinimumBandwidthRuleV2Delete(ctx context.Context, d *s
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(d.Id())
+	qosPolicyID, qosRuleID, err := parsePairedIDs(d.Id(), "openstack_networking_qos_minimum_bandwidth_rule_v2")
 	if err != nil {
-		return diag.Errorf("Error reading openstack_networking_qos_minimum_bandwidth_rule_v2 ID %s: %s", d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	if err := rules.DeleteMinimumBandwidthRule(networkingClient, qosPolicyID, qosRuleID).ExtractErr(); err != nil {

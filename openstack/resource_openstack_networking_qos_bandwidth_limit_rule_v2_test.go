@@ -81,9 +81,9 @@ func testAccCheckNetworkingV2QoSBandwidthLimitRuleExists(n string, rule *rules.B
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(rs.Primary.ID)
+		qosPolicyID, qosRuleID, err := parsePairedIDs(rs.Primary.ID, "openstack_networking_qos_bandwidth_limit_rule_v2")
 		if err != nil {
-			return fmt.Errorf("Error reading openstack_networking_qos_bandwidth_limit_rule_v2 ID %s: %s", rs.Primary.ID, err)
+			return err
 		}
 
 		found, err := rules.GetBandwidthLimitRule(networkingClient, qosPolicyID, qosRuleID).ExtractBandwidthLimitRule()
@@ -115,9 +115,9 @@ func testAccCheckNetworkingV2QoSBandwidthLimitRuleDestroy(s *terraform.State) er
 			continue
 		}
 
-		qosPolicyID, qosRuleID, err := resourceNetworkingQoSRuleV2ParseID(rs.Primary.ID)
+		qosPolicyID, qosRuleID, err := parsePairedIDs(rs.Primary.ID, "openstack_networking_qos_bandwidth_limit_rule_v2")
 		if err != nil {
-			return fmt.Errorf("Error reading openstack_networking_qos_bandwidth_limit_rule_v2 ID %s: %s", rs.Primary.ID, err)
+			return err
 		}
 
 		_, err = rules.GetBandwidthLimitRule(networkingClient, qosPolicyID, qosRuleID).ExtractBandwidthLimitRule()

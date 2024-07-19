@@ -314,18 +314,6 @@ func resourceImagesImageV2UpdateComputedAttributes(_ context.Context, diff *sche
 	return nil
 }
 
-func resourceImagesImageAccessV2ParseID(id string) (string, string, error) {
-	idParts := strings.Split(id, "/")
-	if len(idParts) < 2 {
-		return "", "", fmt.Errorf("Unable to determine image share access ID")
-	}
-
-	imageID := idParts[0]
-	memberID := idParts[1]
-
-	return imageID, memberID, nil
-}
-
 func resourceImagesImageAccessV2DetectMemberID(client *gophercloud.ServiceClient, imageID string) (string, error) {
 	allPages, err := members.List(client, imageID).AllPages()
 	if err != nil {

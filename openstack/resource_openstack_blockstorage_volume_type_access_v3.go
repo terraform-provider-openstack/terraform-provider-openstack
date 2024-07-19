@@ -3,7 +3,6 @@ package openstack
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -72,9 +71,9 @@ func resourceBlockstorageVolumeTypeAccessV3Read(ctx context.Context, d *schema.R
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
-	vtID, projectID, err := parseVolumeTypeAccessID(d.Id())
+	vtID, projectID, err := parsePairedIDs(d.Id(), "openstack_blockstorage_volume_type_access_v3")
 	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "Error parsing ID of openstack_blockstorage_volume_type_access_v3"))
+		return diag.FromErr(err)
 	}
 
 	allPages, err := volumetypes.ListAccesses(blockStorageClient, vtID).AllPages()
@@ -113,9 +112,9 @@ func resourceBlockstorageVolumeTypeAccessV3Delete(ctx context.Context, d *schema
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
-	vtID, projectID, err := parseVolumeTypeAccessID(d.Id())
+	vtID, projectID, err := parsePairedIDs(d.Id(), "openstack_blockstorage_volume_type_access_v3")
 	if err != nil {
-		return diag.Errorf("Error parsing ID of openstack_blockstorage_volume_type_access_v3 %s: %s", d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	removeOpts := volumetypes.RemoveAccessOpts{
@@ -127,13 +126,4 @@ func resourceBlockstorageVolumeTypeAccessV3Delete(ctx context.Context, d *schema
 	}
 
 	return nil
-}
-
-func parseVolumeTypeAccessID(id string) (string, string, error) {
-	idParts := strings.Split(id, "/")
-	if len(idParts) < 2 {
-		return "", "", fmt.Errorf("Unable to determine volume type access ID %s", id)
-	}
-
-	return idParts[0], idParts[1], nil
 }

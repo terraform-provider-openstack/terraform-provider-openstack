@@ -86,7 +86,7 @@ func testAccCheckComputeV2VolumeAttachDestroy(s *terraform.State) error {
 			continue
 		}
 
-		instanceID, volumeID, err := computeVolumeAttachV2ParseID(rs.Primary.ID)
+		instanceID, volumeID, err := parsePairedIDs(rs.Primary.ID, "openstack_compute_volume_attach_v2")
 		if err != nil {
 			return err
 		}
@@ -117,7 +117,7 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		instanceID, volumeID, err := computeVolumeAttachV2ParseID(rs.Primary.ID)
+		instanceID, volumeID, err := parsePairedIDs(rs.Primary.ID, "openstack_compute_volume_attach_v2")
 		if err != nil {
 			return err
 		}

@@ -226,7 +226,7 @@ func testAccCheckContainerInfraV1NodeGroupExists(n string, nodeGroup *nodegroups
 		}
 
 		containerInfraClient.Microversion = containerInfraV1NodeGroupMinMicroversion
-		clusterID, nodeGroupID, err := parseNodeGroupID(rs.Primary.ID)
+		clusterID, nodeGroupID, err := parsePairedIDs(rs.Primary.ID, "openstack_containerinfra_nodegroup_v1")
 		if err != nil {
 			return err
 		}
@@ -258,7 +258,7 @@ func testAccCheckContainerInfraV1NodeGroupDestroy(s *terraform.State) error {
 		if rs.Type != "openstack_containerinfra_nodegroup_v1" {
 			continue
 		}
-		clusterID, nodeGroupID, err := parseVolumeTypeAccessID(rs.Primary.ID)
+		clusterID, nodeGroupID, err := parsePairedIDs(rs.Primary.ID, "openstack_containerinfra_nodegroup_v1")
 		if err != nil {
 			return err
 		}

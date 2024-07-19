@@ -15,16 +15,3 @@ func TestUnitExpandBlockStorageV3AttachMode(t *testing.T) {
 	assert.Equal(t, err, nil)
 	assert.Equal(t, expected, actual)
 }
-
-func TestUnitBlockStorageVolumeAttachV3ParseID(t *testing.T) {
-	id := "foo/bar"
-
-	expectedVolumeID := "foo"
-	expectedAttachmentID := "bar"
-
-	actualVolumeID, actualAttachmentID, err := blockStorageVolumeAttachV3ParseID(id)
-
-	assert.Equal(t, err, nil)
-	assert.Equal(t, expectedVolumeID, actualVolumeID)
-	assert.Equal(t, expectedAttachmentID, actualAttachmentID)
-}

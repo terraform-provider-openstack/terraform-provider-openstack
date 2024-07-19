@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -219,9 +218,9 @@ func resourceContainerInfraNodeGroupV1Read(_ context.Context, d *schema.Resource
 
 	containerInfraClient.Microversion = containerInfraV1NodeGroupMinMicroversion
 
-	clusterID, nodeGroupID, err := parseNodeGroupID(d.Id())
+	clusterID, nodeGroupID, err := parsePairedIDs(d.Id(), "openstack_containerinfra_nodegroup_v1")
 	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "Error parsing ID of openstack_containerinfra_nodegroup_v1"))
+		return diag.FromErr(err)
 	}
 
 	nodeGroup, err := nodegroups.Get(containerInfraClient, clusterID, nodeGroupID).Extract()
@@ -274,9 +273,9 @@ func resourceContainerInfraNodeGroupV1Update(ctx context.Context, d *schema.Reso
 
 	containerInfraClient.Microversion = containerInfraV1NodeGroupMinMicroversion
 
-	clusterID, nodeGroupID, err := parseNodeGroupID(d.Id())
+	clusterID, nodeGroupID, err := parsePairedIDs(d.Id(), "openstack_containerinfra_nodegroup_v1")
 	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "Error parsing ID of openstack_containerinfra_nodegroup_v1"))
+		return diag.FromErr(err)
 	}
 
 	updateOpts := []nodegroups.UpdateOptsBuilder{}
@@ -343,9 +342,9 @@ func resourceContainerInfraNodeGroupV1Delete(ctx context.Context, d *schema.Reso
 
 	containerInfraClient.Microversion = containerInfraV1NodeGroupMinMicroversion
 
-	clusterID, nodeGroupID, err := parseNodeGroupID(d.Id())
+	clusterID, nodeGroupID, err := parsePairedIDs(d.Id(), "openstack_containerinfra_nodegroup_v1")
 	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "Error parsing ID of openstack_containerinfra_nodegroup_v1"))
+		return diag.FromErr(err)
 	}
 
 	if err := nodegroups.Delete(containerInfraClient, clusterID, nodeGroupID).ExtractErr(); err != nil {
@@ -367,13 +366,4 @@ func resourceContainerInfraNodeGroupV1Delete(ctx context.Context, d *schema.Reso
 	}
 
 	return nil
-}
-
-func parseNodeGroupID(id string) (string, string, error) {
-	idParts := strings.Split(id, "/")
-	if len(idParts) < 2 {
-		return "", "", fmt.Errorf("Unable to determine nodegroup ID %s", id)
-	}
-
-	return idParts[0], idParts[1], nil
 }

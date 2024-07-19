@@ -184,7 +184,7 @@ func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 			continue
 		}
 
-		zoneID, recordsetID, err := dnsRecordSetV2ParseID(rs.Primary.ID)
+		zoneID, recordsetID, err := parsePairedIDs(rs.Primary.ID, "openstack_dns_recordset_v2")
 		if err != nil {
 			return err
 		}
@@ -215,7 +215,7 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 			return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 		}
 
-		zoneID, recordsetID, err := dnsRecordSetV2ParseID(rs.Primary.ID)
+		zoneID, recordsetID, err := parsePairedIDs(rs.Primary.ID, "openstack_dns_recordset_v2")
 		if err != nil {
 			return err
 		}

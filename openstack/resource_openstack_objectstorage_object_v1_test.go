@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -304,12 +303,12 @@ func testAccCheckObjectStorageV1ObjectExists(n string, object *objects.GetHeader
 			return fmt.Errorf("Error creating OpenStack object storage client: %s", err)
 		}
 
-		parts := strings.SplitN(rs.Primary.ID, "/", 2)
-		if len(parts) < 2 {
-			return fmt.Errorf("Malformed object name: %s", rs.Primary.ID)
+		container, obj, err := parsePairedIDs(rs.Primary.ID, "openstack_objectstorage_object_v1")
+		if err != nil {
+			return err
 		}
 
-		found, err := objects.Get(objectStorageClient, parts[0], parts[1], nil).Extract()
+		found, err := objects.Get(objectStorageClient, container, obj, nil).Extract()
 		if err != nil {
 			return err
 		}

@@ -3,7 +3,6 @@ package openstack
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
@@ -46,16 +45,4 @@ func dnsRecordSetV2RefreshFunc(dnsClient *gophercloud.ServiceClient, zoneID, rec
 		log.Printf("[DEBUG] openstack_dns_recordset_v2 %s current status: %s", recordset.ID, recordset.Status)
 		return recordset, recordset.Status, nil
 	}
-}
-
-func dnsRecordSetV2ParseID(id string) (string, string, error) {
-	idParts := strings.Split(id, "/")
-	if len(idParts) != 2 {
-		return "", "", fmt.Errorf("Unable to determine openstack_dns_recordset_v2 ID from raw ID: %s", id)
-	}
-
-	zoneID := idParts[0]
-	recordsetID := idParts[1]
-
-	return zoneID, recordsetID, nil
 }

@@ -57,7 +57,7 @@ func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		imageID, memberID, err := resourceImagesImageAccessV2ParseID(rs.Primary.ID)
+		imageID, memberID, err := parsePairedIDs(rs.Primary.ID, "openstack_images_image_access_accept_v2")
 		if err != nil {
 			return err
 		}
