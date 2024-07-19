@@ -16,6 +16,7 @@ func TestAccBGPVPNPortAssociateV2_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckBGPVPN(t)
 		},
 		ProviderFactories: testAccProviders,
@@ -48,6 +49,7 @@ func TestAccBGPVPNPortAssociateV2_no_fixed_ips_advertise(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckBGPVPN(t)
 		},
 		ProviderFactories: testAccProviders,

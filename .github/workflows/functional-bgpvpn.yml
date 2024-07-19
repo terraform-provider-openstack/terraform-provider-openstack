@@ -35,15 +35,64 @@ jobs:
     steps:
       - name: Checkout TPO
         uses: actions/checkout@v4
+      - name: Create additional neutron policies
+        run: |
+          mkdir /tmp/neutron-policies
+          cat << EOF >> /tmp/neutron-policies/bgpvpn.yaml
+          ---
+          "create_bgpvpn": "rule:admin_or_owner"
+          "update_bgpvpn": "rule:admin_or_owner"
+          "delete_bgpvpn": "rule:admin_or_owner"
+          "get_bgpvpn": "rule:admin_or_owner"
+          "get_bgpvpn:tenant_id": "rule:admin_or_owner"
+          "get_bgpvpn:route_targets": "rule:admin_or_owner"
+          "get_bgpvpn:import_targets": "rule:admin_or_owner"
+          "get_bgpvpn:export_targets": "rule:admin_or_owner"
+          "get_bgpvpn:route_distinguishers": "rule:admin_or_owner"
+          "get_bgpvpn:vni": "rule:admin_or_owner"
+          "create_bgpvpn:tenant_id": "rule:admin_or_owner"
+          "create_bgpvpn:route_targets": "rule:admin_or_owner"
+          "create_bgpvpn:name": "rule:admin_or_owner"
+          "create_bgpvpn:import_targets": "rule:admin_or_owner"
+          "create_bgpvpn:export_targets": "rule:admin_or_owner"
+          "create_bgpvpn:route_distinguishers": "rule:admin_or_owner"
+          "create_bgpvpn:type": "rule:admin_or_owner"
+          "create_bgpvpn:local_pref": "rule:admin_or_owner"
+          "create_bgpvpn:vni": "rule:admin_or_owner"
+          "update_bgpvpn:tenant_id": "rule:admin_or_owner"
+          "update_bgpvpn:route_targets": "rule:admin_or_owner"
+          "update_bgpvpn:import_targets": "rule:admin_or_owner"
+          "update_bgpvpn:export_targets": "rule:admin_or_owner"
+          "update_bgpvpn:route_distinguishers": "rule:admin_or_owner"
+          "update_bgpvpn:vni": "rule:admin_or_owner"
+          "create_bgpvpn_network_association": "rule:admin_or_owner"
+          "update_bgpvpn_network_association": "rule:admin_or_owner"
+          "delete_bgpvpn_network_association": "rule:admin_or_owner"
+          "get_bgpvpn_network_association": "rule:admin_or_owner"
+          "get_bgpvpn_network_association:tenant_id": "rule:admin_or_owner"
+          "create_bgpvpn_port_association": "rule:admin_or_owner"
+          "update_bgpvpn_port_association": "rule:admin_or_owner"
+          "delete_bgpvpn_port_association": "rule:admin_or_owner"
+          "get_bgpvpn_port_association": "rule:admin_or_owner"
+          "get_bgpvpn_port_association:tenant_id": "rule:admin_or_owner"
+          "create_bgpvpn_router_association": "rule:admin_or_owner"
+          "update_bgpvpn_router_association": "rule:admin_or_owner"
+          "delete_bgpvpn_router_association": "rule:admin_or_owner"
+          "get_bgpvpn_router_association": "rule:admin_or_owner"
+          "get_bgpvpn_router_association:tenant_id": "rule:admin_or_owner"
+          EOF
       - name: Deploy devstack
         uses: EmilienM/devstack-action@v0.15
         with:
           branch: ${{ matrix.openstack_version }}
           conf_overrides: |
             Q_ML2_PLUGIN_EXT_DRIVERS=qos,port_security,dns_domain_keywords
-              enable_plugin neutron-dynamic-routing https://github.com/openstack/neutron-dynamic-routing ${{ matrix.openstack_version }}
-              enable_plugin networking-bgpvpn https://github.com/openstack/networking-bgpvpn.git ${{ matrix.openstack_version }}
-            ${{ matrix.devstack_conf_overrides }}
+            enable_plugin neutron-dynamic-routing https://github.com/openstack/neutron-dynamic-routing ${{ matrix.openstack_version }}
+            enable_plugin networking-bgpvpn https://github.com/openstack/networking-bgpvpn.git ${{ matrix.openstack_version }}
+
+            [[post-config|\$NEUTRON_CONF]]
+            [oslo_policy]
+            policy_dirs = /tmp/neutron-policies
           enabled_services: 'neutron-dns,neutron-qos,neutron-segments,neutron-trunk,neutron-uplink-status-propagation,neutron-network-segment-range,neutron-port-forwarding'
       - name: Checkout go
         uses: actions/setup-go@v5

@@ -16,6 +16,7 @@ func TestAccBGPVPNRouterAssociateV2_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckBGPVPN(t)
 		},
 		ProviderFactories: testAccProviders,
@@ -48,6 +49,7 @@ func TestAccBGPVPNRouterAssociateV2_no_routes_advertise(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckBGPVPN(t)
 			t.Skip(`bug in OpenStack which ignores {"advertise_extra_routes": false} on POST request, while handles on PUT request.`)
 		},
