@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -75,22 +75,22 @@ func MapValueSpecs(d *schema.ResourceData) map[string]string {
 	return m
 }
 
-func checkForRetryableError(err error) *resource.RetryError {
+func checkForRetryableError(err error) *retry.RetryError {
 	switch e := err.(type) {
 	case gophercloud.ErrDefault500:
-		return resource.RetryableError(err)
+		return retry.RetryableError(err)
 	case gophercloud.ErrDefault409:
-		return resource.RetryableError(err)
+		return retry.RetryableError(err)
 	case gophercloud.ErrDefault503:
-		return resource.RetryableError(err)
+		return retry.RetryableError(err)
 	case gophercloud.ErrUnexpectedResponseCode:
 		if e.GetStatusCode() == 504 || e.GetStatusCode() == 502 {
-			return resource.RetryableError(err)
+			return retry.RetryableError(err)
 		} else {
-			return resource.NonRetryableError(err)
+			return retry.NonRetryableError(err)
 		}
 	default:
-		return resource.NonRetryableError(err)
+		return retry.NonRetryableError(err)
 	}
 }
 
@@ -325,4 +325,15 @@ func parsePairedIDs(id string, res string) (string, string, error) {
 	}
 
 	return parts[0], parts[1], nil
+}
+
+// getOkExists is a helper function that replaces the deprecated GetOkExists
+// schema method. It returns the value of the key if it exists in the
+// configuration, along with a boolean indicating if the key exists.
+func getOkExists(d *schema.ResourceData, key string) (interface{}, bool) {
+	v := d.GetRawConfig().GetAttr(key)
+	if v.IsNull() {
+		return nil, false
+	}
+	return d.Get(key), true
 }

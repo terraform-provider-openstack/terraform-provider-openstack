@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -113,7 +113,7 @@ func resourceLBPoolV1Create(ctx context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[DEBUG] Waiting for OpenStack LB pool (%s) to become available.", p.ID)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    waitForLBPoolActive(networkingClient, p.ID),
@@ -241,7 +241,7 @@ func resourceLBPoolV1Delete(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE", "PENDING_DELETE"},
 		Target:     []string{"DELETED"},
 		Refresh:    waitForLBPoolDelete(networkingClient, d.Id()),
@@ -294,7 +294,7 @@ func resourceLBPoolV1DetermineLBMethod(v string) pools.LBMethod {
 	return lbMethod
 }
 
-func waitForLBPoolActive(networkingClient *gophercloud.ServiceClient, poolID string) resource.StateRefreshFunc {
+func waitForLBPoolActive(networkingClient *gophercloud.ServiceClient, poolID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		p, err := pools.Get(networkingClient, poolID).Extract()
 		if err != nil {
@@ -310,7 +310,7 @@ func waitForLBPoolActive(networkingClient *gophercloud.ServiceClient, poolID str
 	}
 }
 
-func waitForLBPoolDelete(networkingClient *gophercloud.ServiceClient, poolID string) resource.StateRefreshFunc {
+func waitForLBPoolDelete(networkingClient *gophercloud.ServiceClient, poolID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete OpenStack LB Pool %s", poolID)
 

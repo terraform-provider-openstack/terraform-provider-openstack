@@ -3,7 +3,7 @@ package openstack
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/apiversions"
@@ -11,7 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
 )
 
-func sharedFilesystemShareAccessV2StateRefreshFunc(client *gophercloud.ServiceClient, shareID string, accessID string) resource.StateRefreshFunc {
+func sharedFilesystemShareAccessV2StateRefreshFunc(client *gophercloud.ServiceClient, shareID string, accessID string) retry.StateRefreshFunc {
 	// Set the client to the minimum supported microversion.
 	client.Microversion = sharedFilesystemV2MinMicroversion
 
@@ -46,7 +46,7 @@ func sharedFilesystemShareAccessV2StateRefreshFunc(client *gophercloud.ServiceCl
 	return sharedFilesystemShareAccessV2StateRefreshStateOld(client, shareID, accessID)
 }
 
-func sharedFilesystemShareAccessV2StateRefreshStateOld(client *gophercloud.ServiceClient, shareID string, accessID string) resource.StateRefreshFunc {
+func sharedFilesystemShareAccessV2StateRefreshStateOld(client *gophercloud.ServiceClient, shareID string, accessID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		access, err := shares.ListAccessRights(client, shareID).Extract()
 		if err != nil {
@@ -61,7 +61,7 @@ func sharedFilesystemShareAccessV2StateRefreshStateOld(client *gophercloud.Servi
 	}
 }
 
-func sharedFilesystemShareAccessV2StateRefreshStateNew(client *gophercloud.ServiceClient, accessID string) resource.StateRefreshFunc {
+func sharedFilesystemShareAccessV2StateRefreshStateNew(client *gophercloud.ServiceClient, accessID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		access, err := shareaccessrules.Get(client, accessID).Extract()
 		if err != nil {

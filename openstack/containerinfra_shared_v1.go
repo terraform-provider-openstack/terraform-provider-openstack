@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"gopkg.in/yaml.v2"
 
@@ -113,9 +113,9 @@ func containerInfraNodeGroupV1AppendUpdateOpts(updateOpts []nodegroups.UpdateOpt
 	return updateOpts
 }
 
-// ContainerInfraClusterV1StateRefreshFunc returns a resource.StateRefreshFunc
+// ContainerInfraClusterV1StateRefreshFunc returns a retry.StateRefreshFunc
 // that is used to watch a container infra Cluster.
-func containerInfraClusterV1StateRefreshFunc(client *gophercloud.ServiceClient, clusterID string) resource.StateRefreshFunc {
+func containerInfraClusterV1StateRefreshFunc(client *gophercloud.ServiceClient, clusterID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		c, err := clusters.Get(client, clusterID).Extract()
 		if err != nil {
@@ -143,9 +143,9 @@ func containerInfraClusterV1StateRefreshFunc(client *gophercloud.ServiceClient, 
 	}
 }
 
-// ContainerInfraNodeGroupV1StateRefreshFunc returns a resource.StateRefreshFunc
+// ContainerInfraNodeGroupV1StateRefreshFunc returns a retry.StateRefreshFunc
 // that is used to watch a container infra NodeGroup.
-func containerInfraNodeGroupV1StateRefreshFunc(client *gophercloud.ServiceClient, clusterID string, nodeGroupID string) resource.StateRefreshFunc {
+func containerInfraNodeGroupV1StateRefreshFunc(client *gophercloud.ServiceClient, clusterID string, nodeGroupID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		nodeGroup, err := nodegroups.Get(client, clusterID, nodeGroupID).Extract()
 		if err != nil {

@@ -112,13 +112,13 @@ func resourceLoadBalancerQuotaV2Create(ctx context.Context, d *schema.ResourceDa
 	}
 
 	// l7_policy requires octavia minor version 2.19. Only set when specified
-	if v, ok := d.GetOkExists("l7_policy"); ok {
+	if v, ok := getOkExists(d, "l7_policy"); ok {
 		l7Policy := v.(int)
 		updateOpts.L7Policy = &l7Policy
 	}
 
 	// l7_rule requires octavia minor version 2.19. Only set when specified
-	if v, ok := d.GetOkExists("l7_rule"); ok {
+	if v, ok := getOkExists(d, "l7_rule"); ok {
 		l7Rule := v.(int)
 		updateOpts.L7Rule = &l7Rule
 	}

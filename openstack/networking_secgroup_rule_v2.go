@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules"
 )
 
-func resourceNetworkingSecGroupRuleV2StateRefreshFunc(client *gophercloud.ServiceClient, sgRuleID string) resource.StateRefreshFunc {
+func resourceNetworkingSecGroupRuleV2StateRefreshFunc(client *gophercloud.ServiceClient, sgRuleID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		sgRule, err := rules.Get(client, sgRuleID).Extract()
 		if err != nil {

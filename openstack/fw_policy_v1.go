@@ -1,7 +1,7 @@
 package openstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/policies"
@@ -19,7 +19,7 @@ func (opts PolicyCreateOpts) ToFirewallPolicyCreateMap() (map[string]interface{}
 	return BuildRequest(opts, "firewall_policy")
 }
 
-func fwPolicyV1DeleteFunc(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func fwPolicyV1DeleteFunc(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		err := policies.Delete(networkingClient, id).Err
 		if err == nil {

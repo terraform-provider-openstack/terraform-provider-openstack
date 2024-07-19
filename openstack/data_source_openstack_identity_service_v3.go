@@ -73,7 +73,7 @@ func dataSourceIdentityServiceV3Read(ctx context.Context, d *schema.ResourceData
 	}
 
 	// filter by enabled, when the enabled is specified
-	if v, ok := d.GetOkExists("enabled"); ok {
+	if v, ok := getOkExists(d, "enabled"); ok {
 		var filteredServices []services.Service
 		for _, svc := range allServices {
 			if svc.Enabled == v.(bool) {

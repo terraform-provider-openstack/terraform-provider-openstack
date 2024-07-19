@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -189,12 +189,12 @@ func resourceNetworkingNetworkV2Create(ctx context.Context, d *schema.ResourceDa
 		MapValueSpecs(d),
 	}
 
-	if v, ok := d.GetOkExists("admin_state_up"); ok {
+	if v, ok := getOkExists(d, "admin_state_up"); ok {
 		asu := v.(bool)
 		createOpts.AdminStateUp = &asu
 	}
 
-	if v, ok := d.GetOkExists("shared"); ok {
+	if v, ok := getOkExists(d, "shared"); ok {
 		shared := v.(bool)
 		createOpts.Shared = &shared
 	}
@@ -231,7 +231,7 @@ func resourceNetworkingNetworkV2Create(ctx context.Context, d *schema.ResourceDa
 	}
 
 	// Add the port security attribute if specified.
-	if v, ok := d.GetOkExists("port_security_enabled"); ok {
+	if v, ok := getOkExists(d, "port_security_enabled"); ok {
 		portSecurityEnabled := v.(bool)
 		finalCreateOpts = portsecurity.NetworkCreateOptsExt{
 			CreateOptsBuilder:   finalCreateOpts,
@@ -272,7 +272,7 @@ func resourceNetworkingNetworkV2Create(ctx context.Context, d *schema.ResourceDa
 
 	log.Printf("[DEBUG] Waiting for openstack_networking_network_v2 %s to become available.", n.ID)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"BUILD"},
 		Target:     []string{"ACTIVE", "DOWN"},
 		Refresh:    resourceNetworkingNetworkV2StateRefreshFunc(networkingClient, n.ID),
@@ -456,7 +456,7 @@ func resourceNetworkingNetworkV2Delete(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_network_v2"))
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
 		Refresh:    resourceNetworkingNetworkV2StateRefreshFunc(networkingClient, d.Id()),

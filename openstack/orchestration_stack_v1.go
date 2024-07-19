@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -68,7 +68,7 @@ func buildEnvironmentOpts(d *schema.ResourceData) (*stacks.Environment, error) {
 	return nil, nil
 }
 
-func orchestrationStackV1StateRefreshFunc(client *gophercloud.ServiceClient, stackID string, isdelete bool) resource.StateRefreshFunc {
+func orchestrationStackV1StateRefreshFunc(client *gophercloud.ServiceClient, stackID string, isdelete bool) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Refresh Stack status %s", stackID)
 		stack, err := stacks.Find(client, stackID).Extract()

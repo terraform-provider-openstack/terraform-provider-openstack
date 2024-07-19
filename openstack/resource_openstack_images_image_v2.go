@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -320,7 +320,7 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	//wait for active
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{string(images.ImageStatusQueued), string(images.ImageStatusSaving), string(images.ImageStatusImporting)},
 		Target:     []string{string(images.ImageStatusActive)},
 		Refresh:    resourceImagesImageV2RefreshFunc(imageClient, d.Id()),
@@ -338,7 +338,7 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(CheckDeleted(d, err, "image"))
 	}
 
-	if v, ok := d.GetOkExists("verify_checksum"); !useWebDownload && (!ok || (ok && v.(bool))) {
+	if v, ok := getOkExists(d, "verify_checksum"); !useWebDownload && (!ok || (ok && v.(bool))) {
 		if img.Checksum != fileChecksum {
 			return diag.Errorf("Error wrong checksum: got %q, expected %q", img.Checksum, fileChecksum)
 		}

@@ -18,7 +18,7 @@ func TestAccNetworkingV2PortSecGroupAssociate_update(t *testing.T) {
 	var port ports.Port
 
 	if os.Getenv("TF_ACC") != "" {
-		hiddenPort, err := testAccCheckNetworkingV2PortSecGroupCreatePort(t, "hidden_port", true)
+		hiddenPort, err := testAccCheckNetworkingV2PortSecGroupCreatePort(t, "hidden_port_1", true)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -157,7 +157,7 @@ func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName strin
 	if defaultSecGroups {
 		// create default security groups
 		createSecGroupOpts := groups.CreateOpts{
-			Name: "default_1",
+			Name: "default_sg_1",
 		}
 
 		secGroup1, err := groups.Create(client, createSecGroupOpts).Extract()
@@ -167,7 +167,7 @@ func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName strin
 
 		t.Logf("Default security group 1 %s created", secGroup1.ID)
 
-		createSecGroupOpts.Name = "default_2"
+		createSecGroupOpts.Name = "default_sg_2"
 
 		secGroup2, err := groups.Create(client, createSecGroupOpts).Extract()
 		if err != nil {
@@ -294,15 +294,15 @@ resource "openstack_networking_secgroup_v2" "secgroup_2" {
 }
 
 data "openstack_networking_secgroup_v2" "default_1" {
-  name = "default_1"
+  name = "default_sg_1"
 }
 
 data "openstack_networking_secgroup_v2" "default_2" {
-  name = "default_2"
+  name = "default_sg_2"
 }
 
 data "openstack_networking_port_v2" "hidden_port_1" {
-  name = "hidden_port"
+  name = "hidden_port_1"
 }
 `
 

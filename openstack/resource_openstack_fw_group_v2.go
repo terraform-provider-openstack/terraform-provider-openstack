@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/groups"
@@ -145,7 +145,7 @@ func resourceFWGroupV2Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Created openstack_fw_group_v2 %s: %#v", group.ID, group)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
 		Target:     []string{"ACTIVE", "INACTIVE", "DOWN"},
 		Refresh:    fwGroupV2RefreshFunc(networkingClient, group.ID),
@@ -288,7 +288,7 @@ func resourceFWGroupV2Update(ctx context.Context, d *schema.ResourceData, meta i
 			return diag.Errorf("Error updating openstack_fw_group_v2 %s: %s", d.Id(), err)
 		}
 
-		stateConf := &resource.StateChangeConf{
+		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"PENDING_CREATE", "PENDING_UPDATE"},
 			Target:     []string{"ACTIVE", "INACTIVE", "DOWN"},
 			Refresh:    fwGroupV2RefreshFunc(networkingClient, d.Id()),
@@ -347,7 +347,7 @@ func resourceFWGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 		return diag.Errorf("Error deleting openstack_fw_group_v2 %s: %s", d.Id(), err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"DELETING"},
 		Target:     []string{"DELETED"},
 		Refresh:    fwGroupV2DeleteFunc(networkingClient, d.Id()),

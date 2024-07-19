@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -76,7 +76,7 @@ func dnsClientSetAuthHeader(resourceData *schema.ResourceData, dnsClient *gopher
 	return nil
 }
 
-func dnsZoneV2RefreshFunc(dnsClient *gophercloud.ServiceClient, zoneID string) resource.StateRefreshFunc {
+func dnsZoneV2RefreshFunc(dnsClient *gophercloud.ServiceClient, zoneID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		zone, err := zones.Get(dnsClient, zoneID).Extract()
 		if err != nil {

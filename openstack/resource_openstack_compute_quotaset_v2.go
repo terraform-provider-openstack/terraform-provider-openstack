@@ -142,59 +142,59 @@ func resourceComputeQuotasetV2Create(ctx context.Context, d *schema.ResourceData
 
 	updateOpts := quotasets.UpdateOpts{}
 
-	if v, ok := d.GetOkExists("fixed_ips"); ok {
+	if v, ok := getOkExists(d, "fixed_ips"); ok {
 		value := v.(int)
 		updateOpts.FixedIPs = &value
 	}
-	if v, ok := d.GetOkExists("floating_ips"); ok {
+	if v, ok := getOkExists(d, "floating_ips"); ok {
 		value := v.(int)
 		updateOpts.FloatingIPs = &value
 	}
-	if v, ok := d.GetOkExists("injected_file_content_bytes"); ok {
+	if v, ok := getOkExists(d, "injected_file_content_bytes"); ok {
 		value := v.(int)
 		updateOpts.InjectedFileContentBytes = &value
 	}
-	if v, ok := d.GetOkExists("injected_file_path_bytes"); ok {
+	if v, ok := getOkExists(d, "injected_file_path_bytes"); ok {
 		value := v.(int)
 		updateOpts.InjectedFilePathBytes = &value
 	}
-	if v, ok := d.GetOkExists("injected_files"); ok {
+	if v, ok := getOkExists(d, "injected_files"); ok {
 		value := v.(int)
 		updateOpts.InjectedFiles = &value
 	}
-	if v, ok := d.GetOkExists("key_pairs"); ok {
+	if v, ok := getOkExists(d, "key_pairs"); ok {
 		value := v.(int)
 		updateOpts.KeyPairs = &value
 	}
-	if v, ok := d.GetOkExists("metadata_items"); ok {
+	if v, ok := getOkExists(d, "metadata_items"); ok {
 		value := v.(int)
 		updateOpts.MetadataItems = &value
 	}
-	if v, ok := d.GetOkExists("ram"); ok {
+	if v, ok := getOkExists(d, "ram"); ok {
 		value := v.(int)
 		updateOpts.RAM = &value
 	}
-	if v, ok := d.GetOkExists("security_group_rules"); ok {
+	if v, ok := getOkExists(d, "security_group_rules"); ok {
 		value := v.(int)
 		updateOpts.SecurityGroupRules = &value
 	}
-	if v, ok := d.GetOkExists("security_groups"); ok {
+	if v, ok := getOkExists(d, "security_groups"); ok {
 		value := v.(int)
 		updateOpts.SecurityGroups = &value
 	}
-	if v, ok := d.GetOkExists("cores"); ok {
+	if v, ok := getOkExists(d, "cores"); ok {
 		value := v.(int)
 		updateOpts.Cores = &value
 	}
-	if v, ok := d.GetOkExists("instances"); ok {
+	if v, ok := getOkExists(d, "instances"); ok {
 		value := v.(int)
 		updateOpts.Instances = &value
 	}
-	if v, ok := d.GetOkExists("server_groups"); ok {
+	if v, ok := getOkExists(d, "server_groups"); ok {
 		value := v.(int)
 		updateOpts.ServerGroups = &value
 	}
-	if v, ok := d.GetOkExists("server_group_members"); ok {
+	if v, ok := getOkExists(d, "server_group_members"); ok {
 		value := v.(int)
 		updateOpts.ServerGroupMembers = &value
 	}

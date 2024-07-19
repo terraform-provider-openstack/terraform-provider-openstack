@@ -3,7 +3,7 @@ package openstack
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -66,9 +66,9 @@ func expandDatabaseInstanceV1Users(rawUsers []interface{}) users.BatchCreateOpts
 	return userList
 }
 
-// databaseInstanceV1StateRefreshFunc returns a resource.StateRefreshFunc
+// databaseInstanceV1StateRefreshFunc returns a retry.StateRefreshFunc
 // that is used to watch a database instance.
-func databaseInstanceV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string) resource.StateRefreshFunc {
+func databaseInstanceV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		i, err := instances.Get(client, instanceID).Extract()
 		if err != nil {

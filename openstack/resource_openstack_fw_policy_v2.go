@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/policies"
@@ -211,7 +211,7 @@ func resourceFWPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_fw_policy_v2"))
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
 		Refresh:    fwPolicyV2DeleteFunc(networkingClient, d.Id()),

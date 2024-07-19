@@ -5,7 +5,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -93,7 +93,7 @@ func networkingNetworkV2Name(d *schema.ResourceData, meta interface{}, networkID
 	return networkName, err
 }
 
-func resourceNetworkingNetworkV2StateRefreshFunc(client *gophercloud.ServiceClient, networkID string) resource.StateRefreshFunc {
+func resourceNetworkingNetworkV2StateRefreshFunc(client *gophercloud.ServiceClient, networkID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		n, err := networks.Get(client, networkID).Extract()
 		if err != nil {

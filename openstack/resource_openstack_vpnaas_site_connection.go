@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -193,7 +193,7 @@ func resourceSiteConnectionV2Create(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"NOT_CREATED"},
 		Target:     []string{"PENDING_CREATE"},
 		Refresh:    waitForSiteConnectionCreation(networkingClient, conn.ID),
@@ -352,7 +352,7 @@ func resourceSiteConnectionV2Update(ctx context.Context, d *schema.ResourceData,
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		stateConf := &resource.StateChangeConf{
+		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
 			Target:     []string{"UPDATED"},
 			Refresh:    waitForSiteConnectionUpdate(networkingClient, conn.ID),
@@ -387,7 +387,7 @@ func resourceSiteConnectionV2Delete(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"DELETING"},
 		Target:     []string{"DELETED"},
 		Refresh:    waitForSiteConnectionDeletion(networkingClient, d.Id()),
@@ -401,7 +401,7 @@ func resourceSiteConnectionV2Delete(ctx context.Context, d *schema.ResourceData,
 	return diag.FromErr(err)
 }
 
-func waitForSiteConnectionDeletion(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForSiteConnectionDeletion(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		conn, err := siteconnections.Get(networkingClient, id).Extract()
 		log.Printf("[DEBUG] Got site connection %s => %#v", id, conn)
@@ -419,7 +419,7 @@ func waitForSiteConnectionDeletion(networkingClient *gophercloud.ServiceClient, 
 	}
 }
 
-func waitForSiteConnectionCreation(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForSiteConnectionCreation(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		service, err := siteconnections.Get(networkingClient, id).Extract()
 		if err != nil {
@@ -429,7 +429,7 @@ func waitForSiteConnectionCreation(networkingClient *gophercloud.ServiceClient, 
 	}
 }
 
-func waitForSiteConnectionUpdate(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForSiteConnectionUpdate(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		conn, err := siteconnections.Get(networkingClient, id).Extract()
 		if err != nil {

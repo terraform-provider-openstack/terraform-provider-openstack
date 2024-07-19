@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -143,7 +143,7 @@ func resourceLBVipV1Create(ctx context.Context, d *schema.ResourceData, meta int
 
 	log.Printf("[DEBUG] Waiting for OpenStack LB VIP (%s) to become available.", p.ID)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    waitForLBVIPActive(networkingClient, p.ID),
@@ -299,7 +299,7 @@ func resourceLBVipV1Delete(ctx context.Context, d *schema.ResourceData, meta int
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE", "PENDING_DELETE"},
 		Target:     []string{"DELETED"},
 		Refresh:    waitForLBVIPDelete(networkingClient, d.Id()),
@@ -362,7 +362,7 @@ func lbVipV1AssignFloatingIP(floatingIP, portID string, networkingClient *gopher
 	return nil
 }
 
-func waitForLBVIPActive(networkingClient *gophercloud.ServiceClient, vipID string) resource.StateRefreshFunc {
+func waitForLBVIPActive(networkingClient *gophercloud.ServiceClient, vipID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		p, err := vips.Get(networkingClient, vipID).Extract()
 		if err != nil {
@@ -378,7 +378,7 @@ func waitForLBVIPActive(networkingClient *gophercloud.ServiceClient, vipID strin
 	}
 }
 
-func waitForLBVIPDelete(networkingClient *gophercloud.ServiceClient, vipID string) resource.StateRefreshFunc {
+func waitForLBVIPDelete(networkingClient *gophercloud.ServiceClient, vipID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete OpenStack LB VIP %s", vipID)
 
