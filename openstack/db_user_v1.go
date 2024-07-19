@@ -3,7 +3,7 @@ package openstack
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/db/v1/databases"
@@ -31,8 +31,8 @@ func flattenDatabaseUserV1Databases(dbs []databases.Database) []string {
 	return databases
 }
 
-// databaseUserV1StateRefreshFunc returns a resource.StateRefreshFunc that is used to watch db user.
-func databaseUserV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string, userName string) resource.StateRefreshFunc {
+// databaseUserV1StateRefreshFunc returns a retry.StateRefreshFunc that is used to watch db user.
+func databaseUserV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string, userName string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		pages, err := users.List(client, instanceID).AllPages()
 		if err != nil {

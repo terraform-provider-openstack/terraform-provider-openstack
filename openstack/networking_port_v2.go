@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -28,7 +28,7 @@ type portExtended struct {
 	policies.QoSPolicyExt
 }
 
-func resourceNetworkingPortV2StateRefreshFunc(client *gophercloud.ServiceClient, portID string) resource.StateRefreshFunc {
+func resourceNetworkingPortV2StateRefreshFunc(client *gophercloud.ServiceClient, portID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		n, err := ports.Get(client, portID).Extract()
 		if err != nil {

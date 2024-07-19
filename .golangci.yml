@@ -102,9 +102,6 @@ linters:
 issues:
   exclude-rules:
     - linters:
-        - staticcheck
-      text: "SA1019:"
-    - linters:
         - stylecheck
       text: "ST1005:"
 

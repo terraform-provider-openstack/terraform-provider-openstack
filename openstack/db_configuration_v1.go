@@ -3,7 +3,7 @@ package openstack
 import (
 	"strconv"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/db/v1/configurations"
@@ -43,9 +43,9 @@ func expandDatabaseConfigurationV1Values(rawValues []interface{}) map[string]int
 	return values
 }
 
-// databaseConfigurationV1StateRefreshFunc returns a resource.StateRefreshFunc that is used to watch
+// databaseConfigurationV1StateRefreshFunc returns a retry.StateRefreshFunc that is used to watch
 // an cloud database instance.
-func databaseConfigurationV1StateRefreshFunc(client *gophercloud.ServiceClient, cgroupID string) resource.StateRefreshFunc {
+func databaseConfigurationV1StateRefreshFunc(client *gophercloud.ServiceClient, cgroupID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		i, err := configurations.Get(client, cgroupID).Extract()
 		if err != nil {

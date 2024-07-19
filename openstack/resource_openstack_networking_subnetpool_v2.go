@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
@@ -193,7 +193,7 @@ func resourceNetworkingSubnetPoolV2Create(ctx context.Context, d *schema.Resourc
 
 	log.Printf("[DEBUG] Waiting for openstack_networking_subnetpool_v2 %s to become available.", s.ID)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Target:     []string{"ACTIVE"},
 		Refresh:    networkingSubnetpoolV2StateRefreshFunc(networkingClient, s.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
@@ -361,7 +361,7 @@ func resourceNetworkingSubnetPoolV2Delete(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_subnetpool_v2"))
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
 		Refresh:    networkingSubnetpoolV2StateRefreshFunc(networkingClient, d.Id()),

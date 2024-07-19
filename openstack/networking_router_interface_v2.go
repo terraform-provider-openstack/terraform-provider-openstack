@@ -4,7 +4,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -13,7 +13,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
 
-func resourceNetworkingRouterInterfaceV2StateRefreshFunc(networkingClient *gophercloud.ServiceClient, portID string) resource.StateRefreshFunc {
+func resourceNetworkingRouterInterfaceV2StateRefreshFunc(networkingClient *gophercloud.ServiceClient, portID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		r, err := ports.Get(networkingClient, portID).Extract()
 		if err != nil {
@@ -28,7 +28,7 @@ func resourceNetworkingRouterInterfaceV2StateRefreshFunc(networkingClient *gophe
 	}
 }
 
-func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(networkingClient *gophercloud.ServiceClient, d *schema.ResourceData) resource.StateRefreshFunc {
+func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(networkingClient *gophercloud.ServiceClient, d *schema.ResourceData) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		routerID := d.Get("router_id").(string)
 		routerInterfaceID := d.Id()

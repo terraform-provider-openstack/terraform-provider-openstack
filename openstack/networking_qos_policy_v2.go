@@ -1,7 +1,7 @@
 package openstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
@@ -13,7 +13,7 @@ type QoSPolicyCreateOpts struct {
 	ValueSpecs map[string]string `json:"value_specs,omitempty"`
 }
 
-func networkingQoSPolicyV2StateRefreshFunc(client *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func networkingQoSPolicyV2StateRefreshFunc(client *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		policy, err := policies.Get(client, id).Extract()
 		if err != nil {

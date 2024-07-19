@@ -113,12 +113,12 @@ func dataSourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceDat
 		listOpts.Description = v.(string)
 	}
 
-	if v, ok := d.GetOkExists("admin_state_up"); ok {
+	if v, ok := getOkExists(d, "admin_state_up"); ok {
 		asu := v.(bool)
 		listOpts.AdminStateUp = &asu
 	}
 
-	if v, ok := d.GetOkExists("distributed"); ok {
+	if v, ok := getOkExists(d, "distributed"); ok {
 		dist := v.(bool)
 		listOpts.Distributed = &dist
 	}

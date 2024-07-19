@@ -3,7 +3,7 @@ package openstack
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
@@ -41,7 +41,7 @@ func networkingFloatingIPV2ID(client *gophercloud.ServiceClient, floatingIP stri
 	return allFloatingIPs[0].ID, nil
 }
 
-func networkingFloatingIPV2StateRefreshFunc(client *gophercloud.ServiceClient, fipID string) resource.StateRefreshFunc {
+func networkingFloatingIPV2StateRefreshFunc(client *gophercloud.ServiceClient, fipID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		fip, err := floatingips.Get(client, fipID).Extract()
 		if err != nil {

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -151,7 +151,7 @@ func resourceIPSecPolicyV2Create(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    waitForIPSecPolicyCreation(networkingClient, policy.ID),
@@ -272,7 +272,7 @@ func resourceIPSecPolicyV2Update(ctx context.Context, d *schema.ResourceData, me
 			return diag.FromErr(err)
 		}
 
-		stateConf := &resource.StateChangeConf{
+		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
 			Target:     []string{"ACTIVE"},
 			Refresh:    waitForIPSecPolicyUpdate(networkingClient, d.Id()),
@@ -296,7 +296,7 @@ func resourceIPSecPolicyV2Delete(ctx context.Context, d *schema.ResourceData, me
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
 		Refresh:    waitForIPSecPolicyDeletion(networkingClient, d.Id()),
@@ -312,7 +312,7 @@ func resourceIPSecPolicyV2Delete(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func waitForIPSecPolicyDeletion(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForIPSecPolicyDeletion(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		err := ipsecpolicies.Delete(networkingClient, id).Err
 		if err == nil {
@@ -327,7 +327,7 @@ func waitForIPSecPolicyDeletion(networkingClient *gophercloud.ServiceClient, id 
 	}
 }
 
-func waitForIPSecPolicyCreation(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForIPSecPolicyCreation(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		policy, err := ipsecpolicies.Get(networkingClient, id).Extract()
 		if err != nil {
@@ -337,7 +337,7 @@ func waitForIPSecPolicyCreation(networkingClient *gophercloud.ServiceClient, id 
 	}
 }
 
-func waitForIPSecPolicyUpdate(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForIPSecPolicyUpdate(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		policy, err := ipsecpolicies.Get(networkingClient, id).Extract()
 		if err != nil {

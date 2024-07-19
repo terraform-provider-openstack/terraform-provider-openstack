@@ -6,14 +6,14 @@ import (
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
 )
 
-func keyManagerSecretV1WaitForSecretDeletion(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func keyManagerSecretV1WaitForSecretDeletion(kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		err := secrets.Delete(kmClient, id).Err
 		if err == nil {
@@ -48,7 +48,7 @@ func keyManagerSecretV1SecretType(v string) secrets.SecretType {
 	return stype
 }
 
-func keyManagerSecretV1WaitForSecretCreation(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func keyManagerSecretV1WaitForSecretCreation(kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		secret, err := secrets.Get(kmClient, id).Extract()
 		if err != nil {
@@ -83,7 +83,7 @@ func flattenKeyManagerSecretV1Metadata(d *schema.ResourceData) map[string]string
 	return m
 }
 
-func keyManagerSecretMetadataV1WaitForSecretMetadataCreation(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func keyManagerSecretMetadataV1WaitForSecretMetadataCreation(kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		metadata, err := secrets.GetMetadata(kmClient, id).Extract()
 		if err != nil {

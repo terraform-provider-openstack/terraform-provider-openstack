@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -190,7 +190,7 @@ func resourceSharedFilesystemShareV2Create(ctx context.Context, d *schema.Resour
 		AvailabilityZone: d.Get("availability_zone").(string),
 	}
 
-	if v, ok := d.GetOkExists("share_type"); ok {
+	if v, ok := getOkExists(d, "share_type"); ok {
 		createOpts.ShareType = v.(string)
 	}
 
@@ -200,7 +200,7 @@ func resourceSharedFilesystemShareV2Create(ctx context.Context, d *schema.Resour
 
 	log.Printf("[DEBUG] Attempting to create share")
 	var share *shares.Share
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		share, err = shares.Create(sfsClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
@@ -319,7 +319,7 @@ func resourceSharedFilesystemShareV2Update(ctx context.Context, d *schema.Resour
 		}
 
 		log.Printf("[DEBUG] Attempting to update share")
-		err = resource.Retry(timeout, func() *resource.RetryError {
+		err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 			_, err := shares.Update(sfsClient, d.Id(), updateOpts).Extract()
 			if err != nil {
 				return checkForRetryableError(err)
@@ -353,7 +353,7 @@ func resourceSharedFilesystemShareV2Update(ctx context.Context, d *schema.Resour
 			pending = append(pending, "extending")
 			resizeOpts := shares.ExtendOpts{NewSize: newSize.(int)}
 			log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
-			err = resource.Retry(timeout, func() *resource.RetryError {
+			err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 				err := shares.Extend(sfsClient, d.Id(), resizeOpts).Err
 				log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
 				if err != nil {
@@ -365,7 +365,7 @@ func resourceSharedFilesystemShareV2Update(ctx context.Context, d *schema.Resour
 			pending = append(pending, "shrinking")
 			resizeOpts := shares.ShrinkOpts{NewSize: newSize.(int)}
 			log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
-			err = resource.Retry(timeout, func() *resource.RetryError {
+			err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 				err := shares.Shrink(sfsClient, d.Id(), resizeOpts).Err
 				log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
 				if err != nil {
@@ -453,7 +453,7 @@ func resourceSharedFilesystemShareV2Delete(ctx context.Context, d *schema.Resour
 	timeout := d.Timeout(schema.TimeoutDelete)
 
 	log.Printf("[DEBUG] Attempting to delete share %s", d.Id())
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		err = shares.Delete(sfsClient, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
@@ -490,7 +490,7 @@ func resourceSharedFilesystemShareV2Delete(ctx context.Context, d *schema.Resour
 func waitForSFV2Share(ctx context.Context, sfsClient *gophercloud.ServiceClient, id string, target string, pending []string, timeout time.Duration) error {
 	log.Printf("[DEBUG] Waiting for share %s to become %s.", id, target)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Target:     []string{target},
 		Pending:    pending,
 		Refresh:    resourceSFV2ShareRefreshFunc(sfsClient, id),
@@ -520,7 +520,7 @@ func waitForSFV2Share(ctx context.Context, sfsClient *gophercloud.ServiceClient,
 	return nil
 }
 
-func resourceSFV2ShareRefreshFunc(sfsClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func resourceSFV2ShareRefreshFunc(sfsClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		share, err := shares.Get(sfsClient, id).Extract()
 		if err != nil {

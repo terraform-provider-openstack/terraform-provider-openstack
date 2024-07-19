@@ -1,11 +1,13 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/transfer/request"
@@ -13,12 +15,12 @@ import (
 
 func resourceDNSTransferRequestV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDNSTransferRequestV2Create,
-		Read:   resourceDNSTransferRequestV2Read,
-		Update: resourceDNSTransferRequestV2Update,
-		Delete: resourceDNSTransferRequestV2Delete,
+		CreateContext: resourceDNSTransferRequestV2Create,
+		ReadContext:   resourceDNSTransferRequestV2Read,
+		UpdateContext: resourceDNSTransferRequestV2Update,
+		DeleteContext: resourceDNSTransferRequestV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: resourceDNSTransferRequestV2Import,
+			StateContext: resourceDNSTransferRequestV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -76,11 +78,11 @@ func resourceDNSTransferRequestV2() *schema.Resource {
 	}
 }
 
-func resourceDNSTransferRequestV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceDNSTransferRequestV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
 	createOpts := TransferRequestCreateOpts{
@@ -96,17 +98,17 @@ func resourceDNSTransferRequestV2Create(d *schema.ResourceData, meta interface{}
 	zoneID := d.Get("zone_id").(string)
 	n, err := request.Create(dnsClient, zoneID, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating openstack_transfer_request_zone_v2: %s", err)
+		return diag.Errorf("Error creating openstack_transfer_request_zone_v2: %s", err)
 	}
 
 	if d.Get("disable_status_check").(bool) {
 		d.SetId(n.ID)
 
 		log.Printf("[DEBUG] Created OpenStack Zone Transfer request %s: %#v", n.ID, n)
-		return resourceDNSTransferRequestV2Read(d, meta)
+		return resourceDNSTransferRequestV2Read(ctx, d, meta)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Target:     []string{"ACTIVE"},
 		Pending:    []string{"PENDING"},
 		Refresh:    dnsTransferRequestV2RefreshFunc(dnsClient, n.ID),
@@ -115,28 +117,28 @@ func resourceDNSTransferRequestV2Create(d *schema.ResourceData, meta interface{}
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for openstack_dns_transfer_request_v2 %s to become active: %s", d.Id(), err)
 	}
 
 	d.SetId(n.ID)
 
 	log.Printf("[DEBUG] Created OpenStack Zone Transfer request %s: %#v", n.ID, n)
-	return resourceDNSTransferRequestV2Read(d, meta)
+	return resourceDNSTransferRequestV2Read(ctx, d, meta)
 }
 
-func resourceDNSTransferRequestV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceDNSTransferRequestV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
 	n, err := request.Get(dnsClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error retrieving openstack_dns_transfer_request_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_dns_transfer_request_v2"))
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_dns_transfer_request_v2 %s: %#v", d.Id(), n)
@@ -150,11 +152,11 @@ func resourceDNSTransferRequestV2Read(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func resourceDNSTransferRequestV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceDNSTransferRequestV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
 	var updateOpts request.UpdateOpts
@@ -170,21 +172,21 @@ func resourceDNSTransferRequestV2Update(d *schema.ResourceData, meta interface{}
 	}
 
 	if !changed {
-		return resourceDNSTransferRequestV2Read(d, meta)
+		return resourceDNSTransferRequestV2Read(ctx, d, meta)
 	}
 
 	log.Printf("[DEBUG] Updating openstack_dns_transfer_request_v2 %s with options: %#v", d.Id(), updateOpts)
 
 	_, err = request.Update(dnsClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating openstack_dns_transfer_request_v2 %s: %s", d.Id(), err)
+		return diag.Errorf("Error updating openstack_dns_transfer_request_v2 %s: %s", d.Id(), err)
 	}
 
 	if d.Get("disable_status_check").(bool) {
-		return resourceDNSTransferRequestV2Read(d, meta)
+		return resourceDNSTransferRequestV2Read(ctx, d, meta)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Target:     []string{"ACTIVE"},
 		Pending:    []string{"PENDING"},
 		Refresh:    dnsTransferRequestV2RefreshFunc(dnsClient, d.Id()),
@@ -193,32 +195,32 @@ func resourceDNSTransferRequestV2Update(d *schema.ResourceData, meta interface{}
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for openstack_dns_transfer_request_v2 %s to become active: %s", d.Id(), err)
 	}
 
-	return resourceDNSTransferRequestV2Read(d, meta)
+	return resourceDNSTransferRequestV2Read(ctx, d, meta)
 }
 
-func resourceDNSTransferRequestV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceDNSTransferRequestV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
 	err = request.Delete(dnsClient, d.Id()).ExtractErr()
 	if err != nil {
-		return CheckDeleted(d, err, "Error deleting openstack_dns_transfer_request_v2")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_dns_transfer_request_v2"))
 	}
 
 	if d.Get("disable_status_check").(bool) {
 		return nil
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Target:     []string{"DELETED"},
 		Pending:    []string{"ACTIVE", "PENDING"},
 		Refresh:    dnsTransferRequestV2RefreshFunc(dnsClient, d.Id()),
@@ -227,16 +229,16 @@ func resourceDNSTransferRequestV2Delete(d *schema.ResourceData, meta interface{}
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for openstack_dns_transfer_request_v2 %s to become deleted: %s", d.Id(), err)
 	}
 
 	return nil
 }
 
-func resourceDNSTransferRequestV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceDNSTransferRequestV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
 	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
 	if err != nil {

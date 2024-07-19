@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -158,7 +158,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	log.Printf("[DEBUG] Waiting for openstack_dns_zone_v2 %s to become available", n.ID)
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Target:     []string{"ACTIVE"},
 		Pending:    []string{"PENDING"},
 		Refresh:    dnsZoneV2RefreshFunc(dnsClient, n.ID),
@@ -167,8 +167,8 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 		MinTimeout: 3 * time.Second,
 	}
 
-	err = resource.RetryContext(ctx, stateConf.Timeout, func() *resource.RetryError {
-		_, err = stateConf.WaitForState()
+	err = retry.RetryContext(ctx, stateConf.Timeout, func() *retry.RetryError {
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			log.Printf("[DEBUG] Retrying after error: %s", err)
 			return checkForRetryableError(err)
@@ -268,7 +268,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 		return resourceDNSZoneV2Read(ctx, d, meta)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Target:     []string{"ACTIVE"},
 		Pending:    []string{"PENDING"},
 		Refresh:    dnsZoneV2RefreshFunc(dnsClient, d.Id()),
@@ -306,7 +306,7 @@ func resourceDNSZoneV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 		return nil
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Target:     []string{"DELETED"},
 		Pending:    []string{"ACTIVE", "PENDING"},
 		Refresh:    dnsZoneV2RefreshFunc(dnsClient, d.Id()),

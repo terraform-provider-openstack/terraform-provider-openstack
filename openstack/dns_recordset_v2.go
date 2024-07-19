@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets"
@@ -31,7 +31,7 @@ func (opts RecordSetCreateOpts) ToRecordSetCreateMap() (map[string]interface{}, 
 	return nil, fmt.Errorf("Expected map but got %T", b[""])
 }
 
-func dnsRecordSetV2RefreshFunc(dnsClient *gophercloud.ServiceClient, zoneID, recordsetID string) resource.StateRefreshFunc {
+func dnsRecordSetV2RefreshFunc(dnsClient *gophercloud.ServiceClient, zoneID, recordsetID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		recordset, err := recordsets.Get(dnsClient, zoneID, recordsetID).Extract()
 		if err != nil {

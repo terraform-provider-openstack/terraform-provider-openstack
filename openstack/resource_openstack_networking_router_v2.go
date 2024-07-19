@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -189,7 +189,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 		createOpts.AdminStateUp = &asu
 	}
 
-	if dRaw, ok := d.GetOkExists("distributed"); ok {
+	if dRaw, ok := getOkExists(d, "distributed"); ok {
 		d := dRaw.(bool)
 		createOpts.Distributed = &d
 	}
@@ -211,7 +211,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 		gatewayInfo.NetworkID = externalNetworkID
 	}
 
-	if esRaw, ok := d.GetOkExists("enable_snat"); ok {
+	if esRaw, ok := getOkExists(d, "enable_snat"); ok {
 		if externalNetworkID == "" {
 			return diag.Errorf(errEnableSNATWithoutExternalNet)
 		}
@@ -274,7 +274,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 
 	log.Printf("[DEBUG] Waiting for openstack_networking_router_v2 %s to become available.", r.ID)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"BUILD", "PENDING_CREATE", "PENDING_UPDATE"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    resourceNetworkingRouterV2StateRefreshFunc(networkingClient, r.ID),
@@ -468,7 +468,7 @@ func resourceNetworkingRouterV2Delete(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_router_v2"))
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
 		Refresh:    resourceNetworkingRouterV2StateRefreshFunc(networkingClient, d.Id()),

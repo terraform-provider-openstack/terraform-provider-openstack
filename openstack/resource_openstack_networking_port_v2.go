@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -310,7 +310,7 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 		MapValueSpecs(d),
 	}
 
-	if v, ok := d.GetOkExists("admin_state_up"); ok {
+	if v, ok := getOkExists(d, "admin_state_up"); ok {
 		asu := v.(bool)
 		createOpts.AdminStateUp = &asu
 	}
@@ -340,7 +340,7 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 	}
 
 	// Add the port security attribute if specified.
-	if v, ok := d.GetOkExists("port_security_enabled"); ok {
+	if v, ok := getOkExists(d, "port_security_enabled"); ok {
 		portSecurityEnabled := v.(bool)
 		finalCreateOpts = portsecurity.PortCreateOptsExt{
 			CreateOptsBuilder:   finalCreateOpts,
@@ -349,7 +349,7 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 	}
 
 	// Add the port binding parameters if specified.
-	if v, ok := d.GetOkExists("binding"); ok {
+	if v, ok := getOkExists(d, "binding"); ok {
 		for _, raw := range v.([]interface{}) {
 			binding := raw.(map[string]interface{})
 			var profile map[string]interface{}
@@ -398,7 +398,7 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 
 	log.Printf("[DEBUG] Waiting for openstack_networking_port_v2 %s to become available.", port.ID)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Target:     []string{"ACTIVE", "DOWN"},
 		Refresh:    resourceNetworkingPortV2StateRefreshFunc(networkingClient, port.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
@@ -681,7 +681,7 @@ func resourceNetworkingPortV2Delete(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_port_v2"))
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
 		Refresh:    resourceNetworkingPortV2StateRefreshFunc(networkingClient, d.Id()),

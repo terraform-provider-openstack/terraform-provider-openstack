@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -231,7 +231,7 @@ func resourceBlockStorageVolumeV3Create(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("Error creating openstack_blockstorage_volume_v3: %s", err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"downloading", "creating"},
 		Target:     []string{"available"},
 		Refresh:    blockStorageVolumeV3StateRefreshFunc(blockStorageClient, v.ID),
@@ -333,7 +333,7 @@ func resourceBlockStorageVolumeV3Update(ctx context.Context, d *schema.ResourceD
 			return diag.Errorf("Error extending openstack_blockstorage_volume_v3 %s size: %s", d.Id(), err)
 		}
 
-		stateConf := &resource.StateChangeConf{
+		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"extending"},
 			Target:     []string{"available", "in-use"},
 			Refresh:    blockStorageVolumeV3StateRefreshFunc(blockStorageClient, d.Id()),
@@ -400,7 +400,7 @@ func resourceBlockStorageVolumeV3Delete(ctx context.Context, d *schema.ResourceD
 			}
 		}
 
-		stateConf := &resource.StateChangeConf{
+		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"in-use", "attaching", "detaching"},
 			Target:     []string{"available", "deleted"},
 			Refresh:    blockStorageVolumeV3StateRefreshFunc(blockStorageClient, d.Id()),
@@ -425,7 +425,7 @@ func resourceBlockStorageVolumeV3Delete(ctx context.Context, d *schema.ResourceD
 		}
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"deleting", "downloading", "available"},
 		Target:     []string{"deleted"},
 		Refresh:    blockStorageVolumeV3StateRefreshFunc(blockStorageClient, d.Id()),

@@ -5,13 +5,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/orders"
 )
 
-func keyManagerOrderV1WaitForOrderDeletion(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func keyManagerOrderV1WaitForOrderDeletion(kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		err := orders.Delete(kmClient, id).Err
 		if err == nil {
@@ -38,7 +38,7 @@ func keyManagerOrderV1OrderType(v string) orders.OrderType {
 	return otype
 }
 
-func keyManagerOrderV1WaitForOrderCreation(kmClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func keyManagerOrderV1WaitForOrderCreation(kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		order, err := orders.Get(kmClient, id).Extract()
 		if err != nil {

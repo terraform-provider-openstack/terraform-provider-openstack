@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
 
-// networkingSubnetV2StateRefreshFunc returns a standard resource.StateRefreshFunc to wait for subnet status.
-func networkingSubnetV2StateRefreshFunc(client *gophercloud.ServiceClient, subnetID string) resource.StateRefreshFunc {
+// networkingSubnetV2StateRefreshFunc returns a standard retry.StateRefreshFunc to wait for subnet status.
+func networkingSubnetV2StateRefreshFunc(client *gophercloud.ServiceClient, subnetID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		subnet, err := subnets.Get(client, subnetID).Extract()
 		if err != nil {
@@ -26,8 +26,8 @@ func networkingSubnetV2StateRefreshFunc(client *gophercloud.ServiceClient, subne
 	}
 }
 
-// networkingSubnetV2StateRefreshFuncDelete returns a special case resource.StateRefreshFunc to try to delete a subnet.
-func networkingSubnetV2StateRefreshFuncDelete(networkingClient *gophercloud.ServiceClient, subnetID string) resource.StateRefreshFunc {
+// networkingSubnetV2StateRefreshFuncDelete returns a special case retry.StateRefreshFunc to try to delete a subnet.
+func networkingSubnetV2StateRefreshFuncDelete(networkingClient *gophercloud.ServiceClient, subnetID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete openstack_networking_subnet_v2 %s", subnetID)
 

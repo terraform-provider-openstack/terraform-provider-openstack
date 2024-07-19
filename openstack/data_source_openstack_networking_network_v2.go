@@ -162,7 +162,7 @@ func dataSourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceDa
 	}
 
 	// Add the external attribute if specified.
-	if v, ok := d.GetOkExists("external"); ok {
+	if v, ok := getOkExists(d, "external"); ok {
 		isExternal := v.(bool)
 		listOpts = external.ListOptsExt{
 			ListOptsBuilder: listOpts,
@@ -171,7 +171,7 @@ func dataSourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceDa
 	}
 
 	// Add the transparent VLAN attribute if specified.
-	if v, ok := d.GetOkExists("transparent_vlan"); ok {
+	if v, ok := getOkExists(d, "transparent_vlan"); ok {
 		isVLANTransparent := v.(bool)
 		listOpts = vlantransparent.ListOptsExt{
 			ListOptsBuilder: listOpts,
@@ -180,7 +180,7 @@ func dataSourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceDa
 	}
 
 	// Add the MTU attribute if specified.
-	if v, ok := d.GetOkExists("mtu"); ok {
+	if v, ok := getOkExists(d, "mtu"); ok {
 		listOpts = mtuext.ListOptsExt{
 			ListOptsBuilder: listOpts,
 			MTU:             v.(int),

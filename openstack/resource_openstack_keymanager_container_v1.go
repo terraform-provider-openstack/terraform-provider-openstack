@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -158,7 +158,7 @@ func resourceKeyManagerContainerV1Create(ctx context.Context, d *schema.Resource
 
 	uuid := keyManagerContainerV1GetUUIDfromContainerRef(container.ContainerRef)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    keyManagerContainerV1WaitForContainerCreation(kmClient, uuid),
@@ -284,7 +284,7 @@ func resourceKeyManagerContainerV1Delete(ctx context.Context, d *schema.Resource
 		return diag.Errorf("Error creating OpenStack barbican client: %s", err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING"},
 		Target:     []string{"DELETED"},
 		Refresh:    keyManagerContainerV1WaitForContainerDeletion(kmClient, d.Id()),

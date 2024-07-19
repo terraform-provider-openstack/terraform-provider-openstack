@@ -90,7 +90,7 @@ func resourceImagesImageAccessV2Create(ctx context.Context, d *schema.ResourceDa
 	id := fmt.Sprintf("%s/%s", imageID, memberID)
 	d.SetId(id)
 
-	if v, ok := d.GetOkExists("status"); ok {
+	if v, ok := getOkExists(d, "status"); ok {
 		d.Partial(true)
 
 		opts := members.UpdateOpts{

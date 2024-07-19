@@ -3,7 +3,7 @@ package openstack
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/firewalls"
@@ -37,7 +37,7 @@ func (opts FirewallUpdateOpts) ToFirewallUpdateMap() (map[string]interface{}, er
 	return BuildRequest(opts, "firewall")
 }
 
-func fwFirewallV1RefreshFunc(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func fwFirewallV1RefreshFunc(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		var fw Firewall
 
@@ -50,7 +50,7 @@ func fwFirewallV1RefreshFunc(networkingClient *gophercloud.ServiceClient, id str
 	}
 }
 
-func fwFirewallV1DeleteFunc(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func fwFirewallV1DeleteFunc(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		fw, err := firewalls.Get(networkingClient, id).Extract()
 
