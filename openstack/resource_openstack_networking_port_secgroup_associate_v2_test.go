@@ -18,6 +18,8 @@ func TestAccNetworkingV2PortSecGroupAssociate_update(t *testing.T) {
 	var port ports.Port
 
 	if os.Getenv("TF_ACC") != "" {
+		testAccPreCheck(t)
+		testAccPreCheckNonAdminOnly(t)
 		hiddenPort, err := testAccCheckNetworkingV2PortSecGroupCreatePort(t, "hidden_port_1", true)
 		if err != nil {
 			t.Fatal(err)
