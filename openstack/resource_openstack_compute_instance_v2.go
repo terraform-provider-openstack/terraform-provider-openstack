@@ -798,82 +798,6 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
-	if d.HasChange("power_state") {
-		powerStateOldRaw, powerStateNewRaw := d.GetChange("power_state")
-		powerStateOld := powerStateOldRaw.(string)
-		powerStateNew := powerStateNewRaw.(string)
-		if strings.ToLower(powerStateNew) == "shelved_offloaded" {
-			err = shelveunshelve.Shelve(computeClient, d.Id()).ExtractErr()
-			if err != nil {
-				return diag.Errorf("Error shelve OpenStack instance: %s", err)
-			}
-			shelveStateConf := &resource.StateChangeConf{
-				//Pending:    []string{"ACTIVE"},
-				Target:     []string{"SHELVED_OFFLOADED"},
-				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
-				Timeout:    d.Timeout(schema.TimeoutUpdate),
-				Delay:      10 * time.Second,
-				MinTimeout: 3 * time.Second,
-			}
-
-			log.Printf("[DEBUG] Waiting for instance (%s) to shelve", d.Id())
-			_, err = shelveStateConf.WaitForStateContext(ctx)
-			if err != nil {
-				return diag.Errorf("Error waiting for instance (%s) to become shelve: %s", d.Id(), err)
-			}
-		}
-		if strings.ToLower(powerStateNew) == "shutoff" {
-			err = startstop.Stop(computeClient, d.Id()).ExtractErr()
-			if err != nil {
-				return diag.Errorf("Error stopping OpenStack instance: %s", err)
-			}
-			stopStateConf := &resource.StateChangeConf{
-				//Pending:    []string{"ACTIVE"},
-				Target:     []string{"SHUTOFF"},
-				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
-				Timeout:    d.Timeout(schema.TimeoutUpdate),
-				Delay:      10 * time.Second,
-				MinTimeout: 3 * time.Second,
-			}
-
-			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
-			_, err = stopStateConf.WaitForStateContext(ctx)
-			if err != nil {
-				return diag.Errorf("Error waiting for instance (%s) to become inactive(shutoff): %s", d.Id(), err)
-			}
-		}
-		if strings.ToLower(powerStateNew) == "active" {
-			if strings.ToLower(powerStateOld) == "shelved" || strings.ToLower(powerStateOld) == "shelved_offloaded" {
-				unshelveOpt := &shelveunshelve.UnshelveOpts{
-					AvailabilityZone: d.Get("availability_zone").(string),
-				}
-				err = shelveunshelve.Unshelve(computeClient, d.Id(), unshelveOpt).ExtractErr()
-				if err != nil {
-					return diag.Errorf("Error unshelving OpenStack instance: %s", err)
-				}
-			} else if strings.ToLower(powerStateOld) != "build" {
-				err = startstop.Start(computeClient, d.Id()).ExtractErr()
-				if err != nil {
-					return diag.Errorf("Error starting OpenStack instance: %s", err)
-				}
-			}
-			startStateConf := &resource.StateChangeConf{
-				//Pending:    []string{"SHUTOFF"},
-				Target:     []string{"ACTIVE"},
-				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
-				Timeout:    d.Timeout(schema.TimeoutUpdate),
-				Delay:      10 * time.Second,
-				MinTimeout: 3 * time.Second,
-			}
-
-			log.Printf("[DEBUG] Waiting for instance (%s) to start/unshelve", d.Id())
-			_, err = startStateConf.WaitForStateContext(ctx)
-			if err != nil {
-				return diag.Errorf("Error waiting for instance (%s) to become active: %s", d.Id(), err)
-			}
-		}
-	}
-
 	if d.HasChange("metadata") {
 		oldMetadata, newMetadata := d.GetChange("metadata")
 		var metadataToDelete []string
@@ -1095,6 +1019,82 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			return diag.Errorf("Error setting tags on openstack_compute_instance_v2 %s: %s", d.Id(), err)
 		}
 		log.Printf("[DEBUG] Set tags %s on openstack_compute_instance_v2 %s", instanceTags, d.Id())
+	}
+
+	if d.HasChange("power_state") {
+		powerStateOldRaw, powerStateNewRaw := d.GetChange("power_state")
+		powerStateOld := powerStateOldRaw.(string)
+		powerStateNew := powerStateNewRaw.(string)
+		if strings.ToLower(powerStateNew) == "shelved_offloaded" {
+			err = shelveunshelve.Shelve(computeClient, d.Id()).ExtractErr()
+			if err != nil {
+				return diag.Errorf("Error shelve OpenStack instance: %s", err)
+			}
+			shelveStateConf := &resource.StateChangeConf{
+				//Pending:    []string{"ACTIVE"},
+				Target:     []string{"SHELVED_OFFLOADED"},
+				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
+
+			log.Printf("[DEBUG] Waiting for instance (%s) to shelve", d.Id())
+			_, err = shelveStateConf.WaitForStateContext(ctx)
+			if err != nil {
+				return diag.Errorf("Error waiting for instance (%s) to become shelve: %s", d.Id(), err)
+			}
+		}
+		if strings.ToLower(powerStateNew) == "shutoff" {
+			err = startstop.Stop(computeClient, d.Id()).ExtractErr()
+			if err != nil {
+				return diag.Errorf("Error stopping OpenStack instance: %s", err)
+			}
+			stopStateConf := &resource.StateChangeConf{
+				//Pending:    []string{"ACTIVE"},
+				Target:     []string{"SHUTOFF"},
+				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
+
+			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
+			_, err = stopStateConf.WaitForStateContext(ctx)
+			if err != nil {
+				return diag.Errorf("Error waiting for instance (%s) to become inactive(shutoff): %s", d.Id(), err)
+			}
+		}
+		if strings.ToLower(powerStateNew) == "active" {
+			if strings.ToLower(powerStateOld) == "shelved" || strings.ToLower(powerStateOld) == "shelved_offloaded" {
+				unshelveOpt := &shelveunshelve.UnshelveOpts{
+					AvailabilityZone: d.Get("availability_zone").(string),
+				}
+				err = shelveunshelve.Unshelve(computeClient, d.Id(), unshelveOpt).ExtractErr()
+				if err != nil {
+					return diag.Errorf("Error unshelving OpenStack instance: %s", err)
+				}
+			} else if strings.ToLower(powerStateOld) != "build" {
+				err = startstop.Start(computeClient, d.Id()).ExtractErr()
+				if err != nil {
+					return diag.Errorf("Error starting OpenStack instance: %s", err)
+				}
+			}
+			startStateConf := &resource.StateChangeConf{
+				//Pending:    []string{"SHUTOFF"},
+				Target:     []string{"ACTIVE"},
+				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
+
+			log.Printf("[DEBUG] Waiting for instance (%s) to start/unshelve", d.Id())
+			_, err = startStateConf.WaitForStateContext(ctx)
+			if err != nil {
+				return diag.Errorf("Error waiting for instance (%s) to become active: %s", d.Id(), err)
+			}
+		}
 	}
 
 	return resourceComputeInstanceV2Read(ctx, d, meta)

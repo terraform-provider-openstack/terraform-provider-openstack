@@ -1708,6 +1708,11 @@ resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   power_state = "shutoff"
+
+  metadata = {
+    foo = "bar"
+  }
+
   network {
     uuid = "%s"
   }
