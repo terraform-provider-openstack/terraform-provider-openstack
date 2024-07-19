@@ -47,7 +47,7 @@ func resourceBGPVPNRouterAssociateV2() *schema.Resource {
 			"advertise_extra_routes": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				Computed: true,
 			},
 		},
 	}
@@ -66,7 +66,7 @@ func resourceBGPVPNRouterAssociateV2Create(ctx context.Context, d *schema.Resour
 		RouterID:  routerID,
 		ProjectID: d.Get("project_id").(string),
 	}
-	if v, ok := d.GetOk("advertise_extra_routes"); ok {
+	if v, ok := getOkExists(d, "advertise_extra_routes"); ok {
 		v := v.(bool)
 		opts.AdvertiseExtraRoutes = &v
 	}

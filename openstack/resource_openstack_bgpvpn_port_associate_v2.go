@@ -48,7 +48,7 @@ func resourceBGPVPNPortAssociateV2() *schema.Resource {
 			"advertise_fixed_ips": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				Computed: true,
 			},
 			"routes": {
 				Type:     schema.TypeSet,
@@ -98,7 +98,7 @@ func resourceBGPVPNPortAssociateV2Create(ctx context.Context, d *schema.Resource
 		ProjectID: d.Get("project_id").(string),
 		Routes:    expandBGPVPNPortAssociateRoutesV2(routes),
 	}
-	if v, ok := d.GetOk("advertise_fixed_ips"); ok {
+	if v, ok := getOkExists(d, "advertise_fixed_ips"); ok {
 		v := v.(bool)
 		opts.AdvertiseFixedIPs = &v
 	}
