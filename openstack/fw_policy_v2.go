@@ -3,13 +3,13 @@ package openstack
 import (
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/policies"
 )
 
-func fwPolicyV2DeleteFunc(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func fwPolicyV2DeleteFunc(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		err := policies.Delete(networkingClient, id).Err
 		if err == nil {

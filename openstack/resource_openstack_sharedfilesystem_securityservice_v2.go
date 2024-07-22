@@ -113,7 +113,7 @@ func resourceSharedFilesystemSecurityServiceV2Create(ctx context.Context, d *sch
 		Server:      d.Get("server").(string),
 	}
 
-	if v, ok := d.GetOkExists("ou"); ok {
+	if v, ok := getOkExists(d, "ou"); ok {
 		createOpts.OU = v.(string)
 
 		sfsClient.Microversion = sharedFilesystemV2SecurityServiceOUMicroversion
@@ -140,7 +140,7 @@ func resourceSharedFilesystemSecurityServiceV2Read(ctx context.Context, d *schem
 
 	// Select microversion to use.
 	sfsClient.Microversion = sharedFilesystemV2MinMicroversion
-	if _, ok := d.GetOkExists("ou"); ok {
+	if _, ok := d.GetOk("ou"); ok {
 		sfsClient.Microversion = sharedFilesystemV2SecurityServiceOUMicroversion
 	}
 

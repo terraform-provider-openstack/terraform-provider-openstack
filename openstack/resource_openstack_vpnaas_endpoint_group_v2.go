@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -103,7 +103,7 @@ func resourceEndpointGroupV2Create(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    waitForEndpointGroupCreation(networkingClient, group.ID),
@@ -182,7 +182,7 @@ func resourceEndpointGroupV2Update(ctx context.Context, d *schema.ResourceData, 
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		stateConf := &resource.StateChangeConf{
+		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
 			Target:     []string{"UPDATED"},
 			Refresh:    waitForEndpointGroupUpdate(networkingClient, group.ID),
@@ -217,7 +217,7 @@ func resourceEndpointGroupV2Delete(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"DELETING"},
 		Target:     []string{"DELETED"},
 		Refresh:    waitForEndpointGroupDeletion(networkingClient, d.Id()),
@@ -231,7 +231,7 @@ func resourceEndpointGroupV2Delete(ctx context.Context, d *schema.ResourceData, 
 	return diag.FromErr(err)
 }
 
-func waitForEndpointGroupDeletion(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForEndpointGroupDeletion(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		group, err := endpointgroups.Get(networkingClient, id).Extract()
 		log.Printf("[DEBUG] Got group %s => %#v", id, group)
@@ -249,7 +249,7 @@ func waitForEndpointGroupDeletion(networkingClient *gophercloud.ServiceClient, i
 	}
 }
 
-func waitForEndpointGroupCreation(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForEndpointGroupCreation(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		group, err := endpointgroups.Get(networkingClient, id).Extract()
 		if err != nil {
@@ -259,7 +259,7 @@ func waitForEndpointGroupCreation(networkingClient *gophercloud.ServiceClient, i
 	}
 }
 
-func waitForEndpointGroupUpdate(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForEndpointGroupUpdate(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		group, err := endpointgroups.Get(networkingClient, id).Extract()
 		if err != nil {

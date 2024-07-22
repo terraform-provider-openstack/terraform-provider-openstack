@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/firewalls"
@@ -141,7 +141,7 @@ func resourceFWFirewallV1Create(ctx context.Context, d *schema.ResourceData, met
 
 	log.Printf("[DEBUG] openstack_fw_firewall_v1 created: %#v", firewall)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
 		Target:     []string{"ACTIVE", "INACTIVE"},
 		Refresh:    fwFirewallV1RefreshFunc(networkingClient, firewall.ID),
@@ -241,7 +241,7 @@ func resourceFWFirewallV1Update(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE", "PENDING_UPDATE"},
 		Target:     []string{"ACTIVE", "INACTIVE"},
 		Refresh:    fwFirewallV1RefreshFunc(networkingClient, d.Id()),
@@ -271,7 +271,7 @@ func resourceFWFirewallV1Delete(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	// Ensure the firewall was fully created/updated before being deleted.
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE", "PENDING_UPDATE"},
 		Target:     []string{"ACTIVE", "INACTIVE"},
 		Refresh:    fwFirewallV1RefreshFunc(networkingClient, d.Id()),
@@ -290,7 +290,7 @@ func resourceFWFirewallV1Delete(ctx context.Context, d *schema.ResourceData, met
 		return diag.Errorf("Error deleting openstack_fw_firewall_v1 %s: %s", d.Id(), err)
 	}
 
-	stateConf = &resource.StateChangeConf{
+	stateConf = &retry.StateChangeConf{
 		Pending:    []string{"DELETING"},
 		Target:     []string{"DELETED"},
 		Refresh:    fwFirewallV1DeleteFunc(networkingClient, d.Id()),

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/transfer/request"
@@ -31,7 +31,7 @@ func (opts TransferRequestCreateOpts) ToTransferRequestCreateMap() (map[string]i
 	return nil, fmt.Errorf("Expected map but got %T", b[""])
 }
 
-func dnsTransferRequestV2RefreshFunc(dnsClient *gophercloud.ServiceClient, transferRequestID string) resource.StateRefreshFunc {
+func dnsTransferRequestV2RefreshFunc(dnsClient *gophercloud.ServiceClient, transferRequestID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		transferRequest, err := request.Get(dnsClient, transferRequestID).Extract()
 		if err != nil {

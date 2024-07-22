@@ -107,11 +107,11 @@ func dataSourceSharedFilesystemShareNetworkV2Read(ctx context.Context, d *schema
 		NetworkType:     d.Get("network_type").(string),
 	}
 
-	if v, ok := d.GetOkExists("ip_version"); ok {
+	if v, ok := getOkExists(d, "ip_version"); ok {
 		listOpts.IPVersion = gophercloud.IPVersion(v.(int))
 	}
 
-	if v, ok := d.GetOkExists("segmentation_id"); ok {
+	if v, ok := getOkExists(d, "segmentation_id"); ok {
 		listOpts.SegmentationID = v.(int)
 	}
 
@@ -132,7 +132,7 @@ func dataSourceSharedFilesystemShareNetworkV2Read(ctx context.Context, d *schema
 
 	var securityServiceID string
 	var securityServiceIDs []string
-	if v, ok := d.GetOkExists("security_service_id"); ok {
+	if v, ok := getOkExists(d, "security_service_id"); ok {
 		// filtering by "security_service_id"
 		securityServiceID = v.(string)
 		var filteredShareNetworks []sharenetworks.ShareNetwork

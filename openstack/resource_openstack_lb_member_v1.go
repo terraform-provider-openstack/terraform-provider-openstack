@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -94,7 +94,7 @@ func resourceLBMemberV1Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	log.Printf("[DEBUG] Waiting for OpenStack LB member (%s) to become available.", m.ID)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
 		Target:     []string{"ACTIVE", "INACTIVE", "CREATED", "DOWN"},
 		Refresh:    waitForLBMemberActive(networkingClient, m.ID),
@@ -186,7 +186,7 @@ func resourceLBMemberV1Delete(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE", "PENDING_DELETE"},
 		Target:     []string{"DELETED"},
 		Refresh:    waitForLBMemberDelete(networkingClient, d.Id()),
@@ -204,7 +204,7 @@ func resourceLBMemberV1Delete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func waitForLBMemberActive(networkingClient *gophercloud.ServiceClient, memberID string) resource.StateRefreshFunc {
+func waitForLBMemberActive(networkingClient *gophercloud.ServiceClient, memberID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		m, err := members.Get(networkingClient, memberID).Extract()
 		if err != nil {
@@ -220,7 +220,7 @@ func waitForLBMemberActive(networkingClient *gophercloud.ServiceClient, memberID
 	}
 }
 
-func waitForLBMemberDelete(networkingClient *gophercloud.ServiceClient, memberID string) resource.StateRefreshFunc {
+func waitForLBMemberDelete(networkingClient *gophercloud.ServiceClient, memberID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete OpenStack LB member %s", memberID)
 

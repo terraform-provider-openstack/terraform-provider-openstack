@@ -3,7 +3,7 @@ package openstack
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/rules"
@@ -13,7 +13,7 @@ func resourceNetworkingQoSRuleV2BuildID(qosPolicyID, qosRuleID string) string {
 	return fmt.Sprintf("%s/%s", qosPolicyID, qosRuleID)
 }
 
-func networkingQoSBandwidthLimitRuleV2StateRefreshFunc(client *gophercloud.ServiceClient, policyID, ruleID string) resource.StateRefreshFunc {
+func networkingQoSBandwidthLimitRuleV2StateRefreshFunc(client *gophercloud.ServiceClient, policyID, ruleID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		policy, err := rules.GetBandwidthLimitRule(client, policyID, ruleID).ExtractBandwidthLimitRule()
 		if err != nil {
@@ -31,7 +31,7 @@ func networkingQoSBandwidthLimitRuleV2StateRefreshFunc(client *gophercloud.Servi
 	}
 }
 
-func networkingQoSDSCPMarkingRuleV2StateRefreshFunc(client *gophercloud.ServiceClient, policyID, ruleID string) resource.StateRefreshFunc {
+func networkingQoSDSCPMarkingRuleV2StateRefreshFunc(client *gophercloud.ServiceClient, policyID, ruleID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		policy, err := rules.GetDSCPMarkingRule(client, policyID, ruleID).ExtractDSCPMarkingRule()
 		if err != nil {
@@ -49,7 +49,7 @@ func networkingQoSDSCPMarkingRuleV2StateRefreshFunc(client *gophercloud.ServiceC
 	}
 }
 
-func networkingQoSMinimumBandwidthRuleV2StateRefreshFunc(client *gophercloud.ServiceClient, policyID, ruleID string) resource.StateRefreshFunc {
+func networkingQoSMinimumBandwidthRuleV2StateRefreshFunc(client *gophercloud.ServiceClient, policyID, ruleID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		policy, err := rules.GetMinimumBandwidthRule(client, policyID, ruleID).ExtractMinimumBandwidthRule()
 		if err != nil {

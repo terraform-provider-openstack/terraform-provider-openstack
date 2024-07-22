@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
@@ -116,7 +116,7 @@ func resourceNetworkingTrunkV2Create(ctx context.Context, d *schema.ResourceData
 		Subports:    expandNetworkingTrunkV2Subports(d.Get("sub_port").(*schema.Set)),
 	}
 
-	if v, ok := d.GetOkExists("admin_state_up"); ok {
+	if v, ok := getOkExists(d, "admin_state_up"); ok {
 		asu := v.(bool)
 		createOpts.AdminStateUp = &asu
 	}
@@ -129,7 +129,7 @@ func resourceNetworkingTrunkV2Create(ctx context.Context, d *schema.ResourceData
 
 	log.Printf("[DEBUG] Waiting for openstack_networking_trunk_v2 %s to become available.", trunk.ID)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Target:     []string{"ACTIVE", "DOWN"},
 		Refresh:    networkingTrunkV2StateRefreshFunc(client, trunk.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
@@ -288,7 +288,7 @@ func resourceNetworkingTrunkV2Delete(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_trunk_v2"))
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE", "DOWN"},
 		Target:     []string{"DELETED"},
 		Refresh:    networkingTrunkV2StateRefreshFunc(client, d.Id()),

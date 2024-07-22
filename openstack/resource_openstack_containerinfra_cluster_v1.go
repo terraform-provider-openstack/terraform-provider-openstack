@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -296,7 +296,7 @@ func resourceContainerInfraClusterV1Create(ctx context.Context, d *schema.Resour
 	// Store the Cluster ID.
 	d.SetId(s)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:      []string{"CREATE_IN_PROGRESS"},
 		Target:       []string{"CREATE_COMPLETE"},
 		Refresh:      containerInfraClusterV1StateRefreshFunc(containerInfraClient, s),
@@ -429,7 +429,7 @@ func resourceContainerInfraClusterV1Update(ctx context.Context, d *schema.Resour
 			return diag.Errorf("Error upgrading openstack_containerinfra_cluster_v1 %s: %s", d.Id(), err)
 		}
 
-		stateConf := &resource.StateChangeConf{
+		stateConf := &retry.StateChangeConf{
 			Pending:      []string{"UPDATE_IN_PROGRESS"},
 			Target:       []string{"UPDATE_COMPLETE"},
 			Refresh:      containerInfraClusterV1StateRefreshFunc(containerInfraClient, d.Id()),
@@ -469,7 +469,7 @@ func resourceContainerInfraClusterV1Update(ctx context.Context, d *schema.Resour
 			return diag.Errorf("Error updating openstack_containerinfra_cluster_v1 %s: %s", d.Id(), err)
 		}
 
-		stateConf := &resource.StateChangeConf{
+		stateConf := &retry.StateChangeConf{
 			Pending:      []string{"UPDATE_IN_PROGRESS"},
 			Target:       []string{"UPDATE_COMPLETE"},
 			Refresh:      containerInfraClusterV1StateRefreshFunc(containerInfraClient, d.Id()),
@@ -497,7 +497,7 @@ func resourceContainerInfraClusterV1Delete(ctx context.Context, d *schema.Resour
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_containerinfra_cluster_v1"))
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:      []string{"DELETE_IN_PROGRESS"},
 		Target:       []string{"DELETE_COMPLETE"},
 		Refresh:      containerInfraClusterV1StateRefreshFunc(containerInfraClient, d.Id()),

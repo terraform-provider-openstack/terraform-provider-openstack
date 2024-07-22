@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/orchestration/v1/stacks"
@@ -209,7 +209,7 @@ func resourceOrchestrationStackV1Create(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("Error creating openstack_orchestration_stack_v1: %s", err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"CREATE_IN_PROGRESS", "INIT_COMPLETE"},
 		Target:     []string{"CREATE_COMPLETE", "UPDATE_COMPLETE", "UPDATE_IN_PROGRESS"},
 		Refresh:    orchestrationStackV1StateRefreshFunc(orchestrationClient, stack.ID, false),
@@ -348,7 +348,7 @@ func resourceOrchestrationStackV1Update(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("Error updating openstack_orchestration_stack_v1 %s: %s", d.Id(), result.Err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"UPDATE_IN_PROGRESS"},
 		Target:     []string{"UPDATE_COMPLETE"},
 		Refresh:    orchestrationStackV1StateRefreshFunc(orchestrationClient, d.Id(), true),
@@ -386,7 +386,7 @@ func resourceOrchestrationStackV1Delete(ctx context.Context, d *schema.ResourceD
 		}
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"DELETE_IN_PROGRESS"},
 		Target:     []string{"DELETE_COMPLETE"},
 		Refresh:    orchestrationStackV1StateRefreshFunc(orchestrationClient, d.Id(), true),

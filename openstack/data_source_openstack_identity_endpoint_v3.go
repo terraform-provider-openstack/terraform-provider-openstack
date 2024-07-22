@@ -94,7 +94,7 @@ func dataSourceIdentityEndpointV3Read(ctx context.Context, d *schema.ResourceDat
 	}
 
 	// filter by name, when the name is specified
-	if v, ok := d.GetOkExists("name"); ok {
+	if v, ok := getOkExists(d, "name"); ok {
 		var filteredEndpoints []endpoints.Endpoint
 		for _, endpoint := range allEndpoints {
 			if endpoint.Name == v.(string) {

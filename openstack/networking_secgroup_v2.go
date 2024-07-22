@@ -3,14 +3,14 @@ package openstack
 import (
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
 )
 
-// networkingSecgroupV2StateRefreshFuncDelete returns a special case resource.StateRefreshFunc to try to delete a secgroup.
-func networkingSecgroupV2StateRefreshFuncDelete(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+// networkingSecgroupV2StateRefreshFuncDelete returns a special case retry.StateRefreshFunc to try to delete a secgroup.
+func networkingSecgroupV2StateRefreshFuncDelete(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete openstack_networking_secgroup_v2 %s", id)
 

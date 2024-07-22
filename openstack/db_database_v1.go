@@ -3,15 +3,15 @@ package openstack
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/db/v1/databases"
 )
 
-// databaseDatabaseV1StateRefreshFunc returns a resource.StateRefreshFunc
+// databaseDatabaseV1StateRefreshFunc returns a retry.StateRefreshFunc
 // that is used to watch a database.
-func databaseDatabaseV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string, dbName string) resource.StateRefreshFunc {
+func databaseDatabaseV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string, dbName string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		pages, err := databases.List(client, instanceID).AllPages()
 		if err != nil {

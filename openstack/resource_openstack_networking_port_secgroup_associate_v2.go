@@ -77,7 +77,7 @@ func resourceNetworkingPortSecGroupAssociateV2Create(ctx context.Context, d *sch
 
 	var updateOpts ports.UpdateOpts
 	var enforce bool
-	if v, ok := d.GetOkExists("enforce"); ok {
+	if v, ok := getOkExists(d, "enforce"); ok {
 		enforce = v.(bool)
 	}
 
@@ -116,7 +116,7 @@ func resourceNetworkingPortSecGroupAssociateV2Read(ctx context.Context, d *schem
 	// We can assume enforce is `false` as it is defaulted to it. If user
 	// passes `true` it will be overwritten in the if clause
 	enforce := false
-	if v, ok := d.GetOkExists("enforce"); ok {
+	if v, ok := d.GetOk("enforce"); ok {
 		enforce = v.(bool)
 	}
 
@@ -149,7 +149,7 @@ func resourceNetworkingPortSecGroupAssociateV2Update(ctx context.Context, d *sch
 
 	var updateOpts ports.UpdateOpts
 	var enforce bool
-	if v, ok := d.GetOkExists("enforce"); ok {
+	if v, ok := getOkExists(d, "enforce"); ok {
 		enforce = v.(bool)
 	}
 
@@ -188,7 +188,7 @@ func resourceNetworkingPortSecGroupAssociateV2Delete(ctx context.Context, d *sch
 
 	var updateOpts ports.UpdateOpts
 	var enforce bool
-	if v, ok := d.GetOkExists("enforce"); ok {
+	if v, ok := d.GetOk("enforce"); ok {
 		enforce = v.(bool)
 	}
 

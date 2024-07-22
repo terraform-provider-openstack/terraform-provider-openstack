@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -89,14 +89,14 @@ func resourceComputeFloatingIPAssociateV2Create(ctx context.Context, d *schema.R
 	// This API call should be synchronous, but we've had reports where it isn't.
 	// If the user opted in to wait for association, then poll here.
 	var waitUntilAssociated bool
-	if v, ok := d.GetOkExists("wait_until_associated"); ok {
+	if v, ok := getOkExists(d, "wait_until_associated"); ok {
 		if wua, ok := v.(bool); ok {
 			waitUntilAssociated = wua
 		}
 	}
 
 	if waitUntilAssociated {
-		stateConf := &resource.StateChangeConf{
+		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"NOT_ASSOCIATED"},
 			Target:     []string{"ASSOCIATED"},
 			Refresh:    computeFloatingIPAssociateV2CheckAssociation(computeClient, instanceID, floatingIP),

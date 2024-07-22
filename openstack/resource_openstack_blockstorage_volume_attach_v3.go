@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -223,7 +223,7 @@ func resourceBlockStorageVolumeAttachV3Create(ctx context.Context, d *schema.Res
 	log.Printf(
 		"[DEBUG] Waiting for openstack_blockstorage_volume_attach_v3 volume %s to become available", volumeID)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"available", "attaching"},
 		Target:     []string{"in-use"},
 		Refresh:    blockStorageVolumeV3StateRefreshFunc(client, volumeID),
@@ -368,7 +368,7 @@ func resourceBlockStorageVolumeAttachV3Delete(ctx context.Context, d *schema.Res
 		return diag.FromErr(err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"in-use", "attaching", "detaching"},
 		Target:     []string{"available"},
 		Refresh:    blockStorageVolumeV3StateRefreshFunc(client, volumeID),

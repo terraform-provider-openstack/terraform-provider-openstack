@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/rules"
@@ -85,7 +85,7 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Create(ctx context.Context, d *sch
 
 	log.Printf("[DEBUG] Waiting for openstack_networking_qos_bandwidth_limit_rule_v2 %s to become available.", r.ID)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Target:     []string{"ACTIVE"},
 		Refresh:    networkingQoSBandwidthLimitRuleV2StateRefreshFunc(networkingClient, qosPolicyID, r.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
@@ -193,7 +193,7 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Delete(ctx context.Context, d *sch
 		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_qos_bandwidth_limit_rule_v2"))
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
 		Refresh:    networkingQoSBandwidthLimitRuleV2StateRefreshFunc(networkingClient, qosPolicyID, d.Id()),

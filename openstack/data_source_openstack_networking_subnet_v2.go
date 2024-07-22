@@ -194,7 +194,7 @@ func dataSourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceDat
 		listOpts.Description = v.(string)
 	}
 
-	if v, ok := d.GetOkExists("dhcp_enabled"); ok {
+	if v, ok := getOkExists(d, "dhcp_enabled"); ok {
 		enableDHCP := v.(bool)
 		listOpts.EnableDHCP = &enableDHCP
 	}

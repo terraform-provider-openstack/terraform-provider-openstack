@@ -143,7 +143,7 @@ func dataSourceSharedFilesystemShareV2Read(ctx context.Context, d *schema.Resour
 		IsPublic:           &isPublic,
 	}
 
-	if v, ok := d.GetOkExists("export_location_path"); ok {
+	if v, ok := getOkExists(d, "export_location_path"); ok {
 		listOpts.ExportLocationPath = v.(string)
 		sfsClient.Microversion = minManilaShareListExportLocationPath
 	}

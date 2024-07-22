@@ -132,7 +132,7 @@ func dataSourceComputeFlavorV2Read(ctx context.Context, d *schema.ResourceData, 
 		allFlavors = append(allFlavors, *flavor)
 	} else {
 		accessType := flavors.AllAccess
-		if v, ok := d.GetOkExists("is_public"); ok {
+		if v, ok := getOkExists(d, "is_public"); ok {
 			if v, ok := v.(bool); ok {
 				if v {
 					accessType = flavors.PublicAccess

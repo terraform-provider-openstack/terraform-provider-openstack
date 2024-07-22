@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/db/v1/databases"
@@ -232,7 +232,7 @@ func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceDat
 	// Wait for the instance to become available.
 	log.Printf("[DEBUG] Waiting for openstack_db_instance_v1 %s to become available", instance.ID)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"BUILD"},
 		Target:     []string{"ACTIVE", "HEALTHY"},
 		Refresh:    databaseInstanceV1StateRefreshFunc(DatabaseV1Client, instance.ID),
@@ -324,7 +324,7 @@ func resourceDatabaseInstanceV1Delete(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_db_instance_v1"))
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE", "SHUTDOWN"},
 		Target:     []string{"DELETED"},
 		Refresh:    databaseInstanceV1StateRefreshFunc(DatabaseV1Client, d.Id()),

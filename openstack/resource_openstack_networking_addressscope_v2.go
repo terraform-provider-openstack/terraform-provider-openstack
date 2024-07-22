@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/addressscopes"
@@ -87,7 +87,7 @@ func resourceNetworkingAddressScopeV2Create(ctx context.Context, d *schema.Resou
 
 	log.Printf("[DEBUG] Waiting for openstack_networking_addressscope_v2 %s to become available", a.ID)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Target:     []string{"ACTIVE"},
 		Refresh:    resourceNetworkingAddressScopeV2StateRefreshFunc(networkingClient, a.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
@@ -175,7 +175,7 @@ func resourceNetworkingAddressScopeV2Delete(ctx context.Context, d *schema.Resou
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_addressscope_v2"))
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
 		Refresh:    resourceNetworkingAddressScopeV2StateRefreshFunc(networkingClient, d.Id()),

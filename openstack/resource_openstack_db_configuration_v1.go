@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/db/v1/configurations"
@@ -123,7 +123,7 @@ func resourceDatabaseConfigurationV1Create(ctx context.Context, d *schema.Resour
 		return diag.Errorf("Error creating openstack_db_configuration_v1: %s", err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"BUILD"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    databaseConfigurationV1StateRefreshFunc(DatabaseV1Client, cgroup.ID),
@@ -176,7 +176,7 @@ func resourceDatabaseConfigurationV1Delete(ctx context.Context, d *schema.Resour
 		return diag.Errorf("Error deleting openstack_db_configuration_v1 %s: %s", d.Id(), err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE", "SHUTOFF"},
 		Target:     []string{"DELETED"},
 		Refresh:    databaseConfigurationV1StateRefreshFunc(DatabaseV1Client, d.Id()),

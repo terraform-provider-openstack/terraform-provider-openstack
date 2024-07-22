@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -128,7 +128,7 @@ func resourceLBMonitorV1Create(ctx context.Context, d *schema.ResourceData, meta
 
 	log.Printf("[DEBUG] Waiting for OpenStack LB Monitor (%s) to become available.", m.ID)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    waitForLBMonitorActive(networkingClient, m.ID),
@@ -219,7 +219,7 @@ func resourceLBMonitorV1Delete(ctx context.Context, d *schema.ResourceData, meta
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE", "PENDING_DELETE"},
 		Target:     []string{"DELETED"},
 		Refresh:    waitForLBMonitorDelete(networkingClient, d.Id()),
@@ -253,7 +253,7 @@ func resourceLBMonitorV1DetermineType(t string) monitors.MonitorType {
 	return monitorType
 }
 
-func waitForLBMonitorActive(networkingClient *gophercloud.ServiceClient, monitorID string) resource.StateRefreshFunc {
+func waitForLBMonitorActive(networkingClient *gophercloud.ServiceClient, monitorID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		m, err := monitors.Get(networkingClient, monitorID).Extract()
 		if err != nil {
@@ -266,7 +266,7 @@ func waitForLBMonitorActive(networkingClient *gophercloud.ServiceClient, monitor
 	}
 }
 
-func waitForLBMonitorDelete(networkingClient *gophercloud.ServiceClient, monitorID string) resource.StateRefreshFunc {
+func waitForLBMonitorDelete(networkingClient *gophercloud.ServiceClient, monitorID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete OpenStack LB Monitor %s", monitorID)
 

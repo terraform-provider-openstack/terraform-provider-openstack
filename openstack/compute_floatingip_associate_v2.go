@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips"
@@ -72,7 +72,7 @@ func computeFloatingIPAssociateV2ComputeExists(computeClient *gophercloud.Servic
 }
 
 func computeFloatingIPAssociateV2CheckAssociation(
-	computeClient *gophercloud.ServiceClient, instanceID, floatingIP string) resource.StateRefreshFunc {
+	computeClient *gophercloud.ServiceClient, instanceID, floatingIP string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		instance, err := servers.Get(computeClient, instanceID).Extract()
 		if err != nil {

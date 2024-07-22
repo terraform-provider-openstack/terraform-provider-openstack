@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -140,14 +140,14 @@ func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.Resource
 
 	var attachment *volumeattach.VolumeAttachment
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
+	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		attachment, err = volumeattach.Create(computeClient, instanceID, attachOpts).Extract()
 		if err != nil {
 			if _, ok := err.(gophercloud.ErrDefault400); ok && multiattach {
-				return resource.RetryableError(err)
+				return retry.RetryableError(err)
 			}
 
-			return resource.NonRetryableError(err)
+			return retry.NonRetryableError(err)
 		}
 
 		return nil
@@ -157,7 +157,7 @@ func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.Resource
 		return diag.Errorf("Error creating openstack_compute_volume_attach_v2 %s: %s", instanceID, err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ATTACHING"},
 		Target:     []string{"ATTACHED"},
 		Refresh:    computeVolumeAttachV2AttachFunc(computeClient, blockStorageClient, instanceID, attachment.ID, volumeID),
@@ -218,7 +218,7 @@ func resourceComputeVolumeAttachV2Delete(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{""},
 		Target:     []string{"DETACHED"},
 		Refresh:    computeVolumeAttachV2DetachFunc(computeClient, instanceID, attachmentID),

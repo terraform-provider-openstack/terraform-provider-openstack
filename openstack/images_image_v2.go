@@ -16,7 +16,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/klauspost/compress/zstd"
 	"github.com/ulikunitz/xz"
@@ -232,7 +232,7 @@ func resourceImagesImageV2DetectCompression(resp *http.Response) (io.ReadCloser,
 	return nil, fmt.Errorf("Error decompressing image, detected %q formats are not supported", formats)
 }
 
-func resourceImagesImageV2RefreshFunc(client *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func resourceImagesImageV2RefreshFunc(client *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		img, err := images.Get(client, id).Extract()
 		if err != nil {
