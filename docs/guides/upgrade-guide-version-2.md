@@ -6,6 +6,8 @@ description: |-
   Terraform Openstack Provider Version 2 Upgrade Guide
 ---
 
+~> **Note:** The provider go module version has been updated to `v2` in the `2.1.0` release. Downstream users should check the changelog of the `2.1.0` release as well before changing to the `v2` module.
+
 Version 2.0.0 of the Openstack provider for Terraform is a major release and includes some changes that you will need to consider when upgrading. We intend this guide to help with that process.
 
 We previously marked most of the changes we outline in this guide as deprecated in the Terraform plan/apply output throughout previous provider releases. You can find these changes, including deprecation notices, in the [Terraform Openstack Provider CHANGELOG](https://github.com/terraform-provider-openstack/terraform-provider-openstack/blob/main/CHANGELOG.md).
