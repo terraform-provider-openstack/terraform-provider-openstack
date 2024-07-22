@@ -16,7 +16,7 @@ func TestAccBGPVPNPortAssociateV2_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckAdminOnly(t)
+			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckBGPVPN(t)
 		},
 		ProviderFactories: testAccProviders,
@@ -31,6 +31,30 @@ func TestAccBGPVPNPortAssociateV2_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_bgpvpn_port_associate_v2.association_1", "advertise_fixed_ips", "true"),
 				),
 			},
+			{
+				Config: testAccBGPVPNPortAssociateV2ConfigUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBGPVPNPortAssociateV2Exists(
+						"openstack_bgpvpn_port_associate_v2.association_1", &pa),
+					resource.TestCheckResourceAttrPtr("openstack_bgpvpn_port_associate_v2.association_1", "port_id", &pa.PortID),
+					resource.TestCheckResourceAttr("openstack_bgpvpn_port_associate_v2.association_1", "advertise_fixed_ips", "false"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccBGPVPNPortAssociateV2_no_fixed_ips_advertise(t *testing.T) {
+	var pa bgpvpns.PortAssociation
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckBGPVPN(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBGPVPNPortAssociateV2Destroy,
+		Steps: []resource.TestStep{
 			{
 				Config: testAccBGPVPNPortAssociateV2ConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(

@@ -16,7 +16,7 @@ func TestAccBGPVPNRouterAssociateV2_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckAdminOnly(t)
+			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckBGPVPN(t)
 		},
 		ProviderFactories: testAccProviders,
@@ -31,6 +31,31 @@ func TestAccBGPVPNRouterAssociateV2_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_bgpvpn_router_associate_v2.association_1", "advertise_extra_routes", "true"),
 				),
 			},
+			{
+				Config: testAccBGPVPNRouterAssociateV2ConfigUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBGPVPNRouterAssociateV2Exists(
+						"openstack_bgpvpn_router_associate_v2.association_1", &ra),
+					resource.TestCheckResourceAttrPtr("openstack_bgpvpn_router_associate_v2.association_1", "router_id", &ra.RouterID),
+					resource.TestCheckResourceAttr("openstack_bgpvpn_router_associate_v2.association_1", "advertise_extra_routes", "false"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccBGPVPNRouterAssociateV2_no_routes_advertise(t *testing.T) {
+	var ra bgpvpns.RouterAssociation
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckBGPVPN(t)
+			t.Skip(`bug in OpenStack which ignores {"advertise_extra_routes": false} on POST request, while handles on PUT request.`)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBGPVPNRouterAssociateV2Destroy,
+		Steps: []resource.TestStep{
 			{
 				Config: testAccBGPVPNRouterAssociateV2ConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
