@@ -1,5 +1,11 @@
 ## 2.1.0 ( TBD )
 
+NOTES
+
+* The next major release will be `3.0.0` and will include the removal of the deprecated resources and data sources ([#1751](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1751))
+* Removed deprecated `terraform-plugin-sdk` dependency elements ([#1759](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1759))
+* Introduced a `parsePairedIDs` helper function to parse paired IDs from a string and removed duplicated code ([#1756](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1756))
+
 IMPROVEMENTS
 
 * Added `vip_qos_policy_id` on `openstack_lb_loadbalancer_v2` ([#1721](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1721))
@@ -17,6 +23,7 @@ IMPROVEMENTS
 * Added a new `dns_publish_fixed_ip` argument to the `openstack_networking_subnet_v2` resource ([#1748](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1748))
 * Added a new `dns_publish_fixed_ip` argument to the `openstack_networking_subnet_v2` and `openstack_networking_subnet_ids_v2` data sources ([#1748](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1748))
 * Added a new compression format detection based on the filename extension from the `Content-Disposition` response header in the `openstack_images_image_v2` resource([#1746](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1746))
+* Enforce boolean type in JSON requests for "true" or "false" values in the `value_specs` map in networking resources ([#1743](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1743))
 * Added a new `zstd` compression format support in the `openstack_images_image_v2` resource ([#1746](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1746))
 * Added a support for the `description` argument in the `openstack_networking_portforwarding_v2` resource ([#1742](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1742))
 * Added new `container_format` and `disk_format` arguments in the `openstack_images_image_v2` data source ([#1753](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1753))
@@ -25,12 +32,14 @@ IMPROVEMENTS
 * Added a new `openstack_bgpvpn_router_associate_v2` resource ([#1738](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1738))
 * Added a new `openstack_bgpvpn_network_associate_v2` resource ([#1738](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1738))
 * Added a new `openstack_bgpvpn_port_associate_v2` resource ([#1738](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1738))
+* Added OpenStack provider version in the `User-Agent` request header ([#1761](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1761))
+* Added a new `stateful` argument to the `openstack_networking_secgroup_v2` resource ([#1757](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1757))
+* Added a new `stateful` argument to the `openstack_networking_secgroup_v2` data source ([#1757](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1757))
 
 BUG FIXES
 
 * Fixed a bug when updating `node_count` to 0 on `openstack_containerinfra_cluster_v1` ([#1719](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1719))
 * Set load balancer resource ID before waiting for its status in the `openstack_lb_loadbalancer_v2` resource ([#1733](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1733))
-* Enforce boolean type in JSON requests for "true" or "false" values in the `value_specs` map in networking resources ([#1743](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1743))
 * Update module name to v2 to match GitHub versioning ([#1729](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1729))
 * Deleted URL validation in the `openstack_identity_endpoint_v3` resource ([#1701](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1701))
 * Fixed panic on empty `subnet_id` in the `fixed_ip` block of the `openstack_networking_port_v2` resource ([#962](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/962))
