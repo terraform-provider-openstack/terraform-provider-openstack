@@ -14,6 +14,8 @@ import (
 	"github.com/gophercloud/utils/terraform/mutexkv"
 )
 
+var version = "dev"
+
 // Use openstackbase.Config as the base/foundation of this provider's
 // Config struct.
 type Config struct {
@@ -580,7 +582,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 			MaxRetries:                  d.Get("max_retries").(int),
 			DisableNoCacheHeader:        d.Get("disable_no_cache_header").(bool),
 			TerraformVersion:            terraformVersion,
-			SDKVersion:                  getSDKVersion(),
+			SDKVersion:                  getSDKVersion() + " Terraform Provider OpenStack/" + version,
 			MutexKV:                     mutexkv.NewMutexKV(),
 			EnableLogger:                enableLogging,
 		},
