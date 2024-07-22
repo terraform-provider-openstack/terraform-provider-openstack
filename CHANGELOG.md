@@ -32,6 +32,7 @@ IMPROVEMENTS
 * Added a new `openstack_bgpvpn_router_associate_v2` resource ([#1738](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1738))
 * Added a new `openstack_bgpvpn_network_associate_v2` resource ([#1738](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1738))
 * Added a new `openstack_bgpvpn_port_associate_v2` resource ([#1738](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1738))
+* Added a `bgpvpn` value support for the `object_type` in the `openstack_networking_rbac_policy_v2` resource ([#1738](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1738))
 * Added OpenStack provider version in the `User-Agent` request header ([#1761](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1761))
 * Added a new `stateful` argument to the `openstack_networking_secgroup_v2` resource ([#1757](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1757))
 * Added a new `stateful` argument to the `openstack_networking_secgroup_v2` data source ([#1757](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1757))
