@@ -128,7 +128,7 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 		}
 	}
 
-	opts := rules.CreateOpts{
+	opts := secRuleCreateOpts{
 		Description:    d.Get("description").(string),
 		SecGroupID:     d.Get("security_group_id").(string),
 		PortRangeMin:   d.Get("port_range_min").(int),
@@ -188,7 +188,11 @@ func resourceNetworkingSecGroupRuleV2Read(ctx context.Context, d *schema.Resourc
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_secgroup_rule_v2 %s: %#v", d.Id(), sgRule)
-
+	
+	if sgRule.Protocol == "" {
+		sgRule.Protocol = string(rules.ProtocolAny)
+	}
+	
 	d.Set("description", sgRule.Description)
 	d.Set("direction", sgRule.Direction)
 	d.Set("ethertype", sgRule.EtherType)
