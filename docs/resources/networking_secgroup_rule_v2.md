@@ -52,7 +52,11 @@ The following arguments are supported:
 * `ethertype` - (Required) The layer 3 protocol type, valid values are __IPv4__
     or __IPv6__. Changing this creates a new security group rule.
 
-* `protocol` - (Optional) The layer 4 protocol type, valid values are following. Changing this creates a new security group rule. This is required if you want to specify a port range.
+* `protocol` - (Optional) The layer 4 protocol type, valid values are
+  following. Changing this creates a new security group rule. This is required
+  if you want to specify a port range.
+  * empty string or omitted (any protocol)
+  * integer value between 0 and 255 (valid IP protocol number)
   * __tcp__
   * __udp__
   * __icmp__
@@ -74,7 +78,6 @@ The following arguments are supported:
   * __sctp__
   * __udplite__
   * __vrrp__
-  * __any__
 
 * `port_range_min` - (Optional) The lower part of the allowed port range, valid
     integer value needs to be between 1 and 65535. Changing this creates a new
