@@ -188,11 +188,9 @@ func resourceNetworkingSecGroupRuleV2Read(ctx context.Context, d *schema.Resourc
 	}
 
 	log.Printf("[DEBUG] Retrieved openstack_networking_secgroup_rule_v2 %s: %#v", d.Id(), sgRule)
-	
 	if sgRule.Protocol == "" {
 		sgRule.Protocol = string(rules.ProtocolAny)
 	}
-	
 	d.Set("description", sgRule.Description)
 	d.Set("direction", sgRule.Direction)
 	d.Set("ethertype", sgRule.EtherType)
