@@ -60,7 +60,7 @@ func resourceNetworkingSecGroupRuleV2() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				RequiredWith: []string{"protocol"},
-				ValidateFunc: validation.IntBetween(1, 65535),
+				ValidateFunc: validation.IntBetween(0, 65535),
 			},
 
 			"port_range_max": {
@@ -68,7 +68,7 @@ func resourceNetworkingSecGroupRuleV2() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				RequiredWith: []string{"protocol"},
-				ValidateFunc: validation.IntBetween(1, 65535),
+				ValidateFunc: validation.IntBetween(0, 65535),
 			},
 
 			"protocol": {
