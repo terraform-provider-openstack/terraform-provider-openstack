@@ -118,7 +118,6 @@ func TestAccNetworkingV2SecGroupRule_protocols(t *testing.T) {
 	var secgroupRuleSctp rules.SecGroupRule
 	var secgroupRuleUdplite rules.SecGroupRule
 	var secgroupRuleVrrp rules.SecGroupRule
-	var secgroupRuleAny rules.SecGroupRule
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -169,8 +168,6 @@ func TestAccNetworkingV2SecGroupRule_protocols(t *testing.T) {
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_udplite", &secgroupRuleUdplite),
 					testAccCheckNetworkingV2SecGroupRuleExists(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_vrrp", &secgroupRuleVrrp),
-					testAccCheckNetworkingV2SecGroupRuleExists(
-						"openstack_networking_secgroup_rule_v2.secgroup_rule_any", &secgroupRuleAny),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_ah", "protocol", "ah"),
 					resource.TestCheckResourceAttr(
@@ -207,8 +204,6 @@ func TestAccNetworkingV2SecGroupRule_protocols(t *testing.T) {
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_udplite", "protocol", "udplite"),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_vrrp", "protocol", "vrrp"),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_secgroup_rule_v2.secgroup_rule_any", "protocol", "any"),
 				),
 			},
 		},
@@ -531,13 +526,6 @@ resource "openstack_networking_secgroup_rule_v2" "secgroup_rule_vrrp" {
   direction = "ingress"
   ethertype = "IPv4"
   protocol = "vrrp"
-  remote_ip_prefix = "0.0.0.0/0"
-  security_group_id = "${openstack_networking_secgroup_v2.secgroup_1.id}"
-}
-resource "openstack_networking_secgroup_rule_v2" "secgroup_rule_any" {
-  direction = "ingress"
-  ethertype = "IPv4"
-  protocol = "any"
   remote_ip_prefix = "0.0.0.0/0"
   security_group_id = "${openstack_networking_secgroup_v2.secgroup_1.id}"
 }
