@@ -1,10 +1,8 @@
 package openstack
 
 import (
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/endpointgroups"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ikepolicies"
@@ -15,21 +13,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
-
-type secRuleCreateOpts rules.CreateOpts
-
-func (opts secRuleCreateOpts) ToSecGroupRuleCreateMap() (map[string]interface{}, error) {
-	b, err := gophercloud.BuildRequestBody(opts, "security_group_rule")
-	if err != nil {
-		return nil, err
-	}
-
-	if m := b["security_group_rule"].(map[string]interface{}); m["protocol"] == string(rules.ProtocolAny) {
-		m["protocol"] = nil
-	}
-
-	return b, nil
-}
 
 // FloatingIPCreateOpts represents the attributes used when creating a new floating ip.
 type FloatingIPCreateOpts struct {
