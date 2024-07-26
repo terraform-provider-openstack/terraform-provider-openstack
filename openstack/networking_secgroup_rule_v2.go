@@ -26,10 +26,10 @@ func resourceNetworkingSecGroupRuleV2StateRefreshFunc(client *gophercloud.Servic
 }
 
 func resourceNetworkingSecGroupRuleV2Direction(v interface{}, k string) ([]string, []error) {
-	switch v.(string) {
-	case string(rules.DirIngress):
+	switch rules.RuleDirection(v.(string)) {
+	case rules.DirIngress:
 		return nil, nil
-	case string(rules.DirEgress):
+	case rules.DirEgress:
 		return nil, nil
 	}
 
@@ -37,10 +37,10 @@ func resourceNetworkingSecGroupRuleV2Direction(v interface{}, k string) ([]strin
 }
 
 func resourceNetworkingSecGroupRuleV2EtherType(v interface{}, k string) ([]string, []error) {
-	switch v.(string) {
-	case string(rules.EtherType4):
+	switch rules.RuleEtherType(v.(string)) {
+	case rules.EtherType4:
 		return nil, nil
-	case string(rules.EtherType6):
+	case rules.EtherType6:
 		return nil, nil
 	}
 
@@ -48,28 +48,28 @@ func resourceNetworkingSecGroupRuleV2EtherType(v interface{}, k string) ([]strin
 }
 
 func resourceNetworkingSecGroupRuleV2Protocol(v interface{}, k string) ([]string, []error) {
-	switch v.(string) {
-	case string(rules.ProtocolAH),
-		string(rules.ProtocolDCCP),
-		string(rules.ProtocolEGP),
-		string(rules.ProtocolESP),
-		string(rules.ProtocolGRE),
-		string(rules.ProtocolICMP),
-		string(rules.ProtocolIGMP),
-		string(rules.ProtocolIPv6Encap),
-		string(rules.ProtocolIPv6Frag),
-		string(rules.ProtocolIPv6ICMP),
-		string(rules.ProtocolIPv6NoNxt),
-		string(rules.ProtocolIPv6Opts),
-		string(rules.ProtocolIPv6Route),
-		string(rules.ProtocolOSPF),
-		string(rules.ProtocolPGM),
-		string(rules.ProtocolRSVP),
-		string(rules.ProtocolSCTP),
-		string(rules.ProtocolTCP),
-		string(rules.ProtocolUDP),
-		string(rules.ProtocolUDPLite),
-		string(rules.ProtocolVRRP),
+	switch rules.RuleProtocol(v.(string)) {
+	case rules.ProtocolAH,
+		rules.ProtocolDCCP,
+		rules.ProtocolEGP,
+		rules.ProtocolESP,
+		rules.ProtocolGRE,
+		rules.ProtocolICMP,
+		rules.ProtocolIGMP,
+		rules.ProtocolIPv6Encap,
+		rules.ProtocolIPv6Frag,
+		rules.ProtocolIPv6ICMP,
+		rules.ProtocolIPv6NoNxt,
+		rules.ProtocolIPv6Opts,
+		rules.ProtocolIPv6Route,
+		rules.ProtocolOSPF,
+		rules.ProtocolPGM,
+		rules.ProtocolRSVP,
+		rules.ProtocolSCTP,
+		rules.ProtocolTCP,
+		rules.ProtocolUDP,
+		rules.ProtocolUDPLite,
+		rules.ProtocolVRRP,
 		"":
 		return nil, nil
 	}
