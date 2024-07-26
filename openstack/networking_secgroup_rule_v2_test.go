@@ -9,53 +9,39 @@ import (
 )
 
 func TestUnitResourceNetworkingSecGroupRuleV2DirectionIngress(t *testing.T) {
-	expected := rules.DirIngress
+	_, err := resourceNetworkingSecGroupRuleV2Direction("ingress", "direction")
 
-	actual, err := resourceNetworkingSecGroupRuleV2Direction("ingress")
-
-	assert.NoError(t, err)
-	assert.Equal(t, expected, actual)
+	assert.Equal(t, 0, len(err))
 }
 
 func TestUnitResourceNetworkingSecGroupRuleV2DirectionEgress(t *testing.T) {
-	expected := rules.DirEgress
+	_, err := resourceNetworkingSecGroupRuleV2Direction("egress", "direction")
 
-	actual, err := resourceNetworkingSecGroupRuleV2Direction("egress")
-
-	assert.NoError(t, err)
-	assert.Equal(t, expected, actual)
+	assert.Equal(t, 0, len(err))
 }
 
 func TestUnitResourceNetworkingSecGroupRuleV2DirectionUnknown(t *testing.T) {
-	actual, err := resourceNetworkingSecGroupRuleV2Direction("stuff")
+	_, err := resourceNetworkingSecGroupRuleV2Direction("stuff", "direction")
 
-	assert.Error(t, err)
-	assert.Empty(t, actual)
+	assert.Equal(t, 1, len(err))
 }
 
 func TestUnitResourceNetworkingSecGroupRuleV2EtherType4(t *testing.T) {
-	expected := rules.EtherType4
+	_, err := resourceNetworkingSecGroupRuleV2EtherType("IPv4", "ethertype")
 
-	actual, err := resourceNetworkingSecGroupRuleV2EtherType("IPv4")
-
-	assert.NoError(t, err)
-	assert.Equal(t, expected, actual)
+	assert.Equal(t, 0, len(err))
 }
 
 func TestUnitResourceNetworkingSecGroupRuleV2EtherType6(t *testing.T) {
-	expected := rules.EtherType6
+	_, err := resourceNetworkingSecGroupRuleV2EtherType("IPv6", "ethertype")
 
-	actual, err := resourceNetworkingSecGroupRuleV2EtherType("IPv6")
-
-	assert.NoError(t, err)
-	assert.Equal(t, expected, actual)
+	assert.Equal(t, 0, len(err))
 }
 
 func TestUnitResourceNetworkingSecGroupRuleV2EtherTypeUnknown(t *testing.T) {
-	actual, err := resourceNetworkingSecGroupRuleV2EtherType("something")
+	_, err := resourceNetworkingSecGroupRuleV2EtherType("something", "ethertype")
 
-	assert.Error(t, err)
-	assert.Empty(t, actual)
+	assert.Equal(t, 1, len(err))
 }
 
 func TestUnitResourceNetworkingSecGroupRuleV2ProtocolString(t *testing.T) {
@@ -84,19 +70,15 @@ func TestUnitResourceNetworkingSecGroupRuleV2ProtocolString(t *testing.T) {
 		string(rules.ProtocolAny):       rules.ProtocolAny,
 	}
 
-	for name, expected := range protocols {
-		actual, err := resourceNetworkingSecGroupRuleV2Protocol(name)
+	for name := range protocols {
+		_, err := resourceNetworkingSecGroupRuleV2Protocol(name, "protocol")
 
-		assert.NoError(t, err)
-		assert.Equal(t, expected, actual)
+		assert.Equal(t, 0, len(err))
 	}
 }
 
 func TestUnitResourceNetworkingSecGroupRuleV2ProtocolNumber(t *testing.T) {
-	expected := rules.RuleProtocol("6")
+	_, err := resourceNetworkingSecGroupRuleV2Protocol("6", "protocol")
 
-	actual, err := resourceNetworkingSecGroupRuleV2Protocol("6")
-
-	assert.NoError(t, err)
-	assert.Equal(t, expected, actual)
+	assert.Equal(t, 0, len(err))
 }
