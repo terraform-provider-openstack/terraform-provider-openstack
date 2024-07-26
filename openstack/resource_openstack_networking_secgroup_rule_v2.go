@@ -59,7 +59,7 @@ func resourceNetworkingSecGroupRuleV2() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     true,
-				RequiredWith: []string{"protocol"},
+				RequiredWith: []string{"protocol", "port_range_max"},
 				ValidateFunc: validation.IntBetween(0, 65535),
 			},
 
@@ -67,7 +67,7 @@ func resourceNetworkingSecGroupRuleV2() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     true,
-				RequiredWith: []string{"protocol"},
+				RequiredWith: []string{"protocol", "port_range_min"},
 				ValidateFunc: validation.IntBetween(0, 65535),
 			},
 
