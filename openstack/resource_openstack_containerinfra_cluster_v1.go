@@ -158,6 +158,13 @@ func resourceContainerInfraClusterV1() *schema.Resource {
 				Computed: true,
 			},
 
+			"master_lb_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
+
 			"node_count": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -243,9 +250,6 @@ func resourceContainerInfraClusterV1Create(ctx context.Context, d *schema.Resour
 		return diag.Errorf("Unable to determine openstack_containerinfra_cluster_v1 master_flavor")
 	}
 
-	// Get boolean parameters that will be passed by reference.
-	floatingIPEnabled := d.Get("floating_ip_enabled").(bool)
-
 	createOpts := clusters.CreateOpts{
 		ClusterTemplateID: d.Get("cluster_template_id").(string),
 		DiscoveryURL:      d.Get("discovery_url").(string),
@@ -256,36 +260,44 @@ func resourceContainerInfraClusterV1Create(ctx context.Context, d *schema.Resour
 		Name:              d.Get("name").(string),
 		FixedNetwork:      d.Get("fixed_network").(string),
 		FixedSubnet:       d.Get("fixed_subnet").(string),
-		FloatingIPEnabled: &floatingIPEnabled,
 	}
 
-	// Set int parameters that will be passed by reference.
-	createTimeout := d.Get("create_timeout").(int)
-	if createTimeout > 0 {
-		createOpts.CreateTimeout = &createTimeout
+	if v, ok := getOkExists(d, "floating_ip_enabled"); ok {
+		v := v.(bool)
+		createOpts.FloatingIPEnabled = &v
 	}
 
-	dockerVolumeSize := d.Get("docker_volume_size").(int)
-	if dockerVolumeSize > 0 {
-		createOpts.DockerVolumeSize = &dockerVolumeSize
+	if v, ok := getOkExists(d, "create_timeout"); ok {
+		v := v.(int)
+		createOpts.CreateTimeout = &v
 	}
 
-	masterCount := d.Get("master_count").(int)
-	if masterCount > 0 {
-		createOpts.MasterCount = &masterCount
+	if v, ok := getOkExists(d, "docker_volume_size"); ok {
+		v := v.(int)
+		createOpts.DockerVolumeSize = &v
 	}
 
-	nodeCount := d.Get("node_count").(int)
-	if nodeCount >= 0 {
-		createOpts.NodeCount = &nodeCount
-		if nodeCount == 0 {
+	if v, ok := getOkExists(d, "master_count"); ok {
+		v := v.(int)
+		createOpts.MasterCount = &v
+	}
+
+	if v, ok := getOkExists(d, "node_count"); ok {
+		v := v.(int)
+		createOpts.NodeCount = &v
+		if v == 0 {
 			containerInfraClient.Microversion = containerInfraV1ZeroNodeCountMicroversion
 		}
 	}
 
-	mergeLabels := d.Get("merge_labels").(bool)
-	if mergeLabels {
-		createOpts.MergeLabels = &mergeLabels
+	if v, ok := getOkExists(d, "merge_labels"); ok {
+		v := v.(bool)
+		createOpts.MergeLabels = &v
+	}
+
+	if v, ok := getOkExists(d, "master_lb_enabled"); ok {
+		v := v.(bool)
+		createOpts.MasterLBEnabled = &v
 	}
 
 	s, err := clusters.Create(ctx, containerInfraClient, createOpts).Extract()
@@ -386,6 +398,7 @@ func resourceContainerInfraClusterV1Read(ctx context.Context, d *schema.Resource
 	d.Set("master_flavor", s.MasterFlavorID)
 	d.Set("keypair", s.KeyPair)
 	d.Set("master_count", s.MasterCount)
+	d.Set("master_lb_enabled", s.MasterLBEnabled)
 	d.Set("node_count", nodeCount)
 	d.Set("master_addresses", s.MasterAddresses)
 	d.Set("node_addresses", s.NodeAddresses)
@@ -483,6 +496,7 @@ func resourceContainerInfraClusterV1Update(ctx context.Context, d *schema.Resour
 				"Error waiting for openstack_containerinfra_cluster_v1 %s to become updated: %s", d.Id(), err)
 		}
 	}
+
 	return resourceContainerInfraClusterV1Read(ctx, d, meta)
 }
 
