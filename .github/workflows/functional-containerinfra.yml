@@ -6,8 +6,10 @@ on:
   pull_request:
     paths:
       - '.github/workflows/functional-containerinfra.yml'
-      - '**containerinfra**'
+      - 'go.mod'
+      - 'openstack/**containerinfra**'
       - 'CHANGELOG.md'
+      - 'scripts/*'
   schedule:
     - cron: '0 0 * * *'
 jobs:
