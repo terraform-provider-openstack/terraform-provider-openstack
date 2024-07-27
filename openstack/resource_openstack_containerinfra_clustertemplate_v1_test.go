@@ -106,7 +106,7 @@ func TestAccContainerInfraV1ClusterTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "server_type", "vm"),
 					resource.TestCheckResourceAttr(resourceName, "tls_disabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "volume_driver", "cinder"),
-					resource.TestCheckResourceAttr(resourceName, "hidden", "true"),
+					resource.TestCheckResourceAttr(resourceName, "hidden", "false"),
 				),
 			},
 		},
@@ -239,7 +239,7 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   server_type           = "vm"
   tls_disabled          = "true"
   volume_driver         = "cinder"
-  hidden                = "true"
+  hidden                = "false"
 }
 `, osRegionName, clusterTemplateName, osExtGwID, osMagnumFlavor, osMagnumFlavor, osMagnumImage)
 }

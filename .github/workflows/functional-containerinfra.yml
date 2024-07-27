@@ -65,7 +65,7 @@ jobs:
             SWIFT_MAX_FILE_SIZE=5368709122
             KEYSTONE_ADMIN_ENDPOINT=true
             ${{ matrix.devstack_conf_overrides }}
-          enabled_services: "h-eng,h-api,h-api-cfn,h-api-cw,${{ matrix.additional_services }}"
+          enabled_services: "barbican-svc,barbican-retry,barbican-keystone-listener,h-eng,h-api,h-api-cfn,h-api-cw,${{ matrix.additional_services }}"
       - name: Checkout go
         uses: actions/setup-go@v5
         with:
