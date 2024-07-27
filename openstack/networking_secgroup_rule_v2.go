@@ -48,6 +48,7 @@ func resourceNetworkingSecGroupRuleV2EtherType(v interface{}, k string) ([]strin
 }
 
 func resourceNetworkingSecGroupRuleV2Protocol(v interface{}, k string) ([]string, []error) {
+	//nolint:exhaustive // we need to override the rules.ProtocolAny case with an empty string
 	switch rules.RuleProtocol(v.(string)) {
 	case rules.ProtocolAH,
 		rules.ProtocolDCCP,
@@ -71,8 +72,7 @@ func resourceNetworkingSecGroupRuleV2Protocol(v interface{}, k string) ([]string
 		rules.ProtocolUDPLite,
 		rules.ProtocolVRRP,
 		rules.ProtocolIPIP,
-		rules.ProtocolAny,
-		"":
+		"": // rules.ProtocolAny
 		return nil, nil
 	}
 
