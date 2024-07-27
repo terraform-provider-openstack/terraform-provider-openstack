@@ -81,6 +81,9 @@ The following arguments are supported:
 * `master_count` - (Optional) The number of master nodes for the cluster.
     Changing this creates a new cluster.
 
+* `master_lb_enabled` - (Optional) Indicates whether to create a load balancer
+  for the master nodes. Changing this creates a new cluster.
+
 * `node_count` - (Optional) The number of nodes for the cluster.
     
 * `fixed_network` - (Optional) The fixed network that will be attached to the
