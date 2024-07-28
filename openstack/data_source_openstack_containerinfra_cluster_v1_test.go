@@ -15,6 +15,8 @@ func TestAccContainerInfraV1ClusterDataSource_basic(t *testing.T) {
 	clusterName := acctest.RandomWithPrefix("tf-acc-cluster")
 	keypairName := acctest.RandomWithPrefix("tf-acc-keypair")
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
+	floatingIPEnabledClusterTemplate := "true"
+	floatingIPEnabledCluster := "null"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -25,11 +27,11 @@ func TestAccContainerInfraV1ClusterDataSource_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, 1),
+				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, floatingIPEnabledClusterTemplate, floatingIPEnabledCluster, 1),
 			},
 			{
 				Config: testAccContainerInfraV1ClusterDataSourceBasic(
-					testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, 1),
+					testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, floatingIPEnabledClusterTemplate, floatingIPEnabledCluster, 1),
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1ClusterDataSourceID(resourceName),
@@ -55,7 +57,7 @@ func TestAccContainerInfraV1ClusterDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "master_addresses.#", strconv.Itoa(1)),
 					resource.TestCheckResourceAttr(resourceName, "node_addresses.#", strconv.Itoa(1)),
 					resource.TestCheckResourceAttrSet(resourceName, "stack_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "floating_ip_enabled"),
+					resource.TestCheckResourceAttr(resourceName, "floating_ip_enabled", "true"),
 					resource.TestCheckResourceAttrSet(resourceName, "kubeconfig"),
 				),
 			},

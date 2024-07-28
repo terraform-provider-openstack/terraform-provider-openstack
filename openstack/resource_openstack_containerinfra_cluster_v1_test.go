@@ -19,6 +19,8 @@ func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
 	clusterName := acctest.RandomWithPrefix("tf-acc-cluster")
 	keypairName := acctest.RandomWithPrefix("tf-acc-keypair")
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
+	floatingIPEnabledClusterTemplate := "true"
+	floatingIPEnabledCluster := "null"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -30,7 +32,7 @@ func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, 1),
+				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, floatingIPEnabledClusterTemplate, floatingIPEnabledCluster, 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1ClusterExists(resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "region", osRegionName),
@@ -64,7 +66,7 @@ func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, 2),
+				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, floatingIPEnabledClusterTemplate, floatingIPEnabledCluster, 2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerInfraV1ClusterExists(resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "region", osRegionName),
@@ -336,7 +338,7 @@ func testAccCheckContainerInfraV1ClusterDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName string, nodeCount int) string {
+func testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, floatingIPEnabledClusterTemplate, floatingIPEnabledCluster string, nodeCount int) string {
 	return fmt.Sprintf(`
 resource "openstack_compute_keypair_v2" "keypair_1" {
   name = "%s"
@@ -346,7 +348,7 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   name                  = "%s"
   image                 = "%s"
   coe                   = "kubernetes"
-  floating_ip_enabled   = false
+  floating_ip_enabled   = %s
   volume_driver         = "cinder"
   docker_storage_driver = "overlay2"
   docker_volume_size    = 5
@@ -373,9 +375,9 @@ resource "openstack_containerinfra_cluster_v1" "cluster_1" {
   keypair              = "${openstack_compute_keypair_v2.keypair_1.name}"
   master_count         = 1
   node_count           = %d
-  floating_ip_enabled  = true
+  floating_ip_enabled  = %s
 }
-`, keypairName, clusterTemplateName, osMagnumImage, osExtGwID, osMagnumHTTPProxy, osMagnumHTTPSProxy, osMagnumNoProxy, osMagnumLabels, osRegionName, clusterName, osMagnumFlavor, osMagnumFlavor, nodeCount)
+`, keypairName, clusterTemplateName, osMagnumImage, floatingIPEnabledClusterTemplate, osExtGwID, osMagnumHTTPProxy, osMagnumHTTPSProxy, osMagnumNoProxy, osMagnumLabels, osRegionName, clusterName, osMagnumFlavor, osMagnumFlavor, nodeCount, floatingIPEnabledCluster)
 }
 
 func testAccContainerInfraV1ClusterLabels(keypairName, clusterTemplateName, clusterName string, nodeCount int, mergeLabels bool) string {

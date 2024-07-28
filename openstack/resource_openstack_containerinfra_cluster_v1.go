@@ -243,9 +243,6 @@ func resourceContainerInfraClusterV1Create(ctx context.Context, d *schema.Resour
 		return diag.Errorf("Unable to determine openstack_containerinfra_cluster_v1 master_flavor")
 	}
 
-	// Get boolean parameters that will be passed by reference.
-	floatingIPEnabled := d.Get("floating_ip_enabled").(bool)
-
 	createOpts := clusters.CreateOpts{
 		ClusterTemplateID: d.Get("cluster_template_id").(string),
 		DiscoveryURL:      d.Get("discovery_url").(string),
@@ -256,7 +253,13 @@ func resourceContainerInfraClusterV1Create(ctx context.Context, d *schema.Resour
 		Name:              d.Get("name").(string),
 		FixedNetwork:      d.Get("fixed_network").(string),
 		FixedSubnet:       d.Get("fixed_subnet").(string),
-		FloatingIPEnabled: &floatingIPEnabled,
+	}
+
+	// Get boolean value if parameter was provided
+	if v, ok := getOkExists(d, "floating_ip_enabled"); ok {
+		if v, ok := v.(bool); ok {
+			createOpts.FloatingIPEnabled = &v
+		}
 	}
 
 	// Set int parameters that will be passed by reference.

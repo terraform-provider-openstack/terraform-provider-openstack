@@ -12,6 +12,8 @@ func TestAccContainerInfraV1ClusterImport_basic(t *testing.T) {
 	clusterName := acctest.RandomWithPrefix("tf-acc-cluster")
 	keypairName := acctest.RandomWithPrefix("tf-acc-keypair")
 	clusterTemplateName := acctest.RandomWithPrefix("tf-acc-clustertemplate")
+	floatingIPEnabledClusterTemplate := "true"
+	floatingIPEnabledCluster := "null"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -23,7 +25,7 @@ func TestAccContainerInfraV1ClusterImport_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, 1),
+				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, floatingIPEnabledClusterTemplate, floatingIPEnabledCluster, 1),
 			},
 			{
 				ResourceName:            resourceName,
