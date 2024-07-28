@@ -42,6 +42,8 @@ jobs:
           conf_overrides: |
             sudo apt-get autoremove python3-pexpect -y
             enable_plugin trove https://opendev.org/openstack/trove ${{ matrix.openstack_version }}
+            GLANCE_LIMIT_IMAGE_SIZE_TOTAL=5000
+            SWIFT_MAX_FILE_SIZE=5368709122
           enabled_services: 's-account,s-container,s-object,s-proxy'
       - name: Checkout go
         uses: actions/setup-go@v5
