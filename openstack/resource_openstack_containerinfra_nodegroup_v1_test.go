@@ -23,6 +23,7 @@ func TestAccContainerInfraV1NodeGroup_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
+			t.Skip("Currently failing in GH-A: cant deploy cluster")
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckContainerInfra(t)
@@ -87,6 +88,7 @@ func TestAccContainerInfraV1NodeGroup_mergeLabels(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
+			t.Skip("Currently failing in GH-A: cant deploy cluster")
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckContainerInfra(t)
@@ -153,6 +155,7 @@ func TestAccContainerInfraV1NodeGroup_overrideLabels(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
+			t.Skip("Currently failing in GH-A: cant deploy cluster")
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckContainerInfra(t)

@@ -37,6 +37,8 @@ echo export OS_FLAVOR_ID=99 >> openrc
 echo export OS_FLAVOR_ID_RESIZE=98 >> openrc
 echo export OS_DOMAIN_ID=default >> openrc
 echo export OS_MAGNUM_IMAGE_ID="$_MAGNUM_IMAGE_ID" >> openrc
+echo export OS_MAGNUM_IMAGE="$_MAGNUM_IMAGE_ID" >> openrc
+echo export OS_MAGNUM_FLAVOR=99 >> openrc
 echo export OS_MAGNUM_KEYPAIR=magnum >> openrc
 
 source openrc $1 $1
