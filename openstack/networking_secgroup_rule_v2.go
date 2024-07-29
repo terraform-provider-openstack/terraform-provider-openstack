@@ -25,79 +25,65 @@ func resourceNetworkingSecGroupRuleV2StateRefreshFunc(client *gophercloud.Servic
 	}
 }
 
-func resourceNetworkingSecGroupRuleV2Direction(direction string) (rules.RuleDirection, error) {
-	switch direction {
-	case string(rules.DirIngress):
-		return rules.DirIngress, nil
-	case string(rules.DirEgress):
-		return rules.DirEgress, nil
+func resourceNetworkingSecGroupRuleV2Direction(v interface{}, k string) ([]string, []error) {
+	switch rules.RuleDirection(v.(string)) {
+	case rules.DirIngress:
+		return nil, nil
+	case rules.DirEgress:
+		return nil, nil
 	}
 
-	return "", fmt.Errorf("unknown direction for openstack_networking_secgroup_rule_v2: %s", direction)
+	return nil, []error{fmt.Errorf("unknown %q %s for openstack_networking_secgroup_rule_v2", v, k)}
 }
 
-func resourceNetworkingSecGroupRuleV2EtherType(etherType string) (rules.RuleEtherType, error) {
-	switch etherType {
-	case string(rules.EtherType4):
-		return rules.EtherType4, nil
-	case string(rules.EtherType6):
-		return rules.EtherType6, nil
+func resourceNetworkingSecGroupRuleV2EtherType(v interface{}, k string) ([]string, []error) {
+	switch rules.RuleEtherType(v.(string)) {
+	case rules.EtherType4:
+		return nil, nil
+	case rules.EtherType6:
+		return nil, nil
 	}
 
-	return "", fmt.Errorf("unknown ether type for openstack_networking_secgroup_rule_v2: %s", etherType)
+	return nil, []error{fmt.Errorf("unknown %q %s for openstack_networking_secgroup_rule_v2s", v, k)}
 }
 
-func resourceNetworkingSecGroupRuleV2Protocol(protocol string) (rules.RuleProtocol, error) {
-	switch protocol {
-	case string(rules.ProtocolAH):
-		return rules.ProtocolAH, nil
-	case string(rules.ProtocolDCCP):
-		return rules.ProtocolDCCP, nil
-	case string(rules.ProtocolEGP):
-		return rules.ProtocolEGP, nil
-	case string(rules.ProtocolESP):
-		return rules.ProtocolESP, nil
-	case string(rules.ProtocolGRE):
-		return rules.ProtocolGRE, nil
-	case string(rules.ProtocolICMP):
-		return rules.ProtocolICMP, nil
-	case string(rules.ProtocolIGMP):
-		return rules.ProtocolIGMP, nil
-	case string(rules.ProtocolIPv6Encap):
-		return rules.ProtocolIPv6Encap, nil
-	case string(rules.ProtocolIPv6Frag):
-		return rules.ProtocolIPv6Frag, nil
-	case string(rules.ProtocolIPv6ICMP):
-		return rules.ProtocolIPv6ICMP, nil
-	case string(rules.ProtocolIPv6NoNxt):
-		return rules.ProtocolIPv6NoNxt, nil
-	case string(rules.ProtocolIPv6Opts):
-		return rules.ProtocolIPv6Opts, nil
-	case string(rules.ProtocolIPv6Route):
-		return rules.ProtocolIPv6Route, nil
-	case string(rules.ProtocolOSPF):
-		return rules.ProtocolOSPF, nil
-	case string(rules.ProtocolPGM):
-		return rules.ProtocolPGM, nil
-	case string(rules.ProtocolRSVP):
-		return rules.ProtocolRSVP, nil
-	case string(rules.ProtocolSCTP):
-		return rules.ProtocolSCTP, nil
-	case string(rules.ProtocolTCP):
-		return rules.ProtocolTCP, nil
-	case string(rules.ProtocolUDP):
-		return rules.ProtocolUDP, nil
-	case string(rules.ProtocolUDPLite):
-		return rules.ProtocolUDPLite, nil
-	case string(rules.ProtocolVRRP):
-		return rules.ProtocolVRRP, nil
+func resourceNetworkingSecGroupRuleV2Protocol(v interface{}, k string) ([]string, []error) {
+	//nolint:exhaustive // we need to override the rules.ProtocolAny case with an empty string
+	switch rules.RuleProtocol(v.(string)) {
+	case rules.ProtocolAH,
+		rules.ProtocolDCCP,
+		rules.ProtocolEGP,
+		rules.ProtocolESP,
+		rules.ProtocolGRE,
+		rules.ProtocolICMP,
+		rules.ProtocolIGMP,
+		rules.ProtocolIPv6Encap,
+		rules.ProtocolIPv6Frag,
+		rules.ProtocolIPv6ICMP,
+		rules.ProtocolIPv6NoNxt,
+		rules.ProtocolIPv6Opts,
+		rules.ProtocolIPv6Route,
+		rules.ProtocolOSPF,
+		rules.ProtocolPGM,
+		rules.ProtocolRSVP,
+		rules.ProtocolSCTP,
+		rules.ProtocolTCP,
+		rules.ProtocolUDP,
+		rules.ProtocolUDPLite,
+		rules.ProtocolVRRP,
+		rules.ProtocolIPIP,
+		"": // rules.ProtocolAny
+		return nil, nil
 	}
 
 	// If the protocol wasn't matched above, see if it's an integer.
-	_, err := strconv.Atoi(protocol)
-	if err == nil {
-		return rules.RuleProtocol(protocol), nil
+	p, err := strconv.Atoi(v.(string))
+	if err != nil {
+		return nil, []error{fmt.Errorf("unknown %q %s for openstack_networking_secgroup_rule_v2: %s", v, k, err)}
+	}
+	if p < 0 || p > 255 {
+		return nil, []error{fmt.Errorf("unknown %q %s for openstack_networking_secgroup_rule_v2", v, k)}
 	}
 
-	return "", fmt.Errorf("unknown protocol for openstack_networking_secgroup_rule_v2: %s", protocol)
+	return nil, nil
 }
