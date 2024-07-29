@@ -7,7 +7,7 @@ pushd $DEVSTACK_PATH
 source openrc admin admin
 openstack flavor create m1.acctest --id 99 --ram 512 --disk 10 --vcpu 1 --ephemeral 10
 openstack flavor create m1.resize --id 98 --ram 512 --disk 11 --vcpu 1 --ephemeral 10
-openstack flavor create m1.trove --id 97 --ram 1024 --disk 20 --vcpu 1
+openstack flavor create m1.trove --id 97 --ram 512 --disk 10 --vcpu 1
 openstack keypair create magnum
 
 _NETWORK_ID=$(openstack network show private -c id -f value)
