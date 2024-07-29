@@ -31,6 +31,14 @@ const (
 	containerInfraV1ZeroNodeCountMicroversion     = "1.10"
 )
 
+// clusterExt is a struct that embeds the Cluster struct from the containerinfra
+// package, and adds a boolean field to indicate whether the cluster has a
+// master load balancer enabled.
+type clusterExt struct {
+	clusters.Cluster
+	MasterLBEnabled bool `json:"master_lb_enabled"`
+}
+
 func expandContainerInfraV1LabelsMap(v map[string]interface{}) (map[string]string, error) {
 	m := make(map[string]string)
 	for key, val := range v {

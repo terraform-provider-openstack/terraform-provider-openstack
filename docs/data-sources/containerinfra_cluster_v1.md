@@ -69,6 +69,9 @@ attributes are exported:
 
 * `master_count` - The number of master nodes for the cluster.
 
+* `master_lb_enabled` - Whether a load balancer is created for the master
+  cluster nodes.
+
 * `node_count` - The number of nodes for the cluster.
 
 * `fixed_network` - The fixed network that is attached to the cluster.
