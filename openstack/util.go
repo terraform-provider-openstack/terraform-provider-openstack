@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"reflect"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -336,4 +338,47 @@ func getOkExists(d *schema.ResourceData, key string) (interface{}, bool) {
 		return nil, false
 	}
 	return d.Get(key), true
+}
+
+// suppressEquivalentNestedParametersDiff is a helper function that compares 
+// old parameter values for Orchestrations, checks if a given old/new value
+// looks like a JSON blob, and if so, does a more correct comparison.
+// Gets run for each value in the TypeMap.
+func suppressEquivalentNestedParametersDiff(key, oldValue, newValue string, d *schema.ResourceData) bool {
+	if strings.Compare(oldValue, newValue) == 0 {
+		// Strings are identical
+		return true
+	}
+	
+	// an empty string and {} are JSON-equivalent.
+	if strings.Compare(oldValue, "") == 0 && strings.Compare(newValue, "{}") == 0 {
+		return true
+	}
+	
+	if strings.Compare(newValue, "") == 0 && strings.Compare(oldValue, "{}") == 0 {
+		return true
+	}
+	
+	// Do the strings look like JSON?
+	var oldJson map[string]interface{}
+	var newJson map[string]interface{}
+	
+	oldErr := json.Unmarshal([]byte(oldValue), &oldJson)
+	// not checking the error yet, since we want to try to unmarshal the new one
+	// first.
+	newErr := json.Unmarshal([]byte(newValue), &newJson)
+	
+	if oldErr == nil && newErr != nil {
+		return false
+	}
+	if oldErr != nil && newErr == nil {
+		return false
+	}
+	if oldErr != nil && newErr != nil {
+		// Well that's odd, and is an error.
+		log.Printf("[INFO] openstack_orchestration_stack_v1 %s different strings, not JSON.", d.Id())
+		return false
+	}
+	
+	return reflect.DeepEqual(oldJson, newJson)
 }
