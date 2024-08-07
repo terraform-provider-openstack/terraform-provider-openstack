@@ -360,13 +360,13 @@ func suppressEquivalentNestedParametersDiff(key, oldValue, newValue string, d *s
 	}
 	
 	// Do the strings look like JSON?
-	var oldJson map[string]interface{}
-	var newJson map[string]interface{}
+	var oldJSON map[string]interface{}
+	var newJSON map[string]interface{}
 	
-	oldErr := json.Unmarshal([]byte(oldValue), &oldJson)
+	oldErr := json.Unmarshal([]byte(oldValue), &oldJSON)
 	// not checking the error yet, since we want to try to unmarshal the new one
 	// first.
-	newErr := json.Unmarshal([]byte(newValue), &newJson)
+	newErr := json.Unmarshal([]byte(newValue), &newJSON)
 	
 	if oldErr == nil && newErr != nil {
 		return false
