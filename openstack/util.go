@@ -380,5 +380,5 @@ func suppressEquivalentNestedParametersDiff(key, oldValue, newValue string, d *s
 		return false
 	}
 	
-	return reflect.DeepEqual(oldJson, newJson)
+	return reflect.DeepEqual(oldJSON, newJSON)
 }
