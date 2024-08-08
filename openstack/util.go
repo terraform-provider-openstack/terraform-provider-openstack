@@ -2,8 +2,8 @@ package openstack
 
 import (
 	"encoding/json"
-	"log"
 	"fmt"
+	"log"
 	"reflect"
 	"strconv"
 	"strings"
