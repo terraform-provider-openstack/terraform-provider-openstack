@@ -2,12 +2,12 @@ package openstack
 
 import (
 	"encoding/json"
+	"log"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
-	"reflect"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
