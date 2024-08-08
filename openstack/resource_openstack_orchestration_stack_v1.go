@@ -58,11 +58,11 @@ func resourceOrchestrationStackV1() *schema.Resource {
 			},
 
 			"parameters": {
-				Type:     							schema.TypeMap,
-				Optional: 							true,
-				Computed: 							true,
-				DiffSuppressOnRefresh: 	true,
-				DiffSuppressFunc: 			suppressEquivalentNestedParametersDiff,
+				Type:                  schema.TypeMap,
+				Optional:              true,
+				Computed:              true,
+				DiffSuppressOnRefresh: true,
+				DiffSuppressFunc:      suppressEquivalentNestedParametersDiff,
 			},
 
 			"timeout": {
