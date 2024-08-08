@@ -3,6 +3,8 @@ package openstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -336,4 +338,47 @@ func getOkExists(d *schema.ResourceData, key string) (interface{}, bool) {
 		return nil, false
 	}
 	return d.Get(key), true
+}
+
+// suppressEquivalentNestedParametersDiff is a helper function that compares
+// old parameter values for Orchestrations, checks if a given old/new value
+// looks like a JSON blob, and if so, does a more correct comparison.
+// Gets run for each value in the TypeMap.
+func suppressEquivalentNestedParametersDiff(key, oldValue, newValue string, d *schema.ResourceData) bool {
+	if strings.Compare(oldValue, newValue) == 0 {
+		// Strings are identical
+		return true
+	}
+
+	// an empty string and {} are JSON-equivalent.
+	if strings.Compare(oldValue, "") == 0 && strings.Compare(newValue, "{}") == 0 {
+		return true
+	}
+
+	if strings.Compare(newValue, "") == 0 && strings.Compare(oldValue, "{}") == 0 {
+		return true
+	}
+
+	// Do the strings look like JSON?
+	var oldJSON map[string]interface{}
+	var newJSON map[string]interface{}
+
+	oldErr := json.Unmarshal([]byte(oldValue), &oldJSON)
+	// not checking the error yet, since we want to try to unmarshal the new one
+	// first.
+	newErr := json.Unmarshal([]byte(newValue), &newJSON)
+
+	if oldErr == nil && newErr != nil {
+		return false
+	}
+	if oldErr != nil && newErr == nil {
+		return false
+	}
+	if oldErr != nil && newErr != nil {
+		// Well that's odd, and is an error.
+		log.Printf("[INFO] openstack_orchestration_stack_v1 %s different strings, not JSON.", d.Id())
+		return false
+	}
+
+	return reflect.DeepEqual(oldJSON, newJSON)
 }
