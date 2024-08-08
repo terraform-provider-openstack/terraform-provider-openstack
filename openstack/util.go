@@ -340,7 +340,7 @@ func getOkExists(d *schema.ResourceData, key string) (interface{}, bool) {
 	return d.Get(key), true
 }
 
-// suppressEquivalentNestedParametersDiff is a helper function that compares 
+// suppressEquivalentNestedParametersDiff is a helper function that compares
 // old parameter values for Orchestrations, checks if a given old/new value
 // looks like a JSON blob, and if so, does a more correct comparison.
 // Gets run for each value in the TypeMap.
