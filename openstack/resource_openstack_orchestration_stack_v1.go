@@ -406,4 +406,3 @@ func resourceOrchestrationStackV1Delete(ctx context.Context, d *schema.ResourceD
 	log.Printf("[INFO] openstack_orchestration_stack_v1 %s delete complete", d.Id())
 	return nil
 }
-
