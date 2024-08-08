@@ -349,25 +349,25 @@ func suppressEquivalentNestedParametersDiff(key, oldValue, newValue string, d *s
 		// Strings are identical
 		return true
 	}
-	
+
 	// an empty string and {} are JSON-equivalent.
 	if strings.Compare(oldValue, "") == 0 && strings.Compare(newValue, "{}") == 0 {
 		return true
 	}
-	
+
 	if strings.Compare(newValue, "") == 0 && strings.Compare(oldValue, "{}") == 0 {
 		return true
 	}
-	
+
 	// Do the strings look like JSON?
 	var oldJSON map[string]interface{}
 	var newJSON map[string]interface{}
-	
+
 	oldErr := json.Unmarshal([]byte(oldValue), &oldJSON)
 	// not checking the error yet, since we want to try to unmarshal the new one
 	// first.
 	newErr := json.Unmarshal([]byte(newValue), &newJSON)
-	
+
 	if oldErr == nil && newErr != nil {
 		return false
 	}
@@ -379,6 +379,6 @@ func suppressEquivalentNestedParametersDiff(key, oldValue, newValue string, d *s
 		log.Printf("[INFO] openstack_orchestration_stack_v1 %s different strings, not JSON.", d.Id())
 		return false
 	}
-	
+
 	return reflect.DeepEqual(oldJSON, newJSON)
 }
