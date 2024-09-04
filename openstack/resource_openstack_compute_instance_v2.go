@@ -22,6 +22,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/pauseunpause"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/schedulerhints"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/shelveunshelve"
@@ -370,7 +371,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 				ForceNew: false,
 				Default:  "active",
 				ValidateFunc: validation.StringInSlice([]string{
-					"active", "shutoff", "shelved_offloaded",
+					"active", "shutoff", "shelved_offloaded", "paused",
 				}, true),
 				DiffSuppressFunc: suppressPowerStateDiffs,
 			},
@@ -761,7 +762,7 @@ func resourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, me
 	// Set the current power_state
 	currentStatus := strings.ToLower(server.Status)
 	switch currentStatus {
-	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved", "build":
+	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved", "build", "paused":
 		d.Set("power_state", currentStatus)
 	default:
 		return diag.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
@@ -822,6 +823,26 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				return diag.Errorf("Error waiting for instance (%s) to become shelve: %s", d.Id(), err)
 			}
 		}
+		if strings.ToLower(powerStateNew) == "paused" {
+			err = pauseunpause.Pause(computeClient, d.Id()).ExtractErr()
+			if err != nil {
+				return diag.Errorf("Error pausing OpenStack instance: %s", err)
+			}
+			pauseStateConf := &retry.StateChangeConf{
+				//Pending:    []string{"ACTIVE"},
+				Target:     []string{"PAUSED"},
+				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
+
+			log.Printf("[DEBUG] Waiting for instance (%s) to pause", d.Id())
+			_, err = pauseStateConf.WaitForStateContext(ctx)
+			if err != nil {
+				return diag.Errorf("Error waiting for instance (%s) to become paused: %s", d.Id(), err)
+			}
+		}
 		if strings.ToLower(powerStateNew) == "shutoff" {
 			err = startstop.Stop(computeClient, d.Id()).ExtractErr()
 			if err != nil {
@@ -851,6 +872,11 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				if err != nil {
 					return diag.Errorf("Error unshelving OpenStack instance: %s", err)
 				}
+			} else if strings.ToLower(powerStateOld) == "paused" {
+				err = pauseunpause.Unpause(computeClient, d.Id()).ExtractErr()
+				if err != nil {
+					return diag.Errorf("Error resuming OpenStack instance: %s", err)
+				}
 			} else if strings.ToLower(powerStateOld) != "build" {
 				err = startstop.Start(computeClient, d.Id()).ExtractErr()
 				if err != nil {
@@ -866,7 +892,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				MinTimeout: 3 * time.Second,
 			}
 
-			log.Printf("[DEBUG] Waiting for instance (%s) to start/unshelve", d.Id())
+			log.Printf("[DEBUG] Waiting for instance (%s) to start/unshelve/resume", d.Id())
 			_, err = startStateConf.WaitForStateContext(ctx)
 			if err != nil {
 				return diag.Errorf("Error waiting for instance (%s) to become active: %s", d.Id(), err)
