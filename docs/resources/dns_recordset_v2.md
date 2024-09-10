@@ -49,7 +49,7 @@ The following arguments are supported:
   Changing this creates a new DNS  record set.
 
 * `project_id` - (Optional) The ID of the project DNS zone is created
-  for, sets `X-Auth-Sudo-Tenant-ID` header (requires an assigned 
+  for, sets `X-Auth-Sudo-Tenant-ID` header (requires an assigned
   user role in target project)
 
 * `type` - (Optional) The type of record set. Examples: "A", "MX".
@@ -83,9 +83,9 @@ The following attributes are exported:
 
 ## Import
 
-This resource can be imported by specifying the zone ID and recordset ID,
-separated by a forward slash.
+This resource can be imported by specifying the zone ID and recordset ID with an optional project ID as a prefix:
 
 ```
+$ terraform import openstack_dns_recordset_v2.recordset_1 project_id/zone_id/recordset_id
 $ terraform import openstack_dns_recordset_v2.recordset_1 zone_id/recordset_id
 ```
