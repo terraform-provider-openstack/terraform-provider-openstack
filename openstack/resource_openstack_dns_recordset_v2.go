@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -20,7 +21,7 @@ func resourceDNSRecordSetV2() *schema.Resource {
 		UpdateContext: resourceDNSRecordSetV2Update,
 		DeleteContext: resourceDNSRecordSetV2Delete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceDNSRecordSetV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -312,4 +313,15 @@ func resourceDNSRecordSetV2Delete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	return nil
+}
+
+func resourceDNSRecordSetV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) == 3 && parts[0] != "" && parts[1] != "" && parts[2] != "" {
+		d.SetId(fmt.Sprintf("%s/%s", parts[1], parts[2]))
+		d.Set("project_id", parts[0])
+	} else if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("unexpected format of ID (%s), expected <zone_id>/<recordset_id> or <project_id>/<zone_id>/<recordset_id>", d.Id())
+	}
+	return []*schema.ResourceData{d}, nil
 }
