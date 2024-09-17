@@ -129,7 +129,10 @@ func dataSourceIdentityProjectIdsV3Read(ctx context.Context, d *schema.ResourceD
 
 	nameRegex, nameRegexOk := d.GetOk("name_regex")
 	if nameRegexOk {
-		allProjects = projectsFilterByRegex(allProjects, nameRegex.(string))
+		allProjects, err = projectsFilterByRegex(allProjects, nameRegex.(string))
+		if err != nil {
+			return diag.Errorf("Error while compiling regex: %s", err)
+		}
 		log.Printf("[DEBUG] Project list filtered by regex: %s", d.Get("name_regex"))
 	}
 
@@ -146,9 +149,12 @@ func dataSourceIdentityProjectIdsV3Read(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func projectsFilterByRegex(projectArr []projects.Project, nameRegex string) []projects.Project {
+func projectsFilterByRegex(projectArr []projects.Project, nameRegex string) ([]projects.Project, error) {
 	var result []projects.Project
-	r := regexp.MustCompile(nameRegex)
+	r, err := regexp.Compile(nameRegex)
+	if err != nil {
+		return result, err
+	}
 
 	for _, project := range projectArr {
 		if r.MatchString(project.Name) {
@@ -156,5 +162,5 @@ func projectsFilterByRegex(projectArr []projects.Project, nameRegex string) []pr
 		}
 	}
 
-	return result
+	return result, err
 }
