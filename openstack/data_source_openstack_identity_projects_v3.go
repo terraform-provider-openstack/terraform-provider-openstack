@@ -125,7 +125,7 @@ func dataSourceIdentityProjectIdsV3Read(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("Unable to retrieve projects in openstack_identity_project_ids_v3: %s", err)
 	}
 
-	log.Printf("[DEBUG] Retrieved %d images in openstack_identity_project_ids_v3: %+v", len(allProjects), allProjects)
+	log.Printf("[DEBUG] Retrieved %d projects in openstack_identity_project_ids_v3: %+v", len(allProjects), allProjects)
 
 	nameRegex, nameRegexOk := d.GetOk("name_regex")
 	if nameRegexOk {
@@ -139,8 +139,8 @@ func dataSourceIdentityProjectIdsV3Read(ctx context.Context, d *schema.ResourceD
 	log.Printf("[DEBUG] Got %d projects after filtering in openstack_identity_project_ids_v3: %+v", len(allProjects), allProjects)
 
 	projectIDs := make([]string, len(allProjects))
-	for i, image := range allProjects {
-		projectIDs[i] = image.ID
+	for i, project := range allProjects {
+		projectIDs[i] = project.ID
 	}
 
 	d.SetId(fmt.Sprintf("%d", hashcode.String(strings.Join(projectIDs, ","))))
