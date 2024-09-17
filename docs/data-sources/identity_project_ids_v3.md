@@ -12,6 +12,9 @@ description: |-
 Use this data source to get a list of OpenStack Project IDs matching the
 specified criteria.
 
+~> **Note:** You _must_ have domain admin or cloud admin privileges in your OpenStack cloud to use
+this datasource.
+
 ## Example Usage
 
 ```hcl
