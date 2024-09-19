@@ -19,16 +19,16 @@ func TestAccOpenStackIdentityProjectIDsV3DataSource_basic(t *testing.T) {
 				Config: testAccOpenStackIdentityProjectIDsV3DataSourceEmpty(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"data.openstack_identity_project_ids_v2.projects_empty", "ids.#", "0"),
+						"data.openstack_identity_project_ids_v3.projects_empty", "ids.#", "0"),
 				),
 			},
 			{
 				Config: testAccOpenStackIdentityProjectIDsV3DataSourceName(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"data.openstack_identity_project_ids_v2.projects_by_name", "ids.#", "1"),
+						"data.openstack_identity_project_ids_v3.projects_by_name", "ids.#", "1"),
 					resource.TestCheckResourceAttrPair(
-						"data.openstack_identity_project_ids_v2.projects_by_name", "ids.0",
+						"data.openstack_identity_project_ids_v3.projects_by_name", "ids.0",
 						"openstack_identity_project_v3.project_1", "id"),
 				),
 			},
@@ -36,9 +36,9 @@ func TestAccOpenStackIdentityProjectIDsV3DataSource_basic(t *testing.T) {
 				Config: testAccOpenStackIdentityProjectIDsV3DataSourceRegex(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"data.openstack_identity_project_ids_v2.projects_by_name_regex", "ids.#", "2"),
+						"data.openstack_identity_project_ids_v3.projects_by_name_regex", "ids.#", "2"),
 					resource.TestCheckResourceAttrPair(
-						"data.openstack_identity_project_ids_v2.projects_by_name_regex", "ids.0",
+						"data.openstack_identity_project_ids_v3.projects_by_name_regex", "ids.0",
 						"openstack_identity_project_v3.project_2", "id"),
 				),
 			},
@@ -46,7 +46,7 @@ func TestAccOpenStackIdentityProjectIDsV3DataSource_basic(t *testing.T) {
 				Config: testAccOpenStackIdentityProjectIDsV3DataSourceTags(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"data.openstack_identity_project_ids_v2.projects_by_tag", "ids.#", "2"),
+						"data.openstack_identity_project_ids_v3.projects_by_tag", "ids.#", "2"),
 				),
 			},
 		},
