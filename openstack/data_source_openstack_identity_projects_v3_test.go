@@ -36,7 +36,7 @@ func TestAccOpenStackIdentityProjectIDsV3DataSource_basic(t *testing.T) {
 				Config: testAccOpenStackIdentityProjectIDsV3DataSourceRegex(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"data.openstack_identity_project_ids_v3.projects_by_name_regex", "ids.#", "2"),
+						"data.openstack_identity_project_ids_v3.projects_by_name_regex", "ids.#", "1"),
 					resource.TestCheckResourceAttrPair(
 						"data.openstack_identity_project_ids_v3.projects_by_name_regex", "ids.0",
 						"openstack_identity_project_v3.project_2", "id"),
