@@ -206,6 +206,17 @@ func resourceIdentityProjectV3Delete(ctx context.Context, d *schema.ResourceData
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
+	if d.Get("is_domain").(bool) {
+		log.Printf("[DEBUG] openstack_identity_project_v3 %s is domain, disabling", d.Id())
+		updateOpts := projects.UpdateOpts{
+			Enabled: new(bool),
+		}
+		_, err := projects.Update(identityClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return diag.Errorf("Error disabling domain openstack_identity_project_v3 %s: %s", d.Id(), err)
+		}
+	}
+
 	err = projects.Delete(identityClient, d.Id()).ExtractErr()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_identity_project_v3"))
