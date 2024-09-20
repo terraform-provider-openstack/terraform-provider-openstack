@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -21,6 +22,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/extendedstatus"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/pauseunpause"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/schedulerhints"
@@ -34,6 +36,7 @@ import (
 	flavorsutils "github.com/gophercloud/utils/openstack/compute/v2/flavors"
 	imagesutils "github.com/gophercloud/utils/openstack/imageservice/v2/images"
 	"github.com/gophercloud/utils/terraform/hashcode"
+	"github.com/gophercloud/utils/terraform/mutexkv"
 )
 
 func resourceComputeInstanceV2() *schema.Resource {
@@ -375,6 +378,11 @@ func resourceComputeInstanceV2() *schema.Resource {
 				}, true),
 				DiffSuppressFunc: suppressPowerStateDiffs,
 			},
+			"task_states_unlock": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -572,6 +580,11 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
+	stateCheckFunc, unlock := serverV2TaskStateCheckFunc(d, config.MutexKV)
+	if unlock != nil {
+		defer unlock()
+	}
+
 	// If a block_device is used, use the bootfromvolume.Create function as it allows an empty ImageRef.
 	// Otherwise, use the normal servers.Create function.
 	var server *servers.Server
@@ -598,7 +611,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"BUILD"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    ServerV2StateRefreshFunc(computeClient, server.ID),
+		Refresh:    serverV2StatusRefreshFunc(computeClient, server.ID, stateCheckFunc),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -628,7 +641,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		stopStateConf := &retry.StateChangeConf{
 			//Pending:    []string{"ACTIVE"},
 			Target:     []string{"SHUTOFF"},
-			Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+			Refresh:    serverV2StatusRefreshFunc(computeClient, d.Id(), nil),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			Delay:      10 * time.Second,
 			MinTimeout: 3 * time.Second,
@@ -811,7 +824,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			shelveStateConf := &retry.StateChangeConf{
 				//Pending:    []string{"ACTIVE"},
 				Target:     []string{"SHELVED_OFFLOADED"},
-				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Refresh:    serverV2StatusRefreshFunc(computeClient, d.Id(), nil),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
 				Delay:      10 * time.Second,
 				MinTimeout: 3 * time.Second,
@@ -851,7 +864,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			stopStateConf := &retry.StateChangeConf{
 				//Pending:    []string{"ACTIVE"},
 				Target:     []string{"SHUTOFF"},
-				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Refresh:    serverV2StatusRefreshFunc(computeClient, d.Id(), nil),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
 				Delay:      10 * time.Second,
 				MinTimeout: 3 * time.Second,
@@ -886,7 +899,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			startStateConf := &retry.StateChangeConf{
 				//Pending:    []string{"SHUTOFF"},
 				Target:     []string{"ACTIVE"},
-				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Refresh:    serverV2StatusRefreshFunc(computeClient, d.Id(), nil),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
 				Delay:      10 * time.Second,
 				MinTimeout: 3 * time.Second,
@@ -1000,6 +1013,11 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			}
 		}
 
+		stateCheckFunc, unlock := serverV2TaskStateCheckFunc(d, config.MutexKV)
+		if unlock != nil {
+			defer unlock()
+		}
+
 		resizeOpts := &servers.ResizeOpts{
 			FlavorRef: newFlavorID,
 		}
@@ -1017,7 +1035,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			stateConf := &retry.StateChangeConf{
 				Pending:    []string{"RESIZE", "VERIFY_RESIZE"},
 				Target:     []string{"ACTIVE", "SHUTOFF"},
-				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Refresh:    serverV2StatusRefreshFunc(computeClient, d.Id(), stateCheckFunc),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
 				Delay:      10 * time.Second,
 				MinTimeout: 3 * time.Second,
@@ -1031,7 +1049,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			stateConf := &retry.StateChangeConf{
 				Pending:    []string{"RESIZE"},
 				Target:     []string{"VERIFY_RESIZE"},
-				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Refresh:    serverV2StatusRefreshFunc(computeClient, d.Id(), stateCheckFunc),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
 				Delay:      10 * time.Second,
 				MinTimeout: 3 * time.Second,
@@ -1052,7 +1070,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			stateConf = &retry.StateChangeConf{
 				Pending:    []string{"VERIFY_RESIZE"},
 				Target:     []string{"ACTIVE", "SHUTOFF"},
-				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Refresh:    serverV2StatusRefreshFunc(computeClient, d.Id(), stateCheckFunc),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
 				Delay:      10 * time.Second,
 				MinTimeout: 3 * time.Second,
@@ -1062,6 +1080,10 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			if err != nil {
 				return diag.Errorf("Error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
 			}
+		}
+
+		if unlock != nil {
+			unlock()
 		}
 	}
 
@@ -1092,6 +1114,11 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			Personality: resourceInstancePersonalityV2(d),
 		}
 
+		stateCheckFunc, unlock := serverV2TaskStateCheckFunc(d, config.MutexKV)
+		if unlock != nil {
+			defer unlock()
+		}
+
 		log.Printf("[DEBUG] Rebuild configuration: %#v", rebuildOpts)
 		_, err = servers.Rebuild(computeClient, d.Id(), rebuildOpts).Extract()
 		if err != nil {
@@ -1100,7 +1127,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"REBUILD"},
 			Target:     []string{"ACTIVE", "SHUTOFF"},
-			Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+			Refresh:    serverV2StatusRefreshFunc(computeClient, d.Id(), stateCheckFunc),
 			Timeout:    d.Timeout(schema.TimeoutUpdate),
 			Delay:      10 * time.Second,
 			MinTimeout: 3 * time.Second,
@@ -1108,6 +1135,10 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return diag.Errorf("Error waiting for instance (%s) to rebuild: %s", d.Id(), err)
+		}
+
+		if unlock != nil {
+			unlock()
 		}
 	}
 
@@ -1141,7 +1172,7 @@ func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData
 			stopStateConf := &retry.StateChangeConf{
 				Pending:    []string{"ACTIVE"},
 				Target:     []string{"SHUTOFF"},
-				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+				Refresh:    serverV2StatusRefreshFunc(computeClient, d.Id(), nil),
 				Timeout:    d.Timeout(schema.TimeoutDelete),
 				Delay:      10 * time.Second,
 				MinTimeout: 3 * time.Second,
@@ -1201,7 +1232,7 @@ func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE", "SHUTOFF"},
 		Target:     []string{"DELETED", "SOFT_DELETED"},
-		Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+		Refresh:    serverV2StatusRefreshFunc(computeClient, d.Id(), nil),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -1331,11 +1362,16 @@ func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schem
 	return results, nil
 }
 
-// ServerV2StateRefreshFunc returns a retry.StateRefreshFunc that is used to watch
-// an OpenStack instance.
-func ServerV2StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string) retry.StateRefreshFunc {
+// serverV2StatusRefreshFunc returns a resource.StateRefreshFunc that is used
+// to watch an OpenStack instance.
+func serverV2StatusRefreshFunc(client *gophercloud.ServiceClient, instanceID string, stateCheckFunc func(string)) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		s, err := servers.Get(client, instanceID).Extract()
+		type serverStatus struct {
+			servers.Server
+			extendedstatus.ServerExtendedStatusExt
+		}
+		var s serverStatus
+		err := servers.Get(client, instanceID).ExtractInto(&s)
 		if err != nil {
 			if _, ok := err.(gophercloud.ErrDefault404); ok {
 				return s, "DELETED", nil
@@ -1343,8 +1379,39 @@ func ServerV2StateRefreshFunc(client *gophercloud.ServiceClient, instanceID stri
 			return nil, "", err
 		}
 
+		if stateCheckFunc != nil {
+			stateCheckFunc(s.TaskState)
+		}
+
 		return s, s.Status, nil
 	}
+}
+
+// serverV2TaskStateCheckFunc returns two functions: one to check the state of the
+// server and another to unlock the mutex that locks the next server to be
+// created or modified.
+func serverV2TaskStateCheckFunc(d *schema.ResourceData, mutexkv *mutexkv.MutexKV) (func(string), func()) {
+	v, ok := d.GetOk("task_states_unlock")
+	if !ok {
+		return nil, nil
+	}
+	states := v.([]interface{})
+	if len(states) == 0 {
+		return nil, nil
+	}
+
+	expectedStates := expandToStringSlice(states)
+	key := "compute-" + strings.Join(expectedStates, "-")
+	mutexkv.Lock(key)
+
+	var once sync.Once
+	unlockOnce := func() { once.Do(func() { mutexkv.Unlock(key) }) }
+
+	return func(state string) {
+		if strSliceContains(expectedStates, state) {
+			unlockOnce()
+		}
+	}, unlockOnce
 }
 
 func resourceInstanceSecGroupsV2(d *schema.ResourceData) []string {
