@@ -208,10 +208,9 @@ func resourceIdentityProjectV3Delete(ctx context.Context, d *schema.ResourceData
 
 	if d.Get("is_domain").(bool) {
 		log.Printf("[DEBUG] openstack_identity_project_v3 %s is domain, disabling", d.Id())
-		var updateOpts projects.UpdateOpts
-		disable := false
-		updateOpts.Enabled = &disable
-
+		updateOpts := projects.UpdateOpts{
+			Enabled: new(bool),
+		}
 		_, err := projects.Update(identityClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error disabling domain openstack_identity_project_v3 %s: %s", d.Id(), err)
