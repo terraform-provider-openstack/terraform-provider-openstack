@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets"
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/recordsets"
 )
 
 func resourceDNSRecordSetV2() *schema.Resource {
@@ -101,12 +101,12 @@ func resourceDNSRecordSetV2() *schema.Resource {
 
 func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
+	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
-	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
+	if err := dnsClientSetAuthHeader(ctx, d, dnsClient); err != nil {
 		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
@@ -131,7 +131,7 @@ func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("[DEBUG] openstack_dns_recordset_v2 create options: %#v", createOpts)
 
 	zoneID := d.Get("zone_id").(string)
-	n, err := recordsets.Create(dnsClient, zoneID, createOpts).Extract()
+	n, err := recordsets.Create(ctx, dnsClient, zoneID, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_dns_recordset_v2: %s", err)
 	}
@@ -140,7 +140,7 @@ func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, m
 		stateConf := &retry.StateChangeConf{
 			Target:     []string{"ACTIVE"},
 			Pending:    []string{"PENDING"},
-			Refresh:    dnsRecordSetV2RefreshFunc(dnsClient, zoneID, n.ID),
+			Refresh:    dnsRecordSetV2RefreshFunc(ctx, dnsClient, zoneID, n.ID),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			Delay:      5 * time.Second,
 			MinTimeout: 3 * time.Second,
@@ -159,14 +159,14 @@ func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, m
 	return resourceDNSRecordSetV2Read(ctx, d, meta)
 }
 
-func resourceDNSRecordSetV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSRecordSetV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
+	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
-	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
+	if err := dnsClientSetAuthHeader(ctx, d, dnsClient); err != nil {
 		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
@@ -176,7 +176,7 @@ func resourceDNSRecordSetV2Read(_ context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 
-	n, err := recordsets.Get(dnsClient, zoneID, recordsetID).Extract()
+	n, err := recordsets.Get(ctx, dnsClient, zoneID, recordsetID).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_dns_recordset_v2"))
 	}
@@ -201,12 +201,12 @@ func resourceDNSRecordSetV2Read(_ context.Context, d *schema.ResourceData, meta 
 
 func resourceDNSRecordSetV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
+	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
-	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
+	if err := dnsClientSetAuthHeader(ctx, d, dnsClient); err != nil {
 		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
@@ -248,7 +248,7 @@ func resourceDNSRecordSetV2Update(ctx context.Context, d *schema.ResourceData, m
 
 	log.Printf("[DEBUG] Updating openstack_dns_recordset_v2 %s with options: %#v", recordsetID, updateOpts)
 
-	_, err = recordsets.Update(dnsClient, zoneID, recordsetID, updateOpts).Extract()
+	_, err = recordsets.Update(ctx, dnsClient, zoneID, recordsetID, updateOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error updating openstack_dns_recordset_v2 %s: %s", d.Id(), err)
 	}
@@ -257,7 +257,7 @@ func resourceDNSRecordSetV2Update(ctx context.Context, d *schema.ResourceData, m
 		stateConf := &retry.StateChangeConf{
 			Target:     []string{"ACTIVE"},
 			Pending:    []string{"PENDING"},
-			Refresh:    dnsRecordSetV2RefreshFunc(dnsClient, zoneID, recordsetID),
+			Refresh:    dnsRecordSetV2RefreshFunc(ctx, dnsClient, zoneID, recordsetID),
 			Timeout:    d.Timeout(schema.TimeoutUpdate),
 			Delay:      5 * time.Second,
 			MinTimeout: 3 * time.Second,
@@ -275,12 +275,12 @@ func resourceDNSRecordSetV2Update(ctx context.Context, d *schema.ResourceData, m
 
 func resourceDNSRecordSetV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
+	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
-	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
+	if err := dnsClientSetAuthHeader(ctx, d, dnsClient); err != nil {
 		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
 
@@ -290,7 +290,7 @@ func resourceDNSRecordSetV2Delete(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	err = recordsets.Delete(dnsClient, zoneID, recordsetID).ExtractErr()
+	err = recordsets.Delete(ctx, dnsClient, zoneID, recordsetID).ExtractErr()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_dns_recordset_v2"))
 	}
@@ -299,7 +299,7 @@ func resourceDNSRecordSetV2Delete(ctx context.Context, d *schema.ResourceData, m
 		stateConf := &retry.StateChangeConf{
 			Target:     []string{"DELETED"},
 			Pending:    []string{"ACTIVE", "PENDING"},
-			Refresh:    dnsRecordSetV2RefreshFunc(dnsClient, zoneID, recordsetID),
+			Refresh:    dnsRecordSetV2RefreshFunc(ctx, dnsClient, zoneID, recordsetID),
 			Timeout:    d.Timeout(schema.TimeoutDelete),
 			Delay:      5 * time.Second,
 			MinTimeout: 3 * time.Second,

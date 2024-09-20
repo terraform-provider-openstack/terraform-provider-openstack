@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects"
+	"github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/objects"
 )
 
 func resourceObjectstorageTempurlV1() *schema.Resource {
@@ -102,7 +102,7 @@ func resourceObjectstorageTempurlV1() *schema.Resource {
 // resourceObjectstorageTempurlV1Create performs the image lookup.
 func resourceObjectstorageTempurlV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	objectStorageClient, err := config.ObjectStorageV1Client(GetRegion(d, config))
+	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -130,7 +130,7 @@ func resourceObjectstorageTempurlV1Create(ctx context.Context, d *schema.Resourc
 
 	log.Printf("[DEBUG] Create temporary url Options: %#v", turlOptions)
 
-	url, err := objects.CreateTempURL(objectStorageClient, containerName, objectName, turlOptions)
+	url, err := objects.CreateTempURL(ctx, objectStorageClient, containerName, objectName, turlOptions)
 	if err != nil {
 		return diag.Errorf("Unable to generate a temporary url for the object %s in container %s: %s",
 			objectName, containerName, err)

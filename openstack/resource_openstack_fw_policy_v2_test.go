@@ -1,15 +1,17 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"testing"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/policies"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/fwaas_v2/policies"
 )
 
 func TestAccFWPolicyV2_basic(t *testing.T) {
@@ -344,7 +346,7 @@ func TestAccFWPolicyV2_rulesOrder(t *testing.T) {
 
 func testAccCheckFWPolicyV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(osRegionName)
+	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -352,11 +354,11 @@ func testAccCheckFWPolicyV2Destroy(s *terraform.State) error {
 		if rs.Type != "openstack_fw_policy_v2" {
 			continue
 		}
-		_, err = policies.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err = policies.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Firewall policy (%s) still exists", rs.Primary.ID)
 		}
-		if _, ok := err.(gophercloud.ErrDefault404); !ok {
+		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 	}
@@ -375,7 +377,7 @@ func testAccCheckFWPolicyV2Exists(n string, policy *policies.Policy) resource.Te
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -384,9 +386,9 @@ func testAccCheckFWPolicyV2Exists(n string, policy *policies.Policy) resource.Te
 		for i := 0; i < 5; i++ {
 			// Firewall policy creation is asynchronous. Retry some times
 			// if we get a 404 error. Fail on any other error.
-			found, err = policies.Get(networkingClient, rs.Primary.ID).Extract()
+			found, err = policies.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 			if err != nil {
-				if _, ok := err.(gophercloud.ErrDefault404); ok {
+				if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 					time.Sleep(time.Second)
 					continue
 				}

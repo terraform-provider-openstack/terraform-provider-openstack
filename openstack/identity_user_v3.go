@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/users"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
 )
 
 func getUserOptions() [4]users.Option {

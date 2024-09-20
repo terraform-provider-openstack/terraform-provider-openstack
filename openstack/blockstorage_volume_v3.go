@@ -2,14 +2,15 @@ package openstack
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
-	"github.com/gophercloud/utils/terraform/hashcode"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
+	"github.com/gophercloud/utils/v2/terraform/hashcode"
 )
 
 const blockstorageV3VolumeFromBackupMicroversion = "3.47"
@@ -27,11 +28,11 @@ func flattenBlockStorageVolumeV3Attachments(v []volumes.Attachment) []map[string
 	return attachments
 }
 
-func blockStorageVolumeV3StateRefreshFunc(client *gophercloud.ServiceClient, volumeID string) retry.StateRefreshFunc {
+func blockStorageVolumeV3StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, volumeID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		v, err := volumes.Get(client, volumeID).Extract()
+		v, err := volumes.Get(ctx, client, volumeID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return v, "deleted", nil
 			}
 
@@ -57,7 +58,7 @@ func blockStorageVolumeV3AttachmentHash(v interface{}) int {
 	return hashcode.String(buf.String())
 }
 
-func expandBlockStorageVolumeV3SchedulerHints(v schedulerhints.SchedulerHints) map[string]interface{} {
+func expandBlockStorageVolumeV3SchedulerHints(v volumes.SchedulerHintOpts) map[string]interface{} {
 	schedulerHints := make(map[string]interface{})
 
 	differentHost := make([]interface{}, len(v.DifferentHost))
@@ -102,8 +103,8 @@ func blockStorageVolumeV3SchedulerHintsHash(v interface{}) int {
 	return hashcode.String(buf.String())
 }
 
-func resourceBlockStorageVolumeV3SchedulerHints(schedulerHintsRaw map[string]interface{}) schedulerhints.SchedulerHints {
-	schedulerHints := schedulerhints.SchedulerHints{
+func resourceBlockStorageVolumeV3SchedulerHints(schedulerHintsRaw map[string]interface{}) volumes.SchedulerHintOpts {
+	schedulerHints := volumes.SchedulerHintOpts{
 		Query:                schedulerHintsRaw["query"].(string),
 		LocalToInstance:      schedulerHintsRaw["local_to_instance"].(string),
 		AdditionalProperties: schedulerHintsRaw["additional_properties"].(map[string]interface{}),

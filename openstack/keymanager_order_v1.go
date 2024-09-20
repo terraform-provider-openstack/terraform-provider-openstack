@@ -1,24 +1,26 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/orders"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/orders"
 )
 
-func keyManagerOrderV1WaitForOrderDeletion(kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func keyManagerOrderV1WaitForOrderDeletion(ctx context.Context, kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		err := orders.Delete(kmClient, id).Err
+		err := orders.Delete(ctx, kmClient, id).Err
 		if err == nil {
 			return "", "DELETED", nil
 		}
 
-		if _, ok := err.(gophercloud.ErrDefault404); ok {
+		if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return "", "DELETED", nil
 		}
 
@@ -38,11 +40,11 @@ func keyManagerOrderV1OrderType(v string) orders.OrderType {
 	return otype
 }
 
-func keyManagerOrderV1WaitForOrderCreation(kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func keyManagerOrderV1WaitForOrderCreation(ctx context.Context, kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		order, err := orders.Get(kmClient, id).Extract()
+		order, err := orders.Get(ctx, kmClient, id).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return "", "NOT_CREATED", nil
 			}
 

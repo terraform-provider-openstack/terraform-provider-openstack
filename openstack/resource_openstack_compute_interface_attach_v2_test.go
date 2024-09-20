@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/attachinterfaces"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/attachinterfaces"
 )
 
 func TestAccComputeV2InterfaceAttach_basic(t *testing.T) {
@@ -55,7 +56,7 @@ func TestAccComputeV2InterfaceAttach_IP(t *testing.T) {
 
 func testAccCheckComputeV2InterfaceAttachDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.ComputeV2Client(osRegionName)
+	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -70,7 +71,7 @@ func testAccCheckComputeV2InterfaceAttachDestroy(s *terraform.State) error {
 			return err
 		}
 
-		_, err = attachinterfaces.Get(computeClient, instanceID, portID).Extract()
+		_, err = attachinterfaces.Get(context.TODO(), computeClient, instanceID, portID).Extract()
 		if err == nil {
 			return fmt.Errorf("Volume attachment still exists")
 		}
@@ -91,7 +92,7 @@ func testAccCheckComputeV2InterfaceAttachExists(n string, ai *attachinterfaces.I
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(osRegionName)
+		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
@@ -101,7 +102,7 @@ func testAccCheckComputeV2InterfaceAttachExists(n string, ai *attachinterfaces.I
 			return err
 		}
 
-		found, err := attachinterfaces.Get(computeClient, instanceID, portID).Extract()
+		found, err := attachinterfaces.Get(context.TODO(), computeClient, instanceID, portID).Extract()
 		if err != nil {
 			return err
 		}

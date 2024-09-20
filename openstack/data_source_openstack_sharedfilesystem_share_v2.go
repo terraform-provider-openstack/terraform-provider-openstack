@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/shares"
 )
 
 const (
@@ -116,7 +116,7 @@ func dataSourceSharedFilesystemShareV2() *schema.Resource {
 
 func dataSourceSharedFilesystemShareV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
+	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem sfsClient: %s", err)
 	}
@@ -148,7 +148,7 @@ func dataSourceSharedFilesystemShareV2Read(ctx context.Context, d *schema.Resour
 		sfsClient.Microversion = minManilaShareListExportLocationPath
 	}
 
-	allPages, err := shares.ListDetail(sfsClient, listOpts).AllPages()
+	allPages, err := shares.ListDetail(sfsClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query shares: %s", err)
 	}
@@ -169,7 +169,7 @@ func dataSourceSharedFilesystemShareV2Read(ctx context.Context, d *schema.Resour
 	}
 	share = allShares[0]
 
-	exportLocationsRaw, err := shares.ListExportLocations(sfsClient, share.ID).Extract()
+	exportLocationsRaw, err := shares.ListExportLocations(ctx, sfsClient, share.ID).Extract()
 	if err != nil {
 		return diag.Errorf("Failed to retrieve share's export_locations %s: %s", share.ID, err)
 	}

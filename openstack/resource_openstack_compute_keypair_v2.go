@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/keypairs"
 )
 
 func resourceComputeKeypairV2() *schema.Resource {
@@ -70,7 +70,7 @@ func resourceComputeKeypairV2() *schema.Resource {
 
 func resourceComputeKeypairV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -92,7 +92,7 @@ func resourceComputeKeypairV2Create(ctx context.Context, d *schema.ResourceData,
 
 	log.Printf("[DEBUG] openstack_compute_keypair_v2 create options: %#v", createOpts)
 
-	kp, err := keypairs.Create(computeClient, createOpts).Extract()
+	kp, err := keypairs.Create(ctx, computeClient, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to create openstack_compute_keypair_v2 %s: %s", name, err)
 	}
@@ -106,9 +106,9 @@ func resourceComputeKeypairV2Create(ctx context.Context, d *schema.ResourceData,
 	return resourceComputeKeypairV2Read(ctx, d, meta)
 }
 
-func resourceComputeKeypairV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeKeypairV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -124,7 +124,7 @@ func resourceComputeKeypairV2Read(_ context.Context, d *schema.ResourceData, met
 		UserID: userID,
 	}
 
-	kp, err := keypairs.Get(computeClient, d.Id(), kpopts).Extract()
+	kp, err := keypairs.Get(ctx, computeClient, d.Id(), kpopts).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_keypair_v2"))
 	}
@@ -142,9 +142,9 @@ func resourceComputeKeypairV2Read(_ context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceComputeKeypairV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeKeypairV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -161,7 +161,7 @@ func resourceComputeKeypairV2Delete(_ context.Context, d *schema.ResourceData, m
 		UserID: userID,
 	}
 
-	err = keypairs.Delete(computeClient, d.Id(), kpopts).ExtractErr()
+	err = keypairs.Delete(ctx, computeClient, d.Id(), kpopts).ExtractErr()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_compute_keypair_v2"))
 	}

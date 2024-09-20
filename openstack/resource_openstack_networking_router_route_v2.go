@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 )
 
 func resourceNetworkingRouterRouteV2() *schema.Resource {
@@ -50,7 +50,7 @@ func resourceNetworkingRouterRouteV2() *schema.Resource {
 
 func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -59,7 +59,7 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 	config.MutexKV.Lock(routerID)
 	defer config.MutexKV.Unlock(routerID)
 
-	r, err := routers.Get(networkingClient, routerID).Extract()
+	r, err := routers.Get(ctx, networkingClient, routerID).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_router_v2"))
 	}
@@ -91,7 +91,7 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 		Routes: &routes,
 	}
 	log.Printf("[DEBUG] openstack_networking_router_v2 %s update options: %#v", routerID, updateOpts)
-	_, err = routers.Update(networkingClient, routerID, updateOpts).Extract()
+	_, err = routers.Update(ctx, networkingClient, routerID, updateOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error updating openstack_networking_router_v2: %s", err)
 	}
@@ -103,7 +103,7 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 
 func resourceNetworkingRouterRouteV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -119,7 +119,7 @@ func resourceNetworkingRouterRouteV2Read(ctx context.Context, d *schema.Resource
 	}
 	d.Set("router_id", routerID)
 
-	r, err := routers.Get(networkingClient, routerID).Extract()
+	r, err := routers.Get(ctx, networkingClient, routerID).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_router_v2"))
 	}
@@ -141,7 +141,7 @@ func resourceNetworkingRouterRouteV2Read(ctx context.Context, d *schema.Resource
 
 func resourceNetworkingRouterRouteV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -150,7 +150,7 @@ func resourceNetworkingRouterRouteV2Delete(ctx context.Context, d *schema.Resour
 	config.MutexKV.Lock(routerID)
 	defer config.MutexKV.Unlock(routerID)
 
-	r, err := routers.Get(networkingClient, routerID).Extract()
+	r, err := routers.Get(ctx, networkingClient, routerID).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_router_v2"))
 	}
@@ -177,7 +177,7 @@ func resourceNetworkingRouterRouteV2Delete(ctx context.Context, d *schema.Resour
 	updateOpts := routers.UpdateOpts{
 		Routes: &newRoute,
 	}
-	_, err = routers.Update(networkingClient, routerID, updateOpts).Extract()
+	_, err = routers.Update(ctx, networkingClient, routerID, updateOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error updating openstack_networking_router_v2: %s", err)
 	}

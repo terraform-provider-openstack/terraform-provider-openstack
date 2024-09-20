@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/groups"
 )
 
 func dataSourceNetworkingSecGroupV2() *schema.Resource {
@@ -61,7 +61,7 @@ func dataSourceNetworkingSecGroupV2() *schema.Resource {
 
 func dataSourceNetworkingSecGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -82,7 +82,7 @@ func dataSourceNetworkingSecGroupV2Read(ctx context.Context, d *schema.ResourceD
 		listOpts.Tags = strings.Join(tags, ",")
 	}
 
-	pages, err := groups.List(networkingClient, listOpts).AllPages()
+	pages, err := groups.List(networkingClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}

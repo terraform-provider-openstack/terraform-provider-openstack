@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"testing"
@@ -8,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/aggregates"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/aggregates"
 )
 
 var testAccAggregateConfig = `
@@ -122,7 +123,7 @@ func testAccCheckAggregateExists(n string, aggregate *aggregates.Aggregate) reso
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(osRegionName)
+		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
@@ -132,7 +133,7 @@ func testAccCheckAggregateExists(n string, aggregate *aggregates.Aggregate) reso
 			return fmt.Errorf("Can't convert ID to integer: %s", err)
 		}
 
-		found, err := aggregates.Get(computeClient, id).Extract()
+		found, err := aggregates.Get(context.TODO(), computeClient, id).Extract()
 		if err != nil {
 			return err
 		}

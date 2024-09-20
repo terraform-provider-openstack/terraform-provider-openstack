@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/orchestration/v1/stacks"
+	"github.com/gophercloud/gophercloud/v2/openstack/orchestration/v1/stacks"
 )
 
 func TestAccOrchestrationV1Stack_basic(t *testing.T) {
@@ -138,7 +139,7 @@ func TestAccOrchestrationV1Stack_outputs(t *testing.T) {
 
 func testAccCheckOrchestrationV1StackDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	orchestrationClient, err := config.OrchestrationV1Client(osRegionName)
+	orchestrationClient, err := config.OrchestrationV1Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack Orchestration client: %s", err)
 	}
@@ -148,7 +149,7 @@ func testAccCheckOrchestrationV1StackDestroy(s *terraform.State) error {
 			continue
 		}
 
-		stack, err := stacks.Find(orchestrationClient, rs.Primary.ID).Extract()
+		stack, err := stacks.Find(context.TODO(), orchestrationClient, rs.Primary.ID).Extract()
 		if err == nil {
 			if stack.Status != "DELETE_COMPLETE" {
 				return fmt.Errorf("stack still exists")
@@ -171,12 +172,12 @@ func testAccCheckOrchestrationV1StackExists(n string, stack *stacks.RetrievedSta
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		orchestrationClient, err := config.OrchestrationV1Client(osRegionName)
+		orchestrationClient, err := config.OrchestrationV1Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack orchestration client: %s", err)
 		}
 
-		found, err := stacks.Find(orchestrationClient, rs.Primary.ID).Extract()
+		found, err := stacks.Find(context.TODO(), orchestrationClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

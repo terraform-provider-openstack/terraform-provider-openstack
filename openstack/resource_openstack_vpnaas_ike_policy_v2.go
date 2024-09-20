@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ikepolicies"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/ikepolicies"
 )
 
 func resourceIKEPolicyV2() *schema.Resource {
@@ -103,7 +103,7 @@ func resourceIKEPolicyV2() *schema.Resource {
 
 func resourceIKEPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -131,7 +131,7 @@ func resourceIKEPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta
 	}
 	log.Printf("[DEBUG] Create IKE policy: %#v", opts)
 
-	policy, err := ikepolicies.Create(networkingClient, opts).Extract()
+	policy, err := ikepolicies.Create(ctx, networkingClient, opts).Extract()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -139,7 +139,7 @@ func resourceIKEPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    waitForIKEPolicyCreation(networkingClient, policy.ID),
+		Refresh:    waitForIKEPolicyCreation(ctx, networkingClient, policy.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
@@ -161,12 +161,12 @@ func resourceIKEPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta i
 	log.Printf("[DEBUG] Retrieve information about IKE policy: %s", d.Id())
 
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	policy, err := ikepolicies.Get(networkingClient, d.Id()).Extract()
+	policy, err := ikepolicies.Get(ctx, networkingClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "IKE policy"))
 	}
@@ -198,7 +198,7 @@ func resourceIKEPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta i
 
 func resourceIKEPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -249,14 +249,14 @@ func resourceIKEPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta
 	log.Printf("[DEBUG] Updating IKE policy with id %s: %#v", d.Id(), opts)
 
 	if hasChange {
-		err = ikepolicies.Update(networkingClient, d.Id(), opts).Err
+		err = ikepolicies.Update(ctx, networkingClient, d.Id(), opts).Err
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
 			Target:     []string{"ACTIVE"},
-			Refresh:    waitForIKEPolicyUpdate(networkingClient, d.Id()),
+			Refresh:    waitForIKEPolicyUpdate(ctx, networkingClient, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			Delay:      0,
 			MinTimeout: 2 * time.Second,
@@ -273,7 +273,7 @@ func resourceIKEPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta
 	log.Printf("[DEBUG] Destroy IKE policy: %s", d.Id())
 
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -281,7 +281,7 @@ func resourceIKEPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForIKEPolicyDeletion(networkingClient, d.Id()),
+		Refresh:    waitForIKEPolicyDeletion(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
@@ -294,9 +294,9 @@ func resourceIKEPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func waitForIKEPolicyDeletion(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func waitForIKEPolicyDeletion(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		err := ikepolicies.Delete(networkingClient, id).Err
+		err := ikepolicies.Delete(ctx, networkingClient, id).Err
 		if err == nil {
 			return "", "DELETED", nil
 		}
@@ -305,9 +305,9 @@ func waitForIKEPolicyDeletion(networkingClient *gophercloud.ServiceClient, id st
 	}
 }
 
-func waitForIKEPolicyCreation(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func waitForIKEPolicyCreation(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		policy, err := ikepolicies.Get(networkingClient, id).Extract()
+		policy, err := ikepolicies.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return "", "PENDING_CREATE", nil
 		}
@@ -315,9 +315,9 @@ func waitForIKEPolicyCreation(networkingClient *gophercloud.ServiceClient, id st
 	}
 }
 
-func waitForIKEPolicyUpdate(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func waitForIKEPolicyUpdate(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		policy, err := ikepolicies.Get(networkingClient, id).Extract()
+		policy, err := ikepolicies.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return "", "PENDING_UPDATE", nil
 		}

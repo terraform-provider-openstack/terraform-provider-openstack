@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/addressscopes"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/addressscopes"
 )
 
 func TestAccNetworkingV2AddressScope_basic(t *testing.T) {
@@ -58,12 +59,12 @@ func testAccCheckNetworkingV2AddressScopeExists(n string, addressScope *addresss
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		found, err := addressscopes.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := addressscopes.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -80,7 +81,7 @@ func testAccCheckNetworkingV2AddressScopeExists(n string, addressScope *addresss
 
 func testAccCheckNetworkingV2AddressScopeDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(osRegionName)
+	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -90,7 +91,7 @@ func testAccCheckNetworkingV2AddressScopeDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := addressscopes.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err := addressscopes.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Address-scope still exists")
 		}

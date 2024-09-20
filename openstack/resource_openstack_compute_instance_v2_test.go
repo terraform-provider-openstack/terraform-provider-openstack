@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sort"
@@ -10,12 +11,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
-	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/volumeattach"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
+	"github.com/gophercloud/gophercloud/v2/pagination"
 )
 
 func TestAccComputeV2Instance_basic(t *testing.T) {
@@ -774,7 +775,7 @@ func TestAccComputeV2Instance_tags(t *testing.T) {
 
 func testAccCheckComputeV2InstanceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.ComputeV2Client(osRegionName)
+	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -784,7 +785,7 @@ func testAccCheckComputeV2InstanceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		server, err := servers.Get(computeClient, rs.Primary.ID).Extract()
+		server, err := servers.Get(context.TODO(), computeClient, rs.Primary.ID).Extract()
 		if err == nil {
 			if server.Status != "SOFT_DELETED" && server.Status != "DELETED" {
 				return fmt.Errorf("Instance still exists")
@@ -807,12 +808,12 @@ func testAccCheckComputeV2InstanceExists(n string, instance *servers.Server) res
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(osRegionName)
+		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		found, err := servers.Get(computeClient, rs.Primary.ID).Extract()
+		found, err := servers.Get(context.TODO(), computeClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -873,13 +874,14 @@ func testAccCheckComputeV2InstanceBootVolumeAttachment(
 		var attachments []volumeattach.VolumeAttachment
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(osRegionName)
+		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return err
 		}
 
 		err = volumeattach.List(computeClient, instance.ID).EachPage(
-			func(page pagination.Page) (bool, error) {
+			context.TODO(),
+			func(ctx context.Context, page pagination.Page) (bool, error) {
 				actual, err := volumeattach.ExtractVolumeAttachments(page)
 				if err != nil {
 					return false, fmt.Errorf("Unable to lookup attachment: %s", err)

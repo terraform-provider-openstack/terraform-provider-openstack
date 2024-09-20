@@ -3,13 +3,14 @@ package openstack
 import (
 	"context"
 	"log"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/flavors"
-	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/flavors"
+	"github.com/gophercloud/gophercloud/v2/pagination"
 )
 
 func dataSourceLBFlavorV2() *schema.Resource {
@@ -58,7 +59,7 @@ func dataSourceLBFlavorV2() *schema.Resource {
 
 func dataSourceLBFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancer client: %s", err)
 	}
@@ -66,9 +67,9 @@ func dataSourceLBFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta 
 	var allFlavors []flavors.Flavor
 	if v := d.Get("flavor_id").(string); v != "" {
 		var flavor *flavors.Flavor
-		flavor, err = flavors.Get(lbClient, v).Extract()
+		flavor, err = flavors.Get(ctx, lbClient, v).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return diag.Errorf("No flavor found")
 			}
 			return diag.Errorf("Unable to retrieve Openstack %s loadbalancer flavor: %s", v, err)
@@ -79,7 +80,7 @@ func dataSourceLBFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(dataSourceLBFlavorV2Attributes(d, lbClient, &allFlavors[0]))
 	} else {
 		var allPages pagination.Page
-		allPages, err = flavors.List(lbClient, flavors.ListOpts{}).AllPages()
+		allPages, err = flavors.List(lbClient, flavors.ListOpts{}).AllPages(ctx)
 		if err != nil {
 			return diag.Errorf("Unable to query OpenStack flavors: %s", err)
 		}

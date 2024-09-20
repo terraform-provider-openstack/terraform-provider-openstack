@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/addressscopes"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/addressscopes"
 )
 
 func dataSourceNetworkingAddressScopeV2() *schema.Resource {
@@ -45,7 +45,7 @@ func dataSourceNetworkingAddressScopeV2() *schema.Resource {
 
 func dataSourceNetworkingAddressScopeV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -69,7 +69,7 @@ func dataSourceNetworkingAddressScopeV2Read(ctx context.Context, d *schema.Resou
 		listOpts.ProjectID = v.(string)
 	}
 
-	pages, err := addressscopes.List(networkingClient, listOpts).AllPages()
+	pages, err := addressscopes.List(networkingClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to list openstack_networking_addressscope_v2: %s", err)
 	}

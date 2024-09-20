@@ -3,7 +3,7 @@ package openstack
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/bgpvpns"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/bgpvpns"
 )
 
 func expandBGPVPNPortAssociateRoutesV2(routes []interface{}) []bgpvpns.PortRoutes {

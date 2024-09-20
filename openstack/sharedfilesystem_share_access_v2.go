@@ -1,22 +1,24 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/apiversions"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shareaccessrules"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/apiversions"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/shareaccessrules"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/shares"
 )
 
-func sharedFilesystemShareAccessV2StateRefreshFunc(client *gophercloud.ServiceClient, shareID string, accessID string) retry.StateRefreshFunc {
+func sharedFilesystemShareAccessV2StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, shareID string, accessID string) retry.StateRefreshFunc {
 	// Set the client to the minimum supported microversion.
 	client.Microversion = sharedFilesystemV2MinMicroversion
 
 	// Obtain supported Manila microversions.
-	apiInfo, err := apiversions.Get(client, "v2").Extract()
+	apiInfo, err := apiversions.Get(ctx, client, "v2").Extract()
 	if err != nil {
 		return func() (interface{}, string, error) {
 			return nil, "", fmt.Errorf("Unable to query API endpoint for openstack_sharedfilesystem_share_access_v2: %s", err)
@@ -30,7 +32,7 @@ func sharedFilesystemShareAccessV2StateRefreshFunc(client *gophercloud.ServiceCl
 		}
 	} else if ok {
 		client.Microversion = sharedFilesystemV2ShareAccessRulesMicroversion
-		return sharedFilesystemShareAccessV2StateRefreshStateNew(client, accessID)
+		return sharedFilesystemShareAccessV2StateRefreshStateNew(ctx, client, accessID)
 	}
 
 	// Now check and see if the OpenStack environment supports microversion 2.21.
@@ -43,12 +45,12 @@ func sharedFilesystemShareAccessV2StateRefreshFunc(client *gophercloud.ServiceCl
 		client.Microversion = sharedFilesystemV2SharedAccessMinMicroversion
 	}
 
-	return sharedFilesystemShareAccessV2StateRefreshStateOld(client, shareID, accessID)
+	return sharedFilesystemShareAccessV2StateRefreshStateOld(ctx, client, shareID, accessID)
 }
 
-func sharedFilesystemShareAccessV2StateRefreshStateOld(client *gophercloud.ServiceClient, shareID string, accessID string) retry.StateRefreshFunc {
+func sharedFilesystemShareAccessV2StateRefreshStateOld(ctx context.Context, client *gophercloud.ServiceClient, shareID string, accessID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		access, err := shares.ListAccessRights(client, shareID).Extract()
+		access, err := shares.ListAccessRights(ctx, client, shareID).Extract()
 		if err != nil {
 			return nil, "", err
 		}
@@ -57,13 +59,13 @@ func sharedFilesystemShareAccessV2StateRefreshStateOld(client *gophercloud.Servi
 				return v, v.State, nil
 			}
 		}
-		return nil, "", gophercloud.ErrDefault404{}
+		return nil, "", gophercloud.ErrUnexpectedResponseCode{Actual: http.StatusNotFound}
 	}
 }
 
-func sharedFilesystemShareAccessV2StateRefreshStateNew(client *gophercloud.ServiceClient, accessID string) retry.StateRefreshFunc {
+func sharedFilesystemShareAccessV2StateRefreshStateNew(ctx context.Context, client *gophercloud.ServiceClient, accessID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		access, err := shareaccessrules.Get(client, accessID).Extract()
+		access, err := shareaccessrules.Get(ctx, client, accessID).Extract()
 		if err != nil {
 			return nil, "", err
 		}

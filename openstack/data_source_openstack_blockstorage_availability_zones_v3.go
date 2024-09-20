@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
-	"github.com/gophercloud/utils/terraform/hashcode"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/availabilityzones"
+	"github.com/gophercloud/utils/v2/terraform/hashcode"
 )
 
 func dataSourceBlockStorageAvailabilityZonesV3() *schema.Resource {
@@ -42,12 +42,12 @@ func dataSourceBlockStorageAvailabilityZonesV3() *schema.Resource {
 
 func dataSourceBlockStorageAvailabilityZonesV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	client, err := config.BlockStorageV3Client(GetRegion(d, config))
+	client, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
-	allPages, err := availabilityzones.List(client).AllPages()
+	allPages, err := availabilityzones.List(client).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Error retrieving openstack_blockstorage_availability_zones_v3: %s", err)
 	}

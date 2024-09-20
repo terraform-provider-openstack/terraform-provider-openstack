@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
-	"github.com/gophercloud/utils/terraform/hashcode"
+	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
+	"github.com/gophercloud/utils/v2/terraform/hashcode"
 )
 
 func dataSourceImagesImageIDsV2() *schema.Resource {
@@ -140,7 +140,7 @@ func dataSourceImagesImageIDsV2() *schema.Resource {
 // dataSourceImagesImageIdsV2Read performs the image lookup.
 func dataSourceImagesImageIdsV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	imageClient, err := config.ImageV2Client(GetRegion(d, config))
+	imageClient, err := config.ImageV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack image client: %s", err)
 	}
@@ -180,7 +180,7 @@ func dataSourceImagesImageIdsV2Read(ctx context.Context, d *schema.ResourceData,
 
 	log.Printf("[DEBUG] List Options in openstack_images_image_ids_v2: %#v", listOpts)
 
-	allPages, err := images.List(imageClient, listOpts).AllPages()
+	allPages, err := images.List(imageClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to list images in openstack_images_image_ids_v2: %s", err)
 	}

@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/go-homedir"
 
-	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects"
+	"github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/objects"
 )
 
 func resourceObjectStorageObjectV1() *schema.Resource {
@@ -145,7 +145,7 @@ func resourceObjectStorageObjectV1() *schema.Resource {
 
 func resourceObjectStorageObjectV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	objectStorageClient, err := config.ObjectStorageV1Client(GetRegion(d, config))
+	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack object storage client: %s", err)
 	}
@@ -228,7 +228,7 @@ func resourceObjectStorageObjectV1Create(ctx context.Context, d *schema.Resource
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	_, err = objects.Create(objectStorageClient, cn, name, createOpts).Extract()
+	_, err = objects.Create(ctx, objectStorageClient, cn, name, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack container object: %s", err)
 	}
@@ -241,7 +241,7 @@ func resourceObjectStorageObjectV1Create(ctx context.Context, d *schema.Resource
 
 func resourceObjectStorageObjectV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	objectStorageClient, err := config.ObjectStorageV1Client(GetRegion(d, config))
+	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack object storage client: %s", err)
 	}
@@ -259,7 +259,7 @@ func resourceObjectStorageObjectV1Read(ctx context.Context, d *schema.ResourceDa
 	}
 
 	log.Printf("[DEBUG] Get Options: %#v", getOpts)
-	result, err := objects.Get(objectStorageClient, cn, name, getOpts).Extract()
+	result, err := objects.Get(ctx, objectStorageClient, cn, name, getOpts).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error getting OpenStack container object"))
 	}
@@ -288,7 +288,7 @@ func resourceObjectStorageObjectV1Read(ctx context.Context, d *schema.ResourceDa
 
 func resourceObjectStorageObjectV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	objectStorageClient, err := config.ObjectStorageV1Client(GetRegion(d, config))
+	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack object storage client: %s", err)
 	}
@@ -371,7 +371,7 @@ func resourceObjectStorageObjectV1Update(ctx context.Context, d *schema.Resource
 	}
 
 	log.Printf("[DEBUG] Update Options: %#v", createOpts)
-	_, err = objects.Create(objectStorageClient, cn, name, createOpts).Extract()
+	_, err = objects.Create(ctx, objectStorageClient, cn, name, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error updating OpenStack container object: %s", err)
 	}
@@ -381,7 +381,7 @@ func resourceObjectStorageObjectV1Update(ctx context.Context, d *schema.Resource
 
 func resourceObjectStorageObjectV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	objectStorageClient, err := config.ObjectStorageV1Client(GetRegion(d, config))
+	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack object storage client: %s", err)
 	}
@@ -390,7 +390,7 @@ func resourceObjectStorageObjectV1Delete(ctx context.Context, d *schema.Resource
 	cn := d.Get("container_name").(string)
 	deleteOpts := &objects.DeleteOpts{}
 
-	_, err = objects.Delete(objectStorageClient, cn, name, deleteOpts).Extract()
+	_, err = objects.Delete(ctx, objectStorageClient, cn, name, deleteOpts).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, fmt.Sprintf("Error deleting OpenStack container object: %s", name)))
 	}

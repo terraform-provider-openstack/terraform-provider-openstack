@@ -1,13 +1,15 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/dns"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
 type floatingIPExtended struct {
@@ -16,12 +18,12 @@ type floatingIPExtended struct {
 }
 
 // networkingFloatingIPV2ID retrieves floating IP ID by the provided IP address.
-func networkingFloatingIPV2ID(client *gophercloud.ServiceClient, floatingIP string) (string, error) {
+func networkingFloatingIPV2ID(ctx context.Context, client *gophercloud.ServiceClient, floatingIP string) (string, error) {
 	listOpts := floatingips.ListOpts{
 		FloatingIP: floatingIP,
 	}
 
-	allPages, err := floatingips.List(client, listOpts).AllPages()
+	allPages, err := floatingips.List(client, listOpts).AllPages(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -41,11 +43,11 @@ func networkingFloatingIPV2ID(client *gophercloud.ServiceClient, floatingIP stri
 	return allFloatingIPs[0].ID, nil
 }
 
-func networkingFloatingIPV2StateRefreshFunc(client *gophercloud.ServiceClient, fipID string) retry.StateRefreshFunc {
+func networkingFloatingIPV2StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, fipID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		fip, err := floatingips.Get(client, fipID).Extract()
+		fip, err := floatingips.Get(ctx, client, fipID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return fip, "DELETED", nil
 			}
 

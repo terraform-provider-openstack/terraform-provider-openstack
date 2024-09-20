@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/bgpvpns"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/bgpvpns"
 )
 
 func resourceBGPVPNPortAssociateV2() *schema.Resource {
@@ -85,7 +85,7 @@ func resourceBGPVPNPortAssociateV2() *schema.Resource {
 
 func resourceBGPVPNPortAssociateV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
 	}
@@ -104,7 +104,7 @@ func resourceBGPVPNPortAssociateV2Create(ctx context.Context, d *schema.Resource
 	}
 
 	log.Printf("[DEBUG] openstack_bgpvpn_port_associate_v2 create options: %#v", opts)
-	res, err := bgpvpns.CreatePortAssociation(networkingClient, bgpvpnID, opts).Extract()
+	res, err := bgpvpns.CreatePortAssociation(ctx, networkingClient, bgpvpnID, opts).Extract()
 	if err != nil {
 		return diag.Errorf("Error associating openstack_bgpvpn_port_associate_v2 BGP VPN %s with port %s: %s", bgpvpnID, portID, err)
 	}
@@ -119,7 +119,7 @@ func resourceBGPVPNPortAssociateV2Create(ctx context.Context, d *schema.Resource
 
 func resourceBGPVPNPortAssociateV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
 	}
@@ -129,7 +129,7 @@ func resourceBGPVPNPortAssociateV2Read(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	res, err := bgpvpns.GetPortAssociation(networkingClient, bgpvpnID, id).Extract()
+	res, err := bgpvpns.GetPortAssociation(ctx, networkingClient, bgpvpnID, id).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_bgpvpn_port_associate_v2"))
 	}
@@ -152,7 +152,7 @@ func resourceBGPVPNPortAssociateV2Read(ctx context.Context, d *schema.ResourceDa
 
 func resourceBGPVPNPortAssociateV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
 	}
@@ -175,7 +175,7 @@ func resourceBGPVPNPortAssociateV2Update(ctx context.Context, d *schema.Resource
 	}
 
 	log.Printf("[DEBUG] openstack_bgpvpn_port_associate_v2 %s update options: %#v", id, opts)
-	res, err := bgpvpns.UpdatePortAssociation(networkingClient, bgpvpnID, id, opts).Extract()
+	res, err := bgpvpns.UpdatePortAssociation(ctx, networkingClient, bgpvpnID, id, opts).Extract()
 	if err != nil {
 		return diag.Errorf("Error updating openstack_bgpvpn_port_associate_v2 %s: %s", id, err)
 	}
@@ -188,7 +188,7 @@ func resourceBGPVPNPortAssociateV2Update(ctx context.Context, d *schema.Resource
 
 func resourceBGPVPNPortAssociateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
 	}
@@ -200,7 +200,7 @@ func resourceBGPVPNPortAssociateV2Delete(ctx context.Context, d *schema.Resource
 
 	portID := d.Get("port_id").(string)
 
-	err = bgpvpns.DeletePortAssociation(networkingClient, bgpvpnID, id).ExtractErr()
+	err = bgpvpns.DeletePortAssociation(ctx, networkingClient, bgpvpnID, id).ExtractErr()
 	if err != nil {
 		return diag.Errorf("Error disassociating openstack_bgpvpn_port_associate_v2 BGP VPN %s with port %s: %s", bgpvpnID, portID, err)
 	}

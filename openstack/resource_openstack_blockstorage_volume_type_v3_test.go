@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumetypes"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumetypes"
 )
 
 func TestAccBlockStorageVolumeTypeV3_basic(t *testing.T) {
@@ -75,7 +76,7 @@ func TestAccBlockStorageVolumeTypeV3_basic(t *testing.T) {
 
 func testAccCheckBlockStorageVolumeTypeV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	blockStorageClient, err := config.BlockStorageV3Client(osRegionName)
+	blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
@@ -85,7 +86,7 @@ func testAccCheckBlockStorageVolumeTypeV3Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := volumetypes.Get(blockStorageClient, rs.Primary.ID).Extract()
+		_, err := volumetypes.Get(context.TODO(), blockStorageClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("VolumeType still exists")
 		}
@@ -106,12 +107,12 @@ func testAccCheckBlockStorageVolumeTypeV3Exists(n string, volumetype *volumetype
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.BlockStorageV3Client(osRegionName)
+		blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
 
-		found, err := volumetypes.Get(blockStorageClient, rs.Primary.ID).Extract()
+		found, err := volumetypes.Get(context.TODO(), blockStorageClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
