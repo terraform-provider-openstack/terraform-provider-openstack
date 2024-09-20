@@ -53,14 +53,12 @@ func dataSourceIdentityProjectIdsV3() *schema.Resource {
 			"name": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ForceNew:      true,
 				ConflictsWith: []string{"name_regex"},
 			},
 
 			"name_regex": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ForceNew:      true,
 				ValidateFunc:  validation.StringIsValidRegExp,
 				ConflictsWith: []string{"name"},
 			},
@@ -90,7 +88,6 @@ func dataSourceIdentityProjectIdsV3() *schema.Resource {
 // dataSourceIdentityProjectIdsV3Read performs the project lookup.
 func dataSourceIdentityProjectIdsV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-
 	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
@@ -99,20 +96,13 @@ func dataSourceIdentityProjectIdsV3Read(ctx context.Context, d *schema.ResourceD
 	enabled := d.Get("enabled").(bool)
 	isDomain := d.Get("is_domain").(bool)
 
-	tags := []string{}
-	tagList := d.Get("tags").(*schema.Set).List()
-	for _, v := range tagList {
-		tags = append(tags, fmt.Sprint(v))
-	}
-	joinedTags := strings.Join(tags, ",")
-
 	listOpts := projects.ListOpts{
 		DomainID: d.Get("domain_id").(string),
 		Enabled:  &enabled,
 		IsDomain: &isDomain,
 		Name:     d.Get("name").(string),
 		ParentID: d.Get("parent_id").(string),
-		Tags:     joinedTags,
+		Tags:     strings.Join(expandObjectTags(d), ","),
 	}
 
 	allPages, err := projects.List(identityClient, listOpts).AllPages()
@@ -127,13 +117,12 @@ func dataSourceIdentityProjectIdsV3Read(ctx context.Context, d *schema.ResourceD
 
 	log.Printf("[DEBUG] Retrieved %d projects in openstack_identity_project_ids_v3: %+v", len(allProjects), allProjects)
 
-	nameRegex, nameRegexOk := d.GetOk("name_regex")
-	if nameRegexOk {
-		allProjects, err = projectsFilterByRegex(allProjects, nameRegex.(string))
+	if v, ok := d.GetOk("name_regex"); ok {
+		allProjects, err = projectsFilterByRegex(allProjects, v.(string))
 		if err != nil {
 			return diag.Errorf("Error while compiling regex: %s", err)
 		}
-		log.Printf("[DEBUG] Project list filtered by regex: %s", d.Get("name_regex"))
+		log.Printf("[DEBUG] Project list filtered by regex: %s", v)
 	}
 
 	log.Printf("[DEBUG] Got %d projects after filtering in openstack_identity_project_ids_v3: %+v", len(allProjects), allProjects)
@@ -150,17 +139,17 @@ func dataSourceIdentityProjectIdsV3Read(ctx context.Context, d *schema.ResourceD
 }
 
 func projectsFilterByRegex(projectArr []projects.Project, nameRegex string) ([]projects.Project, error) {
-	var result []projects.Project
 	r, err := regexp.Compile(nameRegex)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
+	result := make([]projects.Project, 0, len(projectArr))
 	for _, project := range projectArr {
 		if r.MatchString(project.Name) {
 			result = append(result, project)
 		}
 	}
 
-	return result, err
+	return result, nil
 }
