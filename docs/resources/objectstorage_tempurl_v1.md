@@ -57,6 +57,15 @@ The following arguments are supported:
 * `method` - (Optional) The method allowed when accessing this URL.
   Valid values are `GET`, and `POST`. Default is `GET`.
 
+* `split` - (Optional) Split is the string on which to split the object URL.
+  Default is `/v1/`.
+
+* `key` - (Optional) The key to use when generating the tempurl. If not
+  provided, the key will be read from the container or account metadata.
+
+* `digest` - (Optional) The digest to use when generating the tempurl.
+  Supported values are `sha1`, `sha256` and `sha512`. Default is `sha1`.
+
 * `regenerate` - (Optional) Whether to automatically regenerate the URL when
   it has expired. If set to true, this will create a new resource with a new
   ID and new URL. Defaults to false.

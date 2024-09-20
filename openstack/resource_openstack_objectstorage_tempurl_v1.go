@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/objects"
 )
@@ -69,6 +70,20 @@ func resourceObjectstorageTempurlV1() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"key": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				ForceNew:  true,
+				Sensitive: true,
+			},
+
+			"digest": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"sha1", "sha256", "sha512"}, false),
+			},
+
 			"regenerate": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -103,9 +118,11 @@ func resourceObjectstorageTempurlV1Create(ctx context.Context, d *schema.Resourc
 	}
 
 	turlOptions := objects.CreateTempURLOpts{
-		Method: method,
-		TTL:    d.Get("ttl").(int),
-		Split:  d.Get("split").(string),
+		Method:     method,
+		TTL:        d.Get("ttl").(int),
+		Split:      d.Get("split").(string),
+		TempURLKey: d.Get("key").(string),
+		Digest:     d.Get("digest").(string),
 	}
 
 	containerName := d.Get("container").(string)
