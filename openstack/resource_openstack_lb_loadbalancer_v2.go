@@ -125,7 +125,11 @@ func resourceLoadBalancerV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
+			"cascade": {
+				Type:     schema.TypeBool,
+				Default:  false,
+				Optional: true,
+			},
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -350,10 +354,15 @@ func resourceLoadBalancerV2Delete(ctx context.Context, d *schema.ResourceData, m
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	deleteOpts := loadbalancers.DeleteOpts{
+		Cascade:        d.Get("cascade").(bool),
+	}
+
 	log.Printf("[DEBUG] Deleting openstack_lb_loadbalancer_v2 %s", d.Id())
+	log.Printf("[DEBUG] Delete cascade: %t", d.Get("cascade").(bool))
 	timeout := d.Timeout(schema.TimeoutDelete)
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		err = loadbalancers.Delete(lbClient, d.Id(), loadbalancers.DeleteOpts{}).ExtractErr()
+		err = loadbalancers.Delete(lbClient, d.Id(), deleteOpts).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
