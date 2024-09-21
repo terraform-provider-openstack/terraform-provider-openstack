@@ -8,7 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         go-version:
-          - "1.20"
+          - "1.22"
 
     env:
       GO111MODULE: "on"
