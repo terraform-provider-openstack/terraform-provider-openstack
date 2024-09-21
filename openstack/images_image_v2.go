@@ -21,10 +21,10 @@ import (
 	"github.com/klauspost/compress/zstd"
 	"github.com/ulikunitz/xz"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
-	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/members"
-	"github.com/gophercloud/utils/terraform/mutexkv"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
+	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/members"
+	"github.com/gophercloud/utils/v2/terraform/mutexkv"
 )
 
 func resourceImagesImageV2MemberStatusFromString(v string) images.ImageMemberStatus {
@@ -232,9 +232,9 @@ func resourceImagesImageV2DetectCompression(resp *http.Response) (io.ReadCloser,
 	return nil, fmt.Errorf("Error decompressing image, detected %q formats are not supported", formats)
 }
 
-func resourceImagesImageV2RefreshFunc(client *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func resourceImagesImageV2RefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		img, err := images.Get(client, id).Extract()
+		img, err := images.Get(ctx, client, id).Extract()
 		if err != nil {
 			return nil, "", err
 		}
@@ -314,8 +314,8 @@ func resourceImagesImageV2UpdateComputedAttributes(_ context.Context, diff *sche
 	return nil
 }
 
-func resourceImagesImageAccessV2DetectMemberID(client *gophercloud.ServiceClient, imageID string) (string, error) {
-	allPages, err := members.List(client, imageID).AllPages()
+func resourceImagesImageAccessV2DetectMemberID(ctx context.Context, client *gophercloud.ServiceClient, imageID string) (string, error) {
+	allPages, err := members.List(client, imageID).AllPages(ctx)
 	if err != nil {
 		return "", fmt.Errorf("Unable to list image members: %s", err)
 	}

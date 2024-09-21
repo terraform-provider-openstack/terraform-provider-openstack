@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 
@@ -12,10 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/errors"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shareaccessrules"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/errors"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/shareaccessrules"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/shares"
 )
 
 func resourceSharedFilesystemShareAccessV2() *schema.Resource {
@@ -87,7 +88,7 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 
 func resourceSharedFilesystemShareAccessV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
+	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
@@ -112,7 +113,7 @@ func resourceSharedFilesystemShareAccessV2Create(ctx context.Context, d *schema.
 
 	var access *shares.AccessRight
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		access, err = shares.GrantAccess(sfsClient, shareID, grantOpts).Extract()
+		access, err = shares.GrantAccess(ctx, sfsClient, shareID, grantOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -134,7 +135,7 @@ func resourceSharedFilesystemShareAccessV2Create(ctx context.Context, d *schema.
 	stateConf := &retry.StateChangeConf{
 		Target:     []string{"active"},
 		Pending:    []string{"new", "queued_to_apply", "applying"},
-		Refresh:    sharedFilesystemShareAccessV2StateRefreshFunc(sfsClient, shareID, access.ID),
+		Refresh:    sharedFilesystemShareAccessV2StateRefreshFunc(ctx, sfsClient, shareID, access.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      1 * time.Second,
 		MinTimeout: 1 * time.Second,
@@ -152,13 +153,13 @@ func resourceSharedFilesystemShareAccessV2Create(ctx context.Context, d *schema.
 
 func resourceSharedFilesystemShareAccessV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
+	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
 
 	shareID := d.Get("share_id").(string)
-	access, _, err := sharedFilesystemShareAccessV2StateRefreshFunc(sfsClient, shareID, d.Id())()
+	access, _, err := sharedFilesystemShareAccessV2StateRefreshFunc(ctx, sfsClient, shareID, d.Id())()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Failed to retrieve openstack_sharedfilesystem_share_access_v2"))
 	}
@@ -193,7 +194,7 @@ func resourceSharedFilesystemShareAccessV2Read(ctx context.Context, d *schema.Re
 
 func resourceSharedFilesystemShareAccessV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
+	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
@@ -208,7 +209,7 @@ func resourceSharedFilesystemShareAccessV2Delete(ctx context.Context, d *schema.
 
 	log.Printf("[DEBUG] Attempting to delete openstack_sharedfilesystem_share_access_v2 %s", d.Id())
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		err = shares.RevokeAccess(sfsClient, shareID, revokeOpts).ExtractErr()
+		err = shares.RevokeAccess(ctx, sfsClient, shareID, revokeOpts).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -234,7 +235,7 @@ func resourceSharedFilesystemShareAccessV2Delete(ctx context.Context, d *schema.
 	stateConf := &retry.StateChangeConf{
 		Target:     []string{"denied"},
 		Pending:    []string{"active", "new", "queued_to_deny", "denying"},
-		Refresh:    sharedFilesystemShareAccessV2StateRefreshFunc(sfsClient, shareID, d.Id()),
+		Refresh:    sharedFilesystemShareAccessV2StateRefreshFunc(ctx, sfsClient, shareID, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      1 * time.Second,
 		MinTimeout: 1 * time.Second,
@@ -242,7 +243,7 @@ func resourceSharedFilesystemShareAccessV2Delete(ctx context.Context, d *schema.
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		if _, ok := err.(gophercloud.ErrDefault404); ok {
+		if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return nil
 		}
 		return diag.Errorf("Error waiting for openstack_sharedfilesystem_share_access_v2 %s to become denied: %s", d.Id(), err)
@@ -259,7 +260,7 @@ func resourceSharedFilesystemShareAccessV2Import(ctx context.Context, d *schema.
 	}
 
 	config := meta.(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(GetRegion(d, config))
+	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return nil, fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
@@ -269,7 +270,7 @@ func resourceSharedFilesystemShareAccessV2Import(ctx context.Context, d *schema.
 	shareID := parts[0]
 	accessID := parts[1]
 
-	access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
+	access, err := shares.ListAccessRights(ctx, sfsClient, shareID).Extract()
 	if err != nil {
 		return nil, fmt.Errorf("Unable to get %s openstack_sharedfilesystem_share_v2: %s", shareID, err)
 	}

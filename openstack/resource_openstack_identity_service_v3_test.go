@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/services"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/services"
 )
 
 func TestAccIdentityV3Service_basic(t *testing.T) {
@@ -58,7 +59,7 @@ func TestAccIdentityV3Service_basic(t *testing.T) {
 
 func testAccCheckIdentityV3ServiceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.IdentityV3Client(osRegionName)
+	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -68,7 +69,7 @@ func testAccCheckIdentityV3ServiceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := services.Get(identityClient, rs.Primary.ID).Extract()
+		_, err := services.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Service still exists")
 		}
@@ -89,12 +90,12 @@ func testAccCheckIdentityV3ServiceExists(n string, service *services.Service, na
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.IdentityV3Client(osRegionName)
+		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
 
-		found, err := services.Get(identityClient, rs.Primary.ID).Extract()
+		found, err := services.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/db/v1/databases"
-	"github.com/gophercloud/gophercloud/openstack/db/v1/users"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/databases"
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/users"
 )
 
 func expandDatabaseUserV1Databases(rawDatabases []interface{}) databases.BatchCreateOpts {
@@ -32,9 +33,9 @@ func flattenDatabaseUserV1Databases(dbs []databases.Database) []string {
 }
 
 // databaseUserV1StateRefreshFunc returns a retry.StateRefreshFunc that is used to watch db user.
-func databaseUserV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string, userName string) retry.StateRefreshFunc {
+func databaseUserV1StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, instanceID string, userName string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		pages, err := users.List(client, instanceID).AllPages()
+		pages, err := users.List(client, instanceID).AllPages(ctx)
 		if err != nil {
 			return nil, "", fmt.Errorf("Unable to retrieve OpenStack database users: %s", err)
 		}
@@ -55,12 +56,12 @@ func databaseUserV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceI
 }
 
 // databaseUserV1Exists is used to check whether user exists on particular database instance.
-func databaseUserV1Exists(client *gophercloud.ServiceClient, instanceID string, userName string) (bool, users.User, error) {
+func databaseUserV1Exists(ctx context.Context, client *gophercloud.ServiceClient, instanceID string, userName string) (bool, users.User, error) {
 	var exists bool
 	var err error
 	var userObj users.User
 
-	pages, err := users.List(client, instanceID).AllPages()
+	pages, err := users.List(client, instanceID).AllPages(ctx)
 	if err != nil {
 		return exists, userObj, err
 	}

@@ -1,24 +1,26 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/containers"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/containers"
 )
 
-func keyManagerContainerV1WaitForContainerDeletion(kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func keyManagerContainerV1WaitForContainerDeletion(ctx context.Context, kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		err := containers.Delete(kmClient, id).Err
+		err := containers.Delete(ctx, kmClient, id).Err
 		if err == nil {
 			return "", "DELETED", nil
 		}
 
-		if _, ok := err.(gophercloud.ErrDefault404); ok {
+		if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return "", "DELETED", nil
 		}
 
@@ -41,11 +43,11 @@ func keyManagerContainerV1Type(v string) containers.ContainerType {
 	return ctype
 }
 
-func keyManagerContainerV1WaitForContainerCreation(kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func keyManagerContainerV1WaitForContainerCreation(ctx context.Context, kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		container, err := containers.Get(kmClient, id).Extract()
+		container, err := containers.Get(ctx, kmClient, id).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return "", "NOT_CREATED", nil
 			}
 

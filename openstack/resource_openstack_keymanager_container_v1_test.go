@@ -1,14 +1,16 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/containers"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/containers"
 )
 
 func TestAccKeyManagerContainerV1_basic(t *testing.T) {
@@ -159,7 +161,7 @@ func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
 
 func testAccCheckContainerV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	kmClient, err := config.KeyManagerV1Client(osRegionName)
+	kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 	}
@@ -167,11 +169,11 @@ func testAccCheckContainerV1Destroy(s *terraform.State) error {
 		if rs.Type != "openstack_keymanager_container" {
 			continue
 		}
-		_, err = containers.Get(kmClient, rs.Primary.ID).Extract()
+		_, err = containers.Get(context.TODO(), kmClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Container (%s) still exists", rs.Primary.ID)
 		}
-		if _, ok := err.(gophercloud.ErrDefault404); !ok {
+		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 	}
@@ -190,14 +192,14 @@ func testAccCheckContainerV1Exists(n string, container *containers.Container) re
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		kmClient, err := config.KeyManagerV1Client(osRegionName)
+		kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 		}
 
 		var found *containers.Container
 
-		found, err = containers.Get(kmClient, rs.Primary.ID).Extract()
+		found, err = containers.Get(context.TODO(), kmClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

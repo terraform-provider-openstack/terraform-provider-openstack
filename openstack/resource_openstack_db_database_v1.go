@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/db/v1/databases"
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/databases"
 )
 
 func resourceDatabaseDatabaseV1() *schema.Resource {
@@ -51,7 +51,7 @@ func resourceDatabaseDatabaseV1() *schema.Resource {
 
 func resourceDatabaseDatabaseV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	DatabaseV1Client, err := config.DatabaseV1Client(GetRegion(d, config))
+	DatabaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack database client: %s", err)
 	}
@@ -64,7 +64,7 @@ func resourceDatabaseDatabaseV1Create(ctx context.Context, d *schema.ResourceDat
 		Name: dbName,
 	})
 
-	exists, err := databaseDatabaseV1Exists(DatabaseV1Client, instanceID, dbName)
+	exists, err := databaseDatabaseV1Exists(ctx, DatabaseV1Client, instanceID, dbName)
 	if err != nil {
 		return diag.Errorf("Error checking openstack_db_database_v1 %s status on %s: %s", dbName, instanceID, err)
 	}
@@ -73,7 +73,7 @@ func resourceDatabaseDatabaseV1Create(ctx context.Context, d *schema.ResourceDat
 		return diag.Errorf("openstack_db_database_v1 %s already exists on instance %s", dbName, instanceID)
 	}
 
-	err = databases.Create(DatabaseV1Client, instanceID, dbs).ExtractErr()
+	err = databases.Create(ctx, DatabaseV1Client, instanceID, dbs).ExtractErr()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_db_database_v1 %s on %s: %s", dbName, instanceID, err)
 	}
@@ -81,7 +81,7 @@ func resourceDatabaseDatabaseV1Create(ctx context.Context, d *schema.ResourceDat
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"BUILD"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    databaseDatabaseV1StateRefreshFunc(DatabaseV1Client, instanceID, dbName),
+		Refresh:    databaseDatabaseV1StateRefreshFunc(ctx, DatabaseV1Client, instanceID, dbName),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -98,9 +98,9 @@ func resourceDatabaseDatabaseV1Create(ctx context.Context, d *schema.ResourceDat
 	return resourceDatabaseDatabaseV1Read(ctx, d, meta)
 }
 
-func resourceDatabaseDatabaseV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatabaseDatabaseV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	DatabaseV1Client, err := config.DatabaseV1Client(GetRegion(d, config))
+	DatabaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack database client: %s", err)
 	}
@@ -110,7 +110,7 @@ func resourceDatabaseDatabaseV1Read(_ context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	exists, err := databaseDatabaseV1Exists(DatabaseV1Client, instanceID, dbName)
+	exists, err := databaseDatabaseV1Exists(ctx, DatabaseV1Client, instanceID, dbName)
 	if err != nil {
 		return diag.Errorf("Error checking if openstack_db_database_v1 %s exists: %s", d.Id(), err)
 	}
@@ -126,9 +126,9 @@ func resourceDatabaseDatabaseV1Read(_ context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceDatabaseDatabaseV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatabaseDatabaseV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	DatabaseV1Client, err := config.DatabaseV1Client(GetRegion(d, config))
+	DatabaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack database client: %s", err)
 	}
@@ -138,7 +138,7 @@ func resourceDatabaseDatabaseV1Delete(_ context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	exists, err := databaseDatabaseV1Exists(DatabaseV1Client, instanceID, dbName)
+	exists, err := databaseDatabaseV1Exists(ctx, DatabaseV1Client, instanceID, dbName)
 	if err != nil {
 		return diag.Errorf("Error checking if openstack_db_database_v1 %s exists: %s", d.Id(), err)
 	}
@@ -147,7 +147,7 @@ func resourceDatabaseDatabaseV1Delete(_ context.Context, d *schema.ResourceData,
 		return nil
 	}
 
-	err = databases.Delete(DatabaseV1Client, instanceID, dbName).ExtractErr()
+	err = databases.Delete(ctx, DatabaseV1Client, instanceID, dbName).ExtractErr()
 	if err != nil {
 		return diag.Errorf("Error deleting openstack_db_database_v1 %s: %s", dbName, err)
 	}

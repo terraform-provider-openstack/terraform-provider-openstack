@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -8,6 +9,7 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 
@@ -15,11 +17,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"gopkg.in/yaml.v2"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/certificates"
-	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
-	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clustertemplates"
-	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/nodegroups"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/certificates"
+	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/clusters"
+	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/clustertemplates"
+	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/nodegroups"
 )
 
 const (
@@ -115,11 +117,11 @@ func containerInfraNodeGroupV1AppendUpdateOpts(updateOpts []nodegroups.UpdateOpt
 
 // ContainerInfraClusterV1StateRefreshFunc returns a retry.StateRefreshFunc
 // that is used to watch a container infra Cluster.
-func containerInfraClusterV1StateRefreshFunc(client *gophercloud.ServiceClient, clusterID string) retry.StateRefreshFunc {
+func containerInfraClusterV1StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, clusterID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		c, err := clusters.Get(client, clusterID).Extract()
+		c, err := clusters.Get(ctx, client, clusterID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return c, "DELETE_COMPLETE", nil
 			}
 			return nil, "", err
@@ -145,11 +147,11 @@ func containerInfraClusterV1StateRefreshFunc(client *gophercloud.ServiceClient, 
 
 // ContainerInfraNodeGroupV1StateRefreshFunc returns a retry.StateRefreshFunc
 // that is used to watch a container infra NodeGroup.
-func containerInfraNodeGroupV1StateRefreshFunc(client *gophercloud.ServiceClient, clusterID string, nodeGroupID string) retry.StateRefreshFunc {
+func containerInfraNodeGroupV1StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, clusterID string, nodeGroupID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		nodeGroup, err := nodegroups.Get(client, clusterID, nodeGroupID).Extract()
+		nodeGroup, err := nodegroups.Get(ctx, client, clusterID, nodeGroupID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return nodeGroup, "DELETE_COMPLETE", nil
 			}
 			return nil, "", err
@@ -241,13 +243,13 @@ type kubernetesConfigUserData struct {
 	ClientCertificateData string `yaml:"client-certificate-data"`
 }
 
-func flattenContainerInfraV1Kubeconfig(d *schema.ResourceData, containerInfraClient *gophercloud.ServiceClient) (map[string]interface{}, error) {
+func flattenContainerInfraV1Kubeconfig(ctx context.Context, d *schema.ResourceData, containerInfraClient *gophercloud.ServiceClient) (map[string]interface{}, error) {
 	clientSert, ok := d.Get("kubeconfig.client_certificate").(string)
 	if ok && clientSert != "" {
 		return d.Get("kubeconfig").(map[string]interface{}), nil
 	}
 
-	certificateAuthority, err := certificates.Get(containerInfraClient, d.Id()).Extract()
+	certificateAuthority, err := certificates.Get(ctx, containerInfraClient, d.Id()).Extract()
 	if err != nil {
 		return nil, fmt.Errorf("Error getting certificate authority: %s", err)
 	}
@@ -291,7 +293,7 @@ func flattenContainerInfraV1Kubeconfig(d *schema.ResourceData, containerInfraCli
 		CSR:         string(pemClientCsr),
 	}
 
-	clientCertificate, err := certificates.Create(containerInfraClient, certificateCreateOpts).Extract()
+	clientCertificate, err := certificates.Create(ctx, containerInfraClient, certificateCreateOpts).Extract()
 	if err != nil {
 		return nil, fmt.Errorf("Error requesting client certificate: %s", err)
 	}

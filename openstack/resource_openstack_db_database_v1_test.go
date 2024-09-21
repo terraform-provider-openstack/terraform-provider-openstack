@@ -1,14 +1,15 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/db/v1/databases"
-	"github.com/gophercloud/gophercloud/openstack/db/v1/instances"
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/databases"
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/instances"
 )
 
 func TestAccDatabaseV1Database_basic(t *testing.T) {
@@ -56,12 +57,12 @@ func testAccCheckDatabaseV1DatabaseExists(n string, instance *instances.Instance
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		DatabaseV1Client, err := config.DatabaseV1Client(osRegionName)
+		DatabaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		pages, err := databases.List(DatabaseV1Client, instance.ID).AllPages()
+		pages, err := databases.List(DatabaseV1Client, instance.ID).AllPages(context.TODO())
 		if err != nil {
 			return fmt.Errorf("Unable to retrieve databases: %s", err)
 		}
@@ -85,7 +86,7 @@ func testAccCheckDatabaseV1DatabaseExists(n string, instance *instances.Instance
 func testAccCheckDatabaseV1DatabaseDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
-	DatabaseV1Client, err := config.DatabaseV1Client(osRegionName)
+	DatabaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -100,7 +101,7 @@ func testAccCheckDatabaseV1DatabaseDestroy(s *terraform.State) error {
 			return err
 		}
 
-		pages, err := databases.List(DatabaseV1Client, id).AllPages()
+		pages, err := databases.List(DatabaseV1Client, id).AllPages(context.TODO())
 		if err != nil {
 			return nil
 		}

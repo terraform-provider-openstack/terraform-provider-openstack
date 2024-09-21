@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 )
 
 func dataSourceDNSZoneV2() *schema.Resource {
@@ -117,7 +117,7 @@ func dataSourceDNSZoneV2() *schema.Resource {
 
 func dataSourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	dnsClient, err := config.DNSV2Client(GetRegion(d, config))
+	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -148,11 +148,11 @@ func dataSourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta i
 		listOpts.Type = v.(string)
 	}
 
-	if err := dnsClientSetAuthHeader(d, dnsClient); err != nil {
+	if err := dnsClientSetAuthHeader(ctx, d, dnsClient); err != nil {
 		log.Printf("[DEBUG] unable to ser auth header: %s", err)
 	}
 
-	pages, err := zones.List(dnsClient, listOpts).AllPages()
+	pages, err := zones.List(dnsClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to retrieve zones: %s", err)
 	}

@@ -1,18 +1,19 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/portsecurity"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/groups"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
 )
 
 type testPortWithExtensions struct {
@@ -1011,7 +1012,7 @@ func TestAccNetworkingV2Port_qos_policy_update(t *testing.T) {
 
 func testAccCheckNetworkingV2PortDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(osRegionName)
+	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -1021,7 +1022,7 @@ func testAccCheckNetworkingV2PortDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := ports.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err := ports.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Port still exists")
 		}
@@ -1042,12 +1043,12 @@ func testAccCheckNetworkingV2PortExists(n string, port *ports.Port) resource.Tes
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		found, err := ports.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := ports.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -1075,13 +1076,13 @@ func testAccCheckNetworkingV2PortWithExtensionsExists(
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
 		var p testPortWithExtensions
-		err = ports.Get(networkingClient, rs.Primary.ID).ExtractInto(&p)
+		err = ports.Get(context.TODO(), networkingClient, rs.Primary.ID).ExtractInto(&p)
 		if err != nil {
 			return err
 		}

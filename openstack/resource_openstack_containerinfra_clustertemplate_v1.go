@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clustertemplates"
+	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/clustertemplates"
 )
 
 func resourceContainerInfraClusterTemplateV1() *schema.Resource {
@@ -240,7 +240,7 @@ func resourceContainerInfraClusterTemplateV1() *schema.Resource {
 
 func resourceContainerInfraClusterTemplateV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
+	containerInfraClient, err := config.ContainerInfraV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
@@ -300,7 +300,7 @@ func resourceContainerInfraClusterTemplateV1Create(ctx context.Context, d *schem
 
 	log.Printf("[DEBUG] openstack_containerinfra_clustertemplate_v1 create options: %#v", createOpts)
 
-	s, err := clustertemplates.Create(containerInfraClient, createOpts).Extract()
+	s, err := clustertemplates.Create(ctx, containerInfraClient, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_containerinfra_clustertemplate_v1: %s", err)
 	}
@@ -311,14 +311,14 @@ func resourceContainerInfraClusterTemplateV1Create(ctx context.Context, d *schem
 	return resourceContainerInfraClusterTemplateV1Read(ctx, d, meta)
 }
 
-func resourceContainerInfraClusterTemplateV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceContainerInfraClusterTemplateV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
+	containerInfraClient, err := config.ContainerInfraV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
 
-	s, err := clustertemplates.Get(containerInfraClient, d.Id()).Extract()
+	s, err := clustertemplates.Get(ctx, containerInfraClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_containerinfra_clustertemplate_v1"))
 	}
@@ -372,7 +372,7 @@ func resourceContainerInfraClusterTemplateV1Read(_ context.Context, d *schema.Re
 
 func resourceContainerInfraClusterTemplateV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
+	containerInfraClient, err := config.ContainerInfraV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
@@ -537,7 +537,7 @@ func resourceContainerInfraClusterTemplateV1Update(ctx context.Context, d *schem
 	log.Printf(
 		"[DEBUG] Updating openstack_containerinfra_clustertemplate_v1 %s with options: %#v", d.Id(), updateOpts)
 
-	_, err = clustertemplates.Update(containerInfraClient, d.Id(), updateOpts).Extract()
+	_, err = clustertemplates.Update(ctx, containerInfraClient, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error updating openstack_containerinfra_clustertemplate_v1 %s: %s", d.Id(), err)
 	}
@@ -545,14 +545,14 @@ func resourceContainerInfraClusterTemplateV1Update(ctx context.Context, d *schem
 	return resourceContainerInfraClusterTemplateV1Read(ctx, d, meta)
 }
 
-func resourceContainerInfraClusterTemplateV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceContainerInfraClusterTemplateV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
+	containerInfraClient, err := config.ContainerInfraV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
 
-	if err := clustertemplates.Delete(containerInfraClient, d.Id()).ExtractErr(); err != nil {
+	if err := clustertemplates.Delete(ctx, containerInfraClient, d.Id()).ExtractErr(); err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_containerinfra_clustertemplate_v1"))
 	}
 

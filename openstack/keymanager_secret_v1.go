@@ -1,26 +1,28 @@
 package openstack
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/secrets"
 )
 
-func keyManagerSecretV1WaitForSecretDeletion(kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func keyManagerSecretV1WaitForSecretDeletion(ctx context.Context, kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		err := secrets.Delete(kmClient, id).Err
+		err := secrets.Delete(ctx, kmClient, id).Err
 		if err == nil {
 			return "", "DELETED", nil
 		}
 
-		if _, ok := err.(gophercloud.ErrDefault404); ok {
+		if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return "", "DELETED", nil
 		}
 
@@ -48,11 +50,11 @@ func keyManagerSecretV1SecretType(v string) secrets.SecretType {
 	return stype
 }
 
-func keyManagerSecretV1WaitForSecretCreation(kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func keyManagerSecretV1WaitForSecretCreation(ctx context.Context, kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		secret, err := secrets.Get(kmClient, id).Extract()
+		secret, err := secrets.Get(ctx, kmClient, id).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return "", "NOT_CREATED", nil
 			}
 
@@ -83,11 +85,11 @@ func flattenKeyManagerSecretV1Metadata(d *schema.ResourceData) map[string]string
 	return m
 }
 
-func keyManagerSecretMetadataV1WaitForSecretMetadataCreation(kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func keyManagerSecretMetadataV1WaitForSecretMetadataCreation(ctx context.Context, kmClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		metadata, err := secrets.GetMetadata(kmClient, id).Extract()
+		metadata, err := secrets.GetMetadata(ctx, kmClient, id).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return "", "NOT_CREATED", nil
 			}
 
@@ -97,11 +99,11 @@ func keyManagerSecretMetadataV1WaitForSecretMetadataCreation(kmClient *gopherclo
 	}
 }
 
-func keyManagerSecretV1GetPayload(kmClient *gophercloud.ServiceClient, id, contentType string) string {
+func keyManagerSecretV1GetPayload(ctx context.Context, kmClient *gophercloud.ServiceClient, id, contentType string) string {
 	opts := secrets.GetPayloadOpts{
 		PayloadContentType: contentType,
 	}
-	payload, err := secrets.GetPayload(kmClient, id, opts).Extract()
+	payload, err := secrets.GetPayload(ctx, kmClient, id, opts).Extract()
 	if err != nil {
 		log.Printf("[DEBUG] Could not retrieve payload for secret with id %s: %s", id, err)
 	}

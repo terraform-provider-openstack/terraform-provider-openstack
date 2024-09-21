@@ -12,8 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/monitors"
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/monitors"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 )
 
 func resourceMonitorV2() *schema.Resource {
@@ -124,7 +124,7 @@ func resourceMonitorV2() *schema.Resource {
 
 func resourceMonitorV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -148,7 +148,7 @@ func resourceMonitorV2Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
-	parentPool, err := pools.Get(lbClient, poolID).Extract()
+	parentPool, err := pools.Get(ctx, lbClient, poolID).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to retrieve parent openstack_lb_pool_v2 %s: %s", poolID, err)
 	}
@@ -163,7 +163,7 @@ func resourceMonitorV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	log.Printf("[DEBUG] openstack_lb_monitor_v2 create options: %#v", createOpts)
 	var monitor *monitors.Monitor
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		monitor, err = monitors.Create(lbClient, createOpts).Extract()
+		monitor, err = monitors.Create(ctx, lbClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -187,12 +187,12 @@ func resourceMonitorV2Create(ctx context.Context, d *schema.ResourceData, meta i
 
 func resourceMonitorV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	monitor, err := monitors.Get(lbClient, d.Id()).Extract()
+	monitor, err := monitors.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "monitor"))
 	}
@@ -223,7 +223,7 @@ func resourceMonitorV2Read(ctx context.Context, d *schema.ResourceData, meta int
 func resourceMonitorV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var hasChange bool
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -276,13 +276,13 @@ func resourceMonitorV2Update(ctx context.Context, d *schema.ResourceData, meta i
 
 	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
-	parentPool, err := pools.Get(lbClient, poolID).Extract()
+	parentPool, err := pools.Get(ctx, lbClient, poolID).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to retrieve parent openstack_lb_pool_v2 %s: %s", poolID, err)
 	}
 
 	// Get a clean copy of the monitor.
-	monitor, err := monitors.Get(lbClient, d.Id()).Extract()
+	monitor, err := monitors.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to retrieve openstack_lb_monitor_v2 %s: %s", d.Id(), err)
 	}
@@ -302,7 +302,7 @@ func resourceMonitorV2Update(ctx context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] openstack_lb_monitor_v2 %s update options: %#v", d.Id(), opts)
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		_, err = monitors.Update(lbClient, d.Id(), opts).Extract()
+		_, err = monitors.Update(ctx, lbClient, d.Id(), opts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -324,21 +324,21 @@ func resourceMonitorV2Update(ctx context.Context, d *schema.ResourceData, meta i
 
 func resourceMonitorV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	// Get a clean copy of the parent pool.
 	poolID := d.Get("pool_id").(string)
-	parentPool, err := pools.Get(lbClient, poolID).Extract()
+	parentPool, err := pools.Get(ctx, lbClient, poolID).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to retrieve parent openstack_lb_pool_v2 (%s)"+
 			" for the openstack_lb_monitor_v2: %s", poolID, err)
 	}
 
 	// Get a clean copy of the monitor.
-	monitor, err := monitors.Get(lbClient, d.Id()).Extract()
+	monitor, err := monitors.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve openstack_lb_monitor_v2"))
 	}
@@ -352,7 +352,7 @@ func resourceMonitorV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Deleting openstack_lb_monitor_v2 %s", d.Id())
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		err = monitors.Delete(lbClient, d.Id()).ExtractErr()
+		err = monitors.Delete(ctx, lbClient, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}

@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/rules"
 )
 
 func TestUnitResourceNetworkingSecGroupRuleV2DirectionIngress(t *testing.T) {

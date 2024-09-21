@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/listeners"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 )
 
 func resourcePoolV2() *schema.Resource {
@@ -133,7 +133,7 @@ func resourcePoolV2() *schema.Resource {
 
 func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
@@ -190,7 +190,7 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 
 	// Wait for Listener or LoadBalancer to become active before continuing
 	if listenerID != "" {
-		listener, err := listeners.Get(lbClient, listenerID).Extract()
+		listener, err := listeners.Get(ctx, lbClient, listenerID).Extract()
 		if err != nil {
 			return diag.Errorf("Unable to get openstack_lb_listener_v2 %s: %s", listenerID, err)
 		}
@@ -211,7 +211,7 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 	log.Printf("[DEBUG] Attempting to create pool")
 	var pool *pools.Pool
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		pool, err = pools.Create(lbClient, createOpts).Extract()
+		pool, err = pools.Create(ctx, lbClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -236,12 +236,12 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 
 func resourcePoolV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
-	pool, err := pools.Get(lbClient, d.Id()).Extract()
+	pool, err := pools.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "pool"))
 	}
@@ -263,7 +263,7 @@ func resourcePoolV2Read(ctx context.Context, d *schema.ResourceData, meta interf
 
 func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
@@ -298,7 +298,7 @@ func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta inte
 	timeout := d.Timeout(schema.TimeoutUpdate)
 
 	// Get a clean copy of the pool.
-	pool, err := pools.Get(lbClient, d.Id()).Extract()
+	pool, err := pools.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to retrieve pool %s: %s", d.Id(), err)
 	}
@@ -311,7 +311,7 @@ func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta inte
 
 	log.Printf("[DEBUG] Updating pool %s with options: %#v", d.Id(), updateOpts)
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		_, err = pools.Update(lbClient, d.Id(), updateOpts).Extract()
+		_, err = pools.Update(ctx, lbClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -333,7 +333,7 @@ func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta inte
 
 func resourcePoolV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
@@ -341,14 +341,14 @@ func resourcePoolV2Delete(ctx context.Context, d *schema.ResourceData, meta inte
 	timeout := d.Timeout(schema.TimeoutDelete)
 
 	// Get a clean copy of the pool.
-	pool, err := pools.Get(lbClient, d.Id()).Extract()
+	pool, err := pools.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve pool"))
 	}
 
 	log.Printf("[DEBUG] Attempting to delete pool %s", d.Id())
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		err = pools.Delete(lbClient, d.Id()).ExtractErr()
+		err = pools.Delete(ctx, lbClient, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -370,12 +370,12 @@ func resourcePoolV2Delete(ctx context.Context, d *schema.ResourceData, meta inte
 
 func resourcePoolV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return nil, fmt.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
-	pool, err := pools.Get(lbClient, d.Id()).Extract()
+	pool, err := pools.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return nil, CheckDeleted(d, err, "pool")
 	}

@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/acls"
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/acls"
 )
 
 // So far only "read" is supported.

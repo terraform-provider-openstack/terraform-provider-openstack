@@ -1,17 +1,20 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/snapshots"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/shares"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/snapshots"
 )
 
 func TestAccSFSV2SnapshotDataSource_basic(t *testing.T) {
@@ -55,10 +58,12 @@ func TestAccSFSV2SnapshotDataSource_basic(t *testing.T) {
 }
 
 func waitForShareStatus(t *testing.T, c *gophercloud.ServiceClient, id, status string, secs int) error {
-	return gophercloud.WaitFor(secs, func() (bool, error) {
-		current, err := shares.Get(c, id).Extract()
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Duration(secs)*time.Second)
+	defer cancel()
+	return gophercloud.WaitFor(ctx, func(ctx context.Context) (bool, error) {
+		current, err := shares.Get(ctx, c, id).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				switch status {
 				case "deleted":
 					return true, nil
@@ -82,10 +87,12 @@ func waitForShareStatus(t *testing.T, c *gophercloud.ServiceClient, id, status s
 }
 
 func waitForSnapshotStatus(t *testing.T, c *gophercloud.ServiceClient, id, status string, secs int) error {
-	return gophercloud.WaitFor(secs, func() (bool, error) {
-		current, err := snapshots.Get(c, id).Extract()
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Duration(secs)*time.Second)
+	defer cancel()
+	return gophercloud.WaitFor(ctx, func(ctx context.Context) (bool, error) {
+		current, err := snapshots.Get(ctx, c, id).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				switch status {
 				case "deleted":
 					return true, nil
@@ -114,7 +121,7 @@ func testAccSFSV2SnapshotCreate(t *testing.T, snapshotName string) (*snapshots.S
 		return nil, err
 	}
 
-	client, err := config.SharedfilesystemV2Client(osRegionName)
+	client, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +133,7 @@ func testAccSFSV2SnapshotCreate(t *testing.T, snapshotName string) (*snapshots.S
 		ShareType:  "dhss_false",
 	}
 
-	share, err := shares.Create(client, createShareOpts).Extract()
+	share, err := shares.Create(context.TODO(), client, createShareOpts).Extract()
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +142,7 @@ func testAccSFSV2SnapshotCreate(t *testing.T, snapshotName string) (*snapshots.S
 
 	err = waitForShareStatus(t, client, share.ID, "available", 600)
 	if err != nil {
-		nErr := shares.Delete(client, share.ID).ExtractErr()
+		nErr := shares.Delete(context.TODO(), client, share.ID).ExtractErr()
 		if nErr != nil {
 			return nil, fmt.Errorf("Unable to get share available status (%s) and Delete:  %s)", err, nErr)
 		}
@@ -147,9 +154,9 @@ func testAccSFSV2SnapshotCreate(t *testing.T, snapshotName string) (*snapshots.S
 		Name:    snapshotName,
 	}
 
-	snapshot, err := snapshots.Create(client, createOpts).Extract()
+	snapshot, err := snapshots.Create(context.TODO(), client, createOpts).Extract()
 	if err != nil {
-		nErr := shares.Delete(client, share.ID).ExtractErr()
+		nErr := shares.Delete(context.TODO(), client, share.ID).ExtractErr()
 		if nErr != nil {
 			return nil, fmt.Errorf("Unable to create snapshot (%s) and delete share (%s: %s)", err, share.ID, nErr)
 		}
@@ -171,12 +178,12 @@ func testAccSFSV2SnapshotDelete(t *testing.T, snapshot *snapshots.Snapshot) erro
 		return err
 	}
 
-	client, err := config.SharedfilesystemV2Client(osRegionName)
+	client, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return err
 	}
 
-	err = snapshots.Delete(client, snapshot.ID).ExtractErr()
+	err = snapshots.Delete(context.TODO(), client, snapshot.ID).ExtractErr()
 	if err != nil {
 		return err
 	}
@@ -187,7 +194,7 @@ func testAccSFSV2SnapshotDelete(t *testing.T, snapshot *snapshots.Snapshot) erro
 
 	t.Logf("Snapshot %s deleted", snapshot.ID)
 
-	err = shares.Delete(client, snapshot.ShareID).ExtractErr()
+	err = shares.Delete(context.TODO(), client, snapshot.ShareID).ExtractErr()
 	if err != nil {
 		return err
 	}

@@ -6,8 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerhints"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 )
 
 func blockStorageVolumeV3VolumeFixture() volumes.Volume {
@@ -62,8 +61,8 @@ func TestUnitBlockStorageVolumeV3AttachmentHash(t *testing.T) {
 	assert.Equal(t, expectedHashcode, actualHashcode)
 }
 
-func blockStorageVolumeV3SchedulerHints() schedulerhints.SchedulerHints {
-	return schedulerhints.SchedulerHints{
+func blockStorageVolumeV3SchedulerHints() volumes.SchedulerHintOpts {
+	return volumes.SchedulerHintOpts{
 		SameHost:             []string{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
 		DifferentHost:        []string{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
 		LocalToInstance:      "83ec2e3b-4321-422b-8706-a84185f52a0a",

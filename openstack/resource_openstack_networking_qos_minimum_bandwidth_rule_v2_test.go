@@ -1,14 +1,15 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/rules"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/rules"
 )
 
 func TestAccNetworkingV2QoSMinimumBandwidthRule_basic(t *testing.T) {
@@ -68,7 +69,7 @@ func testAccCheckNetworkingV2QoSMinimumBandwidthRuleExists(n string, rule *rules
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -78,7 +79,7 @@ func testAccCheckNetworkingV2QoSMinimumBandwidthRuleExists(n string, rule *rules
 			return err
 		}
 
-		found, err := rules.GetMinimumBandwidthRule(networkingClient, qosPolicyID, qosRuleID).ExtractMinimumBandwidthRule()
+		found, err := rules.GetMinimumBandwidthRule(context.TODO(), networkingClient, qosPolicyID, qosRuleID).ExtractMinimumBandwidthRule()
 		if err != nil {
 			return err
 		}
@@ -97,7 +98,7 @@ func testAccCheckNetworkingV2QoSMinimumBandwidthRuleExists(n string, rule *rules
 
 func testAccCheckNetworkingV2QoSMinimumBandwidthRuleDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(osRegionName)
+	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -112,7 +113,7 @@ func testAccCheckNetworkingV2QoSMinimumBandwidthRuleDestroy(s *terraform.State) 
 			return err
 		}
 
-		_, err = rules.GetMinimumBandwidthRule(networkingClient, qosPolicyID, qosRuleID).ExtractMinimumBandwidthRule()
+		_, err = rules.GetMinimumBandwidthRule(context.TODO(), networkingClient, qosPolicyID, qosRuleID).ExtractMinimumBandwidthRule()
 		if err == nil {
 			return fmt.Errorf("QoS rule still exists")
 		}

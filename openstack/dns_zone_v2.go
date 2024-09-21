@@ -1,15 +1,17 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
 )
 
 // ZoneCreateOpts represents the attributes used when creating a new DNS zone.
@@ -41,9 +43,9 @@ const headerAuthSudoTenantID string = "X-Auth-Sudo-Tenant-ID"
 const headerAuthAllProjects string = "X-Auth-All-Projects"
 
 // dnsClientSetAuthHeaders sets auth headers for interacting with different projects.
-func dnsClientSetAuthHeader(resourceData *schema.ResourceData, dnsClient *gophercloud.ServiceClient) error {
+func dnsClientSetAuthHeader(ctx context.Context, resourceData *schema.ResourceData, dnsClient *gophercloud.ServiceClient) error {
 	// Extracting project ID from token to compare with provided one
-	project, err := getProjectFromToken(dnsClient)
+	project, err := getProjectFromToken(ctx, dnsClient)
 	if err != nil {
 		return fmt.Errorf("Error extracting project ID from token: %s", err)
 	}
@@ -76,11 +78,11 @@ func dnsClientSetAuthHeader(resourceData *schema.ResourceData, dnsClient *gopher
 	return nil
 }
 
-func dnsZoneV2RefreshFunc(dnsClient *gophercloud.ServiceClient, zoneID string) retry.StateRefreshFunc {
+func dnsZoneV2RefreshFunc(ctx context.Context, dnsClient *gophercloud.ServiceClient, zoneID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		zone, err := zones.Get(dnsClient, zoneID).Extract()
+		zone, err := zones.Get(ctx, dnsClient, zoneID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return zone, "DELETED", nil
 			}
 
@@ -92,7 +94,7 @@ func dnsZoneV2RefreshFunc(dnsClient *gophercloud.ServiceClient, zoneID string) r
 	}
 }
 
-func getProjectFromToken(dnsClient *gophercloud.ServiceClient) (*tokens.Project, error) {
+func getProjectFromToken(ctx context.Context, dnsClient *gophercloud.ServiceClient) (*tokens.Project, error) {
 	var (
 		project *tokens.Project
 		err     error
@@ -110,7 +112,7 @@ func getProjectFromToken(dnsClient *gophercloud.ServiceClient) (*tokens.Project,
 			return nil, err
 		}
 	default:
-		res := tokens.Get(dnsClient, dnsClient.ProviderClient.TokenID)
+		res := tokens.Get(ctx, dnsClient, dnsClient.ProviderClient.TokenID)
 		project, err = res.ExtractProject()
 		if err != nil {
 			return nil, err

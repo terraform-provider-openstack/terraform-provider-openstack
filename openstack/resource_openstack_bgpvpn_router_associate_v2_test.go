@@ -1,14 +1,16 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/bgpvpns"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/bgpvpns"
 )
 
 func TestAccBGPVPNRouterAssociateV2_basic(t *testing.T) {
@@ -71,7 +73,7 @@ func TestAccBGPVPNRouterAssociateV2_no_routes_advertise(t *testing.T) {
 
 func testAccCheckBGPVPNRouterAssociateV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(osRegionName)
+	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -85,11 +87,11 @@ func testAccCheckBGPVPNRouterAssociateV2Destroy(s *terraform.State) error {
 			return err
 		}
 
-		_, err = bgpvpns.GetRouterAssociation(networkingClient, bgpvpnID, id).Extract()
+		_, err = bgpvpns.GetRouterAssociation(context.TODO(), networkingClient, bgpvpnID, id).Extract()
 		if err == nil {
 			return fmt.Errorf("BGP VPN router association (%s) still exists", id)
 		}
-		if _, ok := err.(gophercloud.ErrDefault404); !ok {
+		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 	}
@@ -108,7 +110,7 @@ func testAccCheckBGPVPNRouterAssociateV2Exists(n string, ra *bgpvpns.RouterAssoc
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
@@ -118,7 +120,7 @@ func testAccCheckBGPVPNRouterAssociateV2Exists(n string, ra *bgpvpns.RouterAssoc
 			return err
 		}
 
-		found, err := bgpvpns.GetRouterAssociation(networkingClient, bgpvpnID, id).Extract()
+		found, err := bgpvpns.GetRouterAssociation(context.TODO(), networkingClient, bgpvpnID, id).Extract()
 		if err != nil {
 			return err
 		}

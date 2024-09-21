@@ -1,12 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"strings"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/roles"
-	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/roles"
+	"github.com/gophercloud/gophercloud/v2/pagination"
 )
 
 // Role assignments have no ID in OpenStack.
@@ -25,7 +27,7 @@ func identityRoleAssignmentV3ParseID(roleAssignmentID string) (string, string, s
 	return split[0], split[1], split[2], split[3], split[4], nil
 }
 
-func identityRoleAssignmentV3FindAssignment(identityClient *gophercloud.ServiceClient, id string) (roles.RoleAssignment, error) {
+func identityRoleAssignmentV3FindAssignment(ctx context.Context, identityClient *gophercloud.ServiceClient, id string) (roles.RoleAssignment, error) {
 	var assignment roles.RoleAssignment
 
 	domainID, projectID, groupID, userID, roleID, err := identityRoleAssignmentV3ParseID(id)
@@ -43,7 +45,7 @@ func identityRoleAssignmentV3FindAssignment(identityClient *gophercloud.ServiceC
 	pager := roles.ListAssignmentsOnResource(identityClient, opts)
 
 	found := false
-	err = pager.EachPage(func(page pagination.Page) (bool, error) {
+	err = pager.EachPage(ctx, func(ctx context.Context, page pagination.Page) (bool, error) {
 		assignmentList, err := roles.ExtractRoles(page)
 		if err != nil {
 			return false, err
@@ -79,7 +81,7 @@ func identityRoleAssignmentV3FindAssignment(identityClient *gophercloud.ServiceC
 	})
 
 	if !found {
-		return assignment, gophercloud.ErrDefault404{}
+		return assignment, gophercloud.ErrUnexpectedResponseCode{Actual: http.StatusNotFound}
 	}
 
 	return assignment, err

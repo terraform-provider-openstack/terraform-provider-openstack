@@ -10,9 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
-	"github.com/gophercloud/utils/terraform/hashcode"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/dns"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
+	"github.com/gophercloud/utils/v2/terraform/hashcode"
 )
 
 func dataSourceNetworkingPortIDsV2() *schema.Resource {
@@ -140,7 +140,7 @@ func dataSourceNetworkingPortIDsV2() *schema.Resource {
 
 func dataSourceNetworkingPortIDsV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -211,7 +211,7 @@ func dataSourceNetworkingPortIDsV2Read(ctx context.Context, d *schema.ResourceDa
 		}
 	}
 
-	allPages, err := ports.List(networkingClient, listOptsBuilder).AllPages()
+	allPages, err := ports.List(networkingClient, listOptsBuilder).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to list openstack_networking_port_ids_v2: %s", err)
 	}

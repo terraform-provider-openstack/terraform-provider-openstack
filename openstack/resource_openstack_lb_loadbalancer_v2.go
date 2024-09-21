@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/loadbalancers"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/loadbalancers"
 )
 
 func resourceLoadBalancerV2() *schema.Resource {
@@ -138,7 +138,7 @@ func resourceLoadBalancerV2() *schema.Resource {
 
 func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
@@ -181,7 +181,7 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	log.Printf("[DEBUG] openstack_lb_loadbalancer_v2 create options: %#v", createOpts)
-	lb, err := loadbalancers.Create(lbClient, createOpts).Extract()
+	lb, err := loadbalancers.Create(ctx, lbClient, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_lb_loadbalancer_v2: %s", err)
 	}
@@ -200,11 +200,11 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 
 	// Once the load-balancer has been created, apply any requested security groups
 	// to the port that was created behind the scenes.
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
-	if err := resourceLoadBalancerV2SetSecurityGroups(networkingClient, vipPortID, d); err != nil {
+	if err := resourceLoadBalancerV2SetSecurityGroups(ctx, networkingClient, vipPortID, d); err != nil {
 		return diag.Errorf("Error setting openstack_lb_loadbalancer_v2 security groups: %s", err)
 	}
 
@@ -213,14 +213,14 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 
 func resourceLoadBalancerV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
 	var vipPortID string
 
-	lb, err := loadbalancers.Get(lbClient, d.Id()).Extract()
+	lb, err := loadbalancers.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve openstack_lb_loadbalancer_v2"))
 	}
@@ -246,11 +246,11 @@ func resourceLoadBalancerV2Read(ctx context.Context, d *schema.ResourceData, met
 
 	// Get any security groups on the VIP Port.
 	if vipPortID != "" {
-		networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+		networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 		if err != nil {
 			return diag.Errorf("Error creating OpenStack networking client: %s", err)
 		}
-		if err := resourceLoadBalancerV2GetSecurityGroups(networkingClient, vipPortID, d); err != nil {
+		if err := resourceLoadBalancerV2GetSecurityGroups(ctx, networkingClient, vipPortID, d); err != nil {
 			return diag.Errorf("Error getting port security groups for openstack_lb_loadbalancer_v2: %s", err)
 		}
 	}
@@ -260,7 +260,7 @@ func resourceLoadBalancerV2Read(ctx context.Context, d *schema.ResourceData, met
 
 func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	var hasChange bool
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -310,7 +310,7 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 
 		log.Printf("[DEBUG] Updating openstack_lb_loadbalancer_v2 %s with options: %#v", d.Id(), updateOpts)
 		err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-			_, err = loadbalancers.Update(lbClient, d.Id(), updateOpts).Extract()
+			_, err = loadbalancers.Update(ctx, lbClient, d.Id(), updateOpts).Extract()
 			if err != nil {
 				return checkForRetryableError(err)
 			}
@@ -330,12 +330,12 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 
 	// Security Groups get updated separately.
 	if d.HasChange("security_group_ids") {
-		networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+		networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 		if err != nil {
 			return diag.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 		vipPortID := d.Get("vip_port_id").(string)
-		if err := resourceLoadBalancerV2SetSecurityGroups(networkingClient, vipPortID, d); err != nil {
+		if err := resourceLoadBalancerV2SetSecurityGroups(ctx, networkingClient, vipPortID, d); err != nil {
 			return diag.Errorf("Error setting openstack_lb_loadbalancer_v2 security groups: %s", err)
 		}
 	}
@@ -345,7 +345,7 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 
 func resourceLoadBalancerV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -353,7 +353,7 @@ func resourceLoadBalancerV2Delete(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("[DEBUG] Deleting openstack_lb_loadbalancer_v2 %s", d.Id())
 	timeout := d.Timeout(schema.TimeoutDelete)
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		err = loadbalancers.Delete(lbClient, d.Id(), loadbalancers.DeleteOpts{}).ExtractErr()
+		err = loadbalancers.Delete(ctx, lbClient, d.Id(), loadbalancers.DeleteOpts{}).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}

@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/shares"
 )
 
 func TestAccSFSV2Share_basic(t *testing.T) {
@@ -154,7 +155,7 @@ func TestAccSFSV2Share_admin(t *testing.T) {
 
 func testAccCheckSFSV2ShareDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
+	sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
@@ -164,7 +165,7 @@ func testAccCheckSFSV2ShareDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := shares.Get(sfsClient, rs.Primary.ID).Extract()
+		_, err := shares.Get(context.TODO(), sfsClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Manila share still exists: %s", rs.Primary.ID)
 		}
@@ -185,12 +186,12 @@ func testAccCheckSFSV2ShareExists(n string, share *shares.Share) resource.TestCh
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
+		sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
 
-		found, err := shares.Get(sfsClient, rs.Primary.ID).Extract()
+		found, err := shares.Get(context.TODO(), sfsClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -208,12 +209,12 @@ func testAccCheckSFSV2ShareExists(n string, share *shares.Share) resource.TestCh
 func testAccCheckSFSV2ShareMetadataEquals(key string, value string, share *shares.Share) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
+		sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
 
-		metadatum, err := shares.GetMetadatum(sfsClient, share.ID, key).Extract()
+		metadatum, err := shares.GetMetadatum(context.TODO(), sfsClient, share.ID, key).Extract()
 		if err != nil {
 			return err
 		}
@@ -229,12 +230,12 @@ func testAccCheckSFSV2ShareMetadataEquals(key string, value string, share *share
 func testAccCheckSFSV2ShareMetadataAbsent(key string, share *shares.Share) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
+		sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
 
-		_, err = shares.GetMetadatum(sfsClient, share.ID, key).Extract()
+		_, err = shares.GetMetadatum(context.TODO(), sfsClient, share.ID, key).Extract()
 		if err == nil {
 			return fmt.Errorf("Metadata %s key must not exist", key)
 		}

@@ -12,9 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/l7policies"
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/l7policies"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/listeners"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 )
 
 func resourceL7PolicyV2() *schema.Resource {
@@ -24,7 +24,7 @@ func resourceL7PolicyV2() *schema.Resource {
 		UpdateContext: resourceL7PolicyV2Update,
 		DeleteContext: resourceL7PolicyV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: resourceL7PolicyV2Import,
+			StateContext: resourceL7PolicyV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -124,7 +124,7 @@ func resourceL7PolicyV2() *schema.Resource {
 
 func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -168,7 +168,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	// Make sure the associated pool is active before proceeding.
 	if redirectPoolID != "" {
-		pool, err := pools.Get(lbClient, redirectPoolID).Extract()
+		pool, err := pools.Get(ctx, lbClient, redirectPoolID).Extract()
 		if err != nil {
 			return diag.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
 		}
@@ -180,7 +180,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Get a clean copy of the parent listener.
-	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
+	parentListener, err := listeners.Get(ctx, lbClient, listenerID).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to retrieve listener %s: %s", listenerID, err)
 	}
@@ -194,7 +194,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	log.Printf("[DEBUG] Attempting to create L7 Policy")
 	var l7Policy *l7policies.L7Policy
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		l7Policy, err = l7policies.Create(lbClient, createOpts).Extract()
+		l7Policy, err = l7policies.Create(ctx, lbClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -218,12 +218,12 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceL7PolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	l7Policy, err := l7policies.Get(lbClient, d.Id()).Extract()
+	l7Policy, err := l7policies.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "L7 Policy"))
 	}
@@ -247,7 +247,7 @@ func resourceL7PolicyV2Read(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -303,7 +303,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	// Make sure the pool is active before continuing.
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	if redirectPoolID != "" {
-		pool, err := pools.Get(lbClient, redirectPoolID).Extract()
+		pool, err := pools.Get(ctx, lbClient, redirectPoolID).Extract()
 		if err != nil {
 			return diag.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
 		}
@@ -315,13 +315,13 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Get a clean copy of the parent listener.
-	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
+	parentListener, err := listeners.Get(ctx, lbClient, listenerID).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to retrieve parent listener %s: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the L7 Policy.
-	l7Policy, err := l7policies.Get(lbClient, d.Id()).Extract()
+	l7Policy, err := l7policies.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to retrieve L7 Policy: %s: %s", d.Id(), err)
 	}
@@ -340,7 +340,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	log.Printf("[DEBUG] Updating L7 Policy %s with options: %#v", d.Id(), updateOpts)
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		_, err = l7policies.Update(lbClient, d.Id(), updateOpts).Extract()
+		_, err = l7policies.Update(ctx, lbClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -362,7 +362,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -371,13 +371,13 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	listenerID := d.Get("listener_id").(string)
 
 	// Get a clean copy of the listener.
-	listener, err := listeners.Get(lbClient, listenerID).Extract()
+	listener, err := listeners.Get(ctx, lbClient, listenerID).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to retrieve parent listener (%s) for the L7 Policy: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the L7 Policy.
-	l7Policy, err := l7policies.Get(lbClient, d.Id()).Extract()
+	l7Policy, err := l7policies.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve L7 Policy"))
 	}
@@ -390,7 +390,7 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 
 	log.Printf("[DEBUG] Attempting to delete L7 Policy %s", d.Id())
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		err = l7policies.Delete(lbClient, d.Id()).ExtractErr()
+		err = l7policies.Delete(ctx, lbClient, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -409,14 +409,14 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceL7PolicyV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceL7PolicyV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return nil, fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	l7Policy, err := l7policies.Get(lbClient, d.Id()).Extract()
+	l7Policy, err := l7policies.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return nil, CheckDeleted(d, err, "L7 Policy")
 	}
@@ -427,7 +427,7 @@ func resourceL7PolicyV2Import(d *schema.ResourceData, meta interface{}) ([]*sche
 		d.Set("listener_id", l7Policy.ListenerID)
 	} else {
 		// Fallback for the Neutron LBaaSv2 extension
-		listenerID, err := getListenerIDForL7Policy(lbClient, d.Id())
+		listenerID, err := getListenerIDForL7Policy(ctx, lbClient, d.Id())
 		if err != nil {
 			return nil, err
 		}

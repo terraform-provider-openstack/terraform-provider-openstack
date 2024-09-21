@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
 )
 
 func dataSourceNetworkingSubnetV2() *schema.Resource {
@@ -179,7 +179,7 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 
 func dataSourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -245,7 +245,7 @@ func dataSourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceDat
 		listOpts.Tags = strings.Join(tags, ",")
 	}
 
-	pages, err := subnets.List(networkingClient, listOpts).AllPages()
+	pages, err := subnets.List(networkingClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to retrieve openstack_networking_subnet_v2: %s", err)
 	}

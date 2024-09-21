@@ -1,7 +1,9 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"testing"
@@ -9,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
 )
 
 func TestAccIPSecPolicyVPNaaSV2_basic(t *testing.T) {
@@ -132,7 +134,7 @@ func TestAccIPSecPolicyVPNaaSV2_withLifetimeUpdate(t *testing.T) {
 
 func testAccCheckIPSecPolicyV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(osRegionName)
+	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -140,11 +142,11 @@ func testAccCheckIPSecPolicyV2Destroy(s *terraform.State) error {
 		if rs.Type != "openstack_vpnaas_ipsec_policy_v2" {
 			continue
 		}
-		_, err = ipsecpolicies.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err = ipsecpolicies.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("IPSec policy (%s) still exists", rs.Primary.ID)
 		}
-		if _, ok := err.(gophercloud.ErrDefault404); !ok {
+		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 	}
@@ -163,12 +165,12 @@ func testAccCheckIPSecPolicyV2Exists(n string, policy *ipsecpolicies.Policy) res
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		found, err := ipsecpolicies.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := ipsecpolicies.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

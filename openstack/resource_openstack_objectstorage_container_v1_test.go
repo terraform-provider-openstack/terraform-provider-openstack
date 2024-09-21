@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/containers"
+	"github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/containers"
 )
 
 func TestAccObjectStorageV1Container_basic(t *testing.T) {
@@ -104,7 +105,7 @@ func TestAccObjectStorageV1Container_storagePolicy(t *testing.T) {
 
 func testAccCheckObjectStorageV1ContainerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	objectStorageClient, err := config.ObjectStorageV1Client(osRegionName)
+	objectStorageClient, err := config.ObjectStorageV1Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack object storage client: %s", err)
 	}
@@ -114,7 +115,7 @@ func testAccCheckObjectStorageV1ContainerDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := containers.Get(objectStorageClient, rs.Primary.ID, nil).Extract()
+		_, err := containers.Get(context.TODO(), objectStorageClient, rs.Primary.ID, nil).Extract()
 		if err == nil {
 			return fmt.Errorf("Container still exists")
 		}

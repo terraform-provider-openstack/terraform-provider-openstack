@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/orchestration/v1/stacks"
+	"github.com/gophercloud/gophercloud/v2/openstack/orchestration/v1/stacks"
 )
 
 func resourceOrchestrationStackV1() *schema.Resource {
@@ -164,7 +164,7 @@ func resourceOrchestrationStackV1() *schema.Resource {
 func resourceOrchestrationStackV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Prepare for create openstack_orchestration_stack_v1")
 	config := meta.(*Config)
-	orchestrationClient, err := config.OrchestrationV1Client(GetRegion(d, config))
+	orchestrationClient, err := config.OrchestrationV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack Orchestration client: %s", err)
 	}
@@ -203,7 +203,7 @@ func resourceOrchestrationStackV1Create(ctx context.Context, d *schema.ResourceD
 	}
 
 	log.Printf("[DEBUG] Creating openstack_orchestration_stack_v1")
-	stack, err := stacks.Create(orchestrationClient, createOpts).Extract()
+	stack, err := stacks.Create(ctx, orchestrationClient, createOpts).Extract()
 	if err != nil {
 		log.Printf("[DEBUG] openstack_orchestration_stack_v1 error occurred during Create: %s", err)
 		return diag.Errorf("Error creating openstack_orchestration_stack_v1: %s", err)
@@ -212,7 +212,7 @@ func resourceOrchestrationStackV1Create(ctx context.Context, d *schema.ResourceD
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"CREATE_IN_PROGRESS", "INIT_COMPLETE"},
 		Target:     []string{"CREATE_COMPLETE", "UPDATE_COMPLETE", "UPDATE_IN_PROGRESS"},
-		Refresh:    orchestrationStackV1StateRefreshFunc(orchestrationClient, stack.ID, false),
+		Refresh:    orchestrationStackV1StateRefreshFunc(ctx, orchestrationClient, stack.ID, false),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -233,13 +233,13 @@ func resourceOrchestrationStackV1Create(ctx context.Context, d *schema.ResourceD
 
 func resourceOrchestrationStackV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	orchestrationClient, err := config.OrchestrationV1Client(GetRegion(d, config))
+	orchestrationClient, err := config.OrchestrationV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack Orchestration client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Fetch openstack_orchestration_stack_v1 information: %s", d.Id())
-	stack, err := stacks.Find(orchestrationClient, d.Id()).Extract()
+	stack, err := stacks.Find(ctx, orchestrationClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_orchestration_stack_v1"))
 	}
@@ -303,7 +303,7 @@ func resourceOrchestrationStackV1Update(ctx context.Context, d *schema.ResourceD
 	log.Printf("[DEBUG] Prepare information for update openstack_orchestration_stack_v1")
 
 	config := meta.(*Config)
-	orchestrationClient, err := config.OrchestrationV1Client(GetRegion(d, config))
+	orchestrationClient, err := config.OrchestrationV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack Orchestration client: %s", err)
 	}
@@ -337,13 +337,13 @@ func resourceOrchestrationStackV1Update(ctx context.Context, d *schema.ResourceD
 		updateOpts.Tags = tags
 	}
 
-	stack, err := stacks.Find(orchestrationClient, d.Id()).Extract()
+	stack, err := stacks.Find(ctx, orchestrationClient, d.Id()).Extract()
 	if err != nil {
 		return diag.Errorf("Error retrieving openstack_orchestration_stack_v1 %s before Update:  %s", d.Id(), err)
 	}
 
 	log.Printf("[DEBUG] Updating openstack_orchestration_stack_v1")
-	result := stacks.Update(orchestrationClient, stack.Name, d.Id(), updateOpts)
+	result := stacks.Update(ctx, orchestrationClient, stack.Name, d.Id(), updateOpts)
 	if result.Err != nil {
 		return diag.Errorf("Error updating openstack_orchestration_stack_v1 %s: %s", d.Id(), result.Err)
 	}
@@ -351,7 +351,7 @@ func resourceOrchestrationStackV1Update(ctx context.Context, d *schema.ResourceD
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"UPDATE_IN_PROGRESS"},
 		Target:     []string{"UPDATE_COMPLETE"},
-		Refresh:    orchestrationStackV1StateRefreshFunc(orchestrationClient, d.Id(), true),
+		Refresh:    orchestrationStackV1StateRefreshFunc(ctx, orchestrationClient, d.Id(), true),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -369,19 +369,19 @@ func resourceOrchestrationStackV1Update(ctx context.Context, d *schema.ResourceD
 func resourceOrchestrationStackV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Prepare for delete openstack_orchestration_stack_v1")
 	config := meta.(*Config)
-	orchestrationClient, err := config.OrchestrationV1Client(GetRegion(d, config))
+	orchestrationClient, err := config.OrchestrationV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack Orchestration client: %s", err)
 	}
 
-	stack, err := stacks.Find(orchestrationClient, d.Id()).Extract()
+	stack, err := stacks.Find(ctx, orchestrationClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_orchestration_stack_v1"))
 	}
 
 	if stack.Status != "DELETE_IN_PROGRESS" {
 		log.Printf("[DEBUG] Deleting openstack_orchestration_stack_v1: %s", d.Id())
-		if err := stacks.Delete(orchestrationClient, stack.Name, d.Id()).ExtractErr(); err != nil {
+		if err := stacks.Delete(ctx, orchestrationClient, stack.Name, d.Id()).ExtractErr(); err != nil {
 			return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_orchestration_stack_v1"))
 		}
 	}
@@ -389,7 +389,7 @@ func resourceOrchestrationStackV1Delete(ctx context.Context, d *schema.ResourceD
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"DELETE_IN_PROGRESS"},
 		Target:     []string{"DELETE_COMPLETE"},
-		Refresh:    orchestrationStackV1StateRefreshFunc(orchestrationClient, d.Id(), true),
+		Refresh:    orchestrationStackV1StateRefreshFunc(ctx, orchestrationClient, d.Id(), true),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,

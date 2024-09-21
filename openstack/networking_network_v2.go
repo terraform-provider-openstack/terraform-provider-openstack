@@ -1,23 +1,25 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/dns"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/mtu"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/qos/policies"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vlantransparent"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
-	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/dns"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/external"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/mtu"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/portsecurity"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/provider"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vlantransparent"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
+	"github.com/gophercloud/gophercloud/v2/pagination"
 )
 
 type networkExtended struct {
@@ -32,9 +34,9 @@ type networkExtended struct {
 }
 
 // networkingNetworkV2ID retrieves network ID by the provided name.
-func networkingNetworkV2ID(d *schema.ResourceData, meta interface{}, networkName string) (string, error) {
+func networkingNetworkV2ID(ctx context.Context, d *schema.ResourceData, meta interface{}, networkName string) (string, error) {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return "", fmt.Errorf("Error creating OpenStack network client: %s", err)
 	}
@@ -43,7 +45,7 @@ func networkingNetworkV2ID(d *schema.ResourceData, meta interface{}, networkName
 	pager := networks.List(networkingClient, opts)
 	networkID := ""
 
-	err = pager.EachPage(func(page pagination.Page) (bool, error) {
+	err = pager.EachPage(ctx, func(ctx context.Context, page pagination.Page) (bool, error) {
 		networkList, err := networks.ExtractNetworks(page)
 		if err != nil {
 			return false, err
@@ -63,9 +65,9 @@ func networkingNetworkV2ID(d *schema.ResourceData, meta interface{}, networkName
 }
 
 // networkingNetworkV2Name retrieves network name by the provided ID.
-func networkingNetworkV2Name(d *schema.ResourceData, meta interface{}, networkID string) (string, error) {
+func networkingNetworkV2Name(ctx context.Context, d *schema.ResourceData, meta interface{}, networkID string) (string, error) {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return "", fmt.Errorf("Error creating OpenStack network client: %s", err)
 	}
@@ -74,7 +76,7 @@ func networkingNetworkV2Name(d *schema.ResourceData, meta interface{}, networkID
 	pager := networks.List(networkingClient, opts)
 	networkName := ""
 
-	err = pager.EachPage(func(page pagination.Page) (bool, error) {
+	err = pager.EachPage(ctx, func(ctx context.Context, page pagination.Page) (bool, error) {
 		networkList, err := networks.ExtractNetworks(page)
 		if err != nil {
 			return false, err
@@ -93,14 +95,14 @@ func networkingNetworkV2Name(d *schema.ResourceData, meta interface{}, networkID
 	return networkName, err
 }
 
-func resourceNetworkingNetworkV2StateRefreshFunc(client *gophercloud.ServiceClient, networkID string) retry.StateRefreshFunc {
+func resourceNetworkingNetworkV2StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, networkID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := networks.Get(client, networkID).Extract()
+		n, err := networks.Get(ctx, client, networkID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return n, "DELETED", nil
 			}
-			if _, ok := err.(gophercloud.ErrDefault409); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusConflict) {
 				return n, "ACTIVE", nil
 			}
 

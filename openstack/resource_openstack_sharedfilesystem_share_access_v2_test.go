@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"testing"
@@ -8,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/shares"
 )
 
 func TestAccSFSV2ShareAccess_basic(t *testing.T) {
@@ -66,7 +67,7 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 
 func testAccCheckSFSV2ShareAccessDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
+	sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
@@ -84,7 +85,7 @@ func testAccCheckSFSV2ShareAccessDestroy(s *terraform.State) error {
 			}
 		}
 
-		access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
+		access, err := shares.ListAccessRights(context.TODO(), sfsClient, shareID).Extract()
 		if err == nil {
 			for _, v := range access {
 				if v.ID == rs.Primary.ID {
@@ -109,7 +110,7 @@ func testAccCheckSFSV2ShareAccessExists(n string, share *shares.AccessRight) res
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
+		sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
@@ -124,7 +125,7 @@ func testAccCheckSFSV2ShareAccessExists(n string, share *shares.AccessRight) res
 
 		sfsClient.Microversion = sharedFilesystemV2MinMicroversion
 
-		access, err := shares.ListAccessRights(sfsClient, shareID).Extract()
+		access, err := shares.ListAccessRights(context.TODO(), sfsClient, shareID).Extract()
 		if err != nil {
 			return fmt.Errorf("Unable to get %s share: %s", shareID, err)
 		}

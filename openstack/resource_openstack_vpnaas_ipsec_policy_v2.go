@@ -3,6 +3,7 @@ package openstack
 import (
 	"context"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -10,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
 )
 
 func resourceIPSecPolicyV2() *schema.Resource {
@@ -117,7 +118,7 @@ func resourceIPSecPolicyV2() *schema.Resource {
 
 func resourceIPSecPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -146,7 +147,7 @@ func resourceIPSecPolicyV2Create(ctx context.Context, d *schema.ResourceData, me
 
 	log.Printf("[DEBUG] Create IPSec policy: %#v", opts)
 
-	policy, err := ipsecpolicies.Create(networkingClient, opts).Extract()
+	policy, err := ipsecpolicies.Create(ctx, networkingClient, opts).Extract()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -154,7 +155,7 @@ func resourceIPSecPolicyV2Create(ctx context.Context, d *schema.ResourceData, me
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    waitForIPSecPolicyCreation(networkingClient, policy.ID),
+		Refresh:    waitForIPSecPolicyCreation(ctx, networkingClient, policy.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
@@ -176,12 +177,12 @@ func resourceIPSecPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta
 	log.Printf("[DEBUG] Retrieve information about IPSec policy: %s", d.Id())
 
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	policy, err := ipsecpolicies.Get(networkingClient, d.Id()).Extract()
+	policy, err := ipsecpolicies.Get(ctx, networkingClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "IPSec policy"))
 	}
@@ -213,7 +214,7 @@ func resourceIPSecPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta
 
 func resourceIPSecPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -267,7 +268,7 @@ func resourceIPSecPolicyV2Update(ctx context.Context, d *schema.ResourceData, me
 	log.Printf("[DEBUG] Updating IPSec policy with id %s: %#v", d.Id(), opts)
 
 	if hasChange {
-		_, err = ipsecpolicies.Update(networkingClient, d.Id(), opts).Extract()
+		_, err = ipsecpolicies.Update(ctx, networkingClient, d.Id(), opts).Extract()
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -275,7 +276,7 @@ func resourceIPSecPolicyV2Update(ctx context.Context, d *schema.ResourceData, me
 		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
 			Target:     []string{"ACTIVE"},
-			Refresh:    waitForIPSecPolicyUpdate(networkingClient, d.Id()),
+			Refresh:    waitForIPSecPolicyUpdate(ctx, networkingClient, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			Delay:      0,
 			MinTimeout: 2 * time.Second,
@@ -291,7 +292,7 @@ func resourceIPSecPolicyV2Delete(ctx context.Context, d *schema.ResourceData, me
 	log.Printf("[DEBUG] Destroy IPSec policy: %s", d.Id())
 
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -299,7 +300,7 @@ func resourceIPSecPolicyV2Delete(ctx context.Context, d *schema.ResourceData, me
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForIPSecPolicyDeletion(networkingClient, d.Id()),
+		Refresh:    waitForIPSecPolicyDeletion(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
@@ -312,14 +313,14 @@ func resourceIPSecPolicyV2Delete(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func waitForIPSecPolicyDeletion(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func waitForIPSecPolicyDeletion(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		err := ipsecpolicies.Delete(networkingClient, id).Err
+		err := ipsecpolicies.Delete(ctx, networkingClient, id).Err
 		if err == nil {
 			return "", "DELETED", nil
 		}
 
-		if _, ok := err.(gophercloud.ErrDefault409); ok {
+		if gophercloud.ResponseCodeIs(err, http.StatusConflict) {
 			return nil, "ACTIVE", nil
 		}
 
@@ -327,9 +328,9 @@ func waitForIPSecPolicyDeletion(networkingClient *gophercloud.ServiceClient, id 
 	}
 }
 
-func waitForIPSecPolicyCreation(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func waitForIPSecPolicyCreation(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		policy, err := ipsecpolicies.Get(networkingClient, id).Extract()
+		policy, err := ipsecpolicies.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return "", "PENDING_CREATE", nil
 		}
@@ -337,9 +338,9 @@ func waitForIPSecPolicyCreation(networkingClient *gophercloud.ServiceClient, id 
 	}
 }
 
-func waitForIPSecPolicyUpdate(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func waitForIPSecPolicyUpdate(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		policy, err := ipsecpolicies.Get(networkingClient, id).Extract()
+		policy, err := ipsecpolicies.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return "", "PENDING_UPDATE", nil
 		}

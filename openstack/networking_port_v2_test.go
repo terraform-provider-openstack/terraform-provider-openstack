@@ -6,9 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/extradhcpopts"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/extradhcpopts"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
 )
 
 func TestUnitExpandNetworkingPortDHCPOptsV2Create(t *testing.T) {

@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
+	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
 )
 
 func dataSourceImagesImageV2() *schema.Resource {
@@ -192,7 +192,7 @@ func dataSourceImagesImageV2() *schema.Resource {
 // dataSourceImagesImageV2Read performs the image lookup.
 func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	imageClient, err := config.ImageV2Client(GetRegion(d, config))
+	imageClient, err := config.ImageV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack image client: %s", err)
 	}
@@ -229,7 +229,7 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 	log.Printf("[DEBUG] List Options: %#v", listOpts)
 
 	var image images.Image
-	allPages, err := images.List(imageClient, listOpts).AllPages()
+	allPages, err := images.List(imageClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query images: %s", err)
 	}

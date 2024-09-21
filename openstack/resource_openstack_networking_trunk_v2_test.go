@@ -1,15 +1,16 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/trunks"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/trunks"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
 )
 
 func TestAccNetworkingV2Trunk_nosubports(t *testing.T) {
@@ -231,7 +232,7 @@ func TestAccNetworkingV2Trunk_Instance(t *testing.T) {
 
 func testAccCheckNetworkingV2TrunkDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	client, err := config.NetworkingV2Client(osRegionName)
+	client, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -241,7 +242,7 @@ func testAccCheckNetworkingV2TrunkDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := trunks.Get(client, rs.Primary.ID).Extract()
+		_, err := trunks.Get(context.TODO(), client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Trunk still exists")
 		}
@@ -278,12 +279,12 @@ func testAccCheckNetworkingV2TrunkExists(n string, subportResourceNames []string
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		client, err := config.NetworkingV2Client(osRegionName)
+		client, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		found, err := trunks.Get(client, rs.Primary.ID).Extract()
+		found, err := trunks.Get(context.TODO(), client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

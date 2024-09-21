@@ -1,18 +1,21 @@
 package openstack
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/trunks"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/trunks"
 )
 
-func networkingTrunkV2StateRefreshFunc(client *gophercloud.ServiceClient, trunkID string) retry.StateRefreshFunc {
+func networkingTrunkV2StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, trunkID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		trunk, err := trunks.Get(client, trunkID).Extract()
+		trunk, err := trunks.Get(ctx, client, trunkID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return trunk, "DELETED", nil
 			}
 

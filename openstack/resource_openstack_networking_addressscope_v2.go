@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/addressscopes"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/addressscopes"
 )
 
 func resourceNetworkingAddressScopeV2() *schema.Resource {
@@ -67,7 +67,7 @@ func resourceNetworkingAddressScopeV2() *schema.Resource {
 
 func resourceNetworkingAddressScopeV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -80,7 +80,7 @@ func resourceNetworkingAddressScopeV2Create(ctx context.Context, d *schema.Resou
 	}
 
 	log.Printf("[DEBUG] openstack_networking_addressscope_v2 create options: %#v", createOpts)
-	a, err := addressscopes.Create(networkingClient, createOpts).Extract()
+	a, err := addressscopes.Create(ctx, networkingClient, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_networking_addressscope_v2: %s", err)
 	}
@@ -89,7 +89,7 @@ func resourceNetworkingAddressScopeV2Create(ctx context.Context, d *schema.Resou
 
 	stateConf := &retry.StateChangeConf{
 		Target:     []string{"ACTIVE"},
-		Refresh:    resourceNetworkingAddressScopeV2StateRefreshFunc(networkingClient, a.ID),
+		Refresh:    resourceNetworkingAddressScopeV2StateRefreshFunc(ctx, networkingClient, a.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -108,12 +108,12 @@ func resourceNetworkingAddressScopeV2Create(ctx context.Context, d *schema.Resou
 
 func resourceNetworkingAddressScopeV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	a, err := addressscopes.Get(networkingClient, d.Id()).Extract()
+	a, err := addressscopes.Get(ctx, networkingClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_addressscope_v2"))
 	}
@@ -131,7 +131,7 @@ func resourceNetworkingAddressScopeV2Read(ctx context.Context, d *schema.Resourc
 
 func resourceNetworkingAddressScopeV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -155,7 +155,7 @@ func resourceNetworkingAddressScopeV2Update(ctx context.Context, d *schema.Resou
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_networking_addressscope_v2 %s update options: %#v", d.Id(), updateOpts)
-		_, err = addressscopes.Update(networkingClient, d.Id(), updateOpts).Extract()
+		_, err = addressscopes.Update(ctx, networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_networking_addressscope_v2 %s: %s", d.Id(), err)
 		}
@@ -166,19 +166,19 @@ func resourceNetworkingAddressScopeV2Update(ctx context.Context, d *schema.Resou
 
 func resourceNetworkingAddressScopeV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	if err := addressscopes.Delete(networkingClient, d.Id()).ExtractErr(); err != nil {
+	if err := addressscopes.Delete(ctx, networkingClient, d.Id()).ExtractErr(); err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_addressscope_v2"))
 	}
 
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    resourceNetworkingAddressScopeV2StateRefreshFunc(networkingClient, d.Id()),
+		Refresh:    resourceNetworkingAddressScopeV2StateRefreshFunc(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,

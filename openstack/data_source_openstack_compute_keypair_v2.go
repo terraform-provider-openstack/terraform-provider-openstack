@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/keypairs"
 )
 
 func dataSourceComputeKeypairV2() *schema.Resource {
@@ -48,7 +48,7 @@ func dataSourceComputeKeypairV2() *schema.Resource {
 
 func dataSourceComputeKeypairV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -64,7 +64,7 @@ func dataSourceComputeKeypairV2Read(ctx context.Context, d *schema.ResourceData,
 	}
 
 	name := d.Get("name").(string)
-	kp, err := keypairs.Get(computeClient, name, opts).Extract()
+	kp, err := keypairs.Get(ctx, computeClient, name, opts).Extract()
 	if err != nil {
 		return diag.Errorf("Error retrieving openstack_compute_keypair_v2 %s: %s", name, err)
 	}

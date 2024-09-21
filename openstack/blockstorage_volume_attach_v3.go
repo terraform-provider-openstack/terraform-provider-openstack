@@ -3,20 +3,20 @@ package openstack
 import (
 	"fmt"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 )
 
-func expandBlockStorageV3AttachMode(v string) (volumeactions.AttachMode, error) {
-	var attachMode volumeactions.AttachMode
+func expandBlockStorageV3AttachMode(v string) (volumes.AttachMode, error) {
+	var attachMode volumes.AttachMode
 	var attachError error
 
 	switch v {
 	case "":
 		attachMode = ""
 	case "ro":
-		attachMode = volumeactions.ReadOnly
+		attachMode = volumes.ReadOnly
 	case "rw":
-		attachMode = volumeactions.ReadWrite
+		attachMode = volumes.ReadWrite
 	default:
 		attachError = fmt.Errorf("Invalid attach_mode specified")
 	}
