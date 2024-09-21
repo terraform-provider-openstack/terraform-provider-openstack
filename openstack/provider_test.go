@@ -21,7 +21,6 @@ var (
 	osDBEnvironment              = os.Getenv("OS_DB_ENVIRONMENT")
 	osDBDatastoreVersion         = os.Getenv("OS_DB_DATASTORE_VERSION")
 	osDBDatastoreType            = os.Getenv("OS_DB_DATASTORE_TYPE")
-	osDeprecatedEnvironment      = os.Getenv("OS_DEPRECATED_ENVIRONMENT")
 	osDNSEnvironment             = os.Getenv("OS_DNS_ENVIRONMENT")
 	osExtGwID                    = os.Getenv("OS_EXTGW_ID")
 	osFlavorID                   = os.Getenv("OS_FLAVOR_ID")
@@ -46,7 +45,6 @@ var (
 	osGlanceimportEnvironment    = os.Getenv("OS_GLANCEIMPORT_ENVIRONMENT")
 	osHypervisorEnvironment      = os.Getenv("OS_HYPERVISOR_HOSTNAME")
 	osPortForwardingEnvironment  = os.Getenv("OS_PORT_FORWARDING_ENVIRONMENT")
-	osBlockStorageV2             = os.Getenv("OS_BLOCKSTORAGE_V2")
 	osMagnumHTTPProxy            = os.Getenv("OS_MAGNUM_HTTP_PROXY")
 	osMagnumHTTPSProxy           = os.Getenv("OS_MAGNUM_HTTPS_PROXY")
 	osMagnumNoProxy              = os.Getenv("OS_MAGNUM_NO_PROXY")
@@ -96,19 +94,6 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 
 func testAccPreCheck(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
-
-	// Do not run the test if this is a deprecated testing environment.
-	if osDeprecatedEnvironment != "" {
-		t.Skip("This environment only runs deprecated tests")
-	}
-}
-
-func testAccPreCheckDeprecated(t *testing.T) {
-	testAccPreCheckRequiredEnvVars(t)
-
-	if osDeprecatedEnvironment == "" {
-		t.Skip("This environment does not support deprecated tests")
-	}
 }
 
 func testAccPreCheckDNS(t *testing.T) {
@@ -144,14 +129,6 @@ func testAccPreCheckLB(t *testing.T) {
 
 	if osLbFlavorName == "" {
 		t.Skip("This environment does not support LB tests")
-	}
-}
-
-func testAccPreCheckBlockStorageV2(t *testing.T) {
-	testAccPreCheckRequiredEnvVars(t)
-
-	if osBlockStorageV2 == "" {
-		t.Skip("This environment does not support BlockStorageV2 tests")
 	}
 }
 
@@ -287,17 +264,6 @@ func IsReleasesBelow(t *testing.T, release string) bool {
 	}
 	t.Logf("Target release %s is above the current branch %s", release, currentBranch)
 	return false
-}
-
-// testAccSkipReleasesAbove will have the test be skipped on releases above a certain
-// one. The test is always skipped on master release. Releases are named such
-// as 'stable/mitaka', master, etc.
-func testAccSkipReleasesAbove(t *testing.T, release string) {
-	currentBranch := os.Getenv("OS_BRANCH")
-
-	if IsReleasesAbove(t, release) {
-		t.Skipf("this is not supported above %s, testing in %s", release, currentBranch)
-	}
 }
 
 // IsReleasesAbove will return true on releases above a certain

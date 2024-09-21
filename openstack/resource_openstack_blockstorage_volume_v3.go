@@ -178,7 +178,7 @@ func resourceBlockStorageVolumeV3() *schema.Resource {
 						},
 					},
 				},
-				Set: blockStorageExtensionsSchedulerHintsHash,
+				Set: blockStorageVolumeV3SchedulerHintsHash,
 			},
 		},
 	}
@@ -212,7 +212,7 @@ func resourceBlockStorageVolumeV3Create(ctx context.Context, d *schema.ResourceD
 	schedulerHintsRaw := d.Get("scheduler_hints").(*schema.Set).List()
 	if len(schedulerHintsRaw) > 0 {
 		log.Printf("[DEBUG] openstack_blockstorage_volume_v3 scheduler hints: %+v", schedulerHintsRaw[0])
-		schedulerHints = resourceBlockStorageSchedulerHints(schedulerHintsRaw[0].(map[string]interface{}))
+		schedulerHints = resourceBlockStorageVolumeV3SchedulerHints(schedulerHintsRaw[0].(map[string]interface{}))
 	}
 	createOpts = schedulerhints.CreateOptsExt{
 		VolumeCreateOptsBuilder: volumeCreateOpts,

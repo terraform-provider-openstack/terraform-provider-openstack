@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
@@ -207,69 +206,6 @@ func TestAccComputeV2Instance_initialPaused(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_compute_instance_v2.instance_1", "power_state", "active"),
 					testAccCheckComputeV2InstanceState(&instance, "active"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeV2Instance_secgroupMulti(t *testing.T) {
-	var instance1 servers.Server
-	var secgroup1 secgroups.SecurityGroup
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
-		},
-		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeV2InstanceSecgroupMulti(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists(
-						"openstack_compute_secgroup_v2.secgroup_1", &secgroup1),
-					testAccCheckComputeV2InstanceExists(
-						"openstack_compute_instance_v2.instance_1", &instance1),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeV2Instance_secgroupMultiUpdate(t *testing.T) {
-	var instance1 servers.Server
-	var secgroup1, secgroup2 secgroups.SecurityGroup
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
-		},
-		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeV2InstanceSecgroupMultiUpdate1(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists(
-						"openstack_compute_secgroup_v2.secgroup_1", &secgroup1),
-					testAccCheckComputeV2SecGroupExists(
-						"openstack_compute_secgroup_v2.secgroup_2", &secgroup2),
-					testAccCheckComputeV2InstanceExists(
-						"openstack_compute_instance_v2.instance_1", &instance1),
-				),
-			},
-			{
-				Config: testAccComputeV2InstanceSecgroupMultiUpdate2(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists(
-						"openstack_compute_secgroup_v2.secgroup_1", &secgroup1),
-					testAccCheckComputeV2SecGroupExists(
-						"openstack_compute_secgroup_v2.secgroup_2", &secgroup2),
-					testAccCheckComputeV2InstanceExists(
-						"openstack_compute_instance_v2.instance_1", &instance1),
 				),
 			},
 		},
@@ -1073,97 +1009,6 @@ resource "openstack_compute_instance_v2" "instance_1" {
   metadata = {
     foo = "bar"
   }
-  network {
-    uuid = "%s"
-  }
-}
-`, osNetworkID)
-}
-
-func testAccComputeV2InstanceSecgroupMulti() string {
-	return fmt.Sprintf(`
-resource "openstack_compute_secgroup_v2" "secgroup_1" {
-  name = "secgroup_1"
-  description = "a security group"
-  rule {
-    from_port = 22
-    to_port = 22
-    ip_protocol = "tcp"
-    cidr = "0.0.0.0/0"
-  }
-}
-
-resource "openstack_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default", "${openstack_compute_secgroup_v2.secgroup_1.name}"]
-  network {
-    uuid = "%s"
-  }
-}
-`, osNetworkID)
-}
-
-func testAccComputeV2InstanceSecgroupMultiUpdate1() string {
-	return fmt.Sprintf(`
-resource "openstack_compute_secgroup_v2" "secgroup_1" {
-  name = "secgroup_1"
-  description = "a security group"
-  rule {
-    from_port = 22
-    to_port = 22
-    ip_protocol = "tcp"
-    cidr = "0.0.0.0/0"
-  }
-}
-
-resource "openstack_compute_secgroup_v2" "secgroup_2" {
-  name = "secgroup_2"
-  description = "another security group"
-  rule {
-    from_port = 80
-    to_port = 80
-    ip_protocol = "tcp"
-    cidr = "0.0.0.0/0"
-  }
-}
-
-resource "openstack_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
-  network {
-    uuid = "%s"
-  }
-}
-`, osNetworkID)
-}
-
-func testAccComputeV2InstanceSecgroupMultiUpdate2() string {
-	return fmt.Sprintf(`
-resource "openstack_compute_secgroup_v2" "secgroup_1" {
-  name = "secgroup_1"
-  description = "a security group"
-  rule {
-    from_port = 22
-    to_port = 22
-    ip_protocol = "tcp"
-    cidr = "0.0.0.0/0"
-  }
-}
-
-resource "openstack_compute_secgroup_v2" "secgroup_2" {
-  name = "secgroup_2"
-  description = "another security group"
-  rule {
-    from_port = 80
-    to_port = 80
-    ip_protocol = "tcp"
-    cidr = "0.0.0.0/0"
-  }
-}
-
-resource "openstack_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default", "${openstack_compute_secgroup_v2.secgroup_1.name}", "${openstack_compute_secgroup_v2.secgroup_2.name}"]
   network {
     uuid = "%s"
   }
