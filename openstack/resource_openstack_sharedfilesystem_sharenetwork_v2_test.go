@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -11,8 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/securityservices"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/sharenetworks"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/securityservices"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/sharenetworks"
 )
 
 func TestAccSFSV2ShareNetwork_basic(t *testing.T) {
@@ -135,7 +136,7 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 
 func testAccCheckSFSV2ShareNetworkDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
+	sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
@@ -145,7 +146,7 @@ func testAccCheckSFSV2ShareNetworkDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := sharenetworks.Get(sfsClient, rs.Primary.ID).Extract()
+		_, err := sharenetworks.Get(context.TODO(), sfsClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Manila sharenetwork still exists: %s", rs.Primary.ID)
 		}
@@ -166,12 +167,12 @@ func testAccCheckSFSV2ShareNetworkExists(n string, sharenetwork *sharenetworks.S
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
+		sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
 
-		found, err := sharenetworks.Get(sfsClient, rs.Primary.ID).Extract()
+		found, err := sharenetworks.Get(context.TODO(), sfsClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -198,13 +199,13 @@ func testAccCheckSFSV2ShareNetworkSecSvcExists(n string) resource.TestCheckFunc 
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
+		sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
 
 		securityServiceListOpts := securityservices.ListOpts{ShareNetworkID: rs.Primary.ID}
-		securityServicePages, err := securityservices.List(sfsClient, securityServiceListOpts).AllPages()
+		securityServicePages, err := securityservices.List(sfsClient, securityServiceListOpts).AllPages(context.TODO())
 		if err != nil {
 			return err
 		}

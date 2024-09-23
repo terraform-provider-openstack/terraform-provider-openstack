@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/flavors"
 )
 
 func resourceComputeFlavorV2() *schema.Resource {
@@ -100,7 +100,7 @@ func resourceComputeFlavorV2() *schema.Resource {
 
 func resourceComputeFlavorV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -130,7 +130,7 @@ func resourceComputeFlavorV2Create(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	log.Printf("[DEBUG] openstack_compute_flavor_v2 create options: %#v", createOpts)
-	fl, err := flavors.Create(computeClient, &createOpts).Extract()
+	fl, err := flavors.Create(ctx, computeClient, &createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_compute_flavor_v2 %s: %s", name, err)
 	}
@@ -141,7 +141,7 @@ func resourceComputeFlavorV2Create(ctx context.Context, d *schema.ResourceData, 
 	if len(extraSpecsRaw) > 0 {
 		extraSpecs := expandComputeFlavorV2ExtraSpecs(extraSpecsRaw)
 
-		_, err := flavors.CreateExtraSpecs(computeClient, fl.ID, extraSpecs).Extract()
+		_, err := flavors.CreateExtraSpecs(ctx, computeClient, fl.ID, extraSpecs).Extract()
 		if err != nil {
 			return diag.Errorf("Error creating extra_specs for openstack_compute_flavor_v2 %s: %s", fl.ID, err)
 		}
@@ -150,9 +150,9 @@ func resourceComputeFlavorV2Create(ctx context.Context, d *schema.ResourceData, 
 	return resourceComputeFlavorV2Read(ctx, d, meta)
 }
 
-func resourceComputeFlavorV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -161,11 +161,11 @@ func resourceComputeFlavorV2Read(_ context.Context, d *schema.ResourceData, meta
 
 	// try and read flavor using microversion that includes description
 	computeClient.Microversion = computeV2FlavorDescriptionMicroversion
-	fl, err = flavors.Get(computeClient, d.Id()).Extract()
+	fl, err = flavors.Get(ctx, computeClient, d.Id()).Extract()
 	if err != nil {
 		// reset microversion to 2.1 and try again
 		computeClient.Microversion = "2.1"
-		fl, err = flavors.Get(computeClient, d.Id()).Extract()
+		fl, err = flavors.Get(ctx, computeClient, d.Id()).Extract()
 		if err != nil {
 			return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_flavor_v2"))
 		}
@@ -185,7 +185,7 @@ func resourceComputeFlavorV2Read(_ context.Context, d *schema.ResourceData, meta
 	d.Set("ephemeral", fl.Ephemeral)
 	d.Set("region", GetRegion(d, config))
 
-	es, err := flavors.ListExtraSpecs(computeClient, d.Id()).Extract()
+	es, err := flavors.ListExtraSpecs(ctx, computeClient, d.Id()).Extract()
 	if err != nil {
 		return diag.Errorf("Error reading extra_specs for openstack_compute_flavor_v2 %s: %s", d.Id(), err)
 	}
@@ -199,7 +199,7 @@ func resourceComputeFlavorV2Read(_ context.Context, d *schema.ResourceData, meta
 
 func resourceComputeFlavorV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -216,7 +216,7 @@ func resourceComputeFlavorV2Update(ctx context.Context, d *schema.ResourceData, 
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_compute_flavor_v2 %s update options: %#v", d.Id(), updateOpts)
-		_, err = flavors.Update(computeClient, d.Id(), updateOpts).Extract()
+		_, err = flavors.Update(ctx, computeClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error openstack_compute_flavor_v2 %s: %s", d.Id(), err)
 		}
@@ -227,7 +227,7 @@ func resourceComputeFlavorV2Update(ctx context.Context, d *schema.ResourceData, 
 
 		// Delete all old extra specs.
 		for oldKey := range oldES.(map[string]interface{}) {
-			if err := flavors.DeleteExtraSpec(computeClient, d.Id(), oldKey).ExtractErr(); err != nil {
+			if err := flavors.DeleteExtraSpec(ctx, computeClient, d.Id(), oldKey).ExtractErr(); err != nil {
 				return diag.Errorf("Error deleting extra_spec %s from openstack_compute_flavor_v2 %s: %s", oldKey, d.Id(), err)
 			}
 		}
@@ -237,7 +237,7 @@ func resourceComputeFlavorV2Update(ctx context.Context, d *schema.ResourceData, 
 		if len(newESRaw) > 0 {
 			extraSpecs := expandComputeFlavorV2ExtraSpecs(newESRaw)
 
-			_, err := flavors.CreateExtraSpecs(computeClient, d.Id(), extraSpecs).Extract()
+			_, err := flavors.CreateExtraSpecs(ctx, computeClient, d.Id(), extraSpecs).Extract()
 			if err != nil {
 				return diag.Errorf("Error creating extra_specs for openstack_compute_flavor_v2 %s: %s", d.Id(), err)
 			}
@@ -247,14 +247,14 @@ func resourceComputeFlavorV2Update(ctx context.Context, d *schema.ResourceData, 
 	return resourceComputeFlavorV2Read(ctx, d, meta)
 }
 
-func resourceComputeFlavorV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeFlavorV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	err = flavors.Delete(computeClient, d.Id()).ExtractErr()
+	err = flavors.Delete(ctx, computeClient, d.Id()).ExtractErr()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_compute_flavor_v2"))
 	}

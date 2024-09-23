@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/rules"
 )
 
 func resourceNetworkingSecGroupRuleV2() *schema.Resource {
@@ -113,7 +113,7 @@ func resourceNetworkingSecGroupRuleV2() *schema.Resource {
 
 func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -140,7 +140,7 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 
 	log.Printf("[DEBUG] openstack_networking_secgroup_rule_v2 create options: %#v", opts)
 
-	sgRule, err := rules.Create(networkingClient, opts).Extract()
+	sgRule, err := rules.Create(ctx, networkingClient, opts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_networking_secgroup_rule_v2: %s", err)
 	}
@@ -153,12 +153,12 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 
 func resourceNetworkingSecGroupRuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	sgRule, err := rules.Get(networkingClient, d.Id()).Extract()
+	sgRule, err := rules.Get(ctx, networkingClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_secgroup_rule_v2"))
 	}
@@ -182,7 +182,7 @@ func resourceNetworkingSecGroupRuleV2Read(ctx context.Context, d *schema.Resourc
 
 func resourceNetworkingSecGroupRuleV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -191,14 +191,14 @@ func resourceNetworkingSecGroupRuleV2Delete(ctx context.Context, d *schema.Resou
 	config.MutexKV.Lock(securityGroupID)
 	defer config.MutexKV.Unlock(securityGroupID)
 
-	if err := rules.Delete(networkingClient, d.Id()).ExtractErr(); err != nil {
+	if err := rules.Delete(ctx, networkingClient, d.Id()).ExtractErr(); err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_secgroup_rule_v2"))
 	}
 
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    resourceNetworkingSecGroupRuleV2StateRefreshFunc(networkingClient, d.Id()),
+		Refresh:    resourceNetworkingSecGroupRuleV2StateRefreshFunc(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,

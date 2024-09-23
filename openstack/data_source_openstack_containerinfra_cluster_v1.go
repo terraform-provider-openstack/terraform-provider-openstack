@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
+	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/clusters"
 )
 
 func dataSourceContainerInfraCluster() *schema.Resource {
@@ -106,6 +106,11 @@ func dataSourceContainerInfraCluster() *schema.Resource {
 				Computed: true,
 			},
 
+			"master_lb_enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+
 			"node_count": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -142,6 +147,7 @@ func dataSourceContainerInfraCluster() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+
 			"kubeconfig": {
 				Type:      schema.TypeMap,
 				Computed:  true,
@@ -154,13 +160,13 @@ func dataSourceContainerInfraCluster() *schema.Resource {
 
 func dataSourceContainerInfraClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	containerInfraClient, err := config.ContainerInfraV1Client(GetRegion(d, config))
+	containerInfraClient, err := config.ContainerInfraV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
 
 	name := d.Get("name").(string)
-	c, err := clusters.Get(containerInfraClient, name).Extract()
+	c, err := clusters.Get(ctx, containerInfraClient, name).Extract()
 	if err != nil {
 		return diag.Errorf("Error getting openstack_containerinfra_cluster_v1 %s: %s", name, err)
 	}
@@ -180,6 +186,7 @@ func dataSourceContainerInfraClusterRead(ctx context.Context, d *schema.Resource
 	d.Set("master_flavor", c.MasterFlavorID)
 	d.Set("keypair", c.KeyPair)
 	d.Set("master_count", c.MasterCount)
+	d.Set("master_lb_enabled", c.MasterLBEnabled)
 	d.Set("node_count", c.NodeCount)
 	d.Set("master_addresses", c.MasterAddresses)
 	d.Set("node_addresses", c.NodeAddresses)
@@ -187,7 +194,7 @@ func dataSourceContainerInfraClusterRead(ctx context.Context, d *schema.Resource
 	d.Set("fixed_network", c.FixedNetwork)
 	d.Set("fixed_subnet", c.FixedSubnet)
 	d.Set("floating_ip_enabled", c.FloatingIPEnabled)
-	kubeconfig, err := flattenContainerInfraV1Kubeconfig(d, containerInfraClient)
+	kubeconfig, err := flattenContainerInfraV1Kubeconfig(ctx, d, containerInfraClient)
 	if err != nil {
 		return diag.Errorf("Error building kubeconfig for openstack_containerinfra_cluster_v1 %s: %s", d.Id(), err)
 	}

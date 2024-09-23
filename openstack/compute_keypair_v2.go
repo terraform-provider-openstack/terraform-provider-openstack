@@ -1,6 +1,6 @@
 package openstack
 
-import "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
+import "github.com/gophercloud/gophercloud/v2/openstack/compute/v2/keypairs"
 
 const (
 	computeKeyPairV2UserIDMicroversion = "2.10"

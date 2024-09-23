@@ -3,19 +3,20 @@ package openstack
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/groups"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/fwaas_v2/groups"
 )
 
-func fwGroupV2RefreshFunc(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func fwGroupV2RefreshFunc(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		group, err := groups.Get(networkingClient, id).Extract()
+		group, err := groups.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return nil, "", err
 		}
@@ -24,12 +25,12 @@ func fwGroupV2RefreshFunc(networkingClient *gophercloud.ServiceClient, id string
 	}
 }
 
-func fwGroupV2DeleteFunc(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func fwGroupV2DeleteFunc(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		group, err := groups.Get(networkingClient, id).Extract()
+		group, err := groups.Get(ctx, networkingClient, id).Extract()
 
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return "", "DELETED", nil
 			}
 			return nil, "", fmt.Errorf("Unexpected error: %s", err)
@@ -39,11 +40,11 @@ func fwGroupV2DeleteFunc(networkingClient *gophercloud.ServiceClient, id string)
 	}
 }
 
-func fwGroupV2IngressPolicyDeleteFunc(networkingClient *gophercloud.ServiceClient, d *schema.ResourceData, ctx context.Context, groupID string) diag.Diagnostics {
+func fwGroupV2IngressPolicyDeleteFunc(ctx context.Context, networkingClient *gophercloud.ServiceClient, d *schema.ResourceData, groupID string) diag.Diagnostics {
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE", "PENDING_UPDATE"},
 		Target:     []string{"ACTIVE", "INACTIVE", "DOWN"},
-		Refresh:    fwGroupV2RefreshFunc(networkingClient, d.Id()),
+		Refresh:    fwGroupV2RefreshFunc(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutUpdate),
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
@@ -54,7 +55,7 @@ func fwGroupV2IngressPolicyDeleteFunc(networkingClient *gophercloud.ServiceClien
 		return diag.Errorf("Error waiting for openstack_fw_group_v2 %s to become active: %s", d.Id(), err)
 	}
 
-	_, err = groups.RemoveIngressPolicy(networkingClient, groupID).Extract()
+	_, err = groups.RemoveIngressPolicy(ctx, networkingClient, groupID).Extract()
 	if err != nil {
 		return diag.Errorf("Error removing ingress firewall policy from openstack_fw_group_v2 %s: %s", d.Id(), err)
 	}
@@ -62,11 +63,11 @@ func fwGroupV2IngressPolicyDeleteFunc(networkingClient *gophercloud.ServiceClien
 	return nil
 }
 
-func fwGroupV2EgressPolicyDeleteFunc(networkingClient *gophercloud.ServiceClient, d *schema.ResourceData, ctx context.Context, groupID string) diag.Diagnostics {
+func fwGroupV2EgressPolicyDeleteFunc(ctx context.Context, networkingClient *gophercloud.ServiceClient, d *schema.ResourceData, groupID string) diag.Diagnostics {
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE", "PENDING_UPDATE"},
 		Target:     []string{"ACTIVE", "INACTIVE", "DOWN"},
-		Refresh:    fwGroupV2RefreshFunc(networkingClient, d.Id()),
+		Refresh:    fwGroupV2RefreshFunc(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutUpdate),
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
@@ -77,7 +78,7 @@ func fwGroupV2EgressPolicyDeleteFunc(networkingClient *gophercloud.ServiceClient
 		return diag.Errorf("Error waiting for openstack_fw_group_v2 %s to become active: %s", d.Id(), err)
 	}
 
-	_, err = groups.RemoveEgressPolicy(networkingClient, groupID).Extract()
+	_, err = groups.RemoveEgressPolicy(ctx, networkingClient, groupID).Extract()
 	if err != nil {
 		return diag.Errorf("Error removing egress firewall policy from openstack_fw_group_v2 %s: %s", d.Id(), err)
 	}

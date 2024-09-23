@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/securityservices"
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/securityservices"
 )
 
 func TestAccSFSV2SecurityService_basic(t *testing.T) {
@@ -76,7 +77,7 @@ func TestAccSFSV2SecurityService_basic(t *testing.T) {
 
 func testAccCheckSFSV2SecurityServiceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
+	sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
@@ -86,7 +87,7 @@ func testAccCheckSFSV2SecurityServiceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := securityservices.Get(sfsClient, rs.Primary.ID).Extract()
+		_, err := securityservices.Get(context.TODO(), sfsClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Manila securityservice still exists: %s", rs.Primary.ID)
 		}
@@ -107,12 +108,12 @@ func testAccCheckSFSV2SecurityServiceExists(n string, securityservice *securitys
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.SharedfilesystemV2Client(osRegionName)
+		sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 		}
 
-		found, err := securityservices.Get(sfsClient, rs.Primary.ID).Extract()
+		found, err := securityservices.Get(context.TODO(), sfsClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

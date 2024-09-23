@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
-	"github.com/gophercloud/utils/terraform/hashcode"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
+	"github.com/gophercloud/utils/v2/terraform/hashcode"
 )
 
 func dataSourceIdentityProjectIdsV3() *schema.Resource {
@@ -88,7 +88,7 @@ func dataSourceIdentityProjectIdsV3() *schema.Resource {
 // dataSourceIdentityProjectIdsV3Read performs the project lookup.
 func dataSourceIdentityProjectIdsV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -105,7 +105,7 @@ func dataSourceIdentityProjectIdsV3Read(ctx context.Context, d *schema.ResourceD
 		Tags:     strings.Join(expandObjectTags(d), ","),
 	}
 
-	allPages, err := projects.List(identityClient, listOpts).AllPages()
+	allPages, err := projects.List(identityClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to list projects in openstack_identity_project_ids_v3: %s", err)
 	}

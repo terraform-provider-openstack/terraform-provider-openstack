@@ -1,7 +1,9 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"sort"
 	"strings"
 	"testing"
@@ -9,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/endpointgroups"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/endpointgroups"
 )
 
 func TestAccGroupVPNaaSV2_basic(t *testing.T) {
@@ -75,7 +77,7 @@ func TestAccGroupVPNaaSV2_update(t *testing.T) {
 
 func testAccCheckEndpointGroupV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(osRegionName)
+	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -83,11 +85,11 @@ func testAccCheckEndpointGroupV2Destroy(s *terraform.State) error {
 		if rs.Type != "openstack_vpnaas_group" {
 			continue
 		}
-		_, err = endpointgroups.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err = endpointgroups.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("EndpointGroup (%s) still exists", rs.Primary.ID)
 		}
-		if _, ok := err.(gophercloud.ErrDefault404); !ok {
+		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 	}
@@ -106,14 +108,14 @@ func testAccCheckEndpointGroupV2Exists(n string, group *endpointgroups.EndpointG
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
 		var found *endpointgroups.EndpointGroup
 
-		found, err = endpointgroups.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err = endpointgroups.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

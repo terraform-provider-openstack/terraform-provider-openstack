@@ -4,14 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/services"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/services"
 )
 
 func resourceServiceV2() *schema.Resource {
@@ -90,7 +91,7 @@ func resourceServiceV2() *schema.Resource {
 
 func resourceServiceV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -112,7 +113,7 @@ func resourceServiceV2Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Create service: %#v", createOpts)
 
-	service, err := services.Create(networkingClient, createOpts).Extract()
+	service, err := services.Create(ctx, networkingClient, createOpts).Extract()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -120,7 +121,7 @@ func resourceServiceV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"NOT_CREATED"},
 		Target:     []string{"PENDING_CREATE"},
-		Refresh:    waitForServiceCreation(networkingClient, service.ID),
+		Refresh:    waitForServiceCreation(ctx, networkingClient, service.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
@@ -142,12 +143,12 @@ func resourceServiceV2Read(ctx context.Context, d *schema.ResourceData, meta int
 	log.Printf("[DEBUG] Retrieve information about service: %s", d.Id())
 
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	service, err := services.Get(networkingClient, d.Id()).Extract()
+	service, err := services.Get(ctx, networkingClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "service"))
 	}
@@ -170,7 +171,7 @@ func resourceServiceV2Read(ctx context.Context, d *schema.ResourceData, meta int
 
 func resourceServiceV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -202,14 +203,14 @@ func resourceServiceV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	log.Printf("[DEBUG] Updating service with id %s: %#v", d.Id(), updateOpts)
 
 	if hasChange {
-		service, err := services.Update(networkingClient, d.Id(), updateOpts).Extract()
+		service, err := services.Update(ctx, networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
 			Target:     []string{"UPDATED"},
-			Refresh:    waitForServiceUpdate(networkingClient, service.ID),
+			Refresh:    waitForServiceUpdate(ctx, networkingClient, service.ID),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			Delay:      0,
 			MinTimeout: 2 * time.Second,
@@ -230,12 +231,12 @@ func resourceServiceV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 	log.Printf("[DEBUG] Destroy service: %s", d.Id())
 
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	err = services.Delete(networkingClient, d.Id()).Err
+	err = services.Delete(ctx, networkingClient, d.Id()).Err
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -244,7 +245,7 @@ func resourceServiceV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"DELETING"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForServiceDeletion(networkingClient, d.Id()),
+		Refresh:    waitForServiceDeletion(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
@@ -255,13 +256,13 @@ func resourceServiceV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 	return diag.FromErr(err)
 }
 
-func waitForServiceDeletion(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func waitForServiceDeletion(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		serv, err := services.Get(networkingClient, id).Extract()
+		serv, err := services.Get(ctx, networkingClient, id).Extract()
 		log.Printf("[DEBUG] Got service %s => %#v", id, serv)
 
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				log.Printf("[DEBUG] Service %s is actually deleted", id)
 				return "", "DELETED", nil
 			}
@@ -273,9 +274,9 @@ func waitForServiceDeletion(networkingClient *gophercloud.ServiceClient, id stri
 	}
 }
 
-func waitForServiceCreation(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func waitForServiceCreation(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		service, err := services.Get(networkingClient, id).Extract()
+		service, err := services.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return "", "NOT_CREATED", nil
 		}
@@ -283,9 +284,9 @@ func waitForServiceCreation(networkingClient *gophercloud.ServiceClient, id stri
 	}
 }
 
-func waitForServiceUpdate(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func waitForServiceUpdate(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		service, err := services.Get(networkingClient, id).Extract()
+		service, err := services.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return "", "PENDING_UPDATE", nil
 		}

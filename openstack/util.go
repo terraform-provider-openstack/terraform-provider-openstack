@@ -3,6 +3,7 @@ package openstack
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -10,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 // BuildRequest takes an opts struct and builds a request body for
@@ -29,7 +30,7 @@ func BuildRequest(opts interface{}, parent string) (map[string]interface{}, erro
 // CheckDeleted checks the error to see if it's a 404 (Not Found) and, if so,
 // sets the resource ID to the empty string instead of throwing an error.
 func CheckDeleted(d *schema.ResourceData, err error, msg string) error {
-	if _, ok := err.(gophercloud.ErrDefault404); ok {
+	if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 		d.SetId("")
 		return nil
 	}
@@ -76,22 +77,21 @@ func MapValueSpecs(d *schema.ResourceData) map[string]string {
 }
 
 func checkForRetryableError(err error) *retry.RetryError {
-	switch e := err.(type) {
-	case gophercloud.ErrDefault500:
-		return retry.RetryableError(err)
-	case gophercloud.ErrDefault409:
-		return retry.RetryableError(err)
-	case gophercloud.ErrDefault503:
-		return retry.RetryableError(err)
-	case gophercloud.ErrUnexpectedResponseCode:
-		if e.GetStatusCode() == 504 || e.GetStatusCode() == 502 {
-			return retry.RetryableError(err)
-		} else {
-			return retry.NonRetryableError(err)
-		}
-	default:
+	e, ok := err.(gophercloud.ErrUnexpectedResponseCode)
+	if !ok {
 		return retry.NonRetryableError(err)
 	}
+
+	switch e.Actual {
+	case http.StatusConflict, // 409
+		http.StatusInternalServerError, // 500
+		http.StatusBadGateway,          // 502
+		http.StatusServiceUnavailable,  // 503
+		http.StatusGatewayTimeout:      // 504
+		return retry.RetryableError(err)
+	}
+
+	return retry.NonRetryableError(err)
 }
 
 func suppressEquivalentTimeDiffs(k, old, new string, d *schema.ResourceData) bool {

@@ -1,15 +1,17 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/orchestration/v1/stacks"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/orchestration/v1/stacks"
 )
 
 func buildTE(t map[string]interface{}) (*stacks.TE, error) {
@@ -68,12 +70,12 @@ func buildEnvironmentOpts(d *schema.ResourceData) (*stacks.Environment, error) {
 	return nil, nil
 }
 
-func orchestrationStackV1StateRefreshFunc(client *gophercloud.ServiceClient, stackID string, isdelete bool) retry.StateRefreshFunc {
+func orchestrationStackV1StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, stackID string, isdelete bool) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Refresh Stack status %s", stackID)
-		stack, err := stacks.Find(client, stackID).Extract()
+		stack, err := stacks.Find(ctx, client, stackID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok && isdelete {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) && isdelete {
 				return stack, "DELETE_COMPLETE", nil
 			}
 

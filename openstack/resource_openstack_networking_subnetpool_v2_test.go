@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/subnetpools"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/subnetpools"
 )
 
 func TestAccNetworkingV2SubnetPool_Basic(t *testing.T) {
@@ -78,12 +79,12 @@ func testAccCheckNetworkingV2SubnetPoolExists(n string, subnetPool *subnetpools.
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		found, err := subnetpools.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := subnetpools.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -100,7 +101,7 @@ func testAccCheckNetworkingV2SubnetPoolExists(n string, subnetPool *subnetpools.
 
 func testAccCheckNetworkingV2SubnetPoolDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(osRegionName)
+	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -110,7 +111,7 @@ func testAccCheckNetworkingV2SubnetPoolDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := subnetpools.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err := subnetpools.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Subnetpool still exists")
 		}

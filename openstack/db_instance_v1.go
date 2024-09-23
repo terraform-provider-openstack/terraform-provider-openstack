@@ -1,15 +1,17 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/db/v1/databases"
-	"github.com/gophercloud/gophercloud/openstack/db/v1/instances"
-	"github.com/gophercloud/gophercloud/openstack/db/v1/users"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/databases"
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/instances"
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/users"
 )
 
 func expandDatabaseInstanceV1Datastore(rawDatastore []interface{}) instances.DatastoreOpts {
@@ -68,11 +70,11 @@ func expandDatabaseInstanceV1Users(rawUsers []interface{}) users.BatchCreateOpts
 
 // databaseInstanceV1StateRefreshFunc returns a retry.StateRefreshFunc
 // that is used to watch a database instance.
-func databaseInstanceV1StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string) retry.StateRefreshFunc {
+func databaseInstanceV1StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, instanceID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		i, err := instances.Get(client, instanceID).Extract()
+		i, err := instances.Get(ctx, client, instanceID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return i, "DELETED", nil
 			}
 			return nil, "", err

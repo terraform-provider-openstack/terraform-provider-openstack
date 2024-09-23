@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/attachinterfaces"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/attachinterfaces"
 )
 
 func resourceComputeInterfaceAttachV2() *schema.Resource {
@@ -70,7 +70,7 @@ func resourceComputeInterfaceAttachV2() *schema.Resource {
 
 func resourceComputeInterfaceAttachV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -105,7 +105,7 @@ func resourceComputeInterfaceAttachV2Create(ctx context.Context, d *schema.Resou
 
 	log.Printf("[DEBUG] openstack_compute_interface_attach_v2 attach options: %#v", attachOpts)
 
-	attachment, err := attachinterfaces.Create(computeClient, instanceID, attachOpts).Extract()
+	attachment, err := attachinterfaces.Create(ctx, computeClient, instanceID, attachOpts).Extract()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -113,7 +113,7 @@ func resourceComputeInterfaceAttachV2Create(ctx context.Context, d *schema.Resou
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ATTACHING"},
 		Target:     []string{"ATTACHED"},
-		Refresh:    computeInterfaceAttachV2AttachFunc(computeClient, instanceID, attachment.PortID),
+		Refresh:    computeInterfaceAttachV2AttachFunc(ctx, computeClient, instanceID, attachment.PortID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 5 * time.Second,
@@ -133,9 +133,9 @@ func resourceComputeInterfaceAttachV2Create(ctx context.Context, d *schema.Resou
 	return resourceComputeInterfaceAttachV2Read(ctx, d, meta)
 }
 
-func resourceComputeInterfaceAttachV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeInterfaceAttachV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -145,7 +145,7 @@ func resourceComputeInterfaceAttachV2Read(_ context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	attachment, err := attachinterfaces.Get(computeClient, instanceID, attachmentID).Extract()
+	attachment, err := attachinterfaces.Get(ctx, computeClient, instanceID, attachmentID).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_compute_interface_attach_v2"))
 	}
@@ -166,7 +166,7 @@ func resourceComputeInterfaceAttachV2Read(_ context.Context, d *schema.ResourceD
 
 func resourceComputeInterfaceAttachV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -179,7 +179,7 @@ func resourceComputeInterfaceAttachV2Delete(ctx context.Context, d *schema.Resou
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{""},
 		Target:     []string{"DETACHED"},
-		Refresh:    computeInterfaceAttachV2DetachFunc(computeClient, instanceID, attachmentID),
+		Refresh:    computeInterfaceAttachV2DetachFunc(ctx, computeClient, instanceID, attachmentID),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 5 * time.Second,

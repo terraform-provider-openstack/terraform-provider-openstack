@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/users"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
 )
 
 func resourceIdentityUserMembershipV3() *schema.Resource {
@@ -42,7 +42,7 @@ func resourceIdentityUserMembershipV3() *schema.Resource {
 
 func resourceIdentityUserMembershipV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -50,7 +50,7 @@ func resourceIdentityUserMembershipV3Create(ctx context.Context, d *schema.Resou
 	userID := d.Get("user_id").(string)
 	groupID := d.Get("group_id").(string)
 
-	if err := users.AddToGroup(identityClient, groupID, userID).ExtractErr(); err != nil {
+	if err := users.AddToGroup(ctx, identityClient, groupID, userID).ExtractErr(); err != nil {
 		return diag.Errorf("Error creating openstack_identity_user_membership_v3: %s", err)
 	}
 
@@ -62,7 +62,7 @@ func resourceIdentityUserMembershipV3Create(ctx context.Context, d *schema.Resou
 
 func resourceIdentityUserMembershipV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -72,7 +72,7 @@ func resourceIdentityUserMembershipV3Read(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	userMembership, err := users.IsMemberOfGroup(identityClient, groupID, userID).Extract()
+	userMembership, err := users.IsMemberOfGroup(ctx, identityClient, groupID, userID).Extract()
 	if err != nil || !userMembership {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_identity_user_membership_v3"))
 	}
@@ -86,7 +86,7 @@ func resourceIdentityUserMembershipV3Read(ctx context.Context, d *schema.Resourc
 
 func resourceIdentityUserMembershipV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -96,7 +96,7 @@ func resourceIdentityUserMembershipV3Delete(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 
-	if err := users.RemoveFromGroup(identityClient, groupID, userID).ExtractErr(); err != nil {
+	if err := users.RemoveFromGroup(ctx, identityClient, groupID, userID).ExtractErr(); err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error removing openstack_identity_user_membership_v3"))
 	}
 

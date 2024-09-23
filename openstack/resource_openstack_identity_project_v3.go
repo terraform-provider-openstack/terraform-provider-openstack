@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
 )
 
 func resourceIdentityProjectV3() *schema.Resource {
@@ -77,7 +77,7 @@ func resourceIdentityProjectV3() *schema.Resource {
 
 func resourceIdentityProjectV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -99,7 +99,7 @@ func resourceIdentityProjectV3Create(ctx context.Context, d *schema.ResourceData
 	}
 
 	log.Printf("[DEBUG] openstack_identity_project_v3 create options: %#v", createOpts)
-	project, err := projects.Create(identityClient, createOpts).Extract()
+	project, err := projects.Create(ctx, identityClient, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_identity_project_v3: %s", err)
 	}
@@ -111,12 +111,12 @@ func resourceIdentityProjectV3Create(ctx context.Context, d *schema.ResourceData
 
 func resourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
-	project, err := projects.Get(identityClient, d.Id()).Extract()
+	project, err := projects.Get(ctx, identityClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_identity_project_v3"))
 	}
@@ -137,7 +137,7 @@ func resourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData, 
 
 func resourceIdentityProjectV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -190,7 +190,7 @@ func resourceIdentityProjectV3Update(ctx context.Context, d *schema.ResourceData
 	}
 
 	if hasChange {
-		_, err := projects.Update(identityClient, d.Id(), updateOpts).Extract()
+		_, err := projects.Update(ctx, identityClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_identity_project_v3 %s: %s", d.Id(), err)
 		}
@@ -201,7 +201,7 @@ func resourceIdentityProjectV3Update(ctx context.Context, d *schema.ResourceData
 
 func resourceIdentityProjectV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -211,13 +211,13 @@ func resourceIdentityProjectV3Delete(ctx context.Context, d *schema.ResourceData
 		updateOpts := projects.UpdateOpts{
 			Enabled: new(bool),
 		}
-		_, err := projects.Update(identityClient, d.Id(), updateOpts).Extract()
+		_, err := projects.Update(ctx, identityClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error disabling domain openstack_identity_project_v3 %s: %s", d.Id(), err)
 		}
 	}
 
-	err = projects.Delete(identityClient, d.Id()).ExtractErr()
+	err = projects.Delete(ctx, identityClient, d.Id()).ExtractErr()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_identity_project_v3"))
 	}

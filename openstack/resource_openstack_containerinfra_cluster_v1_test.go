@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"testing"
@@ -9,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
+	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/clusters"
 )
 
 func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
@@ -298,12 +299,12 @@ func testAccCheckContainerInfraV1ClusterExists(n string, cluster *clusters.Clust
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		containerInfraClient, err := config.ContainerInfraV1Client(osRegionName)
+		containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
 		}
 
-		found, err := clusters.Get(containerInfraClient, rs.Primary.ID).Extract()
+		found, err := clusters.Get(context.TODO(), containerInfraClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -320,7 +321,7 @@ func testAccCheckContainerInfraV1ClusterExists(n string, cluster *clusters.Clust
 
 func testAccCheckContainerInfraV1ClusterDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	containerInfraClient, err := config.ContainerInfraV1Client(osRegionName)
+	containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
@@ -330,7 +331,7 @@ func testAccCheckContainerInfraV1ClusterDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := clusters.Get(containerInfraClient, rs.Primary.ID).Extract()
+		_, err := clusters.Get(context.TODO(), containerInfraClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Cluster still exists")
 		}
@@ -341,6 +342,27 @@ func testAccCheckContainerInfraV1ClusterDestroy(s *terraform.State) error {
 
 func testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName string, nodeCount int) string {
 	return fmt.Sprintf(`
+resource "openstack_networking_router_v2" "router_1" {
+  name                = "my_router"
+  external_network_id = "%s"
+}
+
+resource "openstack_networking_router_interface_v2" "router_interface_1" {
+  router_id = openstack_networking_router_v2.router_1.id
+  subnet_id = openstack_networking_subnet_v2.cluster_subnet_1.id
+}
+
+resource "openstack_networking_network_v2" "cluster_network_1" {
+  name           = "cluster-network"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "cluster_subnet_1" {
+  name       = "cluster-network-subnet"
+  network_id = openstack_networking_network_v2.cluster_network_1.id
+  cidr       = "192.168.199.0/24"
+}
+
 resource "openstack_compute_keypair_v2" "keypair_1" {
   name = "%s"
 }
@@ -353,6 +375,8 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
   volume_driver         = "cinder"
   docker_storage_driver = "overlay2"
   docker_volume_size    = 5
+  fixed_network         = openstack_networking_network_v2.cluster_network_1.name
+  fixed_subnet          = openstack_networking_subnet_v2.cluster_subnet_1.name
   external_network_id   = "%s"
   network_driver        = "flannel"
   http_proxy            = "%s"
@@ -378,7 +402,7 @@ resource "openstack_containerinfra_cluster_v1" "cluster_1" {
   node_count           = %d
   floating_ip_enabled  = true
 }
-`, keypairName, clusterTemplateName, osMagnumImage, osExtGwID, osMagnumHTTPProxy, osMagnumHTTPSProxy, osMagnumNoProxy, osMagnumLabels, osRegionName, clusterName, osMagnumFlavor, osMagnumFlavor, nodeCount)
+`, osExtGwID, keypairName, clusterTemplateName, osMagnumImage, osExtGwID, osMagnumHTTPProxy, osMagnumHTTPSProxy, osMagnumNoProxy, osMagnumLabels, osRegionName, clusterName, osMagnumFlavor, osMagnumFlavor, nodeCount)
 }
 
 func testAccContainerInfraV1ClusterLabels(keypairName, clusterTemplateName, clusterName string, nodeCount int, mergeLabels bool) string {

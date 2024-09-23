@@ -1,14 +1,16 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/bgpvpns"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/bgpvpns"
 )
 
 func TestAccBGPVPNV2_basic(t *testing.T) {
@@ -37,7 +39,7 @@ func TestAccBGPVPNV2_basic(t *testing.T) {
 
 func testAccCheckBGPVPNV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(osRegionName)
+	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -45,11 +47,11 @@ func testAccCheckBGPVPNV2Destroy(s *terraform.State) error {
 		if rs.Type != "openstack_bgpvpn_v2" {
 			continue
 		}
-		_, err = bgpvpns.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err = bgpvpns.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("BGPVPN (%s) still exists", rs.Primary.ID)
 		}
-		if _, ok := err.(gophercloud.ErrDefault404); !ok {
+		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 	}
@@ -68,13 +70,13 @@ func testAccCheckBGPVPNV2Exists(n string, bgpvpn *bgpvpns.BGPVPN) resource.TestC
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
 		var found *bgpvpns.BGPVPN
-		found, err = bgpvpns.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err = bgpvpns.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

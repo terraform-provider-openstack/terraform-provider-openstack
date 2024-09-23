@@ -3,15 +3,16 @@ package openstack
 import (
 	"context"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/attributestags"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/attributestags"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 )
 
 const (
@@ -169,7 +170,7 @@ func resourceNetworkingRouterV2() *schema.Resource {
 
 func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -242,7 +243,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 
 	if len(externalSubnetIDs) == 0 {
 		// router creation without a retry
-		r, err = routers.Create(networkingClient, createOpts).Extract()
+		r, err = routers.Create(ctx, networkingClient, createOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error creating openstack_networking_router_v2: %s", err)
 		}
@@ -257,7 +258,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 
 			log.Printf("[DEBUG] openstack_networking_router_v2 create options (try %d): %#v", i+1, createOpts)
 
-			r, err = routers.Create(networkingClient, createOpts).Extract()
+			r, err = routers.Create(ctx, networkingClient, createOpts).Extract()
 			if err != nil {
 				if retryOn409(err) {
 					continue
@@ -277,7 +278,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"BUILD", "PENDING_CREATE", "PENDING_UPDATE"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    resourceNetworkingRouterV2StateRefreshFunc(networkingClient, r.ID),
+		Refresh:    resourceNetworkingRouterV2StateRefreshFunc(ctx, networkingClient, r.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -298,7 +299,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 		var updateOpts routers.UpdateOpts
 		updateOpts.GatewayInfo = &gatewayInfo
 
-		_, err = routers.Update(networkingClient, r.ID, updateOpts).Extract()
+		_, err = routers.Update(ctx, networkingClient, r.ID, updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_networking_router_v2: %s", err)
 		}
@@ -307,7 +308,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
-		tags, err := attributestags.ReplaceAll(networkingClient, "routers", r.ID, tagOpts).Extract()
+		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "routers", r.ID, tagOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error setting tags on openstack_networking_router_v2 %s: %s", r.ID, err)
 		}
@@ -320,14 +321,14 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 
 func resourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	r, err := routers.Get(networkingClient, d.Id()).Extract()
+	r, err := routers.Get(ctx, networkingClient, d.Id()).Extract()
 	if err != nil {
-		if _, ok := err.(gophercloud.ErrDefault404); ok {
+		if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			d.SetId("")
 			return nil
 		}
@@ -365,7 +366,7 @@ func resourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData,
 
 func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -437,7 +438,7 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_networking_router_v2 %s update options: %#v", d.Id(), updateOpts)
-		_, err = routers.Update(networkingClient, d.Id(), updateOpts).Extract()
+		_, err = routers.Update(ctx, networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_networking_router_v2: %s", err)
 		}
@@ -447,7 +448,7 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 	if d.HasChange("tags") {
 		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
-		tags, err := attributestags.ReplaceAll(networkingClient, "routers", d.Id(), tagOpts).Extract()
+		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "routers", d.Id(), tagOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error setting tags on openstack_networking_router_v2 %s: %s", d.Id(), err)
 		}
@@ -459,19 +460,19 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 
 func resourceNetworkingRouterV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	if err := routers.Delete(networkingClient, d.Id()).ExtractErr(); err != nil {
+	if err := routers.Delete(ctx, networkingClient, d.Id()).ExtractErr(); err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_router_v2"))
 	}
 
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    resourceNetworkingRouterV2StateRefreshFunc(networkingClient, d.Id()),
+		Refresh:    resourceNetworkingRouterV2StateRefreshFunc(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,

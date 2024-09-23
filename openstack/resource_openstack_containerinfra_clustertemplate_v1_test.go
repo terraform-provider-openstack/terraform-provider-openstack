@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clustertemplates"
+	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/clustertemplates"
 )
 
 func TestAccContainerInfraV1ClusterTemplate_basic(t *testing.T) {
@@ -125,12 +126,12 @@ func testAccCheckContainerInfraV1ClusterTemplateExists(n string, clustertemplate
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		containerInfraClient, err := config.ContainerInfraV1Client(osRegionName)
+		containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
 		}
 
-		found, err := clustertemplates.Get(containerInfraClient, rs.Primary.ID).Extract()
+		found, err := clustertemplates.Get(context.TODO(), containerInfraClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -147,7 +148,7 @@ func testAccCheckContainerInfraV1ClusterTemplateExists(n string, clustertemplate
 
 func testAccCheckContainerInfraV1ClusterTemplateDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	containerInfraClient, err := config.ContainerInfraV1Client(osRegionName)
+	containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
 	}
@@ -157,7 +158,7 @@ func testAccCheckContainerInfraV1ClusterTemplateDestroy(s *terraform.State) erro
 			continue
 		}
 
-		_, err := clustertemplates.Get(containerInfraClient, rs.Primary.ID).Extract()
+		_, err := clustertemplates.Get(context.TODO(), containerInfraClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Cluster template still exists")
 		}

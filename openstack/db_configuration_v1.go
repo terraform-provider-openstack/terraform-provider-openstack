@@ -1,12 +1,14 @@
 package openstack
 
 import (
+	"context"
+	"net/http"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/db/v1/configurations"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/configurations"
 )
 
 func expandDatabaseConfigurationV1Datastore(rawDatastore []interface{}) configurations.DatastoreOpts {
@@ -45,11 +47,11 @@ func expandDatabaseConfigurationV1Values(rawValues []interface{}) map[string]int
 
 // databaseConfigurationV1StateRefreshFunc returns a retry.StateRefreshFunc that is used to watch
 // an cloud database instance.
-func databaseConfigurationV1StateRefreshFunc(client *gophercloud.ServiceClient, cgroupID string) retry.StateRefreshFunc {
+func databaseConfigurationV1StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, cgroupID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		i, err := configurations.Get(client, cgroupID).Extract()
+		i, err := configurations.Get(ctx, client, cgroupID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return i, "DELETED", nil
 			}
 			return nil, "", err

@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/quotas"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/quotas"
 )
 
 func resourceNetworkingQuotaV2() *schema.Resource {
@@ -103,7 +103,7 @@ func resourceNetworkingQuotaV2() *schema.Resource {
 func resourceNetworkingQuotaV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
-	networkingClient, err := config.NetworkingV2Client(region)
+	networkingClient, err := config.NetworkingV2Client(ctx, region)
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -157,7 +157,7 @@ func resourceNetworkingQuotaV2Create(ctx context.Context, d *schema.ResourceData
 		updateOpts.SubnetPool = &psubnetPool
 	}
 
-	q, err := quotas.Update(networkingClient, projectID, updateOpts).Extract()
+	q, err := quotas.Update(ctx, networkingClient, projectID, updateOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_networking_quota_v2: %s", err)
 	}
@@ -173,7 +173,7 @@ func resourceNetworkingQuotaV2Create(ctx context.Context, d *schema.ResourceData
 func resourceNetworkingQuotaV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
-	networkingClient, err := config.NetworkingV2Client(region)
+	networkingClient, err := config.NetworkingV2Client(ctx, region)
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -183,7 +183,7 @@ func resourceNetworkingQuotaV2Read(ctx context.Context, d *schema.ResourceData, 
 	// in both cases
 	projectID := strings.Split(d.Id(), "/")[0]
 
-	q, err := quotas.Get(networkingClient, projectID).Extract()
+	q, err := quotas.Get(ctx, networkingClient, projectID).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_networking_quota_v2"))
 	}
@@ -207,7 +207,7 @@ func resourceNetworkingQuotaV2Read(ctx context.Context, d *schema.ResourceData, 
 
 func resourceNetworkingQuotaV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	networkingClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -274,7 +274,7 @@ func resourceNetworkingQuotaV2Update(ctx context.Context, d *schema.ResourceData
 	if hasChange {
 		log.Printf("[DEBUG] openstack_networking_quota_v2 %s update options: %#v", d.Id(), updateOpts)
 		projectID := d.Get("project_id").(string)
-		_, err := quotas.Update(networkingClient, projectID, updateOpts).Extract()
+		_, err := quotas.Update(ctx, networkingClient, projectID, updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_networking_quota_v2: %s", err)
 		}

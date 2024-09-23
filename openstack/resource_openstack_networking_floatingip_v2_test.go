@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
 func TestAccNetworkingV2FloatingIP_basic(t *testing.T) {
@@ -107,7 +108,7 @@ func TestAccNetworkingV2FloatingIP_timeout(t *testing.T) {
 
 func testAccCheckNetworkingV2FloatingIPDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkClient, err := config.NetworkingV2Client(osRegionName)
+	networkClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack floating IP: %s", err)
 	}
@@ -117,7 +118,7 @@ func testAccCheckNetworkingV2FloatingIPDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := floatingips.Get(networkClient, rs.Primary.ID).Extract()
+		_, err := floatingips.Get(context.TODO(), networkClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Floating IP still exists")
 		}
@@ -138,12 +139,12 @@ func testAccCheckNetworkingV2FloatingIPExists(n string, kp *floatingips.Floating
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkClient, err := config.NetworkingV2Client(osRegionName)
+		networkClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
-		found, err := floatingips.Get(networkClient, rs.Primary.ID).Extract()
+		found, err := floatingips.Get(context.TODO(), networkClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

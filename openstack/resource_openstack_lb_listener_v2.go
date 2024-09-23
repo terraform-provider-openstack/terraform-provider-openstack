@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/listeners"
 )
 
 func resourceListenerV2() *schema.Resource {
@@ -153,7 +153,7 @@ func resourceListenerV2() *schema.Resource {
 
 func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
@@ -238,7 +238,7 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	log.Printf("[DEBUG] openstack_lb_listener_v2 create options: %#v", createOpts)
 	var listener *listeners.Listener
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		listener, err = listeners.Create(lbClient, createOpts).Extract()
+		listener, err = listeners.Create(ctx, lbClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -262,12 +262,12 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceListenerV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	listener, err := listeners.Get(lbClient, d.Id()).Extract()
+	listener, err := listeners.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "openstack_lb_listener_v2"))
 	}
@@ -306,13 +306,13 @@ func resourceListenerV2Read(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	// Get a clean copy of the listener.
-	listener, err := listeners.Get(lbClient, d.Id()).Extract()
+	listener, err := listeners.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to retrieve openstack_lb_listener_v2 %s: %s", d.Id(), err)
 	}
@@ -440,7 +440,7 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	log.Printf("[DEBUG] openstack_lb_listener_v2 %s update options: %#v", d.Id(), updateOpts)
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		_, err = listeners.Update(lbClient, d.Id(), updateOpts).Extract()
+		_, err = listeners.Update(ctx, lbClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -462,13 +462,13 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	lbClient, err := config.LoadBalancerV2Client(GetRegion(d, config))
+	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	// Get a clean copy of the listener.
-	listener, err := listeners.Get(lbClient, d.Id()).Extract()
+	listener, err := listeners.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve openstack_lb_listener_v2"))
 	}
@@ -477,7 +477,7 @@ func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 
 	log.Printf("[DEBUG] Deleting openstack_lb_listener_v2 %s", d.Id())
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		err = listeners.Delete(lbClient, d.Id()).ExtractErr()
+		err = listeners.Delete(ctx, lbClient, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}

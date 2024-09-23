@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
+	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
 )
 
 func TestAccImagesImageV2_basic(t *testing.T) {
@@ -322,7 +323,7 @@ func TestAccImagesImageV2_decompress_zst(t *testing.T) {
 
 func testAccCheckImagesImageV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	imageClient, err := config.ImageV2Client(osRegionName)
+	imageClient, err := config.ImageV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack Image: %s", err)
 	}
@@ -332,7 +333,7 @@ func testAccCheckImagesImageV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := images.Get(imageClient, rs.Primary.ID).Extract()
+		_, err := images.Get(context.TODO(), imageClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Image still exists")
 		}
@@ -353,12 +354,12 @@ func testAccCheckImagesImageV2Exists(n string, image *images.Image) resource.Tes
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		imageClient, err := config.ImageV2Client(osRegionName)
+		imageClient, err := config.ImageV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack Image: %s", err)
 		}
 
-		found, err := images.Get(imageClient, rs.Primary.ID).Extract()
+		found, err := images.Get(context.TODO(), imageClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -385,12 +386,12 @@ func testAccCheckImagesImageV2HasTag(n, tag string) resource.TestCheckFunc {
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		imageClient, err := config.ImageV2Client(osRegionName)
+		imageClient, err := config.ImageV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack Image: %s", err)
 		}
 
-		found, err := images.Get(imageClient, rs.Primary.ID).Extract()
+		found, err := images.Get(context.TODO(), imageClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -421,12 +422,12 @@ func testAccCheckImagesImageV2TagCount(n string, expected int) resource.TestChec
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		imageClient, err := config.ImageV2Client(osRegionName)
+		imageClient, err := config.ImageV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack Image: %s", err)
 		}
 
-		found, err := images.Get(imageClient, rs.Primary.ID).Extract()
+		found, err := images.Get(context.TODO(), imageClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

@@ -1,16 +1,17 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/roles"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/users"
-	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/roles"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
+	"github.com/gophercloud/gophercloud/v2/pagination"
 )
 
 func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
@@ -43,7 +44,7 @@ func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 
 func testAccCheckIdentityV3RoleAssignmentDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.IdentityV3Client(osRegionName)
+	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -53,7 +54,7 @@ func testAccCheckIdentityV3RoleAssignmentDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := roles.Get(identityClient, rs.Primary.ID).Extract()
+		_, err := roles.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Role assignment still exists")
 		}
@@ -74,7 +75,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.IdentityV3Client(osRegionName)
+		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
@@ -94,7 +95,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 		pager := roles.ListAssignments(identityClient, opts)
 		var assignment roles.RoleAssignment
 
-		err = pager.EachPage(func(page pagination.Page) (bool, error) {
+		err = pager.EachPage(context.TODO(), func(ctx context.Context, page pagination.Page) (bool, error) {
 			assignmentList, err := roles.ExtractRoleAssignments(page)
 			if err != nil {
 				return false, err
@@ -113,17 +114,17 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 			return err
 		}
 
-		p, err := projects.Get(identityClient, assignment.Scope.Project.ID).Extract()
+		p, err := projects.Get(context.TODO(), identityClient, assignment.Scope.Project.ID).Extract()
 		if err != nil {
 			return fmt.Errorf("Project not found")
 		}
 		*project = *p
-		u, err := users.Get(identityClient, assignment.User.ID).Extract()
+		u, err := users.Get(context.TODO(), identityClient, assignment.User.ID).Extract()
 		if err != nil {
 			return fmt.Errorf("User not found")
 		}
 		*user = *u
-		r, err := roles.Get(identityClient, assignment.Role.ID).Extract()
+		r, err := roles.Get(context.TODO(), identityClient, assignment.Role.ID).Extract()
 		if err != nil {
 			return fmt.Errorf("Role not found")
 		}

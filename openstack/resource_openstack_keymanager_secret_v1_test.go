@@ -1,14 +1,16 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/secrets"
 )
 
 func TestAccKeyManagerSecretV1_basic(t *testing.T) {
@@ -230,7 +232,7 @@ func TestAccKeyManagerSecretV1_acls_update(t *testing.T) {
 
 func testAccCheckSecretV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	kmClient, err := config.KeyManagerV1Client(osRegionName)
+	kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 	}
@@ -238,11 +240,11 @@ func testAccCheckSecretV1Destroy(s *terraform.State) error {
 		if rs.Type != "openstack_keymanager_secret" {
 			continue
 		}
-		_, err = secrets.Get(kmClient, rs.Primary.ID).Extract()
+		_, err = secrets.Get(context.TODO(), kmClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Secret (%s) still exists", rs.Primary.ID)
 		}
-		if _, ok := err.(gophercloud.ErrDefault404); !ok {
+		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 	}
@@ -261,14 +263,14 @@ func testAccCheckSecretV1Exists(n string, secret *secrets.Secret) resource.TestC
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		kmClient, err := config.KeyManagerV1Client(osRegionName)
+		kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 		}
 
 		var found *secrets.Secret
 
-		found, err = secrets.Get(kmClient, rs.Primary.ID).Extract()
+		found, err = secrets.Get(context.TODO(), kmClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -281,7 +283,7 @@ func testAccCheckSecretV1Exists(n string, secret *secrets.Secret) resource.TestC
 func testAccCheckPayloadEquals(payload string, secret *secrets.Secret) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		kmClient, err := config.KeyManagerV1Client(osRegionName)
+		kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 		}
@@ -291,7 +293,7 @@ func testAccCheckPayloadEquals(payload string, secret *secrets.Secret) resource.
 		}
 
 		uuid := keyManagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
-		secretPayload, _ := secrets.GetPayload(kmClient, uuid, opts).Extract()
+		secretPayload, _ := secrets.GetPayload(context.TODO(), kmClient, uuid, opts).Extract()
 		if string(secretPayload) != payload {
 			return fmt.Errorf("Payloads do not match. Expected %s but got %s", payload, secretPayload)
 		}
@@ -302,13 +304,13 @@ func testAccCheckPayloadEquals(payload string, secret *secrets.Secret) resource.
 func testAccCheckMetadataEquals(key string, value string, secret *secrets.Secret) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		kmClient, err := config.KeyManagerV1Client(osRegionName)
+		kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
 		uuid := keyManagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
-		metadatum, err := secrets.GetMetadatum(kmClient, uuid, key).Extract()
+		metadatum, err := secrets.GetMetadatum(context.TODO(), kmClient, uuid, key).Extract()
 		if err != nil {
 			return err
 		}

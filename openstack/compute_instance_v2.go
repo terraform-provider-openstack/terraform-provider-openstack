@@ -10,15 +10,16 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
 )
 
 const (
@@ -76,7 +77,7 @@ type InstanceNetwork struct {
 // reference the actual port resource itself.
 //
 // So, let's begin the journey.
-func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]InstanceNetwork, error) {
+func getAllInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]InstanceNetwork, error) {
 	networks := d.Get("network").([]interface{})
 
 	instanceNetworks := make([]InstanceNetwork, 0, len(networks))
@@ -125,7 +126,7 @@ func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]Instanc
 			queryTerm = portID
 		}
 
-		networkInfo, err := getInstanceNetworkInfo(d, meta, queryType, queryTerm)
+		networkInfo, err := getInstanceNetworkInfo(ctx, d, meta, queryType, queryTerm)
 		if err != nil {
 			return nil, err
 		}
@@ -151,14 +152,14 @@ func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]Instanc
 
 // getInstanceNetworkInfo will query for network information in order to make
 // an accurate determination of a network's name and a network's ID.
-func getInstanceNetworkInfo(d *schema.ResourceData, meta interface{}, queryType, queryTerm string) (map[string]interface{}, error) {
+func getInstanceNetworkInfo(ctx context.Context, d *schema.ResourceData, meta interface{}, queryType, queryTerm string) (map[string]interface{}, error) {
 	config := meta.(*Config)
-	networkClient, err := config.NetworkingV2Client(GetRegion(d, config))
+	networkClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return nil, fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	networkInfo, err := getInstanceNetworkInfoNeutron(networkClient, queryType, queryTerm)
+	networkInfo, err := getInstanceNetworkInfoNeutron(ctx, networkClient, queryType, queryTerm)
 	if err != nil {
 		return nil, fmt.Errorf("Error trying to get network information from the Network API: %s", err)
 	}
@@ -168,14 +169,14 @@ func getInstanceNetworkInfo(d *schema.ResourceData, meta interface{}, queryType,
 
 // getInstanceNetworkInfoNeutron will query the neutron API for the network
 // information.
-func getInstanceNetworkInfoNeutron(client *gophercloud.ServiceClient, queryType, queryTerm string) (map[string]interface{}, error) {
+func getInstanceNetworkInfoNeutron(ctx context.Context, client *gophercloud.ServiceClient, queryType, queryTerm string) (map[string]interface{}, error) {
 	// If a port was specified, use it to look up the network ID
 	// and then query the network as if a network ID was originally used.
 	if queryType == "port" {
 		listOpts := ports.ListOpts{
 			ID: queryTerm,
 		}
-		allPages, err := ports.List(client, listOpts).AllPages()
+		allPages, err := ports.List(client, listOpts).AllPages(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
 		}
@@ -210,7 +211,7 @@ func getInstanceNetworkInfoNeutron(client *gophercloud.ServiceClient, queryType,
 		listOpts.ID = queryTerm
 	}
 
-	allPages, err := networks.List(client, listOpts).AllPages()
+	allPages, err := networks.List(client, listOpts).AllPages(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
 	}
@@ -341,20 +342,20 @@ func expandInstanceNetworks(allInstanceNetworks []InstanceNetwork) []servers.Net
 
 // flattenInstanceNetworks collects instance network information from different
 // sources and aggregates it all together into a map array.
-func flattenInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]map[string]interface{}, error) {
+func flattenInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]map[string]interface{}, error) {
 	config := meta.(*Config)
-	computeClient, err := config.ComputeV2Client(GetRegion(d, config))
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return nil, fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
-	server, err := servers.Get(computeClient, d.Id()).Extract()
+	server, err := servers.Get(ctx, computeClient, d.Id()).Extract()
 	if err != nil {
 		return nil, CheckDeleted(d, err, "server")
 	}
 
 	allInstanceAddresses := getInstanceAddresses(server.Addresses)
-	allInstanceNetworks, err := getAllInstanceNetworks(d, meta)
+	allInstanceNetworks, err := getAllInstanceNetworks(ctx, d, meta)
 	if err != nil {
 		return nil, err
 	}
@@ -377,7 +378,7 @@ func flattenInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]map[st
 				}
 
 				// Use the same method as getAllInstanceNetworks to get the network uuid
-				networkInfo, err := getInstanceNetworkInfo(d, meta, "name", instanceAddresses.NetworkName)
+				networkInfo, err := getInstanceNetworkInfo(ctx, d, meta, "name", instanceAddresses.NetworkName)
 				if err != nil {
 					log.Printf("[WARN] Error getting default network uuid: %s", err)
 				} else {

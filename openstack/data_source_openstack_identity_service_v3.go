@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/services"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/services"
 )
 
 func dataSourceIdentityServiceV3() *schema.Resource {
@@ -48,7 +48,7 @@ func dataSourceIdentityServiceV3() *schema.Resource {
 // dataSourceIdentityServiceV3Read performs the service lookup.
 func dataSourceIdentityServiceV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -62,7 +62,7 @@ func dataSourceIdentityServiceV3Read(ctx context.Context, d *schema.ResourceData
 	log.Printf("[DEBUG] openstack_identity_service_v3 list options: %#v", listOpts)
 
 	var service services.Service
-	allPages, err := services.List(identityClient, listOpts).AllPages()
+	allPages, err := services.List(identityClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query openstack_identity_service_v3: %s", err)
 	}

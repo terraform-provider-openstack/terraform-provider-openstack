@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -8,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/quotasets"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumetypes"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/quotasets"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumetypes"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
 )
 
 func TestAccBlockStorageQuotasetV3_basic(t *testing.T) {
@@ -125,14 +126,14 @@ func testAccCheckBlockStorageQuotasetV3Exists(n string, quotaset *quotasets.Quot
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.BlockStorageV3Client(osRegionName)
+		blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 		}
 
 		projectID := strings.Split(rs.Primary.ID, "/")[0]
 
-		found, err := quotasets.Get(blockStorageClient, projectID).Extract()
+		found, err := quotasets.Get(context.TODO(), blockStorageClient, projectID).Extract()
 		if err != nil {
 			return err
 		}

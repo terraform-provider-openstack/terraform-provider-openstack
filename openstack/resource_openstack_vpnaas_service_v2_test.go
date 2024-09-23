@@ -1,15 +1,17 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/vpnaas/services"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/services"
 )
 
 func TestAccServiceVPNaaSV2_basic(t *testing.T) {
@@ -39,7 +41,7 @@ func TestAccServiceVPNaaSV2_basic(t *testing.T) {
 
 func testAccCheckServiceV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.NetworkingV2Client(osRegionName)
+	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
@@ -47,11 +49,11 @@ func testAccCheckServiceV2Destroy(s *terraform.State) error {
 		if rs.Type != "openstack_vpnaas_service" {
 			continue
 		}
-		_, err = services.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err = services.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Service (%s) still exists", rs.Primary.ID)
 		}
-		if _, ok := err.(gophercloud.ErrDefault404); !ok {
+		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 	}
@@ -70,14 +72,14 @@ func testAccCheckServiceV2Exists(n string, serv *services.Service) resource.Test
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.NetworkingV2Client(osRegionName)
+		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 		}
 
 		var found *services.Service
 
-		found, err = services.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err = services.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/groups"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/groups"
 )
 
 func TestAccIdentityV3Group_basic(t *testing.T) {
@@ -46,7 +47,7 @@ func TestAccIdentityV3Group_basic(t *testing.T) {
 
 func testAccCheckIdentityV3GroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	identityClient, err := config.IdentityV3Client(osRegionName)
+	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
@@ -56,7 +57,7 @@ func testAccCheckIdentityV3GroupDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := groups.Get(identityClient, rs.Primary.ID).Extract()
+		_, err := groups.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Group still exists")
 		}
@@ -77,12 +78,12 @@ func testAccCheckIdentityV3GroupExists(n string, group *groups.Group) resource.T
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		identityClient, err := config.IdentityV3Client(osRegionName)
+		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 		}
 
-		found, err := groups.Get(identityClient, rs.Primary.ID).Extract()
+		found, err := groups.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

@@ -1,16 +1,18 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/orders"
-	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/orders"
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/secrets"
 )
 
 func TestAccKeyManagerOrderV1_basic(t *testing.T) {
@@ -42,7 +44,7 @@ func TestAccKeyManagerOrderV1_basic(t *testing.T) {
 
 func testAccCheckOrderV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	kmClient, err := config.KeyManagerV1Client(osRegionName)
+	kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 	}
@@ -50,16 +52,16 @@ func testAccCheckOrderV1Destroy(s *terraform.State) error {
 		if rs.Type != "openstack_keymanager_order_v1" {
 			continue
 		}
-		_, err = orders.Get(kmClient, rs.Primary.ID).Extract()
+		_, err = orders.Get(context.TODO(), kmClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Order (%s) still exists", rs.Primary.ID)
 		}
-		if _, ok := err.(gophercloud.ErrDefault404); !ok {
+		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 		secretRefSplit := strings.Split(rs.Primary.Attributes["secret_ref"], "/")
 		uuid := secretRefSplit[len(secretRefSplit)-1]
-		result := secrets.Delete(kmClient, uuid)
+		result := secrets.Delete(context.TODO(), kmClient, uuid)
 		if result.ExtractErr() != nil {
 			return fmt.Errorf("Secret (%s) still exists", uuid)
 		}
@@ -79,14 +81,14 @@ func testAccCheckOrderV1Exists(n string, order *orders.Order) resource.TestCheck
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		kmClient, err := config.KeyManagerV1Client(osRegionName)
+		kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
 		}
 
 		var found *orders.Order
 
-		found, err = orders.Get(kmClient, rs.Primary.ID).Extract()
+		found, err = orders.Get(context.TODO(), kmClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

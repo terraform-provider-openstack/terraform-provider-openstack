@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/terraform-provider-openstack/terraform-provider-openstack/v2/openstack/internal/pathorcontents"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/utils/terraform/auth"
-	"github.com/gophercloud/utils/terraform/mutexkv"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/utils/v2/terraform/auth"
+	"github.com/gophercloud/utils/v2/terraform/mutexkv"
 )
 
 var (
@@ -499,7 +499,7 @@ func testAccAuthFromEnv() (*Config, error) {
 		},
 	}
 
-	if err := config.LoadAndValidate(); err != nil {
+	if err := config.LoadAndValidate(context.TODO()); err != nil {
 		return nil, err
 	}
 

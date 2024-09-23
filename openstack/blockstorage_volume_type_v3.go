@@ -1,7 +1,7 @@
 package openstack
 
 import (
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumetypes"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumetypes"
 )
 
 func expandBlockStorageVolumeTypeV3ExtraSpecs(raw map[string]interface{}) volumetypes.ExtraSpecsOpts {

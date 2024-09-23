@@ -1,13 +1,15 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/dns/v2/transfer/request"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/transfer/request"
 )
 
 // TransferRequestCreateOpts represents the attributes used when creating a new transfer request.
@@ -31,11 +33,11 @@ func (opts TransferRequestCreateOpts) ToTransferRequestCreateMap() (map[string]i
 	return nil, fmt.Errorf("Expected map but got %T", b[""])
 }
 
-func dnsTransferRequestV2RefreshFunc(dnsClient *gophercloud.ServiceClient, transferRequestID string) retry.StateRefreshFunc {
+func dnsTransferRequestV2RefreshFunc(ctx context.Context, dnsClient *gophercloud.ServiceClient, transferRequestID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		transferRequest, err := request.Get(dnsClient, transferRequestID).Extract()
+		transferRequest, err := request.Get(ctx, dnsClient, transferRequestID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return transferRequest, "DELETED", nil
 			}
 

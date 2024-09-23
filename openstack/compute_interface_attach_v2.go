@@ -1,20 +1,22 @@
 package openstack
 
 import (
+	"context"
 	"log"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/attachinterfaces"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/attachinterfaces"
 )
 
-func computeInterfaceAttachV2AttachFunc(
+func computeInterfaceAttachV2AttachFunc(ctx context.Context,
 	computeClient *gophercloud.ServiceClient, instanceID, attachmentID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		va, err := attachinterfaces.Get(computeClient, instanceID, attachmentID).Extract()
+		va, err := attachinterfaces.Get(ctx, computeClient, instanceID, attachmentID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return va, "ATTACHING", nil
 			}
 			return va, "", err
@@ -24,27 +26,27 @@ func computeInterfaceAttachV2AttachFunc(
 	}
 }
 
-func computeInterfaceAttachV2DetachFunc(
+func computeInterfaceAttachV2DetachFunc(ctx context.Context,
 	computeClient *gophercloud.ServiceClient, instanceID, attachmentID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to detach openstack_compute_interface_attach_v2 %s from instance %s",
 			attachmentID, instanceID)
 
-		va, err := attachinterfaces.Get(computeClient, instanceID, attachmentID).Extract()
+		va, err := attachinterfaces.Get(ctx, computeClient, instanceID, attachmentID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return va, "DETACHED", nil
 			}
 			return va, "", err
 		}
 
-		err = attachinterfaces.Delete(computeClient, instanceID, attachmentID).ExtractErr()
+		err = attachinterfaces.Delete(ctx, computeClient, instanceID, attachmentID).ExtractErr()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return va, "DETACHED", nil
 			}
 
-			if _, ok := err.(gophercloud.ErrDefault400); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusBadRequest) {
 				return nil, "", nil
 			}
 

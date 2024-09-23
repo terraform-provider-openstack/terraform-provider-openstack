@@ -1,22 +1,24 @@
 package openstack
 
 import (
+	"context"
 	"log"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/groups"
 )
 
 // networkingSecgroupV2StateRefreshFuncDelete returns a special case retry.StateRefreshFunc to try to delete a secgroup.
-func networkingSecgroupV2StateRefreshFuncDelete(networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
+func networkingSecgroupV2StateRefreshFuncDelete(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete openstack_networking_secgroup_v2 %s", id)
 
-		r, err := groups.Get(networkingClient, id).Extract()
+		r, err := groups.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				log.Printf("[DEBUG] Successfully deleted openstack_networking_secgroup_v2 %s", id)
 				return r, "DELETED", nil
 			}
@@ -24,13 +26,13 @@ func networkingSecgroupV2StateRefreshFuncDelete(networkingClient *gophercloud.Se
 			return r, "ACTIVE", err
 		}
 
-		err = groups.Delete(networkingClient, id).ExtractErr()
+		err = groups.Delete(ctx, networkingClient, id).ExtractErr()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				log.Printf("[DEBUG] Successfully deleted openstack_networking_secgroup_v2 %s", id)
 				return r, "DELETED", nil
 			}
-			if _, ok := err.(gophercloud.ErrDefault409); ok {
+			if gophercloud.ResponseCodeIs(err, http.StatusConflict) {
 				return r, "ACTIVE", nil
 			}
 

@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"testing"
@@ -9,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets"
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/recordsets"
 )
 
 func randomZoneName() string {
@@ -174,7 +175,7 @@ func TestAccDNSV2RecordSet_sudoProjectID(t *testing.T) {
 
 func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	dnsClient, err := config.DNSV2Client(osRegionName)
+	dnsClient, err := config.DNSV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
@@ -189,7 +190,7 @@ func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 			return err
 		}
 
-		_, err = recordsets.Get(dnsClient, zoneID, recordsetID).Extract()
+		_, err = recordsets.Get(context.TODO(), dnsClient, zoneID, recordsetID).Extract()
 		if err == nil {
 			return fmt.Errorf("Record set still exists")
 		}
@@ -210,7 +211,7 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		dnsClient, err := config.DNSV2Client(osRegionName)
+		dnsClient, err := config.DNSV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
 		}
@@ -220,7 +221,7 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 			return err
 		}
 
-		found, err := recordsets.Get(dnsClient, zoneID, recordsetID).Extract()
+		found, err := recordsets.Get(context.TODO(), dnsClient, zoneID, recordsetID).Extract()
 		if err != nil {
 			return err
 		}

@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"testing"
@@ -8,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/keypairs"
 )
 
 func TestAccComputeV2Keypair_basic(t *testing.T) {
@@ -62,7 +63,7 @@ func TestAccComputeV2Keypair_generatePrivate(t *testing.T) {
 
 func testAccCheckComputeV2KeypairDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.ComputeV2Client(osRegionName)
+	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -72,7 +73,7 @@ func testAccCheckComputeV2KeypairDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := keypairs.Get(computeClient, rs.Primary.ID, keypairs.GetOpts{}).Extract()
+		_, err := keypairs.Get(context.TODO(), computeClient, rs.Primary.ID, keypairs.GetOpts{}).Extract()
 		if err == nil {
 			return fmt.Errorf("Keypair still exists")
 		}
@@ -93,12 +94,12 @@ func testAccCheckComputeV2KeypairExists(n string, kp *keypairs.KeyPair) resource
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.ComputeV2Client(osRegionName)
+		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		found, err := keypairs.Get(computeClient, rs.Primary.ID, keypairs.GetOpts{}).Extract()
+		found, err := keypairs.Get(context.TODO(), computeClient, rs.Primary.ID, keypairs.GetOpts{}).Extract()
 		if err != nil {
 			return err
 		}
