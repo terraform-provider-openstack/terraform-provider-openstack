@@ -106,6 +106,11 @@ func dataSourceContainerInfraCluster() *schema.Resource {
 				Computed: true,
 			},
 
+			"master_lb_enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+
 			"node_count": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -142,6 +147,7 @@ func dataSourceContainerInfraCluster() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+
 			"kubeconfig": {
 				Type:      schema.TypeMap,
 				Computed:  true,
@@ -180,6 +186,7 @@ func dataSourceContainerInfraClusterRead(ctx context.Context, d *schema.Resource
 	d.Set("master_flavor", c.MasterFlavorID)
 	d.Set("keypair", c.KeyPair)
 	d.Set("master_count", c.MasterCount)
+	d.Set("master_lb_enabled", c.MasterLBEnabled)
 	d.Set("node_count", c.NodeCount)
 	d.Set("master_addresses", c.MasterAddresses)
 	d.Set("node_addresses", c.NodeAddresses)
