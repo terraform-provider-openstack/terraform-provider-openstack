@@ -362,7 +362,7 @@ func resourceLoadBalancerV2Delete(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("[DEBUG] Delete cascade: %t", d.Get("cascade").(bool))
 	timeout := d.Timeout(schema.TimeoutDelete)
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		err = loadbalancers.Delete(ctx, lbClient, d.Id(), loadbalancers.DeleteOpts{}).ExtractErr()
+		err = loadbalancers.Delete(ctx, lbClient, d.Id(), deleteOpts).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
