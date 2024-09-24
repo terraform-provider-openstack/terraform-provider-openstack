@@ -47,8 +47,8 @@ github.com/google/go-cmp v0.3.1/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMyw
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
-github.com/gophercloud/gophercloud/v2 v2.1.2-0.20240923103837-5e424784fb07 h1:ZpkVLc5mgJWv/NPa1qxU7ldhau2QVnN+YPRDaWNeU+4=
-github.com/gophercloud/gophercloud/v2 v2.1.2-0.20240923103837-5e424784fb07/go.mod h1:f2hMRC7Kakbv5vM7wSGHrIPZh6JZR60GVHryJlF/K44=
+github.com/gophercloud/gophercloud/v2 v2.1.2-0.20240924071442-fe94e7d1940d h1:KEnGknAwkUmqkflJ11MvjAgXWarJPtuquIN5WqBhxUE=
+github.com/gophercloud/gophercloud/v2 v2.1.2-0.20240924071442-fe94e7d1940d/go.mod h1:f2hMRC7Kakbv5vM7wSGHrIPZh6JZR60GVHryJlF/K44=
 github.com/gophercloud/utils/v2 v2.0.0-20240705071316-780b64d153e3 h1:Jakaq9ALfVGOGC8w0eTS2FMa+yG8bMbM1lDhkFpEDXA=
 github.com/gophercloud/utils/v2 v2.0.0-20240705071316-780b64d153e3/go.mod h1:SlglU6S3SCTU9qjapk7XjPufH/VhHXi+nKl8fuoLUoc=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
