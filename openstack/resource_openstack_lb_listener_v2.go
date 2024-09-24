@@ -99,6 +99,75 @@ func resourceListenerV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
+			"alpn_protocols": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Computed: true, // unsetting this parameter results in a default value
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{
+						"http/1.0", "http/1.1", "h2",
+					}, false),
+				},
+			},
+
+			"client_authentication": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"NONE", "OPTIONAL", "MANDATORY",
+				}, false),
+				DiffSuppressFunc: func(k, o, n string, d *schema.ResourceData) bool {
+					return o == "NONE" && n == ""
+				},
+				DiffSuppressOnRefresh: true,
+			},
+
+			"client_ca_tls_container_ref": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"client_crl_container_ref": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"hsts_include_subdomains": {
+				Type:         schema.TypeBool,
+				Optional:     true,
+				RequiredWith: []string{"hsts_max_age"},
+			},
+
+			"hsts_max_age": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+
+			"hsts_preload": {
+				Type:         schema.TypeBool,
+				Optional:     true,
+				RequiredWith: []string{"hsts_max_age"},
+			},
+
+			"tls_ciphers": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true, // unsetting this parameter results in a default value
+			},
+
+			"tls_versions": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Computed: true, // unsetting this parameter is not possible due to a bug in Octavia
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{
+						"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3",
+					}, false),
+				},
+			},
+
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Default:  true,
@@ -132,7 +201,6 @@ func resourceListenerV2() *schema.Resource {
 			"insert_headers": {
 				Type:     schema.TypeMap,
 				Optional: true,
-				ForceNew: false,
 			},
 
 			"allowed_cidrs": {
@@ -167,25 +235,33 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
-	var sniContainerRefs []string
-	if raw, ok := d.GetOk("sni_container_refs"); ok {
-		for _, v := range raw.([]interface{}) {
-			sniContainerRefs = append(sniContainerRefs, v.(string))
-		}
-	}
-
 	createOpts := listeners.CreateOpts{
 		// Protocol SCTP requires octavia minor version 2.23
-		Protocol:               listeners.Protocol(d.Get("protocol").(string)),
-		ProtocolPort:           d.Get("protocol_port").(int),
-		ProjectID:              d.Get("tenant_id").(string),
-		LoadbalancerID:         d.Get("loadbalancer_id").(string),
-		Name:                   d.Get("name").(string),
-		DefaultPoolID:          d.Get("default_pool_id").(string),
-		Description:            d.Get("description").(string),
-		DefaultTlsContainerRef: d.Get("default_tls_container_ref").(string),
-		SniContainerRefs:       sniContainerRefs,
-		AdminStateUp:           &adminStateUp,
+		Protocol:                listeners.Protocol(d.Get("protocol").(string)),
+		ProtocolPort:            d.Get("protocol_port").(int),
+		ProjectID:               d.Get("tenant_id").(string),
+		LoadbalancerID:          d.Get("loadbalancer_id").(string),
+		Name:                    d.Get("name").(string),
+		DefaultPoolID:           d.Get("default_pool_id").(string),
+		Description:             d.Get("description").(string),
+		DefaultTlsContainerRef:  d.Get("default_tls_container_ref").(string),
+		SniContainerRefs:        expandToStringSlice(d.Get("sni_container_refs").([]interface{})),
+		ALPNProtocols:           expandToStringSlice(d.Get("alpn_protocols").(*schema.Set).List()),
+		ClientAuthentication:    listeners.ClientAuthentication(d.Get("client_authentication").(string)),
+		ClientCATLSContainerRef: d.Get("client_ca_tls_container_ref").(string),
+		ClientCRLContainerRef:   d.Get("client_crl_container_ref").(string),
+		HSTSIncludeSubdomains:   d.Get("hsts_include_subdomains").(bool),
+		HSTSMaxAge:              d.Get("hsts_max_age").(int),
+		HSTSPreload:             d.Get("hsts_preload").(bool),
+		TLSCiphers:              d.Get("tls_ciphers").(string),
+		InsertHeaders:           expandToMapStringString(d.Get("insert_headers").(map[string]interface{})),
+		AllowedCIDRs:            expandToStringSlice(d.Get("allowed_cidrs").([]interface{})),
+		AdminStateUp:            &adminStateUp,
+		Tags:                    expandToStringSlice(d.Get("tags").(*schema.Set).List()),
+	}
+
+	if v, ok := d.GetOk("tls_versions"); ok {
+		createOpts.TLSVersions = expandLBListenerTLSVersionV2(v.(*schema.Set).List())
 	}
 
 	if v, ok := d.GetOk("connection_limit"); ok {
@@ -211,28 +287,6 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	if v, ok := d.GetOk("timeout_tcp_inspect"); ok {
 		timeoutTCPInspect := v.(int)
 		createOpts.TimeoutTCPInspect = &timeoutTCPInspect
-	}
-
-	if v, ok := d.GetOk("tags"); ok {
-		tags := v.(*schema.Set).List()
-		createOpts.Tags = expandToStringSlice(tags)
-	}
-
-	// Get and check insert  headers map.
-	rawHeaders := d.Get("insert_headers").(map[string]interface{})
-	headers, err := expandLBV2ListenerHeadersMap(rawHeaders)
-	if err != nil {
-		return diag.Errorf("Unable to parse insert_headers argument for openstack_lb_listener_v2: %s", err)
-	}
-
-	createOpts.InsertHeaders = headers
-
-	if raw, ok := d.GetOk("allowed_cidrs"); ok {
-		allowedCidrs := make([]string, len(raw.([]interface{})))
-		for i, v := range raw.([]interface{}) {
-			allowedCidrs[i] = v.(string)
-		}
-		createOpts.AllowedCIDRs = allowedCidrs
 	}
 
 	log.Printf("[DEBUG] openstack_lb_listener_v2 create options: %#v", createOpts)
@@ -289,6 +343,15 @@ func resourceListenerV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	d.Set("sni_container_refs", listener.SniContainerRefs)
 	d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
 	d.Set("allowed_cidrs", listener.AllowedCIDRs)
+	d.Set("alpn_protocols", listener.ALPNProtocols)
+	d.Set("client_authentication", listener.ClientAuthentication)
+	d.Set("client_ca_tls_container_ref", listener.ClientCATLSContainerRef)
+	d.Set("client_crl_container_ref", listener.ClientCRLContainerRef)
+	d.Set("hsts_include_subdomains", listener.HSTSIncludeSubdomains)
+	d.Set("hsts_max_age", listener.HSTSMaxAge)
+	d.Set("hsts_preload", listener.HSTSPreload)
+	d.Set("tls_ciphers", listener.TLSCiphers)
+	d.Set("tls_versions", listener.TLSVersions)
 	d.Set("region", GetRegion(d, config))
 	d.Set("tags", listener.Tags)
 
@@ -383,13 +446,8 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("sni_container_refs") {
 		hasChange = true
-		var sniContainerRefs []string
-		if raw, ok := d.GetOk("sni_container_refs"); ok {
-			for _, v := range raw.([]interface{}) {
-				sniContainerRefs = append(sniContainerRefs, v.(string))
-			}
-		}
-		updateOpts.SniContainerRefs = &sniContainerRefs
+		v := expandToStringSlice(d.Get("sni_container_refs").([]interface{}))
+		updateOpts.SniContainerRefs = &v
 	}
 
 	if d.HasChange("admin_state_up") {
@@ -400,26 +458,71 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("insert_headers") {
 		hasChange = true
-
-		// Get and check insert headers map.
-		rawHeaders := d.Get("insert_headers").(map[string]interface{})
-		headers, err := expandLBV2ListenerHeadersMap(rawHeaders)
-		if err != nil {
-			return diag.Errorf("Error parsing insert header for openstack_lb_listener_v2 %s: %s", d.Id(), err)
-		}
-
-		updateOpts.InsertHeaders = &headers
+		v := expandToMapStringString(d.Get("insert_headers").(map[string]interface{}))
+		updateOpts.InsertHeaders = &v
 	}
 
 	if d.HasChange("allowed_cidrs") {
 		hasChange = true
-		var allowedCidrs []string
-		if raw, ok := d.GetOk("allowed_cidrs"); ok {
-			for _, v := range raw.([]interface{}) {
-				allowedCidrs = append(allowedCidrs, v.(string))
-			}
+		v := expandToStringSlice(d.Get("allowed_cidrs").([]interface{}))
+		updateOpts.AllowedCIDRs = &v
+	}
+
+	if d.HasChange("alpn_protocols") {
+		hasChange = true
+		v := expandToStringSlice(d.Get("alpn_protocols").(*schema.Set).List())
+		updateOpts.ALPNProtocols = &v
+	}
+
+	if d.HasChange("client_authentication") {
+		hasChange = true
+		v := listeners.ClientAuthentication(d.Get("client_authentication").(string))
+		if v == "" {
+			v = listeners.ClientAuthenticationNone
 		}
-		updateOpts.AllowedCIDRs = &allowedCidrs
+		updateOpts.ClientAuthentication = &v
+	}
+
+	if d.HasChange("client_ca_tls_container_ref") {
+		hasChange = true
+		v := d.Get("client_ca_tls_container_ref").(string)
+		updateOpts.ClientCATLSContainerRef = &v
+	}
+
+	if d.HasChange("client_crl_container_ref") {
+		hasChange = true
+		v := d.Get("client_crl_container_ref").(string)
+		updateOpts.ClientCRLContainerRef = &v
+	}
+
+	if d.HasChange("hsts_include_subdomains") {
+		hasChange = true
+		v := d.Get("hsts_include_subdomains").(bool)
+		updateOpts.HSTSIncludeSubdomains = &v
+	}
+
+	if d.HasChange("hsts_max_age") {
+		hasChange = true
+		v := d.Get("hsts_max_age").(int)
+		updateOpts.HSTSMaxAge = &v
+	}
+
+	if d.HasChange("hsts_preload") {
+		hasChange = true
+		v := d.Get("hsts_preload").(bool)
+		updateOpts.HSTSPreload = &v
+	}
+
+	if d.HasChange("tls_ciphers") {
+		hasChange = true
+		v := d.Get("tls_ciphers").(string)
+		updateOpts.TLSCiphers = &v
+	}
+
+	if d.HasChange("tls_versions") {
+		hasChange = true
+		v := expandLBListenerTLSVersionV2(d.Get("tls_versions").(*schema.Set).List())
+		updateOpts.TLSVersions = &v
 	}
 
 	if d.HasChange("tags") {

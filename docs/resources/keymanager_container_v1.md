@@ -13,9 +13,9 @@ Manages a V1 Barbican container resource within OpenStack.
 
 ## Example Usage
 
-### Simple secret
+### Simple container
 
-The container with the TLS certificates, which can be used by the loadbalancer HTTPS listener.
+A container with the TLS certificates.
 
 ```hcl
 resource "openstack_keymanager_secret_v1" "certificate_1" {
@@ -57,23 +57,6 @@ resource "openstack_keymanager_container_v1" "tls_1" {
     name       = "intermediates"
     secret_ref = openstack_keymanager_secret_v1.intermediate_1.secret_ref
   }
-}
-
-data "openstack_networking_subnet_v2" "subnet_1" {
-  name = "my-subnet"
-}
-
-resource "openstack_lb_loadbalancer_v2" "lb_1" {
-  name          = "loadbalancer"
-  vip_subnet_id = data.openstack_networking_subnet_v2.subnet_1.id
-}
-
-resource "openstack_lb_listener_v2" "listener_1" {
-  name                      = "https"
-  protocol                  = "TERMINATED_HTTPS"
-  protocol_port             = 443
-  loadbalancer_id           = openstack_lb_loadbalancer_v2.lb_1.id
-  default_tls_container_ref = openstack_keymanager_container_v1.tls_1.container_ref
 }
 ```
 

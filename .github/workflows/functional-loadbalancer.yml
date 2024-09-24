@@ -42,7 +42,8 @@ jobs:
           conf_overrides: |
             enable_plugin octavia https://github.com/openstack/octavia ${{ matrix.openstack_version }}
             enable_plugin neutron https://github.com/openstack/neutron ${{ matrix.openstack_version }}
-          enabled_services: 'octavia,o-api,o-cw,o-hk,o-hm,o-da'
+            enable_plugin barbican https://github.com/openstack/barbican ${{ matrix.openstack_version }}
+          enabled_services: 'octavia,o-api,o-cw,o-hk,o-hm,o-da,barbican-svc,barbican-retry,barbican-keystone-listener'
       - name: Checkout go
         uses: actions/setup-go@v5
         with:

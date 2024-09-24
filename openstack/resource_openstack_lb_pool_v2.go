@@ -92,15 +92,12 @@ func resourcePoolV2() *schema.Resource {
 			"persistence": {
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: true,
-				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"SOURCE_IP", "HTTP_COOKIE", "APP_COOKIE",
 							}, false),
@@ -109,9 +106,58 @@ func resourcePoolV2() *schema.Resource {
 						"cookie_name": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 						},
 					},
+				},
+			},
+
+			"alpn_protocols": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Computed: true, // unsetting this parameter results in a default value
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{
+						"http/1.0", "http/1.1", "h2",
+					}, false),
+				},
+			},
+
+			"ca_tls_container_ref": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"crl_container_ref": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"tls_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+
+			"tls_ciphers": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true, // unsetting this parameter results in a default value
+			},
+
+			"tls_container_ref": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"tls_versions": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Computed: true, // unsetting this parameter results in a default value
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{
+						"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3",
+					}, false),
 				},
 			},
 
@@ -141,47 +187,38 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 	adminStateUp := d.Get("admin_state_up").(bool)
 	lbID := d.Get("loadbalancer_id").(string)
 	listenerID := d.Get("listener_id").(string)
-	var persistence pools.SessionPersistence
-	if p, ok := d.GetOk("persistence"); ok {
-		pV := (p.([]interface{}))[0].(map[string]interface{})
-
-		persistence = pools.SessionPersistence{
-			Type: pV["type"].(string),
-		}
-
-		if persistence.Type == "APP_COOKIE" {
-			if pV["cookie_name"].(string) == "" {
-				return diag.Errorf(
-					"Persistence cookie_name needs to be set if using 'APP_COOKIE' persistence type")
-			}
-			persistence.CookieName = pV["cookie_name"].(string)
-		} else {
-			if pV["cookie_name"].(string) != "" {
-				return diag.Errorf(
-					"Persistence cookie_name can only be set if using 'APP_COOKIE' persistence type")
-			}
-		}
-	}
 
 	createOpts := pools.CreateOpts{
-		ProjectID:      d.Get("tenant_id").(string),
-		Name:           d.Get("name").(string),
-		Description:    d.Get("description").(string),
-		Protocol:       pools.Protocol(d.Get("protocol").(string)),
-		LoadbalancerID: lbID,
-		ListenerID:     listenerID,
-		LBMethod:       pools.LBMethod(d.Get("lb_method").(string)),
-		AdminStateUp:   &adminStateUp,
+		ProjectID:         d.Get("tenant_id").(string),
+		Name:              d.Get("name").(string),
+		Description:       d.Get("description").(string),
+		Protocol:          pools.Protocol(d.Get("protocol").(string)),
+		LoadbalancerID:    lbID,
+		ListenerID:        listenerID,
+		LBMethod:          pools.LBMethod(d.Get("lb_method").(string)),
+		ALPNProtocols:     expandToStringSlice(d.Get("alpn_protocols").(*schema.Set).List()),
+		CATLSContainerRef: d.Get("ca_tls_container_ref").(string),
+		CRLContainerRef:   d.Get("crl_container_ref").(string),
+		TLSEnabled:        d.Get("tls_enabled").(bool),
+		TLSCiphers:        d.Get("tls_ciphers").(string),
+		TLSContainerRef:   d.Get("tls_container_ref").(string),
+		AdminStateUp:      &adminStateUp,
+	}
+
+	if v, ok := d.GetOk("tls_versions"); ok {
+		createOpts.TLSVersions = expandLBPoolTLSVersionV2(v.(*schema.Set).List())
+	}
+
+	if v, ok := d.GetOk("persistence"); ok {
+		createOpts.Persistence, err = expandLBPoolPersistanceV2(v.([]interface{}))
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	if v, ok := d.GetOk("tags"); ok {
 		tags := v.(*schema.Set).List()
 		createOpts.Tags = expandToStringSlice(tags)
-	}
-
-	// Must omit if not set
-	if persistence != (pools.SessionPersistence{}) {
-		createOpts.Persistence = &persistence
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -255,6 +292,13 @@ func resourcePoolV2Read(ctx context.Context, d *schema.ResourceData, meta interf
 	d.Set("admin_state_up", pool.AdminStateUp)
 	d.Set("name", pool.Name)
 	d.Set("persistence", flattenLBPoolPersistenceV2(pool.Persistence))
+	d.Set("alpn_protocols", pool.ALPNProtocols)
+	d.Set("ca_tls_container_ref", pool.CATLSContainerRef)
+	d.Set("crl_container_ref", pool.CRLContainerRef)
+	d.Set("tls_enabled", pool.TLSEnabled)
+	d.Set("tls_ciphers", pool.TLSCiphers)
+	d.Set("tls_container_ref", pool.TLSContainerRef)
+	d.Set("tls_versions", pool.TLSVersions)
 	d.Set("region", GetRegion(d, config))
 	d.Set("tags", pool.Tags)
 
@@ -283,6 +327,40 @@ func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta inte
 	if d.HasChange("admin_state_up") {
 		asu := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &asu
+	}
+	if d.HasChange("persistence") {
+		updateOpts.Persistence, err = expandLBPoolPersistanceV2(d.Get("persistence").([]interface{}))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+	if d.HasChange("alpn_protocols") {
+		v := expandToStringSlice(d.Get("alpn_protocols").(*schema.Set).List())
+		updateOpts.ALPNProtocols = &v
+	}
+	if d.HasChange("ca_tls_container_ref") {
+		v := d.Get("ca_tls_container_ref").(string)
+		updateOpts.CATLSContainerRef = &v
+	}
+	if d.HasChange("crl_container_ref") {
+		v := d.Get("crl_container_ref").(string)
+		updateOpts.CRLContainerRef = &v
+	}
+	if d.HasChange("tls_enabled") {
+		v := d.Get("tls_enabled").(bool)
+		updateOpts.TLSEnabled = &v
+	}
+	if d.HasChange("tls_ciphers") {
+		v := d.Get("tls_ciphers").(string)
+		updateOpts.TLSCiphers = &v
+	}
+	if d.HasChange("tls_container_ref") {
+		v := d.Get("tls_container_ref").(string)
+		updateOpts.TLSContainerRef = &v
+	}
+	if d.HasChange("tls_versions") {
+		v := expandLBPoolTLSVersionV2(d.Get("tls_versions").(*schema.Set).List())
+		updateOpts.TLSVersions = &v
 	}
 
 	if d.HasChange("tags") {

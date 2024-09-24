@@ -162,7 +162,7 @@ func expandObjectTags(d *schema.ResourceData) []string {
 }
 
 func expandToMapStringString(v map[string]interface{}) map[string]string {
-	m := make(map[string]string)
+	m := make(map[string]string, len(v))
 	for key, val := range v {
 		if strVal, ok := val.(string); ok {
 			m[key] = strVal
