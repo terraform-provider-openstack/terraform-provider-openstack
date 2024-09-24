@@ -589,13 +589,59 @@ func resourceLBV2MonitorRefreshFunc(ctx context.Context, lbClient *gophercloud.S
 	}
 }
 
+func expandLBPoolTLSVersionV2(v []interface{}) []pools.TLSVersion {
+	versions := make([]pools.TLSVersion, len(v))
+	for i, v := range v {
+		versions[i] = pools.TLSVersion(v.(string))
+	}
+	return versions
+}
+
+func expandLBListenerTLSVersionV2(v []interface{}) []listeners.TLSVersion {
+	versions := make([]listeners.TLSVersion, len(v))
+	for i, v := range v {
+		versions[i] = listeners.TLSVersion(v.(string))
+	}
+	return versions
+}
+
 func flattenLBPoolPersistenceV2(p pools.SessionPersistence) []map[string]interface{} {
+	if p == (pools.SessionPersistence{}) {
+		return nil
+	}
 	return []map[string]interface{}{
 		{
 			"type":        p.Type,
 			"cookie_name": p.CookieName,
 		},
 	}
+}
+
+func expandLBPoolPersistanceV2(p []interface{}) (*pools.SessionPersistence, error) {
+	persistence := &pools.SessionPersistence{}
+
+	for _, v := range p {
+		v := v.(map[string]interface{})
+		persistence.Type = v["type"].(string)
+
+		if persistence.Type == "APP_COOKIE" {
+			if v["cookie_name"].(string) == "" {
+				return nil, fmt.Errorf("Persistence cookie_name needs to be set if using 'APP_COOKIE' persistence type")
+			}
+			persistence.CookieName = v["cookie_name"].(string)
+
+			return persistence, nil
+		}
+
+		if v["cookie_name"].(string) != "" {
+			return nil, fmt.Errorf("Persistence cookie_name can only be set if using 'APP_COOKIE' persistence type")
+		}
+
+		//nolint:staticcheck // we need the first element
+		return persistence, nil
+	}
+
+	return persistence, nil
 }
 
 func waitForLBV2LoadBalancer(ctx context.Context, lbClient *gophercloud.ServiceClient, lbID string, target string, pending []string, timeout time.Duration) error {
@@ -635,20 +681,6 @@ func resourceLBV2LoadBalancerRefreshFunc(ctx context.Context, lbClient *gophercl
 
 		return lb, lb.ProvisioningStatus, nil
 	}
-}
-
-func expandLBV2ListenerHeadersMap(raw map[string]interface{}) (map[string]string, error) {
-	m := make(map[string]string, len(raw))
-	for key, val := range raw {
-		labelValue, ok := val.(string)
-		if !ok {
-			return nil, fmt.Errorf("label %s value should be string", key)
-		}
-
-		m[key] = labelValue
-	}
-
-	return m, nil
 }
 
 func resourceLoadBalancerV2SetSecurityGroups(ctx context.Context, networkingClient *gophercloud.ServiceClient, vipPortID string, d *schema.ResourceData) error {

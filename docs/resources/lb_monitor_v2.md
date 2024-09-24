@@ -28,7 +28,7 @@ resource "openstack_lb_monitor_v2" "monitor_1" {
 The following arguments are supported:
 
 * `region` - (Optional) The region in which to obtain the V2 Networking client.
-  A Networking client is needed to create an . If omitted, the
+  A Networking client is needed to create a monitor. If omitted, the
   `region` argument of the provider is used. Changing this creates a new
   monitor.
 
@@ -65,7 +65,7 @@ The following arguments are supported:
 * `url_path` - (Optional) Required for HTTP(S) types. URI path that will be
   accessed if monitor type is HTTP or HTTPS. Default is `/`.
 
-*  `http_method` - (Optional) Required for HTTP(S) types. The HTTP method that 
+* `http_method` - (Optional) Required for HTTP(S) types. The HTTP method that 
   the health monitor uses for requests. One of CONNECT, DELETE, GET, HEAD, 
   OPTIONS, PATCH, POST, PUT, or TRACE. The default is GET.
 

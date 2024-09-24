@@ -29,6 +29,13 @@ func TestAccLBV2Pool_basic(t *testing.T) {
 					testAccCheckLBV2PoolExists("openstack_lb_pool_v2.pool_1", &pool),
 					testAccCheckLBV2PoolHasTag("openstack_lb_pool_v2.pool_1", "foo"),
 					testAccCheckLBV2PoolTagCount("openstack_lb_pool_v2.pool_1", 1),
+					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "persistence.#", "1"),
+					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "persistence.0.type", "APP_COOKIE"),
+					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "persistence.0.cookie_name", "testCookie"),
+					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "tls_enabled", "true"),
+					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "tls_versions.#", "1"),
+					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "alpn_protocols.#", "1"),
+					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "tls_ciphers", "TLS13-CHACHA20-POLY1305-SHA256"),
 				),
 			},
 			{
@@ -37,6 +44,14 @@ func TestAccLBV2Pool_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "name", "pool_1_updated"),
 					testAccCheckLBV2PoolHasTag("openstack_lb_pool_v2.pool_1", "bar"),
 					testAccCheckLBV2PoolTagCount("openstack_lb_pool_v2.pool_1", 1),
+					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "persistence.#", "0"),
+					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "tls_enabled", "false"),
+					// tls_versions reset to Octavia default value
+					// resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "tls_versions.#", "0"),
+					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "alpn_protocols.#", "0"),
+					// even though we unset this value, it should still be present in the state
+					// because it is a computed field
+					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "tls_ciphers", "TLS13-CHACHA20-POLY1305-SHA256"),
 				),
 			},
 		},
@@ -227,6 +242,16 @@ resource "openstack_lb_pool_v2" "pool_1" {
   listener_id = "${openstack_lb_listener_v2.listener_1.id}"
   tags = ["foo"]
 
+  tls_enabled    = true
+  tls_versions   = ["TLSv1.2"]
+  alpn_protocols = ["http/1.1"]
+  tls_ciphers    = "TLS13-CHACHA20-POLY1305-SHA256"
+
+  persistence {
+    type        = "APP_COOKIE"
+    cookie_name = "testCookie"
+  }
+
   timeouts {
     create = "5m"
     update = "5m"
@@ -273,6 +298,8 @@ resource "openstack_lb_pool_v2" "pool_1" {
   admin_state_up = "true"
   listener_id = "${openstack_lb_listener_v2.listener_1.id}"
   tags = ["bar"]
+
+  alpn_protocols = []
 
   timeouts {
     create = "5m"

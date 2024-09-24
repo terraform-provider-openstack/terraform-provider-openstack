@@ -258,11 +258,10 @@ A simple way of checking which minor versions are supported on your Openstack
 cloud is the following:
 
 ```shell
-export OS_TOKEN=`openstack token issue -c id -f value`
-curl -s -H "X-Auth-Token: $OS_TOKEN"  "https://example.com:9876/"
+export OCTAVIA_URL=`openstack endpoint list --interface public --service octavia -f value -c URL`
+export OS_TOKEN=`openstack token issue -f value -c id`
+curl -s -H "X-Auth-Token: $OS_TOKEN" "$OCTAVIA_URL" | jq -r '.versions[]|select(.status=="SUPPORTED")|.id' | tail -1
 ```
-
-
 
 ### Rackspace Compatibility
 
