@@ -51,6 +51,11 @@ func resourceMonitorV2() *schema.Resource {
 				Optional: true,
 			},
 
+			"domain_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -107,6 +112,14 @@ func resourceMonitorV2() *schema.Resource {
 				Computed: true,
 			},
 
+			"http_version": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"1.0", "1.1",
+				}, false),
+			},
+
 			"expected_codes": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -141,8 +154,10 @@ func resourceMonitorV2Create(ctx context.Context, d *schema.ResourceData, meta i
 		MaxRetriesDown: d.Get("max_retries_down").(int),
 		URLPath:        d.Get("url_path").(string),
 		HTTPMethod:     d.Get("http_method").(string),
+		HTTPVersion:    d.Get("http_version").(string),
 		ExpectedCodes:  d.Get("expected_codes").(string),
 		Name:           d.Get("name").(string),
+		DomainName:     d.Get("domain_name").(string),
 		AdminStateUp:   &adminStateUp,
 	}
 
@@ -207,9 +222,11 @@ func resourceMonitorV2Read(ctx context.Context, d *schema.ResourceData, meta int
 	d.Set("max_retries_down", monitor.MaxRetriesDown)
 	d.Set("url_path", monitor.URLPath)
 	d.Set("http_method", monitor.HTTPMethod)
+	d.Set("http_version", monitor.HTTPVersion)
 	d.Set("expected_codes", monitor.ExpectedCodes)
 	d.Set("admin_state_up", monitor.AdminStateUp)
 	d.Set("name", monitor.Name)
+	d.Set("domain_name", monitor.DomainName)
 	d.Set("region", GetRegion(d, config))
 
 	// OpenContrail workaround (https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/762)
@@ -264,9 +281,19 @@ func resourceMonitorV2Update(ctx context.Context, d *schema.ResourceData, meta i
 		name := d.Get("name").(string)
 		opts.Name = &name
 	}
+	if d.HasChange("domain_name") {
+		hasChange = true
+		v := d.Get("domain_name").(string)
+		opts.DomainName = &v
+	}
 	if d.HasChange("http_method") {
 		hasChange = true
 		opts.HTTPMethod = d.Get("http_method").(string)
+	}
+	if d.HasChange("http_version") {
+		hasChange = true
+		v := d.Get("http_version").(string)
+		opts.HTTPVersion = &v
 	}
 
 	if !hasChange {
