@@ -390,6 +390,7 @@ func Provider() *schema.Provider {
 			"openstack_networking_addressscope_v2":               resourceNetworkingAddressScopeV2(),
 			"openstack_networking_trunk_v2":                      resourceNetworkingTrunkV2(),
 			"openstack_networking_portforwarding_v2":             resourceNetworkingPortForwardingV2(),
+			"openstack_objectstorage_account_v1":                 resourceObjectStorageAccountV1(),
 			"openstack_objectstorage_container_v1":               resourceObjectStorageContainerV1(),
 			"openstack_objectstorage_object_v1":                  resourceObjectStorageObjectV1(),
 			"openstack_objectstorage_tempurl_v1":                 resourceObjectstorageTempurlV1(),
