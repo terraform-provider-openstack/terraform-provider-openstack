@@ -134,7 +134,7 @@ func resourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData, 
 	d.Set("enabled", project.Enabled)
 	d.Set("is_domain", project.IsDomain)
 	d.Set("name", project.Name)
-	d.Set("extra", project.Extra)
+	d.Set("extra", expandToMapStringString(project.Extra))
 	d.Set("parent_id", project.ParentID)
 	d.Set("region", GetRegion(d, config))
 	d.Set("tags", project.Tags)
