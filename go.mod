@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.7
 
 require (
-	github.com/gophercloud/gophercloud/v2 v2.1.2-0.20240924071442-fe94e7d1940d
+	github.com/gophercloud/gophercloud/v2 v2.1.2-0.20240924171548-1737ff4518d5
 	github.com/gophercloud/utils/v2 v2.0.0-20240705071316-780b64d153e3
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.30.0
 	github.com/klauspost/compress v1.17.9
