@@ -187,7 +187,7 @@ func resourceIdentityProjectV3Update(ctx context.Context, d *schema.ResourceData
 
 	if d.HasChange("extra") {
 		hasChange = true
-		updateOpts.Extra = d.Get("extra").(map[string]interface{})
+		updateOpts.Extra = resourceIdentityProjectV3ExtraChange(d)
 	}
 
 	if d.HasChange("tags") {
@@ -235,4 +235,20 @@ func resourceIdentityProjectV3Delete(ctx context.Context, d *schema.ResourceData
 	}
 
 	return nil
+}
+
+func resourceIdentityProjectV3ExtraChange(d *schema.ResourceData) map[string]interface{} {
+	o, n := d.GetChange("extra")
+	oldExtra := o.(map[string]interface{})
+	newExtra := n.(map[string]interface{})
+	extra := newExtra
+
+	for oldKey := range oldExtra {
+		// unset old keys
+		if _, ok := newExtra[oldKey]; !ok {
+			extra[oldKey] = nil
+		}
+	}
+
+	return extra
 }
