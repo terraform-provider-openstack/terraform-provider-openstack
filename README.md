@@ -64,20 +64,3 @@ they will become available via the Terraform Registry.
 Before releasing, a PR updating the changelog should be made to trigger the CI 
 for all services and ensure that everything is OK. Moreover, update the example
 on `website/docs/index.html.markdown` to point to the new version.
-
-Thank You
----------
-
-We'd like to extend special thanks and appreciation to the following:
-
-### OpenLab
-
-<a href="http://openlabtesting.org/"><img src="assets/openlab.png" width="600px"></a>
-
-OpenLab is providing a full CI environment to test each PR and merge for a variety of OpenStack releases.
-
-### VEXXHOST
-
-<a href="https://vexxhost.com/"><img src="assets/vexxhost.png" width="600px"></a>
-
-VEXXHOST is providing their services to assist with the development and testing of this provider.
