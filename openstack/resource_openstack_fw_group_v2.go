@@ -344,7 +344,7 @@ func resourceFWGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 
 	err = groups.Delete(ctx, networkingClient, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.Errorf("Error deleting openstack_fw_group_v2 %s: %s", d.Id(), err)
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_fw_group_v2"))
 	}
 
 	stateConf := &retry.StateChangeConf{

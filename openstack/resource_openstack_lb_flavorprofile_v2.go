@@ -162,8 +162,8 @@ func resourceLoadBalancerFlavorProfileV2Delete(ctx context.Context, d *schema.Re
 	}
 
 	log.Printf("[DEBUG] Deleting openstack_lb_flavorprofile_v2: %s", d.Id())
-	if err := flavorprofiles.Delete(ctx, lbClient, d.Id()).Err; err != nil {
-		return diag.Errorf("Error deleting openstack_lb_flavorprofile_v2: %s", err)
+	if err := flavorprofiles.Delete(ctx, lbClient, d.Id()).ExtractErr(); err != nil {
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_lb_flavorprofile_v2"))
 	}
 
 	d.SetId("")

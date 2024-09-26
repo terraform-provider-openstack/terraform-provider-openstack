@@ -177,7 +177,7 @@ func resourceImagesImageAccessV2Delete(ctx context.Context, d *schema.ResourceDa
 
 	log.Printf("[DEBUG] Deleting Image member %s", d.Id())
 
-	if err := members.Delete(ctx, imageClient, imageID, memberID).Err; err != nil {
+	if err := members.Delete(ctx, imageClient, imageID, memberID).ExtractErr(); err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting the openstack_images_image_access_v2"))
 	}
 

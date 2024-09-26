@@ -893,7 +893,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 
 		for _, key := range metadataToDelete {
 			err := servers.DeleteMetadatum(ctx, computeClient, d.Id(), key).ExtractErr()
-			if err != nil {
+			if err != nil && CheckDeleted(d, err, "") != nil {
 				return diag.Errorf("Error deleting metadata (%s) from server (%s): %s", key, d.Id(), err)
 			}
 		}

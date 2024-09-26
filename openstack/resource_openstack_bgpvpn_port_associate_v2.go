@@ -201,7 +201,7 @@ func resourceBGPVPNPortAssociateV2Delete(ctx context.Context, d *schema.Resource
 	portID := d.Get("port_id").(string)
 
 	err = bgpvpns.DeletePortAssociation(ctx, networkingClient, bgpvpnID, id).ExtractErr()
-	if err != nil {
+	if err != nil && CheckDeleted(d, err, "") == nil {
 		return diag.Errorf("Error disassociating openstack_bgpvpn_port_associate_v2 BGP VPN %s with port %s: %s", bgpvpnID, portID, err)
 	}
 

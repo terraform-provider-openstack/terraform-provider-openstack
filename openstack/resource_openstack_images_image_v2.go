@@ -538,8 +538,8 @@ func resourceImagesImageV2Delete(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	log.Printf("[DEBUG] Deleting Image %s", d.Id())
-	if err := images.Delete(ctx, imageClient, d.Id()).Err; err != nil {
-		return diag.Errorf("Error deleting Image: %s", err)
+	if err := images.Delete(ctx, imageClient, d.Id()).ExtractErr(); err != nil {
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting Image"))
 	}
 
 	d.SetId("")

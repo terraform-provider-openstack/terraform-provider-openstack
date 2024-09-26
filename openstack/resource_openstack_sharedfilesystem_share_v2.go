@@ -415,7 +415,7 @@ func resourceSharedFilesystemShareV2Update(ctx context.Context, d *schema.Resour
 
 		for oldKey := range metadataToDelete {
 			err := shares.DeleteMetadatum(ctx, sfsClient, d.Id(), oldKey).ExtractErr()
-			if err != nil {
+			if err != nil && CheckDeleted(d, err, "") != nil {
 				return diag.Errorf("Error deleting openstack_sharedfilesystem_share_v2 %s metadata %s: %s", d.Id(), oldKey, err)
 			}
 		}

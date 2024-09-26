@@ -111,7 +111,7 @@ func resourceComputeAggregateV2Read(ctx context.Context, d *schema.ResourceData,
 
 	aggregate, err := aggregates.Get(ctx, computeClient, id).Extract()
 	if err != nil {
-		return diag.Errorf("Error getting host aggregate: %s", err)
+		return diag.FromErr(CheckDeleted(d, err, "Error getting host aggregate"))
 	}
 
 	// Metadata is redundant with Availability Zone
@@ -216,7 +216,7 @@ func resourceComputeAggregateV2Delete(ctx context.Context, d *schema.ResourceDat
 
 	err = aggregates.Delete(ctx, computeClient, id).ExtractErr()
 	if err != nil {
-		return diag.Errorf("Error deleting OpenStack aggregate: %s", err)
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting OpenStack aggregate"))
 	}
 
 	return nil

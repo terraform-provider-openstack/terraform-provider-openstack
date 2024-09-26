@@ -166,7 +166,7 @@ func resourceDatabaseUserV1Delete(ctx context.Context, d *schema.ResourceData, m
 
 	err = users.Delete(ctx, DatabaseV1Client, instanceID, userName).ExtractErr()
 	if err != nil {
-		return diag.Errorf("Error deleting openstack_db_user_v1 %s: %s", d.Id(), err)
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_db_user_v1"))
 	}
 
 	return nil

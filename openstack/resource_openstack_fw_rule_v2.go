@@ -332,7 +332,7 @@ func resourceFWRuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 		for _, firewallPolicyID := range rule.FirewallPolicyID {
 			log.Printf("[DEBUG] openstack_fw_rule_v2 %s associate with openstack_fw_policy_v2: %#v", d.Id(), firewallPolicyID)
 			_, err := policies.RemoveRule(ctx, networkingClient, firewallPolicyID, rule.ID).Extract()
-			if err != nil {
+			if err != nil && CheckDeleted(d, err, "") != nil {
 				return diag.Errorf("Error removing openstack_fw_rule_v2 %s from policy %s: %s", d.Id(), firewallPolicyID, err)
 			}
 		}
@@ -340,7 +340,7 @@ func resourceFWRuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 
 	err = rules.Delete(ctx, networkingClient, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.Errorf("Error deleting openstack_fw_rule_v2 %s: %s", d.Id(), err)
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_fw_rule_v2"))
 	}
 
 	return nil

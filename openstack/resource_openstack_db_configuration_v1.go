@@ -173,7 +173,7 @@ func resourceDatabaseConfigurationV1Delete(ctx context.Context, d *schema.Resour
 
 	err = configurations.Delete(ctx, DatabaseV1Client, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.Errorf("Error deleting openstack_db_configuration_v1 %s: %s", d.Id(), err)
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_db_configuration_v1"))
 	}
 
 	stateConf := &retry.StateChangeConf{

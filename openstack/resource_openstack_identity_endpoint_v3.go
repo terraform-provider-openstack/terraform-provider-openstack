@@ -223,7 +223,7 @@ func resourceIdentityEndpointV3Delete(ctx context.Context, d *schema.ResourceDat
 
 	err = endpoints.Delete(ctx, identityClient, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.Errorf("Error deleting openstack_identity_endpoint_v3: %s", err)
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_identity_endpoint_v3"))
 	}
 
 	return nil
