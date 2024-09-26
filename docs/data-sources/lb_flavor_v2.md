@@ -2,7 +2,7 @@
 subcategory: "Load Balancing as a Service / Octavia"
 layout: "openstack"
 page_title: "OpenStack: openstack_loadbalancer_flavor_v2"
-sidebar_current: "docs-openstack-datasource-loadbalancer-falvor-v2"
+sidebar_current: "docs-openstack-datasource-loadbalancer-flavor-v2"
 description: |-
   Get information on an OpenStack Load Balancer Flavor.
 ---
