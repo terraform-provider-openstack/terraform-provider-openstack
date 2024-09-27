@@ -312,6 +312,7 @@ func Provider() *schema.Provider {
 			"openstack_keymanager_secret_v1":                     dataSourceKeyManagerSecretV1(),
 			"openstack_keymanager_container_v1":                  dataSourceKeyManagerContainerV1(),
 			"openstack_loadbalancer_flavor_v2":                   dataSourceLBFlavorV2(),
+			"openstack_lb_flavorprofile_v2":                      dataSourceLBFlavorProfileV2(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
