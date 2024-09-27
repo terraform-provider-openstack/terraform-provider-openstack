@@ -74,7 +74,7 @@ func resourceNetworkingSecGroupRuleV2Protocol(v interface{}, k string) ([]string
 		rules.ProtocolUDPLite,
 		rules.ProtocolVRRP,
 		rules.ProtocolIPIP,
-		"": // rules.ProtocolAny
+		rules.ProtocolAny:
 		return nil, nil
 	}
 
