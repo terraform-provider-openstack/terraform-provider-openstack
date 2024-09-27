@@ -115,7 +115,7 @@ func resourceBGPVPNNetworkAssociateV2Delete(ctx context.Context, d *schema.Resou
 	networkID := d.Get("network_id").(string)
 
 	err = bgpvpns.DeleteNetworkAssociation(ctx, networkingClient, bgpvpnID, id).ExtractErr()
-	if err != nil {
+	if err != nil && CheckDeleted(d, err, "") != nil {
 		return diag.Errorf("Error disassociating openstack_bgpvpn_network_associate_v2 BGP VPN %s with network %s: %s", bgpvpnID, networkID, err)
 	}
 

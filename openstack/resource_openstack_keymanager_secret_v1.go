@@ -373,7 +373,7 @@ func resourceKeyManagerSecretV1Update(ctx context.Context, d *schema.ResourceDat
 
 		for _, key := range metadataToDelete {
 			err := secrets.DeleteMetadatum(ctx, kmClient, d.Id(), key).ExtractErr()
-			if err != nil {
+			if err != nil && CheckDeleted(d, err, "") != nil {
 				return diag.Errorf("Error deleting openstack_keymanager_secret_v1 %s metadata %s: %s", d.Id(), key, err)
 			}
 		}

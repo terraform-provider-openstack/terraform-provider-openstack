@@ -178,7 +178,7 @@ func resourceImagesImageAccessAcceptV2Delete(ctx context.Context, d *schema.Reso
 	opts := members.UpdateOpts{
 		Status: "rejected",
 	}
-	if err := members.Update(ctx, imageClient, imageID, memberID, opts).Err; err != nil {
+	if _, err := members.Update(ctx, imageClient, imageID, memberID, opts).Extract(); err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error rejecting the openstack_images_image_access_accept_v2"))
 	}
 

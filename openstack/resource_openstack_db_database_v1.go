@@ -149,7 +149,7 @@ func resourceDatabaseDatabaseV1Delete(ctx context.Context, d *schema.ResourceDat
 
 	err = databases.Delete(ctx, DatabaseV1Client, instanceID, dbName).ExtractErr()
 	if err != nil {
-		return diag.Errorf("Error deleting openstack_db_database_v1 %s: %s", dbName, err)
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_db_database_v1"))
 	}
 
 	return nil

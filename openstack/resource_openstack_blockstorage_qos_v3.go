@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -159,8 +160,8 @@ func resourceBlockStorageQosV3Delete(ctx context.Context, d *schema.ResourceData
 
 	// remove all associations first
 	err = qos.DisassociateAll(ctx, blockStorageClient, d.Id()).ExtractErr()
-	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_blockstorage_qos_v3 associations"))
+	if err != nil && CheckDeleted(d, err, "") != nil {
+		return diag.FromErr(fmt.Errorf("Error deleting openstack_blockstorage_qos_v3 associations: %s", err))
 	}
 
 	// Delete the QoS itself

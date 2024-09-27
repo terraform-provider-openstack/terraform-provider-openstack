@@ -343,9 +343,9 @@ func resourceOrchestrationStackV1Update(ctx context.Context, d *schema.ResourceD
 	}
 
 	log.Printf("[DEBUG] Updating openstack_orchestration_stack_v1")
-	result := stacks.Update(ctx, orchestrationClient, stack.Name, d.Id(), updateOpts)
-	if result.Err != nil {
-		return diag.Errorf("Error updating openstack_orchestration_stack_v1 %s: %s", d.Id(), result.Err)
+	err = stacks.Update(ctx, orchestrationClient, stack.Name, d.Id(), updateOpts).ExtractErr()
+	if err != nil {
+		return diag.Errorf("Error updating openstack_orchestration_stack_v1 %s: %s", d.Id(), err)
 	}
 
 	stateConf := &retry.StateChangeConf{

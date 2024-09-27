@@ -151,7 +151,7 @@ func resourceIdentityServiceV3Delete(ctx context.Context, d *schema.ResourceData
 
 	err = services.Delete(ctx, identityClient, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.Errorf("Error deleting openstack_identity_service_v3: %s", err)
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_identity_service_v3"))
 	}
 
 	return nil

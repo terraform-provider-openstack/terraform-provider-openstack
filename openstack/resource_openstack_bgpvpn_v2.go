@@ -133,14 +133,14 @@ func resourceBGPVPNV2Create(ctx context.Context, d *schema.ResourceData, meta in
 		LocalPref:           d.Get("local_pref").(int),
 	}
 
-	log.Printf("[DEBUG] Create BGP VPN: %#v", createOpts)
+	log.Printf("[DEBUG] Create openstack_bgpvpn_v2: %#v", createOpts)
 
 	bgpvpn, err := bgpvpns.Create(ctx, networkingClient, createOpts).Extract()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[DEBUG] BGP VPN created: %#v", bgpvpn)
+	log.Printf("[DEBUG] openstack_bgpvpn_v2 created: %#v", bgpvpn)
 
 	d.SetId(bgpvpn.ID)
 
@@ -148,7 +148,7 @@ func resourceBGPVPNV2Create(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceBGPVPNV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	log.Printf("[DEBUG] Retrieve information about BGP VPN: %s", d.Id())
+	log.Printf("[DEBUG] Retrieve information about openstack_bgpvpn_v2: %s", d.Id())
 
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
@@ -158,10 +158,10 @@ func resourceBGPVPNV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 
 	bgpvpn, err := bgpvpns.Get(ctx, networkingClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "BGP VPN"))
+		return diag.FromErr(CheckDeleted(d, err, "openstack_bgpvpn_v2"))
 	}
 
-	log.Printf("[DEBUG] Read OpenStack BGP VPN %s: %#v", d.Id(), bgpvpn)
+	log.Printf("[DEBUG] Read OpenStack openstack_bgpvpn_v2 %s: %#v", d.Id(), bgpvpn)
 
 	d.Set("name", bgpvpn.Name)
 	d.Set("type", bgpvpn.Type)
@@ -228,7 +228,7 @@ func resourceBGPVPNV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		hasChange = true
 	}
 
-	log.Printf("[DEBUG] Updating BGP VPN with id %s: %#v", d.Id(), opts)
+	log.Printf("[DEBUG] Updating openstack_bgpvpn_v2 with id %s: %#v", d.Id(), opts)
 
 	if hasChange {
 		_, err = bgpvpns.Update(ctx, networkingClient, d.Id(), opts).Extract()
@@ -236,14 +236,14 @@ func resourceBGPVPNV2Update(ctx context.Context, d *schema.ResourceData, meta in
 			return diag.FromErr(err)
 		}
 
-		log.Printf("[DEBUG] Updated BGP VPN with id %s", d.Id())
+		log.Printf("[DEBUG] Updated openstack_bgpvpn_v2 with id %s", d.Id())
 	}
 
 	return resourceBGPVPNV2Read(ctx, d, meta)
 }
 
 func resourceBGPVPNV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	log.Printf("[DEBUG] Destroy BGP VPN: %s", d.Id())
+	log.Printf("[DEBUG] Destroy openstack_bgpvpn_v2: %s", d.Id())
 
 	config := meta.(*Config)
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
@@ -253,7 +253,7 @@ func resourceBGPVPNV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 
 	err = bgpvpns.Delete(ctx, networkingClient, d.Id()).Err
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_bgpvpn_v2"))
 	}
 
 	return nil
