@@ -311,9 +311,10 @@ func Provider() *schema.Provider {
 			"openstack_sharedfilesystem_snapshot_v2":             dataSourceSharedFilesystemSnapshotV2(),
 			"openstack_keymanager_secret_v1":                     dataSourceKeyManagerSecretV1(),
 			"openstack_keymanager_container_v1":                  dataSourceKeyManagerContainerV1(),
-			"openstack_loadbalancer_flavor_v2":                   dataSourceLBFlavorV2(),
-			"openstack_workflow_workflow_v2":                     dataSourceWorkflowWorkflowV2(),
+			"openstack_loadbalancer_flavor_v2":                   dataSourceLoadBalancerFlavorV2(),
+			"openstack_lb_flavor_v2":                             dataSourceLBFlavorV2(),
 			"openstack_lb_flavorprofile_v2":                      dataSourceLBFlavorProfileV2(),
+			"openstack_workflow_workflow_v2":                     dataSourceWorkflowWorkflowV2(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
