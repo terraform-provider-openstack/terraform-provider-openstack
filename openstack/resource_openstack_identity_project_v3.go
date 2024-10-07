@@ -71,6 +71,11 @@ func resourceIdentityProjectV3() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
+
+			"extra": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -90,6 +95,7 @@ func resourceIdentityProjectV3Create(ctx context.Context, d *schema.ResourceData
 		Enabled:     &enabled,
 		IsDomain:    &isDomain,
 		Name:        d.Get("name").(string),
+		Extra:       d.Get("extra").(map[string]interface{}),
 		ParentID:    d.Get("parent_id").(string),
 	}
 
@@ -128,6 +134,7 @@ func resourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData, 
 	d.Set("enabled", project.Enabled)
 	d.Set("is_domain", project.IsDomain)
 	d.Set("name", project.Name)
+	d.Set("extra", expandToMapStringString(project.Extra))
 	d.Set("parent_id", project.ParentID)
 	d.Set("region", GetRegion(d, config))
 	d.Set("tags", project.Tags)
@@ -178,6 +185,11 @@ func resourceIdentityProjectV3Update(ctx context.Context, d *schema.ResourceData
 		updateOpts.Description = &description
 	}
 
+	if d.HasChange("extra") {
+		hasChange = true
+		updateOpts.Extra = resourceIdentityProjectV3ExtraChange(d)
+	}
+
 	if d.HasChange("tags") {
 		hasChange = true
 		if v, ok := d.GetOk("tags"); ok {
@@ -223,4 +235,20 @@ func resourceIdentityProjectV3Delete(ctx context.Context, d *schema.ResourceData
 	}
 
 	return nil
+}
+
+func resourceIdentityProjectV3ExtraChange(d *schema.ResourceData) map[string]interface{} {
+	o, n := d.GetChange("extra")
+	oldExtra := o.(map[string]interface{})
+	newExtra := n.(map[string]interface{})
+	extra := newExtra
+
+	for oldKey := range oldExtra {
+		// unset old keys
+		if _, ok := newExtra[oldKey]; !ok {
+			extra[oldKey] = nil
+		}
+	}
+
+	return extra
 }
