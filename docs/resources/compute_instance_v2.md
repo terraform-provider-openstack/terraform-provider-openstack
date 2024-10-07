@@ -205,8 +205,8 @@ data "openstack_networking_port_v2" "vm-port" {
   network_id = openstack_compute_instance_v2.multi-net.network.1.uuid
 }
 
-resource "openstack_networking_floatingip_associate_v2" "myip" {
-  floating_ip = openstack_networking_floatingip_v2.fip_vm.address
+resource "openstack_networking_floatingip_associate_v2" "fip_vm" {
+  floating_ip = openstack_networking_floatingip_v2.myip.address
   port_id     = data.openstack_networking_port_v2.vm-port.id
 }
 ```
