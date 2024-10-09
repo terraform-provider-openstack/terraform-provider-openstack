@@ -6,7 +6,7 @@ toolchain go1.22.7
 
 require (
 	github.com/gophercloud/gophercloud/v2 v2.1.2-0.20240924171548-1737ff4518d5
-	github.com/gophercloud/utils/v2 v2.0.0-20240919072936-a66ae2ba6ef0
+	github.com/gophercloud/utils/v2 v2.0.0-20241008104625-7cbb8fd76bb7
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.34.0
 	github.com/klauspost/compress v1.17.10
 	github.com/mitchellh/go-homedir v1.1.0
@@ -14,6 +14,8 @@ require (
 	github.com/ulikunitz/xz v0.5.12
 	gopkg.in/yaml.v2 v2.4.0
 )
+
+replace github.com/gophercloud/utils/v2 => github.com/kayrus/utils/v2 v2.0.0-20241009194146-79bdfeb5fa97
 
 require (
 	github.com/ProtonMail/go-crypto v1.1.0-alpha.2 // indirect
@@ -61,8 +63,8 @@ require (
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.25.0 // indirect
-	golang.org/x/text v0.18.0 // indirect
+	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/text v0.19.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240227224415-6ceb2ff114de // indirect
