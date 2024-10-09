@@ -223,6 +223,23 @@ Identity/Keystone service catalog. This provider supports:
 Please use this feature at your own risk. If you are unsure about needing
 to override an endpoint, you most likely do not need to override one.
 
+### Overriding service types
+
+You can override service types if needed. For example, to use the
+`block-storage` service type instead of `volumev3`, configure the provider as
+follows:
+
+```hcl
+provider "openstack" {
+  endpoint_overrides = {
+    "volumev3" = "block-storage"
+  }
+}
+```
+
+This ensures that requests intended for `volumev3` are directed to the
+`block-storage` service.
+
 ## Additional Logging
 
 This provider has the ability to log all HTTP requests and responses between
@@ -401,7 +418,7 @@ go build .
 ```
 this should generate a `terraform-provider-openstack` binary.
 
-- Remove the Terraform Lock File 
+- Remove the Terraform Lock File
 
 If there is already a terraform lock file, remove it with:
 ```
@@ -418,10 +435,10 @@ provider_installation {
   direct {}
 }
 ```
-This configuration tells Terraform to use the provider binary at the specified path 
-instead of the one from the Terraform Registry. The direct {} block tells Terraform 
-to use the provider from the Terraform Registry if it’s not available locally. 
-Any other providers not specified in dev_overrides will still be downloaded from the 
+This configuration tells Terraform to use the provider binary at the specified path
+instead of the one from the Terraform Registry. The direct {} block tells Terraform
+to use the provider from the Terraform Registry if it’s not available locally.
+Any other providers not specified in dev_overrides will still be downloaded from the
 Terraform Registry.
 
 - Set Environment Variable for Terraform Configuration
@@ -436,10 +453,10 @@ export TF_CLI_CONFIG_FILE=~/.terraform.rc
 ❯ terraform plan
 
 │ Warning: Provider development overrides are in effect
-│ 
+│
 │ The following provider development overrides are set in the CLI configuration:
 │  - terraform-provider-openstack/openstack in /path/to/directory/where/the/provider/binary/is
-│ 
+│
 | The behavior may therefore not match any released version of the provider and applying changes may cause the state to become incompatible with published releases.
 
 ```
