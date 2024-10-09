@@ -6,7 +6,7 @@ toolchain go1.23.7
 
 require (
 	github.com/gophercloud/gophercloud/v2 v2.6.1-0.20250312111101-908ce172717e
-	github.com/gophercloud/utils/v2 v2.0.0-20241108144456-f4302a5ad8c6
+	github.com/gophercloud/utils/v2 v2.0.0-20250212084022-725b94822eeb
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.34.0
 	github.com/hashicorp/terraform-plugin-testing v1.10.0
 	github.com/klauspost/compress v1.17.10
