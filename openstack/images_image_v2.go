@@ -105,7 +105,7 @@ func resourceImagesImageV2File(client *gophercloud.ServiceClient, d *schema.Reso
 	}
 
 	// calculate the hashsum and create a lock to prevent simultaneous file access
-	md5sum := fmt.Sprintf("%x", md5.Sum([]byte(furl)))
+	md5sum := fmt.Sprintf("%x", md5.Sum([]byte(fmt.Sprintf("%s%t", furl, d.Get("decompress").(bool)))))
 	mutexKV.Lock(md5sum)
 	defer mutexKV.Unlock(md5sum)
 
