@@ -79,6 +79,8 @@ The following arguments are supported:
     loadbalancer. The security groups must be specified by ID and not name (as
     opposed to how they are configured with the Compute Instance).
 
+* `cascade` - (Optional) Cascade the delete to all child elements of the load balancer. Default `false`.
+
 * `tags` - (Optional) A list of simple strings assigned to the loadbalancer.
     Available only for Octavia **minor version 2.5 or later**.
 
@@ -99,6 +101,7 @@ The following attributes are exported:
 * `loadbalancer_provider` - See Argument Reference above.
 * `availability_zone` - See Argument Reference above.
 * `security_group_ids` - See Argument Reference above.
+* `cascade` - See Argument Reference above
 * `tags` - See Argument Reference above.
 * `vip_qos_policy_id`: See Argument Reference above.
 
