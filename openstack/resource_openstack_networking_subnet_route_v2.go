@@ -58,8 +58,10 @@ func resourceNetworkingSubnetRouteV2Create(ctx context.Context, d *schema.Resour
 	}
 
 	subnetID := d.Get("subnet_id").(string)
-	config.MutexKV.Lock(subnetID)
-	defer config.MutexKV.Unlock(subnetID)
+	if config.UseMutex {
+		config.MutexKV.Lock(subnetID)
+		defer config.MutexKV.Unlock(subnetID)
+	}
 
 	subnet, err := subnets.Get(ctx, networkingClient, subnetID).Extract()
 	if err != nil {
@@ -164,8 +166,10 @@ func resourceNetworkingSubnetRouteV2Delete(ctx context.Context, d *schema.Resour
 	}
 
 	subnetID := d.Get("subnet_id").(string)
-	config.MutexKV.Lock(subnetID)
-	defer config.MutexKV.Unlock(subnetID)
+	if config.UseMutex {
+		config.MutexKV.Lock(subnetID)
+		defer config.MutexKV.Unlock(subnetID)
+	}
 
 	subnet, err := subnets.Get(ctx, networkingClient, subnetID).Extract()
 	if err != nil {
