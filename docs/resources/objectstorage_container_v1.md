@@ -93,54 +93,82 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 }
 ```
 
+### Set a custom storage class in the Ceph RGW Swift API
+
+```hcl
+provider "openstack" {
+  endpoint_overrides = {
+    "object-store" = "https://ceph.local/swift/v1/AUTH_ee7c356a391a4a9ea50c3a5bb7dc831e/"
+  }
+}
+
+resource "openstack_objectstorage_container_v1" "container_1" {
+  name   = "tf-test-container-1"
+
+  storage_policy = "az1"
+  storage_class  = "SSD"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
 * `region` - (Optional) The region in which to create the container. If
-    omitted, the `region` argument of the provider is used. Changing this
-    creates a new container.
+  omitted, the `region` argument of the provider is used. Changing this creates
+  a new container.
 
 * `name` - (Required) A unique name for the container. Changing this creates a
-    new container.
+  new container.
 
 * `container_read` - (Optional) Sets an access control list (ACL) that grants
-    read access. This header can contain a comma-delimited list of users that
-    can read the container (allows the GET method for all objects in the
-    container). Changing this updates the access control list read access.
+  read access. This header can contain a comma-delimited list of users that can
+  read the container (allows the GET method for all objects in the container).
+  Changing this updates the access control list read access.
 
-* `container_sync_to` - (Optional) The destination for container synchronization.
-    Changing this updates container synchronization.
+* `container_sync_to` - (Optional) The destination for container
+  synchronization. Changing this updates container synchronization.
 
-* `container_sync_key` - (Optional) The secret key for container synchronization.
-    Changing this updates container synchronization.
+* `container_sync_key` - (Optional) The secret key for container
+  synchronization. Changing this updates container synchronization.
 
-* `container_write` - (Optional) Sets an ACL that grants write access.
-    Changing this updates the access control list write access.
+* `container_write` - (Optional) Sets an ACL that grants write access. Changing
+  this updates the access control list write access.
 
 * `versioning` - (Optional) A boolean that can enable or disable object
   versioning. The default value is `false`. To use this feature, your Swift
-  version must be 2.24 or higher (as described in the [OpenStack Swift Ussuri release notes](https://docs.openstack.org/releasenotes/swift/ussuri.html#relnotes-2-24-0-stable-ussuri)),
+  version must be 2.24 or higher (as described in the [OpenStack Swift Ussuri
+  release
+  notes](https://docs.openstack.org/releasenotes/swift/ussuri.html#relnotes-2-24-0-stable-ussuri)),
   and a cloud administrator must have set the `allow_object_versioning = true`
-  configuration option in Swift. If you cannot set this versioning type, you may
-  want to consider using `versioning_legacy` instead.
+  configuration option in Swift. If you cannot set this versioning type, you
+  may want to consider using `versioning_legacy` instead.
 
-* `versioning_legacy` - (Deprecated) Enable legacy object versioning. The structure is described below.
+* `versioning_legacy` - (Deprecated) Enable legacy object versioning. The
+  structure is described below.
 
-* `metadata` - (Optional) Custom key/value pairs to associate with the container.
-    Changing this updates the existing container metadata.
+* `metadata` - (Optional) Custom key/value pairs to associate with the
+  container. Changing this updates the existing container metadata.
 
 * `content_type` - (Optional) The MIME type for the container. Changing this
-    updates the MIME type.
+  updates the MIME type.
 
-* `storage_policy` - (Optional) The storage policy to be used for the container. 
-    Changing this creates a new container.
+* `storage_policy` - (Optional) The storage policy to be used for the
+  container. Changing this creates a new container.
 
-* `force_destroy` - (Optional, Default:false ) A boolean that indicates all objects should be deleted from the container so that the container can be destroyed without error. These objects are not recoverable.
+* `storage_class` - (Optional) The storage class to be used for the container.
+  Changing this creates a new container. This option is only available in Ceph
+  RGW Swift API implementation.
+
+* `force_destroy` - (Optional, Default:false ) A boolean that indicates all
+  objects should be deleted from the container so that the container can be
+  destroyed without error. These objects are not recoverable.
 
 The `versioning_legacy` block supports:
 
-  * `type` - (Required) Versioning type which can be `versions` or `history` according to [Openstack documentation](https://docs.openstack.org/swift/latest/api/object_versioning.html).
+  * `type` - (Required) Versioning type which can be `versions` or `history`
+    according to [OpenStack
+    documentation](https://docs.openstack.org/swift/latest/api/object_versioning.html).
   * `location` - (Required) Container in which versions will be stored.
 
 
@@ -159,6 +187,7 @@ The following attributes are exported:
 * `metadata` - See Argument Reference above.
 * `content_type` - See Argument Reference above.
 * `storage_policy` - See Argument Reference above.
+* `storage_class` - See Argument Reference above.
 
 ## Import
 

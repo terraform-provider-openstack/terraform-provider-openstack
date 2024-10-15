@@ -121,6 +121,12 @@ func resourceObjectStorageContainerV1() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 			},
+			"storage_class": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -134,15 +140,18 @@ func resourceObjectStorageContainerV1Create(ctx context.Context, d *schema.Resou
 
 	cn := d.Get("name").(string)
 
-	createOpts := &containers.CreateOpts{
-		ContainerRead:    d.Get("container_read").(string),
-		ContainerSyncTo:  d.Get("container_sync_to").(string),
-		ContainerSyncKey: d.Get("container_sync_key").(string),
-		ContainerWrite:   d.Get("container_write").(string),
-		ContentType:      d.Get("content_type").(string),
-		StoragePolicy:    d.Get("storage_policy").(string),
-		VersionsEnabled:  d.Get("versioning").(bool),
-		Metadata:         resourceContainerMetadataV2(d),
+	createOpts := &containerCreateOpts{
+		CreateOpts: containers.CreateOpts{
+			ContainerRead:    d.Get("container_read").(string),
+			ContainerSyncTo:  d.Get("container_sync_to").(string),
+			ContainerSyncKey: d.Get("container_sync_key").(string),
+			ContainerWrite:   d.Get("container_write").(string),
+			ContentType:      d.Get("content_type").(string),
+			StoragePolicy:    d.Get("storage_policy").(string),
+			VersionsEnabled:  d.Get("versioning").(bool),
+			Metadata:         resourceContainerMetadataV2(d),
+		},
+		StorageClass: d.Get("storage_class").(string),
 	}
 
 	versioning := d.Get("versioning_legacy").(*schema.Set)
@@ -235,6 +244,10 @@ func resourceObjectStorageContainerV1Read(ctx context.Context, d *schema.Resourc
 			return diag.Errorf("error setting 'history' versioning for objectstorage_container_v1 '%s': %s", d.Id(), err)
 		}
 	}
+
+	// Despite the create request "X-Object-Storage-Class" header, the
+	// response header is "X-Storage-Class".
+	d.Set("storage_class", result.Header.Get("X-Storage-Class"))
 
 	d.Set("versioning", headers.VersionsEnabled)
 	d.Set("region", GetRegion(d, config))
