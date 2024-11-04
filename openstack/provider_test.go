@@ -45,6 +45,7 @@ var (
 	osGlanceimportEnvironment    = os.Getenv("OS_GLANCEIMPORT_ENVIRONMENT")
 	osHypervisorEnvironment      = os.Getenv("OS_HYPERVISOR_HOSTNAME")
 	osPortForwardingEnvironment  = os.Getenv("OS_PORT_FORWARDING_ENVIRONMENT")
+	osWorkflowEnvironment        = os.Getenv("OS_WORKFLOW_ENVIRONMENT")
 	osMagnumHTTPProxy            = os.Getenv("OS_MAGNUM_HTTP_PROXY")
 	osMagnumHTTPSProxy           = os.Getenv("OS_MAGNUM_HTTPS_PROXY")
 	osMagnumNoProxy              = os.Getenv("OS_MAGNUM_NO_PROXY")
@@ -215,6 +216,14 @@ func testAccPreCheckPortForwarding(t *testing.T) {
 
 	if osPortForwardingEnvironment == "" {
 		t.Skip("This environment does not support 'portforwarding' extension tests")
+	}
+}
+
+func testAccPreCheckWorkflow(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if osWorkflowEnvironment == "" {
+		t.Skip("This environment does not support 'workflow' extension tests")
 	}
 }
 

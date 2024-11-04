@@ -218,6 +218,7 @@ Identity/Keystone service catalog. This provider supports:
 * `volume`: Block Storage / Cinder v1
 * `volumev2`: Block Storage / Cinder v2
 * `volumev3`: Block Storage / Cinder v3
+* `workflowv2`: Workflow / Mistral v2
 
 Please use this feature at your own risk. If you are unsure about needing
 to override an endpoint, you most likely do not need to override one.
@@ -503,6 +504,9 @@ the feature or bug you're testing:
   data source. Set this value to one valid hypervisor hostname to test this data source.
 
 * `OS_BGPVPN_ENVIRONMENT` - Required if you're working on the `openstack_bgpvpn_*`
+  resources. Set this value to "1" to enable testing these resources.
+
+* `OS_WORKFLOW_ENVIRONMENT` - Required if you're working on the `openstack_workflow_*`
   resources. Set this value to "1" to enable testing these resources.
 
 We recommend only running the acceptance tests related to the feature or bug
