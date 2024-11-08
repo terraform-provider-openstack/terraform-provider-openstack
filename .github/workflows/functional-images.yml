@@ -22,6 +22,9 @@ jobs:
         openstack_version: ["master"]
         ubuntu_version: ["22.04"]
         include:
+          - name: "dalmatian"
+            openstack_version: "stable/2024.2"
+            ubuntu_version: "22.04"
           - name: "caracal"
             openstack_version: "stable/2024.1"
             ubuntu_version: "22.04"
