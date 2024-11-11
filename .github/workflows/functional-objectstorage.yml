@@ -49,7 +49,8 @@ jobs:
       - name: Checkout go
         uses: actions/setup-go@v5
         with:
-          go-version: '^1.22'
+          go-version-file: 'go.mod'
+          cache: true
       - name: Run Gophercloud acceptance tests
         run: OS_SWIFT_ENVIRONMENT=true ./scripts/acceptancetest.sh
         env:

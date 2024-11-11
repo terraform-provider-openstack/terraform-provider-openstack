@@ -52,7 +52,8 @@ jobs:
       - name: Checkout go
         uses: actions/setup-go@v5
         with:
-          go-version: '^1.22'
+          go-version-file: 'go.mod'
+          cache: true
       - name: Run TPO acceptance tests
         run: OS_FW_ENVIRONMENT="1" ./scripts/acceptancetest.sh
         env:
