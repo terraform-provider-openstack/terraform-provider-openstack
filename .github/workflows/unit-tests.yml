@@ -4,22 +4,19 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        go-version:
-          - "1.22"
 
     env:
       GO111MODULE: "on"
 
     steps:
-      - name: Setup Go ${{ matrix.go-version }}
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go-version }}
-
-      - uses: actions/checkout@v4
+          go-version-file: 'go.mod'
+          cache: true
 
       - name: Run go vet
         run: |
