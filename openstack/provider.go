@@ -269,6 +269,7 @@ func Provider() *schema.Provider {
 			"openstack_compute_instance_v2":                      dataSourceComputeInstanceV2(),
 			"openstack_compute_flavor_v2":                        dataSourceComputeFlavorV2(),
 			"openstack_compute_hypervisor_v2":                    dataSourceComputeHypervisorV2(),
+			"openstack_compute_servergroup_v2":                   dataSourceComputeServerGroupV2(),
 			"openstack_compute_keypair_v2":                       dataSourceComputeKeypairV2(),
 			"openstack_compute_quotaset_v2":                      dataSourceComputeQuotasetV2(),
 			"openstack_compute_limits_v2":                        dataSourceComputeLimitsV2(),
