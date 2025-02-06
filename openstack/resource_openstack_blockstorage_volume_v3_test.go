@@ -272,7 +272,7 @@ func TestAccBlockStorageV3Volume_VolumeTypeUpdate(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
