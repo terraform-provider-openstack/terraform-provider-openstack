@@ -355,7 +355,7 @@ func resourceBlockStorageVolumeV3Update(ctx context.Context, d *schema.ResourceD
 	}
 
 	if d.HasChange("volume_type") {
-		v, err = volumes.Get(ctx, blockStorageClient, d.Id()).Extract()
+		_, err = volumes.Get(ctx, blockStorageClient, d.Id()).Extract()
 		if err != nil {
 			return diag.Errorf("Error changing volume type openstack_blockstorage_volume_v3 %s: %s", d.Id(), err)
 		}
