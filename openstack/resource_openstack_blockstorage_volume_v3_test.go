@@ -285,7 +285,7 @@ func TestAccBlockStorageV3Volume_VolumeTypeUpdate(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccBlockStorageV3VolumeRetype(),
+				Config: testAccBlockStorageV3VolumeRetypeUpdate(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "volume_type", "new_type"),
@@ -293,15 +293,6 @@ func TestAccBlockStorageV3Volume_VolumeTypeUpdate(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccCheckVolumeSame(t *testing.T, v1, v2 *volumes.Volume) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		if v1.ID != v2.ID {
-			return fmt.Errorf("Volume was recreated during volume_type update: %s -> %s", v1.ID, v2.ID)
-		}
-		return nil
-	}
 }
 
 const testAccBlockStorageV3VolumeBasic = `
