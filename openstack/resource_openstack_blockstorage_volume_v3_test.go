@@ -268,6 +268,45 @@ func testAccCheckBlockStorageV3VolumeAttachment(
 	}
 }
 
+func TestAccBlockStorageV3Volume_VolumeTypeUpdate(t *testing.T) {
+	var volume1, volume2 volumes.Volume
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBlockStorageV3VolumeConfigWithVolumeType("initial_type"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume1),
+					resource.TestCheckResourceAttr("openstack_blockstorage_volume_v3.volume_1", "volume_type", "initial_type"),
+				),
+			},
+			{
+				Config: testAccBlockStorageV3VolumeConfigWithVolumeType("new_type"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume2),
+					resource.TestCheckResourceAttr("openstack_blockstorage_volume_v3.volume_1", "volume_type", "new_type"),
+					testAccCheckVolumeSame(t, &volume1, &volume2),
+				),
+			},
+		},
+	})
+}
+
+func testAccCheckVolumeSame(t *testing.T, v1, v2 *volumes.Volume) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if v1.ID != v2.ID {
+			return fmt.Errorf("Volume was recreated during volume_type update: %s -> %s", v1.ID, v2.ID)
+		}
+		return nil
+	}
+}
+
 const testAccBlockStorageV3VolumeBasic = `
 resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
@@ -388,4 +427,14 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   size = 2
 }
 `, osBackupID)
+}
+
+func testAccBlockStorageV3VolumeConfigWithVolumeType(volumeType string) string {
+	return fmt.Sprintf(`
+resource "openstack_blockstorage_volume_v3" "volume_1" {
+  name        = "volume_1"
+  size        = 1
+  volume_retype_policy = "on-demand"
+  volume_type = "%s"
+}`, volumeType)
 }

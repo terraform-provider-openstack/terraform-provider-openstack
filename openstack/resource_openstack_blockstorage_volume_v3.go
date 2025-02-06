@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
@@ -105,8 +106,18 @@ func resourceBlockStorageVolumeV3() *schema.Resource {
 			"volume_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
+				ForceNew: false,
 				Computed: true,
+			},
+
+			"volume_retype_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+				Default:  "never",
+				ValidateFunc: validation.StringInSlice([]string{
+					"never", "on-demand",
+				}, true),
 			},
 
 			"consistency_group_id": {
@@ -337,6 +348,38 @@ func resourceBlockStorageVolumeV3Update(ctx context.Context, d *schema.ResourceD
 		}
 
 		_, err := stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return diag.Errorf(
+				"Error waiting for openstack_blockstorage_volume_v3 %s to become ready: %s", d.Id(), err)
+		}
+	}
+
+	if d.HasChange("volume_type") {
+		v, err = volumes.Get(ctx, blockStorageClient, d.Id()).Extract()
+		if err != nil {
+			return diag.Errorf("Error changing volume type openstack_blockstorage_volume_v3 %s: %s", d.Id(), err)
+		}
+
+		retypeOptions := &volumes.ChangeTypeOpts{
+			NewType:         d.Get("volume_type").(string),
+			MigrationPolicy: volumes.MigrationPolicy(d.Get("volume_retype_policy").(string)),
+		}
+
+		err := volumes.ChangeType(ctx, blockStorageClient, d.Id(), retypeOptions).ExtractErr()
+		if err != nil {
+			return diag.Errorf("Error changing volume %s type: %s", d.Id(), err)
+		}
+
+		stateConf := &retry.StateChangeConf{
+			Pending:    []string{"retyping"},
+			Target:     []string{"available", "in-use"},
+			Refresh:    blockStorageVolumeV3StateRefreshFunc(ctx, blockStorageClient, d.Id()),
+			Timeout:    d.Timeout(schema.TimeoutCreate),
+			Delay:      10 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
+
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return diag.Errorf(
 				"Error waiting for openstack_blockstorage_volume_v3 %s to become ready: %s", d.Id(), err)
