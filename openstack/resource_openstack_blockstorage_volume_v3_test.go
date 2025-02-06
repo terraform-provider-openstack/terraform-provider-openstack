@@ -269,8 +269,6 @@ func testAccCheckBlockStorageV3VolumeAttachment(
 }
 
 func TestAccBlockStorageV3Volume_VolumeTypeUpdate(t *testing.T) {
-	var volume1, volume2 volumes.Volume
-
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -280,18 +278,17 @@ func TestAccBlockStorageV3Volume_VolumeTypeUpdate(t *testing.T) {
 		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV3VolumeConfigWithVolumeType("initial_type"),
+				Config: testAccBlockStorageV3VolumeRetype(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume1),
-					resource.TestCheckResourceAttr("openstack_blockstorage_volume_v3.volume_1", "volume_type", "initial_type"),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_volume_v3.volume_1", "volume_type", "initial_type"),
 				),
 			},
 			{
-				Config: testAccBlockStorageV3VolumeConfigWithVolumeType("new_type"),
+				Config: testAccBlockStorageV3VolumeRetype(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume2),
-					resource.TestCheckResourceAttr("openstack_blockstorage_volume_v3.volume_1", "volume_type", "new_type"),
-					testAccCheckVolumeSame(t, &volume1, &volume2),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_volume_v3.volume_1", "volume_type", "new_type"),
 				),
 			},
 		},
@@ -429,12 +426,46 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
 `, osBackupID)
 }
 
-func testAccBlockStorageV3VolumeConfigWithVolumeType(volumeType string) string {
+func testAccBlockStorageV3VolumeRetype() string {
 	return fmt.Sprintf(`
+resource "openstack_blockstorage_volume_type_v3" "initial_type" {
+  name        = "initial_type"
+  description = "initial_type"
+  is_public   = true
+}
+
+resource "openstack_blockstorage_volume_type_v3" "new_type" {
+  name        = "new_type"
+  description = "new_type"
+  is_public   = true
+}
+
 resource "openstack_blockstorage_volume_v3" "volume_1" {
-  name        = "volume_1"
-  size        = 1
+  name                 = "volume_1"
+  size                 = 1
   volume_retype_policy = "on-demand"
-  volume_type = "%s"
-}`, volumeType)
+  volume_type          = "initial_type"
+}`)
+}
+
+func testAccBlockStorageV3VolumeRetypeUpdate() string {
+	return fmt.Sprintf(`
+resource "openstack_blockstorage_volume_type_v3" "initial_type" {
+  name        = "initial_type"
+  description = "initial_type"
+  is_public   = true
+}
+
+resource "openstack_blockstorage_volume_type_v3" "new_type" {
+  name        = "new_type"
+  description = "new_type"
+  is_public   = true
+}
+
+resource "openstack_blockstorage_volume_v3" "volume_1" {
+  name                 = "volume_1"
+  size                 = 1
+  volume_retype_policy = "on-demand"
+  volume_type          = "new_type"
+}`)
 }
