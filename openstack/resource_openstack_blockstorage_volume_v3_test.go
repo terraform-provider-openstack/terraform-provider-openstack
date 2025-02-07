@@ -435,7 +435,7 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   name                 = "volume_1"
   size                 = 1
   volume_retype_policy = "on-demand"
-  volume_type          = "initial_type"
+  volume_type          = openstack_blockstorage_volume_type_v3.initial_type.name
 }`)
 }
 
@@ -457,6 +457,6 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   name                 = "volume_1"
   size                 = 1
   volume_retype_policy = "on-demand"
-  volume_type          = "new_type"
+  volume_type          = openstack_blockstorage_volume_type_v3.new_type.name
 }`)
 }
