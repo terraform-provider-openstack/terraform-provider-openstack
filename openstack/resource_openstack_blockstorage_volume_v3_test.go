@@ -18,7 +18,7 @@ func TestAccBlockStorageV3Volume_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckNonAdminOnly(t)
+			// testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
@@ -269,6 +269,8 @@ func testAccCheckBlockStorageV3VolumeAttachment(
 }
 
 func TestAccBlockStorageV3Volume_VolumeTypeUpdate(t *testing.T) {
+	var volume volumes.Volume
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -280,6 +282,7 @@ func TestAccBlockStorageV3Volume_VolumeTypeUpdate(t *testing.T) {
 			{
 				Config: testAccBlockStorageV3VolumeRetype(),
 				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "volume_type", "initial_type"),
 				),
@@ -287,6 +290,7 @@ func TestAccBlockStorageV3Volume_VolumeTypeUpdate(t *testing.T) {
 			{
 				Config: testAccBlockStorageV3VolumeRetypeUpdate(),
 				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "volume_type", "new_type"),
 				),
