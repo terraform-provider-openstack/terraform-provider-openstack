@@ -5,46 +5,35 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccDataSourceDNSSharedZoneV2_basic(t *testing.T) {
-	dataSourceName := "data.openstack_dns_shared_zone_v2.test"
+func TestAccDataSourceDNSZoneShareV2_basic(t *testing.T) {
+	zoneID := "dummy-zone-id"
+	projectID := "dummy-project-id"
+	sudoProjectID := "dummy-sudo-project-id"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: convertTestAccProviders(testAccProviders),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceDNSSharedZoneV2Config,
+				Config: testAccDataSourceDNSZoneShareV2Config(zoneID, projectID, sudoProjectID),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSSharedZoneV2DataSourceExists(dataSourceName),
-					resource.TestCheckResourceAttr(dataSourceName, "shared_zones.#", "1"),
-					resource.TestCheckResourceAttr(dataSourceName, "shared_zones.0.zone_id", "12345"),
-					resource.TestCheckResourceAttr(dataSourceName, "shared_zones.0.project_id", "67890"),
+					resource.TestCheckResourceAttr("data.openstack_dns_shared_zone_v2.test", "zone_id", zoneID),
+					resource.TestCheckResourceAttr("data.openstack_dns_shared_zone_v2.test", "project_id", projectID),
+					resource.TestCheckResourceAttr("data.openstack_dns_shared_zone_v2.test", "x_auth_sudo_project_id", sudoProjectID),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckDNSSharedZoneV2DataSourceExists(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Can't find DNS Shared Zone data source: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("DNS Shared Zone data source ID not set")
-		}
-
-		return nil
-	}
-}
-
-var testAccDataSourceDNSSharedZoneV2Config = `
+func testAccDataSourceDNSZoneShareV2Config(zoneID, projectID, sudoProjectID string) string {
+	return fmt.Sprintf(`
 data "openstack_dns_shared_zone_v2" "test" {
-  zone_id = "12345"
+  zone_id                 = "%s"
+  project_id              = "%s"
+  x_auth_sudo_project_id  = "%s"
 }
-`
+`, zoneID, projectID, sudoProjectID)
+}

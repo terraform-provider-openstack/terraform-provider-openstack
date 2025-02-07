@@ -1,32 +1,41 @@
 package openstack
 
 import (
-	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
+	"context"
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceDNSSharedZoneV2() *schema.Resource {
+func dataSourceDNSZoneShareV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDNSSharedZoneV2Read,
+		Read: dataSourceDNSZoneShareV2Read,
+
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Filter results by zone ID.",
+				Required:    true,
+				Description: "The ID of the DNS zone",
 			},
-			"shared_zones": {
+			"x_auth_sudo_project_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The owner project ID required to authorize sharing",
+			},
+			"shares": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"zone_id": {
-							Type:     schema.TypeString,
-							Computed: true,
+						"share_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of the share",
 						},
 						"project_id": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project ID of the share",
 						},
 					},
 				},
@@ -35,37 +44,44 @@ func dataSourceDNSSharedZoneV2() *schema.Resource {
 	}
 }
 
-func dataSourceDNSSharedZoneV2Read(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*gophercloud.ServiceClient)
-
-	var listOpts zones.ListOpts
-
-	if v, ok := d.GetOk("zone_id"); ok {
-		listOpts.ID = v.(string)
-	}
-
-	allPages, err := zones.List(client, listOpts).AllPages()
+func dataSourceDNSZoneShareV2Read(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	client, err := config.DNSV2Client(context.Background(), "")
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating OpenStack DNS client: %s", err)
 	}
 
-	allZones, err := zones.ExtractZones(allPages)
+	zoneID := d.Get("zone_id").(string)
+
+	// Get the sudo project ID if available
+	var sudoProjectID string
+	if v, ok := d.GetOk("x_auth_sudo_project_id"); ok {
+		sudoProjectID = v.(string)
+	}
+
+	// Fetch shared zones
+	shares, err := listZoneShares(client, zoneID, sudoProjectID)
 	if err != nil {
-		return err
+		return fmt.Errorf("error retrieving shared zones for DNS zone %s: %s", zoneID, err)
 	}
 
-	var sharedZones []map[string]interface{}
-	for _, zone := range allZones {
-		sharedZones = append(sharedZones, map[string]interface{}{
-			"zone_id":    zone.ID,
-			"project_id": zone.ProjectID,
+	// Ensure we are parsing the correct JSON field
+	var results []map[string]interface{}
+	for _, share := range shares {
+		results = append(results, map[string]interface{}{
+			"share_id":   share.ID,
+			"project_id": share.TargetProjectID,
 		})
 	}
 
-	if err := d.Set("shared_zones", sharedZones); err != nil {
-		return err
+	// 🔥 DEBUGGING: Print to confirm parsing is correct
+	fmt.Printf("Retrieved %d shared zones for %s: %+v\n", len(results), zoneID, results)
+
+	// Set the parsed data in Terraform
+	if err := d.Set("shares", results); err != nil {
+		return fmt.Errorf("error setting shared zones for DNS zone %s: %s", zoneID, err)
 	}
 
-	d.SetId("shared-zones-list")
+	d.SetId(zoneID)
 	return nil
 }
