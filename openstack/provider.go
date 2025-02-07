@@ -342,7 +342,7 @@ func Provider() *schema.Provider {
 			"openstack_db_database_v1":                           resourceDatabaseDatabaseV1(),
 			"openstack_dns_recordset_v2":                         resourceDNSRecordSetV2(),
 			"openstack_dns_zone_v2":                              resourceDNSZoneV2(),
-			"openstack_dns_shared_zone_v2":                       resourceDNSSharedZoneV2(),
+			"openstack_dns_shared_zone_v2":                       resourceDnsZoneShare(),
 			"openstack_dns_transfer_request_v2":                  resourceDNSTransferRequestV2(),
 			"openstack_dns_transfer_accept_v2":                   resourceDNSTransferAcceptV2(),
 			"openstack_fw_group_v2":                              resourceFWGroupV2(),

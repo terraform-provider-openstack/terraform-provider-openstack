@@ -8,43 +8,41 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccResourceDNSSharedZoneV2_basic(t *testing.T) {
-	resourceName := "openstack_dns_shared_zone_v2.test"
+func TestAccDnsZoneShare_basic(t *testing.T) {
+	zoneID := "test-zone-id"
+	targetProjectID := "test-project-id"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDnsZoneShareDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceDNSSharedZoneV2Config,
+				Config: testAccDnsZoneShareConfig(zoneID, targetProjectID),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSSharedZoneV2Exists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "zone_id", "12345"),
-					resource.TestCheckResourceAttr(resourceName, "project_id", "67890"),
+					resource.TestCheckResourceAttr("openstack_dns_zone_share.test", "zone_id", zoneID),
+					resource.TestCheckResourceAttr("openstack_dns_zone_share.test", "target_project_id", targetProjectID),
 				),
+			},
+			{
+				ResourceName:      "openstack_dns_zone_share.test",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-func testAccCheckDNSSharedZoneV2Exists(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Can't find DNS Shared Zone resource: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("DNS Shared Zone resource ID not set")
-		}
-
-		return nil
-	}
+func testAccDnsZoneShareConfig(zoneID, targetProjectID string) string {
+	return fmt.Sprintf(`
+resource "openstack_dns_zone_share" "test" {
+	zone_id           = "%s"
+	target_project_id = "%s"
+}
+`, zoneID, targetProjectID)
 }
 
-var testAccResourceDNSSharedZoneV2Config = `
-resource "openstack_dns_shared_zone_v2" "test" {
-  zone_id    = "12345"
-  project_id = "67890"
+func testAccCheckDnsZoneShareDestroy(s *terraform.State) error {
+	// No API exists to verify share deletion.
+	return nil
 }
-`

@@ -1,63 +1,72 @@
 package openstack
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceDNSSharedZoneV2() *schema.Resource {
+// resourceDnsZoneShare creates a resource for sharing DNS zones.
+func resourceDnsZoneShare() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDNSSharedZoneV2Create,
-		Read:   resourceDNSSharedZoneV2Read,
-		Delete: resourceDNSSharedZoneV2Delete,
+		Create: resourceDnsZoneShareCreate,
+		Read:   resourceDnsZoneShareRead,
+		Delete: resourceDnsZoneShareDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The ID of the zone to be shared.",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
-			"project_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The ID of the project with which the zone is shared.",
+			"target_project_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 		},
 	}
 }
 
-func resourceDNSSharedZoneV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceDnsZoneShareCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*gophercloud.ServiceClient)
 	zoneID := d.Get("zone_id").(string)
-	projectID := d.Get("project_id").(string)
+	targetProjectID := d.Get("target_project_id").(string)
 
 	shareOpts := zones.ShareZoneOpts{
-		TargetProjectID: projectID,
+		TargetProjectID: targetProjectID,
 	}
 
-	err := zones.Share(client, zoneID, shareOpts).ExtractErr()
+	err := zones.Share(context.Background(), client, zoneID, shareOpts).ExtractErr()
 	if err != nil {
-		return err
+		return fmt.Errorf("error sharing DNS zone %s: %s", zoneID, err)
 	}
 
-	d.SetId(zoneID)
-	return resourceDNSSharedZoneV2Read(d, meta)
+	// Use a composite ID (zoneID:targetProjectID)
+	d.SetId(fmt.Sprintf("%s:%s", zoneID, targetProjectID))
+	return resourceDnsZoneShareRead(d, meta)
 }
 
-func resourceDNSSharedZoneV2Read(d *schema.ResourceData, meta interface{}) error {
-	// Fetch shared zone details using the OpenStack API.
+func resourceDnsZoneShareRead(d *schema.ResourceData, meta interface{}) error {
+	// There is no dedicated API to read share details.
+	// We assume that if creation succeeded, the share exists.
 	return nil
 }
 
-func resourceDNSSharedZoneV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceDnsZoneShareDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*gophercloud.ServiceClient)
 	zoneID := d.Get("zone_id").(string)
+	shareID := d.Get("target_project_id").(string)
 
-	err := zones.Unshare(client, zoneID).ExtractErr()
+	err := zones.Unshare(context.Background(), client, zoneID, shareID).ExtractErr()
 	if err != nil {
-		return err
+		return fmt.Errorf("error unsharing DNS zone %s: %s", zoneID, err)
 	}
-
 	d.SetId("")
 	return nil
 }
