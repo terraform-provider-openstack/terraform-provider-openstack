@@ -281,6 +281,10 @@ func resourceBlockStorageVolumeV3Read(ctx context.Context, d *schema.ResourceDat
 	d.Set("metadata", v.Metadata)
 	d.Set("region", GetRegion(d, config))
 
+	if _, exists := d.GetOk("volume_retype_policy"); !exists {
+		d.Set("volume_retype_policy", "never")
+	}
+
 	attachments := flattenBlockStorageVolumeV3Attachments(v.Attachments)
 	log.Printf("[DEBUG] openstack_blockstorage_volume_v3 %s attachments: %#v", d.Id(), attachments)
 	if err := d.Set("attachment", attachments); err != nil {
