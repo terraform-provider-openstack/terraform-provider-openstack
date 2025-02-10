@@ -307,6 +307,7 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
     foo = "bar"
   }
   size = 1
+  volume_retype_policy = "never"
 }
 `
 
