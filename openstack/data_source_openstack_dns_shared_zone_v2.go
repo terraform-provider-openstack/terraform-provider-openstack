@@ -17,7 +17,7 @@ func dataSourceDNSZoneShareV2() *schema.Resource {
 				Required:    true,
 				Description: "The ID of the DNS zone",
 			},
-			"x_auth_sudo_project_id": {
+			"project_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The owner project ID required to authorize sharing",
@@ -55,7 +55,7 @@ func dataSourceDNSZoneShareV2Read(d *schema.ResourceData, meta interface{}) erro
 
 	// Get the sudo project ID if available
 	var sudoProjectID string
-	if v, ok := d.GetOk("x_auth_sudo_project_id"); ok {
+	if v, ok := d.GetOk("project_id"); ok {
 		sudoProjectID = v.(string)
 	}
 
