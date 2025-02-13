@@ -28,6 +28,10 @@ func TestAccNetworkingV2SubnetDataSource_basic(t *testing.T) {
 						"data.openstack_networking_subnet_v2.subnet_1", "name", "subnet_1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_subnet_v2.subnet_1", "all_tags.#", "2"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_subnet_v2.subnet_1", "host_routes.0.destination_cidr", "10.0.1.0/24"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_subnet_v2.subnet_1", "host_routes.0.next_hop", "192.168.199.254"),
 				),
 			},
 		},
@@ -204,6 +208,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
     "foo",
     "bar",
   ]
+}
+
+resource "openstack_networking_subnet_route_v2" "subnet_route_1" {
+  subnet_id        = openstack_networking_subnet_v2.subnet_1.id
+  destination_cidr = "10.0.1.0/24"
+  next_hop         = "192.168.199.254"
 }
 `
 

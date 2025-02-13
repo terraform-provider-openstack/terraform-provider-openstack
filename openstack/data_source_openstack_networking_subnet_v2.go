@@ -293,7 +293,8 @@ func dataSourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceDat
 		log.Printf("[DEBUG] Unable to set openstack_networking_subnet_v2 service_types: %s", err)
 	}
 
-	if err := d.Set("host_routes", subnet.HostRoutes); err != nil {
+	hostRoutes := flattenNetworkingSubnetV2HostRoutes(subnet.HostRoutes)
+	if err := d.Set("host_routes", hostRoutes); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_networking_subnet_v2 host_routes: %s", err)
 	}
 
