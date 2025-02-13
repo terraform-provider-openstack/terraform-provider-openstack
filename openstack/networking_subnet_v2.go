@@ -93,6 +93,21 @@ func flattenNetworkingSubnetV2AllocationPools(allocationPools []subnets.Allocati
 	return result
 }
 
+// flattenNetworkingSubnetV2HostRoutes allows to flatten slice of subnets.HostRoute structs into
+// a slice of maps.
+func flattenNetworkingSubnetV2HostRoutes(hostRoutes []subnets.HostRoute) []map[string]interface{} {
+	result := make([]map[string]interface{}, len(hostRoutes))
+	for i, hostRoute := range hostRoutes {
+		route := make(map[string]interface{})
+		route["destination_cidr"] = hostRoute.DestinationCIDR
+		route["next_hop"] = hostRoute.NextHop
+
+		result[i] = route
+	}
+
+	return result
+}
+
 func networkingSubnetV2AllocationPoolsMatch(oldPools, newPools []interface{}) bool {
 	if len(oldPools) != len(newPools) {
 		return false
