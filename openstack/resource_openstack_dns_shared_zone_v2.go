@@ -23,7 +23,7 @@ func resourceDNSZoneShareV2() *schema.Resource {
 		Read:   resourceDNSZoneShareV2Read,
 		Delete: resourceDNSZoneShareV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceDNSZoneShareV2Importer,
 		},
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
@@ -51,6 +51,38 @@ func resourceDNSZoneShareV2() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceDNSZoneShareV2Importer(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	// Expected format: zone_id:project_id:target_project_id/share_id
+	parts := strings.SplitN(d.Id(), "/", 2)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("unexpected format (%s), expected <zone_id>:<project_id>:<target_project_id>/<share_id>", d.Id())
+	}
+	zonePart := parts[0]
+	shareID := parts[1]
+
+	zoneParts := strings.SplitN(zonePart, ":", 3)
+	if len(zoneParts) != 3 {
+		return nil, fmt.Errorf("unexpected zone part format (%s), expected <zone_id>:<project_id>:<target_project_id>", zonePart)
+	}
+	zoneID := zoneParts[0]
+	projectID := zoneParts[1]
+	targetProjectID := zoneParts[2]
+
+	// Set attributes in state based on the parsed import ID.
+	if err := d.Set("zone_id", zoneID); err != nil {
+		return nil, fmt.Errorf("error setting zone_id: %s", err)
+	}
+	if err := d.Set("project_id", projectID); err != nil {
+		return nil, fmt.Errorf("error setting project_id: %s", err)
+	}
+	if err := d.Set("target_project_id", targetProjectID); err != nil {
+		return nil, fmt.Errorf("error setting target_project_id: %s", err)
+	}
+	// Set the resource ID back to a composite of zone_id and share_id.
+	d.SetId(fmt.Sprintf("%s/%s", zoneID, shareID))
+	return []*schema.ResourceData{d}, resourceDNSZoneShareV2Read(d, meta)
 }
 
 func resourceDNSZoneShareV2Create(d *schema.ResourceData, meta interface{}) error {
