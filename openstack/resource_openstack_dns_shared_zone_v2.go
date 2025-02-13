@@ -64,12 +64,10 @@ func resourceDNSZoneShareV2Create(d *schema.ResourceData, meta interface{}) erro
 	projectID := d.Get("target_project_id").(string)
 	sudoProjectID := d.Get("project_id").(string)
 
-	// Construct the share request
 	shareOpts := zones.ShareZoneOpts{
 		TargetProjectID: projectID,
 	}
 
-	// Set additional headers manually using gophercloud's RequestOpts
 	client.Microversion = "2.0"
 	client.MoreHeaders = map[string]string{
 		"X-Auth-Sudo-Project-Id": sudoProjectID,

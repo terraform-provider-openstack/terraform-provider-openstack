@@ -74,7 +74,7 @@ func dataSourceDNSZoneShareV2Read(d *schema.ResourceData, meta interface{}) erro
 		})
 	}
 
-	// 🔥 DEBUGGING: Print to confirm parsing is correct
+	// DEBUGGING: Print to confirm parsing is correct
 	fmt.Printf("Retrieved %d shared zones for %s: %+v\n", len(results), zoneID, results)
 
 	// Set the parsed data in Terraform
