@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -11,27 +12,47 @@ import (
 
 func TestAccResourceDNSZoneShareV2_basic(t *testing.T) {
 	zoneID := "dummy-zone-id"
+	targetProjectID := "dummy-target-project-id"
 	projectID := "dummy-project-id"
-	sudoProjectID := "dummy-sudo-project-id"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: convertTestAccProviders(testAccProviders),
 		CheckDestroy: func(state *terraform.State) error {
-			// Implement a check to ensure the resource is destroyed
-			return nil
+			return testAccCheckDNSZoneShareV2Destroy(state, zoneID, targetProjectID, projectID)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceDNSZoneShareV2Config(zoneID, projectID, sudoProjectID),
+				Config: testAccResourceDNSZoneShareV2Config(zoneID, targetProjectID, projectID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_dns_shared_zone_v2.test", "zone_id", zoneID),
+					resource.TestCheckResourceAttr("openstack_dns_shared_zone_v2.test", "target_project_id", targetProjectID),
 					resource.TestCheckResourceAttr("openstack_dns_shared_zone_v2.test", "project_id", projectID),
-					resource.TestCheckResourceAttr("openstack_dns_shared_zone_v2.test", "x_auth_sudo_project_id", sudoProjectID),
 				),
 			},
 		},
 	})
+}
+
+func testAccCheckDNSZoneShareV2Destroy(state *terraform.State, zoneID, targetProjectID, projectID string) error {
+	config := testAccProvider.Meta().(*Config)
+	client, err := config.DNSV2Client(context.Background(), "")
+	if err != nil {
+		return fmt.Errorf("error creating OpenStack DNS client: %s", err)
+	}
+
+	shares, err := listZoneShares(client, zoneID, projectID)
+	if err != nil {
+		return fmt.Errorf("error listing shares for DNS zone %s: %s", zoneID, err)
+	}
+
+	for _, s := range shares {
+		if s.TargetProjectID == targetProjectID {
+			return fmt.Errorf("DNS zone share still exists for zone %s and target project %s", zoneID, targetProjectID)
+		}
+	}
+
+	return nil
 }
 
 func convertTestAccProviders(providers map[string]func() (*schema.Provider, error)) map[string]*schema.Provider {
@@ -44,12 +65,12 @@ func convertTestAccProviders(providers map[string]func() (*schema.Provider, erro
 	return converted
 }
 
-func testAccResourceDNSZoneShareV2Config(zoneID, projectID, sudoProjectID string) string {
+func testAccResourceDNSZoneShareV2Config(zoneID, targetProjectID, projectID string) string {
 	return fmt.Sprintf(`
 resource "openstack_dns_shared_zone_v2" "test" {
-  zone_id                 = "%s"
-  project_id              = "%s"
-  x_auth_sudo_project_id  = "%s"
+  zone_id            = "%s"
+  target_project_id  = "%s"
+  project_id         = "%s"
 }
-`, zoneID, projectID, sudoProjectID)
+`, zoneID, targetProjectID, projectID)
 }
