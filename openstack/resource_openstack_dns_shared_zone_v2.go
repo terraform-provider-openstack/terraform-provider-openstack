@@ -32,15 +32,15 @@ func resourceDNSZoneShareV2() *schema.Resource {
 				ForceNew:    true,
 				Description: "The ID of the DNS zone to share",
 			},
-			"project_id": {
+			"target_project_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
 				Description: "The target project ID with which to share the DNS zone",
 			},
-			"x_auth_sudo_project_id": {
+			"project_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The owner project ID required to authorize sharing",
 			},
@@ -61,8 +61,8 @@ func resourceDNSZoneShareV2Create(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	zoneID := d.Get("zone_id").(string)
-	projectID := d.Get("project_id").(string)
-	sudoProjectID := d.Get("x_auth_sudo_project_id").(string)
+	projectID := d.Get("target_project_id").(string)
+	sudoProjectID := d.Get("project_id").(string)
 
 	// Construct the share request
 	shareOpts := zones.ShareZoneOpts{
@@ -121,8 +121,8 @@ func resourceDNSZoneShareV2Read(d *schema.ResourceData, meta interface{}) error 
 	if err != nil {
 		return err
 	}
-	projectID := d.Get("project_id").(string)
-	ownerProjectID := d.Get("x_auth_sudo_project_id").(string)
+	projectID := d.Get("target_project_id").(string)
+	ownerProjectID := d.Get("project_id").(string)
 
 	shares, err := listZoneShares(client, zoneID, ownerProjectID)
 	if err != nil {
@@ -154,7 +154,7 @@ func resourceDNSZoneShareV2Delete(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	sudoProjectID := d.Get("x_auth_sudo_project_id").(string)
+	sudoProjectID := d.Get("project_id").(string)
 
 	// Construct the URL for the delete request
 	url := client.ServiceURL("zones", zoneID, "shares", shareID)
