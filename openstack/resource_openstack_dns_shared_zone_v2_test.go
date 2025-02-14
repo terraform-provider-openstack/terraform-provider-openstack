@@ -25,9 +25,9 @@ func TestAccResourceDNSZoneShareV2_basic(t *testing.T) {
 			{
 				Config: testAccResourceDNSZoneShareV2Config(zoneID, targetProjectID, projectID),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("openstack_dns_shared_zone_v2.test", "zone_id", zoneID),
-					resource.TestCheckResourceAttr("openstack_dns_shared_zone_v2.test", "target_project_id", targetProjectID),
-					resource.TestCheckResourceAttr("openstack_dns_shared_zone_v2.test", "project_id", projectID),
+					resource.TestCheckResourceAttr("openstack_dns_zone_share_v2.test", "zone_id", zoneID),
+					resource.TestCheckResourceAttr("openstack_dns_zone_share_v2.test", "target_project_id", targetProjectID),
+					resource.TestCheckResourceAttr("openstack_dns_zone_share_v2.test", "project_id", projectID),
 				),
 			},
 		},
@@ -67,7 +67,7 @@ func convertTestAccProviders(providers map[string]func() (*schema.Provider, erro
 
 func testAccResourceDNSZoneShareV2Config(zoneID, targetProjectID, projectID string) string {
 	return fmt.Sprintf(`
-resource "openstack_dns_shared_zone_v2" "test" {
+resource "openstack_dns_zone_share_v2" "test" {
   zone_id            = "%s"
   target_project_id  = "%s"
   project_id         = "%s"
