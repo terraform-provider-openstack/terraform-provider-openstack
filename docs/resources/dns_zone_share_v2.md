@@ -2,12 +2,12 @@
 subcategory: "DNS / Designate"
 layout: "openstack"
 page_title: "OpenStack: openstack_dns_zone_share_v2"
-sidebar_current: "docs-openstack-resource-dns-shared-zone-v2"
+sidebar_current: "docs-openstack-resource-dns-zone-share-v2"
 description: |-
   Manages a shared DNS zone in the OpenStack DNS Service
 ---
 
-# openstack\_dns\_shared\_zone\_v2
+# openstack\_dns\_zone\_share\_v2
 
 Manages the sharing of a DNS zone in the OpenStack DNS Service (Designate).
 
