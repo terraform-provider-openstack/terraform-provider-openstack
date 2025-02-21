@@ -43,7 +43,7 @@ func fwGroupV2DeleteFunc(ctx context.Context, networkingClient *gophercloud.Serv
 func fwGroupV2IngressPolicyDeleteFunc(ctx context.Context, networkingClient *gophercloud.ServiceClient, d *schema.ResourceData, groupID string) diag.Diagnostics {
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE", "PENDING_UPDATE"},
-		Target:     []string{"ACTIVE", "INACTIVE", "DOWN"},
+		Target:     []string{"ACTIVE", "INACTIVE", "DOWN", "CREATED"},
 		Refresh:    fwGroupV2RefreshFunc(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutUpdate),
 		Delay:      0,
