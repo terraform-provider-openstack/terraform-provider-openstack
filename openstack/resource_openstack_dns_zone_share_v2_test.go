@@ -3,74 +3,127 @@ package openstack
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccResourceDNSZoneShareV2_basic(t *testing.T) {
-	zoneID := "dummy-zone-id"
-	targetProjectID := "dummy-target-project-id"
-	projectID := "dummy-project-id"
+	var zone zones.Zone
+
+	zoneName := fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
+	targetProjectName := fmt.Sprintf("ACPTTEST-Target-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: convertTestAccProviders(testAccProviders),
-		CheckDestroy: func(state *terraform.State) error {
-			return testAccCheckDNSZoneShareV2Destroy(state, zoneID, targetProjectID, projectID)
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckDNS(t)
 		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDNSZoneShareV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceDNSZoneShareV2Config(zoneID, targetProjectID, projectID),
+				Config: testAccResourceDNSZoneShareV2Config(zoneName, targetProjectName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("openstack_dns_zone_share_v2.test", "zone_id", zoneID),
-					resource.TestCheckResourceAttr("openstack_dns_zone_share_v2.test", "target_project_id", targetProjectID),
-					resource.TestCheckResourceAttr("openstack_dns_zone_share_v2.test", "project_id", projectID),
+					testAccCheckDNSZoneShareV2Exists("openstack_dns_zone_share_v2.share", &zone),
+					resource.TestMatchResourceAttr("openstack_dns_zone_v2.zone", "name", regexp.MustCompile(`^ACPTTEST.+\.com\.$`)),
+					resource.TestCheckResourceAttrPair("openstack_dns_zone_share_v2.share", "target_project_id", "openstack_identity_project_v3.target", "id"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckDNSZoneShareV2Destroy(state *terraform.State, zoneID, targetProjectID, projectID string) error {
-	config := testAccProvider.Meta().(*Config)
-	client, err := config.DNSV2Client(context.Background(), "")
-	if err != nil {
-		return fmt.Errorf("error creating OpenStack DNS client: %s", err)
-	}
-
-	shares, err := listZoneShares(client, zoneID, projectID)
-	if err != nil {
-		return fmt.Errorf("error listing shares for DNS zone %s: %s", zoneID, err)
-	}
-
-	for _, s := range shares {
-		if s.TargetProjectID == targetProjectID {
-			return fmt.Errorf("DNS zone share still exists for zone %s and target project %s", zoneID, targetProjectID)
-		}
-	}
-
-	return nil
-}
-
-func convertTestAccProviders(providers map[string]func() (*schema.Provider, error)) map[string]*schema.Provider {
-	converted := make(map[string]*schema.Provider)
-	for key, providerFunc := range providers {
-		if provider, err := providerFunc(); err == nil {
-			converted[key] = provider
-		}
-	}
-	return converted
-}
-
-func testAccResourceDNSZoneShareV2Config(zoneID, targetProjectID, projectID string) string {
+func testAccResourceDNSZoneShareV2Config(zoneName, targetProjectName string) string {
 	return fmt.Sprintf(`
-resource "openstack_dns_zone_share_v2" "test" {
-  zone_id            = "%s"
-  target_project_id  = "%s"
-  project_id         = "%s"
+resource "openstack_dns_zone_v2" "zone" {
+  name  = "%s"
+  email = "admin@example.com"
+  ttl   = 3000
+  type  = "PRIMARY"
 }
-`, zoneID, targetProjectID, projectID)
+
+resource "openstack_identity_project_v3" "target" {
+  name        = "%s"
+  description = "The target project with which we share the zone"
+}
+
+resource "openstack_dns_zone_share_v2" "share" {
+  zone_id           = openstack_dns_zone_v2.zone.id
+  target_project_id = openstack_identity_project_v3.target.id
+}
+`, zoneName, targetProjectName)
+}
+
+func testAccCheckDNSZoneShareV2Exists(n string, zone *zones.Zone) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("DNS zone share resource not found: %s", n)
+		}
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("DNS zone share resource has no ID set")
+		}
+
+		config := testAccProvider.Meta().(*Config)
+		dnsClient, err := config.DNSV2Client(context.Background(), osRegionName)
+		if err != nil {
+			return fmt.Errorf("error creating DNS client: %s", err)
+		}
+
+		zoneID := rs.Primary.Attributes["zone_id"]
+		_, shareID, err := parseDnsSharedZoneID(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+		ownerProjID := rs.Primary.Attributes["project_id"]
+
+		shares, err := listZoneShares(context.Background(), dnsClient, zoneID, ownerProjID)
+		if err != nil {
+			return fmt.Errorf("error listing DNS zone shares: %s", err)
+		}
+		for _, s := range shares {
+			if s.ID == shareID {
+				return nil
+			}
+		}
+		return fmt.Errorf("DNS zone share %s not found", shareID)
+	}
+}
+
+func testAccCheckDNSZoneShareV2Destroy(s *terraform.State) error {
+	config := testAccProvider.Meta().(*Config)
+	dnsClient, err := config.DNSV2Client(context.Background(), osRegionName)
+	if err != nil {
+		return fmt.Errorf("error creating DNS client: %s", err)
+	}
+	for _, rs := range s.RootModule().Resources {
+		// Skip data sources and resources with no zone_id.
+		if rs.Type == "data.openstack_dns_zone_share_v2" || rs.Primary.Attributes["zone_id"] == "" {
+			continue
+		}
+		zoneID, shareID, err := parseDnsSharedZoneID(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+		// If zoneID is empty, skip the check.
+		if zoneID == "" {
+			continue
+		}
+		ownerProjID := rs.Primary.Attributes["project_id"]
+		shares, err := listZoneShares(context.Background(), dnsClient, zoneID, ownerProjID)
+		if err != nil {
+			return fmt.Errorf("error listing DNS zone shares: %s", err)
+		}
+		for _, s := range shares {
+			if s.ID == shareID {
+				return fmt.Errorf("DNS zone share still exists: %s", shareID)
+			}
+		}
+	}
+	return nil
 }
