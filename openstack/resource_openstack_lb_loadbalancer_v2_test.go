@@ -163,6 +163,35 @@ func TestAccLBV2LoadBalancer_vip_port_id(t *testing.T) {
 	})
 }
 
+func TestAccLBV2LoadBalancer_cascadeDelete(t *testing.T) {
+	var lb loadbalancers.LoadBalancer
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckLB(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLbV2LoadBalancerConfigCascade(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV2LoadBalancerExists("openstack_lb_loadbalancer_v2.loadbalancer_1", &lb),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_loadbalancer_v2.loadbalancer_1", "cascade", "true"),
+				),
+			},
+			{
+				ResourceName:      "openstack_lb_loadbalancer_v2.loadbalancer_1",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccCheckLBV2LoadBalancerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
@@ -366,6 +395,33 @@ func testAccLbV2LoadBalancerConfigUpdate(lbProvider string) string {
         delete = "15m"
       }
     }`, lbProvider)
+}
+
+func testAccLbV2LoadBalancerConfigCascade(cascade bool) string {
+	return fmt.Sprintf(`
+    resource "openstack_networking_network_v2" "network_1" {
+      name = "network_1"
+      admin_state_up = "true"
+    }
+
+    resource "openstack_networking_subnet_v2" "subnet_1" {
+      name = "subnet_1"
+      cidr = "192.168.199.0/24"
+      ip_version = 4
+      network_id = "${openstack_networking_network_v2.network_1.id}"
+    }
+
+    resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
+      name = "loadbalancer_1"
+      vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+      cascade = %t
+
+      timeouts {
+        create = "15m"
+        update = "15m"
+        delete = "15m"
+      }
+    }`, cascade)
 }
 
 const testAccLbV2LoadBalancerSecGroup = `
