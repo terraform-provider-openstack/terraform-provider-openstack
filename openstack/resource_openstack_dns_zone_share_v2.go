@@ -7,6 +7,7 @@ import (
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -16,14 +17,13 @@ type ZoneShare struct {
 	TargetProjectID string `json:"target_project_id"`
 }
 
-// resourceDNSZoneShareV2 defines the resource to share a DNS zone.
 func resourceDNSZoneShareV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDNSZoneShareV2Create,
-		Read:   resourceDNSZoneShareV2Read,
-		Delete: resourceDNSZoneShareV2Delete,
+		CreateContext: resourceDNSZoneShareV2Create,
+		ReadContext:   resourceDNSZoneShareV2Read,
+		DeleteContext: resourceDNSZoneShareV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: resourceDNSZoneShareV2Importer,
+			StateContext: resourceDNSZoneShareV2Importer,
 		},
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
@@ -41,8 +41,9 @@ func resourceDNSZoneShareV2() *schema.Resource {
 			"project_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
-				Description: "The owner project ID required to authorize sharing",
+				Description: "The owner project ID. If omitted, it is derived from the zone details.",
 			},
 			"share_id": {
 				Type:        schema.TypeString,
@@ -53,51 +54,108 @@ func resourceDNSZoneShareV2() *schema.Resource {
 	}
 }
 
-func resourceDNSZoneShareV2Importer(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	// Expected format: zone_id:project_id:target_project_id/share_id
-	parts := strings.SplitN(d.Id(), "/", 2)
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("unexpected format (%s), expected <zone_id>:<project_id>:<target_project_id>/<share_id>", d.Id())
+// resourceDNSZoneShareV2Importer supports both full-format (<zone_id>/<project_id>/<target_project_id>/<share_id>)
+// and simplified (<zone_id>/<share_id>) imports.
+func resourceDNSZoneShareV2Importer(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*Config)
+	client, err := config.DNSV2Client(ctx, "")
+	if err != nil {
+		return nil, fmt.Errorf("error creating OpenStack DNS client: %s", err)
 	}
-	zonePart := parts[0]
-	shareID := parts[1]
 
-	zoneParts := strings.SplitN(zonePart, ":", 3)
-	if len(zoneParts) != 3 {
-		return nil, fmt.Errorf("unexpected zone part format (%s), expected <zone_id>:<project_id>:<target_project_id>", zonePart)
-	}
-	zoneID := zoneParts[0]
-	projectID := zoneParts[1]
-	targetProjectID := zoneParts[2]
+	parts := strings.Split(d.Id(), "/")
+	switch len(parts) {
+	case 4:
+		// Full format: <zone_id>/<project_id>/<target_project_id>/<share_id>
+		zoneID := parts[0]
+		projectID := parts[1]
+		targetProjectID := parts[2]
+		shareID := parts[3]
 
-	// Set attributes in state based on the parsed import ID.
-	if err := d.Set("zone_id", zoneID); err != nil {
-		return nil, fmt.Errorf("error setting zone_id: %s", err)
+		d.Set("zone_id", zoneID)
+		d.Set("project_id", projectID)
+		d.Set("target_project_id", targetProjectID)
+		d.Set("share_id", shareID)
+		// Canonicalize the ID as <zone_id>/<share_id>
+		d.SetId(fmt.Sprintf("%s/%s", zoneID, shareID))
+	case 2:
+		zoneID := parts[0]
+		shareID := parts[1]
+		d.Set("zone_id", zoneID)
+		d.Set("share_id", shareID)
+
+		// Determine the owner project ID.
+		var ownerProjectID string
+		if v, ok := d.GetOk("project_id"); ok && v.(string) != "" {
+			ownerProjectID = v.(string)
+		} else {
+			zone, err := zones.Get(ctx, client, zoneID).Extract()
+			if err != nil {
+				return nil, fmt.Errorf("error retrieving zone details for zone %s: %s", zoneID, err)
+			}
+			ownerProjectID = zone.ProjectID
+			d.Set("project_id", ownerProjectID)
+		}
+
+		// If target_project_id is not provided in the config, derive it from the shares.
+		var targetProjectID string
+		if v, ok := d.GetOk("target_project_id"); ok {
+			targetProjectID = v.(string)
+		} else {
+			shares, err := listZoneShares(ctx, client, zoneID, ownerProjectID)
+			if err != nil {
+				return nil, fmt.Errorf("error listing shares for DNS zone %s: %s", zoneID, err)
+			}
+			found := false
+			for _, s := range shares {
+				if s.ID == shareID {
+					targetProjectID = s.TargetProjectID
+					found = true
+					break
+				}
+			}
+			if !found {
+				return nil, fmt.Errorf("could not find share with id %s for zone %s", shareID, zoneID)
+			}
+			d.Set("target_project_id", targetProjectID)
+		}
+		d.SetId(fmt.Sprintf("%s/%s", zoneID, shareID))
+	default:
+		return nil, fmt.Errorf("unexpected format (%s); expected either <zone_id>/<share_id> or <zone_id>/<project_id>/<target_project_id>/<share_id>", d.Id())
 	}
-	if err := d.Set("project_id", projectID); err != nil {
-		return nil, fmt.Errorf("error setting project_id: %s", err)
+
+	diags := resourceDNSZoneShareV2Read(ctx, d, meta)
+	if diags.HasError() {
+		return nil, fmt.Errorf("error reading DNS zone share: %v", diags)
 	}
-	if err := d.Set("target_project_id", targetProjectID); err != nil {
-		return nil, fmt.Errorf("error setting target_project_id: %s", err)
-	}
-	// Set the resource ID back to a composite of zone_id and share_id.
-	d.SetId(fmt.Sprintf("%s/%s", zoneID, shareID))
-	return []*schema.ResourceData{d}, resourceDNSZoneShareV2Read(d, meta)
+	return []*schema.ResourceData{d}, nil
 }
 
-func resourceDNSZoneShareV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceDNSZoneShareV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	client, err := config.DNSV2Client(context.Background(), "")
+	client, err := config.DNSV2Client(ctx, "")
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack DNS client: %s", err)
+		return diag.FromErr(fmt.Errorf("error creating OpenStack DNS client: %s", err))
 	}
 
 	zoneID := d.Get("zone_id").(string)
-	projectID := d.Get("target_project_id").(string)
-	sudoProjectID := d.Get("project_id").(string)
+	targetProjectID := d.Get("target_project_id").(string)
+
+	// Use the provided project_id if set; otherwise, retrieve it from the zone.
+	var sudoProjectID string
+	if v, ok := d.GetOk("project_id"); ok && v.(string) != "" {
+		sudoProjectID = v.(string)
+	} else {
+		zone, err := zones.Get(ctx, client, zoneID).Extract()
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("error retrieving zone details for zone %s: %s", zoneID, err))
+		}
+		sudoProjectID = zone.ProjectID
+		d.Set("project_id", sudoProjectID)
+	}
 
 	shareOpts := zones.ShareZoneOpts{
-		TargetProjectID: projectID,
+		TargetProjectID: targetProjectID,
 	}
 
 	client.Microversion = "2.0"
@@ -105,130 +163,139 @@ func resourceDNSZoneShareV2Create(d *schema.ResourceData, meta interface{}) erro
 		"X-Auth-Sudo-Project-Id": sudoProjectID,
 	}
 
-	// Log API details for debugging
-	fmt.Printf("DEBUG: Making API call to share DNS zone\n")
-	fmt.Printf("DEBUG: URL: %s\n", client.ServiceURL("zones", zoneID, "shares"))
-	fmt.Printf("DEBUG: Headers: X-Auth-Sudo-Project-Id: %s\n", sudoProjectID)
-	fmt.Printf("DEBUG: Request Body: %+v\n", shareOpts)
-
-	// Execute the API call
-	if err := zones.Share(context.Background(), client, zoneID, shareOpts).ExtractErr(); err != nil {
-		return fmt.Errorf("error sharing DNS zone %s with project %s: %s", zoneID, projectID, err)
+	if err := zones.Share(ctx, client, zoneID, shareOpts).ExtractErr(); err != nil {
+		return diag.FromErr(fmt.Errorf("error sharing DNS zone %s with project %s: %s", zoneID, targetProjectID, err))
 	}
 
-	// Fetch shares to get the share ID
-	shares, err := listZoneShares(client, zoneID, sudoProjectID)
+	shares, err := listZoneShares(ctx, client, zoneID, sudoProjectID)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
-
 	var shareID string
 	for _, s := range shares {
-		if s.TargetProjectID == projectID {
+		if s.TargetProjectID == targetProjectID {
 			shareID = s.ID
 			break
 		}
 	}
 	if shareID == "" {
-		return fmt.Errorf("failed to locate share for DNS zone %s with project %s", zoneID, projectID)
+		return diag.FromErr(fmt.Errorf("failed to locate share for DNS zone %s with project %s", zoneID, targetProjectID))
 	}
 
-	// Store the resource ID
-	id := fmt.Sprintf("%s/%s", zoneID, shareID)
-	d.SetId(id)
+	d.SetId(fmt.Sprintf("%s/%s", zoneID, shareID))
 	d.Set("share_id", shareID)
-	return resourceDNSZoneShareV2Read(d, meta)
+	return resourceDNSZoneShareV2Read(ctx, d, meta)
 }
 
-func resourceDNSZoneShareV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceDNSZoneShareV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	client, err := config.DNSV2Client(context.Background(), "")
+	client, err := config.DNSV2Client(ctx, "")
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack DNS client: %s", err)
+		return diag.FromErr(fmt.Errorf("error creating OpenStack DNS client: %s", err))
 	}
 
 	zoneID, shareID, err := parseDnsSharedZoneID(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
-	projectID := d.Get("target_project_id").(string)
-	ownerProjectID := d.Get("project_id").(string)
 
-	shares, err := listZoneShares(client, zoneID, ownerProjectID)
+	// Determine owner project ID: use the value from configuration if set; otherwise, fetch it.
+	var ownerProjectID string
+	if v, ok := d.GetOk("project_id"); ok && v.(string) != "" {
+		ownerProjectID = v.(string)
+	} else {
+		zone, err := zones.Get(ctx, client, zoneID).Extract()
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("error retrieving zone details for zone %s: %s", zoneID, err))
+		}
+		ownerProjectID = zone.ProjectID
+		d.Set("project_id", ownerProjectID)
+	}
+
+	targetProjectID := d.Get("target_project_id").(string)
+
+	shares, err := listZoneShares(ctx, client, zoneID, ownerProjectID)
 	if err != nil {
-		return fmt.Errorf("error listing shares for DNS zone %s: %s", zoneID, err)
+		return diag.FromErr(fmt.Errorf("error listing shares for DNS zone %s: %s", zoneID, err))
 	}
 
 	found := false
 	for _, s := range shares {
-		if s.ID == shareID && s.TargetProjectID == projectID {
+		if s.ID == shareID && s.TargetProjectID == targetProjectID {
 			found = true
 			break
 		}
 	}
 	if !found {
-		d.SetId("")
+		return diag.Errorf("DNS zone share not found: zone_id %s, share_id %s", zoneID, shareID)
 	}
 	return nil
 }
 
-func resourceDNSZoneShareV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceDNSZoneShareV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	client, err := config.DNSV2Client(context.Background(), "")
+	client, err := config.DNSV2Client(ctx, "")
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack DNS client: %s", err)
+		return diag.FromErr(fmt.Errorf("error creating OpenStack DNS client: %s", err))
 	}
 
 	zoneID, shareID, err := parseDnsSharedZoneID(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	sudoProjectID := d.Get("project_id").(string)
+	// Use the provided project_id (or derive it) to authorize the deletion.
+	var sudoProjectID string
+	if v, ok := d.GetOk("project_id"); ok && v.(string) != "" {
+		sudoProjectID = v.(string)
+	} else {
+		zone, err := zones.Get(ctx, client, zoneID).Extract()
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("error retrieving zone details for zone %s: %s", zoneID, err))
+		}
+		sudoProjectID = zone.ProjectID
+		d.Set("project_id", sudoProjectID)
+	}
 
-	// Construct the URL for the delete request
 	url := client.ServiceURL("zones", zoneID, "shares", shareID)
-
-	// Create the request options with the necessary header
 	reqOpts := &gophercloud.RequestOpts{
 		MoreHeaders: map[string]string{
 			"X-Auth-Sudo-Project-Id": sudoProjectID,
 		},
 	}
-
-	// Perform the delete request
-	_, err = client.Delete(context.Background(), url, reqOpts)
+	_, err = client.Delete(ctx, url, reqOpts)
 	if err != nil {
-		return fmt.Errorf("error unsharing DNS zone %s: %s", zoneID, err)
+		return diag.FromErr(fmt.Errorf("error unsharing DNS zone %s: %s", zoneID, err))
 	}
-
+	d.SetId("")
 	return nil
 }
 
 func parseDnsSharedZoneID(id string) (string, string, error) {
+	if !strings.Contains(id, "/") {
+		return "", id, nil
+	}
 	parts := strings.Split(id, "/")
 	if len(parts) != 2 {
-		return "", "", fmt.Errorf("unexpected ID format (%s), expected <zoneID>/<shareID>", id)
+		return "", "", fmt.Errorf("unexpected ID format (%s), expected <zone_id>/<share_id>", id)
 	}
 	return parts[0], parts[1], nil
 }
 
-func listZoneShares(client *gophercloud.ServiceClient, zoneID string, ownerProjectID string) ([]ZoneShare, error) {
+func listZoneShares(ctx context.Context, client *gophercloud.ServiceClient, zoneID string, ownerProjectID string) ([]ZoneShare, error) {
 	url := client.ServiceURL("zones", zoneID, "shares")
 	var result struct {
 		Shares []ZoneShare `json:"shared_zones"`
 	}
-
-	reqOpts := &gophercloud.RequestOpts{
-		MoreHeaders: map[string]string{
+	reqOpts := &gophercloud.RequestOpts{}
+	if ownerProjectID != "" {
+		reqOpts.MoreHeaders = map[string]string{
 			"X-Auth-Sudo-Project-Id": ownerProjectID,
-		},
+		}
 	}
-
-	_, err := client.Get(context.Background(), url, &result, reqOpts)
+	_, err := client.Get(ctx, url, &result, reqOpts)
 	if err != nil {
 		return nil, fmt.Errorf("error getting shares for zone %s: %s", zoneID, err)
 	}
-
 	return result.Shares, nil
 }
