@@ -194,7 +194,7 @@ func resourceDNSZoneShareV2Read(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(fmt.Errorf("error creating OpenStack DNS client: %s", err))
 	}
 
-	zoneID, shareID, err := parseDnsSharedZoneID(d.Id())
+	zoneID, shareID, err := parseDNSSharedZoneID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -239,7 +239,7 @@ func resourceDNSZoneShareV2Delete(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(fmt.Errorf("error creating OpenStack DNS client: %s", err))
 	}
 
-	zoneID, shareID, err := parseDnsSharedZoneID(d.Id())
+	zoneID, shareID, err := parseDNSSharedZoneID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -271,7 +271,7 @@ func resourceDNSZoneShareV2Delete(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func parseDnsSharedZoneID(id string) (string, string, error) {
+func parseDNSSharedZoneID(id string) (string, string, error) {
 	if !strings.Contains(id, "/") {
 		return "", id, nil
 	}
