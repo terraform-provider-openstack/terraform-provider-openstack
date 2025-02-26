@@ -76,7 +76,7 @@ func testAccCheckDNSZoneShareV2Exists(n string, zone *zones.Zone) resource.TestC
 		}
 
 		zoneID := rs.Primary.Attributes["zone_id"]
-		_, shareID, err := parseDnsSharedZoneID(rs.Primary.ID)
+		_, shareID, err := parseDNSSharedZoneID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -106,7 +106,7 @@ func testAccCheckDNSZoneShareV2Destroy(s *terraform.State) error {
 		if rs.Type == "data.openstack_dns_zone_share_v2" || rs.Primary.Attributes["zone_id"] == "" {
 			continue
 		}
-		zoneID, shareID, err := parseDnsSharedZoneID(rs.Primary.ID)
+		zoneID, shareID, err := parseDNSSharedZoneID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
