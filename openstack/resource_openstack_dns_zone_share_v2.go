@@ -97,9 +97,9 @@ func resourceDNSZoneShareV2Importer(ctx context.Context, d *schema.ResourceData,
 			d.Set("project_id", ownerProjectID)
 		}
 
-		// If target_project_id is not provided in the config, derive it from the shares.
+		// Determine target_project_id.
 		var targetProjectID string
-		if v, ok := d.GetOk("target_project_id"); ok {
+		if v, ok := d.GetOk("target_project_id"); ok && v.(string) != "" {
 			targetProjectID = v.(string)
 		} else {
 			shares, err := listZoneShares(ctx, client, zoneID, ownerProjectID)
@@ -199,7 +199,7 @@ func resourceDNSZoneShareV2Read(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 
-	// Determine owner project ID: use the value from configuration if set; otherwise, fetch it.
+	// Determine owner project ID: use configuration if set; otherwise, fetch it.
 	var ownerProjectID string
 	if v, ok := d.GetOk("project_id"); ok && v.(string) != "" {
 		ownerProjectID = v.(string)
@@ -244,7 +244,6 @@ func resourceDNSZoneShareV2Delete(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	// Use the provided project_id (or derive it) to authorize the deletion.
 	var sudoProjectID string
 	if v, ok := d.GetOk("project_id"); ok && v.(string) != "" {
 		sudoProjectID = v.(string)
@@ -263,10 +262,13 @@ func resourceDNSZoneShareV2Delete(ctx context.Context, d *schema.ResourceData, m
 			"X-Auth-Sudo-Project-Id": sudoProjectID,
 		},
 	}
-	_, err = client.Delete(ctx, url, reqOpts)
+
+	resp, err := client.Delete(ctx, url, reqOpts)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error unsharing DNS zone %s: %s", zoneID, err))
 	}
+	defer resp.Body.Close()
+
 	d.SetId("")
 	return nil
 }
@@ -293,9 +295,11 @@ func listZoneShares(ctx context.Context, client *gophercloud.ServiceClient, zone
 			"X-Auth-Sudo-Project-Id": ownerProjectID,
 		}
 	}
-	_, err := client.Get(ctx, url, &result, reqOpts)
+
+	resp, err := client.Get(ctx, url, &result, reqOpts)
 	if err != nil {
 		return nil, fmt.Errorf("error getting shares for zone %s: %s", zoneID, err)
 	}
+	defer resp.Body.Close()
 	return result.Shares, nil
 }
