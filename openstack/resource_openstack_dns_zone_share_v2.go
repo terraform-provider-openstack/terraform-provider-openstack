@@ -7,6 +7,7 @@ import (
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -98,10 +99,8 @@ func resourceDNSZoneShareV2Importer(ctx context.Context, d *schema.ResourceData,
 		}
 
 		// Determine target_project_id.
-		var targetProjectID string
-		if v, ok := d.GetOk("target_project_id"); ok && v.(string) != "" {
-			targetProjectID = v.(string)
-		} else {
+		targetProjectID := d.Get("target_project_id").(string)
+		if targetProjectID == "" {
 			shares, err := listZoneShares(ctx, client, zoneID, ownerProjectID)
 			if err != nil {
 				return nil, fmt.Errorf("error listing shares for DNS zone %s: %s", zoneID, err)
@@ -117,8 +116,8 @@ func resourceDNSZoneShareV2Importer(ctx context.Context, d *schema.ResourceData,
 			if !found {
 				return nil, fmt.Errorf("could not find share with id %s for zone %s", shareID, zoneID)
 			}
-			d.Set("target_project_id", targetProjectID)
 		}
+		d.Set("target_project_id", targetProjectID)
 		d.SetId(fmt.Sprintf("%s/%s", zoneID, shareID))
 	default:
 		return nil, fmt.Errorf("unexpected format (%s); expected either <zone_id>/<share_id> or <zone_id>/<project_id>/<target_project_id>/<share_id>", d.Id())
@@ -199,7 +198,6 @@ func resourceDNSZoneShareV2Read(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 
-	// Determine owner project ID: use configuration if set; otherwise, fetch it.
 	var ownerProjectID string
 	if v, ok := d.GetOk("project_id"); ok && v.(string) != "" {
 		ownerProjectID = v.(string)
