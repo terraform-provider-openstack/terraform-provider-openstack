@@ -1680,3 +1680,37 @@ resource "openstack_compute_instance_v2" "instance_1" {
 }
 `, osNetworkID)
 }
+
+func TestAccComputeInstanceV2_hypervisorHostname(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceV2HypervisorHostnameConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance", "hypervisor_hostname", "my-hypervisor",
+					),
+				),
+			},
+		},
+	})
+}
+
+func testAccComputeInstanceV2HypervisorHostnameConfig() string {
+	return fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance" {
+  name            = "test-instance"
+  image_id        = "%s"
+  flavor_id       = "%s"
+
+  hypervisor_hostname = "my-hypervisor"
+
+  networks {
+    uuid = "%s"
+  }
+}
+`, osImageID, osFlavorID, osNetworkID)
+}

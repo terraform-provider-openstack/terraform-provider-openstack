@@ -178,6 +178,11 @@ func resourceComputeInstanceV2() *schema.Resource {
 					},
 				},
 			},
+			"hypervisor_hostname": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"metadata": {
 				Type:     schema.TypeMap,
 				Optional: true,
