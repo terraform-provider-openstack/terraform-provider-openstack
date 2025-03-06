@@ -1708,7 +1708,7 @@ resource "openstack_compute_instance_v2" "instance" {
 
   hypervisor_hostname = "my-hypervisor"
 
-  networks {
+  network {
     uuid = "%s"
   }
 }
