@@ -495,7 +495,11 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		networks = expandInstanceNetworks(allInstanceNetworks)
 	}
 
-	hypervisorHostname := d.Get("hypervisor_hostname").(string)
+	var hypervisorHostname string
+	if v, ok := d.Get("hypervisor_hostname").(string); ok {
+		hypervisorHostname = v
+		computeClient.Microversion = computeV2InstanceCreateServerWithHypervisorHostnameMicroversion
+	}
 
 	configDrive := d.Get("config_drive").(bool)
 
