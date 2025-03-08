@@ -426,6 +426,8 @@ The following arguments are supported:
 * `vendor_options` - (Optional) Map of additional vendor-specific options.
     Supported options are described below.
 
+* `hypervisor_hostname` - (Optional) Specifies the exact hypervisor hostname on which to create the instance. When provided, this parameter is included in the request to Nova, directing the scheduler to launch the instance on the specified host. Note: This option requires administrative privileges and a Nova microversion of 2.74 or later. Changing this value forces a new instance to be created.
+
 The `network` block supports:
 
 * `uuid` - (Required unless `port`  or `name` is provided) The network UUID to
