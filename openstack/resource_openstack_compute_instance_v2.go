@@ -495,6 +495,8 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		networks = expandInstanceNetworks(allInstanceNetworks)
 	}
 
+	hypervisorHostname := d.Get("hypervisor_hostname").(string)
+
 	configDrive := d.Get("config_drive").(bool)
 
 	// Retrieve tags and set microversion if they're provided.
@@ -516,6 +518,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		SecurityGroups:   resourceInstanceSecGroupsV2(d),
 		AvailabilityZone: availabilityZone,
 		Networks:         networks,
+		HypervisorHostname: hypervisorHostname,
 		Metadata:         resourceInstanceMetadataV2(d),
 		ConfigDrive:      &configDrive,
 		AdminPass:        d.Get("admin_pass").(string),
@@ -753,6 +756,9 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 	} else {
 		computeV2InstanceReadTags(d, instanceTags)
 	}
+
+	// Set the hypervisor hostname
+	d.Set("hypervisor_hostname", server.HypervisorHostname)
 
 	return nil
 }
