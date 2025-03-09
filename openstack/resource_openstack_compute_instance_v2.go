@@ -180,6 +180,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 			},
 			"hypervisor_hostname": {
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 				ForceNew: true,
 			},
@@ -495,18 +496,18 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		networks = expandInstanceNetworks(allInstanceNetworks)
 	}
 
-	var hypervisorHostname string
-	if v, ok := d.Get("hypervisor_hostname").(string); ok {
-		hypervisorHostname = v
-		computeClient.Microversion = computeV2InstanceCreateServerWithHypervisorHostnameMicroversion
-	}
-
 	configDrive := d.Get("config_drive").(bool)
 
 	// Retrieve tags and set microversion if they're provided.
 	instanceTags := computeV2InstanceTags(d)
 	if len(instanceTags) > 0 {
 		computeClient.Microversion = computeV2InstanceCreateServerWithTagsMicroversion
+	}
+
+	var hypervisorHostname string
+	if v, ok := d.Get("hypervisor_hostname").(string); ok {
+		hypervisorHostname = v
+		computeClient.Microversion = computeV2InstanceCreateServerWithHypervisorHostnameMicroversion
 	}
 
 	if v, ok := getOkExists(d, "availability_zone"); ok {
