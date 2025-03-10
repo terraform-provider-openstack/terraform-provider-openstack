@@ -517,19 +517,19 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	}
 
 	createOpts := &servers.CreateOpts{
-		Name:             d.Get("name").(string),
-		ImageRef:         imageID,
-		FlavorRef:        flavorID,
-		SecurityGroups:   resourceInstanceSecGroupsV2(d),
-		AvailabilityZone: availabilityZone,
-		Networks:         networks,
+		Name:               d.Get("name").(string),
+		ImageRef:           imageID,
+		FlavorRef:          flavorID,
+		SecurityGroups:     resourceInstanceSecGroupsV2(d),
+		AvailabilityZone:   availabilityZone,
+		Networks:           networks,
 		HypervisorHostname: hypervisorHostname,
-		Metadata:         resourceInstanceMetadataV2(d),
-		ConfigDrive:      &configDrive,
-		AdminPass:        d.Get("admin_pass").(string),
-		UserData:         []byte(d.Get("user_data").(string)),
-		Personality:      resourceInstancePersonalityV2(d),
-		Tags:             instanceTags,
+		Metadata:           resourceInstanceMetadataV2(d),
+		ConfigDrive:        &configDrive,
+		AdminPass:          d.Get("admin_pass").(string),
+		UserData:           []byte(d.Get("user_data").(string)),
+		Personality:        resourceInstancePersonalityV2(d),
+		Tags:               instanceTags,
 	}
 
 	if vL, ok := d.GetOk("block_device"); ok {
