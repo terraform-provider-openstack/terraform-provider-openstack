@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 )
 
 // dataSourceDNSZoneShareV2 defines the schema for the DNS Zone Share data source.
