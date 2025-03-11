@@ -773,6 +773,29 @@ func TestAccComputeV2Instance_tags(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstanceV2_hypervisorHostname(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceV2HypervisorHostnameConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_compute_instance_v2.instance_1", "hypervisor_hostname", &instance.HypervisorHostname,
+					),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckComputeV2InstanceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
@@ -1681,32 +1704,17 @@ resource "openstack_compute_instance_v2" "instance_1" {
 `, osNetworkID)
 }
 
-func TestAccComputeInstanceV2_hypervisorHostname(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeInstanceV2HypervisorHostnameConfig(),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"openstack_compute_instance_v2.instance", "hypervisor_hostname", "my-hypervisor",
-					),
-				),
-			},
-		},
-	})
-}
-
 func testAccComputeInstanceV2HypervisorHostnameConfig() string {
 	return fmt.Sprintf(`
-resource "openstack_compute_instance_v2" "instance" {
+data "openstack_compute_hypervisor_v2" "host01" {
+}
+
+resource "openstack_compute_instance_v2" "instance_1" {
   name            = "test-instance"
   image_id        = "%s"
   flavor_id       = "%s"
 
-  hypervisor_hostname = "my-hypervisor"
+  hypervisor_hostname = data.openstack_compute_hypervisor_v2.host01.hostname
 
   network {
     uuid = "%s"
