@@ -106,14 +106,12 @@ func resourceBlockStorageVolumeV3() *schema.Resource {
 			"volume_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: false,
 				Computed: true,
 			},
 
 			"volume_retype_policy": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: false,
 				Default:  "never",
 				ValidateFunc: validation.StringInSlice([]string{
 					"never", "on-demand",
