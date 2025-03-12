@@ -179,10 +179,11 @@ func resourceComputeInstanceV2() *schema.Resource {
 				},
 			},
 			"hypervisor_hostname": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Computed:      true,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"personality"},
 			},
 			"metadata": {
 				Type:     schema.TypeMap,
@@ -350,7 +351,8 @@ func resourceComputeInstanceV2() *schema.Resource {
 						},
 					},
 				},
-				Set: resourceComputeInstancePersonalityHash,
+				Set:           resourceComputeInstancePersonalityHash,
+				ConflictsWith: []string{"hypervisor_hostname"},
 			},
 			"stop_before_destroy": {
 				Type:     schema.TypeBool,
@@ -505,8 +507,8 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	}
 
 	var hypervisorHostname string
-	if v, ok := d.Get("hypervisor_hostname").(string); ok {
-		hypervisorHostname = v
+	if v, ok := getOkExists(d, "hypervisor_hostname"); ok {
+		hypervisorHostname = v.(string)
 		computeClient.Microversion = computeV2InstanceCreateServerWithHypervisorHostnameMicroversion
 	}
 
