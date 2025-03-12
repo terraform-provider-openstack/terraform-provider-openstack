@@ -16,9 +16,6 @@ Manages a V3 block storage quotaset resource within OpenStack.
 ~> **Note:** This resource has a no-op deletion so no actual actions will be done against the OpenStack API
     in case of delete call.
 
-~> **Note:** This resource has all-in creation so all optional quota arguments that were not specified are
-    created with zero value. This excludes volume type quota.
-
 ## Example Usage
 
 ```hcl
