@@ -403,8 +403,9 @@ The following arguments are supported:
     the instance should be launched. The available hints are described below.
 
 * `personality` - (Optional) Customize the personality of an instance by
-    defining one or more files and their contents. The personality structure
-    is described below. Changing this rebuilds the existing server.
+  defining one or more files and their contents. The personality structure is
+  described below. Conflicts with `hypervisor_hostname`. Changing this rebuilds
+  the existing server.
 
 * `stop_before_destroy` - (Optional) Whether to try stop instance gracefully
     before destroying it, thus giving chance for guest OS daemons to stop correctly.
@@ -425,6 +426,13 @@ The following arguments are supported:
 
 * `vendor_options` - (Optional) Map of additional vendor-specific options.
     Supported options are described below.
+
+* `hypervisor_hostname` - (Optional) Specifies the exact hypervisor hostname on
+  which to create the instance. When provided, this parameter is included in
+  the request to Nova, directing the scheduler to launch the instance on the
+  specified host. Note: This option requires administrative privileges and a
+  Nova microversion of 2.74 or later. Conflicts with `personality`. Changing
+  this value forces a new instance to be created.
 
 The `network` block supports:
 

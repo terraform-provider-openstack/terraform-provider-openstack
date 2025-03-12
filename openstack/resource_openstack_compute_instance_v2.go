@@ -178,6 +178,13 @@ func resourceComputeInstanceV2() *schema.Resource {
 					},
 				},
 			},
+			"hypervisor_hostname": {
+				Type:          schema.TypeString,
+				Computed:      true,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"personality"},
+			},
 			"metadata": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -344,7 +351,8 @@ func resourceComputeInstanceV2() *schema.Resource {
 						},
 					},
 				},
-				Set: resourceComputeInstancePersonalityHash,
+				Set:           resourceComputeInstancePersonalityHash,
+				ConflictsWith: []string{"hypervisor_hostname"},
 			},
 			"stop_before_destroy": {
 				Type:     schema.TypeBool,
@@ -498,6 +506,12 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		computeClient.Microversion = computeV2InstanceCreateServerWithTagsMicroversion
 	}
 
+	var hypervisorHostname string
+	if v, ok := getOkExists(d, "hypervisor_hostname"); ok {
+		hypervisorHostname = v.(string)
+		computeClient.Microversion = computeV2InstanceCreateServerWithHypervisorHostnameMicroversion
+	}
+
 	if v, ok := getOkExists(d, "availability_zone"); ok {
 		availabilityZone = v.(string)
 	} else {
@@ -505,18 +519,19 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	}
 
 	createOpts := &servers.CreateOpts{
-		Name:             d.Get("name").(string),
-		ImageRef:         imageID,
-		FlavorRef:        flavorID,
-		SecurityGroups:   resourceInstanceSecGroupsV2(d),
-		AvailabilityZone: availabilityZone,
-		Networks:         networks,
-		Metadata:         resourceInstanceMetadataV2(d),
-		ConfigDrive:      &configDrive,
-		AdminPass:        d.Get("admin_pass").(string),
-		UserData:         []byte(d.Get("user_data").(string)),
-		Personality:      resourceInstancePersonalityV2(d),
-		Tags:             instanceTags,
+		Name:               d.Get("name").(string),
+		ImageRef:           imageID,
+		FlavorRef:          flavorID,
+		SecurityGroups:     resourceInstanceSecGroupsV2(d),
+		AvailabilityZone:   availabilityZone,
+		Networks:           networks,
+		HypervisorHostname: hypervisorHostname,
+		Metadata:           resourceInstanceMetadataV2(d),
+		ConfigDrive:        &configDrive,
+		AdminPass:          d.Get("admin_pass").(string),
+		UserData:           []byte(d.Get("user_data").(string)),
+		Personality:        resourceInstancePersonalityV2(d),
+		Tags:               instanceTags,
 	}
 
 	if vL, ok := d.GetOk("block_device"); ok {
@@ -748,6 +763,9 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 	} else {
 		computeV2InstanceReadTags(d, instanceTags)
 	}
+
+	// Set the hypervisor hostname
+	d.Set("hypervisor_hostname", server.HypervisorHostname)
 
 	return nil
 }
