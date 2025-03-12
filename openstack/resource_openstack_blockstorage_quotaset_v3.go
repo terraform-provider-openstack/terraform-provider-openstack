@@ -103,7 +103,7 @@ func resourceBlockStorageQuotasetV3Create(ctx context.Context, d *schema.Resourc
 
 	updateOpts := quotasets.UpdateOpts{}
 	projectID := d.Get("project_id").(string)
-	if v, ok := getOkExists(d, "fixed_ips"); ok {
+	if v, ok := getOkExists(d, "volumes"); ok {
 		value := v.(int)
 		updateOpts.Volumes = &value
 	}
