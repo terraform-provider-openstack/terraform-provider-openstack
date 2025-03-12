@@ -1,3 +1,12 @@
+---
+name: Bug report
+about: Bug report
+title: ''
+labels: ''
+assignees: ''
+
+---
+
 Hi there,
 
 Thank you for opening an issue. Please note that we try to keep the Terraform issue tracker reserved for bug reports and feature requests. For general usage questions, please see https://www.terraform.io/community.html.
