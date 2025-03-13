@@ -79,8 +79,13 @@ func resourceNetworkingRouterInterfaceV2Create(ctx context.Context, d *schema.Re
 		PortID:   d.Get("port_id").(string),
 	}
 
+	routerID := d.Get("router_id").(string)
+	// the lock is necessary, when multiple interfaces are added to the same router in parallel
+	config.MutexKV.Lock(routerID)
+	defer config.MutexKV.Unlock(routerID)
+
 	log.Printf("[DEBUG] openstack_networking_router_interface_v2 create options: %#v", createOpts)
-	r, err := routers.AddInterface(ctx, networkingClient, d.Get("router_id").(string), createOpts).Extract()
+	r, err := routers.AddInterface(ctx, networkingClient, routerID, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_networking_router_interface_v2: %s", err)
 	}
