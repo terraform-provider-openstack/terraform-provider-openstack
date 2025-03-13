@@ -58,6 +58,10 @@ var (
 )
 
 func init() {
+	// ensure that only "sharev2" service type endpoint is used for shared-file-system
+	// see https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/1847
+	gophercloud.ServiceTypeAliases["shared-file-system"] = []string{"sharev2"}
+
 	testAccProvider = Provider()
 	testAccProviders = map[string]func() (*schema.Provider, error){
 		"openstack": func() (*schema.Provider, error) {
