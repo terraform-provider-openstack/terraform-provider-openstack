@@ -52,7 +52,7 @@ jobs:
       - name: Checkout go
         uses: actions/setup-go@v5
         with:
-          go-version: '^1.22'
+          go-version: '^1.23'
       - name: Run TPO acceptance tests
         run: OS_WORKFLOW_ENVIRONMENT=true ./scripts/acceptancetest.sh
         env:
