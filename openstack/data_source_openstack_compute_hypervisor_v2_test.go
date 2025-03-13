@@ -20,7 +20,6 @@ func TestAccComputeHypervisorV2DataSource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckAdminOnly(t)
-			testAccPreCheckHypervisor(t)
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
@@ -28,7 +27,7 @@ func TestAccComputeHypervisorV2DataSource(t *testing.T) {
 				Config: testAccHypervisorDataSource(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeHypervisorV2DataSourceID("data.openstack_compute_hypervisor_v2.host01"),
-					resource.TestCheckResourceAttr("data.openstack_compute_hypervisor_v2.host01", "hostname", osHypervisorEnvironment),
+					resource.TestCheckResourceAttrSet("data.openstack_compute_hypervisor_v2.host01", "hostname"),
 				),
 			},
 		},

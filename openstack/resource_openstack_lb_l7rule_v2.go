@@ -255,6 +255,10 @@ func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		invert := d.Get("invert").(bool)
 		updateOpts.Invert = &invert
 	}
+	if d.HasChange("admin_state_up") {
+		adminStateUp := d.Get("admin_state_up").(bool)
+		updateOpts.AdminStateUp = &adminStateUp
+	}
 
 	// Ensure the right combination of options have been specified.
 	err = checkL7RuleType(ruleType, key)

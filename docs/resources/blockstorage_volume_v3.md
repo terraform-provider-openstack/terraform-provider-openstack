@@ -69,8 +69,12 @@ The following arguments are supported:
     Conflicts with `snapshot_id`, `source_vol_id`, `image_id`. Changing this
     creates a new volume. Requires microversion >= 3.47.
 
-* `volume_type` - (Optional) The type of volume to create.
-    Changing this creates a new volume.
+* `volume_type` - (Optional) The type of volume to create or update.
+    Changing this will attempt an in-place retype operation; migration depends on `volume_retype_policy`.  
+
+* `volume_retype_policy` - (Optional) Migration policy when changing `volume_type`.
+    `"never"` *(default)* prevents migration to another storage backend, while `"on-demand"`
+    allows migration if needed. Applicable only when updating `volume_type`.
 
 * `scheduler_hints` - (Optional) Provide the Cinder scheduler with hints on where
     to instantiate a volume in the OpenStack cloud. The available hints are described below.

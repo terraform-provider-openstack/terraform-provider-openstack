@@ -15,7 +15,8 @@ func dataSourceComputeHypervisorV2() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"hostname": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Computed: true,
 			},
 
 			"host_ip": {
@@ -78,7 +79,7 @@ func dataSourceComputeHypervisorV2Read(ctx context.Context, d *schema.ResourceDa
 
 	var refinedHypervisors []hypervisors.Hypervisor
 	for _, hypervisor := range allHypervisors {
-		if hypervisor.HypervisorHostname == name {
+		if len(name) == 0 || hypervisor.HypervisorHostname == name {
 			refinedHypervisors = append(refinedHypervisors, hypervisor)
 		}
 	}

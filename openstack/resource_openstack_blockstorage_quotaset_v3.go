@@ -101,30 +101,43 @@ func resourceBlockStorageQuotasetV3Create(ctx context.Context, d *schema.Resourc
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
+	updateOpts := quotasets.UpdateOpts{}
 	projectID := d.Get("project_id").(string)
-	volumes := d.Get("volumes").(int)
-	snapshots := d.Get("snapshots").(int)
-	gigabytes := d.Get("gigabytes").(int)
-	perVolumeGigabytes := d.Get("per_volume_gigabytes").(int)
-	backups := d.Get("backups").(int)
-	backupGigabytes := d.Get("backup_gigabytes").(int)
-	groups := d.Get("groups").(int)
+	if v, ok := getOkExists(d, "volumes"); ok {
+		value := v.(int)
+		updateOpts.Volumes = &value
+	}
+	if v, ok := getOkExists(d, "snapshots"); ok {
+		value := v.(int)
+		updateOpts.Snapshots = &value
+	}
+	if v, ok := getOkExists(d, "gigabytes"); ok {
+		value := v.(int)
+		updateOpts.Gigabytes = &value
+	}
+	if v, ok := getOkExists(d, "per_volume_gigabytes"); ok {
+		value := v.(int)
+		updateOpts.PerVolumeGigabytes = &value
+	}
+	if v, ok := getOkExists(d, "backups"); ok {
+		value := v.(int)
+		updateOpts.Backups = &value
+	}
+	if v, ok := getOkExists(d, "backup_gigabytes"); ok {
+		value := v.(int)
+		updateOpts.BackupGigabytes = &value
+	}
+	if v, ok := getOkExists(d, "groups"); ok {
+		value := v.(int)
+		updateOpts.Groups = &value
+	}
+
 	volumeTypeQuotaRaw := d.Get("volume_type_quota").(map[string]interface{})
 	volumeTypeQuota, err := blockStorageQuotasetVolTypeQuotaToInt(volumeTypeQuotaRaw)
 	if err != nil {
 		return diag.Errorf("Error parsing volume_type_quota in openstack_blockstorage_quotaset_v3: %s", err)
 	}
-
-	updateOpts := quotasets.UpdateOpts{
-		Volumes:            &volumes,
-		Snapshots:          &snapshots,
-		Gigabytes:          &gigabytes,
-		PerVolumeGigabytes: &perVolumeGigabytes,
-		Backups:            &backups,
-		BackupGigabytes:    &backupGigabytes,
-		Groups:             &groups,
-		Extra:              volumeTypeQuota,
-	}
+	updateOpts.Extra = volumeTypeQuota
 
 	q, err := quotasets.Update(ctx, blockStorageClient, projectID, updateOpts).Extract()
 	if err != nil {
