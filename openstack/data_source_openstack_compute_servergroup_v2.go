@@ -35,8 +35,16 @@ func dataSourceComputeServerGroupV2() *schema.Resource {
 			},
 
 			"rules": {
-				Type:     schema.TypeMap,
+				Type:     schema.TypeList,
 				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"max_server_per_host": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+					},
+				},
 			},
 
 			"members": {
