@@ -35,7 +35,8 @@ func dataSourceComputeServerGroupV2() *schema.Resource {
 			},
 
 			"rules": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeMap,
+				Optional: true,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
