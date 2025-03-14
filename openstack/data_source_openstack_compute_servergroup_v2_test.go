@@ -2,7 +2,6 @@ package openstack
 
 import (
 	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -23,7 +22,7 @@ func TestAccComputeServerGroupV2DataSource(t *testing.T) {
 					testAccCheckComputeServerGroupV2DataSourceID("data.openstack_compute_servergroup_v2.server_group_1"),
 					resource.TestCheckResourceAttr("data.openstack_compute_servergroup_v2.server_group_1", "name", "my-servergroup"),
 					resource.TestCheckResourceAttr("data.openstack_compute_servergroup_v2.server_group_1", "policy", "anti-affinity"),
-					resource.TestCheckResourceAttr("data.openstack_compute_servergroup_v2.server_group_1", "rules.max_server_per_host", strconv.Itoa(3)),
+					resource.TestCheckResourceAttr("data.openstack_compute_servergroup_v2.server_group_1.rules", "max_server_per_host", "3"),
 				),
 			},
 		},
