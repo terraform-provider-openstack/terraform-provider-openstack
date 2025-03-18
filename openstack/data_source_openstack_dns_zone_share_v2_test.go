@@ -98,10 +98,10 @@ func testAccCheckDNSZoneShareV2DataSourceHasShares(n string) resource.TestCheckF
 		}
 		sharesCount, ok := rs.Primary.Attributes["shares.#"]
 		if !ok {
-			return fmt.Errorf("no shares attribute found in data source %s", n)
+			return fmt.Errorf("No shares attribute found in data source %s", n)
 		}
 		if sharesCount == "0" {
-			return fmt.Errorf("no shares returned in data source %s", n)
+			return fmt.Errorf("No shares returned in data source %s", n)
 		}
 		return nil
 	}

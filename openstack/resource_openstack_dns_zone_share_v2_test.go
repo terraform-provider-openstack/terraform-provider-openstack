@@ -73,7 +73,7 @@ func testAccCheckDNSZoneShareV2Exists(n string, zone *zones.Zone) resource.TestC
 		config := testAccProvider.Meta().(*Config)
 		dnsClient, err := config.DNSV2Client(context.Background(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("error creating DNS client: %s", err)
+			return fmt.Errorf("Error creating DNS client: %s", err)
 		}
 
 		zoneID := rs.Primary.Attributes["zone_id"]
@@ -85,7 +85,7 @@ func testAccCheckDNSZoneShareV2Exists(n string, zone *zones.Zone) resource.TestC
 
 		shares, err := listZoneShares(context.Background(), dnsClient, zoneID, ownerProjID)
 		if err != nil {
-			return fmt.Errorf("error listing DNS zone shares: %s", err)
+			return fmt.Errorf("Error listing DNS zone shares: %s", err)
 		}
 		for _, s := range shares {
 			if s.ID == shareID {
@@ -100,7 +100,7 @@ func testAccCheckDNSZoneShareV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	dnsClient, err := config.DNSV2Client(context.Background(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("error creating DNS client: %s", err)
+		return fmt.Errorf("Error creating DNS client: %s", err)
 	}
 	for _, rs := range s.RootModule().Resources {
 		// Skip data sources and resources with no zone_id.
@@ -118,7 +118,7 @@ func testAccCheckDNSZoneShareV2Destroy(s *terraform.State) error {
 		ownerProjID := rs.Primary.Attributes["project_id"]
 		shares, err := listZoneShares(context.Background(), dnsClient, zoneID, ownerProjID)
 		if err != nil {
-			return fmt.Errorf("error listing DNS zone shares: %s", err)
+			return fmt.Errorf("Error listing DNS zone shares: %s", err)
 		}
 		for _, s := range shares {
 			if s.ID == shareID {
