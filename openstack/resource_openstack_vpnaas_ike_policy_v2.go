@@ -336,6 +336,10 @@ func resourceIKEPolicyV2AuthAlgorithm(v string) ikepolicies.AuthAlgorithm {
 		authAlgorithm = ikepolicies.AuthAlgorithmSHA384
 	case "sha512":
 		authAlgorithm = ikepolicies.AuthAlgorithmSHA512
+	case "aes-xcbc":
+		authAlgorithm = ikepolicies.AuthAlgorithmAESXCBC
+	case "aes-cmac":
+		authAlgorithm = ikepolicies.AuthAlgorithmAESCMAC
 	}
 
 	return authAlgorithm
@@ -352,6 +356,48 @@ func resourceIKEPolicyV2EncryptionAlgorithm(v string) ikepolicies.EncryptionAlgo
 		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192
 	case "aes-256":
 		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256
+	case "aes-128-ctr":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128CTR
+	case "aes-192-ctr":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192CTR
+	case "aes-256-ctr":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256CTR
+	case "aes-128-ccm-8":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128CCM8
+	case "aes-192-ccm-8":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192CCM8
+	case "aes-256-ccm-8":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256CCM8
+	case "aes-128-ccm-12":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128CCM12
+	case "aes-192-ccm-12":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192CCM12
+	case "aes-256-ccm-12":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256CCM12
+	case "aes-128-ccm-16":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128CCM16
+	case "aes-192-ccm-16":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192CCM16
+	case "aes-256-ccm-16":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256CCM16
+	case "aes-128-gcm-8":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128GCM8
+	case "aes-192-gcm-8":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192GCM8
+	case "aes-256-gcm-8":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256GCM8
+	case "aes-128-gcm-12":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128GCM12
+	case "aes-192-gcm-12":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192GCM12
+	case "aes-256-gcm-12":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256GCM12
+	case "aes-128-gcm-16":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128GCM16
+	case "aes-192-gcm-16":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192GCM16
+	case "aes-256-gcm-16":
+		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256GCM16
 	}
 
 	return encryptionAlgorithm
@@ -366,6 +412,40 @@ func resourceIKEPolicyV2PFS(v string) ikepolicies.PFS {
 		pfs = ikepolicies.PFSGroup2
 	case "group14":
 		pfs = ikepolicies.PFSGroup14
+	case "group15":
+		pfs = ikepolicies.PFSGroup15
+	case "group16":
+		pfs = ikepolicies.PFSGroup16
+	case "group17":
+		pfs = ikepolicies.PFSGroup17
+	case "group18":
+		pfs = ikepolicies.PFSGroup18
+	case "group19":
+		pfs = ikepolicies.PFSGroup19
+	case "group20":
+		pfs = ikepolicies.PFSGroup20
+	case "group21":
+		pfs = ikepolicies.PFSGroup21
+	case "group22":
+		pfs = ikepolicies.PFSGroup22
+	case "group23":
+		pfs = ikepolicies.PFSGroup23
+	case "group24":
+		pfs = ikepolicies.PFSGroup24
+	case "group25":
+		pfs = ikepolicies.PFSGroup25
+	case "group26":
+		pfs = ikepolicies.PFSGroup26
+	case "group27":
+		pfs = ikepolicies.PFSGroup27
+	case "group28":
+		pfs = ikepolicies.PFSGroup28
+	case "group29":
+		pfs = ikepolicies.PFSGroup29
+	case "group30":
+		pfs = ikepolicies.PFSGroup30
+	case "group31":
+		pfs = ikepolicies.PFSGroup31
 	}
 	return pfs
 }
