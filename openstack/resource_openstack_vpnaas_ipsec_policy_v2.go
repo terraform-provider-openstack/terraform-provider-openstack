@@ -45,7 +45,7 @@ func resourceIPSecPolicyV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"sha1", "sha256", "sha384", "sha512",
+					"sha1", "sha256", "sha384", "sha512", "aes-xcbc", "aes-cmac",
 				}, false),
 			},
 			"encapsulation_mode": {
@@ -61,7 +61,10 @@ func resourceIPSecPolicyV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"group2", "group5", "group14",
+					"group2", "group5", "group14", "group15", "group16",
+					"group17", "group18", "group19", "group20", "group21",
+					"group22", "group23", "group24", "group25", "group26",
+					"group27", "group28", "group29", "group30", "group31",
 				}, false),
 			},
 			"encryption_algorithm": {
@@ -369,6 +372,40 @@ func resourceIPSecPolicyV2PFS(pfsString string) ipsecpolicies.PFS {
 		pfs = ipsecpolicies.PFSGroup5
 	case "group14":
 		pfs = ipsecpolicies.PFSGroup14
+	case "group15":
+		pfs = ipsecpolicies.PFSGroup15
+	case "group16":
+		pfs = ipsecpolicies.PFSGroup16
+	case "group17":
+		pfs = ipsecpolicies.PFSGroup17
+	case "group18":
+		pfs = ipsecpolicies.PFSGroup18
+	case "group19":
+		pfs = ipsecpolicies.PFSGroup19
+	case "group20":
+		pfs = ipsecpolicies.PFSGroup20
+	case "group21":
+		pfs = ipsecpolicies.PFSGroup21
+	case "group22":
+		pfs = ipsecpolicies.PFSGroup22
+	case "group23":
+		pfs = ipsecpolicies.PFSGroup23
+	case "group24":
+		pfs = ipsecpolicies.PFSGroup24
+	case "group25":
+		pfs = ipsecpolicies.PFSGroup25
+	case "group26":
+		pfs = ipsecpolicies.PFSGroup26
+	case "group27":
+		pfs = ipsecpolicies.PFSGroup27
+	case "group28":
+		pfs = ipsecpolicies.PFSGroup28
+	case "group29":
+		pfs = ipsecpolicies.PFSGroup29
+	case "group30":
+		pfs = ipsecpolicies.PFSGroup30
+	case "group31":
+		pfs = ipsecpolicies.PFSGroup31
 	}
 	return pfs
 }
@@ -383,6 +420,48 @@ func resourceIPSecPolicyV2EncryptionAlgorithm(encryptionAlgo string) ipsecpolici
 		alg = ipsecpolicies.EncryptionAlgorithmAES256
 	case "aes-192":
 		alg = ipsecpolicies.EncryptionAlgorithmAES192
+	case "aes-128-ctr":
+		alg = ipsecpolicies.EncryptionAlgorithmAES128CTR
+	case "aes-192-ctr":
+		alg = ipsecpolicies.EncryptionAlgorithmAES192CTR
+	case "aes-256-ctr":
+		alg = ipsecpolicies.EncryptionAlgorithmAES256CTR
+	case "aes-128-ccm-8":
+		alg = ipsecpolicies.EncryptionAlgorithmAES128CCM8
+	case "aes-192-ccm-8":
+		alg = ipsecpolicies.EncryptionAlgorithmAES192CCM8
+	case "aes-256-ccm-8":
+		alg = ipsecpolicies.EncryptionAlgorithmAES256CCM8
+	case "aes-128-ccm-12":
+		alg = ipsecpolicies.EncryptionAlgorithmAES128CCM12
+	case "aes-192-ccm-12":
+		alg = ipsecpolicies.EncryptionAlgorithmAES192CCM12
+	case "aes-256-ccm-12":
+		alg = ipsecpolicies.EncryptionAlgorithmAES256CCM12
+	case "aes-128-ccm-16":
+		alg = ipsecpolicies.EncryptionAlgorithmAES128CCM16
+	case "aes-192-ccm-16":
+		alg = ipsecpolicies.EncryptionAlgorithmAES192CCM16
+	case "aes-256-ccm-16":
+		alg = ipsecpolicies.EncryptionAlgorithmAES256CCM16
+	case "aes-128-gcm-8":
+		alg = ipsecpolicies.EncryptionAlgorithmAES128GCM8
+	case "aes-192-gcm-8":
+		alg = ipsecpolicies.EncryptionAlgorithmAES192GCM8
+	case "aes-256-gcm-8":
+		alg = ipsecpolicies.EncryptionAlgorithmAES256GCM8
+	case "aes-128-gcm-12":
+		alg = ipsecpolicies.EncryptionAlgorithmAES128GCM12
+	case "aes-192-gcm-12":
+		alg = ipsecpolicies.EncryptionAlgorithmAES192GCM12
+	case "aes-256-gcm-12":
+		alg = ipsecpolicies.EncryptionAlgorithmAES256GCM12
+	case "aes-128-gcm-16":
+		alg = ipsecpolicies.EncryptionAlgorithmAES128GCM16
+	case "aes-192-gcm-16":
+		alg = ipsecpolicies.EncryptionAlgorithmAES192GCM16
+	case "aes-256-gcm-16":
+		alg = ipsecpolicies.EncryptionAlgorithmAES256GCM16
 	}
 	return alg
 }
@@ -397,6 +476,10 @@ func resourceIPSecPolicyV2AuthAlgorithm(authAlgo string) ipsecpolicies.AuthAlgor
 		alg = ipsecpolicies.AuthAlgorithmSHA384
 	case "sha512":
 		alg = ipsecpolicies.AuthAlgorithmSHA512
+	case "aes-xcbc":
+		alg = ipsecpolicies.AuthAlgorithmAESXCBC
+	case "aes-cmac":
+		alg = ipsecpolicies.AuthAlgorithmAESCMAC
 	}
 	return alg
 }
