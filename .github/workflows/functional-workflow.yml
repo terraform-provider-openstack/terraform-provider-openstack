@@ -20,27 +20,16 @@ jobs:
         name: ["master"]
         openstack_version: ["master"]
         ubuntu_version: ["22.04"]
-        mistral_plugin_version: ["master"]
         include:
           - name: "epoxy"
             openstack_version: "stable/2025.1"
             ubuntu_version: "22.04"
-            mistral_plugin_version: "stable/2025.1"
           - name: "dalmatian"
             openstack_version: "stable/2024.2"
             ubuntu_version: "22.04"
-            mistral_plugin_version: "stable/2024.2"
           - name: "caracal"
             openstack_version: "stable/2024.1"
             ubuntu_version: "22.04"
-            mistral_plugin_version: "stable/2024.1"
-          - name: "bobcat"
-            openstack_version: "stable/2023.2"
-            ubuntu_version: "22.04"
-            # Devstack support is broken with Mistral v2023.2, and requires 2 patches:
-            # * https://github.com/openstack/mistral/commit/e343ccb078d8ba261ac70afca93f4358589730d3
-            # * https://github.com/openstack/mistral/commit/ecdeadeb7a1aa87cba2cdb0c1a2bb1ffc4aabf25
-            mistral_plugin_version: "ecdeadeb7a1aa87cba2cdb0c1a2bb1ffc4aabf25"
     runs-on: ubuntu-${{ matrix.ubuntu_version }}
     name: Deploy OpenStack ${{ matrix.name }} with Mistral and run workflow acceptance tests
     steps:
@@ -51,7 +40,7 @@ jobs:
         with:
           branch: ${{ matrix.openstack_version }}
           conf_overrides: |
-            enable_plugin mistral https://github.com/openstack/mistral ${{ matrix.mistral_plugin_version }}
+            enable_plugin mistral https://github.com/openstack/mistral ${{ matrix.openstack_version }}
           enabled_services: 'mistral,mistral-api,mistral-engine,mistral-executor,mistral-event-engine'
       - name: Checkout go
         uses: actions/setup-go@v5
