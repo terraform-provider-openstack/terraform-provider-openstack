@@ -22,6 +22,10 @@ jobs:
         ubuntu_version: ["22.04"]
         mistral_plugin_version: ["master"]
         include:
+          - name: "epoxy"
+            openstack_version: "stable/2025.1"
+            ubuntu_version: "22.04"
+            mistral_plugin_version: "stable/2025.1"
           - name: "dalmatian"
             openstack_version: "stable/2024.2"
             ubuntu_version: "22.04"
