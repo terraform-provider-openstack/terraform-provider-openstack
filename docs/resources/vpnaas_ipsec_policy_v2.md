@@ -37,17 +37,19 @@ The following arguments are supported:
 * `description` - (Optional) The human-readable description for the policy.
     Changing this updates the description of the existing policy.
 
-* `auth_algorithm` - (Optional) The authentication hash algorithm. Valid values are sha1, sha256, sha384, sha512.
-    Default is sha1. Changing this updates the algorithm of the existing policy.
+* `auth_algorithm` - (Optional) The authentication hash algorithm. Valid values are sha1, sha256, sha384, sha512,
+    aes-xcbc, aes-cmac. Default is sha1.
+    Changing this updates the algorithm of the existing policy.
 
 * `encapsulation_mode` - (Optional) The encapsulation mode. Valid values are tunnel and transport. Default is tunnel.
     Changing this updates the existing policy.
 
-* `encryption_algorithm` - (Optional) The encryption algorithm. Valid values are 3des, aes-128, aes-192 and so on.
+* `encryption_algorithm` - (Optional) The encryption algorithm. Valid values are 3des, aes-128, aes-192, aes-256,
+    aes-KKK-ctr, aes-KKK-ccm-II, aes-KKK-gcm-II (with KKK = 128/192/256 bits key size and II = 8/12/16 octets ICV).
     The default value is aes-128. Changing this updates the existing policy.
 
-* `pfs` - (Optional) The perfect forward secrecy mode. Valid values are group2, group5 and group14. Default 
-    is group5. Changing this updates the existing policy.
+* `pfs` - (Optional) The perfect forward secrecy mode. Valid values are group2, group5 and group14 to group31.
+    Default is group5. Changing this updates the existing policy.
 
 * `transform_protocol` - (Optional) The transform protocol. Valid values are esp, ah and ah-esp.
     Changing this updates the existing policy. Default is ESP.
