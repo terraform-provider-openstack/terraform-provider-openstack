@@ -37,14 +37,16 @@ The following arguments are supported:
 * `description` - (Optional) The human-readable description for the policy.
     Changing this updates the description of the existing policy.
 
-* `auth_algorithm` - (Optional) The authentication hash algorithm. Valid values are sha1, sha256, sha384, sha512.
-    Default is sha1. Changing this updates the algorithm of the existing policy.
+* `auth_algorithm` - (Optional) The authentication hash algorithm. Valid values are sha1, sha256, sha384, sha512,
+    aes-xcbc, aes-cmac. Default is sha1.
+    Changing this updates the algorithm of the existing policy.
 
-* `encryption_algorithm` - (Optional) The encryption algorithm. Valid values are 3des, aes-128, aes-192 and so on.
+* `encryption_algorithm` - (Optional) The encryption algorithm. Valid values are 3des, aes-128, aes-192, aes-256,
+    aes-KKK-ctr, aes-KKK-ccm-II, aes-KKK-gcm-II (with KKK = 128/192/256 bits key size and II = 8/12/16 octets ICV).
     The default value is aes-128. Changing this updates the existing policy.
 
-* `pfs` - (Optional) The perfect forward secrecy mode. Valid values are Group2, Group5 and Group14. Default is Group5.
-    Changing this updates the existing policy.
+* `pfs` - (Optional) The perfect forward secrecy mode. Valid values are group2, group5 and group14 to group31.
+    Default is group5. Changing this updates the existing policy.
 
 * `phase1_negotiation_mode` - (Optional) The IKE mode. A valid value is main, which is the default.
     Changing this updates the existing policy.
