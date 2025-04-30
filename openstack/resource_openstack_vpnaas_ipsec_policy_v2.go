@@ -3,7 +3,9 @@ package openstack
 import (
 	"context"
 	"log"
+	"maps"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -15,7 +17,69 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
 )
 
+var ipsecPolicyV2PFSMap = map[string]ipsecpolicies.PFS{
+	"group2":  ipsecpolicies.PFSGroup2,
+	"group5":  ipsecpolicies.PFSGroup5,
+	"group14": ipsecpolicies.PFSGroup14,
+	"group15": ipsecpolicies.PFSGroup15,
+	"group16": ipsecpolicies.PFSGroup16,
+	"group17": ipsecpolicies.PFSGroup17,
+	"group18": ipsecpolicies.PFSGroup18,
+	"group19": ipsecpolicies.PFSGroup19,
+	"group20": ipsecpolicies.PFSGroup20,
+	"group21": ipsecpolicies.PFSGroup21,
+	"group22": ipsecpolicies.PFSGroup22,
+	"group23": ipsecpolicies.PFSGroup23,
+	"group24": ipsecpolicies.PFSGroup24,
+	"group25": ipsecpolicies.PFSGroup25,
+	"group26": ipsecpolicies.PFSGroup26,
+	"group27": ipsecpolicies.PFSGroup27,
+	"group28": ipsecpolicies.PFSGroup28,
+	"group29": ipsecpolicies.PFSGroup29,
+	"group30": ipsecpolicies.PFSGroup30,
+	"group31": ipsecpolicies.PFSGroup31,
+}
+
+var ipsecPolicyV2EncryptionAlgorithmMap = map[string]ipsecpolicies.EncryptionAlgorithm{
+	"3des":           ipsecpolicies.EncryptionAlgorithm3DES,
+	"aes-128":        ipsecpolicies.EncryptionAlgorithmAES128,
+	"aes-256":        ipsecpolicies.EncryptionAlgorithmAES256,
+	"aes-192":        ipsecpolicies.EncryptionAlgorithmAES192,
+	"aes-128-ctr":    ipsecpolicies.EncryptionAlgorithmAES128CTR,
+	"aes-192-ctr":    ipsecpolicies.EncryptionAlgorithmAES192CTR,
+	"aes-256-ctr":    ipsecpolicies.EncryptionAlgorithmAES256CTR,
+	"aes-128-ccm-8":  ipsecpolicies.EncryptionAlgorithmAES128CCM8,
+	"aes-192-ccm-8":  ipsecpolicies.EncryptionAlgorithmAES192CCM8,
+	"aes-256-ccm-8":  ipsecpolicies.EncryptionAlgorithmAES256CCM8,
+	"aes-128-ccm-12": ipsecpolicies.EncryptionAlgorithmAES128CCM12,
+	"aes-192-ccm-12": ipsecpolicies.EncryptionAlgorithmAES192CCM12,
+	"aes-256-ccm-12": ipsecpolicies.EncryptionAlgorithmAES256CCM12,
+	"aes-128-ccm-16": ipsecpolicies.EncryptionAlgorithmAES128CCM16,
+	"aes-192-ccm-16": ipsecpolicies.EncryptionAlgorithmAES192CCM16,
+	"aes-256-ccm-16": ipsecpolicies.EncryptionAlgorithmAES256CCM16,
+	"aes-128-gcm-8":  ipsecpolicies.EncryptionAlgorithmAES128GCM8,
+	"aes-192-gcm-8":  ipsecpolicies.EncryptionAlgorithmAES192GCM8,
+	"aes-256-gcm-8":  ipsecpolicies.EncryptionAlgorithmAES256GCM8,
+	"aes-128-gcm-12": ipsecpolicies.EncryptionAlgorithmAES128GCM12,
+	"aes-192-gcm-12": ipsecpolicies.EncryptionAlgorithmAES192GCM12,
+	"aes-256-gcm-12": ipsecpolicies.EncryptionAlgorithmAES256GCM12,
+	"aes-128-gcm-16": ipsecpolicies.EncryptionAlgorithmAES128GCM16,
+	"aes-192-gcm-16": ipsecpolicies.EncryptionAlgorithmAES192GCM16,
+	"aes-256-gcm-16": ipsecpolicies.EncryptionAlgorithmAES256GCM16,
+}
+var ipsecPolicyV2AuthAlgorithmMap = map[string]ipsecpolicies.AuthAlgorithm{
+	"sha1":     ipsecpolicies.AuthAlgorithmSHA1,
+	"sha256":   ipsecpolicies.AuthAlgorithmSHA256,
+	"sha384":   ipsecpolicies.AuthAlgorithmSHA384,
+	"sha512":   ipsecpolicies.AuthAlgorithmSHA512,
+	"aes-xcbc": ipsecpolicies.AuthAlgorithmAESXCBC,
+	"aes-cmac": ipsecpolicies.AuthAlgorithmAESCMAC,
+}
+
 func resourceIPSecPolicyV2() *schema.Resource {
+	validPFSs := slices.Collect(maps.Keys(ipsecPolicyV2PFSMap))
+	validEncryptionAlgorithms := slices.Collect(maps.Keys(ipsecPolicyV2EncryptionAlgorithmMap))
+	validAuthAlgorithms := slices.Collect(maps.Keys(ipsecPolicyV2AuthAlgorithmMap))
 	return &schema.Resource{
 		CreateContext: resourceIPSecPolicyV2Create,
 		ReadContext:   resourceIPSecPolicyV2Read,
@@ -41,12 +105,10 @@ func resourceIPSecPolicyV2() *schema.Resource {
 				Optional: true,
 			},
 			"auth_algorithm": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"sha1", "sha256", "sha384", "sha512", "aes-xcbc", "aes-cmac",
-				}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice(validAuthAlgorithms, false),
 			},
 			"encapsulation_mode": {
 				Type:     schema.TypeString,
@@ -57,20 +119,16 @@ func resourceIPSecPolicyV2() *schema.Resource {
 				}, false),
 			},
 			"pfs": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"group2", "group5", "group14", "group15", "group16",
-					"group17", "group18", "group19", "group20", "group21",
-					"group22", "group23", "group24", "group25", "group26",
-					"group27", "group28", "group29", "group30", "group31",
-				}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice(validPFSs, false),
 			},
 			"encryption_algorithm": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice(validEncryptionAlgorithms, false),
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -364,124 +422,13 @@ func resourceIPSecPolicyV2TransformProtocol(trp string) ipsecpolicies.TransformP
 	return protocol
 }
 func resourceIPSecPolicyV2PFS(pfsString string) ipsecpolicies.PFS {
-	var pfs ipsecpolicies.PFS
-	switch pfsString {
-	case "group2":
-		pfs = ipsecpolicies.PFSGroup2
-	case "group5":
-		pfs = ipsecpolicies.PFSGroup5
-	case "group14":
-		pfs = ipsecpolicies.PFSGroup14
-	case "group15":
-		pfs = ipsecpolicies.PFSGroup15
-	case "group16":
-		pfs = ipsecpolicies.PFSGroup16
-	case "group17":
-		pfs = ipsecpolicies.PFSGroup17
-	case "group18":
-		pfs = ipsecpolicies.PFSGroup18
-	case "group19":
-		pfs = ipsecpolicies.PFSGroup19
-	case "group20":
-		pfs = ipsecpolicies.PFSGroup20
-	case "group21":
-		pfs = ipsecpolicies.PFSGroup21
-	case "group22":
-		pfs = ipsecpolicies.PFSGroup22
-	case "group23":
-		pfs = ipsecpolicies.PFSGroup23
-	case "group24":
-		pfs = ipsecpolicies.PFSGroup24
-	case "group25":
-		pfs = ipsecpolicies.PFSGroup25
-	case "group26":
-		pfs = ipsecpolicies.PFSGroup26
-	case "group27":
-		pfs = ipsecpolicies.PFSGroup27
-	case "group28":
-		pfs = ipsecpolicies.PFSGroup28
-	case "group29":
-		pfs = ipsecpolicies.PFSGroup29
-	case "group30":
-		pfs = ipsecpolicies.PFSGroup30
-	case "group31":
-		pfs = ipsecpolicies.PFSGroup31
-	}
-	return pfs
+	return ipsecPolicyV2PFSMap[pfsString]
 }
 func resourceIPSecPolicyV2EncryptionAlgorithm(encryptionAlgo string) ipsecpolicies.EncryptionAlgorithm {
-	var alg ipsecpolicies.EncryptionAlgorithm
-	switch encryptionAlgo {
-	case "3des":
-		alg = ipsecpolicies.EncryptionAlgorithm3DES
-	case "aes-128":
-		alg = ipsecpolicies.EncryptionAlgorithmAES128
-	case "aes-256":
-		alg = ipsecpolicies.EncryptionAlgorithmAES256
-	case "aes-192":
-		alg = ipsecpolicies.EncryptionAlgorithmAES192
-	case "aes-128-ctr":
-		alg = ipsecpolicies.EncryptionAlgorithmAES128CTR
-	case "aes-192-ctr":
-		alg = ipsecpolicies.EncryptionAlgorithmAES192CTR
-	case "aes-256-ctr":
-		alg = ipsecpolicies.EncryptionAlgorithmAES256CTR
-	case "aes-128-ccm-8":
-		alg = ipsecpolicies.EncryptionAlgorithmAES128CCM8
-	case "aes-192-ccm-8":
-		alg = ipsecpolicies.EncryptionAlgorithmAES192CCM8
-	case "aes-256-ccm-8":
-		alg = ipsecpolicies.EncryptionAlgorithmAES256CCM8
-	case "aes-128-ccm-12":
-		alg = ipsecpolicies.EncryptionAlgorithmAES128CCM12
-	case "aes-192-ccm-12":
-		alg = ipsecpolicies.EncryptionAlgorithmAES192CCM12
-	case "aes-256-ccm-12":
-		alg = ipsecpolicies.EncryptionAlgorithmAES256CCM12
-	case "aes-128-ccm-16":
-		alg = ipsecpolicies.EncryptionAlgorithmAES128CCM16
-	case "aes-192-ccm-16":
-		alg = ipsecpolicies.EncryptionAlgorithmAES192CCM16
-	case "aes-256-ccm-16":
-		alg = ipsecpolicies.EncryptionAlgorithmAES256CCM16
-	case "aes-128-gcm-8":
-		alg = ipsecpolicies.EncryptionAlgorithmAES128GCM8
-	case "aes-192-gcm-8":
-		alg = ipsecpolicies.EncryptionAlgorithmAES192GCM8
-	case "aes-256-gcm-8":
-		alg = ipsecpolicies.EncryptionAlgorithmAES256GCM8
-	case "aes-128-gcm-12":
-		alg = ipsecpolicies.EncryptionAlgorithmAES128GCM12
-	case "aes-192-gcm-12":
-		alg = ipsecpolicies.EncryptionAlgorithmAES192GCM12
-	case "aes-256-gcm-12":
-		alg = ipsecpolicies.EncryptionAlgorithmAES256GCM12
-	case "aes-128-gcm-16":
-		alg = ipsecpolicies.EncryptionAlgorithmAES128GCM16
-	case "aes-192-gcm-16":
-		alg = ipsecpolicies.EncryptionAlgorithmAES192GCM16
-	case "aes-256-gcm-16":
-		alg = ipsecpolicies.EncryptionAlgorithmAES256GCM16
-	}
-	return alg
+	return ipsecPolicyV2EncryptionAlgorithmMap[encryptionAlgo]
 }
 func resourceIPSecPolicyV2AuthAlgorithm(authAlgo string) ipsecpolicies.AuthAlgorithm {
-	var alg ipsecpolicies.AuthAlgorithm
-	switch authAlgo {
-	case "sha1":
-		alg = ipsecpolicies.AuthAlgorithmSHA1
-	case "sha256":
-		alg = ipsecpolicies.AuthAlgorithmSHA256
-	case "sha384":
-		alg = ipsecpolicies.AuthAlgorithmSHA384
-	case "sha512":
-		alg = ipsecpolicies.AuthAlgorithmSHA512
-	case "aes-xcbc":
-		alg = ipsecpolicies.AuthAlgorithmAESXCBC
-	case "aes-cmac":
-		alg = ipsecpolicies.AuthAlgorithmAESCMAC
-	}
-	return alg
+	return ipsecPolicyV2AuthAlgorithmMap[authAlgo]
 }
 func resourceIPSecPolicyV2EncapsulationMode(encMode string) ipsecpolicies.EncapsulationMode {
 	var mode ipsecpolicies.EncapsulationMode
