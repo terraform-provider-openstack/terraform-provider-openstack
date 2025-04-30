@@ -3,17 +3,82 @@ package openstack
 import (
 	"context"
 	"log"
+	"maps"
+	"slices"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/ikepolicies"
 )
 
+var ikePolicyV2PFSMap = map[string]ikepolicies.PFS{
+	"group2":  ikepolicies.PFSGroup2,
+	"group5":  ikepolicies.PFSGroup5,
+	"group14": ikepolicies.PFSGroup14,
+	"group15": ikepolicies.PFSGroup15,
+	"group16": ikepolicies.PFSGroup16,
+	"group17": ikepolicies.PFSGroup17,
+	"group18": ikepolicies.PFSGroup18,
+	"group19": ikepolicies.PFSGroup19,
+	"group20": ikepolicies.PFSGroup20,
+	"group21": ikepolicies.PFSGroup21,
+	"group22": ikepolicies.PFSGroup22,
+	"group23": ikepolicies.PFSGroup23,
+	"group24": ikepolicies.PFSGroup24,
+	"group25": ikepolicies.PFSGroup25,
+	"group26": ikepolicies.PFSGroup26,
+	"group27": ikepolicies.PFSGroup27,
+	"group28": ikepolicies.PFSGroup28,
+	"group29": ikepolicies.PFSGroup29,
+	"group30": ikepolicies.PFSGroup30,
+	"group31": ikepolicies.PFSGroup31,
+}
+
+var ikePolicyV2EncryptionAlgorithmMap = map[string]ikepolicies.EncryptionAlgorithm{
+	"3des":           ikepolicies.EncryptionAlgorithm3DES,
+	"aes-128":        ikepolicies.EncryptionAlgorithmAES128,
+	"aes-256":        ikepolicies.EncryptionAlgorithmAES256,
+	"aes-192":        ikepolicies.EncryptionAlgorithmAES192,
+	"aes-128-ctr":    ikepolicies.EncryptionAlgorithmAES128CTR,
+	"aes-192-ctr":    ikepolicies.EncryptionAlgorithmAES192CTR,
+	"aes-256-ctr":    ikepolicies.EncryptionAlgorithmAES256CTR,
+	"aes-128-ccm-8":  ikepolicies.EncryptionAlgorithmAES128CCM8,
+	"aes-192-ccm-8":  ikepolicies.EncryptionAlgorithmAES192CCM8,
+	"aes-256-ccm-8":  ikepolicies.EncryptionAlgorithmAES256CCM8,
+	"aes-128-ccm-12": ikepolicies.EncryptionAlgorithmAES128CCM12,
+	"aes-192-ccm-12": ikepolicies.EncryptionAlgorithmAES192CCM12,
+	"aes-256-ccm-12": ikepolicies.EncryptionAlgorithmAES256CCM12,
+	"aes-128-ccm-16": ikepolicies.EncryptionAlgorithmAES128CCM16,
+	"aes-192-ccm-16": ikepolicies.EncryptionAlgorithmAES192CCM16,
+	"aes-256-ccm-16": ikepolicies.EncryptionAlgorithmAES256CCM16,
+	"aes-128-gcm-8":  ikepolicies.EncryptionAlgorithmAES128GCM8,
+	"aes-192-gcm-8":  ikepolicies.EncryptionAlgorithmAES192GCM8,
+	"aes-256-gcm-8":  ikepolicies.EncryptionAlgorithmAES256GCM8,
+	"aes-128-gcm-12": ikepolicies.EncryptionAlgorithmAES128GCM12,
+	"aes-192-gcm-12": ikepolicies.EncryptionAlgorithmAES192GCM12,
+	"aes-256-gcm-12": ikepolicies.EncryptionAlgorithmAES256GCM12,
+	"aes-128-gcm-16": ikepolicies.EncryptionAlgorithmAES128GCM16,
+	"aes-192-gcm-16": ikepolicies.EncryptionAlgorithmAES192GCM16,
+	"aes-256-gcm-16": ikepolicies.EncryptionAlgorithmAES256GCM16,
+}
+var ikePolicyV2AuthAlgorithmMap = map[string]ikepolicies.AuthAlgorithm{
+	"sha1":     ikepolicies.AuthAlgorithmSHA1,
+	"sha256":   ikepolicies.AuthAlgorithmSHA256,
+	"sha384":   ikepolicies.AuthAlgorithmSHA384,
+	"sha512":   ikepolicies.AuthAlgorithmSHA512,
+	"aes-xcbc": ikepolicies.AuthAlgorithmAESXCBC,
+	"aes-cmac": ikepolicies.AuthAlgorithmAESCMAC,
+}
+
 func resourceIKEPolicyV2() *schema.Resource {
+	validPFSs := slices.Collect(maps.Keys(ipsecPolicyV2PFSMap))
+	validEncryptionAlgorithms := slices.Collect(maps.Keys(ipsecPolicyV2EncryptionAlgorithmMap))
+	validAuthAlgorithms := slices.Collect(maps.Keys(ipsecPolicyV2AuthAlgorithmMap))
 	return &schema.Resource{
 		CreateContext: resourceIKEPolicyV2Create,
 		ReadContext:   resourceIKEPolicyV2Read,
@@ -43,19 +108,22 @@ func resourceIKEPolicyV2() *schema.Resource {
 				Optional: true,
 			},
 			"auth_algorithm": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "sha1",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "sha1",
+				ValidateFunc: validation.StringInSlice(validAuthAlgorithms, false),
 			},
 			"encryption_algorithm": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "aes-128",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "aes-128",
+				ValidateFunc: validation.StringInSlice(validEncryptionAlgorithms, false),
 			},
 			"pfs": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "group5",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "group5",
+				ValidateFunc: validation.StringInSlice(validPFSs, false),
 			},
 			"phase1_negotiation_mode": {
 				Type:     schema.TypeString,
@@ -326,128 +394,15 @@ func waitForIKEPolicyUpdate(ctx context.Context, networkingClient *gophercloud.S
 }
 
 func resourceIKEPolicyV2AuthAlgorithm(v string) ikepolicies.AuthAlgorithm {
-	var authAlgorithm ikepolicies.AuthAlgorithm
-	switch v {
-	case "sha1":
-		authAlgorithm = ikepolicies.AuthAlgorithmSHA1
-	case "sha256":
-		authAlgorithm = ikepolicies.AuthAlgorithmSHA256
-	case "sha384":
-		authAlgorithm = ikepolicies.AuthAlgorithmSHA384
-	case "sha512":
-		authAlgorithm = ikepolicies.AuthAlgorithmSHA512
-	case "aes-xcbc":
-		authAlgorithm = ikepolicies.AuthAlgorithmAESXCBC
-	case "aes-cmac":
-		authAlgorithm = ikepolicies.AuthAlgorithmAESCMAC
-	}
-
-	return authAlgorithm
+	return ikePolicyV2AuthAlgorithmMap[v]
 }
 
 func resourceIKEPolicyV2EncryptionAlgorithm(v string) ikepolicies.EncryptionAlgorithm {
-	var encryptionAlgorithm ikepolicies.EncryptionAlgorithm
-	switch v {
-	case "3des":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithm3DES
-	case "aes-128":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128
-	case "aes-192":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192
-	case "aes-256":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256
-	case "aes-128-ctr":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128CTR
-	case "aes-192-ctr":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192CTR
-	case "aes-256-ctr":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256CTR
-	case "aes-128-ccm-8":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128CCM8
-	case "aes-192-ccm-8":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192CCM8
-	case "aes-256-ccm-8":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256CCM8
-	case "aes-128-ccm-12":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128CCM12
-	case "aes-192-ccm-12":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192CCM12
-	case "aes-256-ccm-12":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256CCM12
-	case "aes-128-ccm-16":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128CCM16
-	case "aes-192-ccm-16":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192CCM16
-	case "aes-256-ccm-16":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256CCM16
-	case "aes-128-gcm-8":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128GCM8
-	case "aes-192-gcm-8":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192GCM8
-	case "aes-256-gcm-8":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256GCM8
-	case "aes-128-gcm-12":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128GCM12
-	case "aes-192-gcm-12":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192GCM12
-	case "aes-256-gcm-12":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256GCM12
-	case "aes-128-gcm-16":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128GCM16
-	case "aes-192-gcm-16":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192GCM16
-	case "aes-256-gcm-16":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256GCM16
-	}
-
-	return encryptionAlgorithm
+	return ikePolicyV2EncryptionAlgorithmMap[v]
 }
 
 func resourceIKEPolicyV2PFS(v string) ikepolicies.PFS {
-	var pfs ikepolicies.PFS
-	switch v {
-	case "group5":
-		pfs = ikepolicies.PFSGroup5
-	case "group2":
-		pfs = ikepolicies.PFSGroup2
-	case "group14":
-		pfs = ikepolicies.PFSGroup14
-	case "group15":
-		pfs = ikepolicies.PFSGroup15
-	case "group16":
-		pfs = ikepolicies.PFSGroup16
-	case "group17":
-		pfs = ikepolicies.PFSGroup17
-	case "group18":
-		pfs = ikepolicies.PFSGroup18
-	case "group19":
-		pfs = ikepolicies.PFSGroup19
-	case "group20":
-		pfs = ikepolicies.PFSGroup20
-	case "group21":
-		pfs = ikepolicies.PFSGroup21
-	case "group22":
-		pfs = ikepolicies.PFSGroup22
-	case "group23":
-		pfs = ikepolicies.PFSGroup23
-	case "group24":
-		pfs = ikepolicies.PFSGroup24
-	case "group25":
-		pfs = ikepolicies.PFSGroup25
-	case "group26":
-		pfs = ikepolicies.PFSGroup26
-	case "group27":
-		pfs = ikepolicies.PFSGroup27
-	case "group28":
-		pfs = ikepolicies.PFSGroup28
-	case "group29":
-		pfs = ikepolicies.PFSGroup29
-	case "group30":
-		pfs = ikepolicies.PFSGroup30
-	case "group31":
-		pfs = ikepolicies.PFSGroup31
-	}
-	return pfs
+	return ikePolicyV2PFSMap[v]
 }
 
 func resourceIKEPolicyV2IKEVersion(v string) ikepolicies.IKEVersion {
