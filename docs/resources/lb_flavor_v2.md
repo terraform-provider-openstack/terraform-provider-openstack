@@ -2,7 +2,7 @@
 subcategory: "Load Balancing as a Service / Octavia"
 layout: "openstack"
 page_title: "OpenStack: openstack_lb_flavor_v2"
-sidebar_current: "docs-openstack-resource-lb-flavorp-v2"
+sidebar_current: "docs-openstack-resource-lb-flavor-v2"
 description: |-
   Manages a V2 flavor resource within OpenStack.
 ---
@@ -13,8 +13,7 @@ Manages a V2 load balancer flavor resource within OpenStack.
 
 ~> **Note:** This usually requires admin privileges.
 
-## Example Usage 
-
+## Example Usage
 
 ```hcl
 resource "openstack_lb_flavorprofile_v2" "fp_1" {
@@ -28,7 +27,7 @@ resource "openstack_lb_flavorprofile_v2" "fp_1" {
 resource "openstack_lb_flavor_v2" "flavor_1" {
 	name              = "test"
 	description       = "This is a test flavor"
-	flavor_profile_id = openstack_lb_flavorprofile_v2.fp_1.id	 
+	flavor_profile_id = openstack_lb_flavorprofile_v2.fp_1.id
 }
 ```
 
@@ -42,11 +41,11 @@ The following arguments are supported:
 * `flavor_profile_id` - (Required) The flavor_profile_id that the flavor
   will use. Changing this creates a new flavor.
 
-* `description` - (Optional) The description of the flavor. Changing this 
+* `description` - (Optional) The description of the flavor. Changing this
   updates the existing flavor.
 
 * `enabled` - (Optional) Whether the flavor is enabled or not. Defaults to `true`.
-  Changing this updates the existing flavor. 
+  Changing this updates the existing flavor.
 
 ## Attributes Reference
 
@@ -61,6 +60,7 @@ The following attributes are exported:
 ## Import
 
 flavors can be imported using their `id`. Example:
+
 ```
 $ terraform import openstack_lb_flavor_v2.flavor_1 2a0f2240-c5e6-41de-896d-e80d97428d6b
 ```

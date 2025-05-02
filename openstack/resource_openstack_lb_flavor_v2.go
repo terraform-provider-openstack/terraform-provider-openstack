@@ -67,26 +67,29 @@ func resourceLoadBalancerFlavorV2Create(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
-	name := d.Get("name").(string)
-	description := d.Get("description").(string)
-	flavorProfileID := d.Get("flavor_profile_id").(string)
-	enabled := d.Get("enabled").(bool)
+	var enabled *bool
+	if v, ok := getOkExists(d, "enabled"); ok {
+		v := v.(bool)
+		enabled = &v
+	}
 
-	createOpts := flavors.CreateOpts{
-		Name:            name,
-		Description:     description,
-		FlavorProfileId: flavorProfileID,
+	// TODO: remove custom struct when gophercloud support pointers,
+	// e.g. gophercloud/v3 is released, see https://github.com/gophercloud/gophercloud/pull/3190
+	createOpts := flavorsCreateOpts{
+		Name:            d.Get("name").(string),
+		Description:     d.Get("description").(string),
+		FlavorProfileID: d.Get("flavor_profile_id").(string),
 		Enabled:         enabled,
 	}
 
-	q, err := flavors.Create(ctx, lbClient, createOpts).Extract()
+	flavor, err := flavors.Create(ctx, lbClient, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_lb_flavor_v2: %s", err)
 	}
 
-	d.SetId(q.ID)
+	d.SetId(flavor.ID)
 
-	log.Printf("[DEBUG] Created openstack_lb_flavor_v2 %#v", q)
+	log.Printf("[DEBUG] Created openstack_lb_flavor_v2 %#v", flavor)
 
 	return resourceLoadBalancerFlavorV2Read(ctx, d, meta)
 }
@@ -98,17 +101,17 @@ func resourceLoadBalancerFlavorV2Read(ctx context.Context, d *schema.ResourceDat
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
-	q, err := flavors.Get(ctx, lbClient, d.Id()).Extract()
+	flavor, err := flavors.Get(ctx, lbClient, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_lb_flavor_v2"))
 	}
 
-	log.Printf("[DEBUG] Retrieved openstack_lb_flavor_v2 %s: %#v", d.Id(), q)
+	log.Printf("[DEBUG] Retrieved openstack_lb_flavor_v2 %s: %#v", d.Id(), flavor)
 
-	d.Set("name", q.Name)
-	d.Set("description", q.Description)
-	d.Set("flavor_profile_id", q.FlavorProfileId)
-	d.Set("enabled", q.Enabled)
+	d.Set("name", flavor.Name)
+	d.Set("description", flavor.Description)
+	d.Set("flavor_profile_id", flavor.FlavorProfileId)
+	d.Set("enabled", flavor.Enabled)
 
 	return nil
 }
@@ -121,26 +124,28 @@ func resourceLoadBalancerFlavorV2Update(ctx context.Context, d *schema.ResourceD
 	}
 
 	var (
-		hasChange  bool
-		updateOpts flavors.UpdateOpts
+		hasChange bool
+		// TODO: remove custom struct when gophercloud support pointers,
+		// e.g. gophercloud/v3 is released, see https://github.com/gophercloud/gophercloud/pull/3190
+		updateOpts flavorsUpdateOpts
 	)
 
 	if d.HasChange("name") {
 		hasChange = true
 		name := d.Get("name").(string)
-		updateOpts.Name = name
+		updateOpts.Name = &name
 	}
 
 	if d.HasChange("description") {
 		hasChange = true
 		description := d.Get("description").(string)
-		updateOpts.Description = description
+		updateOpts.Description = &description
 	}
 
 	if d.HasChange("enabled") {
 		hasChange = true
 		enabled := d.Get("enabled").(bool)
-		updateOpts.Enabled = enabled
+		updateOpts.Enabled = &enabled
 	}
 
 	if hasChange {
@@ -162,8 +167,8 @@ func resourceLoadBalancerFlavorV2Delete(ctx context.Context, d *schema.ResourceD
 	}
 
 	log.Printf("[DEBUG] Deleting openstack_lb_flavor_v2: %s", d.Id())
-	if err := flavors.Delete(ctx, lbClient, d.Id()).Err; err != nil {
-		return diag.Errorf("Error deleting openstack_lb_flavor_v2: %s", err)
+	if err := flavors.Delete(ctx, lbClient, d.Id()).ExtractErr(); err != nil {
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_lb_flavor_v2"))
 	}
 
 	d.SetId("")
