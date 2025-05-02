@@ -4,12 +4,12 @@ layout: "openstack"
 page_title: "OpenStack: openstack_dns_zone_share_v2"
 sidebar_current: "docs-openstack-resource-dns-zone-share-v2"
 description: |-
-  Manages a shared DNS zone in the OpenStack DNS Service (Designate V2).
+  Manages the sharing of a DNS zone in the OpenStack DNS Service.
 ---
 
 # openstack\_dns\_zone\_share\_v2
 
-Manages the sharing of a DNS zone in the OpenStack DNS Service (Designate V2).
+Manages the sharing of a DNS zone in the OpenStack DNS Service.
 
 ## Example Usage
 
@@ -26,38 +26,33 @@ resource "openstack_dns_zone_share_v2" "example" {
 
 The following arguments are supported:
 
-- `zone_id` (Required) - The ID of the DNS zone to be shared.
+* `region` - (Optional) The region in which to obtain the V2 DNS client. If
+  omitted, the `region` argument of the provider is used. Changing this creates
+  a new DNS zone share.
 
-- `target_project_id` (Required) - The ID of the target project with which the DNS zone will be shared.
+* `zone_id` - (Required) The ID of the DNS zone to be shared.
 
-- `project_id` (Optional) - The ID of the owner project authorizing the share. This corresponds to the `X-Auth-Sudo-Project-Id` header in the Designate API. If omitted, the provider's `project_id` is used.
+* `target_project_id` - (Required) The ID of the target project with which the
+  DNS zone will be shared.
+
+* `project_id` - (Optional) The ID of the project DNS zone is created for, sets
+  `X-Auth-Sudo-Tenant-ID` header (requires an assigned user role in target
+  project).
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-- `id` - The ID of the resource, in the format `<zone_id>/<share_id>`.
-
-- `share_id` - The ID of the created share.
+* `region` - See Argument Reference above.
+* `zone_id` - See Argument Reference above.
+* `target_project_id` - See Argument Reference above.
+* `project_id` - See Argument Reference above.
 
 ## Import
 
-DNS zone shares can be imported using either of the following formats:
-
- - Simplified Format (when the zone owner is the same as the one you're working from):
+DNS zone share can be imported by specifying the zone ID with share ID and optional project ID:
 
 ```bash
-$ terraform import openstack_dns_zone_share_v2.imported <zone_id>/<share_id>
+$ terraform import openstack_dns_zone_share_v2.share_1 60cbdc69-64f9-49ee-b294-352e71e22827/0e1dae51-aee2-4b44-962f-885bb69f3a5c
+$ terraform import openstack_dns_zone_share_v2.share_1 60cbdc69-64f9-49ee-b294-352e71e22827/0e1dae51-aee2-4b44-962f-885bb69f3a5c/eb92139f6c054a878852ac9e8cbe612a
 ```
-
- - Full Format (explicitly specifying the owner and target projects):
-
-```bash
-$ terraform import openstack_dns_zone_share_v2.imported <zone_id>/<project_id>/<target_project_id>/<share_id>
-```
-
-Replace `zone_id`, `project_id`, `target_project_id` and `share_id` with the appropriate IDs.
-
----
-
-This documentation provides an overview of the `openstack_dns_zone_share_v2` resource, including its usage, arguments, attributes, and import instructions. 

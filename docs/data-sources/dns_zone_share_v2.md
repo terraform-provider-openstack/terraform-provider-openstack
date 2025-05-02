@@ -4,12 +4,12 @@ layout: "openstack"
 page_title: "OpenStack: openstack_dns_zone_share_v2"
 sidebar_current: "docs-openstack-resource-dns-zone-share-v2"
 description: |-
-  Data source for retrieving shared DNS zones in the OpenStack DNS Service (Designate V2).
+  Data source for retrieving shared DNS zone in the OpenStack DNS Service (Designate V2).
 ---
 
 # openstack\_dns\_zone\_share\_v2
 
-The `openstack_dns_zone_share_v2` data source retrieves a list of DNS zone shares for a given zone. It can be used to discover which projects a zone has been shared with.
+Use this data source to get information about a DNS zone share.
 
 ## Example Usage
 
@@ -27,16 +27,34 @@ data "openstack_dns_zone_share_v2" "example" {
 
 The following arguments are supported:
 
-- `zone_id` (Required) - The ID of the DNS zone for which to list shares.
+* `region` - (Optional) The region in which to obtain the V2 DNS client. If
+  omitted, the `region` argument of the provider is used. Changing this creates
+  a new DNS zone share data source.
 
-- `target_project_id` (Optional) - If provided, the data source returns only the shares with this target project ID.
+* `zone_id` - (Required) The ID of the DNS zone for which to get share.
 
-- `project_id` (Optional) - The owner project ID. If omitted, it is derived from the zone details.
+* `share_id` - (Optional) The ID of the DNS zone share to retrieve. If
+  provided, the data source returns only the share with this ID.
 
+* `all_projects` - (Optional) If set to `true`, the data source will search
+  across all projects. If set to `false`, it will only search within the
+  current project. Defaults to `false`.
+
+* `target_project_id` - (Optional) If provided, the data source returns the
+  share with this target project ID.
+
+* `project_id` - (Optional) The owner project ID. If omitted, it is derived
+  from the zone share details.
 
 ## Attributes Reference
 
-- Shares
-  - A list of objects representing DNS zone shares. Each object includes:
-    - `share_id`: The ID of the share.
-    - `project_id`: The target project ID associated with the share.
+`id` is set to the ID of the found DNS share. In addition, the following
+attributes are exported:
+
+* `region` - See Argument Reference above.
+* `zone_id` - See Argument Reference above.
+* `share_id` - See Argument Reference above.
+* `all_projects` - See Argument Reference above.
+* `target_project_id` - See Argument Reference above.
+* `project_id` - See Argument Reference above.
+* `share_id` - The ID of the zone share.

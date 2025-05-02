@@ -2,7 +2,7 @@ package openstack
 
 import (
 	"context"
-	"fmt"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -15,122 +15,120 @@ func dataSourceDNSZoneShareV2() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceDNSZoneShareV2Read,
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
+			"all_projects": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"share_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
 			"zone_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The ID of the DNS zone.",
 			},
+
 			"target_project_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Optional: If provided, filter shares by target_project_id.",
 			},
+
 			"project_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Optional: The owner project ID. If omitted, it is derived from the zone details.",
 			},
-			"shares": {
-				Type:        schema.TypeList,
-				Computed:    true,
-				Description: "List of zone shares matching the filter.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"share_id": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The share ID.",
-						},
-						"project_id": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The target project ID for this share.",
-						},
-					},
-				},
-			},
 		},
 	}
 }
 
-// flattenZoneShares converts a slice of ZoneShare objects into a slice of maps.
-// If targetFilter is provided and non-empty, only shares with a matching TargetProjectID are included.
-func flattenZoneShares(shares []ZoneShare, targetFilter interface{}) []map[string]interface{} {
-	results := make([]map[string]interface{}, 0)
-	filter := ""
-	if targetFilter != nil {
-		if s, ok := targetFilter.(string); ok {
-			filter = s
-		}
-	}
-	for _, s := range shares {
-		if filter != "" && s.TargetProjectID != filter {
-			continue
-		}
-		results = append(results, map[string]interface{}{
-			"share_id":   s.ID,
-			"project_id": s.TargetProjectID,
-		})
-	}
-	return results
-}
-
-// dataSourceDNSZoneShareV2Read fetches the zone details and associated shares,
-// updates the zone_id to the zone's FQDN, and sets the "shares" attribute using the flatten helper.
+// dataSourceDNSZoneShareV2Read fetches the zone share details based on the provided parameters.
 func dataSourceDNSZoneShareV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	client, err := config.DNSV2Client(ctx, "")
+	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error creating DNS client: %s", err))
+		return diag.Errorf("error creating DNS client: %s", err)
 	}
 
-	// Retrieve the zone ID (as provided in the configuration)
+	if err := dnsClientSetAuthHeader(ctx, d, dnsClient); err != nil {
+		return diag.Errorf("Error setting dns client auth headers: %s", err)
+	}
+	dnsClient.Microversion = "2.1"
+
 	zoneID := d.Get("zone_id").(string)
+	targetProjectID := d.Get("target_project_id").(string)
 
-	// Fetch the zone details so that we can update the zone_id to its FQDN.
-	zone, err := zones.Get(ctx, client, zoneID).Extract()
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("error retrieving zone details for zone %s: %s", zoneID, err))
-	}
+	shareID := d.Get("share_id").(string)
+	if shareID != "" {
+		// If share_id is provided, fetch the specific share.
+		log.Printf("[DEBUG] Fetching specific DNS Zone share with ID: %s", shareID)
 
-	// Determine the owner project ID either from configuration or from the zone details.
-	var ownerProjectID string
-	if v, ok := d.GetOk("project_id"); ok {
-		ownerProjectID = v.(string)
-	} else {
-		ownerProjectID = zone.ProjectID
-	}
+		share, err := zones.GetShare(ctx, dnsClient, zoneID, shareID).Extract()
+		if err != nil {
+			return diag.Errorf("error retrieving DNS Zone share %s for zone %s: %s", shareID, zoneID, err)
+		}
 
-	// Update the zone_id attribute to the zone's FQDN.
-	if err := d.Set("zone_id", zone.Name); err != nil {
-		return diag.FromErr(err)
-	}
+		if targetProjectID != "" && share.TargetProjectID == targetProjectID {
+			log.Printf("[DEBUG] Retrieved DNS Zone share %s: %+v", share.ID, share)
 
-	// Retrieve the filter value (if any) for target_project_id.
-	targetFilter, _ := d.GetOk("target_project_id")
+			d.SetId(share.ID)
+			d.Set("share_id", share.ID)
+			d.Set("project_id", share.ProjectID)
+			d.Set("target_project_id", share.TargetProjectID)
 
-	// List all shares for the given zone.
-	shares, err := listZoneShares(ctx, client, zoneID, ownerProjectID)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("error listing shares for DNS zone %s: %s", zoneID, err))
-	}
-
-	// Flatten the list of shares using the helper function.
-	results := flattenZoneShares(shares, targetFilter)
-
-	// Set the "shares" attribute with the flattened list.
-	if err := d.Set("shares", results); err != nil {
-		return diag.FromErr(fmt.Errorf("error setting shares: %s", err))
-	}
-
-	// If target_project_id is not set, use the first share's target_project_id (if available)
-	if d.Get("target_project_id") == "" && len(results) > 0 {
-		if err := d.Set("target_project_id", results[0]["project_id"]); err != nil {
-			return diag.FromErr(err)
+			return nil
 		}
 	}
 
-	// Use the original zoneID as the data source ID.
-	d.SetId(zoneID)
+	// "all_projects" and "project_id" are handled in the dnsClientSetAuthHeader function.
+	allPages, err := zones.ListShares(dnsClient, zoneID, nil).AllPages(ctx)
+	if err != nil {
+		return diag.Errorf("error listing shares for DNS zone %s: %s", zoneID, err)
+	}
+
+	// Extract the shares from the response.
+	shares, err := zones.ExtractZoneShares(allPages)
+	if err != nil {
+		return diag.Errorf("error extracting shares for DNS zone %s: %s", zoneID, err)
+	}
+
+	var filteredShares []zones.ZoneShare
+	if targetProjectID != "" {
+		for _, share := range shares {
+			if share.TargetProjectID == targetProjectID {
+				filteredShares = append(filteredShares, share)
+			}
+		}
+	} else {
+		filteredShares = shares
+	}
+
+	if len(filteredShares) == 0 {
+		return diag.Errorf("no shares found for DNS zone %s", zoneID)
+	}
+
+	if len(filteredShares) > 1 {
+		return diag.Errorf("multiple shares found for DNS zone %s", zoneID)
+	}
+
+	share := filteredShares[0]
+
+	log.Printf("[DEBUG] Retrieved DNS Zone share %s: %+v", share.ID, share)
+	d.SetId(share.ID)
+	d.Set("share_id", share.ID)
+	d.Set("project_id", share.ProjectID)
+	d.Set("target_project_id", share.TargetProjectID)
+
 	return nil
 }
