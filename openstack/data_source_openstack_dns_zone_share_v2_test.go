@@ -2,17 +2,18 @@ package openstack
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 )
 
 func TestAccDataSourceDNSZoneShareV2_basic(t *testing.T) {
 	zoneName := fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
 	targetProjectName := fmt.Sprintf("ACPTTEST-Target-%s", acctest.RandString(5))
+	var zone zones.Zone
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -25,18 +26,13 @@ func TestAccDataSourceDNSZoneShareV2_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceDNSZoneShareV2Config(zoneName, targetProjectName),
 				Check: resource.ComposeTestCheckFunc(
-					// Check data source with only zone_id provided.
-					testAccCheckDNSZoneShareV2DataSourceHasShares("data.openstack_dns_zone_share_v2.zone_only"),
-					resource.TestMatchResourceAttr("data.openstack_dns_zone_share_v2.zone_only", "zone_id", regexp.MustCompile(`^ACPTTEST.+\.com\.$`)),
+					testAccCheckDNSV2ZoneExists("openstack_dns_zone_v2.zone", &zone),
+					resource.TestCheckResourceAttrPtr("data.openstack_dns_zone_share_v2.zone_only", "zone_id", &zone.ID),
 
-					// Check data source with zone_id and project_id.
-					testAccCheckDNSZoneShareV2DataSourceHasShares("data.openstack_dns_zone_share_v2.zone_and_project_id"),
-					resource.TestMatchResourceAttr("data.openstack_dns_zone_share_v2.zone_and_project_id", "zone_id", regexp.MustCompile(`^ACPTTEST.+\.com\.$`)),
+					resource.TestCheckResourceAttrPtr("data.openstack_dns_zone_share_v2.zone_and_project_id", "zone_id", &zone.ID),
 					resource.TestCheckResourceAttrPair("data.openstack_dns_zone_share_v2.zone_and_project_id", "project_id", "openstack_dns_zone_v2.zone", "project_id"),
 
-					// Check data source with zone_id, project_id and target_project_id.
-					testAccCheckDNSZoneShareV2DataSourceHasShares("data.openstack_dns_zone_share_v2.zone_project_id_and_target"),
-					resource.TestMatchResourceAttr("data.openstack_dns_zone_share_v2.zone_project_id_and_target", "zone_id", regexp.MustCompile(`^ACPTTEST.+\.com\.$`)),
+					resource.TestCheckResourceAttrPtr("data.openstack_dns_zone_share_v2.zone_project_id_and_target", "zone_id", &zone.ID),
 					resource.TestCheckResourceAttrPair("data.openstack_dns_zone_share_v2.zone_project_id_and_target", "project_id", "openstack_dns_zone_v2.zone", "project_id"),
 					resource.TestCheckResourceAttrPair("data.openstack_dns_zone_share_v2.zone_project_id_and_target", "target_project_id", "openstack_identity_project_v3.target", "id"),
 				),
@@ -66,43 +62,22 @@ resource "openstack_dns_zone_share_v2" "share" {
 
 data "openstack_dns_zone_share_v2" "zone_only" {
   zone_id = openstack_dns_zone_v2.zone.id
-
-  depends_on = [ openstack_dns_zone_share_v2.share ]
+  share_id = openstack_dns_zone_share_v2.share.id
 }
 
 data "openstack_dns_zone_share_v2" "zone_and_project_id" {
   zone_id    = openstack_dns_zone_v2.zone.id
   project_id = openstack_dns_zone_v2.zone.project_id
 
-  depends_on = [ openstack_dns_zone_share_v2.share ]
+  share_id = openstack_dns_zone_share_v2.share.id
 }
 
 data "openstack_dns_zone_share_v2" "zone_project_id_and_target" {
   zone_id           = openstack_dns_zone_v2.zone.id
   project_id        = openstack_dns_zone_v2.zone.project_id
   target_project_id = openstack_identity_project_v3.target.id
-  
-  depends_on = [ openstack_dns_zone_share_v2.share ]
+
+  share_id = openstack_dns_zone_share_v2.share.id
 }
 `, zoneName, targetProjectName)
-}
-
-func testAccCheckDNSZoneShareV2DataSourceHasShares(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("DNS zone share data source not found: %s", n)
-		}
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("DNS zone share data source has no ID set")
-		}
-		sharesCount, ok := rs.Primary.Attributes["shares.#"]
-		if !ok {
-			return fmt.Errorf("No shares attribute found in data source %s", n)
-		}
-		if sharesCount == "0" {
-			return fmt.Errorf("No shares returned in data source %s", n)
-		}
-		return nil
-	}
 }
