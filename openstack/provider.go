@@ -360,6 +360,7 @@ func Provider() *schema.Provider {
 			"openstack_images_image_v2":                          resourceImagesImageV2(),
 			"openstack_images_image_access_v2":                   resourceImagesImageAccessV2(),
 			"openstack_images_image_access_accept_v2":            resourceImagesImageAccessAcceptV2(),
+			"openstack_lb_flavor_v2":                             resourceLoadBalancerFlavorV2(),
 			"openstack_lb_flavorprofile_v2":                      resourceLoadBalancerFlavorProfileV2(),
 			"openstack_lb_loadbalancer_v2":                       resourceLoadBalancerV2(),
 			"openstack_lb_listener_v2":                           resourceListenerV2(),
