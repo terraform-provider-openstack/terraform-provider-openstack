@@ -38,6 +38,10 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 						"openstack_identity_project_v3.project_1", "enabled", "true"),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_project_v3.project_1", "is_domain", "false"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_project_v3.project_1", "extra.foo", "foo"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_project_v3.project_1", "extra.bar", "bar"),
 				),
 			},
 			{
@@ -54,6 +58,10 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 						"openstack_identity_project_v3.project_1", "enabled", "false"),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_project_v3.project_1", "is_domain", "false"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_project_v3.project_1", "extra.foo", "bar"),
+					resource.TestCheckNoResourceAttr(
+						"openstack_identity_project_v3.project_1", "extra.bar"),
 					testAccCheckIdentityV3ProjectHasTag("openstack_identity_project_v3.project_1", "tag1"),
 					testAccCheckIdentityV3ProjectHasTag("openstack_identity_project_v3.project_1", "tag2"),
 					testAccCheckIdentityV3ProjectTagCount("openstack_identity_project_v3.project_1", 2),
@@ -221,6 +229,10 @@ func testAccIdentityV3ProjectBasic(projectName string) string {
     resource "openstack_identity_project_v3" "project_1" {
       name = "%s"
       description = "A project"
+	  extra = {
+		foo = "foo"
+		bar = "bar"
+	  }
     }
   `, projectName)
 }
@@ -231,6 +243,9 @@ func testAccIdentityV3ProjectUpdate(projectName string) string {
       name = "%s"
       description = "Some project"
 	  enabled = false
+	  extra = {
+		foo = "bar"
+	  }
 	  tags = ["tag1","tag2"]
     }
   `, projectName)
