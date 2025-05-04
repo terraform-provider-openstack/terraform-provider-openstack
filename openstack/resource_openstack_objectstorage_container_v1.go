@@ -46,7 +46,7 @@ func resourceObjectStorageContainerV1() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: false,
+				ForceNew: true,
 			},
 			"container_read": {
 				Type:     schema.TypeString,
