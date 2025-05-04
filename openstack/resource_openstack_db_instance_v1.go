@@ -48,8 +48,15 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 			},
 
 			"size": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Type:         schema.TypeInt,
+				Required:     true,
+				RequiredWith: []string{"volume_type"},
+				ForceNew:     true,
+			},
+
+			"volume_type": {
+				Type:     schema.TypeString,
+				Optional: true,
 				ForceNew: true,
 			},
 
@@ -192,6 +199,11 @@ func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceDat
 		FlavorRef: d.Get("flavor_id").(string),
 		Name:      d.Get("name").(string),
 		Size:      d.Get("size").(int),
+	}
+
+	// volume_type
+	if v, ok := d.GetOk("volume_type"); ok {
+		createOpts.VolumeType = v.(string)
 	}
 
 	// datastore
