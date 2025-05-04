@@ -119,8 +119,10 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 	}
 
 	securityGroupID := d.Get("security_group_id").(string)
-	config.MutexKV.Lock(securityGroupID)
-	defer config.MutexKV.Unlock(securityGroupID)
+	if config.UseMutex {
+		config.MutexKV.Lock(securityGroupID)
+		defer config.MutexKV.Unlock(securityGroupID)
+	}
 
 	protocol := d.Get("protocol").(string)
 	direction := d.Get("direction").(string)
@@ -188,8 +190,10 @@ func resourceNetworkingSecGroupRuleV2Delete(ctx context.Context, d *schema.Resou
 	}
 
 	securityGroupID := d.Get("security_group_id").(string)
-	config.MutexKV.Lock(securityGroupID)
-	defer config.MutexKV.Unlock(securityGroupID)
+	if config.UseMutex {
+		config.MutexKV.Lock(securityGroupID)
+		defer config.MutexKV.Unlock(securityGroupID)
+	}
 
 	if err := rules.Delete(ctx, networkingClient, d.Id()).ExtractErr(); err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_networking_secgroup_rule_v2"))
