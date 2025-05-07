@@ -37,7 +37,7 @@ func dataSourceIdentityUserV3() *schema.Resource {
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				Computed: true,
 			},
 
 			"idp_id": {
@@ -82,10 +82,15 @@ func dataSourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, m
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
-	enabled := d.Get("enabled").(bool)
+	var enabled *bool
+	if v, ok := getOkExists(d, "enabled"); ok {
+		v := v.(bool)
+		enabled = &v
+	}
+
 	listOpts := users.ListOpts{
 		DomainID:          d.Get("domain_id").(string),
-		Enabled:           &enabled,
+		Enabled:           enabled,
 		IdPID:             d.Get("idp_id").(string),
 		Name:              d.Get("name").(string),
 		PasswordExpiresAt: d.Get("password_expires_at").(string),
