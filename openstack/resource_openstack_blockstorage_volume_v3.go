@@ -283,6 +283,16 @@ func resourceBlockStorageVolumeV3Read(ctx context.Context, d *schema.ResourceDat
 		d.Set("volume_retype_policy", "never")
 	}
 
+	// As we can have a snapshot_id with an image_id if the VolumeImageMetadata is stored in the snapshot for exemple,
+	// we want to exclude image_id when one of the others ids are used
+	_, snapshotExists := d.GetOk("snapshot_id")
+	_, backupExists := d.GetOk("backup_id")
+	_, sourcevolExists := d.GetOk("source_vol_id")
+
+	if !snapshotExists && !backupExists && !sourcevolExists {
+		d.Set("image_id", v.VolumeImageMetadata["image_id"])
+	}
+
 	attachments := flattenBlockStorageVolumeV3Attachments(v.Attachments)
 	log.Printf("[DEBUG] openstack_blockstorage_volume_v3 %s attachments: %#v", d.Id(), attachments)
 	if err := d.Set("attachment", attachments); err != nil {
