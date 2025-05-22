@@ -27,29 +27,6 @@ const (
 	lbError         = "ERROR"
 )
 
-type flavorsCreateOpts struct {
-	Name            string `json:"name,omitempty"`
-	Description     string `json:"description,omitempty"`
-	FlavorProfileID string `json:"flavor_profile_id,omitempty"`
-	Enabled         *bool  `json:"enabled,omitempty"`
-}
-
-// ToFlavorCreateMap constructs a request body from CreateOpts.
-func (opts flavorsCreateOpts) ToFlavorCreateMap() (map[string]any, error) {
-	return gophercloud.BuildRequestBody(opts, "flavor")
-}
-
-type flavorsUpdateOpts struct {
-	Name        *string `json:"name,omitempty"`
-	Description *string `json:"description,omitempty"`
-	Enabled     *bool   `json:"enabled,omitempty"`
-}
-
-// ToFlavorUpdateMap constructs a request body from UpdateOpts.
-func (opts flavorsUpdateOpts) ToFlavorUpdateMap() (map[string]any, error) {
-	return gophercloud.BuildRequestBody(opts, "flavor")
-}
-
 // lbPendingStatuses are the valid statuses a LoadBalancer will be in while
 // it's updating.
 func getLbPendingStatuses() []string {
