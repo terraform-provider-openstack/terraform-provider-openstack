@@ -5,7 +5,7 @@ go 1.24
 require (
 	github.com/google/go-cmp v0.7.0
 	github.com/gophercloud/gophercloud/v2 v2.7.1-0.20250602133909-0c4819a8e5d3
-	github.com/gophercloud/utils/v2 v2.0.0-20250212084022-725b94822eeb
+	github.com/gophercloud/utils/v2 v2.0.0-20250606082759-66f28657aaaa
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.37.0
 	github.com/hashicorp/terraform-plugin-testing v1.13.2
 	github.com/klauspost/compress v1.18.0
@@ -15,6 +15,8 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
+replace github.com/gophercloud/gophercloud/v2 => github.com/gophercloud/gophercloud/v2 v2.0.1-0.20250612141717-611b2a4727d9
+
 require (
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
@@ -22,7 +24,7 @@ require (
 	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.16.0 // indirect
-	github.com/gofrs/uuid/v5 v5.3.0 // indirect
+	github.com/gofrs/uuid/v5 v5.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
