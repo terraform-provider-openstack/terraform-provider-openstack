@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/terraform-plugin-testing v1.10.0
 	github.com/klauspost/compress v1.17.10
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/ulikunitz/xz v0.5.12
 	gopkg.in/yaml.v2 v2.4.0
 )
