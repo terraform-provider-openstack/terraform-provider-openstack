@@ -29,17 +29,16 @@ resource "openstack_dns_zone_v2" "example_com" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 Compute client.
-    Keypairs are associated with accounts, but a Compute client is needed to
-    create one. If omitted, the `region` argument of the provider is used.
-    Changing this creates a new DNS zone.
+* `region` - (Optional) The region in which to obtain the V2 DNS client.
+  If omitted, the `region` argument of the provider is used.
+  Changing this creates a new DNS zone.
 
 * `name` - (Required) The name of the zone. Note the `.` at the end of the name.
   Changing this creates a new DNS zone.
 
 * `project_id` - (Optional) The ID of the project DNS zone is created
   for, sets `X-Auth-Sudo-Tenant-ID` header (requires an assigned 
-  user role in target project)
+  user role in target project).
 
 * `email` - (Optional) The email contact for the zone record.
 
@@ -84,5 +83,5 @@ This resource can be imported by specifying the zone ID with optional project ID
 
 ```
 $ terraform import openstack_dns_zone_v2.zone_1 zone_id
-$ terraform import openstack_dns_zone_v2.zone_1 zone_id:project_id
+$ terraform import openstack_dns_zone_v2.zone_1 zone_id/project_id
 ```
