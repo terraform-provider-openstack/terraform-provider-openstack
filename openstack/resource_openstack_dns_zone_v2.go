@@ -22,18 +22,7 @@ func resourceDNSZoneV2() *schema.Resource {
 		UpdateContext: resourceDNSZoneV2Update,
 		DeleteContext: resourceDNSZoneV2Delete,
 		Importer: &schema.ResourceImporter{
-			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-				// Allow import from different project with id:project_id
-				parts := strings.Split(d.Id(), ":")
-				if parts[0] == "" || len(parts) > 2 {
-					return nil, fmt.Errorf("unexpected format of ID (%s), expected zone <id> or <id>:<project_id>", d.Id())
-				} else if len(parts) == 2 {
-					d.Set("project_id", parts[1])
-				}
-
-				d.SetId(parts[0])
-				return []*schema.ResourceData{d}, nil
-			},
+			StateContext: resourceDNSZoneV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -322,4 +311,18 @@ func resourceDNSZoneV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	return nil
+}
+
+func resourceDNSZoneV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	// Allow import from different project with id/project_id
+	parts := strings.Split(d.Id(), ":")
+	if parts[0] == "" || len(parts) > 2 {
+		return nil, fmt.Errorf("unexpected format of ID (%s), expected zone <id> or <id>:<project_id>", d.Id())
+	} else if len(parts) == 2 {
+		d.Set("project_id", parts[1])
+	}
+
+	d.SetId(parts[0])
+
+	return []*schema.ResourceData{d}, nil
 }
