@@ -10,7 +10,6 @@ import (
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/flavorprofiles"
-	"github.com/gophercloud/gophercloud/v2/pagination"
 )
 
 func dataSourceLBFlavorProfileV2() *schema.Resource {
@@ -23,25 +22,25 @@ func dataSourceLBFlavorProfileV2() *schema.Resource {
 				Optional: true,
 			},
 
-			"id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Computed:     true,
-				ExactlyOneOf: []string{"name"},
+			"flavorprofile_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"name", "provider_name"},
 			},
 
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Computed:     true,
-				ExactlyOneOf: []string{"id"},
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"flavorprofile_id"},
 			},
 
 			"provider_name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"flavorprofile_id"},
 			},
 
 			"flavor_data": {
@@ -59,46 +58,30 @@ func dataSourceLBFlavorProfileV2Read(ctx context.Context, d *schema.ResourceData
 		return diag.Errorf("Error creating OpenStack loadbalancer client: %s", err)
 	}
 
-	var allfps []flavorprofiles.FlavorProfile
-	if v := d.Get("id").(string); v != "" {
-		var fp *flavorprofiles.FlavorProfile
-		fp, err = flavorprofiles.Get(ctx, lbClient, v).Extract()
+	if id := d.Get("flavorprofile_id").(string); id != "" {
+		fp, err := flavorprofiles.Get(ctx, lbClient, id).Extract()
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return diag.Errorf("No flavor profile found")
 			}
-			return diag.Errorf("Unable to retrieve Openstack %s loadbalancer flavor: %s", v, err)
+			return diag.Errorf("Unable to retrieve OpenStack %s loadbalancer flavor: %s", id, err)
 		}
 
-		allfps = append(allfps, *fp)
-
-		return diag.FromErr(dataSourceLBFlavorProfileV2Attributes(d, lbClient, &allfps[0]))
+		return dataSourceLBFlavorProfileV2Attributes(d, lbClient, fp)
 	}
 
-	var allPages pagination.Page
-	allPages, err = flavorprofiles.List(lbClient, flavorprofiles.ListOpts{}).AllPages(ctx)
+	opts := flavorprofiles.ListOpts{
+		Name:         d.Get("name").(string),
+		ProviderName: d.Get("provider_name").(string),
+	}
+	allPages, err := flavorprofiles.List(lbClient, opts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query OpenStack flavors: %s", err)
 	}
 
-	allfps, err = flavorprofiles.ExtractFlavorProfiles(allPages)
+	allfps, err := flavorprofiles.ExtractFlavorProfiles(allPages)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve Openstack loadbalancer flavors: %s", err)
-	}
-
-	// Loop through all flavorprofiles to find a more specific one
-	if len(allfps) > 0 {
-		var filteredfps []flavorprofiles.FlavorProfile
-		name := d.Get("name").(string)
-		for _, fp := range allfps {
-			if fp.Name != name {
-				continue
-			}
-
-			filteredfps = append(filteredfps, fp)
-		}
-
-		allfps = filteredfps
+		return diag.Errorf("Unable to retrieve OpenStack loadbalancer flavors: %s", err)
 	}
 
 	if len(allfps) < 1 {
@@ -112,11 +95,11 @@ func dataSourceLBFlavorProfileV2Read(ctx context.Context, d *schema.ResourceData
 			"Please try a more specific search criteria")
 	}
 
-	return diag.FromErr(dataSourceLBFlavorProfileV2Attributes(d, lbClient, &allfps[0]))
+	return dataSourceLBFlavorProfileV2Attributes(d, lbClient, &allfps[0])
 }
 
-func dataSourceLBFlavorProfileV2Attributes(d *schema.ResourceData, computeClient *gophercloud.ServiceClient, fp *flavorprofiles.FlavorProfile) error {
-	log.Printf("[DEBUG] Retrieved openstack_loadbalancer_flavorprofile_v2 %s: %#v", fp.ID, fp)
+func dataSourceLBFlavorProfileV2Attributes(d *schema.ResourceData, computeClient *gophercloud.ServiceClient, fp *flavorprofiles.FlavorProfile) diag.Diagnostics {
+	log.Printf("[DEBUG] Retrieved openstack_lb_flavorprofile_v2 %s: %#v", fp.ID, fp)
 
 	d.SetId(fp.ID)
 	d.Set("name", fp.Name)

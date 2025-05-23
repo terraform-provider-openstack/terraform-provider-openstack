@@ -28,20 +28,21 @@ The following arguments are supported:
 * `region` - (Optional) The region in which to obtain the V2 Load Balancer client.
   If omitted, the `region` argument of the provider is used.
 
-* `id` - (Optional) The ID of the flavorprofile. Exactly one of `name`, `id` 
-  is required to be set.
+* `flavorprofile_id` - (Optional) The ID of the flavorprofile. Conflicts with `name` and
+  `provider_name`.
 
-* `name` - (Optional) The name of the flavorprofile. Exactly one of `name`, `id` 
-  is required to be set.
+* `name` - (Optional) The name of the flavorprofile. Conflicts with `flavorprofile_id`.
+
+* `provider_name` - (Optional) The name of the provider that the flavorprofile uses. Conflicts
+  with `flavorprofile_id`.
 
 ## Attributes Reference
 
 `id` is set to the ID of the found flavorprofile. In addition, the following attributes
 are exported:
 
- * `name` - The name of the flavorprofile.
+* `name` - The name of the flavorprofile.
 
- * `provider_name` - The name of the provider that the flavorprofile uses.
+* `provider_name` - The name of the provider that the flavorprofile uses.
 
- * `flavor_data` - Extra data of the flavorprofile depending on the provider.
-
+* `flavor_data` - Extra data of the flavorprofile depending on the provider.
