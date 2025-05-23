@@ -1,3 +1,33 @@
+## 3.1.0 ( 23 May, 2025 )
+
+NOTES
+
+* Properly handle 404 OpenStack API response codes during resource deletion ([#1793](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1793))
+* Added support to override a service endpoint type with a new service type ([#1804](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1804))
+* Updated Golang to 1.23 ([#1845](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1845))
+* Updated the `openstack_dns_zone_v2` resource to use a slash (`/`) separator for the import argument ([#1872](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1872))
+
+IMPROVEMENTS
+
+* Added `storage_class` argument to the `openstack_objectstorage_container_v1` resource ([#1810](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1810))
+* Added `openstack_workflow_workflow_v2` data source ([#1813](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1813))
+* Made the `hostname` argument optional in the `openstack_compute_hypervisor_v2` data source ([#1842](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1842))
+* Added `hypervisor_hostname` argument to the `openstack_compute_instance_v2` resource ([#1837](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1837))
+* Included `decompress` flag in the cache key for image uploads in the `openstack_images_image_v2` resource ([#1805](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1805))
+* Added support for in-place `volume_type` updates in `openstack_blockstorage_volume_v3` resource, controlled by the new `volume_retype_policy` argument ([#1831](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1831))
+* Locked `router_id` during parallel creation of router interfaces in the `openstack_networking_router_interface_v2` resource to prevent conflicting router modifications ([#1846](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1846))
+* Added support for additional ciphers (auth, encryption, pfs modes) in the `openstack_vpnaas_ike_policy_v2` resource ([#1851](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1851))
+* Added support for additional ciphers (auth, encryption, pfs modes) in the `openstack_vpnaas_ipsec_policy_v2` resource ([#1851](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1851))
+
+BUG FIXES
+
+* Fixed flattening of `subnet.HostRoutes` into a slice of maps in the `openstack_networking_subnet_v2` data source ([#1825](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1825))
+* Fixed an issue where unspecified quota values were being set to `0` in the `openstack_blockstorage_quotaset_v3` resource ([#1838](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1838))
+* Fixed ignored changes to the `admin_state_up` argument in the `openstack_lb_l7rule_v2` resource ([#1844](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1844))
+* Fixed incorrect unmarshalling of the `http_version` argument type in the `openstack_lb_monitor_v2` resource ([#1858](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1858))
+* Properly handled the `enabled` boolean argument in the `openstack_identity_user_v3` data source ([#1862](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1862))
+* Allowed `image_id` to be imported in the `openstack_blockstorage_volume_v3` resource ([#1860](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1860))
+
 ## 3.0.0 ( 25 September, 2024 )
 
 NOTES
