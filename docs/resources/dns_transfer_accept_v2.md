@@ -40,10 +40,9 @@ resource "openstack_dns_transfer_accept_v2" "accept_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 Compute client.
-    Keypairs are associated with accounts, but a Compute client is needed to
-    create one. If omitted, the `region` argument of the provider is used.
-    Changing this creates a new DNS zone.
+* `region` - (Optional) The region in which to obtain the V2 DNS client.
+  If omitted, the `region` argument of the provider is used.
+  Changing this creates a new DNS zone zone transfer accept.
 
 * `zone_transfer_request_id` - (Required) The ID of the zone transfer request.
 
