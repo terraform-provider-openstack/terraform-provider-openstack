@@ -15,17 +15,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 )
 
-const (
-	errEnableSNATWithoutExternalNet = "setting enable_snat for openstack_networking_router_v2 " +
-		"requires external_network_id to be set"
-
-	errExternalFixedIPWithoutExternalNet = "setting an external_fixed_ip for openstack_networking_router_v2 " +
-		"requires external_network_id to be set"
-
-	errExternalSubnetIDWithoutExternalNet = "setting external_subnet_ids for openstack_networking_router_v2 " +
-		"requires external_network_id to be set"
-)
-
 func resourceNetworkingRouterV2() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceNetworkingRouterV2Create,
@@ -82,18 +71,28 @@ func resourceNetworkingRouterV2() *schema.Resource {
 				Computed: true,
 			},
 
+			"external_qos_policy_id": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     false,
+				Computed:     true,
+				RequiredWith: []string{"external_network_id"},
+			},
+
 			"enable_snat": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: false,
-				Computed: true,
+				Type:         schema.TypeBool,
+				Optional:     true,
+				ForceNew:     false,
+				Computed:     true,
+				RequiredWith: []string{"external_network_id"},
 			},
 
 			"external_fixed_ip": {
-				Type:     schema.TypeList,
-				Optional: true,
-				ForceNew: false,
-				Computed: true,
+				Type:         schema.TypeList,
+				Optional:     true,
+				ForceNew:     false,
+				Computed:     true,
+				RequiredWith: []string{"external_network_id"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"subnet_id": {
@@ -114,6 +113,7 @@ func resourceNetworkingRouterV2() *schema.Resource {
 				Optional:      true,
 				Elem:          &schema.Schema{Type: schema.TypeString},
 				ConflictsWith: []string{"external_fixed_ip"},
+				RequiredWith:  []string{"external_network_id"},
 			},
 
 			"tenant_id": {
@@ -212,19 +212,17 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 		gatewayInfo.NetworkID = externalNetworkID
 	}
 
+	if v := d.Get("external_qos_policy_id").(string); v != "" {
+		gatewayInfo.QoSPolicyID = v
+	}
+
 	if esRaw, ok := getOkExists(d, "enable_snat"); ok {
-		if externalNetworkID == "" {
-			return diag.Errorf(errEnableSNATWithoutExternalNet)
-		}
 		es := esRaw.(bool)
 		gatewayInfo.EnableSNAT = &es
 	}
 
 	externalFixedIPs := expandNetworkingRouterExternalFixedIPsV2(d.Get("external_fixed_ip").([]interface{}))
 	if len(externalFixedIPs) > 0 {
-		if externalNetworkID == "" {
-			return diag.Errorf(errExternalFixedIPWithoutExternalNet)
-		}
 		gatewayInfo.ExternalFixedIPs = externalFixedIPs
 	}
 
@@ -248,10 +246,6 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 			return diag.Errorf("Error creating openstack_networking_router_v2: %s", err)
 		}
 	} else {
-		if externalNetworkID == "" {
-			return diag.Errorf(errExternalSubnetIDWithoutExternalNet)
-		}
-
 		// create a router in a loop with the first available external subnet
 		for i, externalSubnetID := range externalSubnetIDs {
 			gatewayInfo.ExternalFixedIPs = []routers.ExternalFixedIP{externalSubnetID}
@@ -408,27 +402,21 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 	if d.HasChange("external_network_id") {
 		updateGatewaySettings = true
 	}
+	if d.HasChange("external_qos_policy_id") {
+		updateGatewaySettings = true
+		gatewayInfo.QoSPolicyID = d.Get("external_qos_policy_id").(string)
+	}
 
 	if d.HasChange("enable_snat") {
 		updateGatewaySettings = true
-		if externalNetworkID == "" {
-			return diag.Errorf(errEnableSNATWithoutExternalNet)
-		}
-
 		enableSNAT := d.Get("enable_snat").(bool)
 		gatewayInfo.EnableSNAT = &enableSNAT
 	}
 
 	if d.HasChange("external_fixed_ip") {
 		updateGatewaySettings = true
-
 		externalFixedIPs := expandNetworkingRouterExternalFixedIPsV2(d.Get("external_fixed_ip").([]interface{}))
 		gatewayInfo.ExternalFixedIPs = externalFixedIPs
-		if len(externalFixedIPs) > 0 {
-			if externalNetworkID == "" {
-				return diag.Errorf(errExternalFixedIPWithoutExternalNet)
-			}
-		}
 	}
 
 	if updateGatewaySettings {

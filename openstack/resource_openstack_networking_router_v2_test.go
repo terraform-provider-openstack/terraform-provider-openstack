@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
 )
 
 func TestAccNetworkingV2Router_basic(t *testing.T) {
@@ -161,6 +162,36 @@ func TestAccNetworkingV2Router_extSubnetIDs(t *testing.T) {
 						"openstack_networking_router_v2.router_2", "external_fixed_ip.#", "1"),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_router_v2.router_2", "enable_snat", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Router_extQoSPolicy(t *testing.T) {
+	var policy policies.Policy
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2RouterExtQoSPolicy(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2QoSPolicyExists(
+						"openstack_networking_qos_policy_v2.qos_policy_1", &policy),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "name", "router_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "external_fixed_ip.#", "2"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "enable_snat", "true"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_router_v2.router_1", "external_qos_policy_id", &policy.ID),
 				),
 			},
 		},
@@ -354,4 +385,24 @@ resource "openstack_networking_router_v2" "router_2" {
   }
 }
 `, osExtGwID, osExtGwID, osExtGwID, osExtGwID)
+}
+
+func testAccNetworkingV2RouterExtQoSPolicy() string {
+	return fmt.Sprintf(`
+resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
+  name = "qos_policy_1"
+}
+
+resource "openstack_networking_router_v2" "router_1" {
+  name = "router_1"
+  admin_state_up = "true"
+  external_network_id = "%s"
+  external_qos_policy_id = openstack_networking_qos_policy_v2.qos_policy_1.id
+
+  timeouts {
+    create = "5m"
+    delete = "5m"
+  }
+}
+`, osExtGwID)
 }

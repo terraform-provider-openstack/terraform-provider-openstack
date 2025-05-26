@@ -48,6 +48,10 @@ The following arguments are supported:
   compute instances or load balancers will be using floating IPs. Changing
   this updates the external gateway of the router.
 
+* `external_qos_policy_id` - (Optional) The QoS policy UUID that will be applied
+  on the external gateway for the router. Changing this updates the external
+  gateway of the router.
+
 * `enable_snat` - (Optional) Enable Source NAT for the router. Valid values are
   "true" or "false". An `external_network_id` has to be set in order to
   set this property. Changing this updates the `enable_snat` of the router.
@@ -75,7 +79,7 @@ The following arguments are supported:
 * `vendor_options` - (Optional) Map of additional vendor-specific options.
   Supported options are described below.
 
-* `availability_zone_hints` - (Optional) An availability zone is used to make 
+* `availability_zone_hints` - (Optional) An availability zone is used to make
   network resources highly available. Used for resources with high availability
   so that they are scheduled on different availability zones. Changing this
   creates a new router.
@@ -101,6 +105,7 @@ The following attributes are exported:
 * `description` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
 * `external_network_id` - See Argument Reference above.
+* `external_qos_policy_id` - See Argument Reference above.
 * `enable_snat` - See Argument Reference above.
 * `external_fixed_ip` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.

@@ -78,6 +78,10 @@ func dataSourceNetworkingRouterV2() *schema.Resource {
 					},
 				},
 			},
+			"external_qos_policy_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -167,6 +171,7 @@ func dataSourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceDat
 	d.Set("tenant_id", router.TenantID)
 	d.Set("external_network_id", router.GatewayInfo.NetworkID)
 	d.Set("enable_snat", router.GatewayInfo.EnableSNAT)
+	d.Set("external_qos_policy_id", router.GatewayInfo.QoSPolicyID)
 	d.Set("all_tags", router.Tags)
 	d.Set("region", GetRegion(d, config))
 
