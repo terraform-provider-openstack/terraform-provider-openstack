@@ -50,6 +50,8 @@ The following arguments are supported:
 * `tags` - (Optional) Tags for the project. Changing this updates the existing
     project.
 
+* `extra` - (Optional) Free-form key/value pairs of extra information.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -61,6 +63,7 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `parent_id` - See Argument Reference above.
 * `tags` - See Argument Reference above.
+* `extra` - See Argument Reference above.
 * `region` - See Argument Reference above.
 
 ## Import
