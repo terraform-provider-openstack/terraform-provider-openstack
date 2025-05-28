@@ -122,7 +122,7 @@ func dataSourceLBFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func dataSourceLBFlavorV2Attributes(d *schema.ResourceData, computeClient *gophercloud.ServiceClient, flavor *flavors.Flavor) error {
-	log.Printf("[DEBUG] Retrieved openstack_loadbalancer_flavor_v2 %s: %#v", flavor.ID, flavor)
+	log.Printf("[DEBUG] Retrieved openstack_lb_flavor_v2 %s: %#v", flavor.ID, flavor)
 
 	d.SetId(flavor.ID)
 	d.Set("name", flavor.Name)

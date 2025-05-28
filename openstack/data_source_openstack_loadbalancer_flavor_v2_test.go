@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func TestAccLBV2FlavorDataSource_basic(t *testing.T) {
+func TestAccLoadBalancerV2FlavorDataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -18,18 +18,18 @@ func TestAccLBV2FlavorDataSource_basic(t *testing.T) {
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV2FlavorDataSourceBasic(),
+				Config: testAccLoadBalancerV2FlavorDataSourceBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2FlavorDataSourceID("data.openstack_lb_flavor_v2.flavor_1"),
+					testAccCheckLoadBalancerV2FlavorDataSourceID("data.openstack_loadbalancer_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_lb_flavor_v2.flavor_1", "name", "lb.acctest"),
+						"data.openstack_loadbalancer_flavor_v2.flavor_1", "name", "lb.acctest"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckLBV2FlavorDataSourceID(n string) resource.TestCheckFunc {
+func testAccCheckLoadBalancerV2FlavorDataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -44,9 +44,9 @@ func testAccCheckLBV2FlavorDataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccLBV2FlavorDataSourceBasic() string {
+func testAccLoadBalancerV2FlavorDataSourceBasic() string {
 	return fmt.Sprintf(`
-data "openstack_lb_flavor_v2" "flavor_1" {
+data "openstack_loadbalancer_flavor_v2" "flavor_1" {
   name = "%s"
 }
 `, osLbFlavorName)

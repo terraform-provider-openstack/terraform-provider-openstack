@@ -1,20 +1,22 @@
 ---
-subcategory: "Load Balancing as a Service / Octavia"
+subcategory: "Deprecated"
 layout: "openstack"
-page_title: "OpenStack: openstack_lb_flavor_v2"
-sidebar_current: "docs-openstack-datasource-lb-flavor-v2"
+page_title: "OpenStack: openstack_loadbalancer_flavor_v2"
+sidebar_current: "docs-openstack-datasource-loadbalancer-flavor-v2"
 description: |-
   Get information on an OpenStack Load Balancer Flavor.
 ---
 
-# openstack\_lb\_flavor\_v2
+# openstack\_loadbalancer\_flavor\_v2
 
 Use this data source to get the ID of an OpenStack Load Balancer flavor.
+
+~> **Note:** This data source is deprecated, please use `openstack_lb_flavor_v2` instead.
 
 ## Example Usage
 
 ```hcl
-data "openstack_lb_flavor_v2" "flavor_1" {
+data "openstack_loadbalancer_flavor_v2" "flavor_1" {
   name = "flavor_1"
 }
 ```
