@@ -3,6 +3,7 @@ module github.com/terraform-provider-openstack/terraform-provider-openstack/v3
 go 1.24
 
 require (
+	github.com/google/go-cmp v0.7.0
 	github.com/gophercloud/gophercloud/v2 v2.7.1-0.20250522224516-5a1da2b2bbef
 	github.com/gophercloud/utils/v2 v2.0.0-20250212084022-725b94822eeb
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.37.0
@@ -14,6 +15,8 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
+replace github.com/gophercloud/gophercloud/v2 => github.com/kayrus/gophercloud/v2 v2.7.1-0.20250527125153-d6399152156b
+
 require (
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
@@ -23,7 +26,6 @@ require (
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/gofrs/uuid/v5 v5.3.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
