@@ -291,7 +291,7 @@ func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses 
 			if v["OS-EXT-IPS:type"] == "fixed" || v["OS-EXT-IPS:type"] == nil {
 				switch v["version"].(float64) {
 				case 6:
-					instanceNIC.FixedIPv6 = fmt.Sprintf("[%s]", v["addr"].(string))
+					instanceNIC.FixedIPv6 = v["addr"].(string)
 				default:
 					instanceNIC.FixedIPv4 = v["addr"].(string)
 				}
