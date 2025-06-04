@@ -14,6 +14,12 @@ func dataSourceComputeAggregateV2() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceComputeAggregateV2Read,
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -90,6 +96,7 @@ func dataSourceComputeAggregateV2Read(ctx context.Context, d *schema.ResourceDat
 	d.Set("zone", aggr.AvailabilityZone)
 	d.Set("hosts", aggr.Hosts)
 	d.Set("metadata", metadata)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

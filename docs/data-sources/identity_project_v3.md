@@ -23,6 +23,9 @@ data "openstack_identity_project_v3" "project_1" {
 
 The following arguments are supported:
 
+* `region` - (Optional) The region in which to obtain the V3 Keystone client.
+  If omitted, the `region` argument of the provider is used.
+
 * `domain_id` - (Optional) The domain this project belongs to.
 
 * `enabled` - (Optional) Whether the project is enabled or disabled. Valid
@@ -45,6 +48,7 @@ The following arguments are supported:
 `id` is set to the ID of the found project. In addition, the following attributes
 are exported:
 
+* `region` - See Argument Reference above.
 * `description` - The description of the project.
 * `domain_id` - See Argument Reference above.
 * `enabled` - See Argument Reference above.
@@ -53,4 +57,3 @@ are exported:
 * `parent_id` - See Argument Reference above.
 * `tags` - See Argument Reference above.
 * `project_id` - See Argument Reference above.
-* `region` - The region the project is located in.

@@ -112,6 +112,7 @@ func resourceLoadBalancerFlavorV2Read(ctx context.Context, d *schema.ResourceDat
 	d.Set("description", flavor.Description)
 	d.Set("flavor_profile_id", flavor.FlavorProfileId)
 	d.Set("enabled", flavor.Enabled)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

@@ -67,7 +67,6 @@ func resourceIdentityEc2CredentialV3() *schema.Resource {
 
 func resourceIdentityEc2CredentialV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
@@ -117,6 +116,7 @@ func resourceIdentityEc2CredentialV3Create(ctx context.Context, d *schema.Resour
 	d.Set("user_id", ec2Credential.UserID)
 	d.Set("project_id", ec2Credential.TenantID)
 	d.Set("trust_id", ec2Credential.TrustID)
+	d.Set("region", GetRegion(d, config))
 
 	return resourceIdentityEc2CredentialV3Read(ctx, d, meta)
 }
@@ -153,6 +153,7 @@ func resourceIdentityEc2CredentialV3Read(ctx context.Context, d *schema.Resource
 	d.Set("project_id", ec2Credential.TenantID)
 	d.Set("access", ec2Credential.Access)
 	d.Set("trust_id", ec2Credential.TrustID)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

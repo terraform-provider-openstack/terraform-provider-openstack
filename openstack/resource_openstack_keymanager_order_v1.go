@@ -29,6 +29,12 @@ func resourceKeyManagerOrderV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"meta": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -97,12 +103,6 @@ func resourceKeyManagerOrderV1() *schema.Resource {
 			"order_ref": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
 			},
 			"secret_ref": {
 				Type:     schema.TypeString,
@@ -197,6 +197,7 @@ func resourceKeyManagerOrderV1Read(ctx context.Context, d *schema.ResourceData, 
 	d.Set("sub_status_message", order.SubStatusMessage)
 	d.Set("type", order.Type)
 	d.Set("updated", order.Updated.Format(time.RFC3339))
+	d.Set("region", GetRegion(d, config))
 	if err := d.Set("meta", flattenKeyManagerOrderV1Meta(order.Meta)); err != nil {
 		return diag.Errorf("error setting meta for resource %s: %s", d.Id(), err)
 	}

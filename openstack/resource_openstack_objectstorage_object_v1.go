@@ -282,6 +282,7 @@ func resourceObjectStorageObjectV1Read(ctx context.Context, d *schema.ResourceDa
 	}
 	d.Set("object_manifest", result.ObjectManifest)
 	d.Set("trans_id", result.TransID)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

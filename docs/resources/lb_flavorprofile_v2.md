@@ -41,6 +41,11 @@ resource "openstack_lb_flavorprofile_v2" "flavorprofile_1" {
 
 The following arguments are supported:
 
+* `region` - (Optional) The region in which to obtain the V2 Networking client.
+  A Networking client is needed to create an LB member. If omitted, the
+  `region` argument of the provider is used. Changing this creates a new
+  LB flavorprofile.
+
 * `name` - (Required) Name of the flavorprofile. Changing this updates the existing
   flavorprofile.
 
@@ -56,6 +61,7 @@ The following arguments are supported:
 
 The following attributes are exported:
 
+* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `provider_name` - See Argument Reference above.
 * `flavor_data` - See Argument Reference above.

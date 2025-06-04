@@ -22,13 +22,17 @@ data "openstack_compute_hypervisor_v2" "host01" {
 
 ## Argument Reference
 
-* `hostname` - The hostname of the hypervisor
+* `region` - (Optional) The region in which to obtain the V2 Compute client.
+  If omitted, the `region` argument of the provider is used.
+
+* `hostname` - (Optional) The hostname of the hypervisor.
 
 ## Attributes Reference
 
 `id` is set to the ID of the found Hypervisor. In addition, the
 following attributes are exported:
 
+* `region` - See Argument Reference above.
 * `hostname` - See Argument Reference above.
 * `host_ip` - The IP address of the Hypervisor
 * `state` - The state of the hypervisor (`up` or `down`)

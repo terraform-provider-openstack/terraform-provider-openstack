@@ -220,6 +220,7 @@ func resourceL7RuleV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 	d.Set("key", l7Rule.Key)
 	d.Set("invert", l7Rule.Invert)
 	d.Set("admin_state_up", l7Rule.AdminStateUp)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

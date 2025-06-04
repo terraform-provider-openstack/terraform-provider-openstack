@@ -32,6 +32,9 @@ resource "openstack_db_user_v1" "basic" {
 
 The following arguments are supported:
 
+* `region` - (Optional) The region in which to create the db user. Changing
+  this creates a new user.
+
 * `name` - (Required) A unique name for the resource.
 
 * `instance_id` - (Required) The ID for the database instance.
@@ -44,7 +47,7 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - Openstack region resource is created in.
+* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `instance_id` - See Argument Reference above.
 * `password` - See Argument Reference above.

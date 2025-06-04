@@ -24,7 +24,6 @@ func dataSourceIdentityProjectIdsV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 
 			"description": {
@@ -134,6 +133,7 @@ func dataSourceIdentityProjectIdsV3Read(ctx context.Context, d *schema.ResourceD
 
 	d.SetId(fmt.Sprintf("%d", hashcode.String(strings.Join(projectIDs, ","))))
 	d.Set("ids", projectIDs)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

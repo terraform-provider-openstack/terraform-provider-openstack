@@ -122,6 +122,7 @@ func resourceDatabaseDatabaseV1Read(ctx context.Context, d *schema.ResourceData,
 
 	d.Set("instance_id", instanceID)
 	d.Set("name", dbName)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

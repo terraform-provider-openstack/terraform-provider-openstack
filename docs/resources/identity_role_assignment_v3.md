@@ -41,6 +41,10 @@ resource "openstack_identity_role_assignment_v3" "role_assignment_1" {
 
 The following arguments are supported:
 
+* `region` - (Optional) The region in which to obtain the V3 Keystone client.
+  If omitted, the `region` argument of the provider is used. Changing this
+  creates a new role assignment.
+
 * `domain_id` - (Optional; Required if `project_id` is empty) The domain to assign the role in.
 
 * `group_id` - (Optional; Required if `user_id` is empty) The group to assign the role to.
@@ -55,6 +59,7 @@ The following arguments are supported:
 
 The following attributes are exported:
 
+* `region` - See Argument Reference above.
 * `domain_id` - See Argument Reference above.
 * `project_id` - See Argument Reference above.
 * `group_id` - See Argument Reference above.

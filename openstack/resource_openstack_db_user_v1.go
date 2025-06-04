@@ -134,6 +134,7 @@ func resourceDatabaseUserV1Read(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	d.Set("name", userName)
+	d.Set("region", GetRegion(d, config))
 
 	databases := flattenDatabaseUserV1Databases(userObj.Databases)
 	if err := d.Set("databases", databases); err != nil {

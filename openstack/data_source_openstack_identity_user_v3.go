@@ -20,7 +20,6 @@ func dataSourceIdentityUserV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 
 			"default_project_id": {
@@ -123,6 +122,7 @@ func dataSourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, m
 	user = allUsers[0]
 
 	dataSourceIdentityUserV3Attributes(d, &user)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

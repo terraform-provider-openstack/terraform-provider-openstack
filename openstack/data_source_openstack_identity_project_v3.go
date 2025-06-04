@@ -20,7 +20,6 @@ func dataSourceIdentityProjectV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 
 			"description": {
@@ -88,7 +87,6 @@ func filterProjects(allProjects []projects.Project, listOpts projects.ListOpts) 
 // dataSourceIdentityProjectV3Read performs the project lookup.
 func dataSourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
@@ -151,6 +149,7 @@ func dataSourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData
 	}
 
 	dataSourceIdentityProjectV3Attributes(d, &allProjects[0])
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

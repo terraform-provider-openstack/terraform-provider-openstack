@@ -109,6 +109,7 @@ func resourceLoadBalancerFlavorProfileV2Read(ctx context.Context, d *schema.Reso
 	d.Set("name", q.Name)
 	d.Set("provider_name", q.ProviderName)
 	d.Set("flavor_data", q.FlavorData)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

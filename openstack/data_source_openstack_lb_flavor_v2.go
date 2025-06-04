@@ -21,6 +21,7 @@ func dataSourceLBFlavorV2() *schema.Resource {
 			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 
 			"flavor_id": {
@@ -75,9 +76,10 @@ func dataSourceLBFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta 
 			return diag.Errorf("Unable to retrieve Openstack %s loadbalancer flavor: %s", v, err)
 		}
 
-		allFlavors = append(allFlavors, *flavor)
+		dataSourceLBFlavorV2Attributes(d, lbClient, flavor)
+		d.Set("region", GetRegion(d, config))
 
-		return diag.FromErr(dataSourceLBFlavorV2Attributes(d, lbClient, &allFlavors[0]))
+		return nil
 	} else {
 		var allPages pagination.Page
 		allPages, err = flavors.List(lbClient, flavors.ListOpts{}).AllPages(ctx)
@@ -118,10 +120,13 @@ func dataSourceLBFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta 
 			"Please try a more specific search criteria")
 	}
 
-	return diag.FromErr(dataSourceLBFlavorV2Attributes(d, lbClient, &allFlavors[0]))
+	dataSourceLBFlavorV2Attributes(d, lbClient, &allFlavors[0])
+	d.Set("region", GetRegion(d, config))
+
+	return nil
 }
 
-func dataSourceLBFlavorV2Attributes(d *schema.ResourceData, computeClient *gophercloud.ServiceClient, flavor *flavors.Flavor) error {
+func dataSourceLBFlavorV2Attributes(d *schema.ResourceData, computeClient *gophercloud.ServiceClient, flavor *flavors.Flavor) {
 	log.Printf("[DEBUG] Retrieved openstack_lb_flavor_v2 %s: %#v", flavor.ID, flavor)
 
 	d.SetId(flavor.ID)
@@ -130,6 +135,4 @@ func dataSourceLBFlavorV2Attributes(d *schema.ResourceData, computeClient *gophe
 	d.Set("flavor_id", flavor.ID)
 	d.Set("flavor_profile_id", flavor.FlavorProfileId)
 	d.Set("enabled", flavor.Enabled)
-
-	return nil
 }

@@ -13,6 +13,12 @@ func dataSourceComputeHypervisorV2() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceComputeHypervisorV2Read,
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
 			"hostname": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -103,6 +109,7 @@ func dataSourceComputeHypervisorV2Read(ctx context.Context, d *schema.ResourceDa
 	d.Set("vcpus", h.VCPUs)
 	d.Set("memory", h.MemoryMB)
 	d.Set("disk", h.LocalGB)
+	d.Set("region", region)
 
 	return nil
 }

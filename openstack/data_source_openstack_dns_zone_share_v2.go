@@ -129,6 +129,7 @@ func dataSourceDNSZoneShareV2Read(ctx context.Context, d *schema.ResourceData, m
 	d.Set("share_id", share.ID)
 	d.Set("project_id", share.ProjectID)
 	d.Set("target_project_id", share.TargetProjectID)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

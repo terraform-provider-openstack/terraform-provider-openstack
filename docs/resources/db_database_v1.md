@@ -26,6 +26,9 @@ resource "openstack_db_database_v1" "mydb" {
 
 The following arguments are supported:
 
+* `region` - (Optional) The region in which to create the database. Changing
+  this creates a new database.
+
 * `name` - (Required) A unique name for the resource.
 
 * `instance_id` - (Required) The ID for the database instance.
@@ -34,7 +37,7 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - Openstack region resource is created in.
+* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `instance_id` - See Argument Reference above.
 

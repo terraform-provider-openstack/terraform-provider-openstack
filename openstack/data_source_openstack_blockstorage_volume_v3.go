@@ -126,6 +126,7 @@ func dataSourceBlockStorageVolumeV3Read(ctx context.Context, d *schema.ResourceD
 	}
 
 	dataSourceBlockStorageVolumeV3Attributes(d, allVolumes[0])
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

@@ -20,6 +20,7 @@ func dataSourceLBFlavorProfileV2() *schema.Resource {
 			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 
 			"flavorprofile_id": {
@@ -67,7 +68,10 @@ func dataSourceLBFlavorProfileV2Read(ctx context.Context, d *schema.ResourceData
 			return diag.Errorf("Unable to retrieve OpenStack %s loadbalancer flavor: %s", id, err)
 		}
 
-		return dataSourceLBFlavorProfileV2Attributes(d, lbClient, fp)
+		dataSourceLBFlavorProfileV2Attributes(d, lbClient, fp)
+		d.Set("region", GetRegion(d, config))
+
+		return nil
 	}
 
 	opts := flavorprofiles.ListOpts{
@@ -95,16 +99,17 @@ func dataSourceLBFlavorProfileV2Read(ctx context.Context, d *schema.ResourceData
 			"Please try a more specific search criteria")
 	}
 
-	return dataSourceLBFlavorProfileV2Attributes(d, lbClient, &allfps[0])
+	dataSourceLBFlavorProfileV2Attributes(d, lbClient, &allfps[0])
+	d.Set("region", GetRegion(d, config))
+
+	return nil
 }
 
-func dataSourceLBFlavorProfileV2Attributes(d *schema.ResourceData, computeClient *gophercloud.ServiceClient, fp *flavorprofiles.FlavorProfile) diag.Diagnostics {
+func dataSourceLBFlavorProfileV2Attributes(d *schema.ResourceData, computeClient *gophercloud.ServiceClient, fp *flavorprofiles.FlavorProfile) {
 	log.Printf("[DEBUG] Retrieved openstack_lb_flavorprofile_v2 %s: %#v", fp.ID, fp)
 
 	d.SetId(fp.ID)
 	d.Set("name", fp.Name)
 	d.Set("provider_name", fp.ProviderName)
 	d.Set("flavor_data", fp.FlavorData)
-
-	return nil
 }

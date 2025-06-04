@@ -21,6 +21,10 @@ data "openstack_sharedfilesystem_share_v2" "share_1" {
 
 ## Argument Reference
 
+* `region` - (Optional) The region in which to obtain the V2 Shared File System
+  client. A Shared File System client is needed to read a share. If omitted,
+  the `region` argument of the provider is used.
+
 * `name` - (Optional) The name of the share.
 
 * `description` - (Optional) The human-readable description for the share.
@@ -51,6 +55,7 @@ data "openstack_sharedfilesystem_share_v2" "share_1" {
 `id` is set to the ID of the found share. In addition, the following attributes
 are exported:
 
+* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `project_id` - See Argument Reference above.
@@ -60,7 +65,6 @@ are exported:
 * `metadata` - See Argument Reference above.
 * `status` - See Argument Reference above.
 * `is_public` - See Argument Reference above.
-* `region` - The region in which to obtain the V2 Shared File System client.
 * `availability_zone` - The share availability zone.
 * `share_proto` - The share protocol.
 * `size` - The share size, in GBs.

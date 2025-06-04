@@ -108,6 +108,7 @@ func dataSourceBlockStorageSnapshotV3Read(ctx context.Context, d *schema.Resourc
 	}
 
 	dataSourceBlockStorageSnapshotV3Attributes(d, snapshot)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

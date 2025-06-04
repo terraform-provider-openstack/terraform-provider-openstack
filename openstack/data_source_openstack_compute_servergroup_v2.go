@@ -126,6 +126,7 @@ func dataSourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceD
 	if sg.Rules != nil {
 		d.Set("rules", []map[string]interface{}{{"max_server_per_host": sg.Rules.MaxServerPerHost}})
 	}
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

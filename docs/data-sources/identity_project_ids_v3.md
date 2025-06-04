@@ -27,6 +27,9 @@ data "openstack_identity_project_ids_v3" "projects" {
 
 The following arguments are supported:
 
+* `region` - (Optional) The region in which to obtain the V3 Keystone client.
+  If omitted, the `region` argument of the provider is used.
+
 * `name` - (Optional) The name of the project. Cannot be used simultaneously with
   `name_regex`.
 
