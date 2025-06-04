@@ -4,7 +4,8 @@ on:
     branches:
       - main
   pull_request:
-
+permissions:
+  contents: read
 jobs:
   golangci-lint:
     name: Lint
