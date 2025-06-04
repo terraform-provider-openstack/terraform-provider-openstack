@@ -14,6 +14,12 @@ func dataSourceComputeServerGroupV2() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceComputeServerGroupV2Read,
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -29,15 +35,23 @@ func dataSourceComputeServerGroupV2() *schema.Resource {
 				Computed: true,
 			},
 
-			"policy": {
-				Type:     schema.TypeString,
+			"policies": {
+				Type:     schema.TypeList,
 				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
 			"rules": {
-				Type:     schema.TypeMap,
-				Optional: true,
+				Type:     schema.TypeList,
 				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"max_server_per_host": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+					},
+				},
 			},
 
 			"members": {
@@ -56,8 +70,7 @@ func dataSourceComputeServerGroupV2() *schema.Resource {
 
 func dataSourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	region := GetRegion(d, config)
-	computeClient, err := config.ComputeV2Client(ctx, region)
+	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -106,14 +119,12 @@ func dataSourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceD
 	d.Set("members", sg.Members)
 	d.Set("metadata", sg.Metadata)
 	if sg.Policy != nil && *sg.Policy != "" {
-		d.Set("policy", *sg.Policy)
+		d.Set("policies", []string{*sg.Policy})
 	} else {
-		d.Set("policy", sg.Policies[0])
+		d.Set("policies", sg.Policies)
 	}
 	if sg.Rules != nil {
-		d.Set("rules", map[string]interface{}{"max_server_per_host": sg.Rules.MaxServerPerHost})
-	} else {
-		d.Set("rules", nil)
+		d.Set("rules", []map[string]interface{}{{"max_server_per_host": sg.Rules.MaxServerPerHost}})
 	}
 
 	return nil

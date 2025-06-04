@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccComputeServerGroupV2DataSource(t *testing.T) {
@@ -21,8 +21,8 @@ func TestAccComputeServerGroupV2DataSource(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeServerGroupV2DataSourceID("data.openstack_compute_servergroup_v2.server_group_1"),
 					resource.TestCheckResourceAttr("data.openstack_compute_servergroup_v2.server_group_1", "name", "my-servergroup"),
-					resource.TestCheckResourceAttr("data.openstack_compute_servergroup_v2.server_group_1", "policy", "anti-affinity"),
-					resource.TestCheckResourceAttr("data.openstack_compute_servergroup_v2.server_group_1.rules", "max_server_per_host", "3"),
+					resource.TestCheckResourceAttr("data.openstack_compute_servergroup_v2.server_group_1", "policies.0", "anti-affinity"),
+					resource.TestCheckResourceAttr("data.openstack_compute_servergroup_v2.server_group_1", "rules.0.max_server_per_host", "3"),
 				),
 			},
 		},
@@ -54,6 +54,6 @@ resource "openstack_compute_servergroup_v2" "server_group_1" {
 }
 
 data "openstack_compute_servergroup_v2" "server_group_1" {
-  name = "${openstack_compute_servergroup_v2.server_group_1.name}"
+  name = openstack_compute_servergroup_v2.server_group_1.name
 }
 `

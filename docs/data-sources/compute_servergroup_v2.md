@@ -4,7 +4,7 @@ layout: "openstack"
 page_title: "OpenStack: openstack_compute_servergroup_v2"
 sidebar_current: "docs-openstack-datasource-compute-servergroup-v2"
 description: |-
-  Get information on Openstack server group
+  Get information on an OpenStack server group.
 ---
 
 # openstack\_compute\_servergroup\_v2
@@ -22,7 +22,10 @@ data "openstack_compute_servergroup_v2" "test" {
 
 ## Argument Reference
 
-* `name` - The name of the server group.
+* `region` - (Optional) The region in which to obtain the V2 Compute client.
+  If omitted, the `region` argument of the provider is used.
+
+* `name` - (Required) The name of the server group.
 
 ## Attributes Reference
 
@@ -30,9 +33,9 @@ data "openstack_compute_servergroup_v2" "test" {
 following attributes are exported:
 
 * `name` - See Argument Reference above.
-* `user_id` - UserID of the server group.
-* `project_id` - ProjectID of the server group.
-* `policy` - Policy name to associate with the server group.
+* `user_id` - User ID of the server group.
+* `project_id` - Project ID of the server group.
+* `policies` - Policy name associated with the server group.
 * `rules` - Rules which are applied to specified policy.
 * `members` - The instances that are part of this server group.
 * `metadata` - Metadata of the server group.
