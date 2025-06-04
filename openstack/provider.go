@@ -393,6 +393,7 @@ func Provider() *schema.Provider {
 			"openstack_networking_router_route_v2":               resourceNetworkingRouterRouteV2(),
 			"openstack_networking_secgroup_v2":                   resourceNetworkingSecGroupV2(),
 			"openstack_networking_secgroup_rule_v2":              resourceNetworkingSecGroupRuleV2(),
+			"openstack_networking_address_group_v2":              resourceNetworkingAddressGroupV2(),
 			"openstack_networking_subnet_v2":                     resourceNetworkingSubnetV2(),
 			"openstack_networking_subnet_route_v2":               resourceNetworkingSubnetRouteV2(),
 			"openstack_networking_subnetpool_v2":                 resourceNetworkingSubnetPoolV2(),

@@ -95,6 +95,11 @@ The following arguments are supported:
     Openstack ID of a security group in the same tenant. Changing this creates
     a new security group rule.
 
+* `remote_address_group_id` - (Optional) The remote address group id, the value
+    needs to be an OpenStack ID of an address group in the same tenant. Changing
+    this creates a new security group rule. This argument is mutually exclusive
+    with `remote_ip_prefix` and `remote_group_id`.
+
 * `security_group_id` - (Required) The security group id the rule should belong
     to, the value needs to be an Openstack ID of a security group in the same
     tenant. Changing this creates a new security group rule.
@@ -116,6 +121,7 @@ The following attributes are exported:
 * `port_range_max` - See Argument Reference above.
 * `remote_ip_prefix` - See Argument Reference above.
 * `remote_group_id` - See Argument Reference above.
+* `remote_address_group_id` - See Argument Reference above.
 * `security_group_id` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.
 
