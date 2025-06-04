@@ -143,11 +143,16 @@ func resourceObjectstorageTempurlV1Create(ctx context.Context, d *schema.Resourc
 	hasher.Write([]byte(url))
 	d.SetId(hex.EncodeToString(hasher.Sum(nil)))
 	d.Set("url", url)
+	d.Set("region", GetRegion(d, config))
+
 	return nil
 }
 
 // resourceObjectstorageTempurlV1Read performs the image lookup.
 func resourceObjectstorageTempurlV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*Config)
+	d.Set("region", GetRegion(d, config))
+
 	turl := d.Get("url").(string)
 	u, err := url.Parse(turl)
 	if err != nil {

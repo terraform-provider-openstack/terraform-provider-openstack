@@ -22,12 +22,16 @@ data "openstack_compute_instance_v2" "instance" {
 
 ## Argument Reference
 
-* `id` - (Required) The UUID of the instance
+* `region` - (Optional) The region in which to obtain the V2 Compute client.
+  If omitted, the `region` argument of the provider is used.
 
+* `id` - (Required) The UUID of the instance
 
 ## Attributes Reference
 
 In addition to the above, the following attributes are exported:
+
+* `region` - See Argument Reference above.
 
 * `name` - The name of the server.
 

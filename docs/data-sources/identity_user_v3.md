@@ -23,6 +23,9 @@ data "openstack_identity_user_v3" "user_1" {
 
 The following arguments are supported:
 
+* `region` - (Optional) The region in which to obtain the V3 Keystone client.
+  If omitted, the `region` argument of the provider is used.
+
 * `default_project_id` - (Optional) The default project this user belongs to.
 
 * `domain_id` - (Optional) The domain this user belongs to.
@@ -44,6 +47,7 @@ The following arguments are supported:
 
 The following attributes are exported:
 
+* `region` - See Argument Reference above.
 * `default_project_id` - See Argument Reference above.
 * `domain_id` - See Argument Reference above.
 * `enabled` - See Argument Reference above.
@@ -51,6 +55,5 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `password_expires_at` - See Argument Reference above.
 * `protocol_id` - See Argument Reference above.
-* `region` - The region the user is located in.
 * `unique_id` - See Argument Reference above.
 * `description` - A description of the user.

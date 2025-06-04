@@ -294,6 +294,8 @@ func resourceBlockStorageVolumeAttachV3Read(ctx context.Context, d *schema.Resou
 		}
 	}
 
+	d.Set("region", GetRegion(d, config))
+
 	log.Printf(
 		"[DEBUG] Retrieved openstack_blockstorage_volume_attach_v3 attachment %s: %#v", d.Id(), attachment)
 

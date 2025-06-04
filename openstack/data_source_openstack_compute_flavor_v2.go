@@ -22,7 +22,6 @@ func dataSourceComputeFlavorV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 
 			"flavor_id": {
@@ -233,7 +232,14 @@ func dataSourceComputeFlavorV2Read(ctx context.Context, d *schema.ResourceData, 
 			"Please try a more specific search criteria")
 	}
 
-	return diag.FromErr(dataSourceComputeFlavorV2Attributes(ctx, d, computeClient, &allFlavors[0]))
+	err = dataSourceComputeFlavorV2Attributes(ctx, d, computeClient, &allFlavors[0])
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.Set("region", GetRegion(d, config))
+
+	return nil
 }
 
 // dataSourceComputeFlavorV2Attributes populates the fields of a Flavor resource.

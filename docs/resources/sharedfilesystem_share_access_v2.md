@@ -124,9 +124,9 @@ output "export_locations" {
 
 The following arguments are supported:
 
-* `region` - The region in which to obtain the V2 Shared File System client.
-    A Shared File System client is needed to create a share access. Changing this
-    creates a new share access.
+* `region` - (Optional) The region in which to obtain the V2 Shared File System
+  client. A Shared File System client is needed to create a share access.
+  Changing this creates a new share access.
 
 * `share_id` - (Required) The UUID of the share to which you are granted access.
 
@@ -135,7 +135,7 @@ The following arguments are supported:
   Shared Filesystem microversion 2.13 (Mitaka) or later.
 
 * `access_to` - (Required) The value that defines the access. Can either be an IP
-    address or a username verified by configured Security Service of the Share Network.
+  address or a username verified by configured Security Service of the Share Network.
 
 * `access_level` - (Required) The access level to the share. Can either be `rw` or `ro`.
 

@@ -41,8 +41,8 @@ resource "openstack_db_instance_v1" "test" {
 
 The following arguments are supported:
 
-* `region` - (Required) The region in which to create the db instance. Changing this
-    creates a new instance.
+* `region` - (Optional) The region in which to create the db instance. Changing this
+  creates a new instance.
 
 * `name` - (Required) A unique name for the resource.
 

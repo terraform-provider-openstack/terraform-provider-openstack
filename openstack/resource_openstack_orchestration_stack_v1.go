@@ -253,6 +253,7 @@ func resourceOrchestrationStackV1Read(ctx context.Context, d *schema.ResourceDat
 	d.Set("status_reason", stack.StatusReason)
 	d.Set("template_description", stack.TemplateDescription)
 	d.Set("timeout", stack.Timeout)
+	d.Set("region", GetRegion(d, config))
 
 	// Set the outputs
 	outputs := make([]map[string]interface{}, 0, len(stack.Outputs))

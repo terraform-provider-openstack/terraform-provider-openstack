@@ -21,19 +21,18 @@ data "openstack_identity_role_v3" "admin" {
 
 ## Argument Reference
 
-* `name` - The name of the role.
+* `region` - (Optional) The region in which to obtain the V3 Keystone client.
+  If omitted, the `region` argument of the provider is used.
+
+* `name` - (Required) The name of the role.
 
 * `domain_id` - (Optional) The domain the role belongs to.
-
-* `region` - (Optional) The region in which to obtain the V3 Keystone client.
-    If omitted, the `region` argument of the provider is used.
-
 
 ## Attributes Reference
 
 `id` is set to the ID of the found role. In addition, the following attributes
 are exported:
 
+* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `domain_id` - See Argument Reference above.
-* `region` - See Argument Reference above.

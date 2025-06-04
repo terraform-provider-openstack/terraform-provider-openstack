@@ -14,6 +14,7 @@ func dataSourceLoadBalancerFlavorV2() *schema.Resource {
 			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 
 			"flavor_id": {

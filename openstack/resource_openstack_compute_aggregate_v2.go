@@ -125,6 +125,7 @@ func resourceComputeAggregateV2Read(ctx context.Context, d *schema.ResourceData,
 	d.Set("zone", aggregate.AvailabilityZone)
 	d.Set("hosts", aggregate.Hosts)
 	d.Set("metadata", metadata)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }

@@ -247,6 +247,7 @@ func resourceSiteConnectionV2Read(ctx context.Context, d *schema.ResourceData, m
 	d.Set("psk", conn.PSK)
 	d.Set("mtu", conn.MTU)
 	d.Set("peer_cidrs", conn.PeerCIDRs)
+	d.Set("region", GetRegion(d, config))
 
 	// Set the dpd
 	var dpdMap = make(map[string]interface{})

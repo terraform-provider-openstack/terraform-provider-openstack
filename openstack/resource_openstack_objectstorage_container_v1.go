@@ -182,7 +182,6 @@ func resourceObjectStorageContainerV1Create(ctx context.Context, d *schema.Resou
 
 func resourceObjectStorageContainerV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-
 	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("error creating OpenStack object storage client: %s", err)

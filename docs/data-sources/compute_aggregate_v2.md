@@ -22,13 +22,17 @@ data "openstack_compute_aggregate_v2" "test" {
 
 ## Argument Reference
 
-* `name` - The name of the host aggregate
+* `region` - (Optional) The region in which to obtain the V2 Compute client.
+  If omitted, the `region` argument of the provider is used.
+
+* `name` - (Required) The name of the host aggregate.
 
 ## Attributes Reference
 
 `id` is set to the ID of the found Host Aggregate. In addition, the
 following attributes are exported:
 
+* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `zone` - Availability zone of the Host Aggregate
 * `metadata` - Metadata of the Host Aggregate
