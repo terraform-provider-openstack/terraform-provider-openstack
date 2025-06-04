@@ -218,7 +218,7 @@ func resourceImagesImageV2DetectCompression(resp *http.Response) (io.ReadCloser,
 				return nil, fmt.Errorf("Error decompressing zstd image: %s", err)
 			}
 			return zstdReader.IOReadCloser(), nil
-		case "application/octet-stream":
+		case "application/octet-stream", "binary/octet-stream":
 			// This is a fallback for cases where the server does not provide
 			// a Content-Type header. In this case, we'll try to detect the
 			// compression based on the Content-Disposition header.
