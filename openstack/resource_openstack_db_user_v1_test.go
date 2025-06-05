@@ -130,6 +130,7 @@ func testAccDatabaseV1UserBasic() string {
 	return fmt.Sprintf(`
 resource "openstack_db_instance_v1" "basic" {
   name = "basic"
+  flavor_id = 97
 
   datastore {
     version = "%s"
@@ -140,7 +141,8 @@ resource "openstack_db_instance_v1" "basic" {
     uuid = "%s"
   }
 
-  size = 10
+  size = 5
+  volume_type = "lvmdriver-1"
 }
 
 resource "openstack_db_user_v1" "basic" {

@@ -130,7 +130,8 @@ func testAccDatabaseV1DatabaseBasic() string {
 	return fmt.Sprintf(`
 resource "openstack_db_instance_v1" "basic" {
   name = "basic"
-  size = 10
+  size = 5
+  flavor_id = 97
 
   datastore {
     version = "%s"

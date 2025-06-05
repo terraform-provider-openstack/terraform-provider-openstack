@@ -3,11 +3,13 @@ package openstack
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
+	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/configurations"
 )
 
@@ -86,7 +88,7 @@ func testAccCheckDatabaseV1ConfigurationDestroy(s *terraform.State) error {
 		}
 
 		_, err := configurations.Get(context.TODO(), databaseV1Client, rs.Primary.ID).Extract()
-		if err.Error() != "Resource not found" {
+		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return fmt.Errorf("Destroy check failed: %s", err)
 		}
 	}
