@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/addressgroups"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/groups"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/rules"
 )
@@ -232,6 +233,29 @@ func TestAccNetworkingV2SecGroupRule_numericProtocol(t *testing.T) {
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", &secgroupRule1),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", "protocol", "6"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2SecGroupRule_addressgroup(t *testing.T) {
+	var addressGroup addressgroups.AddressGroup
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2SecGroupRuleAddressGroup,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2AddressGroupExists("openstack_networking_address_group_v2.group_1", &addressGroup),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", "remote_address_group_id", &addressGroup.ID),
 				),
 			},
 		},
@@ -546,5 +570,31 @@ resource "openstack_networking_secgroup_rule_v2" "secgroup_rule_1" {
   protocol = "6"
   remote_ip_prefix = "0.0.0.0/0"
   security_group_id = "${openstack_networking_secgroup_v2.secgroup_1.id}"
+}
+`
+
+const testAccNetworkingV2SecGroupRuleAddressGroup = `
+resource "openstack_networking_secgroup_v2" "secgroup_1" {
+  name = "secgroup_1"
+  description = "terraform security group rule acceptance test"
+}
+
+resource "openstack_networking_address_group_v2" "group_1" {
+  name = "group_1"
+  description = "terraform security group address group acceptance test"
+  addresses = [
+    "192.168.0.1/32",
+    "2001:db8::/32",
+  ]
+}
+
+resource "openstack_networking_secgroup_rule_v2" "secgroup_rule_1" {
+  direction = "ingress"
+  ethertype = "IPv4"
+  port_range_max = 22
+  port_range_min = 22
+  protocol = "tcp"
+  remote_address_group_id = openstack_networking_address_group_v2.group_1.id
+  security_group_id = openstack_networking_secgroup_v2.secgroup_1.id
 }
 `

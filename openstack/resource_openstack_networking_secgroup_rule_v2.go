@@ -79,20 +79,30 @@ func resourceNetworkingSecGroupRuleV2() *schema.Resource {
 			},
 
 			"remote_group_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				Computed:      true,
+				ConflictsWith: []string{"remote_ip_prefix", "remote_address_group_id"},
 			},
 
 			"remote_ip_prefix": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				Computed:      true,
+				ConflictsWith: []string{"remote_group_id", "remote_address_group_id"},
 				StateFunc: func(v interface{}) string {
 					return strings.ToLower(v.(string))
 				},
+			},
+
+			"remote_address_group_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				Computed:      true,
+				ConflictsWith: []string{"remote_group_id", "remote_ip_prefix"},
 			},
 
 			"security_group_id": {
@@ -126,16 +136,17 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 	direction := d.Get("direction").(string)
 	etherType := d.Get("ethertype").(string)
 	opts := rules.CreateOpts{
-		Direction:      rules.RuleDirection(direction),
-		EtherType:      rules.RuleEtherType(etherType),
-		Protocol:       rules.RuleProtocol(protocol),
-		PortRangeMin:   d.Get("port_range_min").(int),
-		PortRangeMax:   d.Get("port_range_max").(int),
-		Description:    d.Get("description").(string),
-		SecGroupID:     securityGroupID,
-		RemoteGroupID:  d.Get("remote_group_id").(string),
-		RemoteIPPrefix: d.Get("remote_ip_prefix").(string),
-		ProjectID:      d.Get("tenant_id").(string),
+		Direction:            rules.RuleDirection(direction),
+		EtherType:            rules.RuleEtherType(etherType),
+		Protocol:             rules.RuleProtocol(protocol),
+		PortRangeMin:         d.Get("port_range_min").(int),
+		PortRangeMax:         d.Get("port_range_max").(int),
+		Description:          d.Get("description").(string),
+		SecGroupID:           securityGroupID,
+		RemoteGroupID:        d.Get("remote_group_id").(string),
+		RemoteIPPrefix:       d.Get("remote_ip_prefix").(string),
+		RemoteAddressGroupID: d.Get("remote_address_group_id").(string),
+		ProjectID:            d.Get("tenant_id").(string),
 	}
 
 	log.Printf("[DEBUG] openstack_networking_secgroup_rule_v2 create options: %#v", opts)
@@ -173,6 +184,7 @@ func resourceNetworkingSecGroupRuleV2Read(ctx context.Context, d *schema.Resourc
 	d.Set("port_range_max", sgRule.PortRangeMax)
 	d.Set("remote_group_id", sgRule.RemoteGroupID)
 	d.Set("remote_ip_prefix", sgRule.RemoteIPPrefix)
+	d.Set("remote_address_group_id", sgRule.RemoteAddressGroupID)
 	d.Set("security_group_id", sgRule.SecGroupID)
 	d.Set("tenant_id", sgRule.TenantID)
 	d.Set("region", GetRegion(d, config))
