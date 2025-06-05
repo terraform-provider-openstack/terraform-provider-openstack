@@ -49,6 +49,9 @@ data "openstack_networking_subnet_v2" "subnet_1" {
 * `ipv6_ra_mode` - (Optional) The IPv6 Router Advertisement mode. Valid values
   are `dhcpv6-stateful`, `dhcpv6-stateless`, or `slaac`.
 
+* `segment_id` - (Optional) The ID of the segment the subnet belongs to.
+  Available when neutron segment extension is enabled.
+
 * `subnetpool_id` - (Optional) The ID of the subnetpool associated with the subnet.
 
 * `dns_publish_fixed_ip` - (Optional) If the subnet publishes DNS records.

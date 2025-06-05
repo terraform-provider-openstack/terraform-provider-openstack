@@ -93,6 +93,10 @@ The following arguments are supported:
 * `service_types` - (Optional) An array of service types used by the subnet.
   Changing this updates the service types for the existing subnet.
 
+* `segment_id` - (Optional) The segment ID of the subnet. This is used to
+  specify which segment the subnet belongs to when using Neutron's routed
+  provider networks. Available when neutron segment extension is enabled.
+
 * `subnetpool_id` - (Optional) The ID of the subnetpool associated with the subnet.
 
 * `value_specs` - (Optional) Map of additional options.
@@ -121,6 +125,7 @@ The following attributes are exported:
 * `enable_dhcp` - See Argument Reference above.
 * `dns_nameservers` - See Argument Reference above.
 * `service_types` - See Argument Reference above.
+* `segment_id` - See Argument Reference above.
 * `subnetpool_id` - See Argument Reference above.
 * `tags` - See Argument Reference above.
 * `all_tags` - The collection of ags assigned on the subnet, which have been

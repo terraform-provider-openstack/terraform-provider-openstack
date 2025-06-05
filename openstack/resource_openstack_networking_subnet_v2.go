@@ -164,6 +164,11 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				}, false),
 			},
 
+			"segment_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"subnetpool_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -226,6 +231,7 @@ func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceDat
 			AllocationPools: expandNetworkingSubnetV2AllocationPools(allocationPool),
 			DNSNameservers:  expandToStringSlice(d.Get("dns_nameservers").([]interface{})),
 			ServiceTypes:    expandToStringSlice(d.Get("service_types").([]interface{})),
+			SegmentID:       d.Get("segment_id").(string),
 			SubnetPoolID:    d.Get("subnetpool_id").(string),
 			IPVersion:       gophercloud.IPVersion(d.Get("ip_version").(int)),
 		},
@@ -337,6 +343,7 @@ func resourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceData,
 	d.Set("network_id", s.NetworkID)
 	d.Set("ipv6_address_mode", s.IPv6AddressMode)
 	d.Set("ipv6_ra_mode", s.IPv6RAMode)
+	d.Set("segment_id", s.SegmentID)
 	d.Set("subnetpool_id", s.SubnetPoolID)
 	d.Set("dns_publish_fixed_ip", s.DNSPublishFixedIP)
 
@@ -425,6 +432,12 @@ func resourceNetworkingSubnetV2Update(ctx context.Context, d *schema.ResourceDat
 	if d.HasChange("allocation_pool") {
 		hasChange = true
 		updateOpts.AllocationPools = expandNetworkingSubnetV2AllocationPools(d.Get("allocation_pool").(*schema.Set).List())
+	}
+
+	if d.HasChange("segment_id") {
+		hasChange = true
+		v := d.Get("segment_id").(string)
+		updateOpts.SegmentID = &v
 	}
 
 	if d.HasChange("dns_publish_fixed_ip") {
