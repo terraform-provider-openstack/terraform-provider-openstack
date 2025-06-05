@@ -96,19 +96,28 @@ func resourceLoadBalancerQuotaV2Create(ctx context.Context, d *schema.ResourceDa
 	}
 
 	region := GetRegion(d, config)
+	updateOpts := quotas.UpdateOpts{}
 	projectID := d.Get("project_id").(string)
-	loadbalancer := d.Get("loadbalancer").(int)
-	listener := d.Get("listener").(int)
-	member := d.Get("member").(int)
-	pool := d.Get("pool").(int)
-	healthmonitor := d.Get("health_monitor").(int)
 
-	updateOpts := quotas.UpdateOpts{
-		Loadbalancer:  &loadbalancer,
-		Listener:      &listener,
-		Member:        &member,
-		Pool:          &pool,
-		Healthmonitor: &healthmonitor,
+	if v, ok := getOkExists(d, "loadbalancer"); ok {
+		value := v.(int)
+		updateOpts.Loadbalancer = &value
+	}
+	if v, ok := getOkExists(d, "listener"); ok {
+		value := v.(int)
+		updateOpts.Listener = &value
+	}
+	if v, ok := getOkExists(d, "member"); ok {
+		value := v.(int)
+		updateOpts.Member = &value
+	}
+	if v, ok := getOkExists(d, "pool"); ok {
+		value := v.(int)
+		updateOpts.Pool = &value
+	}
+	if v, ok := getOkExists(d, "health_monitor"); ok {
+		value := v.(int)
+		updateOpts.Healthmonitor = &value
 	}
 
 	// l7_policy requires octavia minor version 2.19. Only set when specified
