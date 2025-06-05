@@ -33,6 +33,8 @@ func TestAccDatabaseV1Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPtr(
 						"openstack_db_instance_v1.basic", "name", &instance.Name),
 					resource.TestCheckResourceAttr(
+						"openstack_db_instance_v1.basic", "volume_type", "io-nvme"),
+					resource.TestCheckResourceAttr(
 						"openstack_db_instance_v1.basic", "user.0.name", "testuser"),
 					resource.TestCheckResourceAttr(
 						"openstack_db_instance_v1.basic", "user.0.password", "testpassword"),
@@ -128,6 +130,7 @@ resource "openstack_db_instance_v1" "basic" {
   }
 
   size = 10
+  volume_type = "io-nvme"
 
   database {
     name    = "testdb1"
