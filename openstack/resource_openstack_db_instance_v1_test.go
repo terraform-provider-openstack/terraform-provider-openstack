@@ -72,12 +72,12 @@ func testAccCheckDatabaseV1InstanceExists(n string, instance *instances.Instance
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		DatabaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
+		databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		found, err := instances.Get(context.TODO(), DatabaseV1Client, rs.Primary.ID).Extract()
+		found, err := instances.Get(context.TODO(), databaseV1Client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -95,7 +95,7 @@ func testAccCheckDatabaseV1InstanceExists(n string, instance *instances.Instance
 func testAccCheckDatabaseV1InstanceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
-	DatabaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
+	databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -105,7 +105,7 @@ func testAccCheckDatabaseV1InstanceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := instances.Get(context.TODO(), DatabaseV1Client, rs.Primary.ID).Extract()
+		_, err := instances.Get(context.TODO(), databaseV1Client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Instance still exists")
 		}

@@ -57,12 +57,12 @@ func testAccCheckDatabaseV1DatabaseExists(n string, instance *instances.Instance
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		DatabaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
+		databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		pages, err := databases.List(DatabaseV1Client, instance.ID).AllPages(context.TODO())
+		pages, err := databases.List(databaseV1Client, instance.ID).AllPages(context.TODO())
 		if err != nil {
 			return fmt.Errorf("Unable to retrieve databases: %s", err)
 		}
@@ -86,7 +86,7 @@ func testAccCheckDatabaseV1DatabaseExists(n string, instance *instances.Instance
 func testAccCheckDatabaseV1DatabaseDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
-	DatabaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
+	databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 	}
@@ -101,7 +101,7 @@ func testAccCheckDatabaseV1DatabaseDestroy(s *terraform.State) error {
 			return err
 		}
 
-		pages, err := databases.List(DatabaseV1Client, id).AllPages(context.TODO())
+		pages, err := databases.List(databaseV1Client, id).AllPages(context.TODO())
 		if err != nil {
 			return nil
 		}

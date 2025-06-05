@@ -190,7 +190,7 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 
 func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	DatabaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
+	databaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack database client: %s", err)
 	}
@@ -236,7 +236,7 @@ func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceDat
 
 	log.Printf("[DEBUG] openstack_db_instance_v1 create options: %#v", createOpts)
 
-	instance, err := instances.Create(ctx, DatabaseV1Client, createOpts).Extract()
+	instance, err := instances.Create(ctx, databaseV1Client, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_db_instance_v1: %s", err)
 	}
@@ -247,7 +247,7 @@ func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceDat
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"BUILD"},
 		Target:     []string{"ACTIVE", "HEALTHY"},
-		Refresh:    databaseInstanceV1StateRefreshFunc(ctx, DatabaseV1Client, instance.ID),
+		Refresh:    databaseInstanceV1StateRefreshFunc(ctx, databaseV1Client, instance.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -260,7 +260,7 @@ func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceDat
 
 	if configuration, ok := d.GetOk("configuration_id"); ok {
 		log.Printf("[DEBUG] Attaching configuration %s to openstack_db_instance_v1 %s", configuration, instance.ID)
-		err := instances.AttachConfigurationGroup(ctx, DatabaseV1Client, instance.ID, configuration.(string)).ExtractErr()
+		err := instances.AttachConfigurationGroup(ctx, databaseV1Client, instance.ID, configuration.(string)).ExtractErr()
 		if err != nil {
 			return diag.Errorf("error attaching configuration group %s to openstack_db_instance_v1 %s: %s",
 				configuration, instance.ID, err)
@@ -275,12 +275,12 @@ func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceDat
 
 func resourceDatabaseInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	DatabaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
+	databaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack database client: %s", err)
 	}
 
-	instance, err := instances.Get(ctx, DatabaseV1Client, d.Id()).Extract()
+	instance, err := instances.Get(ctx, databaseV1Client, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_db_instance_v1"))
 	}
@@ -290,15 +290,15 @@ func resourceDatabaseInstanceV1Read(ctx context.Context, d *schema.ResourceData,
 	d.Set("name", instance.Name)
 	d.Set("flavor_id", instance.Flavor)
 	d.Set("datastore", instance.Datastore)
-	d.Set("region", GetRegion(d, config))
 	d.Set("addresses", instance.IP)
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }
 
 func resourceDatabaseInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	DatabaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
+	databaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack database client: %s", err)
 	}
@@ -306,14 +306,14 @@ func resourceDatabaseInstanceUpdate(ctx context.Context, d *schema.ResourceData,
 	if d.HasChange("configuration_id") {
 		o, n := d.GetChange("configuration_id")
 
-		err := instances.DetachConfigurationGroup(ctx, DatabaseV1Client, d.Id()).ExtractErr()
+		err := instances.DetachConfigurationGroup(ctx, databaseV1Client, d.Id()).ExtractErr()
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		log.Printf("Detaching configuration %s from openstack_db_instance_v1 %s", o, d.Id())
 
 		if n != "" {
-			err := instances.AttachConfigurationGroup(ctx, DatabaseV1Client, d.Id(), n.(string)).ExtractErr()
+			err := instances.AttachConfigurationGroup(ctx, databaseV1Client, d.Id(), n.(string)).ExtractErr()
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -326,12 +326,12 @@ func resourceDatabaseInstanceUpdate(ctx context.Context, d *schema.ResourceData,
 
 func resourceDatabaseInstanceV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	DatabaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
+	databaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack database client: %s", err)
 	}
 
-	err = instances.Delete(ctx, DatabaseV1Client, d.Id()).ExtractErr()
+	err = instances.Delete(ctx, databaseV1Client, d.Id()).ExtractErr()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_db_instance_v1"))
 	}
@@ -339,7 +339,7 @@ func resourceDatabaseInstanceV1Delete(ctx context.Context, d *schema.ResourceDat
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE", "SHUTDOWN"},
 		Target:     []string{"DELETED"},
-		Refresh:    databaseInstanceV1StateRefreshFunc(ctx, DatabaseV1Client, d.Id()),
+		Refresh:    databaseInstanceV1StateRefreshFunc(ctx, databaseV1Client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
