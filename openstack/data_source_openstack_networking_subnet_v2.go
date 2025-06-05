@@ -156,6 +156,12 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 				}, false),
 			},
 
+			"segment_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+				Optional: true,
+			},
+
 			"subnetpool_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -231,6 +237,10 @@ func dataSourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceDat
 		listOpts.IPv6RAMode = v.(string)
 	}
 
+	if v, ok := d.GetOk("segment_id"); ok {
+		listOpts.SegmentID = v.(string)
+	}
+
 	if v, ok := d.GetOk("subnetpool_id"); ok {
 		listOpts.SubnetPoolID = v.(string)
 	}
@@ -280,6 +290,7 @@ func dataSourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceDat
 	d.Set("ipv6_ra_mode", subnet.IPv6RAMode)
 	d.Set("gateway_ip", subnet.GatewayIP)
 	d.Set("enable_dhcp", subnet.EnableDHCP)
+	d.Set("segment_id", subnet.SegmentID)
 	d.Set("subnetpool_id", subnet.SubnetPoolID)
 	d.Set("dns_publish_fixed_ip", subnet.DNSPublishFixedIP)
 	d.Set("all_tags", subnet.Tags)

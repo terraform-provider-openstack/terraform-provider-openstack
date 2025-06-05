@@ -104,6 +104,11 @@ func dataSourceNetworkingSubnetIDsV2() *schema.Resource {
 				}, false),
 			},
 
+			"segment_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"subnetpool_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -192,6 +197,10 @@ func dataSourceNetworkingSubnetIDsV2Read(ctx context.Context, d *schema.Resource
 
 	if v, ok := d.GetOk("ipv6_ra_mode"); ok {
 		listOpts.IPv6RAMode = v.(string)
+	}
+
+	if v, ok := d.GetOk("segment_id"); ok {
+		listOpts.SegmentID = v.(string)
 	}
 
 	if v, ok := d.GetOk("subnetpool_id"); ok {
