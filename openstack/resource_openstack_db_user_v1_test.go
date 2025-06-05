@@ -142,6 +142,7 @@ resource "openstack_db_instance_v1" "basic" {
   }
 
   size = 5
+  volume_type = "lvmdriver-1"
 }
 
 resource "openstack_db_user_v1" "basic" {
