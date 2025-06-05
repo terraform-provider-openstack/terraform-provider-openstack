@@ -52,12 +52,12 @@ func testAccCheckDatabaseV1ConfigurationExists(n string, configuration *configur
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		DatabaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
+		databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
-		found, err := configurations.Get(context.TODO(), DatabaseV1Client, rs.Primary.ID).Extract()
+		found, err := configurations.Get(context.TODO(), databaseV1Client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -75,7 +75,7 @@ func testAccCheckDatabaseV1ConfigurationExists(n string, configuration *configur
 func testAccCheckDatabaseV1ConfigurationDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
-	DatabaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
+	databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating database client: %s", err)
 	}
@@ -85,7 +85,7 @@ func testAccCheckDatabaseV1ConfigurationDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := configurations.Get(context.TODO(), DatabaseV1Client, rs.Primary.ID).Extract()
+		_, err := configurations.Get(context.TODO(), databaseV1Client, rs.Primary.ID).Extract()
 		if err.Error() != "Resource not found" {
 			return fmt.Errorf("Destroy check failed: %s", err)
 		}
