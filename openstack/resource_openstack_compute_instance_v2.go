@@ -204,14 +204,10 @@ func resourceComputeInstanceV2() *schema.Resource {
 			"access_ip_v4": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
-				ForceNew: false,
 			},
 			"access_ip_v6": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
-				ForceNew: false,
 			},
 			"key_pair": {
 				Type:     schema.TypeString,

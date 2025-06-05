@@ -448,6 +448,29 @@ func TestAccComputeV2Instance_accessIPv4(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2Instance_accessIPv6(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2InstanceAccessIPv6(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"openstack_compute_instance_v2.instance_1", "access_ip_v6", "2560:d0c2:9d26:eb77:f3d5:8ca3:2069:7783"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 	var instance1 servers.Server
 	var instance2 servers.Server
@@ -1295,6 +1318,40 @@ resource "openstack_compute_instance_v2" "instance_1" {
     uuid = "${openstack_networking_network_v2.network_1.id}"
     fixed_ip_v4 = "192.168.1.100"
     access_network = true
+  }
+}
+`, osNetworkID)
+}
+
+func testAccComputeV2InstanceAccessIPv6() string {
+	return fmt.Sprintf(`
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  network_id = "${openstack_networking_network_v2.network_1.id}"
+  cidr = "2560:d0c2:9d26:eb77:f3d5:8ca3:2069:7783/128"
+  ip_version = 6
+  enable_dhcp = false
+  no_gateway = true
+}
+
+resource "openstack_compute_instance_v2" "instance_1" {
+  depends_on = ["openstack_networking_subnet_v2.subnet_1"]
+
+  name = "instance_1"
+  security_groups = ["default"]
+
+  network {
+	uuid = "%s"
+  }
+
+  network {
+	uuid = "${openstack_networking_network_v2.network_1.id}"
+	fixed_ip_v6 = "2560:d0c2:9d26:eb77:f3d5:8ca3:2069:7783"
+	access_network = true
   }
 }
 `, osNetworkID)
