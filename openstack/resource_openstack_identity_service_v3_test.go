@@ -2,20 +2,22 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/services"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/services"
 )
 
 func TestAccIdentityV3Service_basic(t *testing.T) {
 	var name, description string
+
 	var service services.Service
-	var serviceName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+
+	serviceName := "ACCPTTEST-" + acctest.RandString(5)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -59,9 +61,10 @@ func TestAccIdentityV3Service_basic(t *testing.T) {
 
 func testAccCheckIdentityV3ServiceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -71,7 +74,7 @@ func testAccCheckIdentityV3ServiceDestroy(s *terraform.State) error {
 
 		_, err := services.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Service still exists")
+			return errors.New("Service still exists")
 		}
 	}
 
@@ -86,13 +89,14 @@ func testAccCheckIdentityV3ServiceExists(n string, service *services.Service, na
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
 		found, err := services.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
@@ -101,7 +105,7 @@ func testAccCheckIdentityV3ServiceExists(n string, service *services.Service, na
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Service not found")
+			return errors.New("Service not found")
 		}
 
 		if v, ok := found.Extra["name"]; ok {

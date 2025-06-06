@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
 )
 
 func TestAccNetworkingV2QoSPolicyBasic(t *testing.T) {
@@ -55,13 +55,14 @@ func testAccCheckNetworkingV2QoSPolicyExists(n string, policy *policies.Policy) 
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := policies.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -70,7 +71,7 @@ func testAccCheckNetworkingV2QoSPolicyExists(n string, policy *policies.Policy) 
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("QoS policy not found")
+			return errors.New("QoS policy not found")
 		}
 
 		*policy = *found
@@ -81,9 +82,10 @@ func testAccCheckNetworkingV2QoSPolicyExists(n string, policy *policies.Policy) 
 
 func testAccCheckNetworkingV2QoSPolicyDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -93,7 +95,7 @@ func testAccCheckNetworkingV2QoSPolicyDestroy(s *terraform.State) error {
 
 		_, err := policies.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("QoS policy still exists")
+			return errors.New("QoS policy still exists")
 		}
 	}
 

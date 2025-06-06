@@ -2,14 +2,14 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/ec2credentials"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccIdentityV3Ec2Credential_basic(t *testing.T) {
@@ -43,9 +43,10 @@ func TestAccIdentityV3Ec2Credential_basic(t *testing.T) {
 
 func testAccCheckIdentityV3Ec2CredentialDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 	}
 
 	token := tokens.Get(context.TODO(), identityClient, config.OsClient.TokenID)
@@ -65,14 +66,14 @@ func testAccCheckIdentityV3Ec2CredentialDestroy(s *terraform.State) error {
 
 		_, err := ec2credentials.Get(context.TODO(), identityClient, user.ID, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Ec2Credential still exists")
+			return errors.New("Ec2Credential still exists")
 		}
 	}
 
 	return nil
 }
 
-func testAccCheckIdentityV3Ec2CredentialExists(n string, Ec2Credential *ec2credentials.Credential) resource.TestCheckFunc {
+func testAccCheckIdentityV3Ec2CredentialExists(n string, ec2Credential *ec2credentials.Credential) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -80,13 +81,14 @@ func testAccCheckIdentityV3Ec2CredentialExists(n string, Ec2Credential *ec2crede
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
 		token := tokens.Get(context.TODO(), identityClient, config.OsClient.TokenID)
@@ -105,10 +107,10 @@ func testAccCheckIdentityV3Ec2CredentialExists(n string, Ec2Credential *ec2crede
 		}
 
 		if found.Access != rs.Primary.ID {
-			return fmt.Errorf("Ec2Credential not found")
+			return errors.New("Ec2Credential not found")
 		}
 
-		*Ec2Credential = *found
+		*ec2Credential = *found
 
 		return nil
 	}

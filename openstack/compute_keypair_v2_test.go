@@ -17,8 +17,8 @@ func TestUnitComputeKeyPairV2CreateOpts(t *testing.T) {
 		},
 	}
 
-	expected := map[string]interface{}{
-		"keypair": map[string]interface{}{
+	expected := map[string]any{
+		"keypair": map[string]any{
 			"name": "kp_1",
 			"foo":  "bar",
 		},

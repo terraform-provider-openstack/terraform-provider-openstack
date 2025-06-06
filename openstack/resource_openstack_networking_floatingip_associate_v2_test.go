@@ -2,15 +2,15 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccNetworkingV2FloatingIPAssociate_basic(t *testing.T) {
@@ -82,9 +82,10 @@ func TestAccNetworkingV2FloatingIPAssociate_twoFixedIPs(t *testing.T) {
 
 func testAccCheckNetworkingV2FloatingIPAssociateDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack network client: %s", err)
+		return fmt.Errorf("Error creating OpenStack network client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -98,11 +99,11 @@ func testAccCheckNetworkingV2FloatingIPAssociateDestroy(s *terraform.State) erro
 				return nil
 			}
 
-			return fmt.Errorf("Error retrieving Floating IP: %s", err)
+			return fmt.Errorf("Error retrieving Floating IP: %w", err)
 		}
 
 		if fip.PortID != "" {
-			return fmt.Errorf("Floating IP is still associated")
+			return errors.New("Floating IP is still associated")
 		}
 	}
 

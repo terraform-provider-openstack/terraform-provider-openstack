@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/orchestration/v1/stacks"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/orchestration/v1/stacks"
 )
 
 func TestAccOrchestrationV1Stack_basic(t *testing.T) {
@@ -139,9 +139,10 @@ func TestAccOrchestrationV1Stack_outputs(t *testing.T) {
 
 func testAccCheckOrchestrationV1StackDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	orchestrationClient, err := config.OrchestrationV1Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Orchestration client: %s", err)
+		return fmt.Errorf("Error creating OpenStack Orchestration client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -152,7 +153,7 @@ func testAccCheckOrchestrationV1StackDestroy(s *terraform.State) error {
 		stack, err := stacks.Find(context.TODO(), orchestrationClient, rs.Primary.ID).Extract()
 		if err == nil {
 			if stack.Status != "DELETE_COMPLETE" {
-				return fmt.Errorf("stack still exists")
+				return errors.New("stack still exists")
 			}
 		}
 	}
@@ -168,13 +169,14 @@ func testAccCheckOrchestrationV1StackExists(n string, stack *stacks.RetrievedSta
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		orchestrationClient, err := config.OrchestrationV1Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack orchestration client: %s", err)
+			return fmt.Errorf("Error creating OpenStack orchestration client: %w", err)
 		}
 
 		found, err := stacks.Find(context.TODO(), orchestrationClient, rs.Primary.ID).Extract()
@@ -183,7 +185,7 @@ func testAccCheckOrchestrationV1StackExists(n string, stack *stacks.RetrievedSta
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Stack not found")
+			return errors.New("Stack not found")
 		}
 
 		*stack = *found

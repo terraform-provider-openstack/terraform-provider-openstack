@@ -2,16 +2,16 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/fwaas_v2/groups"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccFWGroupV2_basic(t *testing.T) {
@@ -190,10 +190,12 @@ func TestAccFWGroupV2_port_remove(t *testing.T) {
 
 func testAccCheckFWGroupV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "openstack_fw_group_v2" {
 			continue
@@ -203,10 +205,12 @@ func testAccCheckFWGroupV2Destroy(s *terraform.State) error {
 		if err == nil {
 			return fmt.Errorf("Firewall group (%s) still exists", rs.Primary.ID)
 		}
+
 		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -218,13 +222,14 @@ func testAccCheckFWGroupV2Exists(n string, group *groups.Group) resource.TestChe
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Exists) Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Exists) Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := groups.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -243,7 +248,7 @@ func testAccCheckFWGroupV2Exists(n string, group *groups.Group) resource.TestChe
 }
 
 func testAccCheckFWGroupPortCount(group *groups.Group, expected int) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if len(group.Ports) != expected {
 			return fmt.Errorf("Expected %d Ports, got %d", expected, len(group.Ports))
 		}
@@ -252,7 +257,7 @@ func testAccCheckFWGroupPortCount(group *groups.Group, expected int) resource.Te
 	}
 }
 
-func testAccCheckFWGroupV2(n, expectedName, expectedDescription string, IngressFirewallPolicyID *string) resource.TestCheckFunc {
+func testAccCheckFWGroupV2(n, expectedName, expectedDescription string, ingressFirewallPolicyID *string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -260,27 +265,31 @@ func testAccCheckFWGroupV2(n, expectedName, expectedDescription string, IngressF
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Exists) Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Exists) Error creating OpenStack networking client: %w", err)
 		}
 
 		var found *groups.Group
-		for i := 0; i < 5; i++ {
+		for range 5 {
 			// Firewall group creation is asynchronous. Retry some times
 			// if we get a 404 error. Fail on any other error.
 			found, err = groups.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 			if err != nil {
 				if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 					time.Sleep(time.Second)
+
 					continue
 				}
+
 				return err
 			}
+
 			break
 		}
 
@@ -291,14 +300,14 @@ func testAccCheckFWGroupV2(n, expectedName, expectedDescription string, IngressF
 			err = fmt.Errorf("Expected Description to be <%s> but found <%s>",
 				expectedDescription, found.Description)
 		case found.IngressFirewallPolicyID == "":
-			err = fmt.Errorf("Policy should not be empty")
+			err = errors.New("Policy should not be empty")
 		}
 
 		if err != nil {
 			return err
 		}
 
-		IngressFirewallPolicyID = &found.IngressFirewallPolicyID
+		ingressFirewallPolicyID = &found.IngressFirewallPolicyID
 
 		return nil
 	}

@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -42,7 +43,7 @@ func testAccCheckComputeHypervisorV2DataSourceID(n string) resource.TestCheckFun
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Data source ID not set")
+			return errors.New("Data source ID not set")
 		}
 
 		return nil

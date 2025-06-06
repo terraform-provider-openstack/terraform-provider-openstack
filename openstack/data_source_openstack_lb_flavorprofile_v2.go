@@ -5,11 +5,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/flavorprofiles"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceLBFlavorProfileV2() *schema.Resource {
@@ -52,8 +51,9 @@ func dataSourceLBFlavorProfileV2() *schema.Resource {
 	}
 }
 
-func dataSourceLBFlavorProfileV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceLBFlavorProfileV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancer client: %s", err)
@@ -65,10 +65,11 @@ func dataSourceLBFlavorProfileV2Read(ctx context.Context, d *schema.ResourceData
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return diag.Errorf("No flavor profile found")
 			}
+
 			return diag.Errorf("Unable to retrieve OpenStack %s loadbalancer flavor: %s", id, err)
 		}
 
-		dataSourceLBFlavorProfileV2Attributes(d, lbClient, fp)
+		dataSourceLBFlavorProfileV2Attributes(d, fp)
 		d.Set("region", GetRegion(d, config))
 
 		return nil
@@ -78,6 +79,7 @@ func dataSourceLBFlavorProfileV2Read(ctx context.Context, d *schema.ResourceData
 		Name:         d.Get("name").(string),
 		ProviderName: d.Get("provider_name").(string),
 	}
+
 	allPages, err := flavorprofiles.List(lbClient, opts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query OpenStack flavors: %s", err)
@@ -95,17 +97,18 @@ func dataSourceLBFlavorProfileV2Read(ctx context.Context, d *schema.ResourceData
 
 	if len(allfps) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allfps)
+
 		return diag.Errorf("Your query returned more than one result. " +
 			"Please try a more specific search criteria")
 	}
 
-	dataSourceLBFlavorProfileV2Attributes(d, lbClient, &allfps[0])
+	dataSourceLBFlavorProfileV2Attributes(d, &allfps[0])
 	d.Set("region", GetRegion(d, config))
 
 	return nil
 }
 
-func dataSourceLBFlavorProfileV2Attributes(d *schema.ResourceData, computeClient *gophercloud.ServiceClient, fp *flavorprofiles.FlavorProfile) {
+func dataSourceLBFlavorProfileV2Attributes(d *schema.ResourceData, fp *flavorprofiles.FlavorProfile) {
 	log.Printf("[DEBUG] Retrieved openstack_lb_flavorprofile_v2 %s: %#v", fp.ID, fp)
 
 	d.SetId(fp.ID)

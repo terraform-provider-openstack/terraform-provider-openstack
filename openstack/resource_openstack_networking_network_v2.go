@@ -6,11 +6,6 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/external"
@@ -20,6 +15,10 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vlantransparent"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceNetworkingNetworkV2() *schema.Resource {
@@ -170,8 +169,9 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingNetworkV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingNetworkV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -265,6 +265,7 @@ func resourceNetworkingNetworkV2Create(ctx context.Context, d *schema.ResourceDa
 	}
 
 	log.Printf("[DEBUG] openstack_networking_network_v2 create options: %#v", finalCreateOpts)
+
 	n, err := networks.Create(ctx, networkingClient, finalCreateOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_networking_network_v2: %s", err)
@@ -291,19 +292,23 @@ func resourceNetworkingNetworkV2Create(ctx context.Context, d *schema.ResourceDa
 	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+
 		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "networks", n.ID, tagOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error setting tags on openstack_networking_network_v2 %s: %s", n.ID, err)
 		}
+
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_network_v2 %s", tags, n.ID)
 	}
 
 	log.Printf("[DEBUG] Created openstack_networking_network_v2 %s: %#v", n.ID, n)
+
 	return resourceNetworkingNetworkV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -341,8 +346,9 @@ func resourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceNetworkingNetworkV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingNetworkV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -359,14 +365,17 @@ func resourceNetworkingNetworkV2Update(ctx context.Context, d *schema.ResourceDa
 		name := d.Get("name").(string)
 		updateOpts.Name = &name
 	}
+
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
 	}
+
 	if d.HasChange("admin_state_up") {
 		asu := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &asu
 	}
+
 	if d.HasChange("shared") {
 		shared := d.Get("shared").(bool)
 		updateOpts.Shared = &shared
@@ -376,10 +385,12 @@ func resourceNetworkingNetworkV2Update(ctx context.Context, d *schema.ResourceDa
 	if d.HasChange("tags") {
 		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+
 		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "networks", d.Id(), tagOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error setting tags on openstack_networking_network_v2 %s: %s", d.Id(), err)
 		}
+
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_network_v2 %s", tags, d.Id())
 	}
 
@@ -437,6 +448,7 @@ func resourceNetworkingNetworkV2Update(ctx context.Context, d *schema.ResourceDa
 	}
 
 	log.Printf("[DEBUG] openstack_networking_network_v2 %s update options: %#v", d.Id(), finalUpdateOpts)
+
 	_, err = networks.Update(ctx, networkingClient, d.Id(), finalUpdateOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error updating openstack_networking_network_v2 %s: %s", d.Id(), err)
@@ -445,8 +457,9 @@ func resourceNetworkingNetworkV2Update(ctx context.Context, d *schema.ResourceDa
 	return resourceNetworkingNetworkV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingNetworkV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingNetworkV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -471,5 +484,6 @@ func resourceNetworkingNetworkV2Delete(ctx context.Context, d *schema.ResourceDa
 	}
 
 	d.SetId("")
+
 	return nil
 }

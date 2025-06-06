@@ -4,10 +4,9 @@ import (
 	"context"
 	"log"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/services"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/services"
 )
 
 func dataSourceIdentityServiceV3() *schema.Resource {
@@ -46,8 +45,9 @@ func dataSourceIdentityServiceV3() *schema.Resource {
 }
 
 // dataSourceIdentityServiceV3Read performs the service lookup.
-func dataSourceIdentityServiceV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIdentityServiceV3Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
@@ -62,6 +62,7 @@ func dataSourceIdentityServiceV3Read(ctx context.Context, d *schema.ResourceData
 	log.Printf("[DEBUG] openstack_identity_service_v3 list options: %#v", listOpts)
 
 	var service services.Service
+
 	allPages, err := services.List(identityClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query openstack_identity_service_v3: %s", err)
@@ -75,11 +76,13 @@ func dataSourceIdentityServiceV3Read(ctx context.Context, d *schema.ResourceData
 	// filter by enabled, when the enabled is specified
 	if v, ok := getOkExists(d, "enabled"); ok {
 		var filteredServices []services.Service
+
 		for _, svc := range allServices {
 			if svc.Enabled == v.(bool) {
 				filteredServices = append(filteredServices, svc)
 			}
 		}
+
 		allServices = filteredServices
 	}
 
@@ -91,12 +94,15 @@ func dataSourceIdentityServiceV3Read(ctx context.Context, d *schema.ResourceData
 	if len(allServices) > 1 {
 		return diag.Errorf("Your openstack_identity_service_v3 query returned more than one result")
 	}
+
 	service = allServices[0]
 
 	description := ""
+
 	if v, ok := service.Extra["name"].(string); ok {
 		name = v
 	}
+
 	if v, ok := service.Extra["description"].(string); ok {
 		description = v
 	}

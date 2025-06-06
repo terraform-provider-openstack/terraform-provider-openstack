@@ -4,14 +4,13 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 )
 
 func resourceNetworkingRouterV2StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, routerID string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		n, err := routers.Get(ctx, client, routerID).Extract()
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
@@ -25,11 +24,11 @@ func resourceNetworkingRouterV2StateRefreshFunc(ctx context.Context, client *gop
 	}
 }
 
-func expandNetworkingRouterExternalFixedIPsV2(externalFixedIPs []interface{}) []routers.ExternalFixedIP {
+func expandNetworkingRouterExternalFixedIPsV2(externalFixedIPs []any) []routers.ExternalFixedIP {
 	fixedIPs := make([]routers.ExternalFixedIP, len(externalFixedIPs))
 
 	for i, raw := range externalFixedIPs {
-		rawMap := raw.(map[string]interface{})
+		rawMap := raw.(map[string]any)
 
 		fixedIPs[i] = routers.ExternalFixedIP{
 			SubnetID:  rawMap["subnet_id"].(string),
@@ -40,7 +39,7 @@ func expandNetworkingRouterExternalFixedIPsV2(externalFixedIPs []interface{}) []
 	return fixedIPs
 }
 
-func expandNetworkingRouterExternalSubnetIDsV2(externalSubnetIDs []interface{}) []routers.ExternalFixedIP {
+func expandNetworkingRouterExternalSubnetIDsV2(externalSubnetIDs []any) []routers.ExternalFixedIP {
 	subnetIDs := make([]routers.ExternalFixedIP, len(externalSubnetIDs))
 
 	for i, raw := range externalSubnetIDs {

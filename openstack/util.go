@@ -2,21 +2,21 @@ package openstack
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2"
 )
 
 // BuildRequest takes an opts struct and builds a request body for
 // Gophercloud to execute.
-func BuildRequest(opts interface{}, parent string) (map[string]interface{}, error) {
+func BuildRequest(opts any, parent string) (map[string]any, error) {
 	b, err := gophercloud.BuildRequestBody(opts, "")
 	if err != nil {
 		return nil, err
@@ -24,7 +24,7 @@ func BuildRequest(opts interface{}, parent string) (map[string]interface{}, erro
 
 	b = AddValueSpecs(b)
 
-	return map[string]interface{}{parent: b}, nil
+	return map[string]any{parent: b}, nil
 }
 
 // CheckDeleted checks the error to see if it's a 404 (Not Found) and, if so,
@@ -32,10 +32,11 @@ func BuildRequest(opts interface{}, parent string) (map[string]interface{}, erro
 func CheckDeleted(d *schema.ResourceData, err error, msg string) error {
 	if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 		d.SetId("")
+
 		return nil
 	}
 
-	return fmt.Errorf("%s %s: %s", msg, d.Id(), err)
+	return fmt.Errorf("%s %s: %w", msg, d.Id(), err)
 }
 
 // GetRegion returns the region that was specified in the resource. If a
@@ -51,16 +52,19 @@ func GetRegion(d *schema.ResourceData, config *Config) string {
 
 // AddValueSpecs expands the 'value_specs' object and removes 'value_specs'
 // from the reqeust body.
-func AddValueSpecs(body map[string]interface{}) map[string]interface{} {
+func AddValueSpecs(body map[string]any) map[string]any {
 	if body["value_specs"] != nil {
-		for k, v := range body["value_specs"].(map[string]interface{}) {
+		for k, v := range body["value_specs"].(map[string]any) {
 			// this hack allows to pass boolean values as strings
 			if v == "true" || v == "false" {
 				body[k] = v == "true"
+
 				continue
 			}
+
 			body[k] = v
 		}
+
 		delete(body, "value_specs")
 	}
 
@@ -70,14 +74,17 @@ func AddValueSpecs(body map[string]interface{}) map[string]interface{} {
 // MapValueSpecs converts ResourceData into a map.
 func MapValueSpecs(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
-	for key, val := range d.Get("value_specs").(map[string]interface{}) {
+	for key, val := range d.Get("value_specs").(map[string]any) {
 		m[key] = val.(string)
 	}
+
 	return m
 }
 
 func checkForRetryableError(err error) *retry.RetryError {
-	e, ok := err.(gophercloud.ErrUnexpectedResponseCode)
+	var e gophercloud.ErrUnexpectedResponseCode
+
+	ok := errors.As(err, &e)
 	if !ok {
 		return retry.NonRetryableError(err)
 	}
@@ -94,13 +101,13 @@ func checkForRetryableError(err error) *retry.RetryError {
 	return retry.NonRetryableError(err)
 }
 
-func suppressEquivalentTimeDiffs(k, old, new string, d *schema.ResourceData) bool {
-	oldTime, err := time.Parse(time.RFC3339, old)
+func suppressEquivalentTimeDiffs(_, o, n string, _ *schema.ResourceData) bool {
+	oldTime, err := time.Parse(time.RFC3339, o)
 	if err != nil {
 		return false
 	}
 
-	newTime, err := time.Parse(time.RFC3339, new)
+	newTime, err := time.Parse(time.RFC3339, n)
 	if err != nil {
 		return false
 	}
@@ -109,19 +116,21 @@ func suppressEquivalentTimeDiffs(k, old, new string, d *schema.ResourceData) boo
 }
 
 func resourceNetworkingAvailabilityZoneHintsV2(d *schema.ResourceData) []string {
-	rawAZH := d.Get("availability_zone_hints").([]interface{})
+	rawAZH := d.Get("availability_zone_hints").([]any)
 	azh := make([]string, len(rawAZH))
+
 	for i, raw := range rawAZH {
 		azh[i] = raw.(string)
 	}
+
 	return azh
 }
 
-func expandVendorOptions(vendOptsRaw []interface{}) map[string]interface{} {
-	vendorOptions := make(map[string]interface{})
+func expandVendorOptions(vendOptsRaw []any) map[string]any {
+	vendorOptions := make(map[string]any)
 
 	for _, option := range vendOptsRaw {
-		for optKey, optValue := range option.(map[string]interface{}) {
+		for optKey, optValue := range option.(map[string]any) {
 			vendorOptions[optKey] = optValue
 		}
 	}
@@ -135,6 +144,7 @@ func expandObjectReadTags(d *schema.ResourceData, tags []string) {
 	allTags := d.Get("all_tags").(*schema.Set)
 	desiredTags := d.Get("tags").(*schema.Set)
 	actualTags := allTags.Intersection(desiredTags)
+
 	if !actualTags.Equal(desiredTags) {
 		d.Set("tags", expandToStringSlice(actualTags.List()))
 	}
@@ -161,8 +171,9 @@ func expandObjectTags(d *schema.ResourceData) []string {
 	return tags
 }
 
-func expandToMapStringString(v map[string]interface{}) map[string]string {
+func expandToMapStringString(v map[string]any) map[string]string {
 	m := make(map[string]string, len(v))
+
 	for key, val := range v {
 		if strVal, ok := val.(string); ok {
 			m[key] = strVal
@@ -172,8 +183,9 @@ func expandToMapStringString(v map[string]interface{}) map[string]string {
 	return m
 }
 
-func expandToStringSlice(v []interface{}) []string {
+func expandToStringSlice(v []any) []string {
 	s := make([]string, len(v))
+
 	for i, val := range v {
 		if strVal, ok := val.(string); ok {
 			s[i] = strVal
@@ -191,6 +203,7 @@ func strSliceContains(haystack []string, needle string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -201,11 +214,13 @@ func sliceUnion(a, b []string) []string {
 			res = append(res, i)
 		}
 	}
+
 	for _, k := range b {
 		if !strSliceContains(res, k) {
 			res = append(res, k)
 		}
 	}
+
 	return res
 }
 
@@ -271,35 +286,37 @@ func compatibleMicroversion(direction, required, given string) (bool, error) {
 	return false, nil
 }
 
-func validateJSONObject(v interface{}, k string) ([]string, []error) {
+func validateJSONObject(v any, k string) ([]string, []error) {
 	if v == nil || v.(string) == "" {
 		return nil, []error{fmt.Errorf("%q value must not be empty", k)}
 	}
 
-	var j map[string]interface{}
+	var j map[string]any
+
 	s := v.(string)
 
 	err := json.Unmarshal([]byte(s), &j)
 	if err != nil {
-		return nil, []error{fmt.Errorf("%q must be a JSON object: %s", k, err)}
+		return nil, []error{fmt.Errorf("%q must be a JSON object: %w", k, err)}
 	}
 
 	return nil, nil
 }
 
-func diffSuppressJSONObject(k, old, new string, d *schema.ResourceData) bool {
-	if strSliceContains([]string{"{}", ""}, old) &&
-		strSliceContains([]string{"{}", ""}, new) {
+func diffSuppressJSONObject(_, o, n string, _ *schema.ResourceData) bool {
+	if strSliceContains([]string{"{}", ""}, o) &&
+		strSliceContains([]string{"{}", ""}, n) {
 		return true
 	}
+
 	return false
 }
 
 // Metadata in openstack are not fully replaced with a "set"
 // operation, instead, it's only additive, and the existing
 // metadata are only removed when set to `null` value in json.
-func mapDiffWithNilValues(oldMap, newMap map[string]interface{}) (output map[string]interface{}) {
-	output = make(map[string]interface{})
+func mapDiffWithNilValues(oldMap, newMap map[string]any) (output map[string]any) {
+	output = make(map[string]any)
 
 	for k, v := range newMap {
 		output[k] = v
@@ -330,10 +347,11 @@ func parsePairedIDs(id string, res string) (string, string, error) {
 // getOkExists is a helper function that replaces the deprecated GetOkExists
 // schema method. It returns the value of the key if it exists in the
 // configuration, along with a boolean indicating if the key exists.
-func getOkExists(d *schema.ResourceData, key string) (interface{}, bool) {
+func getOkExists(d *schema.ResourceData, key string) (any, bool) {
 	v := d.GetRawConfig().GetAttr(key)
 	if v.IsNull() {
 		return nil, false
 	}
+
 	return d.Get(key), true
 }

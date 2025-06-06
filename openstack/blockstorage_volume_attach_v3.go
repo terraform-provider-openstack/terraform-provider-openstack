@@ -1,13 +1,14 @@
 package openstack
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 )
 
 func expandBlockStorageV3AttachMode(v string) (volumes.AttachMode, error) {
 	var attachMode volumes.AttachMode
+
 	var attachError error
 
 	switch v {
@@ -18,7 +19,7 @@ func expandBlockStorageV3AttachMode(v string) (volumes.AttachMode, error) {
 	case "rw":
 		attachMode = volumes.ReadWrite
 	default:
-		attachError = fmt.Errorf("Invalid attach_mode specified")
+		attachError = errors.New("Invalid attach_mode specified")
 	}
 
 	return attachMode, attachError

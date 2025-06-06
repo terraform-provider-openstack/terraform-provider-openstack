@@ -2,26 +2,27 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 )
 
 func testAccCheckLBV2MembersComputeHash(members *[]pools.Member, weight int, address string, idx *int) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		membersResource := resourceMembersV2().Schema["member"].Elem.(*schema.Resource)
 		f := schema.HashResource(membersResource)
 
 		for _, m := range flattenLBMembersV2(*members) {
 			if m["address"] == address && m["weight"] == weight {
 				*idx = f(m)
+
 				break
 			}
 		}
@@ -32,7 +33,9 @@ func testAccCheckLBV2MembersComputeHash(members *[]pools.Member, weight int, add
 
 func TestAccLBV2Members_basic(t *testing.T) {
 	var members []pools.Member
+
 	var idx1 int
+
 	var idx2 int
 
 	resource.Test(t, resource.TestCase{
@@ -104,9 +107,10 @@ func TestAccLBV2Members_basic(t *testing.T) {
 
 func testAccCheckLBV2MembersDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+		return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -121,12 +125,13 @@ func testAccCheckLBV2MembersDestroy(s *terraform.State) error {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return nil
 			}
-			return fmt.Errorf("Error getting openstack_lb_members_v2: %s", err)
+
+			return fmt.Errorf("Error getting openstack_lb_members_v2: %w", err)
 		}
 
 		members, err := pools.ExtractMembers(allPages)
 		if err != nil {
-			return fmt.Errorf("Unable to retrieve openstack_lb_members_v2: %s", err)
+			return fmt.Errorf("Unable to retrieve openstack_lb_members_v2: %w", err)
 		}
 
 		if len(members) > 0 {
@@ -145,24 +150,26 @@ func testAccCheckLBV2MembersExists(n string, members *[]pools.Member) resource.T
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
 		poolID := rs.Primary.Attributes["pool_id"]
+
 		allPages, err := pools.ListMembers(lbClient, poolID, pools.ListMembersOpts{}).AllPages(context.TODO())
 		if err != nil {
-			return fmt.Errorf("Error getting openstack_lb_members_v2: %s", err)
+			return fmt.Errorf("Error getting openstack_lb_members_v2: %w", err)
 		}
 
 		found, err := pools.ExtractMembers(allPages)
 		if err != nil {
-			return fmt.Errorf("Unable to retrieve openstack_lb_members_v2: %s", err)
+			return fmt.Errorf("Unable to retrieve openstack_lb_members_v2: %w", err)
 		}
 
 		*members = found

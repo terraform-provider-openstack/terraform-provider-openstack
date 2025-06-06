@@ -6,14 +6,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/rules"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 )
 
 func resourceNetworkingSecGroupRuleV2StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, sgRuleID string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		sgRule, err := rules.Get(ctx, client, sgRuleID).Extract()
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
@@ -27,7 +26,7 @@ func resourceNetworkingSecGroupRuleV2StateRefreshFunc(ctx context.Context, clien
 	}
 }
 
-func resourceNetworkingSecGroupRuleV2Direction(v interface{}, k string) ([]string, []error) {
+func resourceNetworkingSecGroupRuleV2Direction(v any, k string) ([]string, []error) {
 	switch rules.RuleDirection(v.(string)) {
 	case rules.DirIngress:
 		return nil, nil
@@ -38,7 +37,7 @@ func resourceNetworkingSecGroupRuleV2Direction(v interface{}, k string) ([]strin
 	return nil, []error{fmt.Errorf("unknown %q %s for openstack_networking_secgroup_rule_v2", v, k)}
 }
 
-func resourceNetworkingSecGroupRuleV2EtherType(v interface{}, k string) ([]string, []error) {
+func resourceNetworkingSecGroupRuleV2EtherType(v any, k string) ([]string, []error) {
 	switch rules.RuleEtherType(v.(string)) {
 	case rules.EtherType4:
 		return nil, nil
@@ -49,8 +48,7 @@ func resourceNetworkingSecGroupRuleV2EtherType(v interface{}, k string) ([]strin
 	return nil, []error{fmt.Errorf("unknown %q %s for openstack_networking_secgroup_rule_v2s", v, k)}
 }
 
-func resourceNetworkingSecGroupRuleV2Protocol(v interface{}, k string) ([]string, []error) {
-	//nolint:exhaustive // we need to override the rules.ProtocolAny case with an empty string
+func resourceNetworkingSecGroupRuleV2Protocol(v any, k string) ([]string, []error) {
 	switch rules.RuleProtocol(v.(string)) {
 	case rules.ProtocolAH,
 		rules.ProtocolDCCP,
@@ -74,15 +72,16 @@ func resourceNetworkingSecGroupRuleV2Protocol(v interface{}, k string) ([]string
 		rules.ProtocolUDPLite,
 		rules.ProtocolVRRP,
 		rules.ProtocolIPIP,
-		"": // rules.ProtocolAny
+		rules.ProtocolAny:
 		return nil, nil
 	}
 
 	// If the protocol wasn't matched above, see if it's an integer.
 	p, err := strconv.Atoi(v.(string))
 	if err != nil {
-		return nil, []error{fmt.Errorf("unknown %q %s for openstack_networking_secgroup_rule_v2: %s", v, k, err)}
+		return nil, []error{fmt.Errorf("unknown %q %s for openstack_networking_secgroup_rule_v2: %w", v, k, err)}
 	}
+
 	if p < 0 || p > 255 {
 		return nil, []error{fmt.Errorf("unknown %q %s for openstack_networking_secgroup_rule_v2", v, k)}
 	}

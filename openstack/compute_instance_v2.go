@@ -11,15 +11,15 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -78,19 +78,19 @@ type InstanceNetwork struct {
 // reference the actual port resource itself.
 //
 // So, let's begin the journey.
-func getAllInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]InstanceNetwork, error) {
-	networks := d.Get("network").([]interface{})
+func getAllInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta any) ([]InstanceNetwork, error) {
+	networks := d.Get("network").([]any)
 
 	instanceNetworks := make([]InstanceNetwork, 0, len(networks))
+
 	for _, v := range networks {
-		network := v.(map[string]interface{})
+		network := v.(map[string]any)
 		networkID := network["uuid"].(string)
 		networkName := network["name"].(string)
 		portID := network["port"].(string)
 
 		if networkID == "" && networkName == "" && portID == "" {
-			return nil, fmt.Errorf(
-				"At least one of network.uuid, network.name, or network.port must be set")
+			return nil, errors.New("At least one of network.uuid, network.name, or network.port must be set")
 		}
 
 		// If a user specified both an ID and name, that makes things easy
@@ -105,6 +105,7 @@ func getAllInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta in
 				AccessNetwork: network["access_network"].(bool),
 			}
 			instanceNetworks = append(instanceNetworks, v)
+
 			continue
 		}
 
@@ -118,10 +119,12 @@ func getAllInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta in
 		// an exact match.
 		queryType := "name"
 		queryTerm := networkName
+
 		if networkID != "" {
 			queryType = "id"
 			queryTerm = networkID
 		}
+
 		if portID != "" {
 			queryType = "port"
 			queryTerm = portID
@@ -140,6 +143,7 @@ func getAllInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta in
 		if networkInfo["uuid"] != nil {
 			v.UUID = networkInfo["uuid"].(string)
 		}
+
 		if networkInfo["name"] != nil {
 			v.Name = networkInfo["name"].(string)
 		}
@@ -148,21 +152,23 @@ func getAllInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	log.Printf("[DEBUG] getAllInstanceNetworks: %#v", instanceNetworks)
+
 	return instanceNetworks, nil
 }
 
 // getInstanceNetworkInfo will query for network information in order to make
 // an accurate determination of a network's name and a network's ID.
-func getInstanceNetworkInfo(ctx context.Context, d *schema.ResourceData, meta interface{}, queryType, queryTerm string) (map[string]interface{}, error) {
+func getInstanceNetworkInfo(ctx context.Context, d *schema.ResourceData, meta any, queryType, queryTerm string) (map[string]any, error) {
 	config := meta.(*Config)
+
 	networkClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return nil, fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	networkInfo, err := getInstanceNetworkInfoNeutron(ctx, networkClient, queryType, queryTerm)
 	if err != nil {
-		return nil, fmt.Errorf("Error trying to get network information from the Network API: %s", err)
+		return nil, fmt.Errorf("Error trying to get network information from the Network API: %w", err)
 	}
 
 	return networkInfo, nil
@@ -170,24 +176,26 @@ func getInstanceNetworkInfo(ctx context.Context, d *schema.ResourceData, meta in
 
 // getInstanceNetworkInfoNeutron will query the neutron API for the network
 // information.
-func getInstanceNetworkInfoNeutron(ctx context.Context, client *gophercloud.ServiceClient, queryType, queryTerm string) (map[string]interface{}, error) {
+func getInstanceNetworkInfoNeutron(ctx context.Context, client *gophercloud.ServiceClient, queryType, queryTerm string) (map[string]any, error) {
 	// If a port was specified, use it to look up the network ID
 	// and then query the network as if a network ID was originally used.
 	if queryType == "port" {
 		listOpts := ports.ListOpts{
 			ID: queryTerm,
 		}
+
 		allPages, err := ports.List(client, listOpts).AllPages(ctx)
 		if err != nil {
-			return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
+			return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %w", err)
 		}
 
 		allPorts, err := ports.ExtractPorts(allPages)
 		if err != nil {
-			return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
+			return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %w", err)
 		}
 
 		var port ports.Port
+
 		switch len(allPorts) {
 		case 0:
 			return nil, fmt.Errorf("Could not find any matching port for %s %s", queryType, queryTerm)
@@ -214,15 +222,16 @@ func getInstanceNetworkInfoNeutron(ctx context.Context, client *gophercloud.Serv
 
 	allPages, err := networks.List(client, listOpts).AllPages(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
+		return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %w", err)
 	}
 
 	allNetworks, err := networks.ExtractNetworks(allPages)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
+		return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %w", err)
 	}
 
 	var network networks.Network
+
 	switch len(allNetworks) {
 	case 0:
 		return nil, fmt.Errorf("Could not find any matching network for %s %s", queryType, queryTerm)
@@ -232,24 +241,25 @@ func getInstanceNetworkInfoNeutron(ctx context.Context, client *gophercloud.Serv
 		return nil, fmt.Errorf("More than one network found for %s %s", queryType, queryTerm)
 	}
 
-	v := map[string]interface{}{
+	v := map[string]any{
 		"uuid": network.ID,
 		"name": network.Name,
 	}
 
 	log.Printf("[DEBUG] getInstanceNetworkInfoNeutron: %#v", v)
+
 	return v, nil
 }
 
 // getInstanceAddresses parses a Gophercloud server.Server's Address field into
 // a structured InstanceAddresses struct.
-func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses {
+func getInstanceAddresses(addresses map[string]any) []InstanceAddresses {
 	allInstanceAddresses := make([]InstanceAddresses, 0, len(addresses))
 
 	// Addresses includes a list of all IP addresses assigned to the server,
 	// keyed by pool. This unfortunately causes problems because addresses are a
 	// JSON object which means that they are unordered because gophercloud
-	// uses a map[string]interface{} to hold them and maps are unordered.
+	// uses a map[string]any to hold them and maps are unordered.
 	// However OpenStack uses OrderedDict to return this data and this
 	// provider uses a List type for the networks which is an ordered type,
 	// this means that importing resources into terraform will result in
@@ -261,6 +271,7 @@ func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses 
 	// the special case override it.
 	networkNames := make([]string, len(addresses))
 	i := 0
+
 	for k := range addresses {
 		networkNames[i] = k
 		i++
@@ -279,11 +290,12 @@ func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses 
 			NetworkName: networkName,
 		}
 
-		for _, v := range v.([]interface{}) {
+		for _, v := range v.([]any) {
 			instanceNIC := InstanceNIC{}
+
 			var exists bool
 
-			v := v.(map[string]interface{})
+			v := v.(map[string]any)
 			if v, ok := v["OS-EXT-IPS-MAC:mac_addr"].(string); ok {
 				instanceNIC.MAC = v
 			}
@@ -302,9 +314,11 @@ func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses 
 			for i, v := range instanceAddresses.InstanceNICs {
 				if v.MAC == instanceNIC.MAC {
 					exists = true
+
 					if instanceNIC.FixedIPv6 != "" {
 						instanceAddresses.InstanceNICs[i].FixedIPv6 = instanceNIC.FixedIPv6
 					}
+
 					if instanceNIC.FixedIPv4 != "" {
 						instanceAddresses.InstanceNICs[i].FixedIPv4 = instanceNIC.FixedIPv4
 					}
@@ -329,6 +343,7 @@ func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses 
 // and builds a Gophercloud []servers.Network for use in creating an Instance.
 func expandInstanceNetworks(allInstanceNetworks []InstanceNetwork) []servers.Network {
 	networks := make([]servers.Network, 0, len(allInstanceNetworks))
+
 	for _, v := range allInstanceNetworks {
 		n := servers.Network{
 			UUID:    v.UUID,
@@ -343,11 +358,12 @@ func expandInstanceNetworks(allInstanceNetworks []InstanceNetwork) []servers.Net
 
 // flattenInstanceNetworks collects instance network information from different
 // sources and aggregates it all together into a map array.
-func flattenInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]map[string]interface{}, error) {
+func flattenInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta any) ([]map[string]any, error) {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return nil, fmt.Errorf("Error creating OpenStack compute client: %w", err)
 	}
 
 	server, err := servers.Get(ctx, computeClient, d.Id()).Extract()
@@ -356,12 +372,13 @@ func flattenInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	allInstanceAddresses := getInstanceAddresses(server.Addresses)
+
 	allInstanceNetworks, err := getAllInstanceNetworks(ctx, d, meta)
 	if err != nil {
 		return nil, err
 	}
 
-	networks := []map[string]interface{}{}
+	networks := []map[string]any{}
 
 	// If there were no instance networks returned, this means that there
 	// was not a network specified in the Terraform configuration. When this
@@ -371,7 +388,7 @@ func flattenInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta i
 	if len(allInstanceNetworks) == 0 {
 		for _, instanceAddresses := range allInstanceAddresses {
 			for _, instanceNIC := range instanceAddresses.InstanceNICs {
-				v := map[string]interface{}{
+				v := map[string]any{
 					"name":        instanceAddresses.NetworkName,
 					"fixed_ip_v4": instanceNIC.FixedIPv4,
 					"fixed_ip_v6": instanceNIC.FixedIPv6,
@@ -395,6 +412,7 @@ func flattenInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta i
 		}
 
 		log.Printf("[DEBUG] flattenInstanceNetworks: %#v", networks)
+
 		return networks, nil
 	}
 
@@ -411,7 +429,7 @@ func flattenInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta i
 				// on this same network in another Terraform network block.
 				instanceNIC := instanceAddresses.InstanceNICs[0]
 				copy(instanceAddresses.InstanceNICs, instanceAddresses.InstanceNICs[1:])
-				v := map[string]interface{}{
+				v := map[string]any{
 					"name":           instanceAddresses.NetworkName,
 					"fixed_ip_v4":    instanceNIC.FixedIPv4,
 					"fixed_ip_v6":    instanceNIC.FixedIPv6,
@@ -426,6 +444,7 @@ func flattenInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	log.Printf("[DEBUG] flattenInstanceNetworks: %#v", networks)
+
 	return networks, nil
 }
 
@@ -433,7 +452,7 @@ func flattenInstanceNetworks(ctx context.Context, d *schema.ResourceData, meta i
 // with the instance. It does this by looping through all networks and looking
 // for a valid IP address. Priority is given to a network that was flagged as
 // an access_network.
-func getInstanceAccessAddresses(d *schema.ResourceData, networks []map[string]interface{}) (string, string) {
+func getInstanceAccessAddresses(networks []map[string]any) (string, string) {
 	var hostv4, hostv6 string
 
 	// Loop through all networks

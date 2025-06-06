@@ -6,14 +6,13 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/attributestags"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/dns"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/attributestags"
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/dns"
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
 func resourceNetworkingFloatingIPV2() *schema.Resource {
@@ -126,8 +125,9 @@ func resourceNetworkingFloatingIPV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
@@ -138,13 +138,15 @@ func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceDa
 	if err != nil {
 		return diag.Errorf("Error retrieving ID for openstack_networking_floatingip_v2 pool name %s: %s", poolName, err)
 	}
+
 	if len(poolID) == 0 {
 		return diag.Errorf("No network found with name: %s", poolName)
 	}
 
 	subnetID := d.Get("subnet_id").(string)
+
 	var subnetIDs []string
-	if v, ok := d.Get("subnet_ids").([]interface{}); ok {
+	if v, ok := d.Get("subnet_ids").([]any); ok {
 		subnetIDs = make([]string, len(v))
 		for i, v := range v {
 			subnetIDs[i] = v.(string)
@@ -173,6 +175,7 @@ func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceDa
 
 	dnsName := d.Get("dns_name").(string)
 	dnsDomain := d.Get("dns_domain").(string)
+
 	if dnsName != "" || dnsDomain != "" {
 		finalCreateOpts = dns.FloatingIPCreateOptsExt{
 			CreateOptsBuilder: finalCreateOpts,
@@ -203,8 +206,10 @@ func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceDa
 				if retryOn409(err) {
 					continue
 				}
+
 				return diag.Errorf("Error creating openstack_networking_floatingip_v2: %s", err)
 			}
+
 			break
 		}
 		// handle the last error
@@ -238,19 +243,23 @@ func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceDa
 	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+
 		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "floatingips", fip.ID, tagOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error setting tags on openstack_networking_floatingip_v2 %s: %s", fip.ID, err)
 		}
+
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_floatingip_v2 %s", tags, fip.ID)
 	}
 
 	log.Printf("[DEBUG] Created openstack_networking_floatingip_v2 %s: %#v", fip.ID, fip)
+
 	return resourceNetworkFloatingIPV2Read(ctx, d, meta)
 }
 
-func resourceNetworkFloatingIPV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkFloatingIPV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
@@ -280,19 +289,22 @@ func resourceNetworkFloatingIPV2Read(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return diag.Errorf("Error retrieving pool name for openstack_networking_floatingip_v2 %s: %s", d.Id(), err)
 	}
+
 	d.Set("pool", poolName)
 
 	return nil
 }
 
-func resourceNetworkFloatingIPV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkFloatingIPV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
 	}
 
 	var hasChange bool
+
 	var updateOpts floatingips.UpdateOpts
 
 	if d.HasChange("description") {
@@ -316,6 +328,7 @@ func resourceNetworkFloatingIPV2Update(ctx context.Context, d *schema.ResourceDa
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_networking_floatingip_v2 %s update options: %#v", d.Id(), updateOpts)
+
 		_, err = floatingips.Update(ctx, networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_networking_floatingip_v2 %s: %s", d.Id(), err)
@@ -325,18 +338,21 @@ func resourceNetworkFloatingIPV2Update(ctx context.Context, d *schema.ResourceDa
 	if d.HasChange("tags") {
 		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+
 		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "floatingips", d.Id(), tagOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error setting tags on openstack_networking_floatingip_v2 %s: %s", d.Id(), err)
 		}
+
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_floatingip_v2 %s", tags, d.Id())
 	}
 
 	return resourceNetworkFloatingIPV2Read(ctx, d, meta)
 }
 
-func resourceNetworkFloatingIPV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkFloatingIPV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
@@ -361,5 +377,6 @@ func resourceNetworkFloatingIPV2Delete(ctx context.Context, d *schema.ResourceDa
 	}
 
 	d.SetId("")
+
 	return nil
 }

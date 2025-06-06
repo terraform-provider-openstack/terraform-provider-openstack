@@ -2,15 +2,15 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/quotasets"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccComputeQuotasetV2_basic(t *testing.T) {
@@ -144,13 +144,14 @@ func testAccCheckComputeQuotasetV2Exists(n string, quotaset *quotasets.QuotaSet)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
 		projectID := strings.Split(rs.Primary.ID, "/")[0]
@@ -161,7 +162,7 @@ func testAccCheckComputeQuotasetV2Exists(n string, quotaset *quotasets.QuotaSet)
 		}
 
 		if found.ID != projectID {
-			return fmt.Errorf("Quotaset not found")
+			return errors.New("Quotaset not found")
 		}
 
 		*quotaset = *found

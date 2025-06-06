@@ -4,10 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUnitExpandToMapStringString(t *testing.T) {
-	metadata := map[string]interface{}{
+	metadata := map[string]any{
 		"contents": "junk",
 	}
 
@@ -20,7 +21,7 @@ func TestUnitExpandToMapStringString(t *testing.T) {
 }
 
 func TestUnitExpandToStringSlice(t *testing.T) {
-	data := []interface{}{"foo", "bar"}
+	data := []any{"foo", "bar"}
 
 	expected := []string{"foo", "bar"}
 
@@ -30,56 +31,56 @@ func TestUnitExpandToStringSlice(t *testing.T) {
 
 func TestUnitCompatibleMicroversion(t *testing.T) {
 	actual, err := compatibleMicroversion("min", "2.1.0", "2.5")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.False(t, actual)
 
 	actual, err = compatibleMicroversion("min", "2.1", "2.5.0")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.False(t, actual)
 
 	actual, err = compatibleMicroversion("minn", "2.1", "2.5")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.False(t, actual)
 
 	actual, err = compatibleMicroversion("min", "", "2.5")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, actual)
 
 	actual, err = compatibleMicroversion("min", "2.1", "")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, actual)
 
 	actual, err = compatibleMicroversion("min", "2.1", "2.5")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, actual)
 
 	actual, err = compatibleMicroversion("min", "2.1", "3.5")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, actual)
 
 	actual, err = compatibleMicroversion("min", "2.5", "2.1")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, actual)
 
 	actual, err = compatibleMicroversion("max", "2.5", "2.1")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, actual)
 
 	actual, err = compatibleMicroversion("min", "2.10", "2.17")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, actual)
 }
 
 func TestUnitMapDiffWithNilValues(t *testing.T) {
-	oldData := map[string]interface{}{"a": "1", "b": "2"}
-	newData := map[string]interface{}{"a": "1", "c": "3"}
+	oldData := map[string]any{"a": "1", "b": "2"}
+	newData := map[string]any{"a": "1", "c": "3"}
 
 	result := mapDiffWithNilValues(oldData, newData)
 
-	assert.Equal(t, result["a"], "1")
-	assert.Equal(t, result["b"], nil)
-	assert.Equal(t, result["c"], "3")
-	assert.Equal(t, len(result), 3)
+	assert.Equal(t, "1", result["a"])
+	assert.Nil(t, result["b"])
+	assert.Equal(t, "3", result["c"])
+	assert.Len(t, result, 3)
 }
 
 func TestBuildRequestBoolType(t *testing.T) {
@@ -92,10 +93,10 @@ func TestBuildRequestBoolType(t *testing.T) {
 	}
 
 	req, err := BuildRequest(v, "")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	expected := map[string]interface{}{
-		"": map[string]interface{}{
+	expected := map[string]any{
+		"": map[string]any{
 			"key1":       "value1",
 			"key2":       true,
 			"key3":       false,
@@ -111,7 +112,7 @@ func TestUnitparsePairedIDs(t *testing.T) {
 	expectedChildID := "bar"
 
 	actualParentID, actualChildID, err := parsePairedIDs(id, "")
-	assert.Equal(t, err, nil)
+	require.NoError(t, err)
 	assert.Equal(t, expectedParentID, actualParentID)
 	assert.Equal(t, expectedChildID, actualChildID)
 }

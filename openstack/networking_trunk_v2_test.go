@@ -3,10 +3,9 @@ package openstack
 import (
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/trunks"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/trunks"
 )
 
 func TestUnitFlattenNetworkingTrunkSubportsV2(t *testing.T) {
@@ -23,7 +22,7 @@ func TestUnitFlattenNetworkingTrunkSubportsV2(t *testing.T) {
 		},
 	}
 
-	expectedSubports := []map[string]interface{}{
+	expectedSubports := []map[string]any{
 		{
 			"port_id":           "port_id_1",
 			"segmentation_id":   111,
@@ -45,17 +44,18 @@ func TestUnitExpandNetworkingTrunkSubportsV2(t *testing.T) {
 	r := resourceNetworkingTrunkV2()
 	d := r.TestResourceData()
 	d.SetId("1")
-	subport1 := map[string]interface{}{
+
+	subport1 := map[string]any{
 		"port_id":           "port_id_1",
 		"segmentation_id":   111,
 		"segmentation_type": "type_1",
 	}
-	subport2 := map[string]interface{}{
+	subport2 := map[string]any{
 		"port_id":           "port_id_2",
 		"segmentation_id":   222,
 		"segmentation_type": "type_2",
 	}
-	subports := []map[string]interface{}{subport1, subport2}
+	subports := []map[string]any{subport1, subport2}
 	d.Set("sub_port", subports)
 
 	expectedSubports := []trunks.Subport{
@@ -80,17 +80,18 @@ func TestUnitExpandNetworkingTrunkSubportsRemoveV2(t *testing.T) {
 	r := resourceNetworkingTrunkV2()
 	d := r.TestResourceData()
 	d.SetId("1")
-	subport1 := map[string]interface{}{
+
+	subport1 := map[string]any{
 		"port_id":           "port_id_3",
 		"segmentation_id":   333,
 		"segmentation_type": "type_3",
 	}
-	subport2 := map[string]interface{}{
+	subport2 := map[string]any{
 		"port_id":           "port_id_4",
 		"segmentation_id":   444,
 		"segmentation_type": "type_4",
 	}
-	subports := []map[string]interface{}{subport1, subport2}
+	subports := []map[string]any{subport1, subport2}
 	d.Set("sub_port", subports)
 
 	expectedRemoveSubports := []trunks.RemoveSubport{

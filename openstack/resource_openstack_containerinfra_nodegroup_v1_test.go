@@ -2,15 +2,15 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/nodegroups"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/nodegroups"
 )
 
 func TestAccContainerInfraV1NodeGroup_basic(t *testing.T) {
@@ -220,27 +220,30 @@ func testAccCheckContainerInfraV1NodeGroupExists(n string, nodeGroup *nodegroups
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
+			return fmt.Errorf("Error creating OpenStack container infra client: %w", err)
 		}
 
 		containerInfraClient.Microversion = containerInfraV1NodeGroupMinMicroversion
+
 		clusterID, nodeGroupID, err := parsePairedIDs(rs.Primary.ID, "openstack_containerinfra_nodegroup_v1")
 		if err != nil {
 			return err
 		}
+
 		found, err := nodegroups.Get(context.TODO(), containerInfraClient, clusterID, nodeGroupID).Extract()
 		if err != nil {
 			return err
 		}
 
 		if found.UUID != nodeGroupID {
-			return fmt.Errorf("Nodegroup not found")
+			return errors.New("Nodegroup not found")
 		}
 
 		*nodeGroup = *found
@@ -251,9 +254,10 @@ func testAccCheckContainerInfraV1NodeGroupExists(n string, nodeGroup *nodegroups
 
 func testAccCheckContainerInfraV1NodeGroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
+		return fmt.Errorf("Error creating OpenStack container infra client: %w", err)
 	}
 
 	containerInfraClient.Microversion = containerInfraV1NodeGroupMinMicroversion
@@ -262,6 +266,7 @@ func testAccCheckContainerInfraV1NodeGroupDestroy(s *terraform.State) error {
 		if rs.Type != "openstack_containerinfra_nodegroup_v1" {
 			continue
 		}
+
 		clusterID, nodeGroupID, err := parsePairedIDs(rs.Primary.ID, "openstack_containerinfra_nodegroup_v1")
 		if err != nil {
 			return err
@@ -269,7 +274,7 @@ func testAccCheckContainerInfraV1NodeGroupDestroy(s *terraform.State) error {
 
 		_, err = nodegroups.Get(context.TODO(), containerInfraClient, clusterID, nodeGroupID).Extract()
 		if err == nil {
-			return fmt.Errorf("node group still exists")
+			return errors.New("node group still exists")
 		}
 	}
 

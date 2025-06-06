@@ -17,6 +17,7 @@ func resourceNetworkingRouterRouteV2ParseID(routeID string) (string, string, str
 
 	routeIDLastPart := routeIDAllParts[1]
 	routeIDLastParts := strings.Split(routeIDLastPart, "-")
+
 	if len(routeIDLastParts) != 2 {
 		return "", "", "", fmt.Errorf("invalid last part format for %s: %s", routeID, routeIDLastPart)
 	}

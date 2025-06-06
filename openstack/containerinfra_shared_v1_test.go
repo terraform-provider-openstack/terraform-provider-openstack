@@ -3,13 +3,13 @@ package openstack
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/clustertemplates"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUnitExpandContainerInfraV1LabelsMap(t *testing.T) {
-	labels := map[string]interface{}{
+	labels := map[string]any{
 		"foo": "bar",
 		"bar": "baz",
 	}
@@ -20,12 +20,12 @@ func TestUnitExpandContainerInfraV1LabelsMap(t *testing.T) {
 	}
 
 	actualLabels, err := expandContainerInfraV1LabelsMap(labels)
-	assert.Equal(t, err, nil)
+	require.NoError(t, err)
 	assert.Equal(t, expectedLabels, actualLabels)
 }
 
 func TestUnitExpandContainerInfraV1LabelsString(t *testing.T) {
-	labels := map[string]interface{}{
+	labels := map[string]any{
 		"foo": "bar",
 		"bar": "baz",
 	}
@@ -34,7 +34,7 @@ func TestUnitExpandContainerInfraV1LabelsString(t *testing.T) {
 	expectedLabels2 := "{'bar':'baz','foo':'bar'}"
 
 	actualLabels, err := expandContainerInfraV1LabelsString(labels)
-	assert.Equal(t, err, nil)
+	require.NoError(t, err)
 
 	if actualLabels != expectedLabels1 && actualLabels != expectedLabels2 {
 		t.Fatalf("Unexpected labels. Got %s, expected %s or %s",

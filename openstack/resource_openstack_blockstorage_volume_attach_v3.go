@@ -6,12 +6,11 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 )
 
 func resourceBlockStorageVolumeAttachV3() *schema.Resource {
@@ -123,8 +122,9 @@ func resourceBlockStorageVolumeAttachV3() *schema.Resource {
 	}
 }
 
-func resourceBlockStorageVolumeAttachV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBlockStorageVolumeAttachV3Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	client, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
@@ -132,6 +132,7 @@ func resourceBlockStorageVolumeAttachV3Create(ctx context.Context, d *schema.Res
 
 	// initialize the connection
 	volumeID := d.Get("volume_id").(string)
+
 	connOpts := &volumes.InitializeConnectionOpts{}
 	if v, ok := d.GetOk("host_name"); ok {
 		connOpts.Host = v.(string)
@@ -182,7 +183,8 @@ func resourceBlockStorageVolumeAttachV3Create(ctx context.Context, d *schema.Res
 	// it must be set in Create.
 	if v, ok := connInfo["data"]; ok {
 		data := make(map[string]string)
-		for key, value := range v.(map[string]interface{}) {
+
+		for key, value := range v.(map[string]any) {
 			if v, ok := value.(string); ok {
 				data[key] = v
 			}
@@ -247,6 +249,7 @@ func resourceBlockStorageVolumeAttachV3Create(ctx context.Context, d *schema.Res
 
 	// Search for the attachmentID
 	var attachmentID string
+
 	hostName := d.Get("host_name").(string)
 	for _, attachment := range volume.Attachments {
 		if hostName != "" && hostName == attachment.HostName {
@@ -267,8 +270,9 @@ func resourceBlockStorageVolumeAttachV3Create(ctx context.Context, d *schema.Res
 	return resourceBlockStorageVolumeAttachV3Read(ctx, d, meta)
 }
 
-func resourceBlockStorageVolumeAttachV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBlockStorageVolumeAttachV3Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	client, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
@@ -288,6 +292,7 @@ func resourceBlockStorageVolumeAttachV3Read(ctx context.Context, d *schema.Resou
 	log.Printf("[DEBUG] Retrieved openstack_blockstorage_volume_attach_v3 volume %s: %#v", volumeID, volume)
 
 	var attachment volumes.Attachment
+
 	for _, v := range volume.Attachments {
 		if attachmentID == v.AttachmentID {
 			attachment = v
@@ -302,8 +307,9 @@ func resourceBlockStorageVolumeAttachV3Read(ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func resourceBlockStorageVolumeAttachV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBlockStorageVolumeAttachV3Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	client, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)

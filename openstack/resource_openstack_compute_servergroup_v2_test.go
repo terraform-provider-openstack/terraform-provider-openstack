@@ -2,15 +2,15 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servergroups"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccComputeV2ServerGroup_basic(t *testing.T) {
@@ -128,6 +128,7 @@ func TestAccComputeV2ServerGroup_v2_64_with_invalid_rules(t *testing.T) {
 
 func TestAccComputeV2ServerGroup_affinity(t *testing.T) {
 	var instance servers.Server
+
 	var sg servergroups.ServerGroup
 
 	resource.Test(t, resource.TestCase{
@@ -156,6 +157,7 @@ func TestAccComputeV2ServerGroup_affinity(t *testing.T) {
 
 func TestAccComputeV2ServerGroup_affinity_v2_64(t *testing.T) {
 	var instance servers.Server
+
 	var sg servergroups.ServerGroup
 
 	resource.Test(t, resource.TestCase{
@@ -182,6 +184,7 @@ func TestAccComputeV2ServerGroup_affinity_v2_64(t *testing.T) {
 
 func TestAccComputeV2ServerGroup_soft_affinity(t *testing.T) {
 	var instance servers.Server
+
 	var sg servergroups.ServerGroup
 
 	resource.Test(t, resource.TestCase{
@@ -210,9 +213,10 @@ func TestAccComputeV2ServerGroup_soft_affinity(t *testing.T) {
 
 func testAccCheckComputeV2ServerGroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -222,7 +226,7 @@ func testAccCheckComputeV2ServerGroupDestroy(s *terraform.State) error {
 
 		_, err := servergroups.Get(context.TODO(), computeClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("ServerGroup still exists")
+			return errors.New("ServerGroup still exists")
 		}
 	}
 
@@ -237,13 +241,14 @@ func testAccCheckComputeV2ServerGroupExists(n string, kp *servergroups.ServerGro
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
 		found, err := servergroups.Get(context.TODO(), computeClient, rs.Primary.ID).Extract()
@@ -252,7 +257,7 @@ func testAccCheckComputeV2ServerGroupExists(n string, kp *servergroups.ServerGro
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("ServerGroup not found")
+			return errors.New("ServerGroup not found")
 		}
 
 		*kp = *found
@@ -262,7 +267,7 @@ func testAccCheckComputeV2ServerGroupExists(n string, kp *servergroups.ServerGro
 }
 
 func testAccCheckComputeV2InstanceInServerGroup(instance *servers.Server, sg *servergroups.ServerGroup) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if len(sg.Members) > 0 {
 			for _, m := range sg.Members {
 				if m == instance.ID {

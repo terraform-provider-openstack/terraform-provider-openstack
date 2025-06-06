@@ -5,12 +5,11 @@ import (
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/tags"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceComputeInstanceV2() *schema.Resource {
@@ -132,13 +131,16 @@ func dataSourceComputeInstanceV2() *schema.Resource {
 	}
 }
 
-func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	log.Print("[DEBUG] Creating compute client")
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
+
 	imageClient, err := config.ImageV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack image client: %s", err)
@@ -146,6 +148,7 @@ func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData
 
 	id := d.Get("id").(string)
 	log.Printf("[DEBUG] Attempting to retrieve server %s", id)
+
 	server, err := servers.Get(ctx, computeClient, id).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "server"))
@@ -167,7 +170,7 @@ func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData
 	}
 
 	// Determine the best IPv4 and IPv6 addresses to access the instance with
-	hostv4, hostv6 := getInstanceAccessAddresses(d, networks)
+	hostv4, hostv6 := getInstanceAccessAddresses(networks)
 
 	// AccessIPv4/v6 isn't standard in OpenStack, but there have been reports
 	// of them being used in some environments.
@@ -200,13 +203,16 @@ func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData
 	if !ok {
 		return diag.Errorf("Error setting OpenStack server's flavor: %v", server.Flavor)
 	}
+
 	d.Set("flavor_id", flavorID)
 
 	d.Set("key_pair", server.KeyName)
+
 	flavor, err := flavors.Get(ctx, computeClient, flavorID).Extract()
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	d.Set("flavor_name", flavor.Name)
 
 	// Set the instance's image information appropriately
@@ -231,6 +237,7 @@ func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData
 
 	// Populate tags.
 	computeClient.Microversion = computeV2TagsExtensionMicroversion
+
 	instanceTags, err := tags.List(ctx, computeClient, server.ID).Extract()
 	if err != nil {
 		log.Printf("[DEBUG] Unable to get tags for openstack_compute_instance_v2: %s", err)

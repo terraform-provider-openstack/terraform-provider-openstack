@@ -13,10 +13,12 @@ func TestAccNetworkingV2PortSecgroupAssociate_import(t *testing.T) {
 	if os.Getenv("TF_ACC") != "" {
 		testAccPreCheck(t)
 		testAccPreCheckNonAdminOnly(t)
+
 		hiddenPort, err := testAccCheckNetworkingV2PortSecGroupCreatePort(t, "hidden_port_1", true)
 		if err != nil {
 			t.Fatal(err)
 		}
+
 		defer testAccCheckNetworkingV2PortSecGroupDeletePort(t, hiddenPort) //nolint:errcheck
 	}
 

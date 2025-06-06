@@ -2,13 +2,12 @@ package openstack
 
 import (
 	"context"
-	"fmt"
 	"log"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"strconv"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/shares"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -114,8 +113,9 @@ func dataSourceSharedFilesystemShareV2() *schema.Resource {
 	}
 }
 
-func dataSourceSharedFilesystemShareV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSharedFilesystemShareV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem sfsClient: %s", err)
@@ -124,8 +124,9 @@ func dataSourceSharedFilesystemShareV2Read(ctx context.Context, d *schema.Resour
 	sfsClient.Microversion = minManilaShareMicroversion
 
 	isPublic := d.Get("is_public").(bool)
-	metadataRaw := d.Get("metadata").(map[string]interface{})
+	metadataRaw := d.Get("metadata").(map[string]any)
 	metadata := make(map[string]string, len(metadataRaw))
+
 	for k, v := range metadataRaw {
 		if stringVal, ok := v.(string); ok {
 			metadata[k] = stringVal
@@ -163,10 +164,13 @@ func dataSourceSharedFilesystemShareV2Read(ctx context.Context, d *schema.Resour
 	}
 
 	var share shares.Share
+
 	if len(allShares) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allShares)
+
 		return diag.Errorf("Your query returned more than one result. Please try a more specific search criteria")
 	}
+
 	share = allShares[0]
 
 	exportLocationsRaw, err := shares.ListExportLocations(ctx, sfsClient, share.ID).Extract()
@@ -180,7 +184,7 @@ func dataSourceSharedFilesystemShareV2Read(ctx context.Context, d *schema.Resour
 	for _, v := range exportLocationsRaw {
 		exportLocations = append(exportLocations, map[string]string{
 			"path":      v.Path,
-			"preferred": fmt.Sprint(v.Preferred),
+			"preferred": strconv.FormatBool(v.Preferred),
 		})
 	}
 

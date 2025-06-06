@@ -5,11 +5,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/fwaas_v2/policies"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/fwaas_v2/policies"
 )
 
 func resourceFWPolicyV2() *schema.Resource {
@@ -80,8 +79,9 @@ func resourceFWPolicyV2() *schema.Resource {
 	}
 }
 
-func resourceFWPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceFWPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -92,7 +92,7 @@ func resourceFWPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		Description:   d.Get("description").(string),
 		TenantID:      d.Get("tenant_id").(string),
 		ProjectID:     d.Get("project_id").(string),
-		FirewallRules: expandToStringSlice(d.Get("rules").([]interface{})),
+		FirewallRules: expandToStringSlice(d.Get("rules").([]any)),
 	}
 
 	if v, ok := d.GetOk("audited"); ok {
@@ -119,8 +119,9 @@ func resourceFWPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceFWPolicyV2Read(ctx, d, meta)
 }
 
-func resourceFWPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceFWPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -145,8 +146,9 @@ func resourceFWPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceFWPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceFWPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -171,7 +173,7 @@ func resourceFWPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("rules") {
 		hasChange = true
-		rules := expandToStringSlice(d.Get("rules").([]interface{}))
+		rules := expandToStringSlice(d.Get("rules").([]any))
 		updateOpts.FirewallRules = &rules
 	}
 
@@ -199,8 +201,9 @@ func resourceFWPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceFWPolicyV2Read(ctx, d, meta)
 }
 
-func resourceFWPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceFWPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)

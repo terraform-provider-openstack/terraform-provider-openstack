@@ -2,21 +2,23 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccNetworkingV2RouterInterface_basic_subnet(t *testing.T) {
 	var network networks.Network
+
 	var router routers.Router
+
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -42,7 +44,9 @@ func TestAccNetworkingV2RouterInterface_basic_subnet(t *testing.T) {
 
 func TestAccNetworkingV2RouterInterface_force_destroy(t *testing.T) {
 	var network networks.Network
+
 	var router routers.Router
+
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -72,8 +76,11 @@ func TestAccNetworkingV2RouterInterface_force_destroy(t *testing.T) {
 // which are attached to the same port are handled properly.
 func TestAccNetworkingV2RouterInterface_v6_subnet(t *testing.T) {
 	var network networks.Network
+
 	var router routers.Router
+
 	var subnet1 subnets.Subnet
+
 	var subnet2 subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -107,8 +114,11 @@ func TestAccNetworkingV2RouterInterface_v6_subnet(t *testing.T) {
 
 func TestAccNetworkingV2RouterInterface_basic_port(t *testing.T) {
 	var network networks.Network
+
 	var port ports.Port
+
 	var router routers.Router
+
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -135,7 +145,9 @@ func TestAccNetworkingV2RouterInterface_basic_port(t *testing.T) {
 
 func TestAccNetworkingV2RouterInterface_timeout(t *testing.T) {
 	var network networks.Network
+
 	var router routers.Router
+
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -161,9 +173,10 @@ func TestAccNetworkingV2RouterInterface_timeout(t *testing.T) {
 
 func testAccCheckNetworkingV2RouterInterfaceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -173,7 +186,7 @@ func testAccCheckNetworkingV2RouterInterfaceDestroy(s *terraform.State) error {
 
 		_, err := ports.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Router interface still exists")
+			return errors.New("Router interface still exists")
 		}
 	}
 
@@ -188,13 +201,14 @@ func testAccCheckNetworkingV2RouterInterfaceExists(n string) resource.TestCheckF
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := ports.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -203,7 +217,7 @@ func testAccCheckNetworkingV2RouterInterfaceExists(n string) resource.TestCheckF
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Router interface not found")
+			return errors.New("Router interface not found")
 		}
 
 		return nil
@@ -218,13 +232,14 @@ func testAccCheckNetworkingV2RouterInterfaceAddExtraRoutes(n string) resource.Te
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := ports.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -233,7 +248,7 @@ func testAccCheckNetworkingV2RouterInterfaceAddExtraRoutes(n string) resource.Te
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Router interface not found")
+			return errors.New("Router interface not found")
 		}
 
 		// add extra routes to the router
@@ -246,9 +261,10 @@ func testAccCheckNetworkingV2RouterInterfaceAddExtraRoutes(n string) resource.Te
 		opts := routers.UpdateOpts{
 			Routes: &routes,
 		}
+
 		_, err = routers.Update(context.TODO(), networkingClient, found.DeviceID, opts).Extract()
 		if err != nil {
-			return fmt.Errorf("Router cannot be updated: %v", err)
+			return fmt.Errorf("Router cannot be updated: %w", err)
 		}
 
 		return nil

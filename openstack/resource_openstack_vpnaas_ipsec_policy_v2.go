@@ -7,12 +7,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
 )
 
 func resourceIPSecPolicyV2() *schema.Resource {
@@ -111,8 +110,9 @@ func resourceIPSecPolicyV2() *schema.Resource {
 	}
 }
 
-func resourceIPSecPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIPSecPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -155,6 +155,7 @@ func resourceIPSecPolicyV2Create(ctx context.Context, d *schema.ResourceData, me
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
+
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf(
@@ -168,10 +169,11 @@ func resourceIPSecPolicyV2Create(ctx context.Context, d *schema.ResourceData, me
 	return resourceIPSecPolicyV2Read(ctx, d, meta)
 }
 
-func resourceIPSecPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIPSecPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about IPSec policy: %s", d.Id())
 
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -195,10 +197,12 @@ func resourceIPSecPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta
 	d.Set("region", GetRegion(d, config))
 
 	// Set the lifetime
-	var lifetimeMap = make(map[string]interface{})
+	lifetimeMap := make(map[string]any)
 	lifetimeMap["units"] = policy.Lifetime.Units
 	lifetimeMap["value"] = policy.Lifetime.Value
-	var lifetime []map[string]interface{}
+
+	var lifetime []map[string]any
+
 	lifetime = append(lifetime, lifetimeMap)
 	if err := d.Set("lifetime", &lifetime); err != nil {
 		log.Printf("[WARN] unable to set IPSec policy lifetime")
@@ -207,14 +211,16 @@ func resourceIPSecPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func resourceIPSecPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIPSecPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var hasChange bool
+
 	opts := ipsecpolicies.UpdateOpts{}
 
 	if d.HasChange("name") {
@@ -280,13 +286,15 @@ func resourceIPSecPolicyV2Update(ctx context.Context, d *schema.ResourceData, me
 			return diag.FromErr(err)
 		}
 	}
+
 	return resourceIPSecPolicyV2Read(ctx, d, meta)
 }
 
-func resourceIPSecPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIPSecPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy IPSec policy: %s", d.Id())
 
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -309,7 +317,7 @@ func resourceIPSecPolicyV2Delete(ctx context.Context, d *schema.ResourceData, me
 }
 
 func waitForIPSecPolicyDeletion(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		err := ipsecpolicies.Delete(ctx, networkingClient, id).Err
 		if err == nil {
 			return "", "DELETED", nil
@@ -324,26 +332,28 @@ func waitForIPSecPolicyDeletion(ctx context.Context, networkingClient *gopherclo
 }
 
 func waitForIPSecPolicyCreation(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		policy, err := ipsecpolicies.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return "", "PENDING_CREATE", nil
 		}
+
 		return policy, "ACTIVE", nil
 	}
 }
 
 func waitForIPSecPolicyUpdate(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		policy, err := ipsecpolicies.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return "", "PENDING_UPDATE", nil
 		}
+
 		return policy, "ACTIVE", nil
 	}
 }
 
-func resourceIPSecPolicyV2TransformProtocol(v interface{}, k string) ([]string, []error) {
+func resourceIPSecPolicyV2TransformProtocol(v any, k string) ([]string, []error) {
 	switch ipsecpolicies.TransformProtocol(v.(string)) {
 	case ipsecpolicies.TransformProtocolESP,
 		ipsecpolicies.TransformProtocolAH,
@@ -354,7 +364,7 @@ func resourceIPSecPolicyV2TransformProtocol(v interface{}, k string) ([]string, 
 	return nil, []error{fmt.Errorf("unknown %q %s for openstack_vpnaas_ipsec_policy_v2", k, v)}
 }
 
-func resourceIPSecPolicyV2PFS(v interface{}, k string) ([]string, []error) {
+func resourceIPSecPolicyV2PFS(v any, k string) ([]string, []error) {
 	switch ipsecpolicies.PFS(v.(string)) {
 	case ipsecpolicies.PFSGroup2,
 		ipsecpolicies.PFSGroup5,
@@ -382,7 +392,7 @@ func resourceIPSecPolicyV2PFS(v interface{}, k string) ([]string, []error) {
 	return nil, []error{fmt.Errorf("unknown %q %s for openstack_vpnaas_ipsec_policy_v2", k, v)}
 }
 
-func resourceIPSecPolicyV2EncryptionAlgorithm(v interface{}, k string) ([]string, []error) {
+func resourceIPSecPolicyV2EncryptionAlgorithm(v any, k string) ([]string, []error) {
 	switch ipsecpolicies.EncryptionAlgorithm(v.(string)) {
 	case ipsecpolicies.EncryptionAlgorithm3DES,
 		ipsecpolicies.EncryptionAlgorithmAES128,
@@ -415,7 +425,7 @@ func resourceIPSecPolicyV2EncryptionAlgorithm(v interface{}, k string) ([]string
 	return nil, []error{fmt.Errorf("unknown %q %s for openstack_vpnaas_ipsec_policy_v2", k, v)}
 }
 
-func resourceIPSecPolicyV2AuthAlgorithm(v interface{}, k string) ([]string, []error) {
+func resourceIPSecPolicyV2AuthAlgorithm(v any, k string) ([]string, []error) {
 	switch ipsecpolicies.AuthAlgorithm(v.(string)) {
 	case ipsecpolicies.AuthAlgorithmSHA1,
 		ipsecpolicies.AuthAlgorithmSHA256,
@@ -429,7 +439,7 @@ func resourceIPSecPolicyV2AuthAlgorithm(v interface{}, k string) ([]string, []er
 	return nil, []error{fmt.Errorf("unknown %q %s for openstack_vpnaas_ipsec_policy_v2", k, v)}
 }
 
-func resourceIPSecPolicyV2EncapsulationMode(v interface{}, k string) ([]string, []error) {
+func resourceIPSecPolicyV2EncapsulationMode(v any, k string) ([]string, []error) {
 	switch ipsecpolicies.EncapsulationMode(v.(string)) {
 	case ipsecpolicies.EncapsulationModeTunnel,
 		ipsecpolicies.EncapsulationModeTransport:
@@ -444,23 +454,26 @@ func resourceIPSecPolicyV2LifetimeCreateOpts(d *schema.Set) ipsecpolicies.Lifeti
 
 	rawPairs := d.List()
 	for _, raw := range rawPairs {
-		rawMap := raw.(map[string]interface{})
+		rawMap := raw.(map[string]any)
 		lifetime.Units = resourceIPSecPolicyV2Unit(rawMap["units"].(string))
 
 		value := rawMap["value"].(int)
 		lifetime.Value = value
 	}
+
 	return lifetime
 }
 
 func resourceIPSecPolicyV2Unit(units string) ipsecpolicies.Unit {
 	var unit ipsecpolicies.Unit
+
 	switch units {
 	case "seconds":
 		unit = ipsecpolicies.UnitSeconds
 	case "kilobytes":
 		unit = ipsecpolicies.UnitKilobytes
 	}
+
 	return unit
 }
 
@@ -469,11 +482,12 @@ func resourceIPSecPolicyV2LifetimeUpdateOpts(d *schema.Set) ipsecpolicies.Lifeti
 
 	rawPairs := d.List()
 	for _, raw := range rawPairs {
-		rawMap := raw.(map[string]interface{})
+		rawMap := raw.(map[string]any)
 		lifetimeUpdateOpts.Units = resourceIPSecPolicyV2Unit(rawMap["units"].(string))
 
 		value := rawMap["value"].(int)
 		lifetimeUpdateOpts.Value = value
 	}
+
 	return lifetimeUpdateOpts
 }

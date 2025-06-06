@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/flavors"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/flavors"
 )
 
 func TestAccLBV2Flavor_basic(t *testing.T) {
@@ -53,9 +53,10 @@ func TestAccLBV2Flavor_basic(t *testing.T) {
 
 func testAccCheckLBV2FlavorDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+		return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -80,13 +81,14 @@ func testAccCheckLBV2FlavorExists(n string, fp *flavors.Flavor) resource.TestChe
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
 		found, err := flavors.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
@@ -95,7 +97,7 @@ func testAccCheckLBV2FlavorExists(n string, fp *flavors.Flavor) resource.TestChe
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Flavor not found")
+			return errors.New("Flavor not found")
 		}
 
 		*fp = *found

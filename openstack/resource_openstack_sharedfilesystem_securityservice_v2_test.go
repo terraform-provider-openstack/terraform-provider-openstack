@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/securityservices"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/securityservices"
 )
 
 func TestAccSFSV2SecurityService_basic(t *testing.T) {
@@ -77,9 +77,10 @@ func TestAccSFSV2SecurityService_basic(t *testing.T) {
 
 func testAccCheckSFSV2SecurityServiceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -104,13 +105,14 @@ func testAccCheckSFSV2SecurityServiceExists(n string, securityservice *securitys
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %w", err)
 		}
 
 		found, err := securityservices.Get(context.TODO(), sfsClient, rs.Primary.ID).Extract()
@@ -119,7 +121,7 @@ func testAccCheckSFSV2SecurityServiceExists(n string, securityservice *securitys
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Member not found")
+			return errors.New("Member not found")
 		}
 
 		*securityservice = *found

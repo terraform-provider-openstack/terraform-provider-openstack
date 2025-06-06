@@ -2,15 +2,15 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/clusters"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/clusters"
 )
 
 func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
@@ -295,13 +295,14 @@ func testAccCheckContainerInfraV1ClusterExists(n string, cluster *clusters.Clust
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
+			return fmt.Errorf("Error creating OpenStack container infra client: %w", err)
 		}
 
 		found, err := clusters.Get(context.TODO(), containerInfraClient, rs.Primary.ID).Extract()
@@ -310,7 +311,7 @@ func testAccCheckContainerInfraV1ClusterExists(n string, cluster *clusters.Clust
 		}
 
 		if found.UUID != rs.Primary.ID {
-			return fmt.Errorf("Cluster not found")
+			return errors.New("Cluster not found")
 		}
 
 		*cluster = *found
@@ -321,9 +322,10 @@ func testAccCheckContainerInfraV1ClusterExists(n string, cluster *clusters.Clust
 
 func testAccCheckContainerInfraV1ClusterDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
+		return fmt.Errorf("Error creating OpenStack container infra client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -333,7 +335,7 @@ func testAccCheckContainerInfraV1ClusterDestroy(s *terraform.State) error {
 
 		_, err := clusters.Get(context.TODO(), containerInfraClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Cluster still exists")
+			return errors.New("Cluster still exists")
 		}
 	}
 

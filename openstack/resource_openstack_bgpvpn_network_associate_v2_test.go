@@ -2,19 +2,20 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/bgpvpns"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccBGPVPNNetworkAssociateV2_basic(t *testing.T) {
 	var na bgpvpns.NetworkAssociation
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -38,10 +39,12 @@ func TestAccBGPVPNNetworkAssociateV2_basic(t *testing.T) {
 
 func testAccCheckBGPVPNNetworkAssociateV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "openstack_bgpvpn_network_associate_v2" {
 			continue
@@ -56,10 +59,12 @@ func testAccCheckBGPVPNNetworkAssociateV2Destroy(s *terraform.State) error {
 		if err == nil {
 			return fmt.Errorf("BGP VPN network association (%s) still exists", id)
 		}
+
 		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -71,13 +76,14 @@ func testAccCheckBGPVPNNetworkAssociateV2Exists(n string, na *bgpvpns.NetworkAss
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		bgpvpnID, id, err := parsePairedIDs(rs.Primary.ID, "openstack_bgpvpn_network_associate_v2")
@@ -91,7 +97,7 @@ func testAccCheckBGPVPNNetworkAssociateV2Exists(n string, na *bgpvpns.NetworkAss
 		}
 
 		if found.ID != id {
-			return fmt.Errorf("BGP VPN network association not found")
+			return errors.New("BGP VPN network association not found")
 		}
 
 		*na = *found

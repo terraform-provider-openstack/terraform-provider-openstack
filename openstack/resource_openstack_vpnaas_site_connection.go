@@ -7,12 +7,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/siteconnections"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/siteconnections"
 )
 
 func resourceSiteConnectionV2() *schema.Resource {
@@ -144,8 +143,9 @@ func resourceSiteConnectionV2() *schema.Resource {
 	}
 }
 
-func resourceSiteConnectionV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSiteConnectionV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -155,8 +155,9 @@ func resourceSiteConnectionV2Create(ctx context.Context, d *schema.ResourceData,
 
 	dpd := resourceSiteConnectionV2DPDCreateOpts(d.Get("dpd").(*schema.Set))
 
-	v := d.Get("peer_cidrs").([]interface{})
+	v := d.Get("peer_cidrs").([]any)
 	peerCidrs := make([]string, len(v))
+
 	for i, v := range v {
 		peerCidrs[i] = v.(string)
 	}
@@ -202,8 +203,8 @@ func resourceSiteConnectionV2Create(ctx context.Context, d *schema.ResourceData,
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
-	_, err = stateConf.WaitForStateContext(ctx)
 
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -215,10 +216,11 @@ func resourceSiteConnectionV2Create(ctx context.Context, d *schema.ResourceData,
 	return resourceSiteConnectionV2Read(ctx, d, meta)
 }
 
-func resourceSiteConnectionV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSiteConnectionV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about site connection: %s", d.Id())
 
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -250,12 +252,13 @@ func resourceSiteConnectionV2Read(ctx context.Context, d *schema.ResourceData, m
 	d.Set("region", GetRegion(d, config))
 
 	// Set the dpd
-	var dpdMap = make(map[string]interface{})
+	dpdMap := make(map[string]any)
 	dpdMap["action"] = conn.DPD.Action
 	dpdMap["interval"] = conn.DPD.Interval
 	dpdMap["timeout"] = conn.DPD.Timeout
 
-	var dpd []map[string]interface{}
+	var dpd []map[string]any
+
 	dpd = append(dpd, dpdMap)
 	if err := d.Set("dpd", &dpd); err != nil {
 		log.Printf("[WARN] unable to set Site connection DPD")
@@ -264,8 +267,9 @@ func resourceSiteConnectionV2Read(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceSiteConnectionV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSiteConnectionV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -354,6 +358,7 @@ func resourceSiteConnectionV2Update(ctx context.Context, d *schema.ResourceData,
 		if err != nil {
 			return diag.FromErr(err)
 		}
+
 		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
 			Target:     []string{"UPDATED"},
@@ -362,8 +367,8 @@ func resourceSiteConnectionV2Update(ctx context.Context, d *schema.ResourceData,
 			Delay:      0,
 			MinTimeout: 2 * time.Second,
 		}
-		_, err = stateConf.WaitForStateContext(ctx)
 
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -374,17 +379,17 @@ func resourceSiteConnectionV2Update(ctx context.Context, d *schema.ResourceData,
 	return resourceSiteConnectionV2Read(ctx, d, meta)
 }
 
-func resourceSiteConnectionV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSiteConnectionV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy service: %s", d.Id())
 
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	err = siteconnections.Delete(ctx, networkingClient, d.Id()).Err
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -404,51 +409,58 @@ func resourceSiteConnectionV2Delete(ctx context.Context, d *schema.ResourceData,
 }
 
 func waitForSiteConnectionDeletion(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		conn, err := siteconnections.Get(ctx, networkingClient, id).Extract()
 		log.Printf("[DEBUG] Got site connection %s => %#v", id, conn)
 
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				log.Printf("[DEBUG] SiteConnection %s is actually deleted", id)
+
 				return "", "DELETED", nil
 			}
-			return nil, "", fmt.Errorf("Unexpected error: %s", err)
+
+			return nil, "", fmt.Errorf("Unexpected error: %w", err)
 		}
 
 		log.Printf("[DEBUG] SiteConnection %s deletion is pending", id)
+
 		return conn, "DELETING", nil
 	}
 }
 
 func waitForSiteConnectionCreation(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		service, err := siteconnections.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return "", "NOT_CREATED", nil
 		}
+
 		return service, "PENDING_CREATE", nil
 	}
 }
 
 func waitForSiteConnectionUpdate(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		conn, err := siteconnections.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return "", "PENDING_UPDATE", nil
 		}
+
 		return conn, "UPDATED", nil
 	}
 }
 
 func resourceSiteConnectionV2Initiator(initatorString string) siteconnections.Initiator {
 	var ini siteconnections.Initiator
+
 	switch initatorString {
 	case "bi-directional":
 		ini = siteconnections.InitiatorBiDirectional
 	case "response-only":
 		ini = siteconnections.InitiatorResponseOnly
 	}
+
 	return ini
 }
 
@@ -457,7 +469,7 @@ func resourceSiteConnectionV2DPDCreateOpts(d *schema.Set) siteconnections.DPDCre
 
 	rawPairs := d.List()
 	for _, raw := range rawPairs {
-		rawMap := raw.(map[string]interface{})
+		rawMap := raw.(map[string]any)
 		dpd.Action = resourceSiteConnectionV2Action(rawMap["action"].(string))
 
 		timeout := rawMap["timeout"].(int)
@@ -466,10 +478,13 @@ func resourceSiteConnectionV2DPDCreateOpts(d *schema.Set) siteconnections.DPDCre
 		interval := rawMap["interval"].(int)
 		dpd.Interval = interval
 	}
+
 	return dpd
 }
+
 func resourceSiteConnectionV2Action(actionString string) siteconnections.Action {
 	var act siteconnections.Action
+
 	switch actionString {
 	case "hold":
 		act = siteconnections.ActionHold
@@ -482,6 +497,7 @@ func resourceSiteConnectionV2Action(actionString string) siteconnections.Action 
 	case "clear":
 		act = siteconnections.ActionClear
 	}
+
 	return act
 }
 
@@ -490,7 +506,7 @@ func resourceSiteConnectionV2DPDUpdateOpts(d *schema.Set) siteconnections.DPDUpd
 
 	rawPairs := d.List()
 	for _, raw := range rawPairs {
-		rawMap := raw.(map[string]interface{})
+		rawMap := raw.(map[string]any)
 		dpd.Action = resourceSiteConnectionV2Action(rawMap["action"].(string))
 
 		timeout := rawMap["timeout"].(int)
@@ -499,5 +515,6 @@ func resourceSiteConnectionV2DPDUpdateOpts(d *schema.Set) siteconnections.DPDUpd
 		interval := rawMap["interval"].(int)
 		dpd.Interval = interval
 	}
+
 	return dpd
 }

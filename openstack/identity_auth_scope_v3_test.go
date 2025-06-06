@@ -3,9 +3,8 @@ package openstack
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUnitFlattenIdentityAuthScopeV3Roles(t *testing.T) {
@@ -87,7 +86,7 @@ func TestUnitFlattenIdentityAuthScopeV3ServiceCatalog(t *testing.T) {
 		Entries: catalogEntries,
 	}
 
-	expected := []map[string]interface{}{
+	expected := []map[string]any{
 		{
 			"id":   "1",
 			"name": "cinderv2",

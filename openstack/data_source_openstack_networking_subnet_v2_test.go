@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -143,7 +144,7 @@ func testAccCheckNetworkingSubnetV2DataSourceID(n string) resource.TestCheckFunc
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Subnet data source ID not set")
+			return errors.New("Subnet data source ID not set")
 		}
 
 		return nil
@@ -158,7 +159,7 @@ func testAccCheckNetworkingPortV2ID(n string) resource.TestCheckFunc {
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Port resource ID not set")
+			return errors.New("Port resource ID not set")
 		}
 
 		return nil
@@ -173,7 +174,7 @@ func testAccCheckNetworkingSubnetV2DataSourceGoodNetwork(n1, n2 string) resource
 		}
 
 		if ds1.Primary.ID == "" {
-			return fmt.Errorf("Subnet data source ID not set")
+			return errors.New("Subnet data source ID not set")
 		}
 
 		rs2, ok := s.RootModule().Resources[n2]
@@ -182,11 +183,11 @@ func testAccCheckNetworkingSubnetV2DataSourceGoodNetwork(n1, n2 string) resource
 		}
 
 		if rs2.Primary.ID == "" {
-			return fmt.Errorf("Network resource ID not set")
+			return errors.New("Network resource ID not set")
 		}
 
 		if rs2.Primary.ID != ds1.Primary.Attributes["network_id"] {
-			return fmt.Errorf("Network id and subnet network_id don't match")
+			return errors.New("Network id and subnet network_id don't match")
 		}
 
 		return nil

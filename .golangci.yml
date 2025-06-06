@@ -1,109 +1,191 @@
+version: "2"
+
 run:
   timeout: 5m
 
-linters-settings:
-  gci:
-    sections:
-      - standard
-      - default
-      - prefix(github.com/gophercloud)
-  goimports:
-    local-prefixes: github.com/gophercloud
-  depguard:
-    rules:
-      prevent_unmaintained_packages:
-        list-mode: lax
-        files:
-          - $all
-          - "!$test"
-        deny:
-          - pkg: io/ioutil
-            desc: "replaced by io and os packages since Go 1.16: https://tip.golang.org/doc/go1.16#ioutil"
-
 linters:
-  fast: false
-  disable-all: true
+  default: none
   enable:
+    - asasalint
     - asciicheck
+    - bidichk
     - bodyclose
-    - depguard
+    - canonicalheader
+    - containedctx
+    - contextcheck
     - copyloopvar
+    - decorder
+    - depguard
     - dogsled
+    - dupword
+    - durationcheck
     - errcheck
+    - errchkjson
+    - errname
+    - errorlint
     - exhaustive
-    - gci
+    - exptostd
+    - fatcontext
+    - forbidigo
+    - funcorder
+    - ginkgolinter
+    - gocheckcompilerdirectives
+    - gochecknoglobals
+    - gochecknoinits
+    - gochecksumtype
+    - gocritic
     - godot
-    - gofmt
     - goheader
-    - goimports
+    - gomoddirectives
     - gomodguard
     - goprintffuncname
+    - gosmopolitan
     - govet
+    - grouper
+    - iface
+    - importas
+    - inamedparam
     - ineffassign
+    - interfacebloat
+    - intrange
+    - ireturn
+    - loggercheck
+    - makezero
+    - mirror
     - misspell
+    - musttag
     - nakedret
+    - nilnesserr
+    - nlreturn
+    - noctx
     - nolintlint
+    - nosprintfhostport
+    - perfsprint
     - prealloc
+    - predeclared
+    - promlinter
+    - protogetter
+    - reassign
+    - recvcheck
+    - revive
+    - rowserrcheck
+    - sloglint
+    - spancheck
+    - sqlclosecheck
     - staticcheck
-    - stylecheck
-    - typecheck
+    - tagalign
+    - testableexamples
+    - testifylint
+    - tparallel
     - unconvert
+    - unparam
     - unused
+    - usestdlibvars
+    - usetesting
+    - wastedassign
     - whitespace
+    - wsl
+    - zerologlint
 #    - cyclop
 #    - dupl
-#    - durationcheck
-#    - errname
-#    - errorlint
-#    - exhaustivestruct
-#    - forbidigo
+#    - err113
+#    - exhaustruct
 #    - forcetypeassert
 #    - funlen
-#    - gochecknoglobals
-#    - gochecknoinits
 #    - gocognit
 #    - goconst
-#    - gocritic
 #    - gocyclo
 #    - godox
-#    - goerr113
-#    - gofumpt
-#    - golint
-#    - gomnd
-#    - gomoddirectives
-#    - gosec (gas)
-#    - gosimple (megacheck)
-#    - ifshort
-#    - importas
-#    - interfacer
+#    - gosec
 #    - lll
-#    - makezero
-#    - maligned
+#    - maintidx
+#    - mnd
 #    - nestif
 #    - nilerr
-#    - nlreturn
-#    - noctx
+#    - nilnil
+#    - nonamedreturns
 #    - paralleltest
-#    - predeclared
-#    - promlinter
-#    - revive
-#    - scopelint
-#    - sqlclosecheck
 #    - tagliatelle
 #    - testpackage
 #    - thelper
-#    - tparallel
-#    - unparam
-#    - wastedassign
+#    - varnamelen
 #    - wrapcheck
-#    - wsl
-
-issues:
-  exclude-rules:
-    - linters:
-        - stylecheck
-      text: "ST1005:"
-
-    - linters:
-        - errcheck
-      text: "Error return value of `d.Set` is not checked"
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - errcheck
+        text: "Error return value of `d.Set` is not checked"
+      - linters:
+          - staticcheck
+        text: "ST1005:"
+      - linters:
+          - unparam
+        text: ".* always receives .*"
+      - linters:
+          - gocritic
+        text: "ifElseChain: rewrite if-else to switch statement|singleCaseSwitch: should rewrite switch statement to if statement"
+      - linters:
+          - wsl
+        text: "only one cuddle assignment allowed before if statement|block should not end with a whitespace"
+      - path: _test\.go
+        linters:
+          - gochecknoinits
+          - gochecknoglobals
+          - dupl
+  settings:
+    depguard:
+      rules:
+        prevent_unmaintained_packages:
+          list-mode: strict
+          files:
+            - $all
+            - "!$test"
+          allow:
+            - $gostd
+            - github.com/terraform-provider-openstack/terraform-provider-openstack
+            - github.com/gophercloud/gophercloud/v2
+            - github.com/gophercloud/utils/v2
+            - github.com/mitchellh/go-homedir
+            - github.com/hashicorp/terraform-plugin-sdk/v2
+            - github.com/ulikunitz/xz
+            - github.com/klauspost/compress
+            - gopkg.in/yaml.v2
+        test_packages:
+          list-mode: strict
+          files:
+            - $test
+          allow:
+            - $gostd
+            - github.com/terraform-provider-openstack/terraform-provider-openstack
+            - github.com/gophercloud/gophercloud/v2
+            - github.com/gophercloud/utils/v2
+            - github.com/mitchellh/go-homedir
+            - github.com/hashicorp/terraform-plugin-sdk/v2
+            - github.com/hashicorp/terraform-plugin-testing
+            - github.com/google/go-cmp/cmp
+            - github.com/stretchr/testify
+formatters:
+  enable:
+    - gofmt
+    - goimports
+    - gci
+    - gofumpt
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+      no-inline-comments: true
+      no-prefix-comments: true
+    gofmt:
+      rewrite-rules:
+        - pattern: 'interface{}'
+          replacement: 'any'
+        - pattern: 'a[b:len(a)]'
+          replacement: 'a[b:]'

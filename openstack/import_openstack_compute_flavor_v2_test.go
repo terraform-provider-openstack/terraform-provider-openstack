@@ -9,7 +9,8 @@ import (
 
 func TestAccComputeV2Flavor_importBasic(t *testing.T) {
 	resourceName := "openstack_compute_flavor_v2.flavor_1"
-	var flavorName = acctest.RandomWithPrefix("tf-acc-flavor")
+
+	flavorName := acctest.RandomWithPrefix("tf-acc-flavor")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

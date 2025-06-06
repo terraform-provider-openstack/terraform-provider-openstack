@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -10,7 +11,7 @@ import (
 )
 
 func TestAccOpenStackIdentityV3ProjectDataSource_basic(t *testing.T) {
-	projectName := fmt.Sprintf("tf_test_%s", acctest.RandString(5))
+	projectName := "tf_test_" + acctest.RandString(5)
 	projectDescription := acctest.RandString(20)
 	projectTag1 := acctest.RandString(20)
 	projectTag2 := acctest.RandString(20)
@@ -46,7 +47,7 @@ func TestAccOpenStackIdentityV3ProjectDataSource_basic(t *testing.T) {
 }
 
 func TestAccOpenStackIdentityV3ProjectDataSource_withProjectID(t *testing.T) {
-	projectName := fmt.Sprintf("tf_test_%s", acctest.RandString(5))
+	projectName := "tf_test_" + acctest.RandString(5)
 	projectDescription := acctest.RandString(20)
 	projectTag1 := acctest.RandString(20)
 	projectTag2 := acctest.RandString(20)
@@ -89,7 +90,7 @@ func testAccCheckIdentityV3ProjectDataSourceID(n string) resource.TestCheckFunc 
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Project data source ID not set")
+			return errors.New("Project data source ID not set")
 		}
 
 		return nil

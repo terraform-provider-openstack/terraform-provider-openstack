@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceNetworkingRouterV2() *schema.Resource {
@@ -168,8 +167,9 @@ func resourceNetworkingRouterV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -197,7 +197,9 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 
 	// Get Vendor_options
 	vendorOptionsRaw := d.Get("vendor_options").(*schema.Set)
+
 	var vendorUpdateGateway bool
+
 	if vendorOptionsRaw.Len() > 0 {
 		vendorOptions := expandVendorOptions(vendorOptionsRaw.List())
 		vendorUpdateGateway = vendorOptions["set_router_gateway_after_create"].(bool)
@@ -205,6 +207,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 
 	// Gateway settings
 	var externalNetworkID string
+
 	var gatewayInfo routers.GatewayInfo
 
 	if v := d.Get("external_network_id").(string); v != "" {
@@ -221,12 +224,12 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 		gatewayInfo.EnableSNAT = &es
 	}
 
-	externalFixedIPs := expandNetworkingRouterExternalFixedIPsV2(d.Get("external_fixed_ip").([]interface{}))
+	externalFixedIPs := expandNetworkingRouterExternalFixedIPsV2(d.Get("external_fixed_ip").([]any))
 	if len(externalFixedIPs) > 0 {
 		gatewayInfo.ExternalFixedIPs = externalFixedIPs
 	}
 
-	externalSubnetIDs := expandNetworkingRouterExternalSubnetIDsV2(d.Get("external_subnet_ids").([]interface{}))
+	externalSubnetIDs := expandNetworkingRouterExternalSubnetIDsV2(d.Get("external_subnet_ids").([]any))
 
 	// vendorUpdateGateway is a flag for certain vendor-specific virtual routers
 	// which do not allow gateway settings to be set during router creation.
@@ -237,6 +240,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 	}
 
 	var r *routers.Router
+
 	log.Printf("[DEBUG] openstack_networking_router_v2 create options: %#v", createOpts)
 
 	if len(externalSubnetIDs) == 0 {
@@ -257,8 +261,10 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 				if retryOn409(err) {
 					continue
 				}
+
 				return diag.Errorf("Error creating openstack_networking_router_v2: %s", err)
 			}
+
 			break
 		}
 		// handle the last error
@@ -302,19 +308,23 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+
 		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "routers", r.ID, tagOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error setting tags on openstack_networking_router_v2 %s: %s", r.ID, err)
 		}
+
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_router_v2 %s", tags, r.ID)
 	}
 
 	log.Printf("[DEBUG] Created openstack_networking_router_v2 %s: %#v", r.ID, r)
+
 	return resourceNetworkingRouterV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -324,6 +334,7 @@ func resourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			d.SetId("")
+
 			return nil
 		}
 
@@ -358,28 +369,33 @@ func resourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	routerID := d.Id()
-	config.MutexKV.Lock(routerID)
-	defer config.MutexKV.Unlock(routerID)
+	config.Lock(routerID)
+	defer config.Unlock(routerID)
 
 	var hasChange bool
+
 	var updateOpts routers.UpdateOpts
+
 	if d.HasChange("name") {
 		hasChange = true
 		updateOpts.Name = d.Get("name").(string)
 	}
+
 	if d.HasChange("description") {
 		hasChange = true
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
 	}
+
 	if d.HasChange("admin_state_up") {
 		hasChange = true
 		asu := d.Get("admin_state_up").(bool)
@@ -388,7 +404,9 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 
 	// Gateway settings.
 	var updateGatewaySettings bool
+
 	var externalNetworkID string
+
 	gatewayInfo := routers.GatewayInfo{}
 
 	if v := d.Get("external_network_id").(string); v != "" {
@@ -402,6 +420,7 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 	if d.HasChange("external_network_id") {
 		updateGatewaySettings = true
 	}
+
 	if d.HasChange("external_qos_policy_id") {
 		updateGatewaySettings = true
 		gatewayInfo.QoSPolicyID = d.Get("external_qos_policy_id").(string)
@@ -415,7 +434,7 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 
 	if d.HasChange("external_fixed_ip") {
 		updateGatewaySettings = true
-		externalFixedIPs := expandNetworkingRouterExternalFixedIPsV2(d.Get("external_fixed_ip").([]interface{}))
+		externalFixedIPs := expandNetworkingRouterExternalFixedIPsV2(d.Get("external_fixed_ip").([]any))
 		gatewayInfo.ExternalFixedIPs = externalFixedIPs
 	}
 
@@ -426,6 +445,7 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_networking_router_v2 %s update options: %#v", d.Id(), updateOpts)
+
 		_, err = routers.Update(ctx, networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_networking_router_v2: %s", err)
@@ -436,18 +456,21 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 	if d.HasChange("tags") {
 		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+
 		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "routers", d.Id(), tagOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error setting tags on openstack_networking_router_v2 %s: %s", d.Id(), err)
 		}
+
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_router_v2 %s", tags, d.Id())
 	}
 
 	return resourceNetworkingRouterV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingRouterV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingRouterV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -472,5 +495,6 @@ func resourceNetworkingRouterV2Delete(ctx context.Context, d *schema.ResourceDat
 	}
 
 	d.SetId("")
+
 	return nil
 }

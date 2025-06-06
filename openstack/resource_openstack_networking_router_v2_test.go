@@ -2,14 +2,14 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccNetworkingV2Router_basic(t *testing.T) {
@@ -200,9 +200,10 @@ func TestAccNetworkingV2Router_extQoSPolicy(t *testing.T) {
 
 func testAccCheckNetworkingV2RouterDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -212,7 +213,7 @@ func testAccCheckNetworkingV2RouterDestroy(s *terraform.State) error {
 
 		_, err := routers.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Router still exists")
+			return errors.New("Router still exists")
 		}
 	}
 
@@ -227,13 +228,14 @@ func testAccCheckNetworkingV2RouterExists(n string, router *routers.Router) reso
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := routers.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -242,7 +244,7 @@ func testAccCheckNetworkingV2RouterExists(n string, router *routers.Router) reso
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Router not found")
+			return errors.New("Router not found")
 		}
 
 		*router = *found

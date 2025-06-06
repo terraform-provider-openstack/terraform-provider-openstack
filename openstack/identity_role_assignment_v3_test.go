@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUnitIdentityRoleAssignmentV3ID(t *testing.T) {
@@ -28,7 +29,7 @@ func TestUnitIdentityRoleAssignmentV3ParseID(t *testing.T) {
 	expectedRoleID := "role"
 
 	actualDomainID, actualProjectID, actualGroupID, actualUserID, actualRoleID, err := identityRoleAssignmentV3ParseID(id)
-	assert.Equal(t, err, nil)
+	require.NoError(t, err)
 	assert.Equal(t, expectedDomainID, actualDomainID)
 	assert.Equal(t, expectedProjectID, actualProjectID)
 	assert.Equal(t, expectedGroupID, actualGroupID)

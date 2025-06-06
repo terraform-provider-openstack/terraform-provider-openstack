@@ -4,17 +4,16 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
+	"errors"
 	"log"
 	"net/url"
 	"strconv"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/objects"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/objects"
 )
 
 func resourceObjectstorageTempurlV1() *schema.Resource {
@@ -48,12 +47,12 @@ func resourceObjectstorageTempurlV1() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Default:  "get",
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+				ValidateFunc: func(v any, _ string) (ws []string, errs []error) {
 					value := v.(string)
 					if value != "get" && value != "post" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'get', and 'post' are supported values for 'method'"))
+						errs = append(errs, errors.New("Only 'get', and 'post' are supported values for 'method'"))
 					}
+
 					return
 				},
 			},
@@ -100,20 +99,22 @@ func resourceObjectstorageTempurlV1() *schema.Resource {
 }
 
 // resourceObjectstorageTempurlV1Create performs the image lookup.
-func resourceObjectstorageTempurlV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObjectstorageTempurlV1Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
 
 	method := objects.GET
+
 	switch d.Get("method") {
 	case "post":
 		method = objects.POST
 		// gophercloud doesn't have support for PUT yet,
 		// although it's a valid method for swift
-		//case "put":
+		// case "put":
 		//	method = objects.PUT
 	}
 
@@ -149,7 +150,7 @@ func resourceObjectstorageTempurlV1Create(ctx context.Context, d *schema.Resourc
 }
 
 // resourceObjectstorageTempurlV1Read performs the image lookup.
-func resourceObjectstorageTempurlV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObjectstorageTempurlV1Read(_ context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
 	d.Set("region", GetRegion(d, config))
 
@@ -175,6 +176,7 @@ func resourceObjectstorageTempurlV1Read(ctx context.Context, d *schema.ResourceD
 	// Regenerate the URL if it has expired and if the user requested it to be.
 	regen := d.Get("regenerate").(bool)
 	now := time.Now().Unix()
+
 	if expiry < now && regen {
 		log.Printf("[DEBUG] temporary url %s expired, generating a new one", turl)
 		d.SetId("")

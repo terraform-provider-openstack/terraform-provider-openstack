@@ -4,10 +4,9 @@ import (
 	"context"
 	"log"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 )
 
 // dataSourceDNSZoneShareV2 defines the schema for the DNS Zone Share data source.
@@ -54,8 +53,9 @@ func dataSourceDNSZoneShareV2() *schema.Resource {
 }
 
 // dataSourceDNSZoneShareV2Read fetches the zone share details based on the provided parameters.
-func dataSourceDNSZoneShareV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDNSZoneShareV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("error creating DNS client: %s", err)
@@ -64,6 +64,7 @@ func dataSourceDNSZoneShareV2Read(ctx context.Context, d *schema.ResourceData, m
 	if err := dnsClientSetAuthHeader(ctx, d, dnsClient); err != nil {
 		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
+
 	dnsClient.Microversion = "2.1"
 
 	zoneID := d.Get("zone_id").(string)
@@ -104,6 +105,7 @@ func dataSourceDNSZoneShareV2Read(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	var filteredShares []zones.ZoneShare
+
 	if targetProjectID != "" {
 		for _, share := range shares {
 			if share.TargetProjectID == targetProjectID {

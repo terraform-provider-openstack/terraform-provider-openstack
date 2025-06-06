@@ -6,8 +6,8 @@ import (
 )
 
 // blockStorageQuotasetVolTypeQuotaToInt converts block storage vol type quota from map of strings to map of integers.
-func blockStorageQuotasetVolTypeQuotaToInt(raw map[string]interface{}) (map[string]interface{}, error) {
-	res := make(map[string]interface{}, len(raw))
+func blockStorageQuotasetVolTypeQuotaToInt(raw map[string]any) (map[string]any, error) {
+	res := make(map[string]any, len(raw))
 
 	for k, v := range raw {
 		strVal, ok := v.(string)
@@ -27,7 +27,7 @@ func blockStorageQuotasetVolTypeQuotaToInt(raw map[string]interface{}) (map[stri
 }
 
 // blockStorageQuotasetVolTypeQuotaToStr converts block storage vol type quota from map of interfaces to map of strings.
-func blockStorageQuotasetVolTypeQuotaToStr(raw map[string]interface{}) (map[string]string, error) {
+func blockStorageQuotasetVolTypeQuotaToStr(raw map[string]any) (map[string]string, error) {
 	res := make(map[string]string, len(raw))
 
 	for k, v := range raw {

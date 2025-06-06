@@ -2,19 +2,20 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/flavors"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/flavors"
 )
 
 func TestAccComputeV2Flavor_basic(t *testing.T) {
 	var flavor flavors.Flavor
-	var flavorName = acctest.RandomWithPrefix("tf-acc-flavor")
+
+	flavorName := acctest.RandomWithPrefix("tf-acc-flavor")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -58,7 +59,8 @@ func TestAccComputeV2Flavor_basic(t *testing.T) {
 
 func TestAccComputeV2Flavor_extraSpecs(t *testing.T) {
 	var flavor flavors.Flavor
-	var flavorName = acctest.RandomWithPrefix("tf-acc-flavor")
+
+	flavorName := acctest.RandomWithPrefix("tf-acc-flavor")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -100,9 +102,10 @@ func TestAccComputeV2Flavor_extraSpecs(t *testing.T) {
 
 func testAccCheckComputeV2FlavorDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -112,7 +115,7 @@ func testAccCheckComputeV2FlavorDestroy(s *terraform.State) error {
 
 		_, err := flavors.Get(context.TODO(), computeClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Flavor still exists")
+			return errors.New("Flavor still exists")
 		}
 	}
 
@@ -127,13 +130,14 @@ func testAccCheckComputeV2FlavorExists(n string, flavor *flavors.Flavor) resourc
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
 		found, err := flavors.Get(context.TODO(), computeClient, rs.Primary.ID).Extract()
@@ -142,7 +146,7 @@ func testAccCheckComputeV2FlavorExists(n string, flavor *flavors.Flavor) resourc
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Flavor not found")
+			return errors.New("Flavor not found")
 		}
 
 		*flavor = *found
@@ -178,6 +182,7 @@ func testAccComputeV2FlavorBasicWithID(flavorName string) string {
     }
     `, flavorName)
 }
+
 func testAccComputeV2FlavorExtraSpecs1(flavorName string) string {
 	return fmt.Sprintf(`
     resource "openstack_compute_flavor_v2" "flavor_1" {
