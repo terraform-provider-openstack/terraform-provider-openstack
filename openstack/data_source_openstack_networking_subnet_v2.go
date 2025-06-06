@@ -5,11 +5,10 @@ import (
 	"log"
 	"strings"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
 )
 
 func dataSourceNetworkingSubnetV2() *schema.Resource {
@@ -48,10 +47,9 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 			},
 
 			"tenant_id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Optional:    true,
-				Description: descriptions["tenant_id"],
+				Type:     schema.TypeString,
+				Computed: true,
+				Optional: true,
 			},
 
 			"ip_version": {
@@ -183,8 +181,9 @@ func dataSourceNetworkingSubnetV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)

@@ -2,14 +2,14 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/addressscopes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/addressscopes"
 )
 
 func TestAccNetworkingV2AddressScope_basic(t *testing.T) {
@@ -55,13 +55,14 @@ func testAccCheckNetworkingV2AddressScopeExists(n string, addressScope *addresss
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := addressscopes.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -70,7 +71,7 @@ func testAccCheckNetworkingV2AddressScopeExists(n string, addressScope *addresss
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Address-scope not found")
+			return errors.New("Address-scope not found")
 		}
 
 		*addressScope = *found
@@ -81,9 +82,10 @@ func testAccCheckNetworkingV2AddressScopeExists(n string, addressScope *addresss
 
 func testAccCheckNetworkingV2AddressScopeDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -93,7 +95,7 @@ func testAccCheckNetworkingV2AddressScopeDestroy(s *terraform.State) error {
 
 		_, err := addressscopes.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Address-scope still exists")
+			return errors.New("Address-scope still exists")
 		}
 	}
 

@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/subnetpools"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/subnetpools"
 )
 
 func TestAccNetworkingV2SubnetPool_Basic(t *testing.T) {
@@ -75,13 +75,14 @@ func testAccCheckNetworkingV2SubnetPoolExists(n string, subnetPool *subnetpools.
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := subnetpools.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -90,7 +91,7 @@ func testAccCheckNetworkingV2SubnetPoolExists(n string, subnetPool *subnetpools.
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Subnetpool not found")
+			return errors.New("Subnetpool not found")
 		}
 
 		*subnetPool = *found
@@ -101,9 +102,10 @@ func testAccCheckNetworkingV2SubnetPoolExists(n string, subnetPool *subnetpools.
 
 func testAccCheckNetworkingV2SubnetPoolDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -113,7 +115,7 @@ func testAccCheckNetworkingV2SubnetPoolDestroy(s *terraform.State) error {
 
 		_, err := subnetpools.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Subnetpool still exists")
+			return errors.New("Subnetpool still exists")
 		}
 	}
 
@@ -128,12 +130,12 @@ func testAccCheckNetworkingV2SubnetPoolPrefixesConsistency(n string, subnetpool 
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		for i, prefix := range subnetpool.Prefixes {
 			if prefix != rs.Primary.Attributes[fmt.Sprintf("prefixes.%d", i)] {
-				return fmt.Errorf("prefixes list elements or order is not consistent")
+				return errors.New("prefixes list elements or order is not consistent")
 			}
 		}
 

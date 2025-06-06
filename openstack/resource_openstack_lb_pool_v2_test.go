@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 )
 
 func TestAccLBV2Pool_basic(t *testing.T) {
@@ -66,13 +66,14 @@ func testAccCheckLBV2PoolHasTag(n, tag string) resource.TestCheckFunc {
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
 		found, err := pools.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
@@ -81,7 +82,7 @@ func testAccCheckLBV2PoolHasTag(n, tag string) resource.TestCheckFunc {
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Pool not found")
+			return errors.New("Pool not found")
 		}
 
 		for _, v := range found.Tags {
@@ -102,13 +103,14 @@ func testAccCheckLBV2PoolTagCount(n string, expected int) resource.TestCheckFunc
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
 		found, err := pools.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
@@ -117,7 +119,7 @@ func testAccCheckLBV2PoolTagCount(n string, expected int) resource.TestCheckFunc
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Pool not found")
+			return errors.New("Pool not found")
 		}
 
 		if len(found.Tags) != expected {
@@ -153,9 +155,10 @@ func TestAccLBV2Pool_octavia_udp(t *testing.T) {
 
 func testAccCheckLBV2PoolDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+		return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -180,13 +183,14 @@ func testAccCheckLBV2PoolExists(n string, pool *pools.Pool) resource.TestCheckFu
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
 		found, err := pools.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
@@ -195,7 +199,7 @@ func testAccCheckLBV2PoolExists(n string, pool *pools.Pool) resource.TestCheckFu
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Member not found")
+			return errors.New("Member not found")
 		}
 
 		*pool = *found

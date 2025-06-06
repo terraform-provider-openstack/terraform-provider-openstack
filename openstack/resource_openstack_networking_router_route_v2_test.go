@@ -2,20 +2,22 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccNetworkingV2RouterRoute_basic(t *testing.T) {
 	var router routers.Router
+
 	var network [2]networks.Network
+
 	var subnet [2]subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -63,13 +65,14 @@ func testAccCheckNetworkingV2RouterRouteEmpty(n string) resource.TestCheckFunc {
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		router, err := routers.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -78,7 +81,7 @@ func testAccCheckNetworkingV2RouterRouteEmpty(n string) resource.TestCheckFunc {
 		}
 
 		if router.ID != rs.Primary.ID {
-			return fmt.Errorf("Router not found")
+			return errors.New("Router not found")
 		}
 
 		if len(router.Routes) != 0 {
@@ -97,13 +100,14 @@ func testAccCheckNetworkingV2RouterRouteExists(n string) resource.TestCheckFunc 
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		router, err := routers.Get(context.TODO(), networkingClient, rs.Primary.Attributes["router_id"]).Extract()
@@ -112,15 +116,17 @@ func testAccCheckNetworkingV2RouterRouteExists(n string) resource.TestCheckFunc 
 		}
 
 		if router.ID != rs.Primary.Attributes["router_id"] {
-			return fmt.Errorf("Router for route not found")
+			return errors.New("Router for route not found")
 		}
 
 		found := false
+
 		for _, r := range router.Routes {
 			if r.DestinationCIDR == rs.Primary.Attributes["destination_cidr"] && r.NextHop == rs.Primary.Attributes["next_hop"] {
 				found = true
 			}
 		}
+
 		if !found {
 			return fmt.Errorf("Could not find route for destination CIDR: %s, next hop: %s", rs.Primary.Attributes["destination_cidr"], rs.Primary.Attributes["next_hop"])
 		}
@@ -131,9 +137,10 @@ func testAccCheckNetworkingV2RouterRouteExists(n string) resource.TestCheckFunc 
 
 func testAccCheckNetworkingV2RouterRouteDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -141,21 +148,22 @@ func testAccCheckNetworkingV2RouterRouteDestroy(s *terraform.State) error {
 			continue
 		}
 
-		var routeExists = false
+		routeExists := false
 
 		router, err := routers.Get(context.TODO(), networkingClient, rs.Primary.Attributes["router_id"]).Extract()
 		if err == nil {
-			var rts = router.Routes
+			rts := router.Routes
 			for _, r := range rts {
 				if r.DestinationCIDR == rs.Primary.Attributes["destination_cidr"] && r.NextHop == rs.Primary.Attributes["next_hop"] {
 					routeExists = true
+
 					break
 				}
 			}
 		}
 
 		if routeExists {
-			return fmt.Errorf("Route still exists")
+			return errors.New("Route still exists")
 		}
 	}
 

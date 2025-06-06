@@ -7,12 +7,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/endpointgroups"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/endpointgroups"
 )
 
 func resourceEndpointGroupV2() *schema.Resource {
@@ -74,8 +73,9 @@ func resourceEndpointGroupV2() *schema.Resource {
 	}
 }
 
-func resourceEndpointGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceEndpointGroupV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -112,8 +112,8 @@ func resourceEndpointGroupV2Create(ctx context.Context, d *schema.ResourceData, 
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
-	_, err = stateConf.WaitForStateContext(ctx)
 
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -125,10 +125,11 @@ func resourceEndpointGroupV2Create(ctx context.Context, d *schema.ResourceData, 
 	return resourceEndpointGroupV2Read(ctx, d, meta)
 }
 
-func resourceEndpointGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceEndpointGroupV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about group: %s", d.Id())
 
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -151,8 +152,9 @@ func resourceEndpointGroupV2Read(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func resourceEndpointGroupV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceEndpointGroupV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -183,6 +185,7 @@ func resourceEndpointGroupV2Update(ctx context.Context, d *schema.ResourceData, 
 		if err != nil {
 			return diag.FromErr(err)
 		}
+
 		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
 			Target:     []string{"UPDATED"},
@@ -191,8 +194,8 @@ func resourceEndpointGroupV2Update(ctx context.Context, d *schema.ResourceData, 
 			Delay:      0,
 			MinTimeout: 2 * time.Second,
 		}
-		_, err = stateConf.WaitForStateContext(ctx)
 
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -203,17 +206,17 @@ func resourceEndpointGroupV2Update(ctx context.Context, d *schema.ResourceData, 
 	return resourceEndpointGroupV2Read(ctx, d, meta)
 }
 
-func resourceEndpointGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceEndpointGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy group: %s", d.Id())
 
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	err = endpointgroups.Delete(ctx, networkingClient, d.Id()).Err
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -233,45 +236,51 @@ func resourceEndpointGroupV2Delete(ctx context.Context, d *schema.ResourceData, 
 }
 
 func waitForEndpointGroupDeletion(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		group, err := endpointgroups.Get(ctx, networkingClient, id).Extract()
 		log.Printf("[DEBUG] Got group %s => %#v", id, group)
 
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				log.Printf("[DEBUG] EndpointGroup %s is actually deleted", id)
+
 				return "", "DELETED", nil
 			}
-			return nil, "", fmt.Errorf("Unexpected error: %s", err)
+
+			return nil, "", fmt.Errorf("Unexpected error: %w", err)
 		}
 
 		log.Printf("[DEBUG] EndpointGroup %s deletion is pending", id)
+
 		return group, "DELETING", nil
 	}
 }
 
 func waitForEndpointGroupCreation(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		group, err := endpointgroups.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return "", "PENDING_CREATE", nil
 		}
+
 		return group, "ACTIVE", nil
 	}
 }
 
 func waitForEndpointGroupUpdate(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		group, err := endpointgroups.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return "", "PENDING_UPDATE", nil
 		}
+
 		return group, "UPDATED", nil
 	}
 }
 
 func resourceEndpointGroupV2EndpointType(epType string) endpointgroups.EndpointType {
 	var et endpointgroups.EndpointType
+
 	switch epType {
 	case "subnet":
 		et = endpointgroups.TypeSubnet
@@ -284,5 +293,6 @@ func resourceEndpointGroupV2EndpointType(epType string) endpointgroups.EndpointT
 	case "network":
 		et = endpointgroups.TypeNetwork
 	}
+
 	return et
 }

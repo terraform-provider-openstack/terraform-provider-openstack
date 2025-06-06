@@ -2,16 +2,16 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/applicationcredentials"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccIdentityV3ApplicationCredential_basic(t *testing.T) {
@@ -111,9 +111,10 @@ func TestAccIdentityV3ApplicationCredential_access_rules(t *testing.T) {
 
 func testAccCheckIdentityV3ApplicationCredentialDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 	}
 
 	token := tokens.Get(context.TODO(), identityClient, config.OsClient.TokenID)
@@ -133,7 +134,7 @@ func testAccCheckIdentityV3ApplicationCredentialDestroy(s *terraform.State) erro
 
 		_, err := applicationcredentials.Get(context.TODO(), identityClient, user.ID, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("ApplicationCredential still exists")
+			return errors.New("ApplicationCredential still exists")
 		}
 	}
 
@@ -148,13 +149,14 @@ func testAccCheckIdentityV3ApplicationCredentialExists(n string, applicationCred
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
 		token := tokens.Get(context.TODO(), identityClient, config.OsClient.TokenID)
@@ -173,7 +175,7 @@ func testAccCheckIdentityV3ApplicationCredentialExists(n string, applicationCred
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("ApplicationCredential not found")
+			return errors.New("ApplicationCredential not found")
 		}
 
 		*applicationCredential = *found
@@ -183,21 +185,24 @@ func testAccCheckIdentityV3ApplicationCredentialExists(n string, applicationCred
 }
 
 func testAccCheckIdentityV3ApplicationCredentialRoleNameExists(role string, applicationCredential *applicationcredentials.ApplicationCredential) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		roles := flattenIdentityApplicationCredentialRolesV3(applicationCredential.Roles)
+
 		exists := strSliceContains(roles, role)
 		if exists {
 			return nil
 		}
+
 		return fmt.Errorf("The %s role was not found in %+q", role, roles)
 	}
 }
 
 func testAccCheckIdentityV3ApplicationCredentialAccessRulesEqual(ac1, ac2 *applicationcredentials.ApplicationCredential) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if !reflect.DeepEqual(ac1.AccessRules, ac2.AccessRules) {
 			return fmt.Errorf("AccessRules are not equal: %v != %v", ac1.AccessRules, ac2.AccessRules)
 		}
+
 		return nil
 	}
 }

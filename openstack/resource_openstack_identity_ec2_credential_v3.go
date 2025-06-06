@@ -2,14 +2,14 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/ec2credentials"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceIdentityEc2CredentialV3() *schema.Resource {
@@ -65,8 +65,9 @@ func resourceIdentityEc2CredentialV3() *schema.Resource {
 	}
 }
 
-func resourceIdentityEc2CredentialV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityEc2CredentialV3Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
@@ -100,12 +101,18 @@ func resourceIdentityEc2CredentialV3Create(ctx context.Context, d *schema.Resour
 	log.Printf("[DEBUG] openstack_identity_ec2_credential_v3 create options: %#v", createOpts)
 
 	ec2Credential, err := ec2credentials.Create(ctx, identityClient, userID, createOpts).Extract()
-
 	if err != nil {
 		if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
-			err := err.(gophercloud.ErrUnexpectedResponseCode)
+			err := func() gophercloud.ErrUnexpectedResponseCode {
+				var target gophercloud.ErrUnexpectedResponseCode
+				_ = errors.As(err, &target)
+
+				return target
+			}()
+
 			return diag.Errorf("Error creating openstack_identity_ec2_credential_v3: %s", err.Body)
 		}
+
 		return diag.Errorf("Error creating openstack_identity_ec2_credential_v3: %s", err)
 	}
 
@@ -121,8 +128,9 @@ func resourceIdentityEc2CredentialV3Create(ctx context.Context, d *schema.Resour
 	return resourceIdentityEc2CredentialV3Read(ctx, d, meta)
 }
 
-func resourceIdentityEc2CredentialV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityEc2CredentialV3Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
@@ -158,8 +166,9 @@ func resourceIdentityEc2CredentialV3Read(ctx context.Context, d *schema.Resource
 	return nil
 }
 
-func resourceIdentityEc2CredentialV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityEc2CredentialV3Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
@@ -185,5 +194,6 @@ func resourceIdentityEc2CredentialV3Delete(ctx context.Context, d *schema.Resour
 			return diag.FromErr(err)
 		}
 	}
+
 	return nil
 }

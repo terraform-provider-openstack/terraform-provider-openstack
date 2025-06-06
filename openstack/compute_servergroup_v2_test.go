@@ -3,11 +3,11 @@ package openstack
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servergroups"
 	th "github.com/gophercloud/gophercloud/v2/testhelper"
 	thclient "github.com/gophercloud/gophercloud/v2/testhelper/client"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUnitComputeServerGroupV2CreateOpts(t *testing.T) {
@@ -21,24 +21,25 @@ func TestUnitComputeServerGroupV2CreateOpts(t *testing.T) {
 		},
 	}
 
-	expected := map[string]interface{}{
-		"server_group": map[string]interface{}{
+	expected := map[string]any{
+		"server_group": map[string]any{
 			"name":     "foo",
-			"policies": []interface{}{"affinity"},
+			"policies": []any{"affinity"},
 			"foo":      "bar",
 		},
 	}
 
 	actual, err := createOpts.ToServerGroupCreateMap()
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, actual)
 }
 
 func TestUnitExpandComputeServerGroupV2PoliciesMicroversions(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()
-	raw := []interface{}{
+
+	raw := []any{
 		"affinity",
 		"soft-anti-affinity",
 		"soft-affinity",
@@ -64,7 +65,8 @@ func TestUnitExpandComputeServerGroupV2PoliciesMicroversions(t *testing.T) {
 func TestUnitExpandComputeServerGroupV2PoliciesMicroversionsLegacy(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()
-	raw := []interface{}{
+
+	raw := []any{
 		"anti-affinity",
 		"affinity",
 	}

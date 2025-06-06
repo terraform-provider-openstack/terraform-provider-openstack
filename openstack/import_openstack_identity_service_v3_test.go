@@ -1,7 +1,6 @@
 package openstack
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -10,7 +9,8 @@ import (
 
 func TestAccIdentityV3Service_importBasic(t *testing.T) {
 	resourceName := "openstack_identity_service_v3.service_1"
-	var serviceName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+
+	serviceName := "ACCPTTEST-" + acctest.RandString(5)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

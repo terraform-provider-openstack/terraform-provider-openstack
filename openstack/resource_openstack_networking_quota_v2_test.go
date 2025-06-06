@@ -3,9 +3,8 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccNetworkingQuotaV2_basic(t *testing.T) {

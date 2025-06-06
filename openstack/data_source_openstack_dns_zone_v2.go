@@ -5,10 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 )
 
 func dataSourceDNSZoneV2() *schema.Resource {
@@ -115,8 +114,9 @@ func dataSourceDNSZoneV2() *schema.Resource {
 	}
 }
 
-func dataSourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.FromErr(err)
@@ -201,6 +201,7 @@ func dataSourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta i
 	err = d.Set("attributes", zone.Attributes)
 	if err != nil {
 		log.Printf("[DEBUG] Unable to set attributes: %s", err)
+
 		return diag.FromErr(err)
 	}
 
@@ -208,6 +209,7 @@ func dataSourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta i
 	err = d.Set("masters", zone.Masters)
 	if err != nil {
 		log.Printf("[DEBUG] Unable to set masters: %s", err)
+
 		return diag.FromErr(err)
 	}
 

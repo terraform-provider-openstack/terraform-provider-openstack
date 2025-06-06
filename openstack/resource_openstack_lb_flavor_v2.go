@@ -5,10 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/flavors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/flavors"
 )
 
 func resourceLoadBalancerFlavorV2() *schema.Resource {
@@ -60,14 +59,16 @@ func resourceLoadBalancerFlavorV2() *schema.Resource {
 	}
 }
 
-func resourceLoadBalancerFlavorV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadBalancerFlavorV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
 	var enabled *bool
+
 	if v, ok := getOkExists(d, "enabled"); ok {
 		v := v.(bool)
 		enabled = &v
@@ -94,8 +95,9 @@ func resourceLoadBalancerFlavorV2Create(ctx context.Context, d *schema.ResourceD
 	return resourceLoadBalancerFlavorV2Read(ctx, d, meta)
 }
 
-func resourceLoadBalancerFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadBalancerFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
@@ -117,8 +119,9 @@ func resourceLoadBalancerFlavorV2Read(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceLoadBalancerFlavorV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadBalancerFlavorV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
@@ -151,6 +154,7 @@ func resourceLoadBalancerFlavorV2Update(ctx context.Context, d *schema.ResourceD
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_lb_flavor_v2 %s update options: %#v", d.Id(), updateOpts)
+
 		_, err := flavors.Update(ctx, lbClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_lb_flavor_v2: %s", err)
@@ -160,18 +164,21 @@ func resourceLoadBalancerFlavorV2Update(ctx context.Context, d *schema.ResourceD
 	return resourceLoadBalancerFlavorV2Read(ctx, d, meta)
 }
 
-func resourceLoadBalancerFlavorV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadBalancerFlavorV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting openstack_lb_flavor_v2: %s", d.Id())
+
 	if err := flavors.Delete(ctx, lbClient, d.Id()).ExtractErr(); err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_lb_flavor_v2"))
 	}
 
 	d.SetId("")
+
 	return nil
 }

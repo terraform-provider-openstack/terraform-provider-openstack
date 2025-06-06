@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -41,7 +42,7 @@ func testAccCheckIdentityServiceV3DataSourceID(n string) resource.TestCheckFunc 
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Service data source ID not set")
+			return errors.New("Service data source ID not set")
 		}
 
 		return nil

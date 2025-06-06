@@ -3,9 +3,8 @@ package openstack
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/applicationcredentials"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUnitFlattenIdentityApplicationCredentialRolesV3(t *testing.T) {
@@ -34,7 +33,7 @@ func TestUnitExpandIdentityApplicationCredentialRolesV3(t *testing.T) {
 		Name: "bar",
 	}
 
-	roles := []interface{}{role1.Name, role2.Name}
+	roles := []any{role1.Name, role2.Name}
 
 	expected := []applicationcredentials.Role{role1, role2}
 

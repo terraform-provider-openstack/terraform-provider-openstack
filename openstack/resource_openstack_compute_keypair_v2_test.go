@@ -2,14 +2,14 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/keypairs"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/keypairs"
 )
 
 func TestAccComputeV2Keypair_basic(t *testing.T) {
@@ -63,9 +63,10 @@ func TestAccComputeV2Keypair_generatePrivate(t *testing.T) {
 
 func testAccCheckComputeV2KeypairDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -75,7 +76,7 @@ func testAccCheckComputeV2KeypairDestroy(s *terraform.State) error {
 
 		_, err := keypairs.Get(context.TODO(), computeClient, rs.Primary.ID, keypairs.GetOpts{}).Extract()
 		if err == nil {
-			return fmt.Errorf("Keypair still exists")
+			return errors.New("Keypair still exists")
 		}
 	}
 
@@ -90,13 +91,14 @@ func testAccCheckComputeV2KeypairExists(n string, kp *keypairs.KeyPair) resource
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
 		found, err := keypairs.Get(context.TODO(), computeClient, rs.Primary.ID, keypairs.GetOpts{}).Extract()
@@ -105,7 +107,7 @@ func testAccCheckComputeV2KeypairExists(n string, kp *keypairs.KeyPair) resource
 		}
 
 		if found.Name != rs.Primary.ID {
-			return fmt.Errorf("Keypair not found")
+			return errors.New("Keypair not found")
 		}
 
 		*kp = *found

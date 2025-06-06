@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -49,7 +50,7 @@ func testAccCheckNetworkingFloatingIPV2DataSourceID(n string) resource.TestCheck
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Floating IP data source ID not set")
+			return errors.New("Floating IP data source ID not set")
 		}
 
 		return nil

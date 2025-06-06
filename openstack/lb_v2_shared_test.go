@@ -19,8 +19,8 @@ func TestLBV2FlavorCreateOpts(t *testing.T) {
 		t.Fatalf("Error creating flavor create map: %v", err)
 	}
 
-	expected := map[string]interface{}{
-		"flavor": map[string]interface{}{
+	expected := map[string]any{
+		"flavor": map[string]any{
 			"name":              "name",
 			"description":       "description",
 			"flavor_profile_id": "id",

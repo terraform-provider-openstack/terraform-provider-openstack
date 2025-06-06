@@ -3,23 +3,25 @@ package openstack
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/utils/v2/terraform/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 )
 
-const blockstorageV3VolumeFromBackupMicroversion = "3.47"
-const blockstorageV3ResizeOnlineInUse = "3.42"
+const (
+	blockstorageV3VolumeFromBackupMicroversion = "3.47"
+	blockstorageV3ResizeOnlineInUse            = "3.42"
+)
 
-func flattenBlockStorageVolumeV3Attachments(v []volumes.Attachment) []map[string]interface{} {
-	attachments := make([]map[string]interface{}, len(v))
+func flattenBlockStorageVolumeV3Attachments(v []volumes.Attachment) []map[string]any {
+	attachments := make([]map[string]any, len(v))
 	for i, attachment := range v {
-		attachments[i] = make(map[string]interface{})
+		attachments[i] = make(map[string]any)
 		attachments[i]["id"] = attachment.ID
 		attachments[i]["instance_id"] = attachment.ServerID
 		attachments[i]["device"] = attachment.Device
@@ -29,7 +31,7 @@ func flattenBlockStorageVolumeV3Attachments(v []volumes.Attachment) []map[string
 }
 
 func blockStorageVolumeV3StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, volumeID string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		v, err := volumes.Get(ctx, client, volumeID).Extract()
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
@@ -40,7 +42,7 @@ func blockStorageVolumeV3StateRefreshFunc(ctx context.Context, client *gopherclo
 		}
 
 		if v.Status == "error" {
-			return v, v.Status, fmt.Errorf("The volume is in error status. " +
+			return v, v.Status, errors.New("The volume is in error status. " +
 				"Please check with your cloud admin or check the Block Storage " +
 				"API logs to see why this error occurred.")
 		}
@@ -49,24 +51,26 @@ func blockStorageVolumeV3StateRefreshFunc(ctx context.Context, client *gopherclo
 	}
 }
 
-func blockStorageVolumeV3AttachmentHash(v interface{}) int {
+func blockStorageVolumeV3AttachmentHash(v any) int {
 	var buf bytes.Buffer
-	m := v.(map[string]interface{})
+
+	m := v.(map[string]any)
 	if m["instance_id"] != nil {
-		buf.WriteString(fmt.Sprintf("%s-", m["instance_id"].(string)))
+		buf.WriteString(m["instance_id"].(string) + "-")
 	}
+
 	return hashcode.String(buf.String())
 }
 
-func expandBlockStorageVolumeV3SchedulerHints(v volumes.SchedulerHintOpts) map[string]interface{} {
-	schedulerHints := make(map[string]interface{})
+func expandBlockStorageVolumeV3SchedulerHints(v volumes.SchedulerHintOpts) map[string]any {
+	schedulerHints := make(map[string]any)
 
-	differentHost := make([]interface{}, len(v.DifferentHost))
+	differentHost := make([]any, len(v.DifferentHost))
 	for i, dh := range v.DifferentHost {
 		differentHost[i] = dh
 	}
 
-	sameHost := make([]interface{}, len(v.SameHost))
+	sameHost := make([]any, len(v.SameHost))
 	for i, sh := range v.SameHost {
 		sameHost[i] = sh
 	}
@@ -76,41 +80,43 @@ func expandBlockStorageVolumeV3SchedulerHints(v volumes.SchedulerHintOpts) map[s
 	schedulerHints["local_to_instance"] = v.LocalToInstance
 	schedulerHints["query"] = v.Query
 	schedulerHints["additional_properties"] = v.AdditionalProperties
+
 	return schedulerHints
 }
 
-func blockStorageVolumeV3SchedulerHintsHash(v interface{}) int {
+func blockStorageVolumeV3SchedulerHintsHash(v any) int {
 	var buf bytes.Buffer
-	m := v.(map[string]interface{})
+
+	m := v.(map[string]any)
 
 	if m["query"] != nil {
-		buf.WriteString(fmt.Sprintf("%s-", m["query"].(string)))
+		buf.WriteString(m["query"].(string) + "-")
 	}
 
 	if m["local_to_instance"] != nil {
-		buf.WriteString(fmt.Sprintf("%s-", m["local_to_instance"].(string)))
+		buf.WriteString(m["local_to_instance"].(string) + "-")
 	}
 
 	if m["additional_properties"] != nil {
-		for _, v := range m["additional_properties"].(map[string]interface{}) {
+		for _, v := range m["additional_properties"].(map[string]any) {
 			buf.WriteString(fmt.Sprintf("%s-", v))
 		}
 	}
 
-	buf.WriteString(fmt.Sprintf("%s-", m["different_host"].([]interface{})))
-	buf.WriteString(fmt.Sprintf("%s-", m["same_host"].([]interface{})))
+	buf.WriteString(fmt.Sprintf("%s-", m["different_host"].([]any)))
+	buf.WriteString(fmt.Sprintf("%s-", m["same_host"].([]any)))
 
 	return hashcode.String(buf.String())
 }
 
-func resourceBlockStorageVolumeV3SchedulerHints(schedulerHintsRaw map[string]interface{}) volumes.SchedulerHintOpts {
+func resourceBlockStorageVolumeV3SchedulerHints(schedulerHintsRaw map[string]any) volumes.SchedulerHintOpts {
 	schedulerHints := volumes.SchedulerHintOpts{
 		Query:                schedulerHintsRaw["query"].(string),
 		LocalToInstance:      schedulerHintsRaw["local_to_instance"].(string),
-		AdditionalProperties: schedulerHintsRaw["additional_properties"].(map[string]interface{}),
+		AdditionalProperties: schedulerHintsRaw["additional_properties"].(map[string]any),
 	}
 
-	if v, ok := schedulerHintsRaw["different_host"].([]interface{}); ok {
+	if v, ok := schedulerHintsRaw["different_host"].([]any); ok {
 		differentHost := make([]string, len(v))
 
 		for i, dh := range v {
@@ -120,7 +126,7 @@ func resourceBlockStorageVolumeV3SchedulerHints(schedulerHintsRaw map[string]int
 		schedulerHints.DifferentHost = differentHost
 	}
 
-	if v, ok := schedulerHintsRaw["same_host"].([]interface{}); ok {
+	if v, ok := schedulerHintsRaw["same_host"].([]any); ok {
 		sameHost := make([]string, len(v))
 
 		for i, sh := range v {

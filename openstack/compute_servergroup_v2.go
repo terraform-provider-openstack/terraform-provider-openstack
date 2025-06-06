@@ -19,12 +19,13 @@ type ComputeServerGroupV2CreateOpts struct {
 
 // ToServerGroupCreateMap casts a CreateOpts struct to a map.
 // It overrides routers.ToServerGroupCreateMap to add the ValueSpecs field.
-func (opts ComputeServerGroupV2CreateOpts) ToServerGroupCreateMap() (map[string]interface{}, error) {
+func (opts ComputeServerGroupV2CreateOpts) ToServerGroupCreateMap() (map[string]any, error) {
 	return BuildRequest(opts, "server_group")
 }
 
-func expandComputeServerGroupV2Policies(client *gophercloud.ServiceClient, raw []interface{}) []string {
+func expandComputeServerGroupV2Policies(client *gophercloud.ServiceClient, raw []any) []string {
 	policies := make([]string, len(raw))
+
 	for i, v := range raw {
 		client.Microversion = "2.15"
 
@@ -40,12 +41,13 @@ func expandComputeServerGroupV2Policies(client *gophercloud.ServiceClient, raw [
 	return policies
 }
 
-func expandComputeServerGroupV2RulesMaxServerPerHost(raw []interface{}) int {
+func expandComputeServerGroupV2RulesMaxServerPerHost(raw []any) int {
 	for _, raw := range raw {
-		raw, ok := raw.(map[string]interface{})
+		raw, ok := raw.(map[string]any)
 		if !ok {
 			return 0
 		}
+
 		v, ok := raw["max_server_per_host"].(int)
 		if !ok {
 			return 0
@@ -53,5 +55,6 @@ func expandComputeServerGroupV2RulesMaxServerPerHost(raw []interface{}) int {
 		//nolint:staticcheck // we need the first element
 		return v
 	}
+
 	return 0
 }

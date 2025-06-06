@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -45,7 +46,7 @@ func testAccCheckBlockStorageQuotasetV3DataSourceID(n string) resource.TestCheck
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Blockstorage quotaset data source ID not set")
+			return errors.New("Blockstorage quotaset data source ID not set")
 		}
 
 		return nil

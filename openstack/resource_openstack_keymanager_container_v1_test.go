@@ -2,19 +2,20 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/containers"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 	var container containers.Container
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -70,6 +71,7 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 
 func TestAccKeyManagerContainerV1_acls(t *testing.T) {
 	var container containers.Container
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -97,6 +99,7 @@ func TestAccKeyManagerContainerV1_acls(t *testing.T) {
 
 func TestAccKeyManagerContainerV1_certificate_type(t *testing.T) {
 	var container containers.Container
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -122,6 +125,7 @@ func TestAccKeyManagerContainerV1_certificate_type(t *testing.T) {
 
 func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
 	var container containers.Container
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -161,22 +165,27 @@ func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
 
 func testAccCheckContainerV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
+		return fmt.Errorf("Error creating OpenStack KeyManager client: %w", err)
 	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "openstack_keymanager_container" {
 			continue
 		}
+
 		_, err = containers.Get(context.TODO(), kmClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Container (%s) still exists", rs.Primary.ID)
 		}
+
 		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -188,13 +197,14 @@ func testAccCheckContainerV1Exists(n string, container *containers.Container) re
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
+			return fmt.Errorf("Error creating OpenStack KeyManager client: %w", err)
 		}
 
 		var found *containers.Container
@@ -203,6 +213,7 @@ func testAccCheckContainerV1Exists(n string, container *containers.Container) re
 		if err != nil {
 			return err
 		}
+
 		*container = *found
 
 		return nil

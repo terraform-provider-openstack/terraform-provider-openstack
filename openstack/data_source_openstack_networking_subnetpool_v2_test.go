@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -84,7 +85,7 @@ func testAccCheckNetworkingSubnetPoolV2DataSourceID(n string) resource.TestCheck
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Subnetpool data source ID not set")
+			return errors.New("Subnetpool data source ID not set")
 		}
 
 		return nil

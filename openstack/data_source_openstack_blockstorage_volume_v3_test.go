@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -9,12 +10,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 )
 
 func TestAccBlockStorageV3VolumeDataSource_basic(t *testing.T) {
@@ -22,12 +22,15 @@ func TestAccBlockStorageV3VolumeDataSource_basic(t *testing.T) {
 	volumeName := acctest.RandomWithPrefix("tf-acc-volume")
 
 	var volumeID string
+
 	if os.Getenv("TF_ACC") != "" {
 		var err error
+
 		volumeID, err = testAccBlockStorageV3CreateVolume(volumeName)
 		if err != nil {
 			t.Fatal(err)
 		}
+
 		defer testAccBlockStorageV3DeleteVolume(t, volumeID)
 	}
 
@@ -73,6 +76,7 @@ func testAccBlockStorageV3CreateVolume(volumeName string) (string, error) {
 
 	ctx, cancel := context.WithTimeout(context.TODO(), 60*time.Second)
 	defer cancel()
+
 	err = volumes.WaitForStatus(ctx, bsClient, volume.ID, "available")
 	if err != nil {
 		return "", err
@@ -87,18 +91,19 @@ func testAccBlockStorageV3DeleteVolume(t *testing.T, volumeID string) {
 		t.Fatal(err)
 	}
 
-	bsClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
+	bsClient, err := config.BlockStorageV3Client(t.Context(), osRegionName)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = volumes.Delete(context.TODO(), bsClient, volumeID, nil).ExtractErr()
+	err = volumes.Delete(t.Context(), bsClient, volumeID, nil).ExtractErr()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.TODO(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(t.Context(), 60*time.Second)
 	defer cancel()
+
 	err = volumes.WaitForStatus(ctx, bsClient, volumeID, "DELETED")
 	if err != nil {
 		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
@@ -115,7 +120,7 @@ func testAccCheckBlockStorageV3VolumeDataSourceID(n, id string) resource.TestChe
 		}
 
 		if rs.Primary.ID != id {
-			return fmt.Errorf("Volume data source ID not set")
+			return errors.New("Volume data source ID not set")
 		}
 
 		return nil

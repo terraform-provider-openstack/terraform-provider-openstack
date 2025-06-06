@@ -3,29 +3,29 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/extradhcpopts"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUnitExpandNetworkingPortDHCPOptsV2Create(t *testing.T) {
 	r := resourceNetworkingPortV2()
 	d := r.TestResourceData()
 	d.SetId("1")
-	dhcpOpts1 := map[string]interface{}{
+
+	dhcpOpts1 := map[string]any{
 		"ip_version": 4,
 		"name":       "A",
 		"value":      "true",
 	}
-	dhcpOpts2 := map[string]interface{}{
+	dhcpOpts2 := map[string]any{
 		"ip_version": 6,
 		"name":       "B",
 		"value":      "false",
 	}
-	extraDHCPOpts := []map[string]interface{}{dhcpOpts1, dhcpOpts2}
+	extraDHCPOpts := []map[string]any{dhcpOpts1, dhcpOpts2}
 	d.Set("extra_dhcp_option", extraDHCPOpts)
 
 	expectedDHCPOptions := []extradhcpopts.CreateExtraDHCPOpt{
@@ -62,17 +62,18 @@ func TestUnitExpandNetworkingPortDHCPOptsV2Update(t *testing.T) {
 	r := resourceNetworkingPortV2()
 	d := r.TestResourceData()
 	d.SetId("1")
-	dhcpOpts1 := map[string]interface{}{
+
+	dhcpOpts1 := map[string]any{
 		"ip_version": 4,
 		"name":       "A",
 		"value":      "true",
 	}
-	dhcpOpts2 := map[string]interface{}{
+	dhcpOpts2 := map[string]any{
 		"ip_version": 6,
 		"name":       "B",
 		"value":      "false",
 	}
-	extraDHCPOpts := []map[string]interface{}{dhcpOpts1, dhcpOpts2}
+	extraDHCPOpts := []map[string]any{dhcpOpts1, dhcpOpts2}
 	d.Set("extra_dhcp_option", extraDHCPOpts)
 
 	optsValueTrue := "true"
@@ -111,17 +112,18 @@ func TestUnitExpandNetworkingPortDHCPOptsV2Delete(t *testing.T) {
 	r := resourceNetworkingPortV2()
 	d := r.TestResourceData()
 	d.SetId("1")
-	dhcpOpts1 := map[string]interface{}{
+
+	dhcpOpts1 := map[string]any{
 		"ip_version": 4,
 		"name":       "A",
 		"value":      "true",
 	}
-	dhcpOpts2 := map[string]interface{}{
+	dhcpOpts2 := map[string]any{
 		"ip_version": 6,
 		"name":       "B",
 		"value":      "false",
 	}
-	extraDHCPOpts := []map[string]interface{}{dhcpOpts1, dhcpOpts2}
+	extraDHCPOpts := []map[string]any{dhcpOpts1, dhcpOpts2}
 	d.Set("extra_dhcp_option", extraDHCPOpts)
 
 	expectedDHCPOptions := []extradhcpopts.UpdateExtraDHCPOpt{
@@ -154,7 +156,7 @@ func TestUnitFlattenNetworkingPort2DHCPOptionsV2(t *testing.T) {
 		},
 	}
 
-	expectedDHCPOptions := []map[string]interface{}{
+	expectedDHCPOptions := []map[string]any{
 		{
 			"ip_version": 4,
 			"name":       "A",
@@ -176,15 +178,16 @@ func TestUnitExpandNetworkingPortAllowedAddressPairsV2(t *testing.T) {
 	r := resourceNetworkingPortV2()
 	d := r.TestResourceData()
 	d.SetId("1")
-	addressPairs1 := map[string]interface{}{
+
+	addressPairs1 := map[string]any{
 		"ip_address":  "192.0.2.1",
 		"mac_address": "mac1",
 	}
-	addressPairs2 := map[string]interface{}{
+	addressPairs2 := map[string]any{
 		"ip_address":  "198.51.100.1",
 		"mac_address": "mac2",
 	}
-	allowedAddressPairs := []map[string]interface{}{addressPairs1, addressPairs2}
+	allowedAddressPairs := []map[string]any{addressPairs1, addressPairs2}
 	d.Set("allowed_address_pairs", allowedAddressPairs)
 
 	expectedAllowedAddressPairs := []ports.AddressPair{
@@ -216,7 +219,7 @@ func TestUnitFlattenNetworkingPortAllowedAddressPairsV2(t *testing.T) {
 	}
 	mac := "mac3"
 
-	expectedAllowedAddressPairs := []map[string]interface{}{
+	expectedAllowedAddressPairs := []map[string]any{
 		{
 			"ip_address":  "192.0.2.1",
 			"mac_address": "mac1",
@@ -247,15 +250,16 @@ func TestUnitExpandNetworkingPortFixedIPV2SomeFixedIPs(t *testing.T) {
 	r := resourceNetworkingPortV2()
 	d := r.TestResourceData()
 	d.SetId("1")
-	fixedIP1 := map[string]interface{}{
+
+	fixedIP1 := map[string]any{
 		"subnet_id":  "aaa",
 		"ip_address": "192.0.201.101",
 	}
-	fixedIP2 := map[string]interface{}{
+	fixedIP2 := map[string]any{
 		"subnet_id":  "bbb",
 		"ip_address": "192.0.202.102",
 	}
-	fixedIP := []map[string]interface{}{fixedIP1, fixedIP2}
+	fixedIP := []map[string]any{fixedIP1, fixedIP2}
 	d.Set("fixed_ip", fixedIP)
 
 	expectedFixedIP := []ports.IP{

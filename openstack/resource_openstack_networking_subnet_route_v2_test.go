@@ -2,15 +2,15 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccNetworkingV2SubnetRoute_basic(t *testing.T) {
@@ -62,13 +62,14 @@ func testAccCheckNetworkingV2SubnetRouteEmpty(n string) resource.TestCheckFunc {
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		subnet, err := subnets.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -77,7 +78,7 @@ func testAccCheckNetworkingV2SubnetRouteEmpty(n string) resource.TestCheckFunc {
 		}
 
 		if subnet.ID != rs.Primary.ID {
-			return fmt.Errorf("Subnet not found")
+			return errors.New("Subnet not found")
 		}
 
 		if len(subnet.HostRoutes) != 0 {
@@ -96,13 +97,14 @@ func testAccCheckNetworkingV2SubnetRouteExists(n string) resource.TestCheckFunc 
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		subnet, err := subnets.Get(context.TODO(), networkingClient, rs.Primary.Attributes["subnet_id"]).Extract()
@@ -111,15 +113,17 @@ func testAccCheckNetworkingV2SubnetRouteExists(n string) resource.TestCheckFunc 
 		}
 
 		if subnet.ID != rs.Primary.Attributes["subnet_id"] {
-			return fmt.Errorf("Subnet for route not found")
+			return errors.New("Subnet for route not found")
 		}
 
-		var found = false
+		found := false
+
 		for _, r := range subnet.HostRoutes {
 			if r.DestinationCIDR == rs.Primary.Attributes["destination_cidr"] && r.NextHop == rs.Primary.Attributes["next_hop"] {
 				found = true
 			}
 		}
+
 		if !found {
 			return fmt.Errorf("Could not find route for destination CIDR: %s, next hop: %s", rs.Primary.Attributes["destination_cidr"], rs.Primary.Attributes["next_hop"])
 		}
@@ -130,9 +134,10 @@ func testAccCheckNetworkingV2SubnetRouteExists(n string) resource.TestCheckFunc 
 
 func testAccCheckNetworkingV2SubnetRouteDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -140,21 +145,22 @@ func testAccCheckNetworkingV2SubnetRouteDestroy(s *terraform.State) error {
 			continue
 		}
 
-		var routeExists = false
+		routeExists := false
 
 		subnet, err := subnets.Get(context.TODO(), networkingClient, rs.Primary.Attributes["subnet_id"]).Extract()
 		if err == nil {
-			var rts = subnet.HostRoutes
+			rts := subnet.HostRoutes
 			for _, r := range rts {
 				if r.DestinationCIDR == rs.Primary.Attributes["destination_cidr"] && r.NextHop == rs.Primary.Attributes["next_hop"] {
 					routeExists = true
+
 					break
 				}
 			}
 		}
 
 		if routeExists {
-			return fmt.Errorf("Route still exists")
+			return errors.New("Route still exists")
 		}
 	}
 

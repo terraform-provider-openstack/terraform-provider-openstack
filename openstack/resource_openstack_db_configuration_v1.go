@@ -5,11 +5,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/configurations"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/configurations"
 )
 
 func resourceDatabaseConfigurationV1() *schema.Resource {
@@ -92,8 +91,9 @@ func resourceDatabaseConfigurationV1() *schema.Resource {
 	}
 }
 
-func resourceDatabaseConfigurationV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatabaseConfigurationV1Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	databaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack database client: %s", err)
@@ -106,19 +106,21 @@ func resourceDatabaseConfigurationV1Create(ctx context.Context, d *schema.Resour
 
 	var datastore configurations.DatastoreOpts
 	if v, ok := d.GetOk("datastore"); ok {
-		datastore = expandDatabaseConfigurationV1Datastore(v.([]interface{}))
+		datastore = expandDatabaseConfigurationV1Datastore(v.([]any))
 	}
+
 	createOpts.Datastore = &datastore
 
-	values := make(map[string]interface{})
+	values := make(map[string]any)
 	if v, ok := d.GetOk("configuration"); ok {
-		values = expandDatabaseConfigurationV1Values(v.([]interface{}))
+		values = expandDatabaseConfigurationV1Values(v.([]any))
 	}
+
 	createOpts.Values = values
 
 	log.Printf("[DEBUG] openstack_db_configuration_v1 create options: %#v", createOpts)
-	cgroup, err := configurations.Create(ctx, databaseV1Client, createOpts).Extract()
 
+	cgroup, err := configurations.Create(ctx, databaseV1Client, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_db_configuration_v1: %s", err)
 	}
@@ -143,8 +145,9 @@ func resourceDatabaseConfigurationV1Create(ctx context.Context, d *schema.Resour
 	return resourceDatabaseConfigurationV1Read(ctx, d, meta)
 }
 
-func resourceDatabaseConfigurationV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatabaseConfigurationV1Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	databaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack database client: %s", err)
@@ -164,8 +167,9 @@ func resourceDatabaseConfigurationV1Read(ctx context.Context, d *schema.Resource
 	return nil
 }
 
-func resourceDatabaseConfigurationV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatabaseConfigurationV1Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	databaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack database client: %s", err)

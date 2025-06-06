@@ -8,7 +8,7 @@ import (
 )
 
 func TestUnitExpandComputeFlavorV2ExtraSpecs(t *testing.T) {
-	raw := map[string]interface{}{
+	raw := map[string]any{
 		"foo": "bar",
 		"bar": "baz",
 	}

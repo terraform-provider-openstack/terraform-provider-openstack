@@ -2,16 +2,16 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/fwaas_v2/rules"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccFWRuleV2_basic(t *testing.T) {
@@ -293,23 +293,27 @@ func TestAccFWRuleV2_updateName(t *testing.T) {
 
 func testAccCheckFWRuleV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "openstack_fw_rule_v2" {
 			continue
 		}
+
 		_, err = rules.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Firewall rule (%s) still exists", rs.Primary.ID)
 		}
+
 		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -321,27 +325,31 @@ func testAccCheckFWRuleV2Exists(n string, rule *rules.Rule) resource.TestCheckFu
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		var found *rules.Rule
-		for i := 0; i < 5; i++ {
+		for range 5 {
 			// Firewall rule creation is asynchronous. Retry some times
 			// if we get a 404 error. Fail on any other error.
 			found, err = rules.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 			if err != nil {
 				if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 					time.Sleep(time.Second)
+
 					continue
 				}
+
 				return err
 			}
+
 			break
 		}
 

@@ -5,20 +5,21 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/attachinterfaces"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 )
 
 func computeInterfaceAttachV2AttachFunc(ctx context.Context,
-	computeClient *gophercloud.ServiceClient, instanceID, attachmentID string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	computeClient *gophercloud.ServiceClient, instanceID, attachmentID string,
+) retry.StateRefreshFunc {
+	return func() (any, string, error) {
 		va, err := attachinterfaces.Get(ctx, computeClient, instanceID, attachmentID).Extract()
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return va, "ATTACHING", nil
 			}
+
 			return va, "", err
 		}
 
@@ -27,8 +28,9 @@ func computeInterfaceAttachV2AttachFunc(ctx context.Context,
 }
 
 func computeInterfaceAttachV2DetachFunc(ctx context.Context,
-	computeClient *gophercloud.ServiceClient, instanceID, attachmentID string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	computeClient *gophercloud.ServiceClient, instanceID, attachmentID string,
+) retry.StateRefreshFunc {
+	return func() (any, string, error) {
 		log.Printf("[DEBUG] Attempting to detach openstack_compute_interface_attach_v2 %s from instance %s",
 			attachmentID, instanceID)
 
@@ -37,6 +39,7 @@ func computeInterfaceAttachV2DetachFunc(ctx context.Context,
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return va, "DETACHED", nil
 			}
+
 			return va, "", err
 		}
 
@@ -54,6 +57,7 @@ func computeInterfaceAttachV2DetachFunc(ctx context.Context,
 		}
 
 		log.Printf("[DEBUG] openstack_compute_interface_attach_v2 %s is still active.", attachmentID)
+
 		return nil, "", nil
 	}
 }

@@ -4,19 +4,19 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
 	"github.com/gophercloud/utils/v2/terraform/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceImagesImageIDsV2() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceImagesImageIdsV2Read,
+		ReadContext: dataSourceImagesImageIDsV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -137,9 +137,10 @@ func dataSourceImagesImageIDsV2() *schema.Resource {
 	}
 }
 
-// dataSourceImagesImageIdsV2Read performs the image lookup.
-func dataSourceImagesImageIdsV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+// dataSourceImagesImageIDsV2Read performs the image lookup.
+func dataSourceImagesImageIDsV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	imageClient, err := config.ImageV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack image client: %s", err)
@@ -150,10 +151,11 @@ func dataSourceImagesImageIdsV2Read(ctx context.Context, d *schema.ResourceData,
 	memberStatus := resourceImagesImageV2MemberStatusFromString(
 		d.Get("member_status").(string))
 	properties := resourceImagesImageV2ExpandProperties(
-		d.Get("properties").(map[string]interface{}))
+		d.Get("properties").(map[string]any))
 
 	tags := []string{}
 	tagList := d.Get("tags").(*schema.Set).List()
+
 	for _, v := range tagList {
 		tags = append(tags, fmt.Sprint(v))
 	}
@@ -199,6 +201,7 @@ func dataSourceImagesImageIdsV2Read(ctx context.Context, d *schema.ResourceData,
 	nameRegex, nameRegexOk := d.GetOk("name_regex")
 	if nameRegexOk {
 		allImages = imagesFilterByRegex(allImages, nameRegex.(string))
+
 		log.Printf("[DEBUG] Image list filtered by regex: %s", d.Get("name_regex"))
 	}
 
@@ -209,7 +212,7 @@ func dataSourceImagesImageIdsV2Read(ctx context.Context, d *schema.ResourceData,
 		imageIDs[i] = image.ID
 	}
 
-	d.SetId(fmt.Sprintf("%d", hashcode.String(strings.Join(imageIDs, ","))))
+	d.SetId(strconv.Itoa(hashcode.String(strings.Join(imageIDs, ","))))
 	d.Set("ids", imageIDs)
 	d.Set("region", GetRegion(d, config))
 

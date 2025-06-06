@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -46,7 +47,7 @@ func testAccCheckNetworkingQuotaV2DataSourceID(n string) resource.TestCheckFunc 
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Networking quota data source ID not set")
+			return errors.New("Networking quota data source ID not set")
 		}
 
 		return nil

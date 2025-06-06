@@ -2,22 +2,21 @@ package openstack
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"regexp"
+	"strconv"
 	"strings"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
 	"github.com/gophercloud/utils/v2/terraform/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceIdentityProjectIdsV3() *schema.Resource {
+func dataSourceIdentityProjectIDsV3() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceIdentityProjectIdsV3Read,
+		ReadContext: dataSourceIdentityProjectIDsV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -84,9 +83,10 @@ func dataSourceIdentityProjectIdsV3() *schema.Resource {
 	}
 }
 
-// dataSourceIdentityProjectIdsV3Read performs the project lookup.
-func dataSourceIdentityProjectIdsV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+// dataSourceIdentityProjectIDsV3Read performs the project lookup.
+func dataSourceIdentityProjectIDsV3Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
@@ -121,6 +121,7 @@ func dataSourceIdentityProjectIdsV3Read(ctx context.Context, d *schema.ResourceD
 		if err != nil {
 			return diag.Errorf("Error while compiling regex: %s", err)
 		}
+
 		log.Printf("[DEBUG] Project list filtered by regex: %s", v)
 	}
 
@@ -131,7 +132,7 @@ func dataSourceIdentityProjectIdsV3Read(ctx context.Context, d *schema.ResourceD
 		projectIDs[i] = project.ID
 	}
 
-	d.SetId(fmt.Sprintf("%d", hashcode.String(strings.Join(projectIDs, ","))))
+	d.SetId(strconv.Itoa(hashcode.String(strings.Join(projectIDs, ","))))
 	d.Set("ids", projectIDs)
 	d.Set("region", GetRegion(d, config))
 
@@ -145,6 +146,7 @@ func projectsFilterByRegex(projectArr []projects.Project, nameRegex string) ([]p
 	}
 
 	result := make([]projects.Project, 0, len(projectArr))
+
 	for _, project := range projectArr {
 		if r.MatchString(project.Name) {
 			result = append(result, project)

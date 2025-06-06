@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 )
 
 func resourceDNSZoneShareV2() *schema.Resource {
@@ -48,8 +47,9 @@ func resourceDNSZoneShareV2() *schema.Resource {
 	}
 }
 
-func resourceDNSZoneShareV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSZoneShareV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("error creating OpenStack DNS client: %s", err)
@@ -58,6 +58,7 @@ func resourceDNSZoneShareV2Create(ctx context.Context, d *schema.ResourceData, m
 	if err := dnsClientSetAuthHeader(ctx, d, dnsClient); err != nil {
 		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
+
 	dnsClient.Microversion = "2.1"
 
 	zoneID := d.Get("zone_id").(string)
@@ -76,8 +77,9 @@ func resourceDNSZoneShareV2Create(ctx context.Context, d *schema.ResourceData, m
 	return resourceDNSZoneShareV2Read(ctx, d, meta)
 }
 
-func resourceDNSZoneShareV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSZoneShareV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("error creating OpenStack DNS client: %s", err)
@@ -86,12 +88,13 @@ func resourceDNSZoneShareV2Read(ctx context.Context, d *schema.ResourceData, met
 	if err := dnsClientSetAuthHeader(ctx, d, dnsClient); err != nil {
 		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
+
 	dnsClient.Microversion = "2.1"
 
 	zoneID := d.Get("zone_id").(string)
 	share, err := zones.GetShare(ctx, dnsClient, zoneID, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, fmt.Sprintf("error retrieving share details for DNS zone: %s", zoneID)))
+		return diag.FromErr(CheckDeleted(d, err, "error retrieving share details for DNS zone: "+zoneID))
 	}
 
 	d.Set("zone_id", share.ZoneID)
@@ -102,8 +105,9 @@ func resourceDNSZoneShareV2Read(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceDNSZoneShareV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSZoneShareV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("error creating OpenStack DNS client: %s", err)
@@ -112,9 +116,11 @@ func resourceDNSZoneShareV2Delete(ctx context.Context, d *schema.ResourceData, m
 	if err := dnsClientSetAuthHeader(ctx, d, dnsClient); err != nil {
 		return diag.Errorf("Error setting dns client auth headers: %s", err)
 	}
+
 	dnsClient.Microversion = "2.1"
 
 	zoneID := d.Get("zone_id").(string)
+
 	err = zones.Unshare(ctx, dnsClient, zoneID, d.Id()).ExtractErr()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "error unsharing DNS zone"))
@@ -126,7 +132,7 @@ func resourceDNSZoneShareV2Delete(ctx context.Context, d *schema.ResourceData, m
 // resourceDNSZoneShareV2Import supports both full-format
 // (<zone_id>/<share_id>/<project_id>) and simplified (<zone_id>/<share_id>)
 // imports.
-func resourceDNSZoneShareV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceDNSZoneShareV2Import(_ context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 && len(parts) != 3 {
 		return nil, fmt.Errorf("unexpected ID format (%s). Expected either <zone_id>/<share_id> or <zone_id>/<share_id>/<project_id>", d.Id())

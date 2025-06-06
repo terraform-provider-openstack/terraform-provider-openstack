@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceNetworkingRouterInterfaceV2() *schema.Resource {
@@ -67,8 +66,9 @@ func resourceNetworkingRouterInterfaceV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingRouterInterfaceV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingRouterInterfaceV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -81,10 +81,11 @@ func resourceNetworkingRouterInterfaceV2Create(ctx context.Context, d *schema.Re
 
 	routerID := d.Get("router_id").(string)
 	// the lock is necessary, when multiple interfaces are added to the same router in parallel
-	config.MutexKV.Lock(routerID)
-	defer config.MutexKV.Unlock(routerID)
+	config.Lock(routerID)
+	defer config.Unlock(routerID)
 
 	log.Printf("[DEBUG] openstack_networking_router_interface_v2 create options: %#v", createOpts)
+
 	r, err := routers.AddInterface(ctx, networkingClient, routerID, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_networking_router_interface_v2: %s", err)
@@ -109,11 +110,13 @@ func resourceNetworkingRouterInterfaceV2Create(ctx context.Context, d *schema.Re
 	d.SetId(r.PortID)
 
 	log.Printf("[DEBUG] Created openstack_networking_router_interface_v2 %s: %#v", r.ID, r)
+
 	return resourceNetworkingRouterInterfaceV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingRouterInterfaceV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingRouterInterfaceV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -123,6 +126,7 @@ func resourceNetworkingRouterInterfaceV2Read(ctx context.Context, d *schema.Reso
 	if err != nil {
 		if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			d.SetId("")
+
 			return nil
 		}
 
@@ -149,12 +153,13 @@ func resourceNetworkingRouterInterfaceV2Read(ctx context.Context, d *schema.Reso
 	return nil
 }
 
-func resourceNetworkingRouterInterfaceV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingRouterInterfaceV2Update(_ context.Context, _ *schema.ResourceData, _ any) diag.Diagnostics {
 	return nil
 }
 
-func resourceNetworkingRouterInterfaceV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingRouterInterfaceV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -175,5 +180,6 @@ func resourceNetworkingRouterInterfaceV2Delete(ctx context.Context, d *schema.Re
 	}
 
 	d.SetId("")
+
 	return nil
 }

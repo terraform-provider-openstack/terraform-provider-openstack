@@ -6,12 +6,11 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 )
 
 func resourceMembersV2() *schema.Resource {
@@ -110,14 +109,15 @@ func resourceMembersV2() *schema.Resource {
 	}
 }
 
-func resourceMembersV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceMembersV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	createOpts := expandLBMembersV2(d.Get("member").(*schema.Set), lbClient)
+	createOpts := expandLBMembersV2(d.Get("member").(*schema.Set))
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
 	// Get a clean copy of the parent pool.
@@ -129,20 +129,22 @@ func resourceMembersV2Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	// Wait for parent pool to become active before continuing
 	timeout := d.Timeout(schema.TimeoutCreate)
+
 	err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to create members")
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		err = pools.BatchUpdateMembers(ctx, lbClient, poolID, createOpts).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.Errorf("Error creating members: %s", err)
 	}
@@ -158,8 +160,9 @@ func resourceMembersV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	return resourceMembersV2Read(ctx, d, meta)
 }
 
-func resourceMembersV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceMembersV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -184,15 +187,16 @@ func resourceMembersV2Read(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceMembersV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceMembersV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	if d.HasChange("member") {
-		updateOpts := expandLBMembersV2(d.Get("member").(*schema.Set), lbClient)
+		updateOpts := expandLBMembersV2(d.Get("member").(*schema.Set))
 
 		// Get a clean copy of the parent pool.
 		parentPool, err := pools.Get(ctx, lbClient, d.Id()).Extract()
@@ -202,20 +206,22 @@ func resourceMembersV2Update(ctx context.Context, d *schema.ResourceData, meta i
 
 		// Wait for parent pool to become active before continuing.
 		timeout := d.Timeout(schema.TimeoutUpdate)
+
 		err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
 		log.Printf("[DEBUG] Updating %s pool members with options: %#v", d.Id(), updateOpts)
+
 		err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 			err = pools.BatchUpdateMembers(ctx, lbClient, d.Id(), updateOpts).ExtractErr()
 			if err != nil {
 				return checkForRetryableError(err)
 			}
+
 			return nil
 		})
-
 		if err != nil {
 			return diag.Errorf("Unable to update member %s: %s", d.Id(), err)
 		}
@@ -230,8 +236,9 @@ func resourceMembersV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	return resourceMembersV2Read(ctx, d, meta)
 }
 
-func resourceMembersV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceMembersV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -245,20 +252,22 @@ func resourceMembersV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 
 	// Wait for parent pool to become active before continuing.
 	timeout := d.Timeout(schema.TimeoutDelete)
+
 	err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error waiting for the members' pool status"))
 	}
 
 	log.Printf("[DEBUG] Attempting to delete %s pool members", d.Id())
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		err = pools.BatchUpdateMembers(ctx, lbClient, d.Id(), []pools.BatchUpdateMemberOpts{}).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting members"))
 	}

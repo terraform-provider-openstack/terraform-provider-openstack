@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -84,7 +85,7 @@ func testAccCheckFWRuleV2DataSourceID(n string) resource.TestCheckFunc {
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Firewall rule data source ID not set")
+			return errors.New("Firewall rule data source ID not set")
 		}
 
 		return nil

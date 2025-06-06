@@ -4,10 +4,9 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
 )
 
 func TestUnitNetworkingSubnetV2AllocationPools(t *testing.T) {
@@ -22,7 +21,7 @@ func TestUnitNetworkingSubnetV2AllocationPools(t *testing.T) {
 		},
 	}
 
-	expected := []map[string]interface{}{
+	expected := []map[string]any{
 		{
 			"start": "192.168.0.2",
 			"end":   "192.168.0.254",
@@ -43,7 +42,7 @@ func TestUnitExpandNetworkingSubnetV2AllocationPools(t *testing.T) {
 	d := r.TestResourceData()
 	d.SetId("1")
 
-	allocationPools := []map[string]interface{}{
+	allocationPools := []map[string]any{
 		{
 			"start": "192.168.0.2",
 			"end":   "192.168.0.254",
@@ -73,120 +72,120 @@ func TestUnitExpandNetworkingSubnetV2AllocationPools(t *testing.T) {
 }
 
 func TestUnitNetworkingSubnetV2AllocationPoolsMatch(t *testing.T) {
-	oldPools := []interface{}{
-		map[string]interface{}{
+	oldPools := []any{
+		map[string]any{
 			"start": "192.168.199.2",
 			"end":   "192.168.199.100",
 		},
 
-		map[string]interface{}{
+		map[string]any{
 			"start": "10.3.0.1",
 			"end":   "10.3.0.100",
 		},
 	}
 
-	newPools := []interface{}{
-		map[string]interface{}{
+	newPools := []any{
+		map[string]any{
 			"start": "192.168.199.2",
 			"end":   "192.168.199.100",
 		},
 
-		map[string]interface{}{
+		map[string]any{
 			"start": "10.3.0.1",
 			"end":   "10.3.0.100",
 		},
 	}
 
 	same := networkingSubnetV2AllocationPoolsMatch(oldPools, newPools)
-	assert.Equal(t, same, true)
+	assert.True(t, same)
 
-	oldPools = []interface{}{
-		map[string]interface{}{
+	oldPools = []any{
+		map[string]any{
 			"start": "192.168.199.2",
 			"end":   "192.168.199.100",
 		},
 	}
 
-	newPools = []interface{}{
-		map[string]interface{}{
+	newPools = []any{
+		map[string]any{
 			"start": "192.168.199.2",
 			"end":   "192.168.199.100",
 		},
 
-		map[string]interface{}{
+		map[string]any{
 			"start": "10.3.0.1",
 			"end":   "10.3.0.100",
 		},
 	}
 
 	same = networkingSubnetV2AllocationPoolsMatch(oldPools, newPools)
-	assert.Equal(t, same, false)
+	assert.False(t, same)
 
-	oldPools = []interface{}{
-		map[string]interface{}{
+	oldPools = []any{
+		map[string]any{
 			"start": "192.168.199.2",
 			"end":   "192.168.199.100",
 		},
 
-		map[string]interface{}{
+		map[string]any{
 			"start": "10.3.0.1",
 			"end":   "10.3.0.100",
 		},
 	}
 
-	newPools = []interface{}{
-		map[string]interface{}{
+	newPools = []any{
+		map[string]any{
 			"start": "10.3.0.1",
 			"end":   "10.3.0.100",
 		},
 	}
 
 	same = networkingSubnetV2AllocationPoolsMatch(oldPools, newPools)
-	assert.Equal(t, same, false)
+	assert.False(t, same)
 
-	oldPools = []interface{}{
-		map[string]interface{}{
+	oldPools = []any{
+		map[string]any{
 			"start": "192.168.199.10",
 			"end":   "192.168.199.150",
 		},
 
-		map[string]interface{}{
+		map[string]any{
 			"start": "10.3.0.1",
 			"end":   "10.3.0.100",
 		},
 	}
 
-	newPools = []interface{}{
-		map[string]interface{}{
+	newPools = []any{
+		map[string]any{
 			"start": "192.168.199.2",
 			"end":   "192.168.199.100",
 		},
 
-		map[string]interface{}{
+		map[string]any{
 			"start": "10.3.0.1",
 			"end":   "10.3.0.100",
 		},
 	}
 
 	same = networkingSubnetV2AllocationPoolsMatch(oldPools, newPools)
-	assert.Equal(t, same, false)
+	assert.False(t, same)
 }
 
 func TestUnitNetworkingSubnetV2DNSNameserverAreUnique(t *testing.T) {
 	tableTest := []struct {
-		input []interface{}
+		input []any
 		err   error
 	}{
 		{
-			input: []interface{}{"192.168.199.2", "192.168.199.3"},
+			input: []any{"192.168.199.2", "192.168.199.3"},
 			err:   nil,
 		},
 		{
-			input: []interface{}{"192.168.199.1", "192.168.199.5", "192.168.199.1"},
+			input: []any{"192.168.199.1", "192.168.199.5", "192.168.199.1"},
 			err:   errors.New("got duplicate nameserver 192.168.199.1"),
 		},
 		{
-			input: []interface{}{},
+			input: []any{},
 			err:   nil,
 		},
 	}

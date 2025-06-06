@@ -3,45 +3,44 @@ package openstack
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/rules"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUnitResourceNetworkingSecGroupRuleV2DirectionIngress(t *testing.T) {
 	_, err := resourceNetworkingSecGroupRuleV2Direction("ingress", "direction")
 
-	assert.Equal(t, 0, len(err))
+	assert.Empty(t, err)
 }
 
 func TestUnitResourceNetworkingSecGroupRuleV2DirectionEgress(t *testing.T) {
 	_, err := resourceNetworkingSecGroupRuleV2Direction("egress", "direction")
 
-	assert.Equal(t, 0, len(err))
+	assert.Empty(t, err)
 }
 
 func TestUnitResourceNetworkingSecGroupRuleV2DirectionUnknown(t *testing.T) {
 	_, err := resourceNetworkingSecGroupRuleV2Direction("stuff", "direction")
 
-	assert.Equal(t, 1, len(err))
+	assert.Len(t, err, 1)
 }
 
 func TestUnitResourceNetworkingSecGroupRuleV2EtherType4(t *testing.T) {
 	_, err := resourceNetworkingSecGroupRuleV2EtherType("IPv4", "ethertype")
 
-	assert.Equal(t, 0, len(err))
+	assert.Empty(t, err)
 }
 
 func TestUnitResourceNetworkingSecGroupRuleV2EtherType6(t *testing.T) {
 	_, err := resourceNetworkingSecGroupRuleV2EtherType("IPv6", "ethertype")
 
-	assert.Equal(t, 0, len(err))
+	assert.Empty(t, err)
 }
 
 func TestUnitResourceNetworkingSecGroupRuleV2EtherTypeUnknown(t *testing.T) {
 	_, err := resourceNetworkingSecGroupRuleV2EtherType("something", "ethertype")
 
-	assert.Equal(t, 1, len(err))
+	assert.Len(t, err, 1)
 }
 
 func TestUnitResourceNetworkingSecGroupRuleV2ProtocolString(t *testing.T) {
@@ -73,12 +72,12 @@ func TestUnitResourceNetworkingSecGroupRuleV2ProtocolString(t *testing.T) {
 	for name := range protocols {
 		_, err := resourceNetworkingSecGroupRuleV2Protocol(name, "protocol")
 
-		assert.Equal(t, 0, len(err))
+		assert.Empty(t, err)
 	}
 }
 
 func TestUnitResourceNetworkingSecGroupRuleV2ProtocolNumber(t *testing.T) {
 	_, err := resourceNetworkingSecGroupRuleV2Protocol("6", "protocol")
 
-	assert.Equal(t, 0, len(err))
+	assert.Empty(t, err)
 }

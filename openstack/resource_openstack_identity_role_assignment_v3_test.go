@@ -2,22 +2,25 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/roles"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
 	"github.com/gophercloud/gophercloud/v2/pagination"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 	var role roles.Role
+
 	var user users.User
+
 	var project projects.Project
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -44,9 +47,10 @@ func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 
 func testAccCheckIdentityV3RoleAssignmentDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -56,7 +60,7 @@ func testAccCheckIdentityV3RoleAssignmentDestroy(s *terraform.State) error {
 
 		_, err := roles.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Role assignment still exists")
+			return errors.New("Role assignment still exists")
 		}
 	}
 
@@ -71,21 +75,22 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
 		domainID, projectID, groupID, userID, roleID, err := identityRoleAssignmentV3ParseID(rs.Primary.ID)
 		if err != nil {
-			return fmt.Errorf("Error determining openstack_identity_role_assignment_v3 ID: %s", err)
+			return fmt.Errorf("Error determining openstack_identity_role_assignment_v3 ID: %w", err)
 		}
 
-		var opts = roles.ListAssignmentsOpts{
+		opts := roles.ListAssignmentsOpts{
 			GroupID:        groupID,
 			ScopeDomainID:  domainID,
 			ScopeProjectID: projectID,
@@ -93,9 +98,10 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 		}
 
 		pager := roles.ListAssignments(identityClient, opts)
+
 		var assignment roles.RoleAssignment
 
-		err = pager.EachPage(context.TODO(), func(ctx context.Context, page pagination.Page) (bool, error) {
+		err = pager.EachPage(context.TODO(), func(_ context.Context, page pagination.Page) (bool, error) {
 			assignmentList, err := roles.ExtractRoleAssignments(page)
 			if err != nil {
 				return false, err
@@ -104,6 +110,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 			for _, a := range assignmentList {
 				if a.Role.ID == roleID {
 					assignment = a
+
 					return false, nil
 				}
 			}
@@ -116,18 +123,23 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 
 		p, err := projects.Get(context.TODO(), identityClient, assignment.Scope.Project.ID).Extract()
 		if err != nil {
-			return fmt.Errorf("Project not found")
+			return errors.New("Project not found")
 		}
+
 		*project = *p
+
 		u, err := users.Get(context.TODO(), identityClient, assignment.User.ID).Extract()
 		if err != nil {
-			return fmt.Errorf("User not found")
+			return errors.New("User not found")
 		}
+
 		*user = *u
+
 		r, err := roles.Get(context.TODO(), identityClient, assignment.Role.ID).Extract()
 		if err != nil {
-			return fmt.Errorf("Role not found")
+			return errors.New("Role not found")
 		}
+
 		*role = *r
 
 		return nil

@@ -6,10 +6,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/transfer/request"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 )
 
 // TransferRequestCreateOpts represents the attributes used when creating a new transfer request.
@@ -20,13 +19,13 @@ type TransferRequestCreateOpts struct {
 
 // ToTransferRequestCreateMap casts a CreateOpts struct to a map.
 // It overrides request.ToTransferRequestCreateMap to add the ValueSpecs field.
-func (opts TransferRequestCreateOpts) ToTransferRequestCreateMap() (map[string]interface{}, error) {
+func (opts TransferRequestCreateOpts) ToTransferRequestCreateMap() (map[string]any, error) {
 	b, err := BuildRequest(opts, "")
 	if err != nil {
 		return nil, err
 	}
 
-	if m, ok := b[""].(map[string]interface{}); ok {
+	if m, ok := b[""].(map[string]any); ok {
 		return m, nil
 	}
 
@@ -34,7 +33,7 @@ func (opts TransferRequestCreateOpts) ToTransferRequestCreateMap() (map[string]i
 }
 
 func dnsTransferRequestV2RefreshFunc(ctx context.Context, dnsClient *gophercloud.ServiceClient, transferRequestID string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		transferRequest, err := request.Get(ctx, dnsClient, transferRequestID).Extract()
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
@@ -45,6 +44,7 @@ func dnsTransferRequestV2RefreshFunc(ctx context.Context, dnsClient *gophercloud
 		}
 
 		log.Printf("[DEBUG] openstack_dns_transfer_request_v2 %s current status: %s", transferRequest.ID, transferRequest.Status)
+
 		return transferRequest, transferRequest.Status, nil
 	}
 }

@@ -1,6 +1,8 @@
 package openstack
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -65,7 +67,7 @@ func testAccCheckObjectstorageTempurlV1ResourceID(n string) resource.TestCheckFu
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Endpoint resource ID not set")
+			return errors.New("Endpoint resource ID not set")
 		}
 
 		return nil
@@ -80,19 +82,29 @@ func testAccCheckObjectstorageTempurlV1Get(n string) resource.TestCheckFunc {
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Endpoint resource ID not set")
+			return errors.New("Endpoint resource ID not set")
 		}
 
 		var url string
+
 		if url, ok = rs.Primary.Attributes["url"]; !ok {
-			return fmt.Errorf("Temp URL is not set")
+			return errors.New("Temp URL is not set")
 		}
 
-		resp, err := http.Get(url)
+		httpClient := &http.Client{}
+
+		req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, url, nil)
+		if err != nil {
+			return fmt.Errorf("Failed to create request for tempurl: %s", url)
+		}
+
+		resp, err := httpClient.Do(req)
 		if err != nil {
 			return fmt.Errorf("Failed to retrieve tempurl: %s", url)
 		}
+
 		defer resp.Body.Close()
+
 		data, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return fmt.Errorf("Failed to read tempurl body: %s", url)

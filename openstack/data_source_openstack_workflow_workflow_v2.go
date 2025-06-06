@@ -5,10 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/workflow/v2/workflows"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/workflow/v2/workflows"
 )
 
 func dataSourceWorkflowWorkflowV2() *schema.Resource {
@@ -70,8 +69,9 @@ func dataSourceWorkflowWorkflowV2() *schema.Resource {
 	}
 }
 
-func dataSourceWorkflowWorkflowV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceWorkflowWorkflowV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	workflowClient, err := config.WorkflowV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack workflow client: %s", err)
@@ -112,10 +112,13 @@ func dataSourceWorkflowWorkflowV2Read(ctx context.Context, d *schema.ResourceDat
 	}
 
 	var workflow workflows.Workflow
+
 	if len(allWorkflows) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allWorkflows)
+
 		return diag.Errorf("Your query returned more than one result. Please try a more specific search criteria")
 	}
+
 	workflow = allWorkflows[0]
 
 	dataSourceWorkflowWorkflowV2Attributes(d, &workflow, GetRegion(d, config))

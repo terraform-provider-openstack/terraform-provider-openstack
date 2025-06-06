@@ -2,18 +2,19 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/configurations"
 	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/instances"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccDatabaseV1Instance_basic(t *testing.T) {
 	var instance instances.Instance
+
 	var configuration configurations.Config
 
 	resource.Test(t, resource.TestCase{
@@ -68,13 +69,14 @@ func testAccCheckDatabaseV1InstanceExists(n string, instance *instances.Instance
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
 		found, err := instances.Get(context.TODO(), databaseV1Client, rs.Primary.ID).Extract()
@@ -83,7 +85,7 @@ func testAccCheckDatabaseV1InstanceExists(n string, instance *instances.Instance
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Instance not found")
+			return errors.New("Instance not found")
 		}
 
 		*instance = *found
@@ -97,7 +99,7 @@ func testAccCheckDatabaseV1InstanceDestroy(s *terraform.State) error {
 
 	databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -107,7 +109,7 @@ func testAccCheckDatabaseV1InstanceDestroy(s *terraform.State) error {
 
 		_, err := instances.Get(context.TODO(), databaseV1Client, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Instance still exists")
+			return errors.New("Instance still exists")
 		}
 	}
 

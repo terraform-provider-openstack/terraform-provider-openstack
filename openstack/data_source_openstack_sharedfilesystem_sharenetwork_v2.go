@@ -4,11 +4,10 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/sharenetworks"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceSharedFilesystemShareNetworkV2() *schema.Resource {
@@ -91,8 +90,9 @@ func dataSourceSharedFilesystemShareNetworkV2() *schema.Resource {
 	}
 }
 
-func dataSourceSharedFilesystemShareNetworkV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSharedFilesystemShareNetworkV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem sfsClient: %s", err)
@@ -131,18 +131,23 @@ func dataSourceSharedFilesystemShareNetworkV2Read(ctx context.Context, d *schema
 	}
 
 	var securityServiceID string
+
 	var securityServiceIDs []string
+
 	if v, ok := getOkExists(d, "security_service_id"); ok {
 		// filtering by "security_service_id"
 		securityServiceID = v.(string)
+
 		var filteredShareNetworks []sharenetworks.ShareNetwork
 
 		log.Printf("[DEBUG] Filtering share networks by a %s security service ID", securityServiceID)
+
 		for _, shareNetwork := range allShareNetworks {
 			tmp, err := resourceSharedFilesystemShareNetworkV2GetSvcByShareNetID(ctx, sfsClient, shareNetwork.ID)
 			if err != nil {
 				return diag.FromErr(err)
 			}
+
 			if strSliceContains(tmp, securityServiceID) {
 				filteredShareNetworks = append(filteredShareNetworks, shareNetwork)
 				securityServiceIDs = tmp
@@ -153,14 +158,18 @@ func dataSourceSharedFilesystemShareNetworkV2Read(ctx context.Context, d *schema
 			return diag.Errorf("Your query returned no results after the security service ID filter. " +
 				"Please change your search criteria and try again")
 		}
+
 		allShareNetworks = filteredShareNetworks
 	}
 
 	var shareNetwork sharenetworks.ShareNetwork
+
 	if len(allShareNetworks) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allShareNetworks)
+
 		return diag.Errorf("Your query returned more than one result. Please try a more specific search criteria")
 	}
+
 	shareNetwork = allShareNetworks[0]
 
 	// skip extra calls if "security_service_id" filter was already used

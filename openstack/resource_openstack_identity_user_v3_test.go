@@ -2,22 +2,25 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
-	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
 )
 
 func TestAccIdentityV3User_basic(t *testing.T) {
 	var project projects.Project
-	var projectName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+
+	projectName := "ACCPTTEST-" + acctest.RandString(5)
+
 	var user users.User
-	var userName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+
+	userName := "ACCPTTEST-" + acctest.RandString(5)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -84,9 +87,10 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 
 func testAccCheckIdentityV3UserDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -96,7 +100,7 @@ func testAccCheckIdentityV3UserDestroy(s *terraform.State) error {
 
 		_, err := users.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("User still exists")
+			return errors.New("User still exists")
 		}
 	}
 
@@ -111,13 +115,14 @@ func testAccCheckIdentityV3UserExists(n string, user *users.User) resource.TestC
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
 		found, err := users.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
@@ -126,7 +131,7 @@ func testAccCheckIdentityV3UserExists(n string, user *users.User) resource.TestC
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("User not found")
+			return errors.New("User not found")
 		}
 
 		*user = *found

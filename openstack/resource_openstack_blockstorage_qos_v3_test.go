@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/qos"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/qos"
 )
 
 func TestAccBlockStorageQosV3_basic(t *testing.T) {
@@ -70,9 +70,10 @@ func TestAccBlockStorageQosV3_basic(t *testing.T) {
 
 func testAccCheckBlockStorageQosV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -82,7 +83,7 @@ func testAccCheckBlockStorageQosV3Destroy(s *terraform.State) error {
 
 		_, err := qos.Get(context.TODO(), blockStorageClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Qos still exists")
+			return errors.New("Qos still exists")
 		}
 	}
 
@@ -97,13 +98,14 @@ func testAccCheckBlockStorageQosV3Exists(n string, qosTest *qos.QoS) resource.Te
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+			return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 		}
 
 		found, err := qos.Get(context.TODO(), blockStorageClient, rs.Primary.ID).Extract()
@@ -112,7 +114,7 @@ func testAccCheckBlockStorageQosV3Exists(n string, qosTest *qos.QoS) resource.Te
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Qos not found")
+			return errors.New("Qos not found")
 		}
 
 		*qosTest = *found

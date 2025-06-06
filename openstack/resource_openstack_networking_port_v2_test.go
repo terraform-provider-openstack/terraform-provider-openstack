@@ -2,11 +2,9 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/portsecurity"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
@@ -14,6 +12,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 type testPortWithExtensions struct {
@@ -24,7 +24,9 @@ type testPortWithExtensions struct {
 
 func TestAccNetworkingV2Port_basic(t *testing.T) {
 	var network networks.Network
+
 	var port ports.Port
+
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -49,7 +51,9 @@ func TestAccNetworkingV2Port_basic(t *testing.T) {
 
 func TestAccNetworkingV2Port_noIP(t *testing.T) {
 	var network networks.Network
+
 	var port ports.Port
+
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -84,7 +88,9 @@ func TestAccNetworkingV2Port_noIP(t *testing.T) {
 
 func TestAccNetworkingV2Port_multipleNoIP(t *testing.T) {
 	var network networks.Network
+
 	var port ports.Port
+
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -110,7 +116,9 @@ func TestAccNetworkingV2Port_multipleNoIP(t *testing.T) {
 
 func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 	var network networks.Network
+
 	var subnet subnets.Subnet
+
 	var vrrpPort1, vrrpPort2, instancePort ports.Port
 
 	resource.Test(t, resource.TestCase{
@@ -184,7 +192,9 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 
 func TestAccNetworkingV2Port_allowedAddressPairsNoMAC(t *testing.T) {
 	var network networks.Network
+
 	var subnet subnets.Subnet
+
 	var vrrpPort1, vrrpPort2, instancePort ports.Port
 
 	resource.Test(t, resource.TestCase{
@@ -212,7 +222,9 @@ func TestAccNetworkingV2Port_allowedAddressPairsNoMAC(t *testing.T) {
 
 func TestAccNetworkingV2Port_multipleFixedIPs(t *testing.T) {
 	var network networks.Network
+
 	var port ports.Port
+
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -238,7 +250,9 @@ func TestAccNetworkingV2Port_multipleFixedIPs(t *testing.T) {
 
 func TestAccNetworkingV2Port_timeout(t *testing.T) {
 	var network networks.Network
+
 	var port ports.Port
+
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -285,8 +299,11 @@ func TestAccNetworkingV2Port_fixedIPs(t *testing.T) {
 
 func TestAccNetworkingV2Port_updateSecurityGroups(t *testing.T) {
 	var network networks.Network
+
 	var port ports.Port
+
 	var secgroup1, secgroup2 groups.SecGroup
+
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -368,8 +385,11 @@ func TestAccNetworkingV2Port_updateSecurityGroups(t *testing.T) {
 
 func TestAccNetworkingV2Port_noSecurityGroups(t *testing.T) {
 	var network networks.Network
+
 	var port ports.Port
+
 	var secgroup1, secgroup2 groups.SecGroup
+
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
@@ -501,7 +521,9 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 
 func TestAccNetworkingV2Port_createExtraDHCPOpts(t *testing.T) {
 	var network networks.Network
+
 	var subnet subnets.Subnet
+
 	var port ports.Port
 
 	resource.Test(t, resource.TestCase{
@@ -528,7 +550,9 @@ func TestAccNetworkingV2Port_createExtraDHCPOpts(t *testing.T) {
 
 func TestAccNetworkingV2Port_updateExtraDHCPOpts(t *testing.T) {
 	var network networks.Network
+
 	var subnet subnets.Subnet
+
 	var port ports.Port
 
 	resource.Test(t, resource.TestCase{
@@ -1012,9 +1036,10 @@ func TestAccNetworkingV2Port_qos_policy_update(t *testing.T) {
 
 func testAccCheckNetworkingV2PortDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -1024,7 +1049,7 @@ func testAccCheckNetworkingV2PortDestroy(s *terraform.State) error {
 
 		_, err := ports.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Port still exists")
+			return errors.New("Port still exists")
 		}
 	}
 
@@ -1039,13 +1064,14 @@ func testAccCheckNetworkingV2PortExists(n string, port *ports.Port) resource.Tes
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := ports.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -1054,7 +1080,7 @@ func testAccCheckNetworkingV2PortExists(n string, port *ports.Port) resource.Tes
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Port not found")
+			return errors.New("Port not found")
 		}
 
 		*port = *found
@@ -1064,7 +1090,8 @@ func testAccCheckNetworkingV2PortExists(n string, port *ports.Port) resource.Tes
 }
 
 func testAccCheckNetworkingV2PortWithExtensionsExists(
-	n string, port *testPortWithExtensions) resource.TestCheckFunc {
+	n string, port *testPortWithExtensions,
+) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -1072,23 +1099,25 @@ func testAccCheckNetworkingV2PortWithExtensionsExists(
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		var p testPortWithExtensions
+
 		err = ports.Get(context.TODO(), networkingClient, rs.Primary.ID).ExtractInto(&p)
 		if err != nil {
 			return err
 		}
 
 		if p.ID != rs.Primary.ID {
-			return fmt.Errorf("Port not found")
+			return errors.New("Port not found")
 		}
 
 		*port = p
@@ -1098,7 +1127,7 @@ func testAccCheckNetworkingV2PortWithExtensionsExists(
 }
 
 func testAccCheckNetworkingV2PortCountFixedIPs(port *ports.Port, expected int) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if len(port.FixedIPs) != expected {
 			return fmt.Errorf("Expected %d Fixed IPs, got %d", expected, len(port.FixedIPs))
 		}
@@ -1108,7 +1137,7 @@ func testAccCheckNetworkingV2PortCountFixedIPs(port *ports.Port, expected int) r
 }
 
 func testAccCheckNetworkingV2PortCountSecurityGroups(port *ports.Port, expected int) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if len(port.SecurityGroups) != expected {
 			return fmt.Errorf("Expected %d Security Groups, got %d", expected, len(port.SecurityGroups))
 		}
@@ -1118,8 +1147,9 @@ func testAccCheckNetworkingV2PortCountSecurityGroups(port *ports.Port, expected 
 }
 
 func testAccCheckNetworkingV2PortCountAllowedAddressPairs(
-	port *ports.Port, expected int) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	port *ports.Port, expected int,
+) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
 		if len(port.AllowedAddressPairs) != expected {
 			return fmt.Errorf("Expected %d Allowed Address Pairs, got %d", expected, len(port.AllowedAddressPairs))
 		}
@@ -1129,7 +1159,7 @@ func testAccCheckNetworkingV2PortCountAllowedAddressPairs(
 }
 
 func testAccCheckNetworkingV2PortAdminStateUp(port *ports.Port, expected bool) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if port.AdminStateUp != expected {
 			return fmt.Errorf("Port has wrong admin_state_up. Expected %t, got %t", expected, port.AdminStateUp)
 		}
@@ -1139,8 +1169,9 @@ func testAccCheckNetworkingV2PortAdminStateUp(port *ports.Port, expected bool) r
 }
 
 func testAccCheckNetworkingV2PortPortSecurityEnabled(
-	port *testPortWithExtensions, expected bool) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	port *testPortWithExtensions, expected bool,
+) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
 		if port.PortSecurityEnabled != expected {
 			return fmt.Errorf("Port has wrong port_security_enabled. Expected %t, got %t", expected, port.PortSecurityEnabled)
 		}

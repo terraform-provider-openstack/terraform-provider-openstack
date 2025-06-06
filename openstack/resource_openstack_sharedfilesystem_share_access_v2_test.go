@@ -2,18 +2,19 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/shares"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/shares"
 )
 
 func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 	var shareAccess1 shares.AccessRight
+
 	var shareAccess2 shares.AccessRight
 
 	resource.Test(t, resource.TestCase{
@@ -67,9 +68,10 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 
 func testAccCheckSFSV2ShareAccessDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -78,9 +80,11 @@ func testAccCheckSFSV2ShareAccessDestroy(s *terraform.State) error {
 		}
 
 		var shareID string
+
 		for k, v := range rs.Primary.Attributes {
 			if k == "share_id" {
 				shareID = v
+
 				break
 			}
 		}
@@ -106,19 +110,22 @@ func testAccCheckSFSV2ShareAccessExists(n string, share *shares.AccessRight) res
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %w", err)
 		}
 
 		var shareID string
+
 		for k, v := range rs.Primary.Attributes {
 			if k == "share_id" {
 				shareID = v
+
 				break
 			}
 		}
@@ -127,7 +134,7 @@ func testAccCheckSFSV2ShareAccessExists(n string, share *shares.AccessRight) res
 
 		access, err := shares.ListAccessRights(context.TODO(), sfsClient, shareID).Extract()
 		if err != nil {
-			return fmt.Errorf("Unable to get %s share: %s", shareID, err)
+			return fmt.Errorf("Unable to get %s share: %w", shareID, err)
 		}
 
 		var found shares.AccessRight
@@ -135,12 +142,13 @@ func testAccCheckSFSV2ShareAccessExists(n string, share *shares.AccessRight) res
 		for _, v := range access {
 			if v.ID == rs.Primary.ID {
 				found = v
+
 				break
 			}
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("ShareAccess not found")
+			return errors.New("ShareAccess not found")
 		}
 
 		*share = found
@@ -150,11 +158,12 @@ func testAccCheckSFSV2ShareAccessExists(n string, share *shares.AccessRight) res
 }
 
 func testAccCheckSFSV2ShareAccessDiffers(shareAccess1, shareAccess2 *shares.AccessRight) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if shareAccess1.ID != shareAccess2.ID {
 			return nil
 		}
-		return fmt.Errorf("Share accesses should differ")
+
+		return errors.New("Share accesses should differ")
 	}
 }
 

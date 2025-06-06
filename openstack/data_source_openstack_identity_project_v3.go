@@ -4,11 +4,10 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceIdentityProjectV3() *schema.Resource {
@@ -81,23 +80,27 @@ func filterProjects(allProjects []projects.Project, listOpts projects.ListOpts) 
 			results = append(results, p)
 		}
 	}
+
 	return
 }
 
 // dataSourceIdentityProjectV3Read performs the project lookup.
-func dataSourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	var allProjects []projects.Project
+
 	if v := d.Get("project_id").(string); v != "" {
 		project, err := projects.Get(ctx, identityClient, v).Extract()
 		if err != nil {
 			return diag.Errorf("Unable to query openstack_identity_project_v3: %s", err)
 		}
+
 		allProjects = append(allProjects, *project)
 	} else {
 		enabled := d.Get("enabled").(bool)
@@ -113,12 +116,15 @@ func dataSourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData
 		allPages, err := projects.List(identityClient, listOpts).AllPages(ctx)
 		if err != nil {
 			userID := config.UserID
+
 			log.Printf("[DEBUG] Will try to find project with users.ListProjects as I am unable to query openstack_identity_project_v3: %s. Trying listing userprojects.", err)
+
 			if userID == "" {
 				tokenInfo, tokenErr := getTokenInfo(ctx, identityClient)
 				if tokenErr != nil {
 					return diag.Errorf("Error when getting token info: %s", err)
 				}
+
 				userID = tokenInfo.userID
 			}
 			// Search for all the projects using the users.ListProjects API call and filter them
@@ -126,10 +132,12 @@ func dataSourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData
 			if err != nil {
 				return diag.Errorf("Unable to query openstack_identity_project_v3: %s", err)
 			}
+
 			allProjects, err = projects.ExtractProjects(allPages)
 			if err != nil {
 				return diag.Errorf("Unable to retrieve openstack_identity_project_v3: %s", err)
 			}
+
 			allProjects = filterProjects(allProjects, listOpts)
 		} else {
 			allProjects, err = projects.ExtractProjects(allPages)

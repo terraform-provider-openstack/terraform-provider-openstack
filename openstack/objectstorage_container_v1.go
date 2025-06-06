@@ -22,8 +22,10 @@ func (opts containerCreateOpts) ToContainerCreateMap() (map[string]string, error
 	if opts.StorageClass != "" {
 		h["X-Object-Storage-Class"] = opts.StorageClass
 	}
+
 	for k, v := range opts.Metadata {
 		h["X-Container-Meta-"+k] = v
 	}
+
 	return h, nil
 }

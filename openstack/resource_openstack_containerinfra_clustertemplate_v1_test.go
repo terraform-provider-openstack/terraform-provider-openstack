@@ -2,14 +2,14 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/clustertemplates"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/clustertemplates"
 )
 
 func TestAccContainerInfraV1ClusterTemplate_basic(t *testing.T) {
@@ -122,13 +122,14 @@ func testAccCheckContainerInfraV1ClusterTemplateExists(n string, clustertemplate
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
+			return fmt.Errorf("Error creating OpenStack container infra client: %w", err)
 		}
 
 		found, err := clustertemplates.Get(context.TODO(), containerInfraClient, rs.Primary.ID).Extract()
@@ -137,7 +138,7 @@ func testAccCheckContainerInfraV1ClusterTemplateExists(n string, clustertemplate
 		}
 
 		if found.UUID != rs.Primary.ID {
-			return fmt.Errorf("Cluster template not found")
+			return errors.New("Cluster template not found")
 		}
 
 		*clustertemplate = *found
@@ -148,9 +149,10 @@ func testAccCheckContainerInfraV1ClusterTemplateExists(n string, clustertemplate
 
 func testAccCheckContainerInfraV1ClusterTemplateDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack container infra client: %s", err)
+		return fmt.Errorf("Error creating OpenStack container infra client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -160,7 +162,7 @@ func testAccCheckContainerInfraV1ClusterTemplateDestroy(s *terraform.State) erro
 
 		_, err := clustertemplates.Get(context.TODO(), containerInfraClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Cluster template still exists")
+			return errors.New("Cluster template still exists")
 		}
 	}
 

@@ -45,7 +45,7 @@ func identityRoleAssignmentV3FindAssignment(ctx context.Context, identityClient 
 	pager := roles.ListAssignmentsOnResource(identityClient, opts)
 
 	found := false
-	err = pager.EachPage(ctx, func(ctx context.Context, page pagination.Page) (bool, error) {
+	err = pager.EachPage(ctx, func(_ context.Context, page pagination.Page) (bool, error) {
 		assignmentList, err := roles.ExtractRoles(page)
 		if err != nil {
 			return false, err
@@ -73,6 +73,7 @@ func identityRoleAssignmentV3FindAssignment(ctx context.Context, identityClient 
 						ID: groupID,
 					},
 				}
+
 				return false, nil
 			}
 		}

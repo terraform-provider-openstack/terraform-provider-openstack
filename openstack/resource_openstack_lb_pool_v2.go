@@ -2,17 +2,17 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/listeners"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/listeners"
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 )
 
 func resourcePoolV2() *schema.Resource {
@@ -177,8 +177,9 @@ func resourcePoolV2() *schema.Resource {
 	}
 }
 
-func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
@@ -210,7 +211,7 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if v, ok := d.GetOk("persistence"); ok {
-		createOpts.Persistence, err = expandLBPoolPersistanceV2(v.([]interface{}))
+		createOpts.Persistence, err = expandLBPoolPersistanceV2(v.([]any))
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -234,27 +235,27 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 
 		waitErr := waitForLBV2Listener(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
 		if waitErr != nil {
-			return diag.Errorf(
-				"Error waiting for openstack_lb_listener_v2 %s to become active: %s", listenerID, err)
+			return diag.Errorf("Error waiting for openstack_lb_listener_v2 %s to become active: %s", listenerID, waitErr)
 		}
 	} else {
 		waitErr := waitForLBV2LoadBalancer(ctx, lbClient, lbID, "ACTIVE", getLbPendingStatuses(), timeout)
 		if waitErr != nil {
-			return diag.Errorf(
-				"Error waiting for openstack_lb_loadbalancer_v2 %s to become active: %s", lbID, err)
+			return diag.Errorf("Error waiting for openstack_lb_loadbalancer_v2 %s to become active: %s", lbID, waitErr)
 		}
 	}
 
 	log.Printf("[DEBUG] Attempting to create pool")
+
 	var pool *pools.Pool
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		pool, err = pools.Create(ctx, lbClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.Errorf("Error creating pool: %s", err)
 	}
@@ -271,8 +272,9 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta inte
 	return resourcePoolV2Read(ctx, d, meta)
 }
 
-func resourcePoolV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourcePoolV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
@@ -305,8 +307,9 @@ func resourcePoolV2Read(ctx context.Context, d *schema.ResourceData, meta interf
 	return nil
 }
 
-func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
@@ -316,48 +319,59 @@ func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta inte
 	if d.HasChange("lb_method") {
 		updateOpts.LBMethod = pools.LBMethod(d.Get("lb_method").(string))
 	}
+
 	if d.HasChange("name") {
 		name := d.Get("name").(string)
 		updateOpts.Name = &name
 	}
+
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
 	}
+
 	if d.HasChange("admin_state_up") {
 		asu := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &asu
 	}
+
 	if d.HasChange("persistence") {
-		updateOpts.Persistence, err = expandLBPoolPersistanceV2(d.Get("persistence").([]interface{}))
+		updateOpts.Persistence, err = expandLBPoolPersistanceV2(d.Get("persistence").([]any))
 		if err != nil {
 			return diag.FromErr(err)
 		}
 	}
+
 	if d.HasChange("alpn_protocols") {
 		v := expandToStringSlice(d.Get("alpn_protocols").(*schema.Set).List())
 		updateOpts.ALPNProtocols = &v
 	}
+
 	if d.HasChange("ca_tls_container_ref") {
 		v := d.Get("ca_tls_container_ref").(string)
 		updateOpts.CATLSContainerRef = &v
 	}
+
 	if d.HasChange("crl_container_ref") {
 		v := d.Get("crl_container_ref").(string)
 		updateOpts.CRLContainerRef = &v
 	}
+
 	if d.HasChange("tls_enabled") {
 		v := d.Get("tls_enabled").(bool)
 		updateOpts.TLSEnabled = &v
 	}
+
 	if d.HasChange("tls_ciphers") {
 		v := d.Get("tls_ciphers").(string)
 		updateOpts.TLSCiphers = &v
 	}
+
 	if d.HasChange("tls_container_ref") {
 		v := d.Get("tls_container_ref").(string)
 		updateOpts.TLSContainerRef = &v
 	}
+
 	if d.HasChange("tls_versions") {
 		v := expandLBPoolTLSVersionV2(d.Get("tls_versions").(*schema.Set).List())
 		updateOpts.TLSVersions = &v
@@ -388,14 +402,15 @@ func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	log.Printf("[DEBUG] Updating pool %s with options: %#v", d.Id(), updateOpts)
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		_, err = pools.Update(ctx, lbClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.Errorf("Unable to update pool %s: %s", d.Id(), err)
 	}
@@ -409,8 +424,9 @@ func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta inte
 	return resourcePoolV2Read(ctx, d, meta)
 }
 
-func resourcePoolV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourcePoolV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
@@ -425,14 +441,15 @@ func resourcePoolV2Delete(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	log.Printf("[DEBUG] Attempting to delete pool %s", d.Id())
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		err = pools.Delete(ctx, lbClient, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting pool"))
 	}
@@ -446,11 +463,12 @@ func resourcePoolV2Delete(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourcePoolV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourcePoolV2Import(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenStack loadbalancing client: %s", err)
+		return nil, fmt.Errorf("Error creating OpenStack loadbalancing client: %w", err)
 	}
 
 	pool, err := pools.Get(ctx, lbClient, d.Id()).Extract()
@@ -465,7 +483,7 @@ func resourcePoolV2Import(ctx context.Context, d *schema.ResourceData, meta inte
 	} else if len(pool.Loadbalancers) > 0 && pool.Loadbalancers[0].ID != "" {
 		d.Set("loadbalancer_id", pool.Loadbalancers[0].ID)
 	} else {
-		return nil, fmt.Errorf("Unable to detect pool's Listener ID or Load Balancer ID")
+		return nil, errors.New("Unable to detect pool's Listener ID or Load Balancer ID")
 	}
 
 	return []*schema.ResourceData{d}, nil

@@ -2,14 +2,12 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"sort"
 	"strings"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
@@ -17,6 +15,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/v2/pagination"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccComputeV2Instance_basic(t *testing.T) {
@@ -259,6 +259,7 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 
 func TestAccComputeV2Instance_bootFromVolumeForceNew(t *testing.T) {
 	var instance1 servers.Server
+
 	var instance2 servers.Server
 
 	resource.Test(t, resource.TestCase{
@@ -332,6 +333,7 @@ func TestAccComputeV2Instance_blockDeviceNewVolumeTypeAndBus(t *testing.T) {
 
 func TestAccComputeV2Instance_blockDeviceExistingVolume(t *testing.T) {
 	var instance servers.Server
+
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
@@ -473,6 +475,7 @@ func TestAccComputeV2Instance_accessIPv6(t *testing.T) {
 
 func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 	var instance1 servers.Server
+
 	var instance2 servers.Server
 
 	resource.Test(t, resource.TestCase{
@@ -504,6 +507,7 @@ func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 
 func TestAccComputeV2Instance_stopBeforeDestroy(t *testing.T) {
 	var instance servers.Server
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -564,6 +568,7 @@ func TestAccComputeV2Instance_metadataRemove(t *testing.T) {
 
 func TestAccComputeV2Instance_forceDelete(t *testing.T) {
 	var instance servers.Server
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -584,6 +589,7 @@ func TestAccComputeV2Instance_forceDelete(t *testing.T) {
 
 func TestAccComputeV2Instance_timeout(t *testing.T) {
 	var instance servers.Server
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -604,6 +610,7 @@ func TestAccComputeV2Instance_timeout(t *testing.T) {
 
 func TestAccComputeV2Instance_networkModeAuto(t *testing.T) {
 	var instance servers.Server
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -625,6 +632,7 @@ func TestAccComputeV2Instance_networkModeAuto(t *testing.T) {
 
 func TestAccComputeV2Instance_networkModeNone(t *testing.T) {
 	var instance servers.Server
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -646,7 +654,9 @@ func TestAccComputeV2Instance_networkModeNone(t *testing.T) {
 
 func TestAccComputeV2Instance_networkNameToID(t *testing.T) {
 	var instance servers.Server
+
 	var network networks.Network
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -670,11 +680,17 @@ func TestAccComputeV2Instance_networkNameToID(t *testing.T) {
 
 func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 	var instance servers.Server
+
 	var network1 networks.Network
+
 	var network2 networks.Network
+
 	var port1 ports.Port
+
 	var port2 ports.Port
+
 	var port3 ports.Port
+
 	var port4 ports.Port
 
 	resource.Test(t, resource.TestCase{
@@ -821,9 +837,10 @@ func TestAccComputeInstanceV2_hypervisorHostname(t *testing.T) {
 
 func testAccCheckComputeV2InstanceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -834,7 +851,7 @@ func testAccCheckComputeV2InstanceDestroy(s *terraform.State) error {
 		server, err := servers.Get(context.TODO(), computeClient, rs.Primary.ID).Extract()
 		if err == nil {
 			if server.Status != "SOFT_DELETED" && server.Status != "DELETED" {
-				return fmt.Errorf("Instance still exists")
+				return errors.New("Instance still exists")
 			}
 		}
 	}
@@ -850,13 +867,14 @@ func testAccCheckComputeV2InstanceExists(n string, instance *servers.Server) res
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
 		found, err := servers.Get(context.TODO(), computeClient, rs.Primary.ID).Extract()
@@ -865,7 +883,7 @@ func testAccCheckComputeV2InstanceExists(n string, instance *servers.Server) res
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Instance not found")
+			return errors.New("Instance not found")
 		}
 
 		*instance = *found
@@ -875,10 +893,11 @@ func testAccCheckComputeV2InstanceExists(n string, instance *servers.Server) res
 }
 
 func testAccCheckComputeV2InstanceMetadata(
-	instance *servers.Server, k string, v string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	instance *servers.Server, k string, v string,
+) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
 		if instance.Metadata == nil {
-			return fmt.Errorf("No metadata")
+			return errors.New("No metadata")
 		}
 
 		for key, value := range instance.Metadata {
@@ -898,8 +917,9 @@ func testAccCheckComputeV2InstanceMetadata(
 }
 
 func testAccCheckComputeV2InstanceNoMetadataKey(
-	instance *servers.Server, k string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	instance *servers.Server, k string,
+) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
 		if instance.Metadata == nil {
 			return nil
 		}
@@ -915,11 +935,13 @@ func testAccCheckComputeV2InstanceNoMetadataKey(
 }
 
 func testAccCheckComputeV2InstanceBootVolumeAttachment(
-	instance *servers.Server) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	instance *servers.Server,
+) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
 		var attachments []volumeattach.VolumeAttachment
 
 		config := testAccProvider.Meta().(*Config)
+
 		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
 			return err
@@ -927,32 +949,34 @@ func testAccCheckComputeV2InstanceBootVolumeAttachment(
 
 		err = volumeattach.List(computeClient, instance.ID).EachPage(
 			context.TODO(),
-			func(ctx context.Context, page pagination.Page) (bool, error) {
+			func(_ context.Context, page pagination.Page) (bool, error) {
 				actual, err := volumeattach.ExtractVolumeAttachments(page)
 				if err != nil {
-					return false, fmt.Errorf("Unable to lookup attachment: %s", err)
+					return false, fmt.Errorf("Unable to lookup attachment: %w", err)
 				}
 
 				attachments = actual
+
 				return true, nil
 			})
 		if err != nil {
-			return fmt.Errorf("Unable to list volume attachments")
+			return errors.New("Unable to list volume attachments")
 		}
 
 		if len(attachments) == 1 {
 			return nil
 		}
 
-		return fmt.Errorf("No attached volume found")
+		return errors.New("No attached volume found")
 	}
 }
 
 func testAccCheckComputeV2InstanceInstanceIDsDoNotMatch(
-	instance1, instance2 *servers.Server) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	instance1, instance2 *servers.Server,
+) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
 		if instance1.ID == instance2.ID {
-			return fmt.Errorf("Instance was not recreated")
+			return errors.New("Instance was not recreated")
 		}
 
 		return nil
@@ -960,10 +984,11 @@ func testAccCheckComputeV2InstanceInstanceIDsDoNotMatch(
 }
 
 func testAccCheckComputeV2InstanceState(
-	instance *servers.Server, state string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	instance *servers.Server, state string,
+) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
 		if strings.ToLower(instance.Status) != state {
-			return fmt.Errorf("Instance state is not match")
+			return errors.New("Instance state is not match")
 		}
 
 		return nil
@@ -983,6 +1008,7 @@ func testAccCheckComputeV2InstanceTags(name string, tags []string) resource.Test
 		}
 
 		var rtags []string
+
 		for key, val := range rs.Primary.Attributes {
 			if !strings.HasPrefix(key, "tags.") {
 				continue
@@ -997,10 +1023,12 @@ func testAccCheckComputeV2InstanceTags(name string, tags []string) resource.Test
 
 		sort.Strings(rtags)
 		sort.Strings(tags)
+
 		if !reflect.DeepEqual(rtags, tags) {
 			return fmt.Errorf(
 				"%s.tags: expected: %#v, got %#v", name, tags, rtags)
 		}
+
 		return nil
 	}
 }

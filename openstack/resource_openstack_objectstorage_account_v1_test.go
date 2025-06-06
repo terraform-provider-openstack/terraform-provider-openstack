@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/accounts"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/accounts"
 )
 
 func TestAccObjectStorageV1Account_basic(t *testing.T) {
@@ -73,9 +73,10 @@ func TestAccObjectStorageV1Account_quota(t *testing.T) {
 
 func testAccCheckObjectStorageV1AccountDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	objectStorageClient, err := config.ObjectStorageV1Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack object storage client: %s", err)
+		return fmt.Errorf("Error creating OpenStack object storage client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -84,13 +85,14 @@ func testAccCheckObjectStorageV1AccountDestroy(s *terraform.State) error {
 		}
 
 		res := accounts.Get(context.TODO(), objectStorageClient, nil)
+
 		metadata, err := res.ExtractMetadata()
 		if err != nil {
-			return fmt.Errorf("failed to retrieve account metadata: %s", err)
+			return fmt.Errorf("failed to retrieve account metadata: %w", err)
 		}
 
 		if len(metadata) > 1 {
-			return fmt.Errorf("account metadata still exists")
+			return errors.New("account metadata still exists")
 		}
 	}
 

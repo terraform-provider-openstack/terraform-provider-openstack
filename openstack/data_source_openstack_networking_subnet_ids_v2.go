@@ -2,17 +2,16 @@ package openstack
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"regexp"
+	"strconv"
 	"strings"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
 	"github.com/gophercloud/utils/v2/terraform/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceNetworkingSubnetIDsV2() *schema.Resource {
@@ -60,10 +59,9 @@ func dataSourceNetworkingSubnetIDsV2() *schema.Resource {
 			},
 
 			"tenant_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: descriptions["tenant_id"],
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 
 			"ip_version": {
@@ -149,8 +147,9 @@ func dataSourceNetworkingSubnetIDsV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingSubnetIDsV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceNetworkingSubnetIDsV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -237,14 +236,15 @@ func dataSourceNetworkingSubnetIDsV2Read(ctx context.Context, d *schema.Resource
 
 	log.Printf("[DEBUG] Retrieved %d subnets in openstack_networking_subnet_ids_v2: %+v", len(allSubnets), allSubnets)
 
-	var subnetIDs []string
+	subnetIDs := make([]string, 0, len(allSubnets))
+
 	if nameRegex, ok := d.GetOk("name_regex"); !ok {
-		subnetIDs = make([]string, len(allSubnets))
 		for i, subnet := range allSubnets {
 			subnetIDs[i] = subnet.ID
 		}
 	} else {
 		r := regexp.MustCompile(nameRegex.(string))
+
 		for _, subnet := range allSubnets {
 			// Check for a very rare case where the response would include no
 			// subnet name. No name means nothing to attempt a match against,
@@ -253,8 +253,10 @@ func dataSourceNetworkingSubnetIDsV2Read(ctx context.Context, d *schema.Resource
 				log.Printf("[WARN] Unable to find subnet name to match against "+
 					"for %q subnet ID, nothing to do.",
 					subnet.ID)
+
 				continue
 			}
+
 			if r.MatchString(subnet.Name) {
 				subnetIDs = append(subnetIDs, subnet.ID)
 			}
@@ -264,7 +266,7 @@ func dataSourceNetworkingSubnetIDsV2Read(ctx context.Context, d *schema.Resource
 		log.Printf("[DEBUG] Retrieved %d subnet IDs after filtering in openstack_networking_subnet_ids_v2: %+v", len(subnetIDs), subnetIDs)
 	}
 
-	d.SetId(fmt.Sprintf("%d", hashcode.String(strings.Join(subnetIDs, ","))))
+	d.SetId(strconv.Itoa(hashcode.String(strings.Join(subnetIDs, ","))))
 	d.Set("ids", subnetIDs)
 	d.Set("region", GetRegion(d, config))
 

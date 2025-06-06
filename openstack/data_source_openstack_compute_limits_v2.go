@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/limits"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/limits"
 )
 
 func dataSourceComputeLimitsV2() *schema.Resource {
@@ -126,9 +125,10 @@ func dataSourceComputeLimitsV2() *schema.Resource {
 	}
 }
 
-func dataSourceComputeLimitsV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceComputeLimitsV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
+
 	computeClient, err := config.ComputeV2Client(ctx, region)
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)

@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/members"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/members"
 )
 
 func TestAccImagesImageAccessV2_basic(t *testing.T) {
@@ -48,9 +48,10 @@ func TestAccImagesImageAccessV2_basic(t *testing.T) {
 
 func testAccCheckImagesImageAccessV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	imageClient, err := config.ImageV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Image: %s", err)
+		return fmt.Errorf("Error creating OpenStack Image: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -65,7 +66,7 @@ func testAccCheckImagesImageAccessV2Destroy(s *terraform.State) error {
 
 		_, err = members.Get(context.TODO(), imageClient, imageID, memberID).Extract()
 		if err == nil {
-			return fmt.Errorf("Image still exists")
+			return errors.New("Image still exists")
 		}
 	}
 
@@ -80,13 +81,14 @@ func testAccCheckImagesImageAccessV2Exists(n string, member *members.Member) res
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		imageClient, err := config.ImageV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack Image: %s", err)
+			return fmt.Errorf("Error creating OpenStack Image: %w", err)
 		}
 
 		imageID, memberID, err := parsePairedIDs(rs.Primary.ID, "openstack_images_image_access_v2")
@@ -101,7 +103,7 @@ func testAccCheckImagesImageAccessV2Exists(n string, member *members.Member) res
 
 		id := fmt.Sprintf("%s/%s", found.ImageID, found.MemberID)
 		if id != rs.Primary.ID {
-			return fmt.Errorf("Image member not found")
+			return errors.New("Image member not found")
 		}
 
 		*member = *found

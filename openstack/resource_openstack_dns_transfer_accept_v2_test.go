@@ -2,19 +2,20 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/transfer/accept"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/transfer/accept"
 )
 
 func TestAccDNSV2TransferAccept_basic(t *testing.T) {
 	var transferAccept accept.TransferAccept
-	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
+
+	zoneName := fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -38,7 +39,8 @@ func TestAccDNSV2TransferAccept_basic(t *testing.T) {
 
 func TestAccDNSV2TransferAccept_ignoreStatusCheck(t *testing.T) {
 	var transferAccept accept.TransferAccept
-	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
+
+	zoneName := fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -70,13 +72,14 @@ func testAccCheckDNSV2TransferAcceptExists(n string, transferAccept *accept.Tran
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		dnsClient, err := config.DNSV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+			return fmt.Errorf("Error creating OpenStack DNS client: %w", err)
 		}
 
 		found, err := accept.Get(context.TODO(), dnsClient, rs.Primary.ID).Extract()
@@ -85,7 +88,7 @@ func testAccCheckDNSV2TransferAcceptExists(n string, transferAccept *accept.Tran
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Transfer accept not found")
+			return errors.New("Transfer accept not found")
 		}
 
 		*transferAccept = *found
@@ -96,9 +99,10 @@ func testAccCheckDNSV2TransferAcceptExists(n string, transferAccept *accept.Tran
 
 func testAccCheckDNSV2TransferAcceptDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	dnsClient, err := config.DNSV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		return fmt.Errorf("Error creating OpenStack DNS client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -108,7 +112,7 @@ func testAccCheckDNSV2TransferAcceptDestroy(s *terraform.State) error {
 
 		_, err := accept.Get(context.TODO(), dnsClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Transfer accept still exists")
+			return errors.New("Transfer accept still exists")
 		}
 	}
 

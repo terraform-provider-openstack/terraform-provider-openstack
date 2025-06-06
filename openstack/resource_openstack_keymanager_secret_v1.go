@@ -6,13 +6,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/acls"
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/secrets"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/acls"
-	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/secrets"
 )
 
 func resourceKeyManagerSecretV1() *schema.Resource {
@@ -97,7 +96,7 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 				Optional:  true,
 				Sensitive: true,
 				ForceNew:  true,
-				DiffSuppressFunc: func(k, o, n string, d *schema.ResourceData) bool {
+				DiffSuppressFunc: func(_, o, n string, _ *schema.ResourceData) bool {
 					return strings.TrimSpace(o) == strings.TrimSpace(n)
 				},
 			},
@@ -168,13 +167,15 @@ func resourceKeyManagerSecretV1() *schema.Resource {
 	for _, aclOp := range getSupportedACLOperations() {
 		elem.Schema[aclOp] = getACLSchema()
 	}
+
 	ret.Schema["acl"].Elem = elem
 
 	return ret
 }
 
-func resourceKeyManagerSecretV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKeyManagerSecretV1Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	kmClient, err := config.KeyManagerV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack KeyManager client: %s", err)
@@ -199,6 +200,7 @@ func resourceKeyManagerSecretV1Create(ctx context.Context, d *schema.ResourceDat
 	log.Printf("[DEBUG] Create Options for resource_keymanager_secret_v1: %#v", createOpts)
 
 	var secret *secrets.Secret
+
 	secret, err = secrets.Create(ctx, kmClient, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_keymanager_secret_v1: %s", err)
@@ -227,6 +229,7 @@ func resourceKeyManagerSecretV1Create(ctx context.Context, d *schema.ResourceDat
 	// set the acl first before uploading the payload
 	if acl, ok := d.GetOk("acl"); ok {
 		setOpts := expandKeyManagerV1ACLs(acl)
+
 		_, err = acls.SetSecretACL(ctx, kmClient, uuid, setOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error settings ACLs for the openstack_keymanager_secret_v1: %s", err)
@@ -239,6 +242,7 @@ func resourceKeyManagerSecretV1Create(ctx context.Context, d *schema.ResourceDat
 		ContentType:     d.Get("payload_content_type").(string),
 		ContentEncoding: d.Get("payload_content_encoding").(string),
 	}
+
 	err = secrets.Update(ctx, kmClient, uuid, updateOpts).Err
 	if err != nil {
 		return diag.Errorf("Error setting openstack_keymanager_secret_v1 payload: %s", err)
@@ -280,8 +284,9 @@ func resourceKeyManagerSecretV1Create(ctx context.Context, d *schema.ResourceDat
 	return resourceKeyManagerSecretV1Read(ctx, d, meta)
 }
 
-func resourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	kmClient, err := config.KeyManagerV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack barbican client: %s", err)
@@ -312,13 +317,15 @@ func resourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceData,
 	d.Set("payload_content_type", payloadContentType)
 
 	d.Set("payload", keyManagerSecretV1GetPayload(ctx, kmClient, d.Id(), payloadContentType))
+
 	metadataMap, err := secrets.GetMetadata(ctx, kmClient, d.Id()).Extract()
 	if err != nil {
 		log.Printf("[DEBUG] Unable to get %s secret metadata: %s", d.Id(), err)
 	}
+
 	d.Set("all_metadata", metadataMap)
 
-	if secret.Expiration == (time.Time{}) {
+	if secret.Expiration.Equal((time.Time{})) {
 		d.Set("expiration", "")
 	} else {
 		d.Set("expiration", secret.Expiration.Format(time.RFC3339))
@@ -328,6 +335,7 @@ func resourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		log.Printf("[DEBUG] Unable to get %s secret acls: %s", d.Id(), err)
 	}
+
 	d.Set("acl", flattenKeyManagerV1ACLs(acl))
 
 	// Set the region
@@ -336,8 +344,9 @@ func resourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceKeyManagerSecretV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKeyManagerSecretV1Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	kmClient, err := config.KeyManagerV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack barbican client: %s", err)
@@ -345,6 +354,7 @@ func resourceKeyManagerSecretV1Update(ctx context.Context, d *schema.ResourceDat
 
 	if d.HasChange("acl") {
 		updateOpts := expandKeyManagerV1ACLs(d.Get("acl"))
+
 		_, err := acls.UpdateSecretACL(ctx, kmClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_keymanager_secret_v1 %s acl: %s", d.Id(), err)
@@ -353,13 +363,15 @@ func resourceKeyManagerSecretV1Update(ctx context.Context, d *schema.ResourceDat
 
 	if d.HasChange("metadata") {
 		var metadataToDelete []string
+
 		var metadataToAdd []string
+
 		var metadataToUpdate []string
 
 		o, n := d.GetChange("metadata")
-		oldMetadata := o.(map[string]interface{})
-		newMetadata := n.(map[string]interface{})
-		existingMetadata := d.Get("all_metadata").(map[string]interface{})
+		oldMetadata := o.(map[string]any)
+		newMetadata := n.(map[string]any)
+		existingMetadata := d.Get("all_metadata").(map[string]any)
 
 		// Determine if any metadata keys were removed from the configuration.
 		// Then request those keys to be deleted.
@@ -400,6 +412,7 @@ func resourceKeyManagerSecretV1Update(ctx context.Context, d *schema.ResourceDat
 			var metadatumOpts secrets.MetadatumOpts
 			metadatumOpts.Key = key
 			metadatumOpts.Value = newMetadata[key].(string)
+
 			_, err := secrets.UpdateMetadatum(ctx, kmClient, d.Id(), metadatumOpts).Extract()
 			if err != nil {
 				return diag.Errorf("Error updating openstack_keymanager_secret_v1 %s metadata %s: %s", d.Id(), key, err)
@@ -412,6 +425,7 @@ func resourceKeyManagerSecretV1Update(ctx context.Context, d *schema.ResourceDat
 			var metadatumOpts secrets.MetadatumOpts
 			metadatumOpts.Key = key
 			metadatumOpts.Value = newMetadata[key].(string)
+
 			err := secrets.CreateMetadatum(ctx, kmClient, d.Id(), metadatumOpts).Err
 			if err != nil {
 				return diag.Errorf("Error adding openstack_keymanager_secret_v1 %s metadata %s: %s", d.Id(), key, err)
@@ -422,8 +436,9 @@ func resourceKeyManagerSecretV1Update(ctx context.Context, d *schema.ResourceDat
 	return resourceKeyManagerSecretV1Read(ctx, d, meta)
 }
 
-func resourceKeyManagerSecretV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKeyManagerSecretV1Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	kmClient, err := config.KeyManagerV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack barbican client: %s", err)
