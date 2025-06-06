@@ -84,7 +84,7 @@ jobs:
           "get_bgpvpn_router_association:tenant_id": "rule:admin_or_owner"
           EOF
       - name: Deploy devstack
-        uses: EmilienM/devstack-action@v0.15
+        uses: gophercloud/devstack-action@v0.19
         with:
           branch: ${{ matrix.openstack_version }}
           conf_overrides: |
