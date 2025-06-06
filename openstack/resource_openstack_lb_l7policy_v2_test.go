@@ -2,14 +2,14 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/l7policies"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/l7policies"
 )
 
 func TestAccLBV2L7Policy_basic(t *testing.T) {
@@ -137,9 +137,10 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 
 func testAccCheckLBV2L7PolicyDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+		return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -164,13 +165,14 @@ func testAccCheckLBV2L7PolicyExists(n string, l7Policy *l7policies.L7Policy) res
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
 		found, err := l7policies.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
@@ -179,7 +181,7 @@ func testAccCheckLBV2L7PolicyExists(n string, l7Policy *l7policies.L7Policy) res
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Policy not found")
+			return errors.New("Policy not found")
 		}
 
 		*l7Policy = *found

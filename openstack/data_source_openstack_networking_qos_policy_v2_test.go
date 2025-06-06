@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -68,7 +69,7 @@ func testAccCheckNetworkingQoSPolicyV2DataSourceID(n string) resource.TestCheckF
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("QoS policy data source ID not set")
+			return errors.New("QoS policy data source ID not set")
 		}
 
 		return nil

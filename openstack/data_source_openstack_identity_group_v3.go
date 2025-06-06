@@ -4,10 +4,9 @@ import (
 	"context"
 	"log"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/groups"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/groups"
 )
 
 func dataSourceIdentityGroupV3() *schema.Resource {
@@ -42,8 +41,9 @@ func dataSourceIdentityGroupV3() *schema.Resource {
 }
 
 // dataSourceIdentityGroupV3Read performs the group lookup.
-func dataSourceIdentityGroupV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIdentityGroupV3Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
@@ -57,6 +57,7 @@ func dataSourceIdentityGroupV3Read(ctx context.Context, d *schema.ResourceData, 
 	log.Printf("[DEBUG] openstack_identity_group_v3 list options: %#v", listOpts)
 
 	var group groups.Group
+
 	allPages, err := groups.List(identityClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query openstack_identity_group_v3: %s", err)

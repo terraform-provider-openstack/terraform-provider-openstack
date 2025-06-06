@@ -2,20 +2,22 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/osinherit"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/roles"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccIdentityV3InheritRoleAssignment_basic(t *testing.T) {
 	var role roles.Role
+
 	var user users.User
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -42,9 +44,10 @@ func TestAccIdentityV3InheritRoleAssignment_basic(t *testing.T) {
 
 func testAccCheckIdentityV3InheritRoleAssignmentDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -54,10 +57,10 @@ func testAccCheckIdentityV3InheritRoleAssignmentDestroy(s *terraform.State) erro
 
 		domainID, projectID, groupID, userID, roleID, err := identityRoleAssignmentV3ParseID(rs.Primary.ID)
 		if err != nil {
-			return fmt.Errorf("Error determining openstack_identity_inherit_role_assignment_v3 ID: %s", err)
+			return fmt.Errorf("Error determining openstack_identity_inherit_role_assignment_v3 ID: %w", err)
 		}
 
-		var opts = osinherit.ValidateOpts{
+		opts := osinherit.ValidateOpts{
 			GroupID:   groupID,
 			DomainID:  domainID,
 			ProjectID: projectID,
@@ -66,7 +69,7 @@ func testAccCheckIdentityV3InheritRoleAssignmentDestroy(s *terraform.State) erro
 
 		err = osinherit.Validate(context.TODO(), identityClient, roleID, opts).ExtractErr()
 		if err == nil {
-			return fmt.Errorf("Inherit Role assignment still exists")
+			return errors.New("Inherit Role assignment still exists")
 		}
 	}
 
@@ -81,21 +84,22 @@ func testAccCheckIdentityV3InheritRoleAssignmentExists(n string, role *roles.Rol
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
 		domainID, projectID, groupID, userID, roleID, err := identityRoleAssignmentV3ParseID(rs.Primary.ID)
 		if err != nil {
-			return fmt.Errorf("Error determining openstack_identity_inherit_role_assignment_v3 ID: %s", err)
+			return fmt.Errorf("Error determining openstack_identity_inherit_role_assignment_v3 ID: %w", err)
 		}
 
-		var opts = osinherit.ValidateOpts{
+		opts := osinherit.ValidateOpts{
 			GroupID:   groupID,
 			DomainID:  domainID,
 			ProjectID: projectID,
@@ -109,13 +113,16 @@ func testAccCheckIdentityV3InheritRoleAssignmentExists(n string, role *roles.Rol
 
 		u, err := users.Get(context.TODO(), identityClient, userID).Extract()
 		if err != nil {
-			return fmt.Errorf("User not found")
+			return errors.New("User not found")
 		}
+
 		*user = *u
+
 		r, err := roles.Get(context.TODO(), identityClient, roleID).Extract()
 		if err != nil {
-			return fmt.Errorf("Role not found")
+			return errors.New("Role not found")
 		}
+
 		*role = *r
 
 		return nil

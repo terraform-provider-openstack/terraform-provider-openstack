@@ -1,7 +1,6 @@
 package openstack
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -11,8 +10,8 @@ import (
 func TestAccIdentityV3UserMembership_importBasic(t *testing.T) {
 	resourceName := "openstack_identity_user_membership_v3.user_membership_1"
 
-	groupName := fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
-	userName := fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+	groupName := "ACCPTTEST-" + acctest.RandString(5)
+	userName := "ACCPTTEST-" + acctest.RandString(5)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

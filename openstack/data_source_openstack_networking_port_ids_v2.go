@@ -2,17 +2,16 @@ package openstack
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"strconv"
 	"strings"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
 	"github.com/gophercloud/utils/v2/terraform/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceNetworkingPortIDsV2() *schema.Resource {
@@ -138,14 +137,16 @@ func dataSourceNetworkingPortIDsV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingPortIDsV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceNetworkingPortIDsV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	listOpts := ports.ListOpts{}
+
 	var listOptsBuilder ports.ListOptsBuilder
 
 	if v, ok := d.GetOk("sort_key"); ok {
@@ -237,6 +238,7 @@ func dataSourceNetworkingPortIDsV2Read(ctx context.Context, d *schema.ResourceDa
 				}
 			}
 		}
+
 		if len(portsList) == 0 {
 			log.Printf("[DEBUG] No ports in openstack_networking_port_ids_v2 found after the 'fixed_ip' filter")
 		}
@@ -247,6 +249,7 @@ func dataSourceNetworkingPortIDsV2Read(ctx context.Context, d *schema.ResourceDa
 	securityGroups := expandToStringSlice(d.Get("security_group_ids").(*schema.Set).List())
 	if len(securityGroups) > 0 {
 		var sgPorts []ports.Port
+
 		for _, p := range portsList {
 			for _, sg := range p.SecurityGroups {
 				if strSliceContains(securityGroups, sg) {
@@ -254,9 +257,11 @@ func dataSourceNetworkingPortIDsV2Read(ctx context.Context, d *schema.ResourceDa
 				}
 			}
 		}
+
 		if len(sgPorts) == 0 {
 			log.Printf("[DEBUG] No ports in openstack_networking_port_ids_v2 found after the 'security_group_ids' filter")
 		}
+
 		portsList = sgPorts
 	}
 
@@ -266,7 +271,7 @@ func dataSourceNetworkingPortIDsV2Read(ctx context.Context, d *schema.ResourceDa
 
 	log.Printf("[DEBUG] Retrieved %d ports in openstack_networking_port_ids_v2: %+v", len(portsList), portsList)
 
-	d.SetId(fmt.Sprintf("%d", hashcode.String(strings.Join(portIDs, ""))))
+	d.SetId(strconv.Itoa(hashcode.String(strings.Join(portIDs, ""))))
 	d.Set("ids", portIDs)
 	d.Set("region", GetRegion(d, config))
 

@@ -7,10 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/quotasets"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/quotasets"
 )
 
 func resourceComputeQuotasetV2() *schema.Resource {
@@ -130,9 +129,10 @@ func resourceComputeQuotasetV2() *schema.Resource {
 	}
 }
 
-func resourceComputeQuotasetV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeQuotasetV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
+
 	computeClient, err := config.ComputeV2Client(ctx, region)
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
@@ -146,54 +146,67 @@ func resourceComputeQuotasetV2Create(ctx context.Context, d *schema.ResourceData
 		value := v.(int)
 		updateOpts.FixedIPs = &value
 	}
+
 	if v, ok := getOkExists(d, "floating_ips"); ok {
 		value := v.(int)
 		updateOpts.FloatingIPs = &value
 	}
+
 	if v, ok := getOkExists(d, "injected_file_content_bytes"); ok {
 		value := v.(int)
 		updateOpts.InjectedFileContentBytes = &value
 	}
+
 	if v, ok := getOkExists(d, "injected_file_path_bytes"); ok {
 		value := v.(int)
 		updateOpts.InjectedFilePathBytes = &value
 	}
+
 	if v, ok := getOkExists(d, "injected_files"); ok {
 		value := v.(int)
 		updateOpts.InjectedFiles = &value
 	}
+
 	if v, ok := getOkExists(d, "key_pairs"); ok {
 		value := v.(int)
 		updateOpts.KeyPairs = &value
 	}
+
 	if v, ok := getOkExists(d, "metadata_items"); ok {
 		value := v.(int)
 		updateOpts.MetadataItems = &value
 	}
+
 	if v, ok := getOkExists(d, "ram"); ok {
 		value := v.(int)
 		updateOpts.RAM = &value
 	}
+
 	if v, ok := getOkExists(d, "security_group_rules"); ok {
 		value := v.(int)
 		updateOpts.SecurityGroupRules = &value
 	}
+
 	if v, ok := getOkExists(d, "security_groups"); ok {
 		value := v.(int)
 		updateOpts.SecurityGroups = &value
 	}
+
 	if v, ok := getOkExists(d, "cores"); ok {
 		value := v.(int)
 		updateOpts.Cores = &value
 	}
+
 	if v, ok := getOkExists(d, "instances"); ok {
 		value := v.(int)
 		updateOpts.Instances = &value
 	}
+
 	if v, ok := getOkExists(d, "server_groups"); ok {
 		value := v.(int)
 		updateOpts.ServerGroups = &value
 	}
+
 	if v, ok := getOkExists(d, "server_group_members"); ok {
 		value := v.(int)
 		updateOpts.ServerGroupMembers = &value
@@ -212,9 +225,10 @@ func resourceComputeQuotasetV2Create(ctx context.Context, d *schema.ResourceData
 	return resourceComputeQuotasetV2Read(ctx, d, meta)
 }
 
-func resourceComputeQuotasetV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeQuotasetV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
+
 	computeClient, err := config.ComputeV2Client(ctx, region)
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
@@ -252,8 +266,9 @@ func resourceComputeQuotasetV2Read(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceComputeQuotasetV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeQuotasetV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
@@ -351,6 +366,7 @@ func resourceComputeQuotasetV2Update(ctx context.Context, d *schema.ResourceData
 	if hasChange {
 		log.Printf("[DEBUG] openstack_compute_quotaset_v2 %s update options: %#v", d.Id(), updateOpts)
 		projectID := d.Get("project_id").(string)
+
 		_, err := quotasets.Update(ctx, computeClient, projectID, updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_compute_quotaset_v2: %s", err)

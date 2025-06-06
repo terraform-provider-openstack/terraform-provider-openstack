@@ -2,16 +2,16 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/quotasets"
 	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumetypes"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccBlockStorageQuotasetV3_basic(t *testing.T) {
@@ -122,13 +122,14 @@ func testAccCheckBlockStorageQuotasetV3Exists(n string, quotaset *quotasets.Quot
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+			return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 		}
 
 		projectID := strings.Split(rs.Primary.ID, "/")[0]
@@ -139,7 +140,7 @@ func testAccCheckBlockStorageQuotasetV3Exists(n string, quotaset *quotasets.Quot
 		}
 
 		if found.ID != projectID {
-			return fmt.Errorf("Quotaset not found")
+			return errors.New("Quotaset not found")
 		}
 
 		*quotaset = *found

@@ -7,14 +7,13 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/l7policies"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/listeners"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/l7policies"
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/listeners"
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 )
 
 func resourceL7PolicyV2() *schema.Resource {
@@ -95,12 +94,13 @@ func resourceL7PolicyV2() *schema.Resource {
 				Type:          schema.TypeString,
 				ConflictsWith: []string{"redirect_pool_id", "redirect_prefix"},
 				Optional:      true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+				ValidateFunc: func(v any, _ string) (ws []string, errors []error) {
 					value := v.(string)
 					_, err := url.ParseRequestURI(value)
 					if err != nil {
-						errors = append(errors, fmt.Errorf("URL is not valid: %s", err))
+						errors = append(errors, fmt.Errorf("URL is not valid: %w", err))
 					}
+
 					return
 				},
 			},
@@ -122,8 +122,9 @@ func resourceL7PolicyV2() *schema.Resource {
 	}
 }
 
-func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -192,15 +193,17 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	log.Printf("[DEBUG] Attempting to create L7 Policy")
+
 	var l7Policy *l7policies.L7Policy
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		l7Policy, err = l7policies.Create(ctx, lbClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.Errorf("Error creating L7 Policy: %s", err)
 	}
@@ -216,8 +219,9 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceL7PolicyV2Read(ctx, d, meta)
 }
 
-func resourceL7PolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceL7PolicyV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -245,8 +249,9 @@ func resourceL7PolicyV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -266,29 +271,37 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	if d.HasChange("action") {
 		updateOpts.Action = l7policies.Action(action)
 	}
+
 	if d.HasChange("name") {
 		name := d.Get("name").(string)
 		updateOpts.Name = &name
 	}
+
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
 	}
+
 	if d.HasChange("redirect_pool_id") {
 		updateOpts.RedirectPoolID = &redirectPoolID
 	}
+
 	if d.HasChange("redirect_url") {
 		updateOpts.RedirectURL = &redirectURL
 	}
+
 	if d.HasChange("redirect_prefix") {
 		updateOpts.RedirectPrefix = &redirectPrefix
 	}
+
 	if d.HasChange("redirect_http_code") {
 		updateOpts.RedirectHttpCode = redirectHTTPCode
 	}
+
 	if d.HasChange("position") {
 		updateOpts.Position = int32(d.Get("position").(int))
 	}
+
 	if d.HasChange("admin_state_up") {
 		adminStateUp := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &adminStateUp
@@ -302,6 +315,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	// Make sure the pool is active before continuing.
 	timeout := d.Timeout(schema.TimeoutUpdate)
+
 	if redirectPoolID != "" {
 		pool, err := pools.Get(ctx, lbClient, redirectPoolID).Extract()
 		if err != nil {
@@ -339,14 +353,15 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	log.Printf("[DEBUG] Updating L7 Policy %s with options: %#v", d.Id(), updateOpts)
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		_, err = l7policies.Update(ctx, lbClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.Errorf("Unable to update L7 Policy %s: %s", d.Id(), err)
 	}
@@ -360,8 +375,9 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceL7PolicyV2Read(ctx, d, meta)
 }
 
-func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -389,14 +405,15 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	log.Printf("[DEBUG] Attempting to delete L7 Policy %s", d.Id())
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		err = l7policies.Delete(ctx, lbClient, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting L7 Policy"))
 	}
@@ -409,11 +426,12 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceL7PolicyV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceL7PolicyV2Import(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return nil, fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	l7Policy, err := l7policies.Get(ctx, lbClient, d.Id()).Extract()
@@ -431,6 +449,7 @@ func resourceL7PolicyV2Import(ctx context.Context, d *schema.ResourceData, meta 
 		if err != nil {
 			return nil, err
 		}
+
 		d.Set("listener_id", listenerID)
 	}
 

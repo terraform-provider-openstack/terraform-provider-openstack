@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -46,7 +47,7 @@ func testAccCheckSFSV2ShareDataSourceID(n string) resource.TestCheckFunc {
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Share data source ID not set")
+			return errors.New("Share data source ID not set")
 		}
 
 		return nil

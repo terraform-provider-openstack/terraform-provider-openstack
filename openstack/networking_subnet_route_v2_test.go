@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUnitResourceNetworkingSubnetRouteV2BuildID(t *testing.T) {
@@ -27,7 +28,7 @@ func TestUnitResourceNetworkingSubnetRouteV2ParseValidID(t *testing.T) {
 
 	actualRouterID, actualDstCIDR, actualNextHop, err := resourceNetworkingSubnetRouteV2ParseID(routeID)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expectedRouterID, actualRouterID)
 	assert.Equal(t, expectedDstCIDR, actualDstCIDR)
 	assert.Equal(t, expectedNextHop, actualNextHop)
@@ -42,7 +43,7 @@ func TestUnitResourceNetworkingSubnetRouteV2ParseIDInvalidFirstPart(t *testing.T
 
 	actualRouterID, actualDstCIDR, actualNextHop, err := resourceNetworkingSubnetRouteV2ParseID(routeID)
 
-	assert.Error(t, err, "invalid ID format: 123-router")
+	require.Error(t, err, "invalid ID format: 123-router")
 	assert.Equal(t, expectedRouterID, actualRouterID)
 	assert.Equal(t, expectedDstCIDR, actualDstCIDR)
 	assert.Equal(t, expectedNextHop, actualNextHop)
@@ -57,7 +58,7 @@ func TestUnitResourceNetworkingSubnetRouteV2ParseIDInvalidLastPart(t *testing.T)
 
 	actualRouterID, actualDstCIDR, actualNextHop, err := resourceNetworkingSubnetRouteV2ParseID(routeID)
 
-	assert.Error(t, err, "invalid last part format for 123-router-bad: bad")
+	require.Error(t, err, "invalid last part format for 123-router-bad: bad")
 	assert.Equal(t, expectedRouterID, actualRouterID)
 	assert.Equal(t, expectedDstCIDR, actualDstCIDR)
 	assert.Equal(t, expectedNextHop, actualNextHop)

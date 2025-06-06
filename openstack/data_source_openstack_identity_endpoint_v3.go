@@ -4,12 +4,11 @@ import (
 	"context"
 	"log"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/endpoints"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/services"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/endpoints"
-	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/services"
 )
 
 func dataSourceIdentityEndpointV3() *schema.Resource {
@@ -67,8 +66,9 @@ func dataSourceIdentityEndpointV3() *schema.Resource {
 }
 
 // dataSourceIdentityEndpointV3Read performs the endpoint lookup.
-func dataSourceIdentityEndpointV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIdentityEndpointV3Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
@@ -83,6 +83,7 @@ func dataSourceIdentityEndpointV3Read(ctx context.Context, d *schema.ResourceDat
 	log.Printf("[DEBUG] openstack_identity_endpoint_v3 list options: %#v", listOpts)
 
 	var endpoint endpoints.Endpoint
+
 	allPages, err := endpoints.List(identityClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query openstack_identity_endpoint_v3: %s", err)
@@ -96,11 +97,13 @@ func dataSourceIdentityEndpointV3Read(ctx context.Context, d *schema.ResourceDat
 	// filter by name, when the name is specified
 	if v, ok := getOkExists(d, "name"); ok {
 		var filteredEndpoints []endpoints.Endpoint
+
 		for _, endpoint := range allEndpoints {
 			if endpoint.Name == v.(string) {
 				filteredEndpoints = append(filteredEndpoints, endpoint)
 			}
 		}
+
 		allEndpoints = filteredEndpoints
 	}
 
@@ -112,7 +115,9 @@ func dataSourceIdentityEndpointV3Read(ctx context.Context, d *schema.ResourceDat
 	// Query services
 	serviceType := d.Get("service_type").(string)
 	serviceName := d.Get("service_name").(string)
+
 	var filteredEndpoints []endpoints.Endpoint
+
 	allServicePages, err := services.List(identityClient, services.ListOpts{ServiceType: serviceType, Name: serviceName}).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query openstack_identity_endpoint_v3 services: %s", err)
@@ -131,7 +136,9 @@ func dataSourceIdentityEndpointV3Read(ctx context.Context, d *schema.ResourceDat
 				if v, ok := service.Extra["name"].(string); ok {
 					serviceName = v
 				}
+
 				serviceType = service.Type
+
 				filteredEndpoints = append(filteredEndpoints, endpoint)
 			}
 		}
@@ -147,6 +154,7 @@ func dataSourceIdentityEndpointV3Read(ctx context.Context, d *schema.ResourceDat
 	if len(allEndpoints) > 1 {
 		return diag.Errorf("Your openstack_identity_endpoint_v3 query returned more than one result")
 	}
+
 	endpoint = allEndpoints[0]
 
 	log.Printf("[DEBUG] openstack_identity_endpoint_v3 details: %#v", endpoint)

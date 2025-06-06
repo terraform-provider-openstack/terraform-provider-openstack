@@ -2,16 +2,16 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/textproto"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/accounts"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceObjectStorageAccountV1() *schema.Resource {
@@ -68,8 +68,9 @@ func resourceObjectStorageAccountV1() *schema.Resource {
 	}
 }
 
-func resourceObjectStorageAccountV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObjectStorageAccountV1Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("error creating OpenStack object storage client: %s", err)
@@ -85,6 +86,7 @@ func resourceObjectStorageAccountV1Create(ctx context.Context, d *schema.Resourc
 	}
 
 	log.Printf("[DEBUG] Create Options for objectstorage_account_v1: %#v", opts)
+
 	_, err = accounts.Update(ctx, objectStorageClient, opts).Extract()
 	if err != nil {
 		return diag.Errorf("error creating objectstorage_account_v1: %s", err)
@@ -95,8 +97,9 @@ func resourceObjectStorageAccountV1Create(ctx context.Context, d *schema.Resourc
 	return resourceObjectStorageAccountV1Read(ctx, d, meta)
 }
 
-func resourceObjectStorageAccountV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObjectStorageAccountV1Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("error creating OpenStack object storage client: %s", err)
@@ -113,6 +116,7 @@ func resourceObjectStorageAccountV1Read(ctx context.Context, d *schema.ResourceD
 	}
 
 	h := make(map[string]string)
+
 	err = result.ExtractInto(&h)
 	if err != nil {
 		return diag.Errorf("error extracting headers for objectstorage_account_v1 '%s': %s", d.Id(), err)
@@ -122,21 +126,25 @@ func resourceObjectStorageAccountV1Read(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.Errorf("error extracting headers for objectstorage_account_v1 '%s': %s", d.Id(), err)
 	}
+
 	log.Printf("[DEBUG] Retrieved headers for objectstorage_account_v1 '%s': %#v", d.Id(), headers)
 
 	metadata, err := result.ExtractMetadata()
 	if err != nil {
 		return diag.Errorf("error extracting metadata for objectstorage_account_v1 '%s': %s", d.Id(), err)
 	}
+
 	log.Printf("[DEBUG] Retrieved metadata for objectstorage_account_v1 '%s': %#v", d.Id(), metadata)
 
 	d.Set("project_id", projectID)
 	d.Set("bytes_used", headers.BytesUsed)
+
 	if headers.QuotaBytes != nil {
 		d.Set("quota_bytes", *headers.QuotaBytes)
 	} else {
 		d.Set("quota_bytes", 0)
 	}
+
 	d.Set("container_count", headers.ContainerCount)
 	d.Set("object_count", headers.ObjectCount)
 	d.Set("metadata", metadata)
@@ -146,8 +154,9 @@ func resourceObjectStorageAccountV1Read(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func resourceObjectStorageAccountV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObjectStorageAccountV1Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("error creating OpenStack object storage client: %s", err)
@@ -173,8 +182,9 @@ func resourceObjectStorageAccountV1Update(ctx context.Context, d *schema.Resourc
 	return resourceObjectStorageAccountV1Read(ctx, d, meta)
 }
 
-func resourceObjectStorageAccountV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObjectStorageAccountV1Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("error creating OpenStack object storage client: %s", err)
@@ -189,12 +199,15 @@ func resourceObjectStorageAccountV1Delete(ctx context.Context, d *schema.Resourc
 	opts := &accounts.UpdateOpts{
 		RemoveMetadata: make([]string, 0, len(metadata)),
 	}
+
 	for k := range metadata {
 		if k == "Quota-Bytes" {
 			continue
 		}
+
 		opts.RemoveMetadata = append(opts.RemoveMetadata, k)
 	}
+
 	if len(opts.RemoveMetadata) == 0 {
 		return nil
 	}
@@ -211,10 +224,11 @@ func modifyClientEndpoint(ctx context.Context, client *gophercloud.ServiceClient
 	if projectID == "" {
 		v, err := getTokenInfo(ctx, client)
 		if err != nil {
-			return "", fmt.Errorf("failed to obtain token info: %s", err)
+			return "", fmt.Errorf("failed to obtain token info: %w", err)
 		}
+
 		if v.projectID == "" {
-			return "", fmt.Errorf("project_id must be provided, when a token has no project scope")
+			return "", errors.New("project_id must be provided, when a token has no project scope")
 		}
 
 		projectID = v.projectID
@@ -223,7 +237,7 @@ func modifyClientEndpoint(ctx context.Context, client *gophercloud.ServiceClient
 
 	v := strings.SplitN(client.Endpoint, "/AUTH_", 2)
 	if len(v) != 2 {
-		return "", fmt.Errorf("could not extract project_id from the endpoint")
+		return "", errors.New("could not extract project_id from the endpoint")
 	}
 
 	if projectID == v[1] {
@@ -238,7 +252,7 @@ func modifyClientEndpoint(ctx context.Context, client *gophercloud.ServiceClient
 }
 
 func resourceAccountExpandMetadata(d *schema.ResourceData) map[string]string {
-	m := d.Get("metadata").(map[string]interface{})
+	m := d.Get("metadata").(map[string]any)
 	metadata := make(map[string]string, len(m))
 
 	for k, v := range m {
@@ -250,57 +264,64 @@ func resourceAccountExpandMetadata(d *schema.ResourceData) map[string]string {
 
 func resourceAccountMetadataChange(d *schema.ResourceData) (map[string]string, []string) {
 	o, n := d.GetChange("metadata")
-	oldMetadata := o.(map[string]interface{})
-	newMetadata := n.(map[string]interface{})
+	oldMetadata := o.(map[string]any)
+	newMetadata := n.(map[string]any)
 
 	removeKeys := make([]string, 0, len(oldMetadata))
+
 	for oldKey := range oldMetadata {
 		// we cannot remove the Quota-Bytes key
 		if oldKey == "Quota-Bytes" {
 			continue
 		}
+
 		if _, ok := newMetadata[oldKey]; !ok {
 			removeKeys = append(removeKeys, oldKey)
 		}
 	}
 
 	metadata := make(map[string]string, len(newMetadata))
+
 	for k, v := range newMetadata {
 		if v, ok := oldMetadata[k]; ok && v == newMetadata[k] {
 			continue
 		}
+
 		metadata[k] = v.(string)
 	}
 
 	return metadata, removeKeys
 }
 
-func resourceAccountMetadataToCanonicalHeader(m map[string]interface{}) map[string]string {
+func resourceAccountMetadataToCanonicalHeader(m map[string]any) map[string]string {
 	c := make(map[string]string, len(m))
 	for k, v := range m {
 		c[textproto.CanonicalMIMEHeaderKey(k)] = v.(string)
 	}
+
 	return c
 }
 
-func resourceAccountMetadataDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+func resourceAccountMetadataDiffSuppressFunc(_, _, _ string, d *schema.ResourceData) bool {
 	o, n := d.GetChange("metadata")
-	metadataOld := resourceAccountMetadataToCanonicalHeader(o.(map[string]interface{}))
-	metadataNew := resourceAccountMetadataToCanonicalHeader(n.(map[string]interface{}))
+	metadataOld := resourceAccountMetadataToCanonicalHeader(o.(map[string]any))
+	metadataNew := resourceAccountMetadataToCanonicalHeader(n.(map[string]any))
 
 	for k, v := range metadataNew {
-		old := metadataOld[k]
-		if v == old {
+		o := metadataOld[k]
+		if v == o {
 			continue
 		}
+
 		return false
 	}
 
 	for k, v := range metadataOld {
-		new := metadataNew[k]
-		if v == new || k == "Quota-Bytes" && new == "" {
+		n := metadataNew[k]
+		if v == n || k == "Quota-Bytes" && n == "" {
 			continue
 		}
+
 		return false
 	}
 

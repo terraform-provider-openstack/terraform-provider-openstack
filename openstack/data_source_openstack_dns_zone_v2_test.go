@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -49,7 +50,7 @@ func testAccCheckDNSZoneV2DataSourceID(n string) resource.TestCheckFunc {
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("DNS Zone data source ID not set")
+			return errors.New("DNS Zone data source ID not set")
 		}
 
 		return nil

@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -185,7 +186,7 @@ func testAccCheckNetworkingNetworkV2DataSourceID(n string) resource.TestCheckFun
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Network data source ID not set")
+			return errors.New("Network data source ID not set")
 		}
 
 		return nil

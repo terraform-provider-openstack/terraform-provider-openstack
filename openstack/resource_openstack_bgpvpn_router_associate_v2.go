@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/bgpvpns"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/bgpvpns"
 )
 
 func resourceBGPVPNRouterAssociateV2() *schema.Resource {
@@ -53,8 +52,9 @@ func resourceBGPVPNRouterAssociateV2() *schema.Resource {
 	}
 }
 
-func resourceBGPVPNRouterAssociateV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBGPVPNRouterAssociateV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
@@ -66,12 +66,14 @@ func resourceBGPVPNRouterAssociateV2Create(ctx context.Context, d *schema.Resour
 		RouterID:  routerID,
 		ProjectID: d.Get("project_id").(string),
 	}
+
 	if v, ok := getOkExists(d, "advertise_extra_routes"); ok {
 		v := v.(bool)
 		opts.AdvertiseExtraRoutes = &v
 	}
 
 	log.Printf("[DEBUG] openstack_bgpvpn_router_associate_v2 create options: %#v", opts)
+
 	res, err := bgpvpns.CreateRouterAssociation(ctx, networkingClient, bgpvpnID, opts).Extract()
 	if err != nil {
 		return diag.Errorf("Error associating openstack_bgpvpn_router_associate_v2 BGP VPN %s with router %s: %s", bgpvpnID, routerID, err)
@@ -83,8 +85,9 @@ func resourceBGPVPNRouterAssociateV2Create(ctx context.Context, d *schema.Resour
 	return resourceBGPVPNRouterAssociateV2Read(ctx, d, meta)
 }
 
-func resourceBGPVPNRouterAssociateV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBGPVPNRouterAssociateV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
@@ -111,8 +114,9 @@ func resourceBGPVPNRouterAssociateV2Read(ctx context.Context, d *schema.Resource
 	return nil
 }
 
-func resourceBGPVPNRouterAssociateV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBGPVPNRouterAssociateV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
@@ -131,6 +135,7 @@ func resourceBGPVPNRouterAssociateV2Update(ctx context.Context, d *schema.Resour
 	}
 
 	log.Printf("[DEBUG] openstack_bgpvpn_router_associate_v2 %s update options: %#v", id, opts)
+
 	_, err = bgpvpns.UpdateRouterAssociation(ctx, networkingClient, bgpvpnID, id, opts).Extract()
 	if err != nil {
 		return diag.Errorf("Error updating openstack_bgpvpn_router_associate_v2 %s: %s", id, err)
@@ -139,8 +144,9 @@ func resourceBGPVPNRouterAssociateV2Update(ctx context.Context, d *schema.Resour
 	return resourceBGPVPNRouterAssociateV2Read(ctx, d, meta)
 }
 
-func resourceBGPVPNRouterAssociateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBGPVPNRouterAssociateV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)

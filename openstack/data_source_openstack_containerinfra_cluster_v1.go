@@ -5,10 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/clusters"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/clusters"
 )
 
 func dataSourceContainerInfraCluster() *schema.Resource {
@@ -158,8 +157,9 @@ func dataSourceContainerInfraCluster() *schema.Resource {
 	}
 }
 
-func dataSourceContainerInfraClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceContainerInfraClusterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	containerInfraClient, err := config.ContainerInfraV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack container infra client: %s", err)
@@ -194,18 +194,22 @@ func dataSourceContainerInfraClusterRead(ctx context.Context, d *schema.Resource
 	d.Set("fixed_network", c.FixedNetwork)
 	d.Set("fixed_subnet", c.FixedSubnet)
 	d.Set("floating_ip_enabled", c.FloatingIPEnabled)
+
 	kubeconfig, err := flattenContainerInfraV1Kubeconfig(ctx, d, containerInfraClient)
 	if err != nil {
 		return diag.Errorf("Error building kubeconfig for openstack_containerinfra_cluster_v1 %s: %s", d.Id(), err)
 	}
+
 	d.Set("kubeconfig", kubeconfig)
 
 	if err := d.Set("labels", c.Labels); err != nil {
 		log.Printf("[DEBUG] Unable to set labels for openstack_containerinfra_cluster_v1 %s: %s", c.UUID, err)
 	}
+
 	if err := d.Set("created_at", c.CreatedAt.Format(time.RFC3339)); err != nil {
 		log.Printf("[DEBUG] Unable to set created_at for openstack_containerinfra_cluster_v1 %s: %s", c.UUID, err)
 	}
+
 	if err := d.Set("updated_at", c.UpdatedAt.Format(time.RFC3339)); err != nil {
 		log.Printf("[DEBUG] Unable to set updated_at for openstack_containerinfra_cluster_v1 %s: %s", c.UUID, err)
 	}

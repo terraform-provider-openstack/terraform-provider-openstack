@@ -4,10 +4,9 @@ import (
 	"context"
 	"log"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/limits"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/limits"
 )
 
 func resourceIdentityLimitV3() *schema.Resource {
@@ -67,8 +66,9 @@ func resourceIdentityLimitV3() *schema.Resource {
 	}
 }
 
-func resourceIdentityLimitV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityLimitV3Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
@@ -87,6 +87,7 @@ func resourceIdentityLimitV3Create(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	log.Printf("[DEBUG] openstack_identity_limit_v3 create options: %#v", createOpts)
+
 	limit, err := limits.BatchCreate(ctx, identityClient, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_identity_limit_v3: %s", err)
@@ -97,8 +98,9 @@ func resourceIdentityLimitV3Create(ctx context.Context, d *schema.ResourceData, 
 	return resourceIdentityLimitV3Read(ctx, d, meta)
 }
 
-func resourceIdentityLimitV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityLimitV3Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
@@ -122,14 +124,16 @@ func resourceIdentityLimitV3Read(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func resourceIdentityLimitV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityLimitV3Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	var hasChange bool
+
 	var updateOpts limits.UpdateOpts
 
 	if d.HasChange("resource_limit") {
@@ -154,8 +158,9 @@ func resourceIdentityLimitV3Update(ctx context.Context, d *schema.ResourceData, 
 	return resourceIdentityLimitV3Read(ctx, d, meta)
 }
 
-func resourceIdentityLimitV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityLimitV3Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)

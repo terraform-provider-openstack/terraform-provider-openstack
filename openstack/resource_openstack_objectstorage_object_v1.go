@@ -8,11 +8,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/objects"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/go-homedir"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/objects"
 )
 
 func resourceObjectStorageObjectV1() *schema.Resource {
@@ -143,8 +142,9 @@ func resourceObjectStorageObjectV1() *schema.Resource {
 	}
 }
 
-func resourceObjectStorageObjectV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObjectStorageObjectV1Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack object storage client: %s", err)
@@ -161,6 +161,7 @@ func resourceObjectStorageObjectV1Create(ctx context.Context, d *schema.Resource
 	var isValid bool
 	if v, ok := d.GetOk("source"); ok {
 		isValid = true
+
 		file, size, err := resourceObjectSourceV1(v.(string))
 		if err != nil {
 			return diag.FromErr(err)
@@ -228,6 +229,7 @@ func resourceObjectStorageObjectV1Create(ctx context.Context, d *schema.Resource
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
+
 	_, err = objects.Create(ctx, objectStorageClient, cn, name, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack container object: %s", err)
@@ -239,8 +241,9 @@ func resourceObjectStorageObjectV1Create(ctx context.Context, d *schema.Resource
 	return resourceObjectStorageObjectV1Read(ctx, d, meta)
 }
 
-func resourceObjectStorageObjectV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObjectStorageObjectV1Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack object storage client: %s", err)
@@ -254,11 +257,13 @@ func resourceObjectStorageObjectV1Read(ctx context.Context, d *schema.ResourceDa
 	if v, ok := d.GetOk("tmp_url_sig"); ok {
 		getOpts.Signature = v.(string)
 	}
+
 	if v, ok := d.GetOk("tmp_url_expires"); ok {
 		getOpts.Expires = v.(string)
 	}
 
 	log.Printf("[DEBUG] Get Options: %#v", getOpts)
+
 	result, err := objects.Get(ctx, objectStorageClient, cn, name, getOpts).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error getting OpenStack container object"))
@@ -271,15 +276,19 @@ func resourceObjectStorageObjectV1Read(ctx context.Context, d *schema.ResourceDa
 	d.Set("content_encoding", result.ContentEncoding)
 	d.Set("content_length", result.ContentLength)
 	d.Set("content_type", result.ContentType)
+
 	if result.Date.Unix() > 0 {
 		d.Set("date", result.Date.Format(time.RFC3339))
 	}
+
 	if result.DeleteAt.Unix() > 0 {
 		d.Set("delete_at", result.DeleteAt.Format(time.RFC3339))
 	}
+
 	if result.LastModified.Unix() > 0 {
 		d.Set("last_modified", result.LastModified.Format(time.RFC3339))
 	}
+
 	d.Set("object_manifest", result.ObjectManifest)
 	d.Set("trans_id", result.TransID)
 	d.Set("region", GetRegion(d, config))
@@ -287,8 +296,9 @@ func resourceObjectStorageObjectV1Read(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceObjectStorageObjectV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObjectStorageObjectV1Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack object storage client: %s", err)
@@ -309,6 +319,7 @@ func resourceObjectStorageObjectV1Update(ctx context.Context, d *schema.Resource
 
 	if d.HasChange("source") {
 		v := d.Get("source").(string)
+
 		file, size, err := resourceObjectSourceV1(v)
 		if err != nil {
 			return diag.FromErr(err)
@@ -372,6 +383,7 @@ func resourceObjectStorageObjectV1Update(ctx context.Context, d *schema.Resource
 	}
 
 	log.Printf("[DEBUG] Update Options: %#v", createOpts)
+
 	_, err = objects.Create(ctx, objectStorageClient, cn, name, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error updating OpenStack container object: %s", err)
@@ -380,8 +392,9 @@ func resourceObjectStorageObjectV1Update(ctx context.Context, d *schema.Resource
 	return resourceObjectStorageObjectV1Read(ctx, d, meta)
 }
 
-func resourceObjectStorageObjectV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObjectStorageObjectV1Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	objectStorageClient, err := config.ObjectStorageV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack object storage client: %s", err)
@@ -393,33 +406,35 @@ func resourceObjectStorageObjectV1Delete(ctx context.Context, d *schema.Resource
 
 	_, err = objects.Delete(ctx, objectStorageClient, cn, name, deleteOpts).Extract()
 	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, fmt.Sprintf("Error deleting OpenStack container object: %s", name)))
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting OpenStack container object: "+name))
 	}
+
 	return nil
 }
 
 func resourceObjectMetadataV1(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
-	for key, val := range d.Get("metadata").(map[string]interface{}) {
+	for key, val := range d.Get("metadata").(map[string]any) {
 		m[key] = val.(string)
 	}
+
 	return m
 }
 
 func resourceObjectSourceV1(source string) (*os.File, int64, error) {
 	path, err := homedir.Expand(source)
 	if err != nil {
-		return nil, 0, fmt.Errorf("Error expanding homedir in source (%s): %s", source, err)
+		return nil, 0, fmt.Errorf("Error expanding homedir in source (%s): %w", source, err)
 	}
 
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, 0, fmt.Errorf("Error opening openstack swift object source (%s): %s", source, err)
+		return nil, 0, fmt.Errorf("Error opening openstack swift object source (%s): %w", source, err)
 	}
 
 	fileinfo, err := file.Stat()
 	if err != nil {
-		return nil, 0, fmt.Errorf("Error opening openstack swift object source (%s): %s", source, err)
+		return nil, 0, fmt.Errorf("Error opening openstack swift object source (%s): %w", source, err)
 	}
 
 	return file, fileinfo.Size(), nil

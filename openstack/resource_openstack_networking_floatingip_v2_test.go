@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
 func TestAccNetworkingV2FloatingIP_basic(t *testing.T) {
@@ -108,9 +108,10 @@ func TestAccNetworkingV2FloatingIP_timeout(t *testing.T) {
 
 func testAccCheckNetworkingV2FloatingIPDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack floating IP: %s", err)
+		return fmt.Errorf("Error creating OpenStack floating IP: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -120,7 +121,7 @@ func testAccCheckNetworkingV2FloatingIPDestroy(s *terraform.State) error {
 
 		_, err := floatingips.Get(context.TODO(), networkClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Floating IP still exists")
+			return errors.New("Floating IP still exists")
 		}
 	}
 
@@ -135,13 +136,14 @@ func testAccCheckNetworkingV2FloatingIPExists(n string, kp *floatingips.Floating
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := floatingips.Get(context.TODO(), networkClient, rs.Primary.ID).Extract()
@@ -150,7 +152,7 @@ func testAccCheckNetworkingV2FloatingIPExists(n string, kp *floatingips.Floating
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Floating IP not found")
+			return errors.New("Floating IP not found")
 		}
 
 		*kp = *found
@@ -160,9 +162,9 @@ func testAccCheckNetworkingV2FloatingIPExists(n string, kp *floatingips.Floating
 }
 
 func testAccCheckNetworkingV2FloatingIPBoundToCorrectIP(fip *floatingips.FloatingIP, fixedIP string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if fip.FixedIP != fixedIP {
-			return fmt.Errorf("Floating IP associated with wrong fixed ip")
+			return errors.New("Floating IP associated with wrong fixed ip")
 		}
 
 		return nil

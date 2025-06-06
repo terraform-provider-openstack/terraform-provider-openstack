@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
 )
 
 func TestAccNetworkingV2Subnet_basic(t *testing.T) {
@@ -268,7 +268,7 @@ func TestAccNetworkingV2Subnet_multipleAllocationPools(t *testing.T) {
 }
 
 // NOTE: disabled since Terraform SDK V2 currently does not support indexes into TypeSet.
-//func TestAccNetworkingV2Subnet_allocationPool(t *testing.T) {
+// func TestAccNetworkingV2Subnet_allocationPool(t *testing.T) {
 //	resource.Test(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheck(t)
@@ -371,9 +371,10 @@ func TestAccNetworkingV2Subnet_ServiceTypes(t *testing.T) {
 
 func testAccCheckNetworkingV2SubnetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -383,7 +384,7 @@ func testAccCheckNetworkingV2SubnetDestroy(s *terraform.State) error {
 
 		_, err := subnets.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Subnet still exists")
+			return errors.New("Subnet still exists")
 		}
 	}
 
@@ -398,13 +399,14 @@ func testAccCheckNetworkingV2SubnetExists(n string, subnet *subnets.Subnet) reso
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := subnets.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -413,7 +415,7 @@ func testAccCheckNetworkingV2SubnetExists(n string, subnet *subnets.Subnet) reso
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Subnet not found")
+			return errors.New("Subnet not found")
 		}
 
 		*subnet = *found
@@ -430,12 +432,12 @@ func testAccCheckNetworkingV2SubnetDNSConsistency(n string, subnet *subnets.Subn
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		for i, dns := range subnet.DNSNameservers {
 			if dns != rs.Primary.Attributes[fmt.Sprintf("dns_nameservers.%d", i)] {
-				return fmt.Errorf("Dns Nameservers list elements or order is not consistent")
+				return errors.New("Dns Nameservers list elements or order is not consistent")
 			}
 		}
 
@@ -697,13 +699,13 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 }
 `
 
-//const testAccNetworkingV2SubnetAllocationPool1 = `
-//resource "openstack_networking_network_v2" "network_1" {
+// const testAccNetworkingV2SubnetAllocationPool1 = `
+// resource "openstack_networking_network_v2" "network_1" {
 //  name = "network_1"
 //  admin_state_up = "true"
 //}
 //
-//resource "openstack_networking_subnet_v2" "subnet_1" {
+// resource "openstack_networking_subnet_v2" "subnet_1" {
 //  name = "subnet_1"
 //  cidr = "10.3.0.0/16"
 //  network_id = "${openstack_networking_network_v2.network_1.id}"
@@ -720,13 +722,13 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 //}
 //`
 //
-//const testAccNetworkingV2SubnetAllocationPool2 = `
-//resource "openstack_networking_network_v2" "network_1" {
+// const testAccNetworkingV2SubnetAllocationPool2 = `
+// resource "openstack_networking_network_v2" "network_1" {
 //  name = "network_1"
 //  admin_state_up = "true"
 //}
 //
-//resource "openstack_networking_subnet_v2" "subnet_1" {
+// resource "openstack_networking_subnet_v2" "subnet_1" {
 //  name = "subnet_1"
 //  cidr = "10.3.0.0/16"
 //  network_id = "${openstack_networking_network_v2.network_1.id}"

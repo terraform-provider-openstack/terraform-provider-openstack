@@ -3,13 +3,12 @@ package openstack
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/databases"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUnitExpandDatabaseUserV1Databases(t *testing.T) {
-	dbs := []interface{}{"db1", "db2"}
+	dbs := []any{"db1", "db2"}
 
 	expected := databases.BatchCreateOpts{
 		databases.CreateOpts{

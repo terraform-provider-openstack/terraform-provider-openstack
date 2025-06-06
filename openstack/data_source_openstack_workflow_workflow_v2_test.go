@@ -6,9 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/workflow/v2/workflows"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccWorkflowV2WorkflowDataSource_basic(t *testing.T) {
@@ -19,7 +18,9 @@ func TestAccWorkflowV2WorkflowDataSource_basic(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+
 		workflowID = workflow.ID
+
 		defer testAccWorkflowV2WorkflowDelete(workflow.ID) //nolint:errcheck
 	}
 

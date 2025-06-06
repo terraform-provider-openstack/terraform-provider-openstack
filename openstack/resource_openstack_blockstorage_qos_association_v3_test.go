@@ -2,23 +2,25 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/qos"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumetypes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/qos"
-	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumetypes"
 )
 
 func TestAccBlockstorageV3QosAssociation_basic(t *testing.T) {
 	var qosTest qos.QoS
-	var qosName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+
+	qosName := "ACCPTTEST-" + acctest.RandString(5)
 
 	var vt volumetypes.VolumeType
-	var vtName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+
+	vtName := "ACCPTTEST-" + acctest.RandString(5)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -46,9 +48,10 @@ func TestAccBlockstorageV3QosAssociation_basic(t *testing.T) {
 
 func testAccCheckBlockstorageV3QosAssociationDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -67,7 +70,7 @@ func testAccCheckBlockstorageV3QosAssociationDestroy(s *terraform.State) error {
 			if err == nil {
 				for _, association := range allAssociations {
 					if association.ID == vtID {
-						return fmt.Errorf("Qos association still exists")
+						return errors.New("Qos association still exists")
 					}
 				}
 			}
@@ -85,13 +88,14 @@ func testAccCheckBlockstorageV3QosAssociationExists(n string) resource.TestCheck
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+			return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 		}
 
 		qosID, vtID, err := parsePairedIDs(rs.Primary.ID, "openstack_blockstorage_qos_association_v3")
@@ -110,9 +114,11 @@ func testAccCheckBlockstorageV3QosAssociationExists(n string) resource.TestCheck
 		}
 
 		found := false
+
 		for _, association := range allAssociations {
 			if association.ID == vtID {
 				found = true
+
 				break
 			}
 		}

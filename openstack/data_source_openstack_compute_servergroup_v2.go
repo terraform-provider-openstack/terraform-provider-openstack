@@ -4,10 +4,9 @@ import (
 	"context"
 	"log"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servergroups"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servergroups"
 )
 
 func dataSourceComputeServerGroupV2() *schema.Resource {
@@ -68,8 +67,9 @@ func dataSourceComputeServerGroupV2() *schema.Resource {
 	}
 }
 
-func dataSourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
@@ -77,6 +77,7 @@ func dataSourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceD
 
 	// Attempt to read with microversion 2.64
 	computeClient.Microversion = "2.64"
+
 	allPages, err := servergroups.List(computeClient, servergroups.ListOpts{}).AllPages(ctx)
 	if err != nil {
 		log.Printf("[DEBUG] Falling back to legacy API call due to: %#v", err)
@@ -97,6 +98,7 @@ func dataSourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceD
 	name := d.Get("name").(string)
 
 	var refinedServerGroups []servergroups.ServerGroup
+
 	for _, servergroup := range allServerGroups {
 		if servergroup.Name == name {
 			refinedServerGroups = append(refinedServerGroups, servergroup)
@@ -106,6 +108,7 @@ func dataSourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceD
 	if len(refinedServerGroups) < 1 {
 		return diag.Errorf("Could not find any servergroup with this name: %s", name)
 	}
+
 	if len(refinedServerGroups) > 1 {
 		return diag.Errorf("More than one servergroup found with this name: %s", name)
 	}
@@ -118,14 +121,17 @@ func dataSourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceD
 	d.Set("project_id", sg.ProjectID)
 	d.Set("members", sg.Members)
 	d.Set("metadata", sg.Metadata)
+
 	if sg.Policy != nil && *sg.Policy != "" {
 		d.Set("policies", []string{*sg.Policy})
 	} else {
 		d.Set("policies", sg.Policies)
 	}
+
 	if sg.Rules != nil {
-		d.Set("rules", []map[string]interface{}{{"max_server_per_host": sg.Rules.MaxServerPerHost}})
+		d.Set("rules", []map[string]any{{"max_server_per_host": sg.Rules.MaxServerPerHost}})
 	}
+
 	d.Set("region", GetRegion(d, config))
 
 	return nil

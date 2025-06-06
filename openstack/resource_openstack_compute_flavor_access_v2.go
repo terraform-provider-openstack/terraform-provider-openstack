@@ -2,17 +2,17 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/v2/pagination"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceComputeFlavorAccessV2() *schema.Resource {
@@ -45,8 +45,9 @@ func resourceComputeFlavorAccessV2() *schema.Resource {
 	}
 }
 
-func resourceComputeFlavorAccessV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeFlavorAccessV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
@@ -70,8 +71,9 @@ func resourceComputeFlavorAccessV2Create(ctx context.Context, d *schema.Resource
 	return resourceComputeFlavorAccessV2Read(ctx, d, meta)
 }
 
-func resourceComputeFlavorAccessV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeFlavorAccessV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
@@ -89,8 +91,9 @@ func resourceComputeFlavorAccessV2Read(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceComputeFlavorAccessV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeFlavorAccessV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
@@ -114,7 +117,7 @@ func resourceComputeFlavorAccessV2Delete(ctx context.Context, d *schema.Resource
 func parseComputeFlavorAccessID(id string) (string, string, error) {
 	idParts := strings.Split(id, "/")
 	if len(idParts) < 2 {
-		return "", "", fmt.Errorf("Unable to determine flavor access ID")
+		return "", "", errors.New("Unable to determine flavor access ID")
 	}
 
 	flavorID := idParts[0]
@@ -125,6 +128,7 @@ func parseComputeFlavorAccessID(id string) (string, string, error) {
 
 func getFlavorAccess(ctx context.Context, computeClient *gophercloud.ServiceClient, d *schema.ResourceData) (flavors.FlavorAccess, error) {
 	var access flavors.FlavorAccess
+
 	flavorID, tenantID, err := parseComputeFlavorAccessID(d.Id())
 	if err != nil {
 		return access, err
@@ -132,7 +136,7 @@ func getFlavorAccess(ctx context.Context, computeClient *gophercloud.ServiceClie
 
 	found := false
 	pager := flavors.ListAccesses(computeClient, flavorID)
-	err = pager.EachPage(ctx, func(ctx context.Context, page pagination.Page) (bool, error) {
+	err = pager.EachPage(ctx, func(_ context.Context, page pagination.Page) (bool, error) {
 		accessList, err := flavors.ExtractAccesses(page)
 		if err != nil {
 			return false, err
@@ -142,6 +146,7 @@ func getFlavorAccess(ctx context.Context, computeClient *gophercloud.ServiceClie
 			if a.TenantID == tenantID && a.FlavorID == flavorID {
 				access = a
 				found = true
+
 				return false, nil
 			}
 		}

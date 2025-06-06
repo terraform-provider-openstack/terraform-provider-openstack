@@ -7,15 +7,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/external"
 	mtuext "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/mtu"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vlantransparent"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceNetworkingNetworkV2() *schema.Resource {
@@ -56,9 +55,8 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 			},
 
 			"tenant_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: descriptions["tenant_id"],
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 
 			"admin_state_up": {
@@ -139,8 +137,9 @@ func dataSourceNetworkingNetworkV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -211,12 +210,14 @@ func dataSourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceDa
 	}
 
 	var allNetworks []networkExtended
+
 	err = networks.ExtractNetworksInto(pages, &allNetworks)
 	if err != nil {
 		return diag.Errorf("Unable to retrieve openstack_networking_networks_v2: %s", err)
 	}
 
 	var refinedNetworks []networkExtended
+
 	if cidr := d.Get("matching_subnet_cidr").(string); cidr != "" {
 		for _, n := range allNetworks {
 			for _, s := range n.Subnets {
@@ -225,8 +226,10 @@ func dataSourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceDa
 					if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 						continue
 					}
+
 					return diag.Errorf("Unable to retrieve openstack_networking_network_v2 subnet: %s", err)
 				}
+
 				if cidr == subnet.CIDR {
 					refinedNetworks = append(refinedNetworks, n)
 				}

@@ -3,17 +3,16 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/databases"
 	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/instances"
 	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/users"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUnitExpandDatabaseInstanceV1Datastore(t *testing.T) {
-	datastore := []interface{}{
-		map[string]interface{}{
+	datastore := []any{
+		map[string]any{
 			"version": "foo",
 			"type":    "bar",
 		},
@@ -29,8 +28,8 @@ func TestUnitExpandDatabaseInstanceV1Datastore(t *testing.T) {
 }
 
 func TestUnitExpandDatabaseInstanceV1Networks(t *testing.T) {
-	network := []interface{}{
-		map[string]interface{}{
+	network := []any{
+		map[string]any{
 			"uuid":        "foobar",
 			"port":        "",
 			"fixed_ip_v4": "",
@@ -49,13 +48,13 @@ func TestUnitExpandDatabaseInstanceV1Networks(t *testing.T) {
 }
 
 func TestUnitExpandDatabaseInstanceV1Databases(t *testing.T) {
-	dbs := []interface{}{
-		map[string]interface{}{
+	dbs := []any{
+		map[string]any{
 			"name":    "testdb1",
 			"charset": "utf8",
 			"collate": "utf8_general_ci",
 		},
-		map[string]interface{}{
+		map[string]any{
 			"name":    "testdb2",
 			"charset": "utf8",
 			"collate": "utf8_general_ci",
@@ -80,11 +79,11 @@ func TestUnitExpandDatabaseInstanceV1Databases(t *testing.T) {
 }
 
 func TestUnitExpandDatabaseInstanceV1Users(t *testing.T) {
-	userList := []interface{}{
-		map[string]interface{}{
+	userList := []any{
+		map[string]any{
 			"name":      "testuser",
 			"password":  "testpassword",
-			"databases": schema.NewSet(schema.HashString, []interface{}{"testdb1"}),
+			"databases": schema.NewSet(schema.HashString, []any{"testdb1"}),
 			"host":      "foobar",
 		},
 	}

@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/errors"
 	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/messages"
 	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/shares"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 const (
@@ -160,8 +160,9 @@ func resourceSharedFilesystemShareV2() *schema.Resource {
 	}
 }
 
-func resourceSharedFilesystemShareV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSharedFilesystemShareV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
@@ -171,8 +172,9 @@ func resourceSharedFilesystemShareV2Create(ctx context.Context, d *schema.Resour
 
 	isPublic := d.Get("is_public").(bool)
 
-	metadataRaw := d.Get("metadata").(map[string]interface{})
+	metadataRaw := d.Get("metadata").(map[string]any)
 	metadata := make(map[string]string, len(metadataRaw))
+
 	for k, v := range metadataRaw {
 		if stringVal, ok := v.(string); ok {
 			metadata[k] = stringVal
@@ -200,21 +202,25 @@ func resourceSharedFilesystemShareV2Create(ctx context.Context, d *schema.Resour
 	timeout := d.Timeout(schema.TimeoutCreate)
 
 	log.Printf("[DEBUG] Attempting to create share")
+
 	var share *shares.Share
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		share, err = shares.Create(ctx, sfsClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		detailedErr := errors.ErrorDetails{}
+
 		e := errors.ExtractErrorInto(err, &detailedErr)
 		if e != nil {
 			return diag.Errorf("Error creating share: %s: %s", err, e)
 		}
+
 		for k, msg := range detailedErr {
 			return diag.Errorf("Error creating share: %s (%d): %s", k, msg.Code, msg.Message)
 		}
@@ -231,8 +237,9 @@ func resourceSharedFilesystemShareV2Create(ctx context.Context, d *schema.Resour
 	return resourceSharedFilesystemShareV2Read(ctx, d, meta)
 }
 
-func resourceSharedFilesystemShareV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSharedFilesystemShareV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
@@ -258,9 +265,10 @@ func resourceSharedFilesystemShareV2Read(ctx context.Context, d *schema.Resource
 	for _, v := range exportLocationsRaw {
 		exportLocations = append(exportLocations, map[string]string{
 			"path":      v.Path,
-			"preferred": fmt.Sprint(v.Preferred),
+			"preferred": strconv.FormatBool(v.Preferred),
 		})
 	}
+
 	if err = d.Set("export_locations", exportLocations); err != nil {
 		log.Printf("[DEBUG] Unable to set export_locations: %s", err)
 	}
@@ -286,8 +294,9 @@ func resourceSharedFilesystemShareV2Read(ctx context.Context, d *schema.Resource
 	return nil
 }
 
-func resourceSharedFilesystemShareV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSharedFilesystemShareV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
@@ -303,10 +312,12 @@ func resourceSharedFilesystemShareV2Update(ctx context.Context, d *schema.Resour
 		name := d.Get("name").(string)
 		updateOpts.DisplayName = &name
 	}
+
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		updateOpts.DisplayDescription = &description
 	}
+
 	if d.HasChange("is_public") {
 		isPublic := d.Get("is_public").(bool)
 		updateOpts.IsPublic = &isPublic
@@ -320,20 +331,23 @@ func resourceSharedFilesystemShareV2Update(ctx context.Context, d *schema.Resour
 		}
 
 		log.Printf("[DEBUG] Attempting to update share")
+
 		err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 			_, err := shares.Update(ctx, sfsClient, d.Id(), updateOpts).Extract()
 			if err != nil {
 				return checkForRetryableError(err)
 			}
+
 			return nil
 		})
-
 		if err != nil {
 			detailedErr := errors.ErrorDetails{}
+
 			e := errors.ExtractErrorInto(err, &detailedErr)
 			if e != nil {
 				return diag.Errorf("Error updating %s share: %s: %s", d.Id(), err, e)
 			}
+
 			for k, msg := range detailedErr {
 				return diag.Errorf("Error updating %s share: %s (%d): %s", d.Id(), k, msg.Code, msg.Message)
 			}
@@ -348,40 +362,49 @@ func resourceSharedFilesystemShareV2Update(ctx context.Context, d *schema.Resour
 
 	if d.HasChange("size") {
 		var pending []string
+
 		oldSize, newSize := d.GetChange("size")
 
 		if newSize.(int) > oldSize.(int) {
 			pending = append(pending, "extending")
 			resizeOpts := shares.ExtendOpts{NewSize: newSize.(int)}
 			log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
+
 			err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 				err := shares.Extend(ctx, sfsClient, d.Id(), resizeOpts).Err
 				log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
+
 				if err != nil {
 					return checkForRetryableError(err)
 				}
+
 				return nil
 			})
 		} else if newSize.(int) < oldSize.(int) {
 			pending = append(pending, "shrinking")
 			resizeOpts := shares.ShrinkOpts{NewSize: newSize.(int)}
 			log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
+
 			err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 				err := shares.Shrink(ctx, sfsClient, d.Id(), resizeOpts).Err
 				log.Printf("[DEBUG] Resizing share %s with options: %#v", d.Id(), resizeOpts)
+
 				if err != nil {
 					return checkForRetryableError(err)
 				}
+
 				return nil
 			})
 		}
 
 		if err != nil {
 			detailedErr := errors.ErrorDetails{}
+
 			e := errors.ExtractErrorInto(err, &detailedErr)
 			if e != nil {
 				return diag.Errorf("Unable to resize %s share: %s: %s", d.Id(), err, e)
 			}
+
 			for k, msg := range detailedErr {
 				return diag.Errorf("Unable to resize %s share: %s (%d): %s", d.Id(), k, msg.Code, msg.Message)
 			}
@@ -399,9 +422,9 @@ func resourceSharedFilesystemShareV2Update(ctx context.Context, d *schema.Resour
 		metadataToUpdate := make(map[string]string)
 
 		o, n := d.GetChange("metadata")
-		oldMetadata := o.(map[string]interface{})
-		newMetadata := n.(map[string]interface{})
-		existingMetadata := d.Get("all_metadata").(map[string]interface{})
+		oldMetadata := o.(map[string]any)
+		newMetadata := n.(map[string]any)
+		existingMetadata := d.Get("all_metadata").(map[string]any)
 
 		// Determine if any metadata keys were removed from the configuration.
 		// Then request those keys to be deleted.
@@ -444,8 +467,9 @@ func resourceSharedFilesystemShareV2Update(ctx context.Context, d *schema.Resour
 	return resourceSharedFilesystemShareV2Read(ctx, d, meta)
 }
 
-func resourceSharedFilesystemShareV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSharedFilesystemShareV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
@@ -454,24 +478,28 @@ func resourceSharedFilesystemShareV2Delete(ctx context.Context, d *schema.Resour
 	timeout := d.Timeout(schema.TimeoutDelete)
 
 	log.Printf("[DEBUG] Attempting to delete share %s", d.Id())
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		err = shares.Delete(ctx, sfsClient, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		e := CheckDeleted(d, err, "")
 		if e == nil {
 			return nil
 		}
+
 		detailedErr := errors.ErrorDetails{}
+
 		e = errors.ExtractErrorInto(err, &detailedErr)
 		if e != nil {
 			return diag.Errorf("Unable to delete %s share: %s: %s", d.Id(), err, e)
 		}
+
 		for k, msg := range detailedErr {
 			return diag.Errorf("Unable to delete %s share: %s (%d): %s", d.Id(), k, msg.Code, msg.Message)
 		}
@@ -479,6 +507,7 @@ func resourceSharedFilesystemShareV2Delete(ctx context.Context, d *schema.Resour
 
 	// Wait for share to become deleted before continuing
 	pending := []string{"", "deleting", "available"}
+
 	err = waitForSFV2Share(ctx, sfsClient, d.Id(), "deleted", pending, timeout)
 	if err != nil {
 		return diag.FromErr(err)
@@ -507,26 +536,30 @@ func waitForSFV2Share(ctx context.Context, sfsClient *gophercloud.ServiceClient,
 			case "deleted":
 				return nil
 			default:
-				return fmt.Errorf("Error: share %s not found: %s", id, err)
+				return fmt.Errorf("Error: share %s not found: %w", id, err)
 			}
 		}
+
 		errorMessage := fmt.Sprintf("Error waiting for share %s to become %s", id, target)
 		msg := resourceSFSV2ShareManilaMessage(ctx, sfsClient, id)
+
 		if msg == nil {
-			return fmt.Errorf("%s: %s", errorMessage, err)
+			return fmt.Errorf("%s: %w", errorMessage, err)
 		}
-		return fmt.Errorf("%s: %s: the latest manila message (%s): %s", errorMessage, err, msg.CreatedAt, msg.UserMessage)
+
+		return fmt.Errorf("%s: %w: the latest manila message (%s): %s", errorMessage, err, msg.CreatedAt, msg.UserMessage)
 	}
 
 	return nil
 }
 
 func resourceSFV2ShareRefreshFunc(ctx context.Context, sfsClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		share, err := shares.Get(ctx, sfsClient, id).Extract()
 		if err != nil {
 			return nil, "", err
 		}
+
 		return share, share.Status, nil
 	}
 }
@@ -541,20 +574,24 @@ func resourceSFSV2ShareManilaMessage(ctx context.Context, sfsClient *gophercloud
 		SortDir:    "desc",
 		Limit:      1,
 	}
+
 	allPages, err := messages.List(sfsClient, listOpts).AllPages(ctx)
 	if err != nil {
 		log.Printf("[DEBUG] Unable to retrieve messages: %v", err)
+
 		return nil
 	}
 
 	allMessages, err := messages.ExtractMessages(allPages)
 	if err != nil {
 		log.Printf("[DEBUG] Unable to extract messages: %v", err)
+
 		return nil
 	}
 
 	if len(allMessages) == 0 {
 		log.Printf("[DEBUG] No messages found")
+
 		return nil
 	}
 

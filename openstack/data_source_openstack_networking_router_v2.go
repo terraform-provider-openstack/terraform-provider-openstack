@@ -5,10 +5,9 @@ import (
 	"log"
 	"strings"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 )
 
 func dataSourceNetworkingRouterV2() *schema.Resource {
@@ -96,8 +95,9 @@ func dataSourceNetworkingRouterV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -186,8 +186,10 @@ func dataSourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceDat
 			"ip_address": v.IPAddress,
 		})
 	}
+
 	if err = d.Set("external_fixed_ip", externalFixedIPs); err != nil {
 		log.Printf("[DEBUG] Unable to set external_fixed_ip: %s", err)
 	}
+
 	return nil
 }

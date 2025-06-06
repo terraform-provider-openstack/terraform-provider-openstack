@@ -5,11 +5,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/portforwarding"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/portforwarding"
 )
 
 func resourceNetworkingPortForwardingV2() *schema.Resource {
@@ -71,8 +70,9 @@ func resourceNetworkingPortForwardingV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkPortForwardingV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkPortForwardingV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -113,17 +113,20 @@ func resourceNetworkPortForwardingV2Create(ctx context.Context, d *schema.Resour
 	d.SetId(pf.ID)
 
 	log.Printf("[DEBUG] Created openstack_networking_portforwarding_v2 %s: %#v", pf.ID, pf)
+
 	return resourceNetworkPortForwardingV2Read(ctx, d, meta)
 }
 
-func resourceNetworkPortForwardingV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkPortForwardingV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	fipID := d.Get("floatingip_id").(string)
+
 	pf, err := portforwarding.Get(ctx, networkingClient, fipID, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_portforwarding_v2"))
@@ -143,37 +146,44 @@ func resourceNetworkPortForwardingV2Read(ctx context.Context, d *schema.Resource
 	return nil
 }
 
-func resourceNetworkPortForwardingV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkPortForwardingV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var hasChange bool
+
 	var updateOpts portforwarding.UpdateOpts
 
 	fipID := d.Get("floatingip_id").(string)
+
 	if d.HasChange("internal_port_id") {
 		hasChange = true
 		internalPortID := d.Get("internal_port_id").(string)
 		updateOpts.InternalPortID = internalPortID
 	}
+
 	if d.HasChange("external_port") {
 		hasChange = true
 		externalPort := d.Get("external_port").(int)
 		updateOpts.ExternalPort = externalPort
 	}
+
 	if d.HasChange("internal_port") {
 		hasChange = true
 		internalPort := d.Get("internal_port").(int)
 		updateOpts.InternalPort = internalPort
 	}
+
 	if d.HasChange("protocol") {
 		hasChange = true
 		protocol := d.Get("protocol").(string)
 		updateOpts.Protocol = protocol
 	}
+
 	if d.HasChange("description") {
 		hasChange = true
 		description := d.Get("description").(string)
@@ -182,6 +192,7 @@ func resourceNetworkPortForwardingV2Update(ctx context.Context, d *schema.Resour
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_networking_portforwarding_v2 %s update options: %#v", d.Id(), updateOpts)
+
 		_, err = portforwarding.Update(ctx, networkingClient, fipID, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_networking_portforwarding_v2 %s: %s", d.Id(), err)
@@ -191,8 +202,9 @@ func resourceNetworkPortForwardingV2Update(ctx context.Context, d *schema.Resour
 	return resourceNetworkPortForwardingV2Read(ctx, d, meta)
 }
 
-func resourceNetworkPortForwardingV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkPortForwardingV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)

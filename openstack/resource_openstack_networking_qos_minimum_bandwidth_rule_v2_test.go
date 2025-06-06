@@ -2,14 +2,14 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/rules"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccNetworkingV2QoSMinimumBandwidthRule_basic(t *testing.T) {
@@ -65,13 +65,14 @@ func testAccCheckNetworkingV2QoSMinimumBandwidthRuleExists(n string, rule *rules
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		qosPolicyID, qosRuleID, err := parsePairedIDs(rs.Primary.ID, "openstack_networking_qos_minimum_bandwidth_rule_v2")
@@ -87,7 +88,7 @@ func testAccCheckNetworkingV2QoSMinimumBandwidthRuleExists(n string, rule *rules
 		foundID := resourceNetworkingQoSRuleV2BuildID(qosPolicyID, found.ID)
 
 		if foundID != rs.Primary.ID {
-			return fmt.Errorf("QoS min bw rule not found")
+			return errors.New("QoS min bw rule not found")
 		}
 
 		*rule = *found
@@ -98,9 +99,10 @@ func testAccCheckNetworkingV2QoSMinimumBandwidthRuleExists(n string, rule *rules
 
 func testAccCheckNetworkingV2QoSMinimumBandwidthRuleDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -115,7 +117,7 @@ func testAccCheckNetworkingV2QoSMinimumBandwidthRuleDestroy(s *terraform.State) 
 
 		_, err = rules.GetMinimumBandwidthRule(context.TODO(), networkingClient, qosPolicyID, qosRuleID).ExtractMinimumBandwidthRule()
 		if err == nil {
-			return fmt.Errorf("QoS rule still exists")
+			return errors.New("QoS rule still exists")
 		}
 	}
 

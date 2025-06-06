@@ -6,12 +6,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/extradhcpopts"
@@ -19,6 +13,11 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/portsecurity"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceNetworkingPortV2() *schema.Resource {
@@ -232,8 +231,9 @@ func resourceNetworkingPortV2() *schema.Resource {
 							Optional:         true,
 							ValidateFunc:     validateJSONObject,
 							DiffSuppressFunc: diffSuppressJSONObject,
-							StateFunc: func(v interface{}) string {
+							StateFunc: func(v any) string {
 								json, _ := structure.NormalizeJsonString(v)
+
 								return json
 							},
 						},
@@ -279,8 +279,9 @@ func resourceNetworkingPortV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -350,9 +351,10 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 
 	// Add the port binding parameters if specified.
 	if v, ok := getOkExists(d, "binding"); ok {
-		for _, raw := range v.([]interface{}) {
-			binding := raw.(map[string]interface{})
-			var profile map[string]interface{}
+		for _, raw := range v.([]any) {
+			binding := raw.(map[string]any)
+
+			var profile map[string]any
 
 			// Convert raw string into the map
 			rawProfile := binding["profile"].(string)
@@ -416,25 +418,30 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+
 		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "ports", port.ID, tagOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error setting tags on openstack_networking_port_v2 %s: %s", port.ID, err)
 		}
+
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_port_v2 %s", tags, port.ID)
 	}
 
 	log.Printf("[DEBUG] Created openstack_networking_port_v2 %s: %#v", port.ID, port)
+
 	return resourceNetworkingPortV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var port portExtended
+
 	err = ports.Get(ctx, networkingClient, d.Id()).ExtractInto(&port)
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error getting openstack_networking_port_v2"))
@@ -476,8 +483,9 @@ func resourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceNetworkingPortV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingPortV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -492,6 +500,7 @@ func resourceNetworkingPortV2Update(ctx context.Context, d *schema.ResourceData,
 	}
 
 	var hasChange bool
+
 	var updateOpts ports.UpdateOpts
 
 	if d.HasChange("allowed_address_pairs") {
@@ -585,12 +594,13 @@ func resourceNetworkingPortV2Update(ctx context.Context, d *schema.ResourceData,
 	// Next, perform port binding option changes.
 	if d.HasChange("binding") {
 		var newOpts portsbinding.UpdateOptsExt
+
 		var bindingChanged bool
 
-		profile := map[string]interface{}{}
+		profile := map[string]any{}
 
-		for _, raw := range d.Get("binding").([]interface{}) {
-			binding := raw.(map[string]interface{})
+		for _, raw := range d.Get("binding").([]any) {
+			binding := raw.(map[string]any)
 
 			if d.HasChange("binding.0.vnic_type") {
 				bindingChanged = true
@@ -612,10 +622,12 @@ func resourceNetworkingPortV2Update(ctx context.Context, d *schema.ResourceData,
 					if err != nil {
 						return diag.Errorf("Failed to unmarshal the JSON: %s", err)
 					}
+
 					if profile == nil {
-						profile = map[string]interface{}{}
+						profile = map[string]any{}
 					}
 				}
+
 				newOpts.Profile = profile
 			}
 		}
@@ -650,6 +662,7 @@ func resourceNetworkingPortV2Update(ctx context.Context, d *schema.ResourceData,
 	// At this point, perform the update for all "standard" port changes.
 	if hasChange {
 		log.Printf("[DEBUG] openstack_networking_port_v2 %s update options: %#v", d.Id(), finalUpdateOpts)
+
 		_, err = ports.Update(ctx, networkingClient, d.Id(), finalUpdateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating OpenStack Neutron Port: %s", err)
@@ -660,18 +673,21 @@ func resourceNetworkingPortV2Update(ctx context.Context, d *schema.ResourceData,
 	if d.HasChange("tags") {
 		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+
 		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "ports", d.Id(), tagOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error setting tags on openstack_networking_port_v2 %s: %s", d.Id(), err)
 		}
+
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_port_v2 %s", tags, d.Id())
 	}
 
 	return resourceNetworkingPortV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingPortV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingPortV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -696,5 +712,6 @@ func resourceNetworkingPortV2Delete(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId("")
+
 	return nil
 }

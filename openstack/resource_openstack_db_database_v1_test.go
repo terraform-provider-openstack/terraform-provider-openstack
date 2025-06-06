@@ -2,18 +2,19 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/databases"
 	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/instances"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccDatabaseV1Database_basic(t *testing.T) {
 	var db databases.Database
+
 	var instance instances.Instance
 
 	resource.Test(t, resource.TestCase{
@@ -48,7 +49,7 @@ func testAccCheckDatabaseV1DatabaseExists(n string, instance *instances.Instance
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		_, userName, err := parsePairedIDs(rs.Primary.ID, "openstack_db_database_v1")
@@ -57,24 +58,26 @@ func testAccCheckDatabaseV1DatabaseExists(n string, instance *instances.Instance
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
 		pages, err := databases.List(databaseV1Client, instance.ID).AllPages(context.TODO())
 		if err != nil {
-			return fmt.Errorf("Unable to retrieve databases: %s", err)
+			return fmt.Errorf("Unable to retrieve databases: %w", err)
 		}
 
 		allDatabases, err := databases.ExtractDBs(pages)
 		if err != nil {
-			return fmt.Errorf("Unable to extract databases: %s", err)
+			return fmt.Errorf("Unable to extract databases: %w", err)
 		}
 
 		for _, v := range allDatabases {
 			if v.Name == userName {
 				*db = v
+
 				return nil
 			}
 		}
@@ -88,7 +91,7 @@ func testAccCheckDatabaseV1DatabaseDestroy(s *terraform.State) error {
 
 	databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -108,10 +111,11 @@ func testAccCheckDatabaseV1DatabaseDestroy(s *terraform.State) error {
 
 		allDatabases, err := databases.ExtractDBs(pages)
 		if err != nil {
-			return fmt.Errorf("Unable to extract databases: %s", err)
+			return fmt.Errorf("Unable to extract databases: %w", err)
 		}
 
 		var exists bool
+
 		for _, v := range allDatabases {
 			if v.Name == userName {
 				exists = true
@@ -119,7 +123,7 @@ func testAccCheckDatabaseV1DatabaseDestroy(s *terraform.State) error {
 		}
 
 		if exists {
-			return fmt.Errorf("database still exists")
+			return errors.New("database still exists")
 		}
 	}
 

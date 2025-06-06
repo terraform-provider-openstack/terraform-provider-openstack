@@ -1,16 +1,15 @@
 package openstack
 
 import (
-	"context"
 	"reflect"
 	"testing"
 )
 
-func testResourceObjectStorageV1ContainerStateDataV0() map[string]interface{} {
-	return map[string]interface{}{
+func testResourceObjectStorageV1ContainerStateDataV0() map[string]any {
+	return map[string]any{
 		"name": "test",
-		"versioning": []interface{}{
-			map[string]interface{}{
+		"versioning": []any{
+			map[string]any{
 				"type":     "versions",
 				"location": "test",
 			},
@@ -18,9 +17,10 @@ func testResourceObjectStorageV1ContainerStateDataV0() map[string]interface{} {
 	}
 }
 
-func testResourceObjectStorageV1ContainerStateDataV1() map[string]interface{} {
+func testResourceObjectStorageV1ContainerStateDataV1() map[string]any {
 	v0 := testResourceObjectStorageV1ContainerStateDataV0()
-	return map[string]interface{}{
+
+	return map[string]any{
 		"name":              v0["name"],
 		"versioning":        false,
 		"versioning_legacy": v0["versioning"],
@@ -29,7 +29,8 @@ func testResourceObjectStorageV1ContainerStateDataV1() map[string]interface{} {
 
 func TestAccObjectStorageV1ContainerStateUpgradeV0(t *testing.T) {
 	expected := testResourceObjectStorageV1ContainerStateDataV1()
-	actual, err := resourceObjectStorageContainerStateUpgradeV0(context.Background(), testResourceObjectStorageV1ContainerStateDataV0(), nil)
+
+	actual, err := resourceObjectStorageContainerStateUpgradeV0(t.Context(), testResourceObjectStorageV1ContainerStateDataV0(), nil)
 	if err != nil {
 		t.Fatalf("error migrating state: %s", err)
 	}

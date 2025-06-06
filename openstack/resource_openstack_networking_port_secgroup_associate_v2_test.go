@@ -2,17 +2,17 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/groups"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccNetworkingV2PortSecGroupAssociate_update(t *testing.T) {
@@ -21,10 +21,12 @@ func TestAccNetworkingV2PortSecGroupAssociate_update(t *testing.T) {
 	if os.Getenv("TF_ACC") != "" {
 		testAccPreCheck(t)
 		testAccPreCheckNonAdminOnly(t)
+
 		hiddenPort, err := testAccCheckNetworkingV2PortSecGroupCreatePort(t, "hidden_port_1", true)
 		if err != nil {
 			t.Fatal(err)
 		}
+
 		defer testAccCheckNetworkingV2PortSecGroupDeletePort(t, hiddenPort) //nolint:errcheck
 	}
 
@@ -139,7 +141,7 @@ func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName strin
 		return nil, err
 	}
 
-	client, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+	client, err := config.NetworkingV2Client(t.Context(), osRegionName)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +151,7 @@ func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName strin
 		AdminStateUp: gophercloud.Enabled,
 	}
 
-	network, err := networks.Create(context.TODO(), client, createNetOpts).Extract()
+	network, err := networks.Create(t.Context(), client, createNetOpts).Extract()
 	if err != nil {
 		return nil, err
 	}
@@ -157,13 +159,14 @@ func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName strin
 	t.Logf("Network %s created", network.ID)
 
 	var securityGroups []string
+
 	if defaultSecGroups {
 		// create default security groups
 		createSecGroupOpts := groups.CreateOpts{
 			Name: "default_sg_1",
 		}
 
-		secGroup1, err := groups.Create(context.TODO(), client, createSecGroupOpts).Extract()
+		secGroup1, err := groups.Create(t.Context(), client, createSecGroupOpts).Extract()
 		if err != nil {
 			return nil, err
 		}
@@ -172,7 +175,7 @@ func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName strin
 
 		createSecGroupOpts.Name = "default_sg_2"
 
-		secGroup2, err := groups.Create(context.TODO(), client, createSecGroupOpts).Extract()
+		secGroup2, err := groups.Create(t.Context(), client, createSecGroupOpts).Extract()
 		if err != nil {
 			return nil, err
 		}
@@ -192,12 +195,13 @@ func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName strin
 		AdminStateUp:   gophercloud.Enabled,
 	}
 
-	port, err := ports.Create(context.TODO(), client, createOpts).Extract()
+	port, err := ports.Create(t.Context(), client, createOpts).Extract()
 	if err != nil {
-		nErr := networks.Delete(context.TODO(), client, network.ID).ExtractErr()
+		nErr := networks.Delete(t.Context(), client, network.ID).ExtractErr()
 		if nErr != nil {
-			return nil, fmt.Errorf("Unable to create port (%s) and delete network (%s: %s)", err, network.ID, nErr)
+			return nil, fmt.Errorf("Unable to create port (%w) and delete network (%s: %w)", err, network.ID, nErr)
 		}
+
 		return nil, err
 	}
 
@@ -212,12 +216,12 @@ func testAccCheckNetworkingV2PortSecGroupDeletePort(t *testing.T, port *ports.Po
 		return err
 	}
 
-	client, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+	client, err := config.NetworkingV2Client(t.Context(), osRegionName)
 	if err != nil {
 		return err
 	}
 
-	err = ports.Delete(context.TODO(), client, port.ID).ExtractErr()
+	err = ports.Delete(t.Context(), client, port.ID).ExtractErr()
 	if err != nil {
 		return err
 	}
@@ -226,14 +230,15 @@ func testAccCheckNetworkingV2PortSecGroupDeletePort(t *testing.T, port *ports.Po
 
 	// delete default security groups
 	for _, secGroupID := range port.SecurityGroups {
-		err = groups.Delete(context.TODO(), client, secGroupID).ExtractErr()
+		err = groups.Delete(t.Context(), client, secGroupID).ExtractErr()
 		if err != nil {
 			return err
 		}
+
 		t.Logf("Default security group %s deleted", secGroupID)
 	}
 
-	err = networks.Delete(context.TODO(), client, port.NetworkID).ExtractErr()
+	err = networks.Delete(t.Context(), client, port.NetworkID).ExtractErr()
 	if err != nil {
 		return err
 	}
@@ -251,13 +256,14 @@ func testAccCheckNetworkingV2PortSecGroupAssociateExists(n string, port *ports.P
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := ports.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -266,7 +272,7 @@ func testAccCheckNetworkingV2PortSecGroupAssociateExists(n string, port *ports.P
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Port not found")
+			return errors.New("Port not found")
 		}
 
 		*port = *found
@@ -276,7 +282,7 @@ func testAccCheckNetworkingV2PortSecGroupAssociateExists(n string, port *ports.P
 }
 
 func testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(port *ports.Port, expected int) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if len(port.SecurityGroups) != expected {
 			return fmt.Errorf("Expected %d Security Groups, got %d", expected, len(port.SecurityGroups))
 		}

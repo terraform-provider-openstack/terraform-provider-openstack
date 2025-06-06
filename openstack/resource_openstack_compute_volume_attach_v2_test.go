@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/volumeattach"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/volumeattach"
 )
 
 func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
@@ -77,9 +77,10 @@ func TestAccComputeV2VolumeAttach_ignore_volume_confirmation(t *testing.T) {
 
 func testAccCheckComputeV2VolumeAttachDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -94,7 +95,7 @@ func testAccCheckComputeV2VolumeAttachDestroy(s *terraform.State) error {
 
 		_, err = volumeattach.Get(context.TODO(), computeClient, instanceID, volumeID).Extract()
 		if err == nil {
-			return fmt.Errorf("Volume attachment still exists")
+			return errors.New("Volume attachment still exists")
 		}
 	}
 
@@ -109,13 +110,14 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
 		instanceID, volumeID, err := parsePairedIDs(rs.Primary.ID, "openstack_compute_volume_attach_v2")
@@ -129,7 +131,7 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 		}
 
 		if found.ServerID != instanceID || found.VolumeID != volumeID {
-			return fmt.Errorf("VolumeAttach not found")
+			return errors.New("VolumeAttach not found")
 		}
 
 		*va = *found
@@ -139,8 +141,9 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 }
 
 func testAccCheckComputeV2VolumeAttachDevice(
-	va *volumeattach.VolumeAttachment, device string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	va *volumeattach.VolumeAttachment, device string,
+) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
 		if va.Device != device {
 			return fmt.Errorf("Requested device of volume attachment (%s) does not match: %s",
 				device, va.Device)

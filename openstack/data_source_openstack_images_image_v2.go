@@ -7,11 +7,10 @@ import (
 	"sort"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
 )
 
 func dataSourceImagesImageV2() *schema.Resource {
@@ -190,8 +189,9 @@ func dataSourceImagesImageV2() *schema.Resource {
 }
 
 // dataSourceImagesImageV2Read performs the image lookup.
-func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	imageClient, err := config.ImageV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack image client: %s", err)
@@ -202,6 +202,7 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 
 	tags := []string{}
 	tagList := d.Get("tags").(*schema.Set).List()
+
 	for _, v := range tagList {
 		tags = append(tags, fmt.Sprint(v))
 	}
@@ -229,6 +230,7 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 	log.Printf("[DEBUG] List Options: %#v", listOpts)
 
 	var image images.Image
+
 	allPages, err := images.List(imageClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query images: %s", err)
@@ -240,7 +242,7 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	properties := resourceImagesImageV2ExpandProperties(
-		d.Get("properties").(map[string]interface{}))
+		d.Get("properties").(map[string]any))
 
 	if len(allImages) > 1 {
 		allImages = imagesFilterByProperties(allImages, properties)
@@ -251,6 +253,7 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 	nameRegex, nameRegexOk := d.GetOk("name_regex")
 	if nameRegexOk {
 		allImages = imagesFilterByRegex(allImages, nameRegex.(string))
+
 		log.Printf("[DEBUG] Image list filtered by regex: %s", d.Get("name_regex"))
 	}
 
@@ -262,10 +265,12 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 	if len(allImages) > 1 {
 		recent := d.Get("most_recent").(bool)
 		log.Printf("[DEBUG] Multiple results found and `most_recent` is set to: %t", recent)
+
 		if recent {
 			image = mostRecentImage(allImages)
 		} else {
 			log.Printf("[DEBUG] Multiple results found: %#v", allImages)
+
 			return diag.Errorf("Your query returned more than one result. Please try a more " +
 				"specific search criteria, or set `most_recent` attribute to true.")
 		}
@@ -312,6 +317,7 @@ func (a imageSort) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a imageSort) Less(i, j int) bool {
 	itime := a[i].CreatedAt
 	jtime := a[j].CreatedAt
+
 	return itime.Unix() < jtime.Unix()
 }
 
@@ -319,5 +325,6 @@ func (a imageSort) Less(i, j int) bool {
 func mostRecentImage(images []images.Image) images.Image {
 	sortedImages := images
 	sort.Sort(imageSort(sortedImages))
+
 	return sortedImages[len(sortedImages)-1]
 }

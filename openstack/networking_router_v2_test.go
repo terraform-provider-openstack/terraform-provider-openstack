@@ -3,15 +3,15 @@ package openstack
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUnitExpandNetworkingRouterExternalFixedIPsV2(t *testing.T) {
 	r := resourceNetworkingRouterV2()
 	d := r.TestResourceData()
 	d.SetId("1")
+
 	fixedIPs1 := map[string]string{
 		"subnet_id":  "subnet_1",
 		"ip_address": "192.168.101.1",
@@ -34,7 +34,7 @@ func TestUnitExpandNetworkingRouterExternalFixedIPsV2(t *testing.T) {
 		},
 	}
 
-	actualExternalFixedIPs := expandNetworkingRouterExternalFixedIPsV2(d.Get("external_fixed_ip").([]interface{}))
+	actualExternalFixedIPs := expandNetworkingRouterExternalFixedIPsV2(d.Get("external_fixed_ip").([]any))
 
 	assert.ElementsMatch(t, expectedExternalFixedIPs, actualExternalFixedIPs)
 }

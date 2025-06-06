@@ -4,10 +4,9 @@ import (
 	"context"
 	"log"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/rules"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/rules"
 )
 
 func dataSourceNetworkingQoSDSCPMarkingRuleV2() *schema.Resource {
@@ -37,8 +36,9 @@ func dataSourceNetworkingQoSDSCPMarkingRuleV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingQoSDSCPMarkingRuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceNetworkingQoSDSCPMarkingRuleV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)

@@ -2,19 +2,20 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/secrets"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccKeyManagerSecretV1_basic(t *testing.T) {
 	var secret secrets.Secret
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -40,6 +41,7 @@ func TestAccKeyManagerSecretV1_basic(t *testing.T) {
 
 func TestAccKeyManagerSecretV1_basicWithMetadata(t *testing.T) {
 	var secret secrets.Secret
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -65,6 +67,7 @@ func TestAccKeyManagerSecretV1_basicWithMetadata(t *testing.T) {
 
 func TestAccKeyManagerSecretV1_updateMetadata(t *testing.T) {
 	var secret secrets.Secret
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -102,6 +105,7 @@ func TestAccKeyManagerSecretV1_updateMetadata(t *testing.T) {
 
 func TestAccKeyManagerSecretV1_updatePayload(t *testing.T) {
 	var secret secrets.Secret
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -150,6 +154,7 @@ func TestAccKeyManagerSecretV1_updatePayload(t *testing.T) {
 
 func TestAccKeyManagerSecretV1_acls(t *testing.T) {
 	var secret secrets.Secret
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -178,6 +183,7 @@ func TestAccKeyManagerSecretV1_acls(t *testing.T) {
 
 func TestAccKeyManagerSecretV1_acls_update(t *testing.T) {
 	var secret secrets.Secret
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -232,22 +238,27 @@ func TestAccKeyManagerSecretV1_acls_update(t *testing.T) {
 
 func testAccCheckSecretV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
+		return fmt.Errorf("Error creating OpenStack KeyManager client: %w", err)
 	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "openstack_keymanager_secret" {
 			continue
 		}
+
 		_, err = secrets.Get(context.TODO(), kmClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("Secret (%s) still exists", rs.Primary.ID)
 		}
+
 		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -259,13 +270,14 @@ func testAccCheckSecretV1Exists(n string, secret *secrets.Secret) resource.TestC
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
+			return fmt.Errorf("Error creating OpenStack KeyManager client: %w", err)
 		}
 
 		var found *secrets.Secret
@@ -274,6 +286,7 @@ func testAccCheckSecretV1Exists(n string, secret *secrets.Secret) resource.TestC
 		if err != nil {
 			return err
 		}
+
 		*secret = *found
 
 		return nil
@@ -281,11 +294,12 @@ func testAccCheckSecretV1Exists(n string, secret *secrets.Secret) resource.TestC
 }
 
 func testAccCheckPayloadEquals(payload string, secret *secrets.Secret) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
+
 		kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack KeyManager client: %s", err)
+			return fmt.Errorf("Error creating OpenStack KeyManager client: %w", err)
 		}
 
 		opts := secrets.GetPayloadOpts{
@@ -293,27 +307,32 @@ func testAccCheckPayloadEquals(payload string, secret *secrets.Secret) resource.
 		}
 
 		uuid := keyManagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
+
 		secretPayload, _ := secrets.GetPayload(context.TODO(), kmClient, uuid, opts).Extract()
 		if string(secretPayload) != payload {
 			return fmt.Errorf("Payloads do not match. Expected %s but got %s", payload, secretPayload)
 		}
+
 		return nil
 	}
 }
 
 func testAccCheckMetadataEquals(key string, value string, secret *secrets.Secret) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
+
 		kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		uuid := keyManagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
+
 		metadatum, err := secrets.GetMetadatum(context.TODO(), kmClient, uuid, key).Extract()
 		if err != nil {
 			return err
 		}
+
 		if metadatum.Value != value {
 			return fmt.Errorf("Metadata does not match. Expected %s but got %s", metadatum, value)
 		}

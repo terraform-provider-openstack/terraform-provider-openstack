@@ -6,12 +6,11 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/ikepolicies"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/ikepolicies"
 )
 
 func resourceIKEPolicyV2() *schema.Resource {
@@ -109,8 +108,9 @@ func resourceIKEPolicyV2() *schema.Resource {
 	}
 }
 
-func resourceIKEPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIKEPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -152,6 +152,7 @@ func resourceIKEPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
+
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf(
@@ -165,10 +166,11 @@ func resourceIKEPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta
 	return resourceIKEPolicyV2Read(ctx, d, meta)
 }
 
-func resourceIKEPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIKEPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about IKE policy: %s", d.Id())
 
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -192,10 +194,12 @@ func resourceIKEPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta i
 	d.Set("region", GetRegion(d, config))
 
 	// Set the lifetime
-	var lifetimeMap = make(map[string]interface{})
+	lifetimeMap := make(map[string]any)
 	lifetimeMap["units"] = policy.Lifetime.Units
 	lifetimeMap["value"] = policy.Lifetime.Value
-	var lifetime []map[string]interface{}
+
+	var lifetime []map[string]any
+
 	lifetime = append(lifetime, lifetimeMap)
 	if err := d.Set("lifetime", &lifetime); err != nil {
 		log.Printf("[WARN] unable to set IKE policy lifetime")
@@ -204,8 +208,9 @@ func resourceIKEPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta i
 	return nil
 }
 
-func resourceIKEPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIKEPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -231,18 +236,22 @@ func resourceIKEPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta
 		opts.PFS = ikepolicies.PFS(d.Get("pfs").(string))
 		hasChange = true
 	}
+
 	if d.HasChange("auth_algorithm") {
 		opts.AuthAlgorithm = ikepolicies.AuthAlgorithm(d.Get("auth_algorithm").(string))
 		hasChange = true
 	}
+
 	if d.HasChange("encryption_algorithm") {
 		opts.EncryptionAlgorithm = ikepolicies.EncryptionAlgorithm(d.Get("encryption_algorithm").(string))
 		hasChange = true
 	}
+
 	if d.HasChange("phase_1_negotiation_mode") {
 		opts.Phase1NegotiationMode = ikepolicies.Phase1NegotiationMode(d.Get("phase_1_negotiation_mode").(string))
 		hasChange = true
 	}
+
 	if d.HasChange("ike_version") {
 		opts.IKEVersion = ikepolicies.IKEVersion(d.Get("ike_version").(string))
 		hasChange = true
@@ -261,6 +270,7 @@ func resourceIKEPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta
 		if err != nil {
 			return diag.FromErr(err)
 		}
+
 		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
 			Target:     []string{"ACTIVE"},
@@ -277,10 +287,11 @@ func resourceIKEPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta
 	return resourceIKEPolicyV2Read(ctx, d, meta)
 }
 
-func resourceIKEPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIKEPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy IKE policy: %s", d.Id())
 
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -303,7 +314,7 @@ func resourceIKEPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func waitForIKEPolicyDeletion(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		err := ikepolicies.Delete(ctx, networkingClient, id).Err
 		if err == nil {
 			return "", "DELETED", nil
@@ -314,26 +325,28 @@ func waitForIKEPolicyDeletion(ctx context.Context, networkingClient *gophercloud
 }
 
 func waitForIKEPolicyCreation(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		policy, err := ikepolicies.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return "", "PENDING_CREATE", nil
 		}
+
 		return policy, "ACTIVE", nil
 	}
 }
 
 func waitForIKEPolicyUpdate(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		policy, err := ikepolicies.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return "", "PENDING_UPDATE", nil
 		}
+
 		return policy, "ACTIVE", nil
 	}
 }
 
-func resourceIKEPolicyV2AuthAlgorithm(v interface{}, k string) ([]string, []error) {
+func resourceIKEPolicyV2AuthAlgorithm(v any, k string) ([]string, []error) {
 	switch ikepolicies.AuthAlgorithm(v.(string)) {
 	case ikepolicies.AuthAlgorithmSHA1,
 		ikepolicies.AuthAlgorithmSHA256,
@@ -347,7 +360,7 @@ func resourceIKEPolicyV2AuthAlgorithm(v interface{}, k string) ([]string, []erro
 	return nil, []error{fmt.Errorf("unknown %q %s for openstack_vpnaas_ike_policy_v2", k, v)}
 }
 
-func resourceIKEPolicyV2EncryptionAlgorithm(v interface{}, k string) ([]string, []error) {
+func resourceIKEPolicyV2EncryptionAlgorithm(v any, k string) ([]string, []error) {
 	switch ikepolicies.EncryptionAlgorithm(v.(string)) {
 	case ikepolicies.EncryptionAlgorithm3DES,
 		ikepolicies.EncryptionAlgorithmAES128,
@@ -380,7 +393,7 @@ func resourceIKEPolicyV2EncryptionAlgorithm(v interface{}, k string) ([]string, 
 	return nil, []error{fmt.Errorf("unknown %q %s for openstack_vpnaas_ike_policy_v2", k, v)}
 }
 
-func resourceIKEPolicyV2PFS(v interface{}, k string) ([]string, []error) {
+func resourceIKEPolicyV2PFS(v any, k string) ([]string, []error) {
 	switch ikepolicies.PFS(v.(string)) {
 	case ikepolicies.PFSGroup2,
 		ikepolicies.PFSGroup5,
@@ -408,7 +421,7 @@ func resourceIKEPolicyV2PFS(v interface{}, k string) ([]string, []error) {
 	return nil, []error{fmt.Errorf("unknown %q %s for openstack_vpnaas_ike_policy_v2", k, v)}
 }
 
-func resourceIKEPolicyV2IKEVersion(v interface{}, k string) ([]string, []error) {
+func resourceIKEPolicyV2IKEVersion(v any, k string) ([]string, []error) {
 	switch ikepolicies.IKEVersion(v.(string)) {
 	case ikepolicies.IKEVersionv1,
 		ikepolicies.IKEVersionv2:
@@ -418,7 +431,7 @@ func resourceIKEPolicyV2IKEVersion(v interface{}, k string) ([]string, []error) 
 	return nil, []error{fmt.Errorf("unknown %q %s for openstack_vpnaas_ike_policy_v2", k, v)}
 }
 
-func resourceIKEPolicyV2Phase1NegotiationMode(v interface{}, k string) ([]string, []error) {
+func resourceIKEPolicyV2Phase1NegotiationMode(v any, k string) ([]string, []error) {
 	switch ikepolicies.Phase1NegotiationMode(v.(string)) {
 	case ikepolicies.Phase1NegotiationModeMain:
 		return nil, nil
@@ -429,12 +442,14 @@ func resourceIKEPolicyV2Phase1NegotiationMode(v interface{}, k string) ([]string
 
 func resourceIKEPolicyV2Unit(v string) ikepolicies.Unit {
 	var unit ikepolicies.Unit
+
 	switch v {
 	case "kilobytes":
 		unit = ikepolicies.UnitKilobytes
 	case "seconds":
 		unit = ikepolicies.UnitSeconds
 	}
+
 	return unit
 }
 
@@ -443,12 +458,13 @@ func resourceIKEPolicyV2LifetimeCreateOpts(d *schema.Set) ikepolicies.LifetimeCr
 
 	rawPairs := d.List()
 	for _, raw := range rawPairs {
-		rawMap := raw.(map[string]interface{})
+		rawMap := raw.(map[string]any)
 		lifetimeCreateOpts.Units = resourceIKEPolicyV2Unit(rawMap["units"].(string))
 
 		value := rawMap["value"].(int)
 		lifetimeCreateOpts.Value = value
 	}
+
 	return lifetimeCreateOpts
 }
 
@@ -457,11 +473,12 @@ func resourceIKEPolicyV2LifetimeUpdateOpts(d *schema.Set) ikepolicies.LifetimeUp
 
 	rawPairs := d.List()
 	for _, raw := range rawPairs {
-		rawMap := raw.(map[string]interface{})
+		rawMap := raw.(map[string]any)
 		lifetimeUpdateOpts.Units = resourceIKEPolicyV2Unit(rawMap["units"].(string))
 
 		value := rawMap["value"].(int)
 		lifetimeUpdateOpts.Value = value
 	}
+
 	return lifetimeUpdateOpts
 }

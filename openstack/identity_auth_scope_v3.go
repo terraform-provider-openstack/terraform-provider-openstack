@@ -23,8 +23,8 @@ func flattenIdentityAuthScopeV3Roles(roles []tokens3.Role) []map[string]string {
 	return allRoles
 }
 
-func flattenIdentityAuthScopeV3ServiceCatalog(catalog *tokens3.ServiceCatalog) []map[string]interface{} {
-	ret := make([]map[string]interface{}, len(catalog.Entries))
+func flattenIdentityAuthScopeV3ServiceCatalog(catalog *tokens3.ServiceCatalog) []map[string]any {
+	ret := make([]map[string]any, len(catalog.Entries))
 
 	for iEntry, entry := range catalog.Entries {
 		endpoints := make([]map[string]string, len(entry.Endpoints))
@@ -37,7 +37,8 @@ func flattenIdentityAuthScopeV3ServiceCatalog(catalog *tokens3.ServiceCatalog) [
 				"url":       endpoint.URL,
 			}
 		}
-		ret[iEntry] = map[string]interface{}{
+
+		ret[iEntry] = map[string]any{
 			"id":        entry.ID,
 			"name":      entry.Name,
 			"type":      entry.Type,
@@ -62,25 +63,29 @@ func getTokenDetails(ctx context.Context, sc *gophercloud.ServiceClient) (authSc
 		err     error
 	)
 
-	r := sc.ProviderClient.GetAuthResult()
+	r := sc.GetAuthResult()
 	switch result := r.(type) {
 	case tokens3.CreateResult:
 		details.user, err = result.ExtractUser()
 		if err != nil {
 			return details, err
 		}
+
 		details.domain, err = result.ExtractDomain()
 		if err != nil {
 			return details, err
 		}
+
 		details.project, err = result.ExtractProject()
 		if err != nil {
 			return details, err
 		}
+
 		details.roles, err = result.ExtractRoles()
 		if err != nil {
 			return details, err
 		}
+
 		details.catalog, err = result.ExtractServiceCatalog()
 		if err != nil {
 			return details, err
@@ -90,39 +95,47 @@ func getTokenDetails(ctx context.Context, sc *gophercloud.ServiceClient) (authSc
 		if err != nil {
 			return details, err
 		}
+
 		details.domain, err = result.ExtractDomain()
 		if err != nil {
 			return details, err
 		}
+
 		details.project, err = result.ExtractProject()
 		if err != nil {
 			return details, err
 		}
+
 		details.roles, err = result.ExtractRoles()
 		if err != nil {
 			return details, err
 		}
+
 		details.catalog, err = result.ExtractServiceCatalog()
 		if err != nil {
 			return details, err
 		}
 	default:
-		res := tokens3.Get(ctx, sc, sc.ProviderClient.TokenID)
+		res := tokens3.Get(ctx, sc, sc.TokenID)
 		if res.Err != nil {
 			return details, res.Err
 		}
+
 		details.user, err = res.ExtractUser()
 		if err != nil {
 			return details, err
 		}
+
 		details.domain, err = res.ExtractDomain()
 		if err != nil {
 			return details, err
 		}
+
 		details.project, err = res.ExtractProject()
 		if err != nil {
 			return details, err
 		}
+
 		details.roles, err = res.ExtractRoles()
 		if err != nil {
 			return details, err
@@ -140,51 +153,59 @@ type authScopeTokenInfo struct {
 }
 
 func getTokenInfo(ctx context.Context, sc *gophercloud.ServiceClient) (authScopeTokenInfo, error) {
-	r := sc.ProviderClient.GetAuthResult()
+	r := sc.GetAuthResult()
 	switch r := r.(type) {
 	case tokens2.CreateResult:
 		return getTokenInfoV2(r)
 	case tokens3.CreateResult, tokens3.GetResult:
 		return getTokenInfoV3(r)
 	default:
-		token := tokens3.Get(ctx, sc, sc.ProviderClient.TokenID)
+		token := tokens3.Get(ctx, sc, sc.TokenID)
 		if token.Err != nil {
 			return authScopeTokenInfo{}, token.Err
 		}
+
 		return getTokenInfoV3(token)
 	}
 }
 
-func getTokenInfoV3(t interface{}) (authScopeTokenInfo, error) {
+func getTokenInfoV3(t any) (authScopeTokenInfo, error) {
 	var info authScopeTokenInfo
+
 	switch r := t.(type) {
 	case tokens3.CreateResult:
 		user, err := r.ExtractUser()
 		if err != nil {
 			return info, err
 		}
+
 		project, err := r.ExtractProject()
 		if err != nil {
 			return info, err
 		}
+
 		info.userID = user.ID
 		if project != nil {
 			info.projectID = project.ID
 		}
+
 		return info, nil
 	case tokens3.GetResult:
 		user, err := r.ExtractUser()
 		if err != nil {
 			return info, err
 		}
+
 		project, err := r.ExtractProject()
 		if err != nil {
 			return info, err
 		}
+
 		info.userID = user.ID
 		if project != nil {
 			info.projectID = project.ID
 		}
+
 		return info, nil
 	default:
 		return info, fmt.Errorf("got unexpected AuthResult type %t", r)
@@ -193,6 +214,7 @@ func getTokenInfoV3(t interface{}) (authScopeTokenInfo, error) {
 
 func getTokenInfoV2(t tokens2.CreateResult) (authScopeTokenInfo, error) {
 	var info authScopeTokenInfo
+
 	var s struct {
 		Access struct {
 			Token struct {
@@ -208,7 +230,9 @@ func getTokenInfoV2(t tokens2.CreateResult) (authScopeTokenInfo, error) {
 	if err != nil {
 		return info, err
 	}
+
 	info.userID = s.Access.User.ID
 	info.tokenID = s.Access.Token.ID
+
 	return info, nil
 }

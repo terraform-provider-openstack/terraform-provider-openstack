@@ -2,17 +2,17 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/portsecurity"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 type testNetworkWithExtensions struct {
@@ -57,7 +57,9 @@ func TestAccNetworkingV2Network_basic(t *testing.T) {
 
 func TestAccNetworkingV2Network_netstack(t *testing.T) {
 	var network networks.Network
+
 	var subnet subnets.Subnet
+
 	var router routers.Router
 
 	resource.Test(t, resource.TestCase{
@@ -494,9 +496,10 @@ func TestAccNetworkingV2Network_qos_policy_update(t *testing.T) {
 
 func testAccCheckNetworkingV2NetworkDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -506,7 +509,7 @@ func testAccCheckNetworkingV2NetworkDestroy(s *terraform.State) error {
 
 		_, err := networks.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Network still exists")
+			return errors.New("Network still exists")
 		}
 	}
 
@@ -521,13 +524,14 @@ func testAccCheckNetworkingV2NetworkExists(n string, network *networks.Network) 
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := networks.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -536,7 +540,7 @@ func testAccCheckNetworkingV2NetworkExists(n string, network *networks.Network) 
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Network not found")
+			return errors.New("Network not found")
 		}
 
 		*network = *found
@@ -553,23 +557,25 @@ func testAccCheckNetworkingV2NetworkWithExtensionsExists(n string, network *test
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		var n testNetworkWithExtensions
+
 		err = networks.Get(context.TODO(), networkingClient, rs.Primary.ID).ExtractInto(&n)
 		if err != nil {
 			return err
 		}
 
 		if n.ID != rs.Primary.ID {
-			return fmt.Errorf("Network not found")
+			return errors.New("Network not found")
 		}
 
 		*network = n
@@ -579,7 +585,7 @@ func testAccCheckNetworkingV2NetworkWithExtensionsExists(n string, network *test
 }
 
 func testAccCheckNetworkingV2NetworkAdminStateUp(network *networks.Network, expected bool) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if network.AdminStateUp != expected {
 			return fmt.Errorf("Network has wrong admin_state_up. Expected %t, got %t", expected, network.AdminStateUp)
 		}
@@ -589,7 +595,7 @@ func testAccCheckNetworkingV2NetworkAdminStateUp(network *networks.Network, expe
 }
 
 func testAccCheckNetworkingV2NetworkPortSecurityEnabled(network *testNetworkWithExtensions, expected bool) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if network.PortSecurityEnabled != expected {
 			return fmt.Errorf("Network has wrong port_security_enabled. Expected %t, got %t", expected, network.PortSecurityEnabled)
 		}

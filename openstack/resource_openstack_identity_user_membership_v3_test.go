@@ -2,23 +2,25 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/groups"
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/groups"
-	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
 )
 
 func TestAccIdentityV3UserMembership_basic(t *testing.T) {
 	var group groups.Group
-	var groupName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+
+	groupName := "ACCPTTEST-" + acctest.RandString(5)
 
 	var user users.User
-	var userName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+
+	userName := "ACCPTTEST-" + acctest.RandString(5)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -46,9 +48,10 @@ func TestAccIdentityV3UserMembership_basic(t *testing.T) {
 
 func testAccCheckIdentityV3UserMembershipDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -63,7 +66,7 @@ func testAccCheckIdentityV3UserMembershipDestroy(s *terraform.State) error {
 
 		um, err := users.IsMemberOfGroup(context.TODO(), identityClient, gid, uid).Extract()
 		if err == nil && um {
-			return fmt.Errorf("User membership still exists")
+			return errors.New("User membership still exists")
 		}
 	}
 
@@ -78,13 +81,14 @@ func testAccCheckIdentityV3UserMembershipExists(n string) resource.TestCheckFunc
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
 		uid, gid, err := parsePairedIDs(rs.Primary.ID, "openstack_identity_user_membership_v3")
@@ -94,7 +98,7 @@ func testAccCheckIdentityV3UserMembershipExists(n string) resource.TestCheckFunc
 
 		um, err := users.IsMemberOfGroup(context.TODO(), identityClient, gid, uid).Extract()
 		if err != nil || !um {
-			return fmt.Errorf("User membership not found")
+			return errors.New("User membership not found")
 		}
 
 		return nil

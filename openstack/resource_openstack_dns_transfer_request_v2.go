@@ -6,11 +6,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/transfer/request"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/transfer/request"
 )
 
 func resourceDNSTransferRequestV2() *schema.Resource {
@@ -78,8 +77,9 @@ func resourceDNSTransferRequestV2() *schema.Resource {
 	}
 }
 
-func resourceDNSTransferRequestV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSTransferRequestV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
@@ -96,6 +96,7 @@ func resourceDNSTransferRequestV2Create(ctx context.Context, d *schema.ResourceD
 	log.Printf("[DEBUG] openstack_dns_transfer_request_v2 create options: %#v", createOpts)
 
 	zoneID := d.Get("zone_id").(string)
+
 	n, err := request.Create(ctx, dnsClient, zoneID, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_transfer_request_zone_v2: %s", err)
@@ -105,6 +106,7 @@ func resourceDNSTransferRequestV2Create(ctx context.Context, d *schema.ResourceD
 		d.SetId(n.ID)
 
 		log.Printf("[DEBUG] Created OpenStack Zone Transfer request %s: %#v", n.ID, n)
+
 		return resourceDNSTransferRequestV2Read(ctx, d, meta)
 	}
 
@@ -126,11 +128,13 @@ func resourceDNSTransferRequestV2Create(ctx context.Context, d *schema.ResourceD
 	d.SetId(n.ID)
 
 	log.Printf("[DEBUG] Created OpenStack Zone Transfer request %s: %#v", n.ID, n)
+
 	return resourceDNSTransferRequestV2Read(ctx, d, meta)
 }
 
-func resourceDNSTransferRequestV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSTransferRequestV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
@@ -152,15 +156,18 @@ func resourceDNSTransferRequestV2Read(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceDNSTransferRequestV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSTransferRequestV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
 	var updateOpts request.UpdateOpts
+
 	changed := false
+
 	if d.HasChange("target_project_id") {
 		updateOpts.TargetProjectID = d.Get("target_project_id").(string)
 		changed = true
@@ -204,8 +211,9 @@ func resourceDNSTransferRequestV2Update(ctx context.Context, d *schema.ResourceD
 	return resourceDNSTransferRequestV2Read(ctx, d, meta)
 }
 
-func resourceDNSTransferRequestV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSTransferRequestV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
@@ -238,16 +246,17 @@ func resourceDNSTransferRequestV2Delete(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func resourceDNSTransferRequestV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceDNSTransferRequestV2Import(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
+
 	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		return nil, fmt.Errorf("Error creating OpenStack DNS client: %w", err)
 	}
 
 	n, err := request.Get(ctx, dnsClient, d.Id()).Extract()
 	if err != nil {
-		return nil, fmt.Errorf("Error retrieving openstack_dns_transfer_request_v2 %s: %s", d.Id(), err)
+		return nil, fmt.Errorf("Error retrieving openstack_dns_transfer_request_v2 %s: %w", d.Id(), err)
 	}
 
 	d.Set("zone_id", n.ZoneID)

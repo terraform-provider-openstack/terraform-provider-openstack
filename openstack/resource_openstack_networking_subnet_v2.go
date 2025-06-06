@@ -6,14 +6,13 @@ import (
 	"net"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/attributestags"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/attributestags"
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
 )
 
 func resourceNetworkingSubnetV2() *schema.Resource {
@@ -204,15 +203,16 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	// Check nameservers.
-	if err := networkingSubnetV2DNSNameserverAreUnique(d.Get("dns_nameservers").([]interface{})); err != nil {
+	if err := networkingSubnetV2DNSNameserverAreUnique(d.Get("dns_nameservers").([]any)); err != nil {
 		return diag.Errorf("openstack_networking_subnet_v2 dns_nameservers argument is invalid: %s", err)
 	}
 
@@ -229,8 +229,8 @@ func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceDat
 			IPv6AddressMode: d.Get("ipv6_address_mode").(string),
 			IPv6RAMode:      d.Get("ipv6_ra_mode").(string),
 			AllocationPools: expandNetworkingSubnetV2AllocationPools(allocationPool),
-			DNSNameservers:  expandToStringSlice(d.Get("dns_nameservers").([]interface{})),
-			ServiceTypes:    expandToStringSlice(d.Get("service_types").([]interface{})),
+			DNSNameservers:  expandToStringSlice(d.Get("dns_nameservers").([]any)),
+			ServiceTypes:    expandToStringSlice(d.Get("service_types").([]any)),
 			SegmentID:       d.Get("segment_id").(string),
 			SubnetPoolID:    d.Get("subnetpool_id").(string),
 			IPVersion:       gophercloud.IPVersion(d.Get("ip_version").(int)),
@@ -250,9 +250,11 @@ func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceDat
 		if err != nil {
 			return diag.Errorf("Invalid CIDR %s: %s", cidr, err)
 		}
+
 		if netAddr.String() != cidr {
 			return diag.Errorf("cidr %s doesn't match subnet address %s for openstack_networking_subnet_v2", cidr, netAddr.String())
 		}
+
 		createOpts.CIDR = cidr
 	}
 
@@ -273,6 +275,7 @@ func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceDat
 		if d.Get("subnetpool_id").(string) == "" {
 			return diag.Errorf("'prefix_length' is only valid if 'subnetpool_id' is set for openstack_networking_subnet_v2")
 		}
+
 		prefixLength := v.(int)
 		createOpts.Prefixlen = prefixLength
 	}
@@ -282,6 +285,7 @@ func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceDat
 	createOpts.EnableDHCP = &enableDHCP
 
 	log.Printf("[DEBUG] openstack_networking_subnet_v2 create options: %#v", createOpts)
+
 	s, err := subnets.Create(ctx, networkingClient, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_networking_subnet_v2: %s", err)
@@ -306,19 +310,23 @@ func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceDat
 	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+
 		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "subnets", s.ID, tagOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error creating tags on openstack_networking_subnet_v2 %s: %s", s.ID, err)
 		}
+
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_subnet_v2 %s", tags, s.ID)
 	}
 
 	log.Printf("[DEBUG] Created openstack_networking_subnet_v2 %s: %#v", s.ID, s)
+
 	return resourceNetworkingSubnetV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -358,6 +366,7 @@ func resourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceData,
 	// Set the subnet's "gateway_ip" and "no_gateway" attributes.
 	d.Set("gateway_ip", s.GatewayIP)
 	d.Set("no_gateway", false)
+
 	if s.GatewayIP != "" {
 		d.Set("no_gateway", false)
 	} else {
@@ -369,14 +378,16 @@ func resourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceNetworkingSubnetV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingSubnetV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var hasChange bool
+
 	var updateOpts subnets.UpdateOpts
 
 	if d.HasChange("name") {
@@ -394,6 +405,7 @@ func resourceNetworkingSubnetV2Update(ctx context.Context, d *schema.ResourceDat
 	if d.HasChange("gateway_ip") {
 		hasChange = true
 		updateOpts.GatewayIP = nil
+
 		if v, ok := d.GetOk("gateway_ip"); ok {
 			gatewayIP := v.(string)
 			updateOpts.GatewayIP = &gatewayIP
@@ -409,17 +421,18 @@ func resourceNetworkingSubnetV2Update(ctx context.Context, d *schema.ResourceDat
 	}
 
 	if d.HasChange("dns_nameservers") {
-		if err := networkingSubnetV2DNSNameserverAreUnique(d.Get("dns_nameservers").([]interface{})); err != nil {
+		if err := networkingSubnetV2DNSNameserverAreUnique(d.Get("dns_nameservers").([]any)); err != nil {
 			return diag.Errorf("openstack_networking_subnet_v2 dns_nameservers argument is invalid: %s", err)
 		}
+
 		hasChange = true
-		nameservers := expandToStringSlice(d.Get("dns_nameservers").([]interface{}))
+		nameservers := expandToStringSlice(d.Get("dns_nameservers").([]any))
 		updateOpts.DNSNameservers = &nameservers
 	}
 
 	if d.HasChange("service_types") {
 		hasChange = true
-		serviceTypes := expandToStringSlice(d.Get("service_types").([]interface{}))
+		serviceTypes := expandToStringSlice(d.Get("service_types").([]any))
 		updateOpts.ServiceTypes = &serviceTypes
 	}
 
@@ -448,6 +461,7 @@ func resourceNetworkingSubnetV2Update(ctx context.Context, d *schema.ResourceDat
 
 	if hasChange {
 		log.Printf("[DEBUG] Updating openstack_networking_subnet_v2 %s with options: %#v", d.Id(), updateOpts)
+
 		_, err = subnets.Update(ctx, networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating OpenStack Neutron openstack_networking_subnet_v2 %s: %s", d.Id(), err)
@@ -457,18 +471,21 @@ func resourceNetworkingSubnetV2Update(ctx context.Context, d *schema.ResourceDat
 	if d.HasChange("tags") {
 		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+
 		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "subnets", d.Id(), tagOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating tags on openstack_networking_subnet_v2 %s: %s", d.Id(), err)
 		}
+
 		log.Printf("[DEBUG] Updated tags %s on openstack_networking_subnet_v2 %s", tags, d.Id())
 	}
 
 	return resourceNetworkingSubnetV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSubnetV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingSubnetV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)

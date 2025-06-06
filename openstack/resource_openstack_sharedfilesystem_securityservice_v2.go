@@ -5,11 +5,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/securityservices"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/securityservices"
 )
 
 func resourceSharedFilesystemSecurityServiceV2() *schema.Resource {
@@ -94,8 +93,9 @@ func resourceSharedFilesystemSecurityServiceV2() *schema.Resource {
 	}
 }
 
-func resourceSharedFilesystemSecurityServiceV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSharedFilesystemSecurityServiceV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
@@ -121,6 +121,7 @@ func resourceSharedFilesystemSecurityServiceV2Create(ctx context.Context, d *sch
 
 	log.Printf("[DEBUG] openstack_sharedfilesystem_securityservice_v2 create options: %#v", createOpts)
 	createOpts.Password = d.Get("password").(string)
+
 	securityservice, err := securityservices.Create(ctx, sfsClient, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_sharedfilesystem_securityservice_v2: %s", err)
@@ -131,8 +132,9 @@ func resourceSharedFilesystemSecurityServiceV2Create(ctx context.Context, d *sch
 	return resourceSharedFilesystemSecurityServiceV2Read(ctx, d, meta)
 }
 
-func resourceSharedFilesystemSecurityServiceV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSharedFilesystemSecurityServiceV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
@@ -152,6 +154,7 @@ func resourceSharedFilesystemSecurityServiceV2Read(ctx context.Context, d *schem
 	// Workaround for resource import.
 	if securityservice.OU == "" {
 		sfsClient.Microversion = sharedFilesystemV2SecurityServiceOUMicroversion
+
 		securityserviceOU, err := securityservices.Get(ctx, sfsClient, d.Id()).Extract()
 		if err == nil {
 			d.Set("ou", securityserviceOU.OU)
@@ -177,8 +180,9 @@ func resourceSharedFilesystemSecurityServiceV2Read(ctx context.Context, d *schem
 	return nil
 }
 
-func resourceSharedFilesystemSecurityServiceV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSharedFilesystemSecurityServiceV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
@@ -243,8 +247,9 @@ func resourceSharedFilesystemSecurityServiceV2Update(ctx context.Context, d *sch
 	return resourceSharedFilesystemSecurityServiceV2Read(ctx, d, meta)
 }
 
-func resourceSharedFilesystemSecurityServiceV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSharedFilesystemSecurityServiceV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)

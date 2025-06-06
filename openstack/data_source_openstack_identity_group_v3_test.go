@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -36,7 +37,7 @@ func testAccCheckIdentityV3GroupDataSourceID(n string) resource.TestCheckFunc {
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Group data source ID not set")
+			return errors.New("Group data source ID not set")
 		}
 
 		return nil

@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/members"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/members"
 )
 
 func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
@@ -48,9 +48,10 @@ func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 
 func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	imageClient, err := config.ImageV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Image: %s", err)
+		return fmt.Errorf("Error creating OpenStack Image: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -65,7 +66,7 @@ func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 
 		_, err = members.Get(context.TODO(), imageClient, imageID, memberID).Extract()
 		if err == nil {
-			return fmt.Errorf("Image membership still exists")
+			return errors.New("Image membership still exists")
 		}
 	}
 

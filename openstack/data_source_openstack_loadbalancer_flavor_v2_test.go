@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -37,7 +38,7 @@ func testAccCheckLoadBalancerV2FlavorDataSourceID(n string) resource.TestCheckFu
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Flavor data source ID not set")
+			return errors.New("Flavor data source ID not set")
 		}
 
 		return nil

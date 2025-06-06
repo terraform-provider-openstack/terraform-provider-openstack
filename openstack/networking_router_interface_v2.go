@@ -6,17 +6,16 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceNetworkingRouterInterfaceV2StateRefreshFunc(ctx context.Context, networkingClient *gophercloud.ServiceClient, portID string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		r, err := ports.Get(ctx, networkingClient, portID).Extract()
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
@@ -31,7 +30,7 @@ func resourceNetworkingRouterInterfaceV2StateRefreshFunc(ctx context.Context, ne
 }
 
 func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(ctx context.Context, networkingClient *gophercloud.ServiceClient, d *schema.ResourceData) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		routerID := d.Get("router_id").(string)
 		routerInterfaceID := d.Id()
 
@@ -52,8 +51,10 @@ func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(ctx context.Context, n
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				log.Printf("[DEBUG] Successfully deleted openstack_networking_router_interface_v2 %s", routerInterfaceID)
+
 				return r, "DELETED", nil
 			}
+
 			return r, "ACTIVE", err
 		}
 
@@ -61,19 +62,23 @@ func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(ctx context.Context, n
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				log.Printf("[DEBUG] Successfully deleted openstack_networking_router_interface_v2 %s", routerInterfaceID)
+
 				return r, "DELETED", nil
 			}
+
 			if gophercloud.ResponseCodeIs(err, http.StatusConflict) {
 				if d.Get("force_destroy").(bool) {
 					// The router may have routes preventing the interface to be deleted.
 					// Check which routes correspond to a particular router interface.
 					var updateRoutes []routers.Route
+
 					if removeOpts.SubnetID != "" {
 						// get subnet CIDR
 						subnet, err := subnets.Get(ctx, networkingClient, removeOpts.SubnetID).Extract()
 						if err != nil {
 							return r, "ACTIVE", err
 						}
+
 						_, cidr, err := net.ParseCIDR(subnet.CIDR)
 						if err != nil {
 							return r, "ACTIVE", err
@@ -83,6 +88,7 @@ func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(ctx context.Context, n
 						if err != nil {
 							return r, "ACTIVE", err
 						}
+
 						for _, route := range router.Routes {
 							if ip := net.ParseIP(route.NextHop); ip != nil && !cidr.Contains(ip) {
 								updateRoutes = append(updateRoutes, route)
@@ -95,6 +101,7 @@ func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(ctx context.Context, n
 					opts := &routers.UpdateOpts{
 						Routes: &updateRoutes,
 					}
+
 					_, err := routers.Update(ctx, networkingClient, routerID, opts).Extract()
 					if err != nil {
 						return r, "ACTIVE", err
@@ -102,6 +109,7 @@ func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(ctx context.Context, n
 				}
 
 				log.Printf("[DEBUG] openstack_networking_router_interface_v2 %s is still in use", routerInterfaceID)
+
 				return r, "ACTIVE", nil
 			}
 
@@ -109,6 +117,7 @@ func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(ctx context.Context, n
 		}
 
 		log.Printf("[DEBUG] openstack_networking_router_interface_v2 %s is still active", routerInterfaceID)
+
 		return r, "ACTIVE", nil
 	}
 }

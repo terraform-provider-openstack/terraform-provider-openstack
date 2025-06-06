@@ -5,12 +5,11 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/addressgroups"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/addressgroups"
 )
 
 func resourceNetworkingAddressGroupV2() *schema.Resource {
@@ -64,8 +63,9 @@ func resourceNetworkingAddressGroupV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingAddressGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingAddressGroupV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -79,6 +79,7 @@ func resourceNetworkingAddressGroupV2Create(ctx context.Context, d *schema.Resou
 	}
 
 	log.Printf("[DEBUG] openstack_networking_address_group_v2 create options: %#v", opts)
+
 	ag, err := addressgroups.Create(ctx, networkingClient, opts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_networking_address_group_v2: %s", err)
@@ -89,8 +90,9 @@ func resourceNetworkingAddressGroupV2Create(ctx context.Context, d *schema.Resou
 	return resourceNetworkingAddressGroupV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingAddressGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingAddressGroupV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -112,8 +114,9 @@ func resourceNetworkingAddressGroupV2Read(ctx context.Context, d *schema.Resourc
 	return nil
 }
 
-func resourceNetworkingAddressGroupV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingAddressGroupV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -138,6 +141,7 @@ func resourceNetworkingAddressGroupV2Update(ctx context.Context, d *schema.Resou
 
 	if updated {
 		log.Printf("[DEBUG] Updating openstack_networking_address_group_v2 %s with options: %#v", d.Id(), updateOpts)
+
 		_, err = addressgroups.Update(ctx, networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_networking_address_group_v2: %s", err)
@@ -149,21 +153,25 @@ func resourceNetworkingAddressGroupV2Update(ctx context.Context, d *schema.Resou
 		oldAddr, newAddr := o.(*schema.Set), n.(*schema.Set)
 		addrToDel := oldAddr.Difference(newAddr)
 		addrToAdd := newAddr.Difference(oldAddr)
+
 		if v := addrToDel.List(); len(v) > 0 {
 			log.Printf("[DEBUG] Removing addresses '%s' from openstack_networking_address_group_v2 '%s'", v, d.Get("name"))
 			opts := addressgroups.UpdateAddressesOpts{
 				Addresses: expandToStringSlice(v),
 			}
+
 			_, err = addressgroups.RemoveAddresses(ctx, networkingClient, d.Id(), opts).Extract()
 			if err != nil {
 				return diag.Errorf("Error deleting addresses '%s' from openstack_networking_address_group_v2: %s", v, err)
 			}
 		}
+
 		if v := addrToAdd.List(); len(v) > 0 {
 			log.Printf("[DEBUG] Adding addresses '%s' to openstack_networking_address_group_v2 '%s'", v, d.Get("name"))
 			opts := addressgroups.UpdateAddressesOpts{
 				Addresses: expandToStringSlice(v),
 			}
+
 			_, err = addressgroups.AddAddresses(ctx, networkingClient, d.Id(), opts).Extract()
 			if err != nil {
 				return diag.Errorf("Error adding addresses '%s' to openstack_networking_address_group_v2: %s", v, err)
@@ -174,8 +182,9 @@ func resourceNetworkingAddressGroupV2Update(ctx context.Context, d *schema.Resou
 	return resourceNetworkingAddressGroupV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingAddressGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingAddressGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)

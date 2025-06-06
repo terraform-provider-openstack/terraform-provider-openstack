@@ -8,12 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/acls"
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/secrets"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/acls"
-	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/secrets"
 )
 
 func getDateFilters() [4]string {
@@ -27,6 +26,7 @@ func getDateFilters() [4]string {
 
 func getDateFiltersRegexPreformatted() string {
 	df := getDateFilters()
+
 	return strings.Join(df[:], "|")
 }
 
@@ -161,13 +161,15 @@ func dataSourceKeyManagerSecretV1() *schema.Resource {
 	for _, aclOp := range getSupportedACLOperations() {
 		elem.Schema[aclOp] = getACLSchema()
 	}
+
 	ret.Schema["acl"].Elem = elem
 
 	return ret
 }
 
-func dataSourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	kmClient, err := config.KeyManagerV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack barbican client: %s", err)
@@ -206,6 +208,7 @@ func dataSourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceDat
 
 	if len(allSecrets) > 1 {
 		log.Printf("[DEBUG] Multiple openstack_keymanager_secret_v1 results found: %#v", allSecrets)
+
 		return diag.Errorf("Your query returned more than one result. Please try a more " +
 			"specific search criteria")
 	}
@@ -234,13 +237,15 @@ func dataSourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceDat
 	d.Set("payload_content_type", payloadContentType)
 
 	d.Set("payload", keyManagerSecretV1GetPayload(ctx, kmClient, d.Id(), payloadContentType))
+
 	metadataMap, err := secrets.GetMetadata(ctx, kmClient, d.Id()).Extract()
 	if err != nil {
 		log.Printf("[DEBUG] Unable to get %s secret metadata: %s", uuid, err)
 	}
+
 	d.Set("metadata", metadataMap)
 
-	if secret.Expiration == (time.Time{}) {
+	if secret.Expiration.Equal((time.Time{})) {
 		d.Set("expiration", "")
 	} else {
 		d.Set("expiration", secret.Expiration.Format(time.RFC3339))
@@ -250,6 +255,7 @@ func dataSourceKeyManagerSecretV1Read(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		log.Printf("[DEBUG] Unable to get %s secret acls: %s", uuid, err)
 	}
+
 	d.Set("acl", flattenKeyManagerV1ACLs(acl))
 
 	// Set the region
@@ -268,6 +274,7 @@ func dataSourceParseDateFilter(date string) *secrets.DateQuery {
 	}
 
 	var parsedTime time.Time
+
 	var filter *secrets.DateQuery
 
 	if len(parts) == 2 {
@@ -280,14 +287,14 @@ func dataSourceParseDateFilter(date string) *secrets.DateQuery {
 		filter = &secrets.DateQuery{Date: parsedTime}
 	}
 
-	if parsedTime == (time.Time{}) {
+	if parsedTime.Equal((time.Time{})) {
 		return nil
 	}
 
 	return filter
 }
 
-func dataSourceValidateDateFilter(v interface{}, k string) (ws []string, errors []error) {
+func dataSourceValidateDateFilter(v any, _ string) (ws []string, errors []error) {
 	var parts []string
 	if regexp.MustCompile("^" + getDateFiltersRegexPreformatted() + ":").Match([]byte(v.(string))) {
 		parts = strings.SplitN(v.(string), ":", 2)

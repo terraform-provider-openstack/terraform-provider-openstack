@@ -2,15 +2,15 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/recordsets"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/recordsets"
 )
 
 func randomZoneName() string {
@@ -19,6 +19,7 @@ func randomZoneName() string {
 
 func TestAccDNSV2RecordSet_basic(t *testing.T) {
 	var recordset recordsets.RecordSet
+
 	zoneName := randomZoneName()
 
 	resource.Test(t, resource.TestCase{
@@ -60,6 +61,7 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 
 func TestAccDNSV2RecordSet_ipv6(t *testing.T) {
 	var recordset recordsets.RecordSet
+
 	zoneName := randomZoneName()
 
 	resource.Test(t, resource.TestCase{
@@ -89,6 +91,7 @@ func TestAccDNSV2RecordSet_ipv6(t *testing.T) {
 
 func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 	var recordset recordsets.RecordSet
+
 	zoneName := randomZoneName()
 
 	resource.Test(t, resource.TestCase{
@@ -114,6 +117,7 @@ func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 
 func TestAccDNSV2RecordSet_ensureSameTTL(t *testing.T) {
 	var recordset recordsets.RecordSet
+
 	zoneName := randomZoneName()
 
 	resource.Test(t, resource.TestCase{
@@ -150,6 +154,7 @@ func TestAccDNSV2RecordSet_ensureSameTTL(t *testing.T) {
 
 func TestAccDNSV2RecordSet_sudoProjectID(t *testing.T) {
 	var recordset recordsets.RecordSet
+
 	zoneName := randomZoneName()
 
 	resource.Test(t, resource.TestCase{
@@ -175,9 +180,10 @@ func TestAccDNSV2RecordSet_sudoProjectID(t *testing.T) {
 
 func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	dnsClient, err := config.DNSV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+		return fmt.Errorf("Error creating OpenStack DNS client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -192,7 +198,7 @@ func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 
 		_, err = recordsets.Get(context.TODO(), dnsClient, zoneID, recordsetID).Extract()
 		if err == nil {
-			return fmt.Errorf("Record set still exists")
+			return errors.New("Record set still exists")
 		}
 	}
 
@@ -207,13 +213,14 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		dnsClient, err := config.DNSV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack DNS client: %s", err)
+			return fmt.Errorf("Error creating OpenStack DNS client: %w", err)
 		}
 
 		zoneID, recordsetID, err := parsePairedIDs(rs.Primary.ID, "openstack_dns_recordset_v2")
@@ -227,7 +234,7 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 		}
 
 		if found.ID != recordsetID {
-			return fmt.Errorf("Record set not found")
+			return errors.New("Record set not found")
 		}
 
 		*recordset = *found
@@ -238,6 +245,7 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 
 func TestAccDNSV2RecordSet_ignoreStatusCheck(t *testing.T) {
 	var recordset recordsets.RecordSet
+
 	zoneName := randomZoneName()
 
 	resource.Test(t, resource.TestCase{

@@ -5,12 +5,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/flavors"
 	"github.com/gophercloud/gophercloud/v2/pagination"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceLBFlavorV2() *schema.Resource {
@@ -58,44 +57,50 @@ func dataSourceLBFlavorV2() *schema.Resource {
 	}
 }
 
-func dataSourceLBFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceLBFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancer client: %s", err)
 	}
 
 	var allFlavors []flavors.Flavor
+
 	if v := d.Get("flavor_id").(string); v != "" {
 		var flavor *flavors.Flavor
+
 		flavor, err = flavors.Get(ctx, lbClient, v).Extract()
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return diag.Errorf("No flavor found")
 			}
+
 			return diag.Errorf("Unable to retrieve Openstack %s loadbalancer flavor: %s", v, err)
 		}
 
-		dataSourceLBFlavorV2Attributes(d, lbClient, flavor)
+		dataSourceLBFlavorV2Attributes(d, flavor)
 		d.Set("region", GetRegion(d, config))
 
 		return nil
-	} else {
-		var allPages pagination.Page
-		allPages, err = flavors.List(lbClient, flavors.ListOpts{}).AllPages(ctx)
-		if err != nil {
-			return diag.Errorf("Unable to query OpenStack flavors: %s", err)
-		}
+	}
 
-		allFlavors, err = flavors.ExtractFlavors(allPages)
-		if err != nil {
-			return diag.Errorf("Unable to retrieve Openstack loadbalancer flavors: %s", err)
-		}
+	var allPages pagination.Page
+
+	allPages, err = flavors.List(lbClient, flavors.ListOpts{}).AllPages(ctx)
+	if err != nil {
+		return diag.Errorf("Unable to query OpenStack flavors: %s", err)
+	}
+
+	allFlavors, err = flavors.ExtractFlavors(allPages)
+	if err != nil {
+		return diag.Errorf("Unable to retrieve Openstack loadbalancer flavors: %s", err)
 	}
 
 	// Loop through all flavors to find a more specific one
 	if len(allFlavors) > 0 {
 		var filteredFlavors []flavors.Flavor
+
 		for _, flavor := range allFlavors {
 			if v := d.Get("name").(string); v != "" {
 				if flavor.Name != v {
@@ -116,17 +121,18 @@ func dataSourceLBFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta 
 
 	if len(allFlavors) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allFlavors)
+
 		return diag.Errorf("Your query returned more than one result. " +
 			"Please try a more specific search criteria")
 	}
 
-	dataSourceLBFlavorV2Attributes(d, lbClient, &allFlavors[0])
+	dataSourceLBFlavorV2Attributes(d, &allFlavors[0])
 	d.Set("region", GetRegion(d, config))
 
 	return nil
 }
 
-func dataSourceLBFlavorV2Attributes(d *schema.ResourceData, computeClient *gophercloud.ServiceClient, flavor *flavors.Flavor) {
+func dataSourceLBFlavorV2Attributes(d *schema.ResourceData, flavor *flavors.Flavor) {
 	log.Printf("[DEBUG] Retrieved openstack_lb_flavor_v2 %s: %#v", flavor.ID, flavor)
 
 	d.SetId(flavor.ID)

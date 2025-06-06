@@ -4,9 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
+	"github.com/stretchr/testify/assert"
 )
 
 func blockStorageVolumeV3VolumeFixture() volumes.Volume {
@@ -40,7 +39,7 @@ func blockStorageVolumeV3VolumeFixture() volumes.Volume {
 }
 
 func TestUnitFlattenBlockStorageVolumeV3Attachments(t *testing.T) {
-	expectedAttachments := []map[string]interface{}{
+	expectedAttachments := []map[string]any{
 		{
 			"id":          "d6cacb1a-8b59-4c88-ad90-d70ebb82bb75",
 			"instance_id": "83ec2e3b-4321-422b-8706-a84185f52a0a",
@@ -67,17 +66,17 @@ func blockStorageVolumeV3SchedulerHints() volumes.SchedulerHintOpts {
 		DifferentHost:        []string{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
 		LocalToInstance:      "83ec2e3b-4321-422b-8706-a84185f52a0a",
 		Query:                "[“=”, “$backend_id”, “rbd:vol@ceph#cloud”]",
-		AdditionalProperties: map[string]interface{}{},
+		AdditionalProperties: map[string]any{},
 	}
 }
 
 func TestUnitFlattenBlockStorageVolumeV3SchedulerHints(t *testing.T) {
-	expectedSchedulerHints := map[string]interface{}{
-		"same_host":             []interface{}{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
-		"different_host":        []interface{}{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
+	expectedSchedulerHints := map[string]any{
+		"same_host":             []any{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
+		"different_host":        []any{"83ec2e3b-4321-422b-8706-a84185f52a0a"},
 		"local_to_instance":     "83ec2e3b-4321-422b-8706-a84185f52a0a",
 		"query":                 "[“=”, “$backend_id”, “rbd:vol@ceph#cloud”]",
-		"additional_properties": map[string]interface{}{},
+		"additional_properties": map[string]any{},
 	}
 
 	actualSchedulerHints := expandBlockStorageVolumeV3SchedulerHints(blockStorageVolumeV3SchedulerHints())

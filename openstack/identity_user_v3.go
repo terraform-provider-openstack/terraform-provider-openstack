@@ -17,22 +17,23 @@ func getUserOptions() [4]users.Option {
 	}
 }
 
-func expandIdentityUserV3MFARules(rules []interface{}) []interface{} {
-	mfaRules := make([]interface{}, 0, len(rules))
+func expandIdentityUserV3MFARules(rules []any) []any {
+	mfaRules := make([]any, 0, len(rules))
 
 	for _, rule := range rules {
-		ruleMap := rule.(map[string]interface{})
-		ruleList := ruleMap["rule"].([]interface{})
+		ruleMap := rule.(map[string]any)
+		ruleList := ruleMap["rule"].([]any)
 		mfaRules = append(mfaRules, ruleList)
 	}
 
 	return mfaRules
 }
 
-func flattenIdentityUserV3MFARules(v []interface{}) []map[string]interface{} {
-	mfaRules := []map[string]interface{}{}
+func flattenIdentityUserV3MFARules(v []any) []map[string]any {
+	mfaRules := []map[string]any{}
+
 	for _, rawRule := range v {
-		mfaRule := map[string]interface{}{
+		mfaRule := map[string]any{
 			"rule": rawRule,
 		}
 		mfaRules = append(mfaRules, mfaRule)
@@ -43,13 +44,15 @@ func flattenIdentityUserV3MFARules(v []interface{}) []map[string]interface{} {
 
 // Ensure that password_expires_at query matches format explained in
 // https://developer.openstack.org/api-ref/identity/v3/#list-users
-func validatePasswordExpiresAtQuery(v interface{}, k string) (ws []string, errors []error) {
+func validatePasswordExpiresAtQuery(v any, k string) (ws []string, errors []error) {
 	value := v.(string)
 	values := strings.SplitN(value, ":", 2)
+
 	if len(values) != 2 {
 		err := fmt.Errorf("%s '%s' does not match expected format: {operator}:{timestamp}", k, value)
 		errors = append(errors, err)
 	}
+
 	operator, timestamp := values[0], values[1]
 
 	validOperators := map[string]bool{
@@ -71,5 +74,5 @@ func validatePasswordExpiresAtQuery(v interface{}, k string) (ws []string, error
 		errors = append(errors, err)
 	}
 
-	return
+	return ws, errors
 }

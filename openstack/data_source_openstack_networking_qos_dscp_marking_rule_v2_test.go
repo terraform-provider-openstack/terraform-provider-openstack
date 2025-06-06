@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -40,7 +41,7 @@ func testAccCheckNetworkingQoSDSCPMarkingRuleV2DataSourceID(n string) resource.T
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("QoS DSCP marking data source ID not set")
+			return errors.New("QoS DSCP marking data source ID not set")
 		}
 
 		return nil

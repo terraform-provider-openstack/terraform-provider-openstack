@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -56,7 +57,7 @@ func testAccCheckNetworkingQoSBandwidthLimitRuleV2DataSourceID(n string) resourc
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("QoS bw limit data source ID not set")
+			return errors.New("QoS bw limit data source ID not set")
 		}
 
 		return nil
