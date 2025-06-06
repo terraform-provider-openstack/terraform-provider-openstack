@@ -3,19 +3,30 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/functional-bgpvpn.yml'
-      - 'go.mod'
-      - 'openstack/**bgpvpn**'
-      - 'CHANGELOG.md'
-      - 'scripts/*'
+  workflow_run:
+    workflows:
+      - Unit Testing
+      - Golangci-lint
+    types:
+      - completed
   schedule:
     - cron: '0 0 */3 * *'
 permissions:
   contents: read
 jobs:
+  # run functional tests only after unit tests and golangci-lint have completed successfully or on schedule
+  conditional-check:
+    uses: ./.github/workflows/conditional-check.yml
+    with:
+      patterns: |
+        ^.github\/workflows\/functional-bgpvpn\.yml$
+        ^openstack\/.*bgpvpn.*\.go$
+        ^scripts\/
+        ^go\.mod$
+        ^CHANGELOG\.md$
   functional-bgpvpn:
+    needs: conditional-check
+    if: needs.conditional-check.outputs.run_tests == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -35,6 +46,7 @@ jobs:
     runs-on: ubuntu-${{ matrix.ubuntu_version }}
     name: bgpvpn on OpenStack ${{ matrix.name }} with Neutron and run bgpvpn acceptance tests
     steps:
+      - run: echo "Running functional tests..." && false
       - name: Checkout TPO
         uses: actions/checkout@v4
       - name: Create additional neutron policies
