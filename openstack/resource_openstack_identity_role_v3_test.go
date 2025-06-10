@@ -2,17 +2,18 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/roles"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/roles"
 )
 
 func TestAccIdentityV3Role_basic(t *testing.T) {
 	var role roles.Role
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -43,9 +44,10 @@ func TestAccIdentityV3Role_basic(t *testing.T) {
 
 func testAccCheckIdentityV3RoleDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -55,7 +57,7 @@ func testAccCheckIdentityV3RoleDestroy(s *terraform.State) error {
 
 		_, err := roles.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Role still exists")
+			return errors.New("Role still exists")
 		}
 	}
 
@@ -70,13 +72,14 @@ func testAccCheckIdentityV3RoleExists(n string, role *roles.Role) resource.TestC
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
 		found, err := roles.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
@@ -85,7 +88,7 @@ func testAccCheckIdentityV3RoleExists(n string, role *roles.Role) resource.TestC
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Role not found")
+			return errors.New("Role not found")
 		}
 
 		*role = *found

@@ -5,13 +5,12 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/attributestags"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/groups"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/rules"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceNetworkingSecGroupV2() *schema.Resource {
@@ -81,8 +80,9 @@ func resourceNetworkingSecGroupV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingSecGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingSecGroupV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -93,12 +93,14 @@ func resourceNetworkingSecGroupV2Create(ctx context.Context, d *schema.ResourceD
 		Description: d.Get("description").(string),
 		TenantID:    d.Get("tenant_id").(string),
 	}
+
 	if v, ok := getOkExists(d, "stateful"); ok {
 		v := v.(bool)
 		opts.Stateful = &v
 	}
 
 	log.Printf("[DEBUG] openstack_networking_secgroup_v2 create options: %#v", opts)
+
 	sg, err := groups.Create(ctx, networkingClient, opts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_networking_secgroup_v2: %s", err)
@@ -125,10 +127,12 @@ func resourceNetworkingSecGroupV2Create(ctx context.Context, d *schema.ResourceD
 	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+
 		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "security-groups", sg.ID, tagOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error setting tags on openstack_networking_secgroup_v2 %s: %s", sg.ID, err)
 		}
+
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_secgroup_v2 %s", tags, sg.ID)
 	}
 
@@ -137,8 +141,9 @@ func resourceNetworkingSecGroupV2Create(ctx context.Context, d *schema.ResourceD
 	return resourceNetworkingSecGroupV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSecGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingSecGroupV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -162,8 +167,9 @@ func resourceNetworkingSecGroupV2Read(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceNetworkingSecGroupV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingSecGroupV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -193,6 +199,7 @@ func resourceNetworkingSecGroupV2Update(ctx context.Context, d *schema.ResourceD
 
 	if updated {
 		log.Printf("[DEBUG] Updating openstack_networking_secgroup_v2 %s with options: %#v", d.Id(), updateOpts)
+
 		_, err = groups.Update(ctx, networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_networking_secgroup_v2: %s", err)
@@ -202,18 +209,21 @@ func resourceNetworkingSecGroupV2Update(ctx context.Context, d *schema.ResourceD
 	if d.HasChange("tags") {
 		tags := networkingV2UpdateAttributesTags(d)
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
+
 		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "security-groups", d.Id(), tagOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error setting tags on openstack_networking_secgroup_v2 %s: %s", d.Id(), err)
 		}
+
 		log.Printf("[DEBUG] Set tags %s on openstack_networking_secgroup_v2 %s", tags, d.Id())
 	}
 
 	return resourceNetworkingSecGroupV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSecGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingSecGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)

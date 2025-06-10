@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/databases"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/databases"
 )
 
 func resourceDatabaseDatabaseV1() *schema.Resource {
@@ -49,8 +48,9 @@ func resourceDatabaseDatabaseV1() *schema.Resource {
 	}
 }
 
-func resourceDatabaseDatabaseV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatabaseDatabaseV1Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	databaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack database client: %s", err)
@@ -98,8 +98,9 @@ func resourceDatabaseDatabaseV1Create(ctx context.Context, d *schema.ResourceDat
 	return resourceDatabaseDatabaseV1Read(ctx, d, meta)
 }
 
-func resourceDatabaseDatabaseV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatabaseDatabaseV1Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	databaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack database client: %s", err)
@@ -117,6 +118,7 @@ func resourceDatabaseDatabaseV1Read(ctx context.Context, d *schema.ResourceData,
 
 	if !exists {
 		d.SetId("")
+
 		return nil
 	}
 
@@ -127,8 +129,9 @@ func resourceDatabaseDatabaseV1Read(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceDatabaseDatabaseV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatabaseDatabaseV1Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	databaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack database client: %s", err)

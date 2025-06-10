@@ -5,11 +5,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/flavorprofiles"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/flavorprofiles"
 )
 
 func resourceLoadBalancerFlavorProfileV2() *schema.Resource {
@@ -54,8 +53,9 @@ func resourceLoadBalancerFlavorProfileV2() *schema.Resource {
 				Required:         true,
 				ValidateFunc:     validateJSONObject,
 				DiffSuppressFunc: diffSuppressJSONObject,
-				StateFunc: func(v interface{}) string {
+				StateFunc: func(v any) string {
 					json, _ := structure.NormalizeJsonString(v)
+
 					return json
 				},
 			},
@@ -63,8 +63,9 @@ func resourceLoadBalancerFlavorProfileV2() *schema.Resource {
 	}
 }
 
-func resourceLoadBalancerFlavorProfileV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadBalancerFlavorProfileV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
@@ -92,8 +93,9 @@ func resourceLoadBalancerFlavorProfileV2Create(ctx context.Context, d *schema.Re
 	return resourceLoadBalancerFlavorProfileV2Read(ctx, d, meta)
 }
 
-func resourceLoadBalancerFlavorProfileV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadBalancerFlavorProfileV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
@@ -114,8 +116,9 @@ func resourceLoadBalancerFlavorProfileV2Read(ctx context.Context, d *schema.Reso
 	return nil
 }
 
-func resourceLoadBalancerFlavorProfileV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadBalancerFlavorProfileV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
@@ -146,6 +149,7 @@ func resourceLoadBalancerFlavorProfileV2Update(ctx context.Context, d *schema.Re
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_lb_flavorprofile_v2 %s update options: %#v", d.Id(), updateOpts)
+
 		_, err := flavorprofiles.Update(ctx, lbClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_lb_flavorprofile_v2: %s", err)
@@ -155,18 +159,21 @@ func resourceLoadBalancerFlavorProfileV2Update(ctx context.Context, d *schema.Re
 	return resourceLoadBalancerFlavorProfileV2Read(ctx, d, meta)
 }
 
-func resourceLoadBalancerFlavorProfileV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadBalancerFlavorProfileV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting openstack_lb_flavorprofile_v2: %s", d.Id())
+
 	if err := flavorprofiles.Delete(ctx, lbClient, d.Id()).ExtractErr(); err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_lb_flavorprofile_v2"))
 	}
 
 	d.SetId("")
+
 	return nil
 }

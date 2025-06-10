@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/configurations"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/configurations"
 )
 
 func TestAccDatabaseV1Configuration_basic(t *testing.T) {
@@ -48,13 +48,14 @@ func testAccCheckDatabaseV1ConfigurationExists(n string, configuration *configur
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
 		found, err := configurations.Get(context.TODO(), databaseV1Client, rs.Primary.ID).Extract()
@@ -63,7 +64,7 @@ func testAccCheckDatabaseV1ConfigurationExists(n string, configuration *configur
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Configuration not found")
+			return errors.New("Configuration not found")
 		}
 
 		*configuration = *found
@@ -77,7 +78,7 @@ func testAccCheckDatabaseV1ConfigurationDestroy(s *terraform.State) error {
 
 	databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating database client: %s", err)
+		return fmt.Errorf("Error creating database client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -87,7 +88,7 @@ func testAccCheckDatabaseV1ConfigurationDestroy(s *terraform.State) error {
 
 		_, err := configurations.Get(context.TODO(), databaseV1Client, rs.Primary.ID).Extract()
 		if err.Error() != "Resource not found" {
-			return fmt.Errorf("Destroy check failed: %s", err)
+			return fmt.Errorf("Destroy check failed: %w", err)
 		}
 	}
 

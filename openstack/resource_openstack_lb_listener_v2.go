@@ -5,12 +5,11 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/listeners"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/listeners"
 )
 
 func resourceListenerV2() *schema.Resource {
@@ -117,7 +116,7 @@ func resourceListenerV2() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"NONE", "OPTIONAL", "MANDATORY",
 				}, false),
-				DiffSuppressFunc: func(k, o, n string, d *schema.ResourceData) bool {
+				DiffSuppressFunc: func(_, o, n string, _ *schema.ResourceData) bool {
 					return o == "NONE" && n == ""
 				},
 				DiffSuppressOnRefresh: true,
@@ -219,8 +218,9 @@ func resourceListenerV2() *schema.Resource {
 	}
 }
 
-func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
@@ -245,7 +245,7 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		DefaultPoolID:           d.Get("default_pool_id").(string),
 		Description:             d.Get("description").(string),
 		DefaultTlsContainerRef:  d.Get("default_tls_container_ref").(string),
-		SniContainerRefs:        expandToStringSlice(d.Get("sni_container_refs").([]interface{})),
+		SniContainerRefs:        expandToStringSlice(d.Get("sni_container_refs").([]any)),
 		ALPNProtocols:           expandToStringSlice(d.Get("alpn_protocols").(*schema.Set).List()),
 		ClientAuthentication:    listeners.ClientAuthentication(d.Get("client_authentication").(string)),
 		ClientCATLSContainerRef: d.Get("client_ca_tls_container_ref").(string),
@@ -254,8 +254,8 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		HSTSMaxAge:              d.Get("hsts_max_age").(int),
 		HSTSPreload:             d.Get("hsts_preload").(bool),
 		TLSCiphers:              d.Get("tls_ciphers").(string),
-		InsertHeaders:           expandToMapStringString(d.Get("insert_headers").(map[string]interface{})),
-		AllowedCIDRs:            expandToStringSlice(d.Get("allowed_cidrs").([]interface{})),
+		InsertHeaders:           expandToMapStringString(d.Get("insert_headers").(map[string]any)),
+		AllowedCIDRs:            expandToStringSlice(d.Get("allowed_cidrs").([]any)),
 		AdminStateUp:            &adminStateUp,
 		Tags:                    expandToStringSlice(d.Get("tags").(*schema.Set).List()),
 	}
@@ -290,15 +290,17 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	log.Printf("[DEBUG] openstack_lb_listener_v2 create options: %#v", createOpts)
+
 	var listener *listeners.Listener
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		listener, err = listeners.Create(ctx, lbClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.Errorf("Error creating openstack_lb_listener_v2: %s", err)
 	}
@@ -314,8 +316,9 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceListenerV2Read(ctx, d, meta)
 }
 
-func resourceListenerV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceListenerV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -367,8 +370,9 @@ func resourceListenerV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -382,12 +386,14 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	// Wait for the listener to become ACTIVE.
 	timeout := d.Timeout(schema.TimeoutUpdate)
+
 	err = waitForLBV2Listener(ctx, lbClient, listener, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	var updateOpts listeners.UpdateOpts
+
 	var hasChange bool
 
 	if d.HasChange("name") {
@@ -446,7 +452,7 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("sni_container_refs") {
 		hasChange = true
-		v := expandToStringSlice(d.Get("sni_container_refs").([]interface{}))
+		v := expandToStringSlice(d.Get("sni_container_refs").([]any))
 		updateOpts.SniContainerRefs = &v
 	}
 
@@ -458,13 +464,13 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("insert_headers") {
 		hasChange = true
-		v := expandToMapStringString(d.Get("insert_headers").(map[string]interface{}))
+		v := expandToMapStringString(d.Get("insert_headers").(map[string]any))
 		updateOpts.InsertHeaders = &v
 	}
 
 	if d.HasChange("allowed_cidrs") {
 		hasChange = true
-		v := expandToStringSlice(d.Get("allowed_cidrs").([]interface{}))
+		v := expandToStringSlice(d.Get("allowed_cidrs").([]any))
 		updateOpts.AllowedCIDRs = &v
 	}
 
@@ -476,10 +482,12 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("client_authentication") {
 		hasChange = true
+
 		v := listeners.ClientAuthentication(d.Get("client_authentication").(string))
 		if v == "" {
 			v = listeners.ClientAuthenticationNone
 		}
+
 		updateOpts.ClientAuthentication = &v
 	}
 
@@ -527,6 +535,7 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("tags") {
 		hasChange = true
+
 		if v, ok := d.GetOk("tags"); ok {
 			tags := v.(*schema.Set).List()
 			tagsToUpdate := expandToStringSlice(tags)
@@ -538,18 +547,20 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	if !hasChange {
 		log.Printf("[DEBUG] openstack_lb_listener_v2 %s: nothing to update", d.Id())
+
 		return resourceListenerV2Read(ctx, d, meta)
 	}
 
 	log.Printf("[DEBUG] openstack_lb_listener_v2 %s update options: %#v", d.Id(), updateOpts)
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		_, err = listeners.Update(ctx, lbClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.Errorf("Error updating openstack_lb_listener_v2 %s: %s", d.Id(), err)
 	}
@@ -563,8 +574,9 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceListenerV2Read(ctx, d, meta)
 }
 
-func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -579,14 +591,15 @@ func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	timeout := d.Timeout(schema.TimeoutDelete)
 
 	log.Printf("[DEBUG] Deleting openstack_lb_listener_v2 %s", d.Id())
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		err = listeners.Delete(ctx, lbClient, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_lb_listener_v2"))
 	}

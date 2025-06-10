@@ -90,6 +90,7 @@ func testAccCheckNetworkingV2Tags(name string, tags []string) resource.TestCheck
 		}
 
 		var rtags []string
+
 		for key, val := range rs.Primary.Attributes {
 			if !strings.HasPrefix(key, "tags.") {
 				continue
@@ -104,10 +105,12 @@ func testAccCheckNetworkingV2Tags(name string, tags []string) resource.TestCheck
 
 		sort.Strings(rtags)
 		sort.Strings(tags)
+
 		if !reflect.DeepEqual(rtags, tags) {
 			return fmt.Errorf(
 				"%s.tags: expected: %#v, got %#v", name, tags, rtags)
 		}
+
 		return nil
 	}
 }

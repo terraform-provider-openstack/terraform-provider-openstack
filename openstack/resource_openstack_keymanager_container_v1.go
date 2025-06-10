@@ -6,14 +6,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/acls"
+	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/containers"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/acls"
-	"github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/containers"
 )
 
 func resourceKeyManagerContainerV1() *schema.Resource {
@@ -130,13 +129,15 @@ func resourceKeyManagerContainerV1() *schema.Resource {
 	for _, aclOp := range getSupportedACLOperations() {
 		elem.Schema[aclOp] = getACLSchema()
 	}
+
 	ret.Schema["acl"].Elem = elem
 
 	return ret
 }
 
-func resourceKeyManagerContainerV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKeyManagerContainerV1Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	kmClient, err := config.KeyManagerV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack KeyManager client: %s", err)
@@ -180,6 +181,7 @@ func resourceKeyManagerContainerV1Create(ctx context.Context, d *schema.Resource
 	// set the acl first before setting the secret refs
 	if _, ok := d.GetOk("acl"); ok {
 		setOpts := expandKeyManagerV1ACLs(d.Get("acl"))
+
 		_, err = acls.SetContainerACL(ctx, kmClient, uuid, setOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error settings ACLs for the openstack_keymanager_container_v1: %s", err)
@@ -196,8 +198,9 @@ func resourceKeyManagerContainerV1Create(ctx context.Context, d *schema.Resource
 	return resourceKeyManagerContainerV1Read(ctx, d, meta)
 }
 
-func resourceKeyManagerContainerV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKeyManagerContainerV1Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	kmClient, err := config.KeyManagerV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack barbican client: %s", err)
@@ -226,6 +229,7 @@ func resourceKeyManagerContainerV1Read(ctx context.Context, d *schema.ResourceDa
 	if err != nil {
 		log.Printf("[DEBUG] Unable to get %s container acls: %s", d.Id(), err)
 	}
+
 	d.Set("acl", flattenKeyManagerV1ACLs(acl))
 
 	// Set the region
@@ -234,8 +238,9 @@ func resourceKeyManagerContainerV1Read(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceKeyManagerContainerV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKeyManagerContainerV1Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	kmClient, err := config.KeyManagerV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack barbican client: %s", err)
@@ -243,6 +248,7 @@ func resourceKeyManagerContainerV1Update(ctx context.Context, d *schema.Resource
 
 	if d.HasChange("acl") {
 		updateOpts := expandKeyManagerV1ACLs(d.Get("acl"))
+
 		_, err := acls.UpdateContainerACL(ctx, kmClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_keymanager_container_v1 %s acl: %s", d.Id(), err)
@@ -278,8 +284,9 @@ func resourceKeyManagerContainerV1Update(ctx context.Context, d *schema.Resource
 	return resourceKeyManagerContainerV1Read(ctx, d, meta)
 }
 
-func resourceKeyManagerContainerV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKeyManagerContainerV1Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	kmClient, err := config.KeyManagerV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack barbican client: %s", err)

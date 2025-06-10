@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/bgpvpns"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/bgpvpns"
 )
 
 func resourceBGPVPNPortAssociateV2() *schema.Resource {
@@ -83,8 +82,9 @@ func resourceBGPVPNPortAssociateV2() *schema.Resource {
 	}
 }
 
-func resourceBGPVPNPortAssociateV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBGPVPNPortAssociateV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
@@ -98,12 +98,14 @@ func resourceBGPVPNPortAssociateV2Create(ctx context.Context, d *schema.Resource
 		ProjectID: d.Get("project_id").(string),
 		Routes:    expandBGPVPNPortAssociateRoutesV2(routes),
 	}
+
 	if v, ok := getOkExists(d, "advertise_fixed_ips"); ok {
 		v := v.(bool)
 		opts.AdvertiseFixedIPs = &v
 	}
 
 	log.Printf("[DEBUG] openstack_bgpvpn_port_associate_v2 create options: %#v", opts)
+
 	res, err := bgpvpns.CreatePortAssociation(ctx, networkingClient, bgpvpnID, opts).Extract()
 	if err != nil {
 		return diag.Errorf("Error associating openstack_bgpvpn_port_associate_v2 BGP VPN %s with port %s: %s", bgpvpnID, portID, err)
@@ -117,8 +119,9 @@ func resourceBGPVPNPortAssociateV2Create(ctx context.Context, d *schema.Resource
 	return resourceBGPVPNPortAssociateV2Read(ctx, d, meta)
 }
 
-func resourceBGPVPNPortAssociateV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBGPVPNPortAssociateV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
@@ -139,10 +142,12 @@ func resourceBGPVPNPortAssociateV2Read(ctx context.Context, d *schema.ResourceDa
 	d.Set("bgpvpn_id", bgpvpnID)
 	d.Set("port_id", res.PortID)
 	d.Set("advertise_fixed_ips", res.AdvertiseFixedIPs)
+
 	if res.ProjectID != "" {
 		// the project_id is returned only on POST/PUT responses
 		d.Set("project_id", res.ProjectID)
 	}
+
 	d.Set("routes", flattenBGPVPNPortAssociateRoutesV2(res.Routes))
 
 	d.Set("region", GetRegion(d, config))
@@ -150,8 +155,9 @@ func resourceBGPVPNPortAssociateV2Read(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceBGPVPNPortAssociateV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBGPVPNPortAssociateV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
@@ -175,6 +181,7 @@ func resourceBGPVPNPortAssociateV2Update(ctx context.Context, d *schema.Resource
 	}
 
 	log.Printf("[DEBUG] openstack_bgpvpn_port_associate_v2 %s update options: %#v", id, opts)
+
 	res, err := bgpvpns.UpdatePortAssociation(ctx, networkingClient, bgpvpnID, id, opts).Extract()
 	if err != nil {
 		return diag.Errorf("Error updating openstack_bgpvpn_port_associate_v2 %s: %s", id, err)
@@ -186,8 +193,9 @@ func resourceBGPVPNPortAssociateV2Update(ctx context.Context, d *schema.Resource
 	return resourceBGPVPNPortAssociateV2Read(ctx, d, meta)
 }
 
-func resourceBGPVPNPortAssociateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBGPVPNPortAssociateV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)

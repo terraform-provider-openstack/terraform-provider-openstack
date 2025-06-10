@@ -6,10 +6,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
 )
 
 func dataSourceNetworkingQoSPolicyV2() *schema.Resource {
@@ -91,8 +90,9 @@ func dataSourceNetworkingQoSPolicyV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingQoSPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceNetworkingQoSPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -163,6 +163,7 @@ func dataSourceNetworkingQoSPolicyV2Read(ctx context.Context, d *schema.Resource
 	if err := d.Set("created_at", policy.CreatedAt.Format(time.RFC3339)); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_networking_qos_policy_v2 created_at: %s", err)
 	}
+
 	if err := d.Set("updated_at", policy.UpdatedAt.Format(time.RFC3339)); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_networking_qos_policy_v2 updated_at: %s", err)
 	}

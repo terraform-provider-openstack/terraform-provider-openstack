@@ -2,18 +2,19 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/registeredlimits"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/services"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccIdentityV3RegisteredLimit_basic(t *testing.T) {
 	var service services.Service
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -56,9 +57,10 @@ func TestAccIdentityV3RegisteredLimit_basic(t *testing.T) {
 
 func testAccCheckIdentityV3RegisteredLimitDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -68,7 +70,7 @@ func testAccCheckIdentityV3RegisteredLimitDestroy(s *terraform.State) error {
 
 		_, err := registeredlimits.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Registered limit still exists")
+			return errors.New("Registered limit still exists")
 		}
 	}
 
@@ -83,13 +85,14 @@ func testAccCheckIdentityV3RegisteredLimitExists(n string, service *services.Ser
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
 		found, err := registeredlimits.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
@@ -98,12 +101,12 @@ func testAccCheckIdentityV3RegisteredLimitExists(n string, service *services.Ser
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Registered limit not found")
+			return errors.New("Registered limit not found")
 		}
 
 		svc, err := services.Get(context.TODO(), identityClient, found.ServiceID).Extract()
 		if err != nil {
-			return fmt.Errorf("Error retrieving OpenStack service %s: %s", found.ServiceID, err)
+			return fmt.Errorf("Error retrieving OpenStack service %s: %w", found.ServiceID, err)
 		}
 
 		*service = *svc

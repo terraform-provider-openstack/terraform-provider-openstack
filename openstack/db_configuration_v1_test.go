@@ -3,14 +3,13 @@ package openstack
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/configurations"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUnitExpandDatabaseConfigurationV1Datastore(t *testing.T) {
-	datastore := []interface{}{
-		map[string]interface{}{
+	datastore := []any{
+		map[string]any{
 			"version": "foo",
 			"type":    "bar",
 		},
@@ -26,41 +25,41 @@ func TestUnitExpandDatabaseConfigurationV1Datastore(t *testing.T) {
 }
 
 func TestUnitExpandDatabaseConfigurationV1Values(t *testing.T) {
-	values := []interface{}{
-		map[string]interface{}{
+	values := []any{
+		map[string]any{
 			"name":  "collation_server",
 			"value": "latin1_swedish_ci",
 		},
-		map[string]interface{}{
+		map[string]any{
 			"name":  "collation_database",
 			"value": "latin1_swedish_ci",
 		},
-		map[string]interface{}{
+		map[string]any{
 			"name":  "max_connections",
 			"value": "200",
 		},
-		map[string]interface{}{
+		map[string]any{
 			"name":        "collation_connection",
 			"value":       "47",
 			"string_type": false,
 		},
-		map[string]interface{}{
+		map[string]any{
 			"name":        "connect_timeout",
 			"value":       "3",
 			"string_type": true,
 		},
-		map[string]interface{}{
+		map[string]any{
 			"name":  "autocommit",
 			"value": "true",
 		},
-		map[string]interface{}{
+		map[string]any{
 			"name":        "sync_binlog",
 			"value":       "true",
 			"string_type": true,
 		},
 	}
 
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"collation_server":     "latin1_swedish_ci",
 		"collation_database":   "latin1_swedish_ci",
 		"max_connections":      200,

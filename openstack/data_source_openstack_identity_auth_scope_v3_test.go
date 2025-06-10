@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -68,7 +69,7 @@ func testAccCheckIdentityAuthScopeV3DataSourceID(n string) resource.TestCheckFun
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Token data source ID not set")
+			return errors.New("Token data source ID not set")
 		}
 
 		return nil

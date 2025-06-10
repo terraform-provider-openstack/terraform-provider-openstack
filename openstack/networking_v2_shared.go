@@ -2,12 +2,12 @@ package openstack
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/gophercloud/gophercloud/v2"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func networkingV2ReadAttributesTags(d *schema.ResourceData, tags []string) {
@@ -23,7 +23,7 @@ func networkingV2AttributesTags(d *schema.ResourceData) []string {
 }
 
 type neutronErrorWrap struct {
-	NeutronError neutronError
+	NeutronError neutronError `json:"NeutronError"`
 }
 
 type neutronError struct {
@@ -33,7 +33,9 @@ type neutronError struct {
 }
 
 func retryOn409(err error) bool {
-	e, ok := err.(gophercloud.ErrUnexpectedResponseCode)
+	var e gophercloud.ErrUnexpectedResponseCode
+
+	ok := errors.As(err, &e)
 	if !ok {
 		return false
 	}
@@ -44,8 +46,10 @@ func retryOn409(err error) bool {
 		if err != nil {
 			// retry, when error type cannot be detected
 			log.Printf("[DEBUG] failed to decode a neutron error: %s", err)
+
 			return true
 		}
+
 		if neutronError.Type == "IpAddressGenerationFailure" {
 			return true
 		}
@@ -57,8 +61,10 @@ func retryOn409(err error) bool {
 		if err != nil {
 			// retry, when error type cannot be detected
 			log.Printf("[DEBUG] failed to decode a neutron error: %s", err)
+
 			return true
 		}
+
 		if neutronError.Type == "ExternalIpAddressExhausted" {
 			return true
 		}

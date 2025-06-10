@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/addressgroups"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/addressgroups"
 )
 
 func TestAccNetworkingV2AddressGroup_basic(t *testing.T) {
@@ -56,9 +56,10 @@ func TestAccNetworkingV2AddressGroup_basic(t *testing.T) {
 
 func testAccCheckNetworkingV2AddressGroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -68,7 +69,7 @@ func testAccCheckNetworkingV2AddressGroupDestroy(s *terraform.State) error {
 
 		_, err := addressgroups.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Security address group still exists")
+			return errors.New("Security address group still exists")
 		}
 	}
 
@@ -83,13 +84,14 @@ func testAccCheckNetworkingV2AddressGroupExists(n string, ag *addressgroups.Addr
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := addressgroups.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -98,7 +100,7 @@ func testAccCheckNetworkingV2AddressGroupExists(n string, ag *addressgroups.Addr
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Security group not found")
+			return errors.New("Security group not found")
 		}
 
 		*ag = *found

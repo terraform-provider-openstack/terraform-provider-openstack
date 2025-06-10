@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -9,15 +10,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/securityservices"
 	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/sharenetworks"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccSFSV2ShareNetwork_basic(t *testing.T) {
 	var sharenetwork1 sharenetworks.ShareNetwork
+
 	var sharenetwork2 sharenetworks.ShareNetwork
 
 	resource.Test(t, resource.TestCase{
@@ -136,9 +137,10 @@ func TestAccSFSV2ShareNetwork_secservice(t *testing.T) {
 
 func testAccCheckSFSV2ShareNetworkDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -163,13 +165,14 @@ func testAccCheckSFSV2ShareNetworkExists(n string, sharenetwork *sharenetworks.S
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %w", err)
 		}
 
 		found, err := sharenetworks.Get(context.TODO(), sfsClient, rs.Primary.ID).Extract()
@@ -178,7 +181,7 @@ func testAccCheckSFSV2ShareNetworkExists(n string, sharenetwork *sharenetworks.S
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Member not found")
+			return errors.New("Member not found")
 		}
 
 		*sharenetwork = *found
@@ -195,20 +198,23 @@ func testAccCheckSFSV2ShareNetworkSecSvcExists(n string) resource.TestCheckFunc 
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %w", err)
 		}
 
 		securityServiceListOpts := securityservices.ListOpts{ShareNetworkID: rs.Primary.ID}
+
 		securityServicePages, err := securityservices.List(sfsClient, securityServiceListOpts).AllPages(context.TODO())
 		if err != nil {
 			return err
 		}
+
 		securityServiceList, err := securityservices.ExtractSecurityServices(securityServicePages)
 		if err != nil {
 			return err
@@ -217,10 +223,12 @@ func testAccCheckSFSV2ShareNetworkSecSvcExists(n string) resource.TestCheckFunc 
 		apiSecurityServiceIDs := resourceSharedFilesystemShareNetworkV2SecSvcToArray(&securityServiceList)
 
 		var tfSecurityServiceIDs []string
+
 		for k, v := range rs.Primary.Attributes {
 			if strings.HasPrefix(k, "security_service_ids.#") {
 				continue
 			}
+
 			if strings.HasPrefix(k, "security_service_ids.") {
 				tfSecurityServiceIDs = append(tfSecurityServiceIDs, v)
 			}
@@ -238,11 +246,12 @@ func testAccCheckSFSV2ShareNetworkSecSvcExists(n string) resource.TestCheckFunc 
 }
 
 func testAccCheckSFSV2ShareNetworkNetDiffers(sharenetwork1, sharenetwork2 *sharenetworks.ShareNetwork) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if sharenetwork1.NeutronNetID != sharenetwork2.NeutronNetID && sharenetwork1.NeutronSubnetID != sharenetwork2.NeutronSubnetID {
 			return nil
 		}
-		return fmt.Errorf("Underlying neutron network should differ")
+
+		return errors.New("Underlying neutron network should differ")
 	}
 }
 

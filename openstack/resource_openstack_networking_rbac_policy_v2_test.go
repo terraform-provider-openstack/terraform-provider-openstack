@@ -2,24 +2,28 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/rbacpolicies"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccNetworkingV2RBACPolicy_basic(t *testing.T) {
 	var rbac rbacpolicies.RBACPolicy
+
 	var project projects.Project
+
 	var network networks.Network
-	var projectOneName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
-	var projectTwoName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+
+	projectOneName := "ACCPTTEST-" + acctest.RandString(5)
+
+	projectTwoName := "ACCPTTEST-" + acctest.RandString(5)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -75,9 +79,10 @@ func TestAccNetworkingV2RBACPolicy_basic(t *testing.T) {
 
 func testAccCheckNetworkingV2RBACPolicyDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -87,7 +92,7 @@ func testAccCheckNetworkingV2RBACPolicyDestroy(s *terraform.State) error {
 
 		_, err := rbacpolicies.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Project still exists")
+			return errors.New("Project still exists")
 		}
 	}
 
@@ -102,13 +107,14 @@ func testAccCheckNetworkingV2RBACPolicyExists(n string, rbac *rbacpolicies.RBACP
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := rbacpolicies.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -117,7 +123,7 @@ func testAccCheckNetworkingV2RBACPolicyExists(n string, rbac *rbacpolicies.RBACP
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Project not found")
+			return errors.New("Project not found")
 		}
 
 		*rbac = *found

@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -40,7 +41,7 @@ func testAccCheckComputeInstanceV2DataSourceID(n string) resource.TestCheckFunc 
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Compute instance data source ID not set")
+			return errors.New("Compute instance data source ID not set")
 		}
 
 		return nil

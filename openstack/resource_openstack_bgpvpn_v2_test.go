@@ -2,19 +2,20 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/bgpvpns"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccBGPVPNV2_basic(t *testing.T) {
 	var bgpvpn bgpvpns.BGPVPN
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -39,22 +40,27 @@ func TestAccBGPVPNV2_basic(t *testing.T) {
 
 func testAccCheckBGPVPNV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "openstack_bgpvpn_v2" {
 			continue
 		}
+
 		_, err = bgpvpns.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("BGPVPN (%s) still exists", rs.Primary.ID)
 		}
+
 		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -66,23 +72,25 @@ func testAccCheckBGPVPNV2Exists(n string, bgpvpn *bgpvpns.BGPVPN) resource.TestC
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		var found *bgpvpns.BGPVPN
+
 		found, err = bgpvpns.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("BGP VPN not found")
+			return errors.New("BGP VPN not found")
 		}
 
 		*bgpvpn = *found

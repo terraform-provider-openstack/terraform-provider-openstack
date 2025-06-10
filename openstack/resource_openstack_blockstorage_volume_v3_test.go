@@ -2,14 +2,14 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 )
 
 func TestAccBlockStorageV3Volume_basic(t *testing.T) {
@@ -172,9 +172,10 @@ func TestAccBlockStorageV3VolumeFromBackup(t *testing.T) {
 
 func testAccCheckBlockStorageV3VolumeDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -184,7 +185,7 @@ func testAccCheckBlockStorageV3VolumeDestroy(s *terraform.State) error {
 
 		_, err := volumes.Get(context.TODO(), blockStorageClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Volume still exists")
+			return errors.New("Volume still exists")
 		}
 	}
 
@@ -199,13 +200,14 @@ func testAccCheckBlockStorageV3VolumeExists(n string, volume *volumes.Volume) re
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+			return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 		}
 
 		found, err := volumes.Get(context.TODO(), blockStorageClient, rs.Primary.ID).Extract()
@@ -214,7 +216,7 @@ func testAccCheckBlockStorageV3VolumeExists(n string, volume *volumes.Volume) re
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Volume not found")
+			return errors.New("Volume not found")
 		}
 
 		*volume = *found
@@ -224,10 +226,11 @@ func testAccCheckBlockStorageV3VolumeExists(n string, volume *volumes.Volume) re
 }
 
 func testAccCheckBlockStorageV3VolumeMetadata(
-	volume *volumes.Volume, k string, v string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	volume *volumes.Volume, k string, v string,
+) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
 		if volume.Metadata == nil {
-			return fmt.Errorf("No metadata")
+			return errors.New("No metadata")
 		}
 
 		for key, value := range volume.Metadata {
@@ -247,24 +250,25 @@ func testAccCheckBlockStorageV3VolumeMetadata(
 }
 
 func testAccCheckBlockStorageV3VolumeAttachment(
-	volume *volumes.Volume, r regexp.Regexp) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	volume *volumes.Volume, r regexp.Regexp,
+) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
 		if volume.Attachments == nil {
-			return fmt.Errorf("No Attachment information")
+			return errors.New("No Attachment information")
 		}
 
 		if len(volume.Attachments) == 0 {
-			return fmt.Errorf("Volume shows not being attached to any Instance")
+			return errors.New("Volume shows not being attached to any Instance")
 		} else if len(volume.Attachments) > 1 {
-			return fmt.Errorf("Volume shows being attached to more Instances than expected")
+			return errors.New("Volume shows being attached to more Instances than expected")
 		}
 
 		match := r.MatchString(volume.Attachments[0].Device)
 		if match {
 			return nil
-		} else {
-			return fmt.Errorf("Volume shows other mountpoint than expected")
 		}
+
+		return errors.New("Volume shows other mountpoint than expected")
 	}
 }
 
@@ -423,7 +427,7 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
 }
 
 func testAccBlockStorageV3VolumeRetype() string {
-	return fmt.Sprintf(`
+	return `
 resource "openstack_blockstorage_volume_type_v3" "initial_type" {
   name        = "initial_type"
   description = "initial_type"
@@ -441,11 +445,11 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   size                 = 1
   volume_retype_policy = "on-demand"
   volume_type          = openstack_blockstorage_volume_type_v3.initial_type.name
-}`)
+}`
 }
 
 func testAccBlockStorageV3VolumeRetypeUpdate() string {
-	return fmt.Sprintf(`
+	return `
 resource "openstack_blockstorage_volume_type_v3" "initial_type" {
   name        = "initial_type"
   description = "initial_type"
@@ -463,5 +467,5 @@ resource "openstack_blockstorage_volume_v3" "volume_1" {
   size                 = 1
   volume_retype_policy = "on-demand"
   volume_type          = openstack_blockstorage_volume_type_v3.new_type.name
-}`)
+}`
 }

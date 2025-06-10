@@ -7,12 +7,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 )
 
 func resourceDNSZoneV2() *schema.Resource {
@@ -109,8 +108,9 @@ func resourceDNSZoneV2() *schema.Resource {
 	}
 }
 
-func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
@@ -123,7 +123,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 			TTL:         d.Get("ttl").(int),
 			Email:       d.Get("email").(string),
 			Description: d.Get("description").(string),
-			Attributes:  expandToMapStringString(d.Get("attributes").(map[string]interface{})),
+			Attributes:  expandToMapStringString(d.Get("attributes").(map[string]any)),
 			Masters:     expandToStringSlice(d.Get("masters").(*schema.Set).List()),
 		},
 		MapValueSpecs(d),
@@ -134,6 +134,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	log.Printf("[DEBUG] openstack_dns_zone_v2 create options: %#v", createOpts)
+
 	n, err := zones.Create(ctx, dnsClient, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_dns_zone_v2: %s", err)
@@ -143,6 +144,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 		d.SetId(n.ID)
 
 		log.Printf("[DEBUG] Created OpenStack DNS Zone %s: %#v", n.ID, n)
+
 		return resourceDNSZoneV2Read(ctx, d, meta)
 	}
 
@@ -160,11 +162,12 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			log.Printf("[DEBUG] Retrying after error: %s", err)
+
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.Errorf(
 			"Error waiting for openstack_dns_zone_v2 %s to become active: %s", d.Id(), err)
@@ -173,11 +176,13 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	d.SetId(n.ID)
 
 	log.Printf("[DEBUG] Created OpenStack DNS Zone %s: %#v", n.ID, n)
+
 	return resourceDNSZoneV2Read(ctx, d, meta)
 }
 
-func resourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
@@ -207,15 +212,18 @@ func resourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
 	}
 
 	var updateOpts zones.UpdateOpts
+
 	changed := false
+
 	if d.HasChange("email") {
 		updateOpts.Email = d.Get("email").(string)
 		changed = true
@@ -275,8 +283,9 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	return resourceDNSZoneV2Read(ctx, d, meta)
 }
 
-func resourceDNSZoneV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSZoneV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	dnsClient, err := config.DNSV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack DNS client: %s", err)
@@ -313,7 +322,7 @@ func resourceDNSZoneV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 	return nil
 }
 
-func resourceDNSZoneV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceDNSZoneV2Import(_ context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
 	// Allow import from different project with id/project_id
 	parts := strings.Split(d.Id(), ":")
 	if parts[0] == "" || len(parts) > 2 {

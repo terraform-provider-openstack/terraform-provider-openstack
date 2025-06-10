@@ -5,10 +5,9 @@ import (
 	"log"
 	"strings"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/groups"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/groups"
 )
 
 func dataSourceNetworkingSecGroupV2() *schema.Resource {
@@ -59,8 +58,9 @@ func dataSourceNetworkingSecGroupV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingSecGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceNetworkingSecGroupV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -72,6 +72,7 @@ func dataSourceNetworkingSecGroupV2Read(ctx context.Context, d *schema.ResourceD
 		Description: d.Get("description").(string),
 		TenantID:    d.Get("tenant_id").(string),
 	}
+
 	if v, ok := getOkExists(d, "stateful"); ok {
 		v := v.(bool)
 		listOpts.Stateful = &v

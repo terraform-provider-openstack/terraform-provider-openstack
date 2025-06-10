@@ -2,13 +2,13 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumetypes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumetypes"
 )
 
 func TestAccBlockStorageVolumeTypeV3_basic(t *testing.T) {
@@ -76,9 +76,10 @@ func TestAccBlockStorageVolumeTypeV3_basic(t *testing.T) {
 
 func testAccCheckBlockStorageVolumeTypeV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -88,7 +89,7 @@ func testAccCheckBlockStorageVolumeTypeV3Destroy(s *terraform.State) error {
 
 		_, err := volumetypes.Get(context.TODO(), blockStorageClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("VolumeType still exists")
+			return errors.New("VolumeType still exists")
 		}
 	}
 
@@ -103,13 +104,14 @@ func testAccCheckBlockStorageVolumeTypeV3Exists(n string, volumetype *volumetype
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+			return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 		}
 
 		found, err := volumetypes.Get(context.TODO(), blockStorageClient, rs.Primary.ID).Extract()
@@ -118,7 +120,7 @@ func testAccCheckBlockStorageVolumeTypeV3Exists(n string, volumetype *volumetype
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("VolumeType not found")
+			return errors.New("VolumeType not found")
 		}
 
 		*volumetype = *found

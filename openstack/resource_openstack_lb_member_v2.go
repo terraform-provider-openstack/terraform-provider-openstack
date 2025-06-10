@@ -2,17 +2,16 @@ package openstack
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 )
 
 func resourceMemberV2() *schema.Resource {
@@ -22,7 +21,7 @@ func resourceMemberV2() *schema.Resource {
 		UpdateContext: resourceMemberV2Update,
 		DeleteContext: resourceMemberV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: resourceMemberV2Import,
+			StateContext: resourceMemberV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -119,8 +118,9 @@ func resourceMemberV2() *schema.Resource {
 	}
 }
 
-func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -180,22 +180,24 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 
 	// Wait for parent pool to become active before continuing
 	timeout := d.Timeout(schema.TimeoutCreate)
+
 	err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to create member")
+
 	var member *pools.Member
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		member, err = pools.CreateMember(ctx, lbClient, poolID, createOpts).Extract()
-
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.Errorf("Error creating member: %s", err)
 	}
@@ -211,8 +213,9 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceMemberV2Read(ctx, d, meta)
 }
 
-func resourceMemberV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceMemberV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -243,34 +246,41 @@ func resourceMemberV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
 	var updateOpts pools.UpdateMemberOpts
+
 	if d.HasChange("name") {
 		name := d.Get("name").(string)
 		updateOpts.Name = &name
 	}
+
 	if d.HasChange("weight") {
 		weight := d.Get("weight").(int)
 		updateOpts.Weight = &weight
 	}
+
 	if d.HasChange("admin_state_up") {
 		asu := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &asu
 	}
+
 	if d.HasChange("monitor_address") {
 		monitorAddress := d.Get("monitor_address").(string)
 		updateOpts.MonitorAddress = &monitorAddress
 	}
+
 	if d.HasChange("monitor_port") {
 		monitorPort := d.Get("monitor_port").(int)
 		updateOpts.MonitorPort = &monitorPort
 	}
+
 	if d.HasChange("backup") {
 		backup := d.Get("backup").(bool)
 		updateOpts.Backup = &backup
@@ -301,6 +311,7 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 
 	// Wait for parent pool to become active before continuing.
 	timeout := d.Timeout(schema.TimeoutUpdate)
+
 	err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(err)
@@ -313,14 +324,15 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	log.Printf("[DEBUG] Updating member %s with options: %#v", d.Id(), updateOpts)
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		_, err = pools.UpdateMember(ctx, lbClient, poolID, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.Errorf("Unable to update member %s: %s", d.Id(), err)
 	}
@@ -334,8 +346,9 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceMemberV2Read(ctx, d, meta)
 }
 
-func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -356,20 +369,22 @@ func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 
 	// Wait for parent pool to become active before continuing.
 	timeout := d.Timeout(schema.TimeoutDelete)
+
 	err = waitForLBV2Pool(ctx, lbClient, parentPool, "ACTIVE", getLbPendingStatuses(), timeout)
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error waiting for the members pool status"))
 	}
 
 	log.Printf("[DEBUG] Attempting to delete member %s", d.Id())
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		err = pools.DeleteMember(ctx, lbClient, poolID, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting member"))
 	}
@@ -383,10 +398,11 @@ func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceMemberV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceMemberV2Import(_ context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
-		err := fmt.Errorf("Invalid format specified for Member. Format must be <pool id>/<member id>")
+		err := errors.New("Invalid format specified for Member. Format must be <pool id>/<member id>")
+
 		return nil, err
 	}
 

@@ -5,13 +5,12 @@ import (
 	"os"
 	"runtime/debug"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/utils/v2/terraform/auth"
 	"github.com/gophercloud/utils/v2/terraform/mutexkv"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 var version = "dev"
@@ -24,6 +23,78 @@ type Config struct {
 
 // Provider returns a schema.Provider for OpenStack.
 func Provider() *schema.Provider {
+	descriptions := map[string]string{
+		"auth_url": "The Identity authentication URL.",
+
+		"cloud": "An entry in a `clouds.yaml` file to use.",
+
+		"region": "The OpenStack region to connect to.",
+
+		"user_name": "Username to login with.",
+
+		"user_id": "User ID to login with.",
+
+		"application_credential_id": "Application Credential ID to login with.",
+
+		"application_credential_name": "Application Credential name to login with.",
+
+		"application_credential_secret": "Application Credential secret to login with.",
+
+		"tenant_id": "The ID of the Tenant (Identity v2) or Project (Identity v3)\n" +
+			"to login with.",
+
+		"tenant_name": "The name of the Tenant (Identity v2) or Project (Identity v3)\n" +
+			"to login with.",
+
+		"password": "Password to login with.",
+
+		"token": "Authentication token to use as an alternative to username/password.",
+
+		"user_domain_name": "The name of the domain where the user resides (Identity v3).",
+
+		"user_domain_id": "The ID of the domain where the user resides (Identity v3).",
+
+		"project_domain_name": "The name of the domain where the project resides (Identity v3).",
+
+		"project_domain_id": "The ID of the domain where the proejct resides (Identity v3).",
+
+		"domain_id": "The ID of the Domain to scope to (Identity v3).",
+
+		"domain_name": "The name of the Domain to scope to (Identity v3).",
+
+		"default_domain": "The name of the Domain ID to scope to if no other domain is specified. Defaults to `default` (Identity v3).",
+
+		"system_scope": "If set to `true`, system scoped authorization will be enabled. Defaults to `false` (Identity v3).",
+
+		"insecure": "Trust self-signed certificates.",
+
+		"cacert_file": "A Custom CA certificate.",
+
+		"cert": "A client certificate to authenticate with.",
+
+		"key": "A client private key to authenticate with.",
+
+		"endpoint_type": "The catalog endpoint type to use.",
+
+		"endpoint_overrides": "A map of services with an endpoint to override what was\n" +
+			"from the Keystone catalog",
+
+		"swauth": "Use Swift's authentication system instead of Keystone. Only used for\n" +
+			"interaction with Swift.",
+
+		"disable_no_cache_header": "If set to `true`, the HTTP `Cache-Control: no-cache` header will not be added by default to all API requests.",
+
+		"delayed_auth": "If set to `false`, OpenStack authorization will be perfomed,\n" +
+			"every time the service provider client is called. Defaults to `true`.",
+
+		"allow_reauth": "If set to `false`, OpenStack authorization won't be perfomed\n" +
+			"automatically, if the initial auth token get expired. Defaults to `true`",
+
+		"max_retries": "How many times HTTP connection should be retried until giving up.",
+
+		"enable_logging": "Outputs very verbose logs with all calls made to and responses from OpenStack",
+	}
+
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"auth_url": {
@@ -283,7 +354,7 @@ func Provider() *schema.Provider {
 			"openstack_fw_rule_v2":                               dataSourceFWRuleV2(),
 			"openstack_identity_role_v3":                         dataSourceIdentityRoleV3(),
 			"openstack_identity_project_v3":                      dataSourceIdentityProjectV3(),
-			"openstack_identity_project_ids_v3":                  dataSourceIdentityProjectIdsV3(),
+			"openstack_identity_project_ids_v3":                  dataSourceIdentityProjectIDsV3(),
 			"openstack_identity_user_v3":                         dataSourceIdentityUserV3(),
 			"openstack_identity_auth_scope_v3":                   dataSourceIdentityAuthScopeV3(),
 			"openstack_identity_endpoint_v3":                     dataSourceIdentityEndpointV3(),
@@ -425,93 +496,18 @@ func Provider() *schema.Provider {
 		},
 	}
 
-	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
 		terraformVersion := provider.TerraformVersion
 		if terraformVersion == "" {
 			// Terraform 0.12 introduced this field to the protocol
 			// We can therefore assume that if it's missing it's 0.10 or 0.11
 			terraformVersion = "0.11+compatible"
 		}
+
 		return configureProvider(ctx, d, terraformVersion)
 	}
 
 	return provider
-}
-
-var descriptions map[string]string
-
-func init() {
-	descriptions = map[string]string{
-		"auth_url": "The Identity authentication URL.",
-
-		"cloud": "An entry in a `clouds.yaml` file to use.",
-
-		"region": "The OpenStack region to connect to.",
-
-		"user_name": "Username to login with.",
-
-		"user_id": "User ID to login with.",
-
-		"application_credential_id": "Application Credential ID to login with.",
-
-		"application_credential_name": "Application Credential name to login with.",
-
-		"application_credential_secret": "Application Credential secret to login with.",
-
-		"tenant_id": "The ID of the Tenant (Identity v2) or Project (Identity v3)\n" +
-			"to login with.",
-
-		"tenant_name": "The name of the Tenant (Identity v2) or Project (Identity v3)\n" +
-			"to login with.",
-
-		"password": "Password to login with.",
-
-		"token": "Authentication token to use as an alternative to username/password.",
-
-		"user_domain_name": "The name of the domain where the user resides (Identity v3).",
-
-		"user_domain_id": "The ID of the domain where the user resides (Identity v3).",
-
-		"project_domain_name": "The name of the domain where the project resides (Identity v3).",
-
-		"project_domain_id": "The ID of the domain where the proejct resides (Identity v3).",
-
-		"domain_id": "The ID of the Domain to scope to (Identity v3).",
-
-		"domain_name": "The name of the Domain to scope to (Identity v3).",
-
-		"default_domain": "The name of the Domain ID to scope to if no other domain is specified. Defaults to `default` (Identity v3).",
-
-		"system_scope": "If set to `true`, system scoped authorization will be enabled. Defaults to `false` (Identity v3).",
-
-		"insecure": "Trust self-signed certificates.",
-
-		"cacert_file": "A Custom CA certificate.",
-
-		"cert": "A client certificate to authenticate with.",
-
-		"key": "A client private key to authenticate with.",
-
-		"endpoint_type": "The catalog endpoint type to use.",
-
-		"endpoint_overrides": "A map of services with an endpoint to override what was\n" +
-			"from the Keystone catalog",
-
-		"swauth": "Use Swift's authentication system instead of Keystone. Only used for\n" +
-			"interaction with Swift.",
-
-		"disable_no_cache_header": "If set to `true`, the HTTP `Cache-Control: no-cache` header will not be added by default to all API requests.",
-
-		"delayed_auth": "If set to `false`, OpenStack authorization will be perfomed,\n" +
-			"every time the service provider client is called. Defaults to `true`.",
-
-		"allow_reauth": "If set to `false`, OpenStack authorization won't be perfomed\n" +
-			"automatically, if the initial auth token get expired. Defaults to `true`",
-
-		"max_retries": "How many times HTTP connection should be retried until giving up.",
-
-		"enable_logging": "Outputs very verbose logs with all calls made to and responses from OpenStack",
-	}
 }
 
 func getSDKVersion() string {
@@ -529,7 +525,7 @@ func getSDKVersion() string {
 	return ""
 }
 
-func configureProvider(ctx context.Context, d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
+func configureProvider(ctx context.Context, d *schema.ResourceData, terraformVersion string) (any, diag.Diagnostics) {
 	enableLogging := d.Get("enable_logging").(bool)
 	if !enableLogging {
 		// enforce logging (similar to OS_DEBUG) when TF_LOG is 'DEBUG' or 'TRACE'
@@ -553,7 +549,7 @@ func configureProvider(ctx context.Context, d *schema.ResourceData, terraformVer
 			DefaultDomain:               d.Get("default_domain").(string),
 			DomainID:                    d.Get("domain_id").(string),
 			DomainName:                  d.Get("domain_name").(string),
-			EndpointOverrides:           d.Get("endpoint_overrides").(map[string]interface{}),
+			EndpointOverrides:           d.Get("endpoint_overrides").(map[string]any),
 			EndpointType:                d.Get("endpoint_type").(string),
 			IdentityEndpoint:            d.Get("auth_url").(string),
 			Password:                    d.Get("password").(string),

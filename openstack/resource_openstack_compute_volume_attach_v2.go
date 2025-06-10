@@ -7,12 +7,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/volumeattach"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/volumeattach"
 )
 
 func resourceComputeVolumeAttachV2() *schema.Resource {
@@ -87,8 +86,9 @@ func resourceComputeVolumeAttachV2() *schema.Resource {
 	}
 }
 
-func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
@@ -105,6 +105,7 @@ func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.Resource
 		vendorOptions := expandVendorOptions(vendorOptionsRaw.List())
 		ignoreVolumeConfirmation = vendorOptions["ignore_volume_confirmation"].(bool)
 	}
+
 	if !ignoreVolumeConfirmation {
 		blockStorageClient, err = config.BlockStorageV3Client(ctx, GetRegion(d, config))
 		if err != nil {
@@ -140,7 +141,9 @@ func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.Resource
 	}
 
 	var attachment *volumeattach.VolumeAttachment
+
 	timeout := d.Timeout(schema.TimeoutCreate)
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		attachment, err = volumeattach.Create(ctx, computeClient, instanceID, attachOpts).Extract()
 		if err != nil {
@@ -153,7 +156,6 @@ func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.Resource
 
 		return nil
 	})
-
 	if err != nil {
 		return diag.Errorf("Error creating openstack_compute_volume_attach_v2 %s: %s", instanceID, err)
 	}
@@ -180,8 +182,9 @@ func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.Resource
 	return resourceComputeVolumeAttachV2Read(ctx, d, meta)
 }
 
-func resourceComputeVolumeAttachV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeVolumeAttachV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
@@ -207,8 +210,9 @@ func resourceComputeVolumeAttachV2Read(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceComputeVolumeAttachV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeVolumeAttachV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)

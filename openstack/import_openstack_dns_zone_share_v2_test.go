@@ -11,7 +11,7 @@ import (
 
 func TestAccResourceDNSZoneShareV2_importBasic(t *testing.T) {
 	zoneName := fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
-	targetProjectName := fmt.Sprintf("ACPTTEST-Target-%s", acctest.RandString(5))
+	targetProjectName := "ACPTTEST-Target-" + acctest.RandString(5)
 
 	zoneResourceName := "openstack_dns_zone_v2.zone"
 	resourceName := "openstack_dns_zone_share_v2.share"
@@ -40,7 +40,7 @@ func TestAccResourceDNSZoneShareV2_importBasic(t *testing.T) {
 
 func TestAccResourceDNSZoneShareV2_importProjectID(t *testing.T) {
 	zoneName := fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
-	targetProjectName := fmt.Sprintf("ACPTTEST-Target-%s", acctest.RandString(5))
+	targetProjectName := "ACPTTEST-Target-" + acctest.RandString(5)
 
 	zoneResourceName := "openstack_dns_zone_v2.zone"
 	resourceName := "openstack_dns_zone_share_v2.share"

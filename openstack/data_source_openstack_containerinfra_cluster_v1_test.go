@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"testing"
@@ -72,7 +73,7 @@ func testAccCheckContainerInfraV1ClusterDataSourceID(n string) resource.TestChec
 		}
 
 		if ct.Primary.ID == "" {
-			return fmt.Errorf("Cluster data source ID is not set")
+			return errors.New("Cluster data source ID is not set")
 		}
 
 		return nil

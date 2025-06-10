@@ -2,18 +2,18 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/l7policies"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/listeners"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/l7policies"
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/listeners"
 )
 
 func resourceL7RuleV2() *schema.Resource {
@@ -79,10 +79,11 @@ func resourceL7RuleV2() *schema.Resource {
 			"value": {
 				Type:     schema.TypeString,
 				Required: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+				ValidateFunc: func(v any, _ string) (ws []string, errs []error) {
 					if len(v.(string)) == 0 {
-						errors = append(errors, fmt.Errorf("'value' field should not be empty"))
+						errs = append(errs, errors.New("'value' field should not be empty"))
 					}
+
 					return
 				},
 			},
@@ -107,8 +108,9 @@ func resourceL7RuleV2() *schema.Resource {
 	}
 }
 
-func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -116,7 +118,6 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 
 	// Assign some required variables for use in creation.
 	l7policyID := d.Get("l7policy_id").(string)
-	listenerID := ""
 	ruleType := d.Get("type").(string)
 	key := d.Get("key").(string)
 	compareType := d.Get("compare_type").(string)
@@ -148,6 +149,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.Errorf("Unable to get parent L7 Policy: %s", err)
 	}
 
+	var listenerID string
 	if parentL7Policy.ListenerID != "" {
 		listenerID = parentL7Policy.ListenerID
 	} else {
@@ -171,15 +173,17 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	log.Printf("[DEBUG] Attempting to create L7 Rule")
+
 	var l7Rule *l7policies.Rule
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		l7Rule, err = l7policies.CreateRule(ctx, lbClient, l7policyID, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.Errorf("Error creating L7 Rule: %s", err)
 	}
@@ -196,8 +200,9 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceL7RuleV2Read(ctx, d, meta)
 }
 
-func resourceL7RuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceL7RuleV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -225,8 +230,9 @@ func resourceL7RuleV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -246,16 +252,20 @@ func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	if d.HasChange("type") {
 		updateOpts.RuleType = l7policies.RuleType(ruleType)
 	}
+
 	if d.HasChange("compare_type") {
 		updateOpts.CompareType = l7policies.CompareType(d.Get("compare_type").(string))
 	}
+
 	if d.HasChange("value") {
 		updateOpts.Value = d.Get("value").(string)
 	}
+
 	if d.HasChange("invert") {
 		invert := d.Get("invert").(bool)
 		updateOpts.Invert = &invert
 	}
+
 	if d.HasChange("admin_state_up") {
 		adminStateUp := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &adminStateUp
@@ -300,14 +310,15 @@ func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	log.Printf("[DEBUG] Updating L7 Rule %s with options: %#v", d.Id(), updateOpts)
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		_, err := l7policies.UpdateRule(ctx, lbClient, l7policyID, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.Errorf("Unable to update L7 Rule %s: %s", d.Id(), err)
 	}
@@ -321,8 +332,9 @@ func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceL7RuleV2Read(ctx, d, meta)
 }
 
-func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -358,14 +370,15 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	log.Printf("[DEBUG] Attempting to delete L7 Rule %s", d.Id())
+
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		err = l7policies.DeleteRule(ctx, lbClient, l7policyID, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error deleting L7 Rule"))
 	}
@@ -378,29 +391,31 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceL7RuleV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceL7RuleV2Import(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
-		err := fmt.Errorf("Invalid format specified for L7 Rule. Format must be <policy id>/<rule id>")
+		err := errors.New("Invalid format specified for L7 Rule. Format must be <policy id>/<rule id>")
+
 		return nil, err
 	}
 
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return nil, fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
-	listenerID := ""
 	l7policyID := parts[0]
 	l7ruleID := parts[1]
 
 	// Get a clean copy of the parent L7 Policy.
 	parentL7Policy, err := l7policies.Get(ctx, lbClient, l7policyID).Extract()
 	if err != nil {
-		return nil, fmt.Errorf("Unable to get parent L7 Policy: %s", err)
+		return nil, fmt.Errorf("Unable to get parent L7 Policy: %w", err)
 	}
 
+	var listenerID string
 	if parentL7Policy.ListenerID != "" {
 		listenerID = parentL7Policy.ListenerID
 	} else {
@@ -425,5 +440,6 @@ func checkL7RuleType(ruleType, key string) error {
 	} else if !strSliceContains(keyRequired, ruleType) && key != "" {
 		return fmt.Errorf("key attribute must not be used, when the L7 Rule type is not %s", strings.Join(keyRequired, " or "))
 	}
+
 	return nil
 }

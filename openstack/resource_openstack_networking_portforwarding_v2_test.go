@@ -2,17 +2,17 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/portforwarding"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccNetworkingV2Portforwarding_basic(t *testing.T) {
@@ -60,20 +60,23 @@ func TestAccNetworkingV2Portforwarding_basic(t *testing.T) {
 
 func testAccCheckNetworkingV2PortForwardingDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack portforwarding: %s", err)
+		return fmt.Errorf("Error creating OpenStack portforwarding: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "openstack_networking_portforwarding_v2" {
 			continue
 		}
+
 		fipID := rs.Primary.Attributes["floatingip_id"]
 		primID := rs.Primary.ID
+
 		_, err := portforwarding.Get(context.TODO(), networkClient, fipID, primID).Extract()
 		if err == nil {
-			return fmt.Errorf("Port Forwarding still exists")
+			return errors.New("Port Forwarding still exists")
 		}
 	}
 
@@ -88,7 +91,7 @@ func testAccCheckNetworkingV2PortForwardingExists(n string, fipID string, kp *po
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		fip, ok := s.RootModule().Resources[fipID]
@@ -97,9 +100,10 @@ func testAccCheckNetworkingV2PortForwardingExists(n string, fipID string, kp *po
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := portforwarding.Get(context.TODO(), networkClient, fip.Primary.ID, rs.Primary.ID).Extract()
@@ -108,7 +112,7 @@ func testAccCheckNetworkingV2PortForwardingExists(n string, fipID string, kp *po
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("openstack_networking_portforwarding_v2 not found")
+			return errors.New("openstack_networking_portforwarding_v2 not found")
 		}
 
 		*kp = *found

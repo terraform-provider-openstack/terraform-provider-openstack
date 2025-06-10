@@ -5,11 +5,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/fwaas_v2/groups"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/fwaas_v2/groups"
 )
 
 func resourceFWGroupV2() *schema.Resource {
@@ -100,8 +99,9 @@ func resourceFWGroupV2() *schema.Resource {
 	}
 }
 
-func resourceFWGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceFWGroupV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -128,12 +128,12 @@ func resourceFWGroupV2Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	associatedPortsRaw := d.Get("ports").(*schema.Set).List()
 	if len(associatedPortsRaw) > 0 {
-		var portIds []string
+		var portIDs []string
 		for _, v := range associatedPortsRaw {
-			portIds = append(portIds, v.(string))
+			portIDs = append(portIDs, v.(string))
 		}
 
-		groupcreateOpts.Ports = portIds
+		groupcreateOpts.Ports = portIDs
 	}
 
 	log.Printf("[DEBUG] openstack_fw_group_v2 create options: %#v", groupcreateOpts)
@@ -164,8 +164,9 @@ func resourceFWGroupV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	return resourceFWGroupV2Read(ctx, d, meta)
 }
 
-func resourceFWGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceFWGroupV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -193,8 +194,9 @@ func resourceFWGroupV2Read(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceFWGroupV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceFWGroupV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -232,6 +234,7 @@ func resourceFWGroupV2Update(ctx context.Context, d *schema.ResourceData, meta i
 				return err
 			}
 		}
+
 		if len(ingressFirewallPolicyID) > 0 {
 			hasChange = true
 			updateOpts.IngressFirewallPolicyID = &ingressFirewallPolicyID
@@ -248,6 +251,7 @@ func resourceFWGroupV2Update(ctx context.Context, d *schema.ResourceData, meta i
 				return err
 			}
 		}
+
 		if len(egressFirewallPolicyID) > 0 {
 			hasChange = true
 			updateOpts.EgressFirewallPolicyID = &egressFirewallPolicyID
@@ -266,17 +270,20 @@ func resourceFWGroupV2Update(ctx context.Context, d *schema.ResourceData, meta i
 		updateOpts.AdminStateUp = &adminStateUp
 	}
 
-	var portIds []string
+	var portIDs []string
+
 	if d.HasChange("ports") {
 		hasChange = true
 		emptyList := make([]string, 0)
 		updateOpts.Ports = &emptyList
+
 		if _, ok := d.GetOk("ports"); ok {
 			associatedPortsRaw := d.Get("ports").(*schema.Set).List()
 			for _, v := range associatedPortsRaw {
-				portIds = append(portIds, v.(string))
+				portIDs = append(portIDs, v.(string))
 			}
-			updateOpts.Ports = &portIds
+
+			updateOpts.Ports = &portIDs
 		}
 	}
 
@@ -306,8 +313,9 @@ func resourceFWGroupV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	return resourceFWGroupV2Read(ctx, d, meta)
 }
 
-func resourceFWGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceFWGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -320,8 +328,10 @@ func resourceFWGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 
 	if len(group.Ports) > 0 {
 		var updateGroupOpts groups.UpdateOpts
+
 		emptyPorts := []string{}
 		updateGroupOpts.Ports = &emptyPorts
+
 		_, err := groups.Update(ctx, networkingClient, group.ID, updateGroupOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error removing ports from openstack_fw_group_v2 %s: %s", d.Id(), err)

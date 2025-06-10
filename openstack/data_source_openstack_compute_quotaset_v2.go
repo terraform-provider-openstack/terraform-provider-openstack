@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/quotasets"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/quotasets"
 )
 
 func dataSourceComputeQuotasetV2() *schema.Resource {
@@ -101,9 +100,10 @@ func dataSourceComputeQuotasetV2() *schema.Resource {
 	}
 }
 
-func dataSourceComputeQuotasetV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceComputeQuotasetV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
+
 	computeClient, err := config.ComputeV2Client(ctx, region)
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)

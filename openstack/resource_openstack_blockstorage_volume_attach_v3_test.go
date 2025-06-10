@@ -2,15 +2,15 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccBlockStorageVolumeAttachV3_basic(t *testing.T) {
@@ -57,9 +57,10 @@ func TestAccBlockStorageVolumeAttachV3_timeout(t *testing.T) {
 
 func testAccCheckBlockStorageVolumeAttachV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	client, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+		return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -77,12 +78,13 @@ func testAccCheckBlockStorageVolumeAttachV3Destroy(s *terraform.State) error {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return nil
 			}
+
 			return err
 		}
 
 		for _, v := range volume.Attachments {
 			if attachmentID == v.AttachmentID {
-				return fmt.Errorf("Volume attachment still exists")
+				return errors.New("Volume attachment still exists")
 			}
 		}
 	}
@@ -98,13 +100,14 @@ func testAccCheckBlockStorageVolumeAttachV3Exists(n string, va *volumes.Attachme
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		client, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
+			return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 		}
 
 		volumeID, attachmentID, err := parsePairedIDs(rs.Primary.ID, "openstack_blockstorage_volume_attach_v3")
@@ -118,6 +121,7 @@ func testAccCheckBlockStorageVolumeAttachV3Exists(n string, va *volumes.Attachme
 		}
 
 		var found bool
+
 		for _, v := range volume.Attachments {
 			if attachmentID == v.AttachmentID {
 				found = true
@@ -126,7 +130,7 @@ func testAccCheckBlockStorageVolumeAttachV3Exists(n string, va *volumes.Attachme
 		}
 
 		if !found {
-			return fmt.Errorf("Volume Attachment not found")
+			return errors.New("Volume Attachment not found")
 		}
 
 		return nil

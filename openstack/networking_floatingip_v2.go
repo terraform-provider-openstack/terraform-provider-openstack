@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/dns"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 )
 
 type floatingIPExtended struct {
@@ -36,6 +35,7 @@ func networkingFloatingIPV2ID(ctx context.Context, client *gophercloud.ServiceCl
 	if len(allFloatingIPs) == 0 {
 		return "", fmt.Errorf("there are no openstack_networking_floatingip_v2 with %s IP", floatingIP)
 	}
+
 	if len(allFloatingIPs) > 1 {
 		return "", fmt.Errorf("there are more than one openstack_networking_floatingip_v2 with %s IP", floatingIP)
 	}
@@ -44,7 +44,7 @@ func networkingFloatingIPV2ID(ctx context.Context, client *gophercloud.ServiceCl
 }
 
 func networkingFloatingIPV2StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, fipID string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		fip, err := floatingips.Get(ctx, client, fipID).Extract()
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {

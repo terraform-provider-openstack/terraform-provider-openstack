@@ -8,7 +8,7 @@ import (
 )
 
 func TestUnitExpandBlockStorageVolumeTypeV3ExtraSpecs(t *testing.T) {
-	raw := map[string]interface{}{
+	raw := map[string]any{
 		"foo": "foo",
 		"bar": "bar",
 	}

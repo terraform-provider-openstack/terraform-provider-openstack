@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/qos"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/qos"
 )
 
 func resourceBlockStorageQosAssociationV3() *schema.Resource {
@@ -43,8 +42,9 @@ func resourceBlockStorageQosAssociationV3() *schema.Resource {
 	}
 }
 
-func resourceBlockStorageQosAssociationV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBlockStorageQosAssociationV3Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	blockStorageClient, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
@@ -57,7 +57,9 @@ func resourceBlockStorageQosAssociationV3Create(ctx context.Context, d *schema.R
 	}
 
 	id := fmt.Sprintf("%s/%s", qosID, vtID)
+
 	log.Printf("[DEBUG] openstack_blockstorage_qos_association_v3 create options: %#v", associateOpts)
+
 	err = qos.Associate(ctx, blockStorageClient, qosID, associateOpts).ExtractErr()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_blockstorage_qos_association_v3 %s: %s", id, err)
@@ -68,8 +70,9 @@ func resourceBlockStorageQosAssociationV3Create(ctx context.Context, d *schema.R
 	return resourceBlockStorageQosAssociationV3Read(ctx, d, meta)
 }
 
-func resourceBlockStorageQosAssociationV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBlockStorageQosAssociationV3Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	blockStorageClient, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
@@ -91,9 +94,11 @@ func resourceBlockStorageQosAssociationV3Read(ctx context.Context, d *schema.Res
 	}
 
 	found := false
+
 	for _, association := range allAssociations {
 		if association.ID == vtID {
 			found = true
+
 			break
 		}
 	}
@@ -109,8 +114,9 @@ func resourceBlockStorageQosAssociationV3Read(ctx context.Context, d *schema.Res
 	return nil
 }
 
-func resourceBlockStorageQosAssociationV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBlockStorageQosAssociationV3Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	blockStorageClient, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)

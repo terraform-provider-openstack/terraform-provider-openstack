@@ -5,10 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/nodegroups"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/containerinfra/v1/nodegroups"
 )
 
 func dataSourceContainerInfraNodeGroupV1() *schema.Resource {
@@ -90,8 +89,9 @@ func dataSourceContainerInfraNodeGroupV1() *schema.Resource {
 	}
 }
 
-func dataSourceContainerInfraNodeGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceContainerInfraNodeGroupRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	containerInfraClient, err := config.ContainerInfraV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack container infra client: %s", err)
@@ -120,9 +120,11 @@ func dataSourceContainerInfraNodeGroupRead(ctx context.Context, d *schema.Resour
 	if err := d.Set("labels", nodeGroup.Labels); err != nil {
 		log.Printf("[DEBUG] Unable to set labels for openstack_containerinfra_nodegroup_v1 %s: %s", nodeGroup.UUID, err)
 	}
+
 	if err := d.Set("created_at", nodeGroup.CreatedAt.Format(time.RFC3339)); err != nil {
 		log.Printf("[DEBUG] Unable to set created_at for openstack_containerinfra_nodegroup_v1 %s: %s", nodeGroup.UUID, err)
 	}
+
 	if err := d.Set("updated_at", nodeGroup.UpdatedAt.Format(time.RFC3339)); err != nil {
 		log.Printf("[DEBUG] Unable to set updated_at for openstack_containerinfra_nodegroup_v1 %s: %s", nodeGroup.UUID, err)
 	}

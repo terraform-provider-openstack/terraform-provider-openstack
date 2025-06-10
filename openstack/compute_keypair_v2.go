@@ -14,6 +14,6 @@ type ComputeKeyPairV2CreateOpts struct {
 
 // ToKeyPairCreateMap casts a CreateOpts struct to a map.
 // It overrides keypairs.ToKeyPairCreateMap to add the ValueSpecs field.
-func (opts ComputeKeyPairV2CreateOpts) ToKeyPairCreateMap() (map[string]interface{}, error) {
+func (opts ComputeKeyPairV2CreateOpts) ToKeyPairCreateMap() (map[string]any, error) {
 	return BuildRequest(opts, "keypair")
 }

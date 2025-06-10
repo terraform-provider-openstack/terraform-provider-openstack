@@ -7,10 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/quotas"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/quotas"
 )
 
 func resourceLoadBalancerQuotaV2() *schema.Resource {
@@ -88,8 +87,9 @@ func resourceLoadBalancerQuotaV2() *schema.Resource {
 	}
 }
 
-func resourceLoadBalancerQuotaV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadBalancerQuotaV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
@@ -103,18 +103,22 @@ func resourceLoadBalancerQuotaV2Create(ctx context.Context, d *schema.ResourceDa
 		value := v.(int)
 		updateOpts.Loadbalancer = &value
 	}
+
 	if v, ok := getOkExists(d, "listener"); ok {
 		value := v.(int)
 		updateOpts.Listener = &value
 	}
+
 	if v, ok := getOkExists(d, "member"); ok {
 		value := v.(int)
 		updateOpts.Member = &value
 	}
+
 	if v, ok := getOkExists(d, "pool"); ok {
 		value := v.(int)
 		updateOpts.Pool = &value
 	}
+
 	if v, ok := getOkExists(d, "health_monitor"); ok {
 		value := v.(int)
 		updateOpts.Healthmonitor = &value
@@ -145,9 +149,10 @@ func resourceLoadBalancerQuotaV2Create(ctx context.Context, d *schema.ResourceDa
 	return resourceLoadBalancerQuotaV2Read(ctx, d, meta)
 }
 
-func resourceLoadBalancerQuotaV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadBalancerQuotaV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
@@ -176,8 +181,9 @@ func resourceLoadBalancerQuotaV2Read(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceLoadBalancerQuotaV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadBalancerQuotaV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack loadbalancing client: %s", err)
@@ -233,6 +239,7 @@ func resourceLoadBalancerQuotaV2Update(ctx context.Context, d *schema.ResourceDa
 	if hasChange {
 		log.Printf("[DEBUG] openstack_lb_quota_v2 %s update options: %#v", d.Id(), updateOpts)
 		projectID := d.Get("project_id").(string)
+
 		_, err := quotas.Update(ctx, lbClient, projectID, updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_lb_quota_v2: %s", err)
@@ -242,7 +249,8 @@ func resourceLoadBalancerQuotaV2Update(ctx context.Context, d *schema.ResourceDa
 	return resourceLoadBalancerQuotaV2Read(ctx, d, meta)
 }
 
-func resourceLoadBalancerQuotaV2Delete(ctx context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+func resourceLoadBalancerQuotaV2Delete(_ context.Context, d *schema.ResourceData, _ any) diag.Diagnostics {
 	d.SetId("")
+
 	return nil
 }

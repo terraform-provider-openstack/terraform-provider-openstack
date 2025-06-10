@@ -2,22 +2,22 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/groups"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
 
-	var lbProvider = "octavia"
+	lbProvider := "octavia"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -55,6 +55,7 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 
 func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
+
 	var sg1, sg2 groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
@@ -137,6 +138,7 @@ func TestAccLBV2LoadBalancer_vip_network(t *testing.T) {
 
 func TestAccLBV2LoadBalancer_vip_port_id(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
+
 	var port ports.Port
 
 	resource.Test(t, resource.TestCase{
@@ -165,9 +167,10 @@ func TestAccLBV2LoadBalancer_vip_port_id(t *testing.T) {
 
 func testAccCheckLBV2LoadBalancerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+		return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -185,7 +188,8 @@ func testAccCheckLBV2LoadBalancerDestroy(s *terraform.State) error {
 }
 
 func testAccCheckLBV2LoadBalancerExists(
-	n string, lb *loadbalancers.LoadBalancer) resource.TestCheckFunc {
+	n string, lb *loadbalancers.LoadBalancer,
+) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -193,13 +197,14 @@ func testAccCheckLBV2LoadBalancerExists(
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
 		found, err := loadbalancers.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
@@ -208,7 +213,7 @@ func testAccCheckLBV2LoadBalancerExists(
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Loadbalancer not found")
+			return errors.New("Loadbalancer not found")
 		}
 
 		*lb = *found
@@ -225,13 +230,14 @@ func testAccCheckLBV2LoadBalancerHasTag(n, tag string) resource.TestCheckFunc {
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
 		found, err := loadbalancers.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
@@ -240,7 +246,7 @@ func testAccCheckLBV2LoadBalancerHasTag(n, tag string) resource.TestCheckFunc {
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Loadbalancer not found")
+			return errors.New("Loadbalancer not found")
 		}
 
 		for _, v := range found.Tags {
@@ -261,13 +267,14 @@ func testAccCheckLBV2LoadBalancerTagCount(n string, expected int) resource.TestC
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack load balancing client: %s", err)
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
 		found, err := loadbalancers.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
@@ -276,7 +283,7 @@ func testAccCheckLBV2LoadBalancerTagCount(n string, expected int) resource.TestC
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Loadbalancer not found")
+			return errors.New("Loadbalancer not found")
 		}
 
 		if len(found.Tags) != expected {
@@ -288,12 +295,14 @@ func testAccCheckLBV2LoadBalancerTagCount(n string, expected int) resource.TestC
 }
 
 func testAccCheckLBV2LoadBalancerHasSecGroup(
-	lb *loadbalancers.LoadBalancer, sg *groups.SecGroup) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	lb *loadbalancers.LoadBalancer, sg *groups.SecGroup,
+) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		port, err := ports.Get(context.TODO(), networkingClient, lb.VipPortID).Extract()
@@ -307,7 +316,7 @@ func testAccCheckLBV2LoadBalancerHasSecGroup(
 			}
 		}
 
-		return fmt.Errorf("LoadBalancer does not have the security group")
+		return errors.New("LoadBalancer does not have the security group")
 	}
 }
 

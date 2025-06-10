@@ -5,11 +5,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/rules"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/rules"
 )
 
 func resourceNetworkingQoSBandwidthLimitRuleV2() *schema.Resource {
@@ -63,8 +62,9 @@ func resourceNetworkingQoSBandwidthLimitRuleV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingQoSBandwidthLimitRuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingQoSBandwidthLimitRuleV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -78,6 +78,7 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Create(ctx context.Context, d *sch
 	qosPolicyID := d.Get("qos_policy_id").(string)
 
 	log.Printf("[DEBUG] openstack_networking_qos_bandwidth_limit_rule_v2 create options: %#v", createOpts)
+
 	r, err := rules.CreateBandwidthLimitRule(ctx, networkingClient, qosPolicyID, createOpts).ExtractBandwidthLimitRule()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_networking_qos_bandwidth_limit_rule_v2: %s", err)
@@ -106,8 +107,9 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Create(ctx context.Context, d *sch
 	return resourceNetworkingQoSBandwidthLimitRuleV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingQoSBandwidthLimitRuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingQoSBandwidthLimitRuleV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -134,8 +136,9 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Read(ctx context.Context, d *schem
 	return nil
 }
 
-func resourceNetworkingQoSBandwidthLimitRuleV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingQoSBandwidthLimitRuleV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -147,6 +150,7 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Update(ctx context.Context, d *sch
 	}
 
 	var hasChange bool
+
 	var updateOpts rules.UpdateBandwidthLimitRuleOpts
 
 	if d.HasChange("max_kbps") {
@@ -168,6 +172,7 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Update(ctx context.Context, d *sch
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_networking_qos_bandwidth_limit_rule_v2 %s update options: %#v", d.Id(), updateOpts)
+
 		_, err = rules.UpdateBandwidthLimitRule(ctx, networkingClient, qosPolicyID, qosRuleID, updateOpts).ExtractBandwidthLimitRule()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_networking_qos_bandwidth_limit_rule_v2 %s: %s", d.Id(), err)
@@ -177,8 +182,9 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Update(ctx context.Context, d *sch
 	return resourceNetworkingQoSBandwidthLimitRuleV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingQoSBandwidthLimitRuleV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingQoSBandwidthLimitRuleV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)

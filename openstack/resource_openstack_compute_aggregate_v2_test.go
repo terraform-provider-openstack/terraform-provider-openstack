@@ -2,14 +2,14 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/aggregates"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/aggregates"
 )
 
 var testAccAggregateConfig = `
@@ -119,18 +119,19 @@ func testAccCheckAggregateExists(n string, aggregate *aggregates.Aggregate) reso
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
 		id, err := strconv.Atoi(rs.Primary.ID)
 		if err != nil {
-			return fmt.Errorf("Can't convert ID to integer: %s", err)
+			return fmt.Errorf("Can't convert ID to integer: %w", err)
 		}
 
 		found, err := aggregates.Get(context.TODO(), computeClient, id).Extract()
@@ -139,7 +140,7 @@ func testAccCheckAggregateExists(n string, aggregate *aggregates.Aggregate) reso
 		}
 
 		if found.ID != id {
-			return fmt.Errorf("Aggregate not found")
+			return errors.New("Aggregate not found")
 		}
 
 		*aggregate = *found

@@ -4,11 +4,10 @@ import (
 	"context"
 	"log"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servergroups"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servergroups"
 )
 
 func resourceComputeServerGroupV2() *schema.Resource {
@@ -78,8 +77,9 @@ func resourceComputeServerGroupV2() *schema.Resource {
 	}
 }
 
-func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
@@ -87,9 +87,11 @@ func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceD
 
 	name := d.Get("name").(string)
 
-	rawPolicies := d.Get("policies").([]interface{})
+	rawPolicies := d.Get("policies").([]any)
 	policies := expandComputeServerGroupV2Policies(computeClient, rawPolicies)
+
 	var policy string
+
 	if len(policies) == 1 {
 		policy = policies[0]
 	}
@@ -105,16 +107,17 @@ func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceD
 	rulesVal, rulesPresent := d.GetOk("rules")
 	if policy == "anti-affinity" && rulesPresent {
 		computeClient.Microversion = "2.64"
-		createOpts.CreateOpts.Rules = &servergroups.Rules{
-			MaxServerPerHost: expandComputeServerGroupV2RulesMaxServerPerHost(rulesVal.([]interface{})),
+		createOpts.Rules = &servergroups.Rules{
+			MaxServerPerHost: expandComputeServerGroupV2RulesMaxServerPerHost(rulesVal.([]any)),
 		}
 	}
 
 	log.Printf("[DEBUG] openstack_compute_servergroup_v2 create options: %#v", createOpts)
+
 	newSG, err := servergroups.Create(ctx, computeClient, createOpts).Extract()
 	if err != nil {
 		// return an error right away
-		if createOpts.CreateOpts.Rules != nil {
+		if createOpts.Rules != nil {
 			return diag.Errorf("Error creating openstack_compute_servergroup_v2 %s: %s", name, err)
 		}
 
@@ -128,6 +131,7 @@ func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceD
 			MapValueSpecs(d),
 		}
 		log.Printf("[DEBUG] openstack_compute_servergroup_v2 create options: %#v", createOpts)
+
 		newSG, err = servergroups.Create(ctx, computeClient, createOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error creating openstack_compute_servergroup_v2 %s: %s", name, err)
@@ -139,8 +143,9 @@ func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceD
 	return resourceComputeServerGroupV2Read(ctx, d, meta)
 }
 
-func resourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
@@ -148,6 +153,7 @@ func resourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceDat
 
 	// Attempt to read with microversion 2.64
 	computeClient.Microversion = "2.64"
+
 	sg, err := servergroups.Get(ctx, computeClient, d.Id()).Extract()
 	if err != nil {
 		log.Printf("[DEBUG] Falling back to legacy API call due to: %#v", err)
@@ -165,13 +171,15 @@ func resourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceDat
 	d.Set("name", sg.Name)
 	d.Set("members", sg.Members)
 	d.Set("region", GetRegion(d, config))
+
 	if sg.Policy != nil && *sg.Policy != "" {
 		d.Set("policies", []string{*sg.Policy})
 	} else {
 		d.Set("policies", sg.Policies)
 	}
+
 	if sg.Rules != nil {
-		d.Set("rules", []map[string]interface{}{{"max_server_per_host": sg.Rules.MaxServerPerHost}})
+		d.Set("rules", []map[string]any{{"max_server_per_host": sg.Rules.MaxServerPerHost}})
 	} else {
 		d.Set("rules", nil)
 	}
@@ -179,8 +187,9 @@ func resourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceComputeServerGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeServerGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)

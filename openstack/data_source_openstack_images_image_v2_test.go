@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -108,7 +109,7 @@ func testAccCheckImagesV2DataSourceID(n string) resource.TestCheckFunc {
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Image data source ID not set")
+			return errors.New("Image data source ID not set")
 		}
 
 		return nil
@@ -174,6 +175,7 @@ data "openstack_images_image_v2" "image_2" {
 }
 `, testAccOpenStackImagesV2ImageDataSourceCirros)
 }
+
 func testAccOpenStackImagesV2ImageDataSourceQueryTag() string {
 	return fmt.Sprintf(`
 %s
@@ -185,6 +187,7 @@ data "openstack_images_image_v2" "image_1" {
 }
 `, testAccOpenStackImagesV2ImageDataSourceCirros)
 }
+
 func testAccOpenStackImagesV2ImageDataSourceQueryTagList() string {
 	return fmt.Sprintf(`
 %s
@@ -196,6 +199,7 @@ data "openstack_images_image_v2" "image_1" {
 }
 `, testAccOpenStackImagesV2ImageDataSourceCirros)
 }
+
 func testAccOpenStackImagesV2ImageDataSourceQuerySizeMin() string {
 	return fmt.Sprintf(`
 %s

@@ -6,16 +6,15 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/fwaas_v2/groups"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/fwaas_v2/groups"
 )
 
 func fwGroupV2RefreshFunc(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		group, err := groups.Get(ctx, networkingClient, id).Extract()
 		if err != nil {
 			return nil, "", err
@@ -26,14 +25,14 @@ func fwGroupV2RefreshFunc(ctx context.Context, networkingClient *gophercloud.Ser
 }
 
 func fwGroupV2DeleteFunc(ctx context.Context, networkingClient *gophercloud.ServiceClient, id string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		group, err := groups.Get(ctx, networkingClient, id).Extract()
-
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return "", "DELETED", nil
 			}
-			return nil, "", fmt.Errorf("Unexpected error: %s", err)
+
+			return nil, "", fmt.Errorf("Unexpected error: %w", err)
 		}
 
 		return group, "DELETING", nil

@@ -4,12 +4,11 @@ import (
 	"context"
 	"sort"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/availabilityzones"
+	"github.com/gophercloud/utils/v2/terraform/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/availabilityzones"
-	"github.com/gophercloud/utils/v2/terraform/hashcode"
 )
 
 func dataSourceComputeAvailabilityZonesV2() *schema.Resource {
@@ -40,9 +39,10 @@ func dataSourceComputeAvailabilityZonesV2() *schema.Resource {
 	}
 }
 
-func dataSourceComputeAvailabilityZonesV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceComputeAvailabilityZonesV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
+
 	computeClient, err := config.ComputeV2Client(ctx, region)
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
@@ -52,6 +52,7 @@ func dataSourceComputeAvailabilityZonesV2Read(ctx context.Context, d *schema.Res
 	if err != nil {
 		return diag.Errorf("Error retrieving openstack_compute_availability_zones_v2: %s", err)
 	}
+
 	zoneInfo, err := availabilityzones.ExtractAvailabilityZones(allPages)
 	if err != nil {
 		return diag.Errorf("Error extracting openstack_compute_availability_zones_v2 from response: %s", err)
@@ -59,6 +60,7 @@ func dataSourceComputeAvailabilityZonesV2Read(ctx context.Context, d *schema.Res
 
 	stateBool := d.Get("state").(string) == "available"
 	zones := make([]string, 0, len(zoneInfo))
+
 	for _, z := range zoneInfo {
 		if z.ZoneState.Available == stateBool {
 			zones = append(zones, z.ZoneName)

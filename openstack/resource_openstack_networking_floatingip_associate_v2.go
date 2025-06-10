@@ -4,10 +4,9 @@ import (
 	"context"
 	"log"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
 func resourceNetworkingFloatingIPAssociateV2() *schema.Resource {
@@ -48,8 +47,9 @@ func resourceNetworkingFloatingIPAssociateV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
@@ -70,6 +70,7 @@ func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schem
 	}
 
 	log.Printf("[DEBUG] openstack_networking_floatingip_associate_v2 create options: %#v", updateOpts)
+
 	_, err = floatingips.Update(ctx, networkingClient, fipID, updateOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error associating openstack_networking_floatingip_associate_v2 floating_ip %s with port %s: %s", fipID, portID, err)
@@ -80,8 +81,9 @@ func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schem
 	return resourceNetworkingFloatingIPAssociateV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingFloatingIPAssociateV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingFloatingIPAssociateV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
@@ -102,8 +104,9 @@ func resourceNetworkingFloatingIPAssociateV2Read(ctx context.Context, d *schema.
 	return nil
 }
 
-func resourceNetworkingFloatingIPAssociateV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingFloatingIPAssociateV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
@@ -120,6 +123,7 @@ func resourceNetworkingFloatingIPAssociateV2Update(ctx context.Context, d *schem
 	}
 
 	log.Printf("[DEBUG] openstack_networking_floatingip_associate_v2 %s update options: %#v", d.Id(), updateOpts)
+
 	_, err = floatingips.Update(ctx, networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error updating openstack_networking_floatingip_associate_v2 %s: %s", d.Id(), err)
@@ -128,8 +132,9 @@ func resourceNetworkingFloatingIPAssociateV2Update(ctx context.Context, d *schem
 	return resourceNetworkingFloatingIPAssociateV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingFloatingIPAssociateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingFloatingIPAssociateV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack network client: %s", err)
@@ -141,6 +146,7 @@ func resourceNetworkingFloatingIPAssociateV2Delete(ctx context.Context, d *schem
 	}
 
 	log.Printf("[DEBUG] openstack_networking_floatingip_associate_v2 disassociating options: %#v", updateOpts)
+
 	_, err = floatingips.Update(ctx, networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error disassociating openstack_networking_floatingip_associate_v2 floating_ip %s with port %s: %s", d.Id(), portID, err)

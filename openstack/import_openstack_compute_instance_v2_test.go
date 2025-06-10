@@ -58,6 +58,7 @@ func TestAccComputeV2Instance_DetachPortsBeforeDelete(t *testing.T) {
 		},
 	})
 }
+
 func TestAccComputeV2Instance_importbootFromVolumeForceNew_1(t *testing.T) {
 	resourceName := "openstack_compute_instance_v2.instance_1"
 
@@ -84,6 +85,7 @@ func TestAccComputeV2Instance_importbootFromVolumeForceNew_1(t *testing.T) {
 		},
 	})
 }
+
 func TestAccComputeV2Instance_importbootFromVolumeImage(t *testing.T) {
 	resourceName := "openstack_compute_instance_v2.instance_1"
 

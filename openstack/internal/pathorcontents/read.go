@@ -24,6 +24,7 @@ func Read(poc string) (string, bool, error) {
 	path := poc
 	if path[0] == '~' {
 		var err error
+
 		path, err = homedir.Expand(path)
 		if err != nil {
 			return path, true, err
@@ -35,6 +36,7 @@ func Read(poc string) (string, bool, error) {
 		if err != nil {
 			return string(contents), true, err
 		}
+
 		return string(contents), true, nil
 	}
 

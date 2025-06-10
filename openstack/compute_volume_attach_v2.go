@@ -2,24 +2,24 @@ package openstack
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"log"
 	"net/http"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/volumeattach"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 )
 
 func computeVolumeAttachV2AttachFunc(ctx context.Context, computeClient *gophercloud.ServiceClient, blockStorageClient *gophercloud.ServiceClient, instanceID, attachmentID string, volumeID string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		va, err := volumeattach.Get(ctx, computeClient, instanceID, attachmentID).Extract()
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return va, "ATTACHING", nil
 			}
+
 			return va, "", err
 		}
 
@@ -32,9 +32,11 @@ func computeVolumeAttachV2AttachFunc(ctx context.Context, computeClient *gopherc
 		if err != nil {
 			return va, "", err
 		}
+
 		if v.Status == "error" {
-			return va, "", fmt.Errorf("volume entered unexpected error status")
+			return va, "", errors.New("volume entered unexpected error status")
 		}
+
 		if v.Status != "in-use" {
 			return va, "ATTACHING", nil
 		}
@@ -44,7 +46,7 @@ func computeVolumeAttachV2AttachFunc(ctx context.Context, computeClient *gopherc
 }
 
 func computeVolumeAttachV2DetachFunc(ctx context.Context, computeClient *gophercloud.ServiceClient, instanceID, attachmentID string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		log.Printf("[DEBUG] openstack_compute_volume_attach_v2 attempting to detach OpenStack volume %s from instance %s",
 			attachmentID, instanceID)
 
@@ -53,6 +55,7 @@ func computeVolumeAttachV2DetachFunc(ctx context.Context, computeClient *gopherc
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return va, "DETACHED", nil
 			}
+
 			return va, "", err
 		}
 
@@ -70,6 +73,7 @@ func computeVolumeAttachV2DetachFunc(ctx context.Context, computeClient *gopherc
 		}
 
 		log.Printf("[DEBUG] openstack_compute_volume_attach_v2 (%s/%s) is still active.", instanceID, attachmentID)
+
 		return nil, "", nil
 	}
 }

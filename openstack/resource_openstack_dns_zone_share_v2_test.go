@@ -2,21 +2,19 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 )
 
 func TestAccResourceDNSZoneShareV2_basic(t *testing.T) {
-	var zone zones.Zone
-
 	zoneName := fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
-	targetProjectName := fmt.Sprintf("ACPTTEST-Target-%s", acctest.RandString(5))
+	targetProjectName := "ACPTTEST-Target-" + acctest.RandString(5)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -29,7 +27,7 @@ func TestAccResourceDNSZoneShareV2_basic(t *testing.T) {
 			{
 				Config: testAccResourceDNSZoneShareV2Config(zoneName, targetProjectName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSZoneShareV2Exists("openstack_dns_zone_share_v2.share", &zone),
+					testAccCheckDNSZoneShareV2Exists("openstack_dns_zone_share_v2.share"),
 					resource.TestCheckResourceAttr("openstack_dns_zone_v2.zone", "name", zoneName),
 					resource.TestCheckResourceAttrPair("openstack_dns_zone_share_v2.share", "target_project_id", "openstack_identity_project_v3.target", "id"),
 				),
@@ -38,20 +36,22 @@ func TestAccResourceDNSZoneShareV2_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckDNSZoneShareV2Exists(n string, zone *zones.Zone) resource.TestCheckFunc {
+func testAccCheckDNSZoneShareV2Exists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("DNS zone share resource not found: %s", n)
 		}
+
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("DNS zone share resource has no ID set")
+			return errors.New("DNS zone share resource has no ID set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		dnsClient, err := config.DNSV2Client(context.Background(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating DNS client: %s", err)
+			return fmt.Errorf("Error creating DNS client: %w", err)
 		}
 
 		zoneID := rs.Primary.Attributes["zone_id"]
@@ -62,7 +62,7 @@ func testAccCheckDNSZoneShareV2Exists(n string, zone *zones.Zone) resource.TestC
 
 		_, err = zones.GetShare(context.Background(), dnsClient, zoneID, shareID).Extract()
 		if err != nil {
-			return fmt.Errorf("Error getting DNS zone share: %s", err)
+			return fmt.Errorf("Error getting DNS zone share: %w", err)
 		}
 
 		return nil
@@ -71,10 +71,12 @@ func testAccCheckDNSZoneShareV2Exists(n string, zone *zones.Zone) resource.TestC
 
 func testAccCheckDNSZoneShareV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	dnsClient, err := config.DNSV2Client(context.Background(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating DNS client: %s", err)
+		return fmt.Errorf("Error creating DNS client: %w", err)
 	}
+
 	for _, rs := range s.RootModule().Resources {
 		// Skip data sources and resources with no zone_id.
 		if rs.Type == "data.openstack_dns_zone_share_v2" || rs.Primary.Attributes["zone_id"] == "" {
@@ -94,6 +96,7 @@ func testAccCheckDNSZoneShareV2Destroy(s *terraform.State) error {
 
 		return nil
 	}
+
 	return nil
 }
 

@@ -2,21 +2,24 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/addressgroups"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/groups"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/rules"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
 	var secgroup1 groups.SecGroup
+
 	var secgroup2 groups.SecGroup
+
 	var secgroupRule1 rules.SecGroupRule
+
 	var secgroupRule2 rules.SecGroupRule
 
 	resource.Test(t, resource.TestCase{
@@ -50,6 +53,7 @@ func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
 
 func TestAccNetworkingV2SecGroupRule_lowerCaseCIDR(t *testing.T) {
 	var secgroup1 groups.SecGroup
+
 	var secgroupRule1 rules.SecGroupRule
 
 	resource.Test(t, resource.TestCase{
@@ -77,6 +81,7 @@ func TestAccNetworkingV2SecGroupRule_lowerCaseCIDR(t *testing.T) {
 
 func TestAccNetworkingV2SecGroupRule_timeout(t *testing.T) {
 	var secgroup1 groups.SecGroup
+
 	var secgroup2 groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
@@ -102,23 +107,41 @@ func TestAccNetworkingV2SecGroupRule_timeout(t *testing.T) {
 
 func TestAccNetworkingV2SecGroupRule_protocols(t *testing.T) {
 	var secgroup1 groups.SecGroup
+
 	var secgroupRuleAh rules.SecGroupRule
+
 	var secgroupRuleDccp rules.SecGroupRule
+
 	var secgroupRuleEgp rules.SecGroupRule
+
 	var secgroupRuleEsp rules.SecGroupRule
+
 	var secgroupRuleGre rules.SecGroupRule
+
 	var secgroupRuleIgmp rules.SecGroupRule
+
 	var secgroupRuleIPv6Encap rules.SecGroupRule
+
 	var secgroupRuleIPv6Frag rules.SecGroupRule
+
 	var secgroupRuleIPv6Icmp rules.SecGroupRule
+
 	var secgroupRuleIPv6Nonxt rules.SecGroupRule
+
 	var secgroupRuleIPv6Opts rules.SecGroupRule
+
 	var secgroupRuleIPv6Route rules.SecGroupRule
+
 	var secgroupRuleOspf rules.SecGroupRule
+
 	var secgroupRulePgm rules.SecGroupRule
+
 	var secgroupRuleRsvp rules.SecGroupRule
+
 	var secgroupRuleSctp rules.SecGroupRule
+
 	var secgroupRuleUdplite rules.SecGroupRule
+
 	var secgroupRuleVrrp rules.SecGroupRule
 
 	resource.Test(t, resource.TestCase{
@@ -214,6 +237,7 @@ func TestAccNetworkingV2SecGroupRule_protocols(t *testing.T) {
 
 func TestAccNetworkingV2SecGroupRule_numericProtocol(t *testing.T) {
 	var secgroup1 groups.SecGroup
+
 	var secgroupRule1 rules.SecGroupRule
 
 	resource.Test(t, resource.TestCase{
@@ -264,9 +288,10 @@ func TestAccNetworkingV2SecGroupRule_addressgroup(t *testing.T) {
 
 func testAccCheckNetworkingV2SecGroupRuleDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -276,7 +301,7 @@ func testAccCheckNetworkingV2SecGroupRuleDestroy(s *terraform.State) error {
 
 		_, err := rules.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Security group rule still exists")
+			return errors.New("Security group rule still exists")
 		}
 	}
 
@@ -291,13 +316,14 @@ func testAccCheckNetworkingV2SecGroupRuleExists(n string, securityGroupRule *rul
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack networking client: %s", err)
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		found, err := rules.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
@@ -306,7 +332,7 @@ func testAccCheckNetworkingV2SecGroupRuleExists(n string, securityGroupRule *rul
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Security group rule not found")
+			return errors.New("Security group rule not found")
 		}
 
 		*securityGroupRule = *found

@@ -5,10 +5,9 @@ import (
 	"log"
 	"strings"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/trunks"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/trunks"
 )
 
 func dataSourceNetworkingTrunkV2() *schema.Resource {
@@ -94,8 +93,9 @@ func dataSourceNetworkingTrunkV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingTrunkV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceNetworkingTrunkV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	networkingClient, err := config.NetworkingV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
@@ -171,13 +171,14 @@ func dataSourceNetworkingTrunkV2Read(ctx context.Context, d *schema.ResourceData
 	d.Set("project_id", trunk.ProjectID)
 	d.Set("all_tags", trunk.Tags)
 
-	subports := make([]map[string]interface{}, len(trunk.Subports))
+	subports := make([]map[string]any, len(trunk.Subports))
 	for i, trunkSubport := range trunk.Subports {
-		subports[i] = make(map[string]interface{})
+		subports[i] = make(map[string]any)
 		subports[i]["port_id"] = trunkSubport.PortID
 		subports[i]["segmentation_type"] = trunkSubport.SegmentationType
 		subports[i]["segmentation_id"] = trunkSubport.SegmentationID
 	}
+
 	if err = d.Set("sub_port", subports); err != nil {
 		return diag.Errorf("Unable to set sub_port for trunk %s: %s", d.Id(), err)
 	}

@@ -2,18 +2,19 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/instances"
 	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/users"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccDatabaseV1User_basic(t *testing.T) {
 	var user users.User
+
 	var instance instances.Instance
 
 	resource.Test(t, resource.TestCase{
@@ -48,7 +49,7 @@ func testAccCheckDatabaseV1UserExists(n string, instance *instances.Instance, us
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		_, userName, err := parsePairedIDs(rs.Primary.ID, "openstack_db_user_v1")
@@ -57,24 +58,26 @@ func testAccCheckDatabaseV1UserExists(n string, instance *instances.Instance, us
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating cloud database client: %s", err)
+			return fmt.Errorf("Error creating cloud database client: %w", err)
 		}
 
 		pages, err := users.List(databaseV1Client, instance.ID).AllPages(context.TODO())
 		if err != nil {
-			return fmt.Errorf("Unable to retrieve users: %s", err)
+			return fmt.Errorf("Unable to retrieve users: %w", err)
 		}
 
 		allUsers, err := users.ExtractUsers(pages)
 		if err != nil {
-			return fmt.Errorf("Unable to extract users: %s", err)
+			return fmt.Errorf("Unable to extract users: %w", err)
 		}
 
 		for _, u := range allUsers {
 			if u.Name == userName {
 				*user = u
+
 				return nil
 			}
 		}
@@ -88,7 +91,7 @@ func testAccCheckDatabaseV1UserDestroy(s *terraform.State) error {
 
 	databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating cloud database client: %s", err)
+		return fmt.Errorf("Error creating cloud database client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -108,10 +111,11 @@ func testAccCheckDatabaseV1UserDestroy(s *terraform.State) error {
 
 		allUsers, err := users.ExtractUsers(pages)
 		if err != nil {
-			return fmt.Errorf("Unable to extract users: %s", err)
+			return fmt.Errorf("Unable to extract users: %w", err)
 		}
 
 		var exists bool
+
 		for _, v := range allUsers {
 			if v.Name == userName {
 				exists = true
@@ -119,7 +123,7 @@ func testAccCheckDatabaseV1UserDestroy(s *terraform.State) error {
 		}
 
 		if exists {
-			return fmt.Errorf("User still exists")
+			return errors.New("User still exists")
 		}
 	}
 

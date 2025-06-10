@@ -6,18 +6,17 @@ import (
 )
 
 func TestUnitBlockStorageVolumeTypeQuotaConversion(t *testing.T) {
-	raw := map[string]interface{}{
+	raw := map[string]any{
 		"foo": "42",
 		"bar": "43",
 	}
 
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"foo": 42,
 		"bar": 43,
 	}
 
 	actual, err := blockStorageQuotasetVolTypeQuotaToInt(raw)
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -28,7 +27,7 @@ func TestUnitBlockStorageVolumeTypeQuotaConversion(t *testing.T) {
 }
 
 func TestUnitBlockStorageVolumeTypeQuotaConversion_err(t *testing.T) {
-	raw := map[string]interface{}{
+	raw := map[string]any{
 		"foo": 100,
 		"bar": 200,
 	}
@@ -41,7 +40,7 @@ func TestUnitBlockStorageVolumeTypeQuotaConversion_err(t *testing.T) {
 }
 
 func TestUnitBlockStorageVolumeTypeQuotaConversion_err2(t *testing.T) {
-	raw := map[string]interface{}{
+	raw := map[string]any{
 		"foo": "foo",
 		"bar": "bar",
 	}

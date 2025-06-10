@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -114,7 +115,7 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 }
 
 func TestAccComputeV2FlavorDataSource_extraSpecs(t *testing.T) {
-	var flavorName = acctest.RandomWithPrefix("tf-acc-flavor")
+	flavorName := acctest.RandomWithPrefix("tf-acc-flavor")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -145,7 +146,7 @@ func TestAccComputeV2FlavorDataSource_extraSpecs(t *testing.T) {
 }
 
 func TestAccComputeV2FlavorDataSource_flavorID(t *testing.T) {
-	var flavorName = acctest.RandomWithPrefix("tf-acc-flavor")
+	flavorName := acctest.RandomWithPrefix("tf-acc-flavor")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -183,7 +184,7 @@ func testAccCheckComputeV2FlavorDataSourceID(n string) resource.TestCheckFunc {
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Flavor data source ID not set")
+			return errors.New("Flavor data source ID not set")
 		}
 
 		return nil

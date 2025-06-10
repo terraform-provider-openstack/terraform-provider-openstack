@@ -4,13 +4,12 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/endpoints"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/services"
 	"github.com/gophercloud/gophercloud/v2/pagination"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceIdentityEndpointV3() *schema.Resource {
@@ -73,8 +72,9 @@ func resourceIdentityEndpointV3() *schema.Resource {
 	}
 }
 
-func resourceIdentityEndpointV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityEndpointV3Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
@@ -89,6 +89,7 @@ func resourceIdentityEndpointV3Create(ctx context.Context, d *schema.ResourceDat
 	}
 
 	log.Printf("[DEBUG] openstack_identity_endpoint_v3 create options: %#v", createOpts)
+
 	endpoint, err := endpoints.Create(ctx, identityClient, createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_identity_endpoint_v3: %s", err)
@@ -99,28 +100,32 @@ func resourceIdentityEndpointV3Create(ctx context.Context, d *schema.ResourceDat
 	return resourceIdentityEndpointV3Read(ctx, d, meta)
 }
 
-func resourceIdentityEndpointV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityEndpointV3Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	var endpoint endpoints.Endpoint
-	err = endpoints.List(identityClient, nil).EachPage(ctx, func(ctx context.Context, page pagination.Page) (bool, error) {
+
+	err = endpoints.List(identityClient, nil).EachPage(ctx, func(_ context.Context, page pagination.Page) (bool, error) {
 		endpointList, err := endpoints.ExtractEndpoints(page)
 		if err != nil {
 			return false, err
 		}
+
 		for _, v := range endpointList {
 			if v.ID == d.Id() {
 				endpoint = v
+
 				break
 			}
 		}
+
 		return true, nil
 	})
-
 	if err != nil {
 		return diag.FromErr(CheckDeleted(d, err, "Error retrieving openstack_identity_endpoint_v3"))
 	}
@@ -128,12 +133,14 @@ func resourceIdentityEndpointV3Read(ctx context.Context, d *schema.ResourceData,
 	if endpoint == (endpoints.Endpoint{}) {
 		// Endpoint was not found
 		d.SetId("")
+
 		return nil
 	}
 
 	// Query services
 	serviceType := d.Get("service_type").(string)
 	serviceName := d.Get("service_name").(string)
+
 	allServicePages, err := services.List(identityClient, services.ListOpts{ServiceType: serviceType, Name: serviceName}).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query openstack_identity_endpoint_v3 services: %s", err)
@@ -149,6 +156,7 @@ func resourceIdentityEndpointV3Read(ctx context.Context, d *schema.ResourceData,
 			if v, ok := service.Extra["name"].(string); ok {
 				serviceName = v
 			}
+
 			serviceType = service.Type
 		}
 	}
@@ -168,14 +176,16 @@ func resourceIdentityEndpointV3Read(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceIdentityEndpointV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityEndpointV3Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	var hasChange bool
+
 	var updateOpts endpoints.UpdateOpts
 
 	if d.HasChange("name") {
@@ -214,8 +224,9 @@ func resourceIdentityEndpointV3Update(ctx context.Context, d *schema.ResourceDat
 	return resourceIdentityEndpointV3Read(ctx, d, meta)
 }
 
-func resourceIdentityEndpointV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityEndpointV3Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)

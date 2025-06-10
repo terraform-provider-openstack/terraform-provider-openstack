@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/qos"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/qos"
 )
 
 func resourceBlockStorageQosV3() *schema.Resource {
@@ -52,8 +51,9 @@ func resourceBlockStorageQosV3() *schema.Resource {
 	}
 }
 
-func resourceBlockStorageQosV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBlockStorageQosV3Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	blockStorageClient, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
@@ -61,7 +61,7 @@ func resourceBlockStorageQosV3Create(ctx context.Context, d *schema.ResourceData
 
 	name := d.Get("name").(string)
 	consumer := qos.QoSConsumer(d.Get("consumer").(string))
-	specs := d.Get("specs").(map[string]interface{})
+	specs := d.Get("specs").(map[string]any)
 	createOpts := qos.CreateOpts{
 		Name:     name,
 		Consumer: consumer,
@@ -69,6 +69,7 @@ func resourceBlockStorageQosV3Create(ctx context.Context, d *schema.ResourceData
 	}
 
 	log.Printf("[DEBUG] openstack_blockstorage_qos_v3 create options: %#v", createOpts)
+
 	qosRes, err := qos.Create(ctx, blockStorageClient, &createOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_blockstorage_qos_v3 %s: %s", name, err)
@@ -79,8 +80,9 @@ func resourceBlockStorageQosV3Create(ctx context.Context, d *schema.ResourceData
 	return resourceBlockStorageQosV3Read(ctx, d, meta)
 }
 
-func resourceBlockStorageQosV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBlockStorageQosV3Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	blockStorageClient, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
@@ -104,14 +106,16 @@ func resourceBlockStorageQosV3Read(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceBlockStorageQosV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBlockStorageQosV3Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	blockStorageClient, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
 	hasChange := false
+
 	var updateOpts qos.UpdateOpts
 
 	if d.HasChange("consumer") {
@@ -125,16 +129,17 @@ func resourceBlockStorageQosV3Update(ctx context.Context, d *schema.ResourceData
 
 		// Delete all old specs.
 		var deleteKeys qos.DeleteKeysOpts
-		for oldKey := range oldSpecsRaw.(map[string]interface{}) {
+		for oldKey := range oldSpecsRaw.(map[string]any) {
 			deleteKeys = append(deleteKeys, oldKey)
 		}
+
 		err = qos.DeleteKeys(ctx, blockStorageClient, d.Id(), deleteKeys).ExtractErr()
 		if err != nil {
 			return diag.Errorf("Error deleting specs for openstack_blockstorage_qos_v3 %s: %s", d.Id(), err)
 		}
 
 		// Add new specs to UpdateOpts
-		newSpecs := expandToMapStringString(newSpecsRaw.(map[string]interface{}))
+		newSpecs := expandToMapStringString(newSpecsRaw.(map[string]any))
 		if len(newSpecs) > 0 {
 			hasChange = true
 			updateOpts.Specs = newSpecs
@@ -151,8 +156,9 @@ func resourceBlockStorageQosV3Update(ctx context.Context, d *schema.ResourceData
 	return resourceBlockStorageQosV3Read(ctx, d, meta)
 }
 
-func resourceBlockStorageQosV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBlockStorageQosV3Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	blockStorageClient, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
@@ -161,7 +167,7 @@ func resourceBlockStorageQosV3Delete(ctx context.Context, d *schema.ResourceData
 	// remove all associations first
 	err = qos.DisassociateAll(ctx, blockStorageClient, d.Id()).ExtractErr()
 	if err != nil && CheckDeleted(d, err, "") != nil {
-		return diag.FromErr(fmt.Errorf("Error deleting openstack_blockstorage_qos_v3 associations: %s", err))
+		return diag.FromErr(fmt.Errorf("Error deleting openstack_blockstorage_qos_v3 associations: %w", err))
 	}
 
 	// Delete the QoS itself

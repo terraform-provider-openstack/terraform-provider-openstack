@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumetypes"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumetypes"
 )
 
 func resourceBlockstorageVolumeTypeAccessV3() *schema.Resource {
@@ -40,8 +39,9 @@ func resourceBlockstorageVolumeTypeAccessV3() *schema.Resource {
 	}
 }
 
-func resourceBlockstorageVolumeTypeAccessV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBlockstorageVolumeTypeAccessV3Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	blockStorageClient, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
@@ -64,8 +64,9 @@ func resourceBlockstorageVolumeTypeAccessV3Create(ctx context.Context, d *schema
 	return resourceBlockstorageVolumeTypeAccessV3Read(ctx, d, meta)
 }
 
-func resourceBlockstorageVolumeTypeAccessV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBlockstorageVolumeTypeAccessV3Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	blockStorageClient, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)
@@ -87,9 +88,11 @@ func resourceBlockstorageVolumeTypeAccessV3Read(ctx context.Context, d *schema.R
 	}
 
 	found := false
+
 	for _, access := range allAccesses {
 		if access.VolumeTypeID == vtID && access.ProjectID == projectID {
 			found = true
+
 			break
 		}
 	}
@@ -105,8 +108,9 @@ func resourceBlockstorageVolumeTypeAccessV3Read(ctx context.Context, d *schema.R
 	return nil
 }
 
-func resourceBlockstorageVolumeTypeAccessV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBlockstorageVolumeTypeAccessV3Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	blockStorageClient, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack block storage client: %s", err)

@@ -1,13 +1,13 @@
 package openstack
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
 )
 
 func TestAccComputeV2KeypairDataSource_basic(t *testing.T) {
@@ -73,7 +73,7 @@ func testAccCheckComputeV2KeypairDataSourceID(n string) resource.TestCheckFunc {
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Keypair data source ID not set")
+			return errors.New("Keypair data source ID not set")
 		}
 
 		return nil

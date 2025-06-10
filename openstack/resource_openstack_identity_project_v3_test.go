@@ -2,19 +2,20 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
 )
 
 func TestAccIdentityV3Project_basic(t *testing.T) {
 	var project projects.Project
-	var projectName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+
+	projectName := "ACCPTTEST-" + acctest.RandString(5)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -65,7 +66,8 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 
 func TestAccIdentityV3ProjectDomain_basic(t *testing.T) {
 	var project projects.Project
-	var projectName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+
+	projectName := "ACCPTTEST-" + acctest.RandString(5)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -95,9 +97,10 @@ func TestAccIdentityV3ProjectDomain_basic(t *testing.T) {
 
 func testAccCheckIdentityV3ProjectDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
+
 	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -107,7 +110,7 @@ func testAccCheckIdentityV3ProjectDestroy(s *terraform.State) error {
 
 		_, err := projects.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Project still exists")
+			return errors.New("Project still exists")
 		}
 	}
 
@@ -122,13 +125,14 @@ func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) re
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
 		found, err := projects.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
@@ -137,7 +141,7 @@ func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) re
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Project not found")
+			return errors.New("Project not found")
 		}
 
 		*project = *found
@@ -154,13 +158,14 @@ func testAccCheckIdentityV3ProjectHasTag(n, tag string) resource.TestCheckFunc {
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
 		found, err := projects.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
@@ -169,7 +174,7 @@ func testAccCheckIdentityV3ProjectHasTag(n, tag string) resource.TestCheckFunc {
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Project not found")
+			return errors.New("Project not found")
 		}
 
 		for _, v := range found.Tags {
@@ -190,13 +195,14 @@ func testAccCheckIdentityV3ProjectTagCount(n string, expected int) resource.Test
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return errors.New("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
+
 		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
 		found, err := projects.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
@@ -205,7 +211,7 @@ func testAccCheckIdentityV3ProjectTagCount(n string, expected int) resource.Test
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Project not found")
+			return errors.New("Project not found")
 		}
 
 		if len(found.Tags) != expected {

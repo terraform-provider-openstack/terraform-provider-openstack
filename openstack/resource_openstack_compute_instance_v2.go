@@ -5,18 +5,13 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
@@ -29,6 +24,11 @@ import (
 	flavorsutils "github.com/gophercloud/utils/v2/openstack/compute/v2/flavors"
 	imagesutils "github.com/gophercloud/utils/v2/openstack/image/v2/images"
 	"github.com/gophercloud/utils/v2/terraform/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceComputeInstanceV2() *schema.Resource {
@@ -87,10 +87,11 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				// just stash the hash for state & diff comparisons
-				StateFunc: func(v interface{}) string {
+				StateFunc: func(v any) string {
 					switch v := v.(type) {
 					case string:
 						hash := sha1.Sum([]byte(v))
+
 						return hex.EncodeToString(hash[:])
 					default:
 						return ""
@@ -416,13 +417,13 @@ func resourceComputeInstanceV2() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			// OpenStack cannot resize an instance, if its original flavor is deleted, that is why
 			// we need to force recreation, if old flavor name or ID is reported as an empty string
-			customdiff.ForceNewIfChange("flavor_id", func(ctx context.Context, old, new, meta interface{}) bool {
+			customdiff.ForceNewIfChange("flavor_id", func(_ context.Context, old, _, _ any) bool {
 				return old.(string) == ""
 			}),
-			customdiff.ForceNewIfChange("flavor_name", func(ctx context.Context, old, new, meta interface{}) bool {
+			customdiff.ForceNewIfChange("flavor_name", func(_ context.Context, old, _, _ any) bool {
 				return old.(string) == ""
 			}),
-			func(ctx context.Context, d *schema.ResourceDiff, _ interface{}) error {
+			func(_ context.Context, d *schema.ResourceDiff, _ any) error {
 				currentState, _ := d.GetChange("power_state")
 				if currentState == "build" {
 					// In "build" state, network and security groups are not yet available
@@ -433,25 +434,29 @@ func resourceComputeInstanceV2() *schema.Resource {
 						return err
 					}
 				}
+
 				return nil
 			},
 		),
 	}
 }
 
-func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
+
 	imageClient, err := config.ImageV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
 	var availabilityZone string
-	var networks interface{}
+
+	var networks any
 
 	// Determines the Image ID using the following rules:
 	// If a bootable block_device was specified, ignore the image altogether.
@@ -531,15 +536,15 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	}
 
 	if vL, ok := d.GetOk("block_device"); ok {
-		blockDevices, err := resourceInstanceBlockDevicesV2(d, vL.([]interface{}))
+		blockDevices, err := resourceInstanceBlockDevicesV2(d, vL.([]any))
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
 		// Check if Multiattach was set in any of the Block Devices.
 		// If so, set the client's microversion appropriately.
-		for _, bd := range d.Get("block_device").([]interface{}) {
-			if bd.(map[string]interface{})["multiattach"].(bool) {
+		for _, bd := range d.Get("block_device").([]any) {
+			if bd.(map[string]any)["multiattach"].(bool) {
 				computeClient.Microversion = computeV2InstanceBlockDeviceMultiattachMicroversion
 			}
 		}
@@ -564,10 +569,11 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	}
 
 	var schedulerHints servers.SchedulerHintOpts
+
 	schedulerHintsRaw := d.Get("scheduler_hints").(*schema.Set).List()
 	if len(schedulerHintsRaw) > 0 {
 		log.Printf("[DEBUG] schedulerhints: %+v", schedulerHintsRaw)
-		schedulerHints = resourceInstanceSchedulerHintsV2(d, schedulerHintsRaw[0].(map[string]interface{}))
+		schedulerHints = resourceInstanceSchedulerHintsV2(schedulerHintsRaw[0].(map[string]any))
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -578,6 +584,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack server: %s", err)
 	}
+
 	log.Printf("[INFO] Instance ID: %s", server.ID)
 
 	// Store the ID now
@@ -602,11 +609,12 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			log.Printf("[DEBUG] Retrying after error: %s", err)
+
 			return checkForRetryableError(err)
 		}
+
 		return nil
 	})
-
 	if err != nil {
 		return diag.Errorf(
 			"Error waiting for instance (%s) to become ready: %s",
@@ -619,8 +627,9 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		if err != nil {
 			return diag.Errorf("Error stopping OpenStack instance: %s", err)
 		}
+
 		stopStateConf := &retry.StateChangeConf{
-			//Pending:    []string{"ACTIVE"},
+			// Pending:    []string{"ACTIVE"},
 			Target:     []string{"SHUTOFF"},
 			Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
@@ -629,6 +638,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		}
 
 		log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
+
 		_, err = stopStateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return diag.Errorf("Error waiting for instance (%s) to become inactive(shutoff): %s", d.Id(), err)
@@ -638,12 +648,14 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	return resourceComputeInstanceV2Read(ctx, d, meta)
 }
 
-func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
 	}
+
 	imageClient, err := config.ImageV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack image client: %s", err)
@@ -667,7 +679,7 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	// Determine the best IPv4 and IPv6 addresses to access the instance with
-	hostv4, hostv6 := getInstanceAccessAddresses(d, networks)
+	hostv4, hostv6 := getInstanceAccessAddresses(networks)
 
 	// AccessIPv4/v6 isn't standard in OpenStack, but there have been reports
 	// of them being used in some environments.
@@ -706,6 +718,7 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 	for _, sg := range server.SecurityGroups {
 		secGrpNames = append(secGrpNames, sg["name"].(string))
 	}
+
 	d.Set("security_groups", secGrpNames)
 
 	d.Set("key_pair", server.KeyName)
@@ -714,6 +727,7 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 	if !ok {
 		return diag.Errorf("Error setting OpenStack server's flavor: %v", server.Flavor)
 	}
+
 	d.Set("flavor_id", flavorID)
 
 	flavor, err := flavors.Get(ctx, computeClient, flavorID).Extract()
@@ -753,6 +767,7 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 
 	// Populate tags.
 	computeClient.Microversion = computeV2TagsExtensionMicroversion
+
 	instanceTags, err := tags.List(ctx, computeClient, server.ID).Extract()
 	if err != nil {
 		log.Printf("[DEBUG] Unable to get tags for openstack_compute_instance_v2: %s", err)
@@ -766,8 +781,9 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
@@ -788,14 +804,16 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 	if d.HasChange("power_state") {
 		powerStateOldRaw, powerStateNewRaw := d.GetChange("power_state")
 		powerStateOld := powerStateOldRaw.(string)
+
 		powerStateNew := powerStateNewRaw.(string)
 		if strings.ToLower(powerStateNew) == "shelved_offloaded" {
 			err = servers.Shelve(ctx, computeClient, d.Id()).ExtractErr()
 			if err != nil {
 				return diag.Errorf("Error shelve OpenStack instance: %s", err)
 			}
+
 			shelveStateConf := &retry.StateChangeConf{
-				//Pending:    []string{"ACTIVE"},
+				// Pending:    []string{"ACTIVE"},
 				Target:     []string{"SHELVED_OFFLOADED"},
 				Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
@@ -804,18 +822,21 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			}
 
 			log.Printf("[DEBUG] Waiting for instance (%s) to shelve", d.Id())
+
 			_, err = shelveStateConf.WaitForStateContext(ctx)
 			if err != nil {
 				return diag.Errorf("Error waiting for instance (%s) to become shelve: %s", d.Id(), err)
 			}
 		}
+
 		if strings.ToLower(powerStateNew) == "paused" {
 			err = servers.Pause(ctx, computeClient, d.Id()).ExtractErr()
 			if err != nil {
 				return diag.Errorf("Error pausing OpenStack instance: %s", err)
 			}
+
 			pauseStateConf := &retry.StateChangeConf{
-				//Pending:    []string{"ACTIVE"},
+				// Pending:    []string{"ACTIVE"},
 				Target:     []string{"PAUSED"},
 				Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
@@ -824,18 +845,21 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			}
 
 			log.Printf("[DEBUG] Waiting for instance (%s) to pause", d.Id())
+
 			_, err = pauseStateConf.WaitForStateContext(ctx)
 			if err != nil {
 				return diag.Errorf("Error waiting for instance (%s) to become paused: %s", d.Id(), err)
 			}
 		}
+
 		if strings.ToLower(powerStateNew) == "shutoff" {
 			err = servers.Stop(ctx, computeClient, d.Id()).ExtractErr()
 			if err != nil {
 				return diag.Errorf("Error stopping OpenStack instance: %s", err)
 			}
+
 			stopStateConf := &retry.StateChangeConf{
-				//Pending:    []string{"ACTIVE"},
+				// Pending:    []string{"ACTIVE"},
 				Target:     []string{"SHUTOFF"},
 				Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
@@ -844,16 +868,19 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			}
 
 			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
+
 			_, err = stopStateConf.WaitForStateContext(ctx)
 			if err != nil {
 				return diag.Errorf("Error waiting for instance (%s) to become inactive(shutoff): %s", d.Id(), err)
 			}
 		}
+
 		if strings.ToLower(powerStateNew) == "active" {
 			if strings.ToLower(powerStateOld) == "shelved" || strings.ToLower(powerStateOld) == "shelved_offloaded" {
 				unshelveOpt := &servers.UnshelveOpts{
 					AvailabilityZone: d.Get("availability_zone").(string),
 				}
+
 				err = servers.Unshelve(ctx, computeClient, d.Id(), unshelveOpt).ExtractErr()
 				if err != nil {
 					return diag.Errorf("Error unshelving OpenStack instance: %s", err)
@@ -869,8 +896,9 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 					return diag.Errorf("Error starting OpenStack instance: %s", err)
 				}
 			}
+
 			startStateConf := &retry.StateChangeConf{
-				//Pending:    []string{"SHUTOFF"},
+				// Pending:    []string{"SHUTOFF"},
 				Target:     []string{"ACTIVE"},
 				Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
@@ -879,6 +907,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			}
 
 			log.Printf("[DEBUG] Waiting for instance (%s) to start/unshelve/resume", d.Id())
+
 			_, err = startStateConf.WaitForStateContext(ctx)
 			if err != nil {
 				return diag.Errorf("Error waiting for instance (%s) to become active: %s", d.Id(), err)
@@ -888,13 +917,15 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 
 	if d.HasChange("metadata") {
 		oldMetadata, newMetadata := d.GetChange("metadata")
+
 		var metadataToDelete []string
 
 		// Determine if any metadata keys were removed from the configuration.
 		// Then request those keys to be deleted.
-		for oldKey := range oldMetadata.(map[string]interface{}) {
+		for oldKey := range oldMetadata.(map[string]any) {
 			var found bool
-			for newKey := range newMetadata.(map[string]interface{}) {
+
+			for newKey := range newMetadata.(map[string]any) {
 				if oldKey == newKey {
 					found = true
 				}
@@ -914,7 +945,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 
 		// Update existing metadata and add any new metadata.
 		metadataOpts := make(servers.MetadataOpts)
-		for k, v := range newMetadata.(map[string]interface{}) {
+		for k, v := range newMetadata.(map[string]any) {
 			metadataOpts[k] = v.(string)
 		}
 
@@ -944,6 +975,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 
 				return diag.Errorf("Error removing security group (%s) from OpenStack server (%s): %s", g, d.Id(), err)
 			}
+
 			log.Printf("[DEBUG] Removed security group (%s) from instance (%s)", g, d.Id())
 		}
 
@@ -952,6 +984,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			if err != nil && err.Error() != "EOF" {
 				return diag.Errorf("Error adding security group (%s) to OpenStack server (%s): %s", g, d.Id(), err)
 			}
+
 			log.Printf("[DEBUG] Added security group (%s) to instance (%s)", g, d.Id())
 		}
 	}
@@ -968,18 +1001,23 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 	if d.HasChange("flavor_id") || d.HasChange("flavor_name") {
 		// Get vendor_options
 		vendorOptionsRaw := d.Get("vendor_options").(*schema.Set)
+
 		var ignoreResizeConfirmation bool
+
 		if vendorOptionsRaw.Len() > 0 {
 			vendorOptions := expandVendorOptions(vendorOptionsRaw.List())
 			ignoreResizeConfirmation = vendorOptions["ignore_resize_confirmation"].(bool)
 		}
 
 		var newFlavorID string
+
 		var err error
+
 		if d.HasChange("flavor_id") {
 			newFlavorID = d.Get("flavor_id").(string)
 		} else {
 			newFlavorName := d.Get("flavor_name").(string)
+
 			newFlavorID, err = flavorsutils.IDFromName(ctx, computeClient, newFlavorName)
 			if err != nil {
 				return diag.FromErr(err)
@@ -990,6 +1028,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			FlavorRef: newFlavorID,
 		}
 		log.Printf("[DEBUG] Resize configuration: %#v", resizeOpts)
+
 		err = servers.Resize(ctx, computeClient, d.Id(), resizeOpts).ExtractErr()
 		if err != nil {
 			return diag.Errorf("Error resizing OpenStack server: %s", err)
@@ -1030,6 +1069,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 
 			// Confirm resize.
 			log.Printf("[DEBUG] Confirming resize")
+
 			err = servers.ConfirmResize(ctx, computeClient, d.Id()).ExtractErr()
 			if err != nil {
 				return diag.Errorf("Error confirming resize of OpenStack server: %s", err)
@@ -1053,6 +1093,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 
 	if d.HasChange("image_id") || d.HasChange("image_name") || d.HasChange("personality") {
 		var newImageID string
+
 		imageClient, err := config.ImageV2Client(ctx, GetRegion(d, config))
 		if err != nil {
 			return diag.Errorf("Error creating OpenStack image client: %s", err)
@@ -1062,6 +1103,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			newImageID = d.Get("image_id").(string)
 		} else if d.HasChange("image_name") {
 			newImageName := d.Get("image_name").(string)
+
 			newImageID, err = imagesutils.IDFromName(ctx, computeClient, newImageName)
 			if err != nil {
 				return diag.FromErr(err)
@@ -1079,10 +1121,12 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 		}
 
 		log.Printf("[DEBUG] Rebuild configuration: %#v", rebuildOpts)
+
 		_, err = servers.Rebuild(ctx, computeClient, d.Id(), rebuildOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error rebuilding OpenStack server: %s", err)
 		}
+
 		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"REBUILD"},
 			Target:     []string{"ACTIVE", "SHUTOFF"},
@@ -1091,6 +1135,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			Delay:      10 * time.Second,
 			MinTimeout: 3 * time.Second,
 		}
+
 		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return diag.Errorf("Error waiting for instance (%s) to rebuild: %s", d.Id(), err)
@@ -1102,18 +1147,21 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 		instanceTags := computeV2InstanceUpdateTags(d)
 		instanceTagsOpts := tags.ReplaceAllOpts{Tags: instanceTags}
 		computeClient.Microversion = computeV2TagsExtensionMicroversion
+
 		instanceTags, err := tags.ReplaceAll(ctx, computeClient, d.Id(), instanceTagsOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error setting tags on openstack_compute_instance_v2 %s: %s", d.Id(), err)
 		}
+
 		log.Printf("[DEBUG] Set tags %s on openstack_compute_instance_v2 %s", instanceTags, d.Id())
 	}
 
 	return resourceComputeInstanceV2Read(ctx, d, meta)
 }
 
-func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack compute client: %s", err)
@@ -1132,19 +1180,25 @@ func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData
 				Delay:      10 * time.Second,
 				MinTimeout: 3 * time.Second,
 			}
+
 			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
+
 			_, err = stopStateConf.WaitForStateContext(ctx)
 			if err != nil {
 				log.Printf("[WARN] Error waiting for instance (%s) to stop: %s, proceeding to delete", d.Id(), err)
 			}
 		}
 	}
+
 	vendorOptionsRaw := d.Get("vendor_options").(*schema.Set)
+
 	var detachPortBeforeDestroy bool
+
 	if vendorOptionsRaw.Len() > 0 {
 		vendorOptions := expandVendorOptions(vendorOptionsRaw.List())
 		detachPortBeforeDestroy = vendorOptions["detach_ports_before_destroy"].(bool)
 	}
+
 	if detachPortBeforeDestroy {
 		allInstanceNetworks, err := getAllInstanceNetworks(ctx, d, meta)
 		if err != nil {
@@ -1167,14 +1221,17 @@ func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData
 			}
 		}
 	}
+
 	if d.Get("force_delete").(bool) {
 		log.Printf("[DEBUG] Force deleting OpenStack Instance %s", d.Id())
+
 		err = servers.ForceDelete(ctx, computeClient, d.Id()).ExtractErr()
 		if err != nil {
 			return diag.FromErr(CheckDeleted(d, err, "Error force deleting openstack_compute_instance_v2"))
 		}
 	} else {
 		log.Printf("[DEBUG] Deleting OpenStack Instance %s", d.Id())
+
 		err = servers.Delete(ctx, computeClient, d.Id()).ExtractErr()
 		if err != nil {
 			return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_compute_instance_v2"))
@@ -1203,18 +1260,20 @@ func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	var serverWithAttachments struct {
-		VolumesAttached []map[string]interface{} `json:"os-extended-volumes:volumes_attached"`
+		VolumesAttached []map[string]any `json:"os-extended-volumes:volumes_attached"`
 	}
 
 	config := meta.(*Config)
+
 	computeClient, err := config.ComputeV2Client(ctx, GetRegion(d, config))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return nil, fmt.Errorf("Error creating OpenStack compute client: %w", err)
 	}
 
 	results := make([]*schema.ResourceData, 1)
+
 	diagErr := resourceComputeInstanceV2Read(ctx, d, meta)
 	if diagErr != nil {
 		return nil, fmt.Errorf("Error reading openstack_compute_instance_v2 %s: %v", d.Id(), diagErr)
@@ -1232,16 +1291,18 @@ func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schem
 	log.Printf("[DEBUG] Retrieved openstack_compute_instance_v2 %s volume attachments: %#v",
 		d.Id(), serverWithAttachments)
 
-	bds := []map[string]interface{}{}
+	bds := []map[string]any{}
+
 	if len(serverWithAttachments.VolumesAttached) > 0 {
 		blockStorageClient, err := config.BlockStorageV3Client(ctx, GetRegion(d, config))
 		if err == nil {
-			var volMetaData = struct {
-				VolumeImageMetadata map[string]interface{} `json:"volume_image_metadata"`
-				ID                  string                 `json:"id"`
-				Size                int                    `json:"size"`
-				Bootable            string                 `json:"bootable"`
+			volMetaData := struct {
+				VolumeImageMetadata map[string]any `json:"volume_image_metadata"`
+				ID                  string         `json:"id"`
+				Size                int            `json:"size"`
+				Bootable            string         `json:"bootable"`
 			}{}
+
 			for i, b := range serverWithAttachments.VolumesAttached {
 				rawVolume := volumes.Get(ctx, blockStorageClient, b["id"].(string))
 				if err := rawVolume.ExtractInto(&volMetaData); err != nil {
@@ -1249,7 +1310,7 @@ func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schem
 				}
 
 				log.Printf("[DEBUG] retrieved volume%+v", volMetaData)
-				v := map[string]interface{}{
+				v := map[string]any{
 					"delete_on_termination": true,
 					"uuid":                  volMetaData.VolumeImageMetadata["image_id"],
 					"boot_index":            i,
@@ -1267,16 +1328,19 @@ func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schem
 			}
 		} else {
 			log.Print("[DEBUG] Could not create BlockStorageV3 client, trying BlockStorageV2")
+
 			blockStorageClient, err := config.BlockStorageV2Client(ctx, GetRegion(d, config))
 			if err != nil {
-				return nil, fmt.Errorf("Error creating OpenStack volume V2 client: %s", err)
+				return nil, fmt.Errorf("Error creating OpenStack volume V2 client: %w", err)
 			}
-			var volMetaData = struct {
-				VolumeImageMetadata map[string]interface{} `json:"volume_image_metadata"`
-				ID                  string                 `json:"id"`
-				Size                int                    `json:"size"`
-				Bootable            string                 `json:"bootable"`
+
+			volMetaData := struct {
+				VolumeImageMetadata map[string]any `json:"volume_image_metadata"`
+				ID                  string         `json:"id"`
+				Size                int            `json:"size"`
+				Bootable            string         `json:"bootable"`
 			}{}
+
 			for i, b := range serverWithAttachments.VolumesAttached {
 				rawVolume := volumes.Get(ctx, blockStorageClient, b["id"].(string))
 				if err := rawVolume.ExtractInto(&volMetaData); err != nil {
@@ -1284,7 +1348,7 @@ func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schem
 				}
 
 				log.Printf("[DEBUG] retrieved volume%+v", volMetaData)
-				v := map[string]interface{}{
+				v := map[string]any{
 					"delete_on_termination": true,
 					"uuid":                  volMetaData.VolumeImageMetadata["image_id"],
 					"boot_index":            i,
@@ -1307,7 +1371,7 @@ func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schem
 
 	metadata, err := servers.Metadata(ctx, computeClient, d.Id()).Extract()
 	if err != nil {
-		return nil, fmt.Errorf("Unable to read metadata for openstack_compute_instance_v2 %s: %s", d.Id(), err)
+		return nil, fmt.Errorf("Unable to read metadata for openstack_compute_instance_v2 %s: %w", d.Id(), err)
 	}
 
 	d.Set("metadata", metadata)
@@ -1320,12 +1384,13 @@ func resourceOpenStackComputeInstanceV2ImportState(ctx context.Context, d *schem
 // ServerV2StateRefreshFunc returns a retry.StateRefreshFunc that is used to watch
 // an OpenStack instance.
 func ServerV2StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, instanceID string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+	return func() (any, string, error) {
 		s, err := servers.Get(ctx, client, instanceID).Extract()
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return s, "DELETED", nil
 			}
+
 			return nil, "", err
 		}
 
@@ -1336,24 +1401,28 @@ func ServerV2StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceCl
 func resourceInstanceSecGroupsV2(d *schema.ResourceData) []string {
 	rawSecGroups := d.Get("security_groups").(*schema.Set).List()
 	res := make([]string, len(rawSecGroups))
+
 	for i, raw := range rawSecGroups {
 		res[i] = raw.(string)
 	}
+
 	return res
 }
 
 func resourceInstanceMetadataV2(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
-	for key, val := range d.Get("metadata").(map[string]interface{}) {
+	for key, val := range d.Get("metadata").(map[string]any) {
 		m[key] = val.(string)
 	}
+
 	return m
 }
 
-func resourceInstanceBlockDevicesV2(_ *schema.ResourceData, bds []interface{}) ([]servers.BlockDevice, error) {
+func resourceInstanceBlockDevicesV2(_ *schema.ResourceData, bds []any) ([]servers.BlockDevice, error) {
 	blockDeviceOpts := make([]servers.BlockDevice, len(bds))
+
 	for i, bd := range bds {
-		bdM := bd.(map[string]interface{})
+		bdM := bd.(map[string]any)
 		blockDeviceOpts[i] = servers.BlockDevice{
 			UUID:                bdM["uuid"].(string),
 			VolumeSize:          bdM["volume_size"].(int),
@@ -1391,33 +1460,38 @@ func resourceInstanceBlockDevicesV2(_ *schema.ResourceData, bds []interface{}) (
 	}
 
 	log.Printf("[DEBUG] Block Device Options: %+v", blockDeviceOpts)
+
 	return blockDeviceOpts, nil
 }
 
-func resourceInstanceSchedulerHintsV2(ctx *schema.ResourceData, schedulerHintsRaw map[string]interface{}) servers.SchedulerHintOpts {
+func resourceInstanceSchedulerHintsV2(schedulerHintsRaw map[string]any) servers.SchedulerHintOpts {
 	differentHost := []string{}
-	if v, ok := schedulerHintsRaw["different_host"].([]interface{}); ok {
+
+	if v, ok := schedulerHintsRaw["different_host"].([]any); ok {
 		for _, dh := range v {
 			differentHost = append(differentHost, dh.(string))
 		}
 	}
 
 	sameHost := []string{}
-	if v, ok := schedulerHintsRaw["same_host"].([]interface{}); ok {
+
+	if v, ok := schedulerHintsRaw["same_host"].([]any); ok {
 		for _, sh := range v {
 			sameHost = append(sameHost, sh.(string))
 		}
 	}
 
-	query := []interface{}{}
-	if v, ok := schedulerHintsRaw["query"].([]interface{}); ok {
+	query := []any{}
+
+	if v, ok := schedulerHintsRaw["query"].([]any); ok {
 		for _, q := range v {
 			query = append(query, q.(string))
 		}
 	}
 
 	differentCell := []string{}
-	if v, ok := schedulerHintsRaw["different_cell"].([]interface{}); ok {
+
+	if v, ok := schedulerHintsRaw["different_cell"].([]any); ok {
 		for _, dh := range v {
 			differentCell = append(differentCell, dh.(string))
 		}
@@ -1431,7 +1505,7 @@ func resourceInstanceSchedulerHintsV2(ctx *schema.ResourceData, schedulerHintsRa
 		TargetCell:           schedulerHintsRaw["target_cell"].(string),
 		DifferentCell:        differentCell,
 		BuildNearHostIP:      schedulerHintsRaw["build_near_host_ip"].(string),
-		AdditionalProperties: schedulerHintsRaw["additional_properties"].(map[string]interface{}),
+		AdditionalProperties: schedulerHintsRaw["additional_properties"].(map[string]any),
 	}
 
 	return schedulerHints
@@ -1442,12 +1516,14 @@ func getImageIDFromConfig(ctx context.Context, imageClient *gophercloud.ServiceC
 	// combination was used. This emulates normal boot behavior. Otherwise, ignore the image altogether.
 	if vL, ok := d.GetOk("block_device"); ok {
 		needImage := false
-		for _, v := range vL.([]interface{}) {
-			vM := v.(map[string]interface{})
+
+		for _, v := range vL.([]any) {
+			vM := v.(map[string]any)
 			if vM["source_type"] == "image" && vM["destination_type"] == "local" {
 				needImage = true
 			}
 		}
+
 		if !needImage {
 			return "", nil
 		}
@@ -1474,10 +1550,11 @@ func getImageIDFromConfig(ctx context.Context, imageClient *gophercloud.ServiceC
 		if err != nil {
 			return "", err
 		}
+
 		return imageID, nil
 	}
 
-	return "", fmt.Errorf("Neither a boot device, image ID, or image name were able to be determined")
+	return "", errors.New("Neither a boot device, image ID, or image name were able to be determined")
 }
 
 func setImageInformation(ctx context.Context, imageClient *gophercloud.ServiceClient, server *servers.Server, d *schema.ResourceData) error {
@@ -1485,14 +1562,17 @@ func setImageInformation(ctx context.Context, imageClient *gophercloud.ServiceCl
 	// combination was used. This emulates normal boot behavior. Otherwise, ignore the image altogether.
 	if vL, ok := d.GetOk("block_device"); ok {
 		needImage := false
-		for _, v := range vL.([]interface{}) {
-			vM := v.(map[string]interface{})
+
+		for _, v := range vL.([]any) {
+			vM := v.(map[string]any)
 			if vM["source_type"] == "image" && vM["destination_type"] == "local" {
 				needImage = true
 			}
 		}
+
 		if !needImage {
 			d.Set("image_id", "Attempt to boot from volume - no image supplied")
+
 			return nil
 		}
 	}
@@ -1501,6 +1581,7 @@ func setImageInformation(ctx context.Context, imageClient *gophercloud.ServiceCl
 		imageID := server.Image["id"].(string)
 		if imageID != "" {
 			d.Set("image_id", imageID)
+
 			image, err := images.Get(ctx, imageClient, imageID).Extract()
 			if err != nil {
 				if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
@@ -1508,10 +1589,13 @@ func setImageInformation(ctx context.Context, imageClient *gophercloud.ServiceCl
 					// The most likely scenario is that the image no longer exists in the Image Service
 					// but the instance still has a record from when it existed.
 					d.Set("image_name", "Image not found")
+
 					return nil
 				}
+
 				return err
 			}
+
 			d.Set("image_name", image.Name)
 		}
 	}
@@ -1541,53 +1625,55 @@ func getFlavorID(ctx context.Context, computeClient *gophercloud.ServiceClient, 
 		if err != nil {
 			return "", err
 		}
+
 		return flavorID, nil
 	}
 
-	return "", fmt.Errorf("Neither a flavor_id or flavor_name could be determined")
+	return "", errors.New("Neither a flavor_id or flavor_name could be determined")
 }
 
-func resourceComputeSchedulerHintsHash(v interface{}) int {
+func resourceComputeSchedulerHintsHash(v any) int {
 	var buf bytes.Buffer
 
-	m, ok := v.(map[string]interface{})
+	m, ok := v.(map[string]any)
 	if !ok {
 		return hashcode.String(buf.String())
 	}
+
 	if m == nil {
 		return hashcode.String(buf.String())
 	}
 
 	if m["group"] != nil {
-		buf.WriteString(fmt.Sprintf("%s-", m["group"].(string)))
+		buf.WriteString(m["group"].(string) + "-")
 	}
 
 	if m["target_cell"] != nil {
-		buf.WriteString(fmt.Sprintf("%s-", m["target_cell"].(string)))
+		buf.WriteString(m["target_cell"].(string) + "-")
 	}
 
 	if m["build_host_near_ip"] != nil {
-		buf.WriteString(fmt.Sprintf("%s-", m["build_host_near_ip"].(string)))
+		buf.WriteString(m["build_host_near_ip"].(string) + "-")
 	}
 
 	if m["additional_properties"] != nil {
-		for _, v := range m["additional_properties"].(map[string]interface{}) {
+		for _, v := range m["additional_properties"].(map[string]any) {
 			buf.WriteString(fmt.Sprintf("%s-", v))
 		}
 	}
 
-	buf.WriteString(fmt.Sprintf("%s-", m["different_host"].([]interface{})))
-	buf.WriteString(fmt.Sprintf("%s-", m["same_host"].([]interface{})))
-	buf.WriteString(fmt.Sprintf("%s-", m["query"].([]interface{})))
-	buf.WriteString(fmt.Sprintf("%s-", m["different_cell"].([]interface{})))
+	buf.WriteString(fmt.Sprintf("%s-", m["different_host"].([]any)))
+	buf.WriteString(fmt.Sprintf("%s-", m["same_host"].([]any)))
+	buf.WriteString(fmt.Sprintf("%s-", m["query"].([]any)))
+	buf.WriteString(fmt.Sprintf("%s-", m["different_cell"].([]any)))
 
 	return hashcode.String(buf.String())
 }
 
 func checkBlockDeviceConfig(d *schema.ResourceData) error {
 	if vL, ok := d.GetOk("block_device"); ok {
-		for _, v := range vL.([]interface{}) {
-			vM := v.(map[string]interface{})
+		for _, v := range vL.([]any) {
+			vM := v.(map[string]any)
 
 			if vM["source_type"] != "blank" && vM["uuid"] == "" {
 				return fmt.Errorf("You must specify a uuid for %s block device types", vM["source_type"])
@@ -1595,13 +1681,13 @@ func checkBlockDeviceConfig(d *schema.ResourceData) error {
 
 			if vM["source_type"] == "image" && vM["destination_type"] == "volume" {
 				if vM["volume_size"] == 0 {
-					return fmt.Errorf("You must specify a volume_size when creating a volume from an image")
+					return errors.New("You must specify a volume_size when creating a volume from an image")
 				}
 			}
 
 			if vM["source_type"] == "blank" && vM["destination_type"] == "local" {
 				if vM["volume_size"] == 0 {
-					return fmt.Errorf("You must specify a volume_size when creating a blank block device")
+					return errors.New("You must specify a volume_size when creating a blank block device")
 				}
 			}
 		}
@@ -1610,10 +1696,11 @@ func checkBlockDeviceConfig(d *schema.ResourceData) error {
 	return nil
 }
 
-func resourceComputeInstancePersonalityHash(v interface{}) int {
+func resourceComputeInstancePersonalityHash(v any) int {
 	var buf bytes.Buffer
-	m := v.(map[string]interface{})
-	buf.WriteString(fmt.Sprintf("%s-", m["file"].(string)))
+
+	m := v.(map[string]any)
+	buf.WriteString(m["file"].(string) + "-")
 
 	return hashcode.String(buf.String())
 }
@@ -1625,7 +1712,7 @@ func resourceInstancePersonalityV2(d *schema.ResourceData) servers.Personality {
 		personalityList := v.(*schema.Set).List()
 		if len(personalityList) > 0 {
 			for _, p := range personalityList {
-				rawPersonality := p.(map[string]interface{})
+				rawPersonality := p.(map[string]any)
 				file := servers.File{
 					Path:     rawPersonality["file"].(string),
 					Contents: []byte(rawPersonality["content"].(string)),
@@ -1644,12 +1731,12 @@ func resourceInstancePersonalityV2(d *schema.ResourceData) servers.Personality {
 // suppressAvailabilityZoneDetailDiffs will suppress diffs when a user specifies an
 // availability zone in the format of `az:host:node` and Nova/Compute responds with
 // only `az`.
-func suppressAvailabilityZoneDetailDiffs(_, old, new string, _ *schema.ResourceData) bool {
-	if strings.Contains(new, ":") {
-		parts := strings.Split(new, ":")
+func suppressAvailabilityZoneDetailDiffs(_, o, n string, _ *schema.ResourceData) bool {
+	if strings.Contains(n, ":") {
+		parts := strings.Split(n, ":")
 		az := parts[0]
 
-		if az == old {
+		if az == o {
 			return true
 		}
 	}
