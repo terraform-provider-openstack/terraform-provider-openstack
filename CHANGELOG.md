@@ -1,3 +1,42 @@
+## 3.2.0 ( 10 June, 2025 )
+
+NOTES
+
+* Bumped Go version to 1.24 ([#1873](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1873))
+* Bumped Gophercloud library version ([#1876](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1876))
+* Bumped golangci-lint to v2 and enabled new linters ([#1883](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1883))
+
+IMPROVEMENTS
+
+* Added `openstack_lb_flavor_v2` resource ([#1791](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1791))
+* Added `openstack_lb_flavorprofile_v2` data source ([#1792](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1792))
+* Added optional `external_qos_policy_id` argument in the `openstack_networking_router_v2` resource ([#1875](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1875))
+* Added optional `external_qos_policy_id` argument in the `openstack_networking_router_v2` data source ([#1875](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1875))
+* Added `openstack_identity_limit_v3` resource ([#1573](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1573))
+* Added `openstack_identity_registered_limit_v3` resource ([#1571](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1571))
+* Added `openstack_dns_zone_share_v2` resource ([#1832](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1832))
+* Added `openstack_dns_zone_share_v2` data source ([#1832](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1832))
+* Added support for `binary/octet-stream` Content-Type on image decompress in the `openstack_images_image_v2` resource ([#1877](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1877))
+* Added `openstack_compute_servergroup_v2` data source ([#1826](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1826))
+* Added `openstack_networking_address_group_v2` resource ([#1878](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1878))
+* Added optional `remote_address_group_id` argument in the `openstack_networking_secgroup_rule_v2` resource ([#1878](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1878))
+* Added optional `segment_id` argument in the `openstack_networking_subnet_v2` resource ([#1882](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1882))
+* Added optional `segment_id` argument in the `openstack_networking_subnet_v2` data source ([#1882](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1882))
+* Added optional `segment_id` argument in the `openstack_networking_subnet_ids_v2` data source ([#1882](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1882))
+* Added optional `volume_type` argument in the `openstack_db_instance_v1` resource ([#1647](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1647))
+
+BREAKING CHANGES
+
+* Deprecated `openstack_loadbalancer_flavor_v2` data source in favor of `openstack_lb_flavor_v2` ([#1797](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1797))
+
+BUG FIXES
+
+* Set missing `region` attributes across various resources and data sources ([#1880](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1880))
+* Removed IPv6 bracket notation from the `access_ip_v6` attribute in the `openstack_compute_instance_v2` resource ([#1879](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1879))
+* Skipped setting zero quotas for undefined quota values in the `openstack_lb_quota_v2` resource ([#1881](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1881))
+* Skipped setting zero quotas for undefined quota values in the `openstack_networking_quota_v2` resource ([#1881](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1881))
+* Fixed `unmarshal string of type bool` error in the `openstack_identity_user_v3` resource and data source ([#1874](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/1874))
+
 ## 3.1.0 ( 23 May, 2025 )
 
 NOTES
