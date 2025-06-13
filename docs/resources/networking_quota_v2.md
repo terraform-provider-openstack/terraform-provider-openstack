@@ -13,11 +13,11 @@ Manages a V2 networking quota resource within OpenStack.
 
 ~> **Note:** This usually requires admin privileges.
 
-~> **Note:** This resource has a no-op deletion so no actual actions will be done against the OpenStack API
-    in case of delete call.
+~> **Note:** This resource has a no-op deletion so no actual actions will be
+done against the OpenStack API in case of delete call.
 
-~> **Note:** This resource has all-in creation so all optional quota arguments that were not specified are
-    created with zero value.
+~> **Note:** This resource no longer uses all-in creation, so all optional
+quota arguments that are not explicitly set will be ignored.
 
 ## Example Usage
 
@@ -44,39 +44,54 @@ resource "openstack_networking_quota_v2" "quota_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to create the quota. If
-    omitted, the `region` argument of the provider is used. Changing this
-    creates new quota.
+* `region` - (Optional) The region in which to create the quota. If omitted,
+  the `region` argument of the provider is used. Changing this creates new
+  quota.
 
 * `project_id` - (Required) ID of the project to manage quota. Changing this
-    creates new quota.
+  creates new quota.
 
-* `floatingip` - (Optional) Quota value for floating IPs. Changing this updates the
-    existing quota.
+* `bgpvpn` - (Optional) Quota value for BGP VPNs. Changing this updates the
+  existing quota.
+
+* `firewall_group` - (Optional) Quota value for firewall groups. Changing this
+  updates the existing quota.
+
+* `firewall_policy` - (Optional) Quota value for firewall policies. Changing
+  this updates the existing quota.
+
+* `firewall_rule` - (Optional) Quota value for firewall rules. Changing this
+  updates the existing quota.
+
+* `floatingip` - (Optional) Quota value for floating IPs. Changing this updates
+  the existing quota.
 
 * `network` - (Optional) Quota value for networks. Changing this updates the
-    existing quota.
+  existing quota.
 
-* `port` - (Optional) Quota value for ports. Changing this updates the
-    existing quota.
+* `port` - (Optional) Quota value for ports. Changing this updates the existing
+  quota.
 
-* `rbac_policy` - (Optional) Quota value for RBAC policies.
-    Changing this updates the existing quota.
+* `rbac_policy` - (Optional) Quota value for RBAC policies. Changing this
+  updates the existing quota.
 
 * `router` - (Optional) Quota value for routers. Changing this updates the
-    existing quota.
+  existing quota.
 
-* `security_group` - (Optional) Quota value for security groups. Changing
-    this updates the existing quota.
+* `security_group` - (Optional) Quota value for security groups. Changing this
+  updates the existing quota.
 
 * `security_group_rule` - (Optional) Quota value for security group rules.
-    Changing this updates the existing quota.
+  Changing this updates the existing quota.
 
-* `subnet` - (Optional) Quota value for subnets. Changing
-    this updates the existing quota.
+* `subnet` - (Optional) Quota value for subnets. Changing this updates the
+  existing quota.
 
-* `subnetpool` - (Optional) Quota value for subnetpools.
-    Changing this updates the existing quota.
+* `subnetpool` - (Optional) Quota value for subnetpools. Changing this updates
+  the existing quota.
+
+* `trunk` - (Optional) Quota value for trunks. Changing this updates the
+  existing quota.
 
 ## Attributes Reference
 
@@ -84,6 +99,10 @@ The following attributes are exported:
 
 * `region` - See Argument Reference above.
 * `project_id` - See Argument Reference above.
+* `bgpvpn` - See Argument Reference above.
+* `firewall_group` - See Argument Reference above.
+* `firewall_policy` - See Argument Reference above.
+* `firewall_rule` - See Argument Reference above.
 * `floatingip` - See Argument Reference above.
 * `network` - See Argument Reference above.
 * `port` - See Argument Reference above.
@@ -93,6 +112,7 @@ The following attributes are exported:
 * `security_group_rule` - See Argument Reference above.
 * `subnet` - See Argument Reference above.
 * `subnetpool` - See Argument Reference above.
+* `trunk` - See Argument Reference above.
 
 ## Import
 
