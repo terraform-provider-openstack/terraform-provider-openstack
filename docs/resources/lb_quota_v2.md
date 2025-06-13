@@ -13,14 +13,15 @@ Manages a V2 load balancer quota resource within OpenStack.
 
 ~> **Note:** This usually requires admin privileges.
 
-~> **Note:** This resource has a no-op deletion so no actual actions will be done against the OpenStack
-   API in case of delete call.
+~> **Note:** This resource has a no-op deletion so no actual actions will be
+done against the OpenStack API in case of delete call.
 
-~> **Note:** This resource has all-in creation so all optional quota arguments that were not specified are
-   created with zero value.
+~> **Note:** This resource no longer uses all-in creation, so all optional
+quota arguments that are not explicitly set will be ignored.
 
-~> **Note:** This resource has attributes that depend on octavia minor versions.
-Please ensure your Openstack cloud supports the required [minor version](../#octavia-api-versioning).
+~> **Note:** This resource has attributes that depend on octavia minor
+versions. Please ensure your Openstack cloud supports the required [minor
+version](../#octavia-api-versioning).
 
 ## Example Usage
 
@@ -73,7 +74,6 @@ The following arguments are supported:
 * `l7_rule` - (Optional) Quota value for l7_rules. Changing this
   updates the existing quota. Omitting it sets it to 0. Available in
   **Octavia minor version 2.19**.
-
 
 ## Attributes Reference
 
