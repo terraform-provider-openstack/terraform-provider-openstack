@@ -3,20 +3,21 @@
 set -x
 set -o pipefail
 
-timeout="60m"
+# set tests timeout to 60m if not set
+: "${ACCEPTANCE_TESTS_TIMEOUT:=60m}"
+# set tests parallelism to 1 if not set
+: "${ACCEPTANCE_TESTS_PARALLELISM:=1}"
+
 failed=
 
 LOG_DIR=/tmp/devstack-logs
-mkdir -p ${LOG_DIR}
+mkdir -p "${LOG_DIR}"
 
-if [[ -z "${ACCEPTANCE_TESTS_FILTER}" ]]; then
-    ACCEPTANCE_TESTS=($(python <<< "print(' '.join($ACCEPTANCE_TESTS))"))
-else
-    ACCEPTANCE_TESTS=$(go test ./openstack/ -v -list 'Acc' | grep -i -E "$ACCEPTANCE_TESTS_FILTER")
-    ACCEPTANCE_TESTS=($ACCEPTANCE_TESTS)
+if [[ -n ${ACCEPTANCE_TESTS_FILTER} ]]; then
+    ACCEPTANCE_TESTS="(?i)${ACCEPTANCE_TESTS_FILTER}"
 fi
 
-if [[ -z $ACCEPTANCE_TESTS ]]; then
+if [[ -z ${ACCEPTANCE_TESTS} ]]; then
     echo "No acceptance tests to run"
     exit 0
 fi
@@ -24,24 +25,24 @@ fi
 # Source credentials as admin
 source `dirname $0`/stackenv.sh admin
 
-for acceptance_test in "${ACCEPTANCE_TESTS[@]}"; do
-  OS_DEBUG=1 TF_LOG=DEBUG TF_ACC=1 go test ./openstack -v -timeout 120m -run $(echo "$acceptance_test" | tr " " "|") |& tee -a ${LOG_DIR}/acceptance_tests.log
-  # Check the error code after each suite, but do not exit early if a suite failed.
-  if [[ $? != 0 ]]; then
-    failed=1
-  fi
-done
+export OS_DEBUG=1
+export TF_LOG=DEBUG
+export TF_ACC=1
+
+go test ./openstack -v -timeout "${ACCEPTANCE_TESTS_TIMEOUT}" -parallel "${ACCEPTANCE_TESTS_PARALLELISM}" -run "${ACCEPTANCE_TESTS}" |& tee -a "${LOG_DIR}/acceptance_tests.log"
+# Check the error code, but do not exit early.
+if [[ $? != 0 ]]; then
+  failed=1
+fi
 
 # Source credentials as user (demo)
 source `dirname $0`/stackenv.sh demo
 
-for acceptance_test in "${ACCEPTANCE_TESTS[@]}"; do
-  OS_DEBUG=1 TF_LOG=DEBUG TF_ACC=1 go test ./openstack -v -timeout 120m -run $(echo "$acceptance_test" | tr " " "|") |& tee -a ${LOG_DIR}/acceptance_tests.log
-  # Check the error code after each suite, but do not exit early if a suite failed.
-  if [[ $? != 0 ]]; then
-    failed=1
-  fi
-done
+go test ./openstack -v -timeout "${ACCEPTANCE_TESTS_TIMEOUT}" -parallel "${ACCEPTANCE_TESTS_PARALLELISM}" -run "${ACCEPTANCE_TESTS}" |& tee -a "${LOG_DIR}/acceptance_tests.log"
+# Check the error code, but do not exit early.
+if [[ $? != 0 ]]; then
+  failed=1
+fi
 
 # If any of the test suites failed, exit 1
 if [[ -n $failed ]]; then
