@@ -101,7 +101,7 @@ func resourceNetworkPortForwardingV2Create(ctx context.Context, d *schema.Resour
 		Target:     []string{"ACTIVE"},
 		Refresh:    networkingPortForwardingV2StateRefreshFunc(ctx, networkingClient, fipID, pf.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -220,7 +220,7 @@ func resourceNetworkPortForwardingV2Delete(ctx context.Context, d *schema.Resour
 		Target:     []string{"DELETED"},
 		Refresh:    networkingPortForwardingV2StateRefreshFunc(ctx, networkingClient, fipID, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

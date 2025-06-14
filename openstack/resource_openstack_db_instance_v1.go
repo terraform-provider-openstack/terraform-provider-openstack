@@ -253,7 +253,7 @@ func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceDat
 		Target:     []string{"ACTIVE", "HEALTHY"},
 		Refresh:    databaseInstanceV1StateRefreshFunc(ctx, databaseV1Client, instance.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      10 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -351,7 +351,7 @@ func resourceDatabaseInstanceV1Delete(ctx context.Context, d *schema.ResourceDat
 		Target:     []string{"DELETED"},
 		Refresh:    databaseInstanceV1StateRefreshFunc(ctx, databaseV1Client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      10 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

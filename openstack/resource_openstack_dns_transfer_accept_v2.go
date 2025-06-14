@@ -103,7 +103,7 @@ func resourceDNSTransferAcceptV2Create(ctx context.Context, d *schema.ResourceDa
 		Pending:    []string{"PENDING"},
 		Refresh:    dnsTransferAcceptV2RefreshFunc(ctx, dnsClient, n.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -163,7 +163,7 @@ func resourceDNSTransferAcceptV2Delete(ctx context.Context, d *schema.ResourceDa
 		Pending:    []string{"ACTIVE"},
 		Refresh:    dnsTransferAcceptV2RefreshFunc(ctx, dnsClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

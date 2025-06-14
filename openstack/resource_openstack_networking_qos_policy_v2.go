@@ -137,7 +137,7 @@ func resourceNetworkingQoSPolicyV2Create(ctx context.Context, d *schema.Resource
 		Target:     []string{"ACTIVE"},
 		Refresh:    networkingQoSPolicyV2StateRefreshFunc(ctx, networkingClient, p.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -277,7 +277,7 @@ func resourceNetworkingQoSPolicyV2Delete(ctx context.Context, d *schema.Resource
 		Target:     []string{"DELETED"},
 		Refresh:    networkingQoSPolicyV2StateRefreshFunc(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

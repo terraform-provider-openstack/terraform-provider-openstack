@@ -332,7 +332,7 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 		Target:     []string{string(images.ImageStatusActive)},
 		Refresh:    resourceImagesImageV2RefreshFunc(ctx, imageClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      10 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

@@ -134,7 +134,7 @@ func resourceNetworkingTrunkV2Create(ctx context.Context, d *schema.ResourceData
 		Target:     []string{"ACTIVE", "DOWN"},
 		Refresh:    networkingTrunkV2StateRefreshFunc(ctx, client, trunk.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -305,7 +305,7 @@ func resourceNetworkingTrunkV2Delete(ctx context.Context, d *schema.ResourceData
 		Target:     []string{"DELETED"},
 		Refresh:    networkingTrunkV2StateRefreshFunc(ctx, client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

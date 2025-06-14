@@ -302,7 +302,7 @@ func resourceContainerInfraClusterV1Create(ctx context.Context, d *schema.Resour
 		Target:       []string{"CREATE_COMPLETE"},
 		Refresh:      containerInfraClusterV1StateRefreshFunc(ctx, containerInfraClient, s),
 		Timeout:      d.Timeout(schema.TimeoutCreate),
-		Delay:        1 * time.Minute,
+		Delay:        0,
 		PollInterval: 20 * time.Second,
 	}
 
@@ -445,7 +445,7 @@ func resourceContainerInfraClusterV1Update(ctx context.Context, d *schema.Resour
 			Target:       []string{"UPDATE_COMPLETE"},
 			Refresh:      containerInfraClusterV1StateRefreshFunc(ctx, containerInfraClient, d.Id()),
 			Timeout:      d.Timeout(schema.TimeoutUpdate),
-			Delay:        1 * time.Minute,
+			Delay:        0,
 			PollInterval: 20 * time.Second,
 		}
 
@@ -486,7 +486,7 @@ func resourceContainerInfraClusterV1Update(ctx context.Context, d *schema.Resour
 			Target:       []string{"UPDATE_COMPLETE"},
 			Refresh:      containerInfraClusterV1StateRefreshFunc(ctx, containerInfraClient, d.Id()),
 			Timeout:      d.Timeout(schema.TimeoutUpdate),
-			Delay:        1 * time.Minute,
+			Delay:        0,
 			PollInterval: 20 * time.Second,
 		}
 
@@ -517,7 +517,7 @@ func resourceContainerInfraClusterV1Delete(ctx context.Context, d *schema.Resour
 		Target:       []string{"DELETE_COMPLETE"},
 		Refresh:      containerInfraClusterV1StateRefreshFunc(ctx, containerInfraClient, d.Id()),
 		Timeout:      d.Timeout(schema.TimeoutDelete),
-		Delay:        30 * time.Second,
+		Delay:        0,
 		PollInterval: 10 * time.Second,
 	}
 

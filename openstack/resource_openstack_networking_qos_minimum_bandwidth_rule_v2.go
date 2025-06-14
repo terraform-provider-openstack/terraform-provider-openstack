@@ -83,7 +83,7 @@ func resourceNetworkingQoSMinimumBandwidthRuleV2Create(ctx context.Context, d *s
 		Target:     []string{"ACTIVE"},
 		Refresh:    networkingQoSMinimumBandwidthRuleV2StateRefreshFunc(ctx, networkingClient, qosPolicyID, r.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -190,7 +190,7 @@ func resourceNetworkingQoSMinimumBandwidthRuleV2Delete(ctx context.Context, d *s
 		Target:     []string{"DELETED"},
 		Refresh:    networkingQoSMinimumBandwidthRuleV2StateRefreshFunc(ctx, networkingClient, qosPolicyID, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

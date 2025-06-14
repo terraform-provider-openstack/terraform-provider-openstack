@@ -404,7 +404,7 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 		Target:     []string{"ACTIVE", "DOWN"},
 		Refresh:    resourceNetworkingPortV2StateRefreshFunc(ctx, networkingClient, port.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -702,7 +702,7 @@ func resourceNetworkingPortV2Delete(ctx context.Context, d *schema.ResourceData,
 		Target:     []string{"DELETED"},
 		Refresh:    resourceNetworkingPortV2StateRefreshFunc(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

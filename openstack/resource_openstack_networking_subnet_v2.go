@@ -296,7 +296,7 @@ func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceDat
 		Target:     []string{"ACTIVE"},
 		Refresh:    networkingSubnetV2StateRefreshFunc(ctx, networkingClient, s.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -496,7 +496,7 @@ func resourceNetworkingSubnetV2Delete(ctx context.Context, d *schema.ResourceDat
 		Target:     []string{"DELETED"},
 		Refresh:    networkingSubnetV2StateRefreshFuncDelete(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

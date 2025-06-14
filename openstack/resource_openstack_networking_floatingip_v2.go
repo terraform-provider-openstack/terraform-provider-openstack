@@ -224,7 +224,7 @@ func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceDa
 		Target:     []string{"ACTIVE", "DOWN"},
 		Refresh:    networkingFloatingIPV2StateRefreshFunc(ctx, networkingClient, fip.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -367,7 +367,7 @@ func resourceNetworkFloatingIPV2Delete(ctx context.Context, d *schema.ResourceDa
 		Target:     []string{"DELETED"},
 		Refresh:    networkingFloatingIPV2StateRefreshFunc(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

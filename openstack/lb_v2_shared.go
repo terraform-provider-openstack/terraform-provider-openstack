@@ -179,7 +179,7 @@ func waitForLBV2L7Rule(ctx context.Context, lbClient *gophercloud.ServiceClient,
 		Pending:    pending,
 		Refresh:    resourceLBV2L7RuleRefreshFunc(ctx, lbClient, lbID, parentL7policy.ID, l7rule),
 		Timeout:    timeout,
-		Delay:      1 * time.Second,
+		Delay:      0,
 		MinTimeout: 1 * time.Second,
 	}
 
@@ -259,7 +259,7 @@ func waitForLBV2Listener(ctx context.Context, lbClient *gophercloud.ServiceClien
 		Pending:    pending,
 		Refresh:    resourceLBV2ListenerRefreshFunc(ctx, lbClient, lbID, listener),
 		Timeout:    timeout,
-		Delay:      1 * time.Second,
+		Delay:      0,
 		MinTimeout: 1 * time.Second,
 	}
 
@@ -335,7 +335,7 @@ func waitForLBV2Pool(ctx context.Context, lbClient *gophercloud.ServiceClient, p
 		Pending:    pending,
 		Refresh:    resourceLBV2PoolRefreshFunc(ctx, lbClient, lbID, pool),
 		Timeout:    timeout,
-		Delay:      1 * time.Second,
+		Delay:      0,
 		MinTimeout: 1 * time.Second,
 	}
 
@@ -483,7 +483,7 @@ func waitForLBV2L7Policy(ctx context.Context, lbClient *gophercloud.ServiceClien
 		Pending:    pending,
 		Refresh:    resourceLBV2L7PolicyRefreshFunc(ctx, lbClient, lbID, l7policy),
 		Timeout:    timeout,
-		Delay:      1 * time.Second,
+		Delay:      0,
 		MinTimeout: 1 * time.Second,
 	}
 
@@ -538,7 +538,7 @@ func waitForLBV2Member(ctx context.Context, lbClient *gophercloud.ServiceClient,
 		Pending:    pending,
 		Refresh:    resourceLBV2MemberRefreshFunc(ctx, lbClient, lbID, parentPool.ID, member),
 		Timeout:    timeout,
-		Delay:      1 * time.Second,
+		Delay:      0,
 		MinTimeout: 1 * time.Second,
 	}
 
@@ -593,7 +593,7 @@ func waitForLBV2Monitor(ctx context.Context, lbClient *gophercloud.ServiceClient
 		Pending:    pending,
 		Refresh:    resourceLBV2MonitorRefreshFunc(ctx, lbClient, lbID, monitor),
 		Timeout:    timeout,
-		Delay:      1 * time.Second,
+		Delay:      0,
 		MinTimeout: 1 * time.Second,
 	}
 

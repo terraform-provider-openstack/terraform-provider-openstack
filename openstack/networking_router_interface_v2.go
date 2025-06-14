@@ -47,23 +47,12 @@ func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(ctx context.Context, n
 			removeOpts.PortID = ""
 		}
 
-		r, err := ports.Get(ctx, networkingClient, routerInterfaceID).Extract()
+		_, err := routers.RemoveInterface(ctx, networkingClient, routerID, removeOpts).Extract()
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				log.Printf("[DEBUG] Successfully deleted openstack_networking_router_interface_v2 %s", routerInterfaceID)
 
-				return r, "DELETED", nil
-			}
-
-			return r, "ACTIVE", err
-		}
-
-		_, err = routers.RemoveInterface(ctx, networkingClient, routerID, removeOpts).Extract()
-		if err != nil {
-			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
-				log.Printf("[DEBUG] Successfully deleted openstack_networking_router_interface_v2 %s", routerInterfaceID)
-
-				return r, "DELETED", nil
+				return "", "DELETED", nil
 			}
 
 			if gophercloud.ResponseCodeIs(err, http.StatusConflict) {
@@ -76,17 +65,17 @@ func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(ctx context.Context, n
 						// get subnet CIDR
 						subnet, err := subnets.Get(ctx, networkingClient, removeOpts.SubnetID).Extract()
 						if err != nil {
-							return r, "ACTIVE", err
+							return "", "ACTIVE", err
 						}
 
 						_, cidr, err := net.ParseCIDR(subnet.CIDR)
 						if err != nil {
-							return r, "ACTIVE", err
+							return "", "ACTIVE", err
 						}
 						// determine which routes must be removed
 						router, err := routers.Get(ctx, networkingClient, routerID).Extract()
 						if err != nil {
-							return r, "ACTIVE", err
+							return "", "ACTIVE", err
 						}
 
 						for _, route := range router.Routes {
@@ -104,20 +93,31 @@ func resourceNetworkingRouterInterfaceV2DeleteRefreshFunc(ctx context.Context, n
 
 					_, err := routers.Update(ctx, networkingClient, routerID, opts).Extract()
 					if err != nil {
-						return r, "ACTIVE", err
+						return "", "ACTIVE", err
 					}
 				}
 
 				log.Printf("[DEBUG] openstack_networking_router_interface_v2 %s is still in use", routerInterfaceID)
 
-				return r, "ACTIVE", nil
+				return "", "ACTIVE", nil
 			}
 
-			return r, "ACTIVE", err
+			return "", "ACTIVE", err
+		}
+
+		_, err = ports.Get(ctx, networkingClient, routerInterfaceID).Extract()
+		if err != nil {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+				log.Printf("[DEBUG] Successfully deleted openstack_networking_router_interface_v2 %s", routerInterfaceID)
+
+				return "", "DELETED", nil
+			}
+
+			return "", "ACTIVE", err
 		}
 
 		log.Printf("[DEBUG] openstack_networking_router_interface_v2 %s is still active", routerInterfaceID)
 
-		return r, "ACTIVE", nil
+		return "", "ACTIVE", nil
 	}
 }

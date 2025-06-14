@@ -96,7 +96,7 @@ func resourceDatabaseUserV1Create(ctx context.Context, d *schema.ResourceData, m
 		Target:     []string{"ACTIVE"},
 		Refresh:    databaseUserV1StateRefreshFunc(ctx, databaseV1Client, instanceID, userName),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      10 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
