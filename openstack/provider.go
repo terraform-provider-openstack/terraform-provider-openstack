@@ -449,6 +449,8 @@ func Provider() *schema.Provider {
 			"openstack_lb_l7policy_v2":                           resourceL7PolicyV2(),
 			"openstack_lb_l7rule_v2":                             resourceL7RuleV2(),
 			"openstack_lb_quota_v2":                              resourceLoadBalancerQuotaV2(),
+			"openstack_networking_bgp_speaker_v2":                resourceNetworkingBGPSpeakerV2(),
+			"openstack_networking_bgp_peer_v2":                   resourceNetworkingBGPPeerV2(),
 			"openstack_networking_floatingip_v2":                 resourceNetworkingFloatingIPV2(),
 			"openstack_networking_floatingip_associate_v2":       resourceNetworkingFloatingIPAssociateV2(),
 			"openstack_networking_network_v2":                    resourceNetworkingNetworkV2(),
