@@ -240,7 +240,7 @@ func resourceBlockStorageVolumeV3Create(ctx context.Context, d *schema.ResourceD
 		Target:     []string{"available"},
 		Refresh:    blockStorageVolumeV3StateRefreshFunc(ctx, blockStorageClient, v.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      10 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -349,7 +349,7 @@ func resourceBlockStorageVolumeV3Update(ctx context.Context, d *schema.ResourceD
 			Target:     []string{"available", "in-use"},
 			Refresh:    blockStorageVolumeV3StateRefreshFunc(ctx, blockStorageClient, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
-			Delay:      10 * time.Second,
+			Delay:      0,
 			MinTimeout: 3 * time.Second,
 		}
 
@@ -381,7 +381,7 @@ func resourceBlockStorageVolumeV3Update(ctx context.Context, d *schema.ResourceD
 			Target:     []string{"available", "in-use"},
 			Refresh:    blockStorageVolumeV3StateRefreshFunc(ctx, blockStorageClient, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutUpdate),
-			Delay:      10 * time.Second,
+			Delay:      0,
 			MinTimeout: 3 * time.Second,
 		}
 
@@ -450,7 +450,7 @@ func resourceBlockStorageVolumeV3Delete(ctx context.Context, d *schema.ResourceD
 			Target:     []string{"available", "deleted"},
 			Refresh:    blockStorageVolumeV3StateRefreshFunc(ctx, blockStorageClient, d.Id()),
 			Timeout:    10 * time.Minute,
-			Delay:      10 * time.Second,
+			Delay:      0,
 			MinTimeout: 3 * time.Second,
 		}
 
@@ -475,7 +475,7 @@ func resourceBlockStorageVolumeV3Delete(ctx context.Context, d *schema.ResourceD
 		Target:     []string{"deleted"},
 		Refresh:    blockStorageVolumeV3StateRefreshFunc(ctx, blockStorageClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      10 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

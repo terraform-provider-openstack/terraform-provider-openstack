@@ -144,7 +144,7 @@ func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, m
 			Pending:    []string{"PENDING"},
 			Refresh:    dnsRecordSetV2RefreshFunc(ctx, dnsClient, zoneID, n.ID),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
-			Delay:      5 * time.Second,
+			Delay:      0,
 			MinTimeout: 3 * time.Second,
 		}
 
@@ -271,7 +271,7 @@ func resourceDNSRecordSetV2Update(ctx context.Context, d *schema.ResourceData, m
 			Pending:    []string{"PENDING"},
 			Refresh:    dnsRecordSetV2RefreshFunc(ctx, dnsClient, zoneID, recordsetID),
 			Timeout:    d.Timeout(schema.TimeoutUpdate),
-			Delay:      5 * time.Second,
+			Delay:      0,
 			MinTimeout: 3 * time.Second,
 		}
 
@@ -314,7 +314,7 @@ func resourceDNSRecordSetV2Delete(ctx context.Context, d *schema.ResourceData, m
 			Pending:    []string{"ACTIVE", "PENDING"},
 			Refresh:    dnsRecordSetV2RefreshFunc(ctx, dnsClient, zoneID, recordsetID),
 			Timeout:    d.Timeout(schema.TimeoutDelete),
-			Delay:      5 * time.Second,
+			Delay:      0,
 			MinTimeout: 3 * time.Second,
 		}
 

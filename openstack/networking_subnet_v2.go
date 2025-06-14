@@ -32,35 +32,35 @@ func networkingSubnetV2StateRefreshFuncDelete(ctx context.Context, networkingCli
 	return func() (any, string, error) {
 		log.Printf("[DEBUG] Attempting to delete openstack_networking_subnet_v2 %s", subnetID)
 
-		s, err := subnets.Get(ctx, networkingClient, subnetID).Extract()
+		err := subnets.Delete(ctx, networkingClient, subnetID).ExtractErr()
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				log.Printf("[DEBUG] Successfully deleted openstack_networking_subnet_v2 %s", subnetID)
 
-				return s, "DELETED", nil
-			}
-
-			return s, "ACTIVE", err
-		}
-
-		err = subnets.Delete(ctx, networkingClient, subnetID).ExtractErr()
-		if err != nil {
-			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
-				log.Printf("[DEBUG] Successfully deleted openstack_networking_subnet_v2 %s", subnetID)
-
-				return s, "DELETED", nil
+				return "", "DELETED", nil
 			}
 			// Subnet is still in use - we can retry.
 			if gophercloud.ResponseCodeIs(err, http.StatusConflict) {
-				return s, "ACTIVE", nil
+				return "", "ACTIVE", nil
 			}
 
-			return s, "ACTIVE", err
+			return "", "ACTIVE", err
+		}
+
+		_, err = subnets.Get(ctx, networkingClient, subnetID).Extract()
+		if err != nil {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+				log.Printf("[DEBUG] Successfully deleted openstack_networking_subnet_v2 %s", subnetID)
+
+				return "", "DELETED", nil
+			}
+
+			return "", "ACTIVE", err
 		}
 
 		log.Printf("[DEBUG] openstack_networking_subnet_v2 %s is still active", subnetID)
 
-		return s, "ACTIVE", nil
+		return "", "ACTIVE", nil
 	}
 }
 

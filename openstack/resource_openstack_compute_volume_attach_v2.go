@@ -165,7 +165,7 @@ func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.Resource
 		Target:     []string{"ATTACHED"},
 		Refresh:    computeVolumeAttachV2AttachFunc(ctx, computeClient, blockStorageClient, instanceID, attachment.ID, volumeID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -228,7 +228,7 @@ func resourceComputeVolumeAttachV2Delete(ctx context.Context, d *schema.Resource
 		Target:     []string{"DETACHED"},
 		Refresh:    computeVolumeAttachV2DetachFunc(ctx, computeClient, instanceID, attachmentID),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

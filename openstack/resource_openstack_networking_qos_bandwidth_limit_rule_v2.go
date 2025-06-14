@@ -90,7 +90,7 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Create(ctx context.Context, d *sch
 		Target:     []string{"ACTIVE"},
 		Refresh:    networkingQoSBandwidthLimitRuleV2StateRefreshFunc(ctx, networkingClient, qosPolicyID, r.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -204,7 +204,7 @@ func resourceNetworkingQoSBandwidthLimitRuleV2Delete(ctx context.Context, d *sch
 		Target:     []string{"DELETED"},
 		Refresh:    networkingQoSBandwidthLimitRuleV2StateRefreshFunc(ctx, networkingClient, qosPolicyID, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

@@ -115,7 +115,7 @@ func resourceComputeInterfaceAttachV2Create(ctx context.Context, d *schema.Resou
 		Target:     []string{"ATTACHED"},
 		Refresh:    computeInterfaceAttachV2AttachFunc(ctx, computeClient, instanceID, attachment.PortID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 5 * time.Second,
 	}
 
@@ -183,7 +183,7 @@ func resourceComputeInterfaceAttachV2Delete(ctx context.Context, d *schema.Resou
 		Target:     []string{"DETACHED"},
 		Refresh:    computeInterfaceAttachV2DetachFunc(ctx, computeClient, instanceID, attachmentID),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 5 * time.Second,
 	}
 

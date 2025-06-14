@@ -229,7 +229,7 @@ func resourceBlockStorageVolumeAttachV3Create(ctx context.Context, d *schema.Res
 		Target:     []string{"in-use"},
 		Refresh:    blockStorageVolumeV3StateRefreshFunc(ctx, client, volumeID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      10 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -380,7 +380,7 @@ func resourceBlockStorageVolumeAttachV3Delete(ctx context.Context, d *schema.Res
 		Target:     []string{"available"},
 		Refresh:    blockStorageVolumeV3StateRefreshFunc(ctx, client, volumeID),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      10 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

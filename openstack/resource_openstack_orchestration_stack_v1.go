@@ -227,7 +227,7 @@ func resourceOrchestrationStackV1Create(ctx context.Context, d *schema.ResourceD
 		Target:     []string{"CREATE_COMPLETE", "UPDATE_COMPLETE", "UPDATE_IN_PROGRESS"},
 		Refresh:    orchestrationStackV1StateRefreshFunc(ctx, orchestrationClient, stack.ID, false),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -387,7 +387,7 @@ func resourceOrchestrationStackV1Update(ctx context.Context, d *schema.ResourceD
 		Target:     []string{"UPDATE_COMPLETE"},
 		Refresh:    orchestrationStackV1StateRefreshFunc(ctx, orchestrationClient, d.Id(), true),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      10 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -429,7 +429,7 @@ func resourceOrchestrationStackV1Delete(ctx context.Context, d *schema.ResourceD
 		Target:     []string{"DELETE_COMPLETE"},
 		Refresh:    orchestrationStackV1StateRefreshFunc(ctx, orchestrationClient, d.Id(), true),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      10 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

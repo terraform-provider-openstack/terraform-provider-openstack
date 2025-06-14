@@ -75,7 +75,7 @@ func resourceNetworkingQoSDSCPMarkingRuleV2Create(ctx context.Context, d *schema
 		Target:     []string{"ACTIVE"},
 		Refresh:    networkingQoSDSCPMarkingRuleV2StateRefreshFunc(ctx, networkingClient, qosPolicyID, r.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -170,7 +170,7 @@ func resourceNetworkingQoSDSCPMarkingRuleV2Delete(ctx context.Context, d *schema
 		Target:     []string{"DELETED"},
 		Refresh:    networkingQoSDSCPMarkingRuleV2StateRefreshFunc(ctx, networkingClient, qosPolicyID, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

@@ -15,34 +15,34 @@ func networkingSecgroupV2StateRefreshFuncDelete(ctx context.Context, networkingC
 	return func() (any, string, error) {
 		log.Printf("[DEBUG] Attempting to delete openstack_networking_secgroup_v2 %s", id)
 
-		r, err := groups.Get(ctx, networkingClient, id).Extract()
+		err := groups.Delete(ctx, networkingClient, id).ExtractErr()
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				log.Printf("[DEBUG] Successfully deleted openstack_networking_secgroup_v2 %s", id)
 
-				return r, "DELETED", nil
-			}
-
-			return r, "ACTIVE", err
-		}
-
-		err = groups.Delete(ctx, networkingClient, id).ExtractErr()
-		if err != nil {
-			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
-				log.Printf("[DEBUG] Successfully deleted openstack_networking_secgroup_v2 %s", id)
-
-				return r, "DELETED", nil
+				return "", "DELETED", nil
 			}
 
 			if gophercloud.ResponseCodeIs(err, http.StatusConflict) {
-				return r, "ACTIVE", nil
+				return "", "ACTIVE", nil
 			}
 
-			return r, "ACTIVE", err
+			return "", "ACTIVE", err
+		}
+
+		_, err = groups.Get(ctx, networkingClient, id).Extract()
+		if err != nil {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+				log.Printf("[DEBUG] Successfully deleted openstack_networking_secgroup_v2 %s", id)
+
+				return "", "DELETED", nil
+			}
+
+			return "", "ACTIVE", err
 		}
 
 		log.Printf("[DEBUG] openstack_networking_secgroup_v2 %s is still active", id)
 
-		return r, "ACTIVE", nil
+		return "", "ACTIVE", nil
 	}
 }

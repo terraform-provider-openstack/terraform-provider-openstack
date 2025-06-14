@@ -525,7 +525,7 @@ func waitForSFV2Share(ctx context.Context, sfsClient *gophercloud.ServiceClient,
 		Pending:    pending,
 		Refresh:    resourceSFV2ShareRefreshFunc(ctx, sfsClient, id),
 		Timeout:    timeout,
-		Delay:      1 * time.Second,
+		Delay:      0,
 		MinTimeout: 1 * time.Second,
 	}
 

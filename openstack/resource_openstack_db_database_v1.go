@@ -83,7 +83,7 @@ func resourceDatabaseDatabaseV1Create(ctx context.Context, d *schema.ResourceDat
 		Target:     []string{"ACTIVE"},
 		Refresh:    databaseDatabaseV1StateRefreshFunc(ctx, databaseV1Client, instanceID, dbName),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      10 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

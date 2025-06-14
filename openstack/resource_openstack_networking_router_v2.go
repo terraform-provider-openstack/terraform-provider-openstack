@@ -280,7 +280,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 		Target:     []string{"ACTIVE"},
 		Refresh:    resourceNetworkingRouterV2StateRefreshFunc(ctx, networkingClient, r.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -485,7 +485,7 @@ func resourceNetworkingRouterV2Delete(ctx context.Context, d *schema.ResourceDat
 		Target:     []string{"DELETED"},
 		Refresh:    resourceNetworkingRouterV2StateRefreshFunc(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

@@ -154,7 +154,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta a
 		Pending:    []string{"PENDING"},
 		Refresh:    dnsZoneV2RefreshFunc(ctx, dnsClient, n.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -270,7 +270,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta a
 		Pending:    []string{"PENDING"},
 		Refresh:    dnsZoneV2RefreshFunc(ctx, dnsClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutUpdate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -309,7 +309,7 @@ func resourceDNSZoneV2Delete(ctx context.Context, d *schema.ResourceData, meta a
 		Pending:    []string{"ACTIVE", "PENDING"},
 		Refresh:    dnsZoneV2RefreshFunc(ctx, dnsClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

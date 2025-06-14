@@ -234,7 +234,7 @@ func resourceNetworkingSecGroupV2Delete(ctx context.Context, d *schema.ResourceD
 		Target:     []string{"DELETED"},
 		Refresh:    networkingSecgroupV2StateRefreshFuncDelete(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

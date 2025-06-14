@@ -92,7 +92,7 @@ func resourceNetworkingAddressScopeV2Create(ctx context.Context, d *schema.Resou
 		Target:     []string{"ACTIVE"},
 		Refresh:    resourceNetworkingAddressScopeV2StateRefreshFunc(ctx, networkingClient, a.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -186,7 +186,7 @@ func resourceNetworkingAddressScopeV2Delete(ctx context.Context, d *schema.Resou
 		Target:     []string{"DELETED"},
 		Refresh:    resourceNetworkingAddressScopeV2StateRefreshFunc(ctx, networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

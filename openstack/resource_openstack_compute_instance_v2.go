@@ -601,7 +601,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		Target:     []string{"ACTIVE"},
 		Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, server.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      10 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 
@@ -633,7 +633,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 			Target:     []string{"SHUTOFF"},
 			Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
-			Delay:      10 * time.Second,
+			Delay:      0,
 			MinTimeout: 3 * time.Second,
 		}
 
@@ -817,7 +817,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				Target:     []string{"SHELVED_OFFLOADED"},
 				Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
-				Delay:      10 * time.Second,
+				Delay:      0,
 				MinTimeout: 3 * time.Second,
 			}
 
@@ -840,7 +840,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				Target:     []string{"PAUSED"},
 				Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
-				Delay:      10 * time.Second,
+				Delay:      0,
 				MinTimeout: 3 * time.Second,
 			}
 
@@ -863,7 +863,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				Target:     []string{"SHUTOFF"},
 				Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
-				Delay:      10 * time.Second,
+				Delay:      0,
 				MinTimeout: 3 * time.Second,
 			}
 
@@ -902,7 +902,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				Target:     []string{"ACTIVE"},
 				Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
-				Delay:      10 * time.Second,
+				Delay:      0,
 				MinTimeout: 3 * time.Second,
 			}
 
@@ -1044,7 +1044,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				Target:     []string{"ACTIVE", "SHUTOFF"},
 				Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
-				Delay:      10 * time.Second,
+				Delay:      0,
 				MinTimeout: 3 * time.Second,
 			}
 
@@ -1058,7 +1058,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				Target:     []string{"VERIFY_RESIZE"},
 				Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
-				Delay:      10 * time.Second,
+				Delay:      0,
 				MinTimeout: 3 * time.Second,
 			}
 
@@ -1080,7 +1080,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				Target:     []string{"ACTIVE", "SHUTOFF"},
 				Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
-				Delay:      10 * time.Second,
+				Delay:      0,
 				MinTimeout: 3 * time.Second,
 			}
 
@@ -1132,7 +1132,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			Target:     []string{"ACTIVE", "SHUTOFF"},
 			Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutUpdate),
-			Delay:      10 * time.Second,
+			Delay:      0,
 			MinTimeout: 3 * time.Second,
 		}
 
@@ -1177,7 +1177,7 @@ func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData
 				Target:     []string{"SHUTOFF"},
 				Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 				Timeout:    d.Timeout(schema.TimeoutDelete),
-				Delay:      10 * time.Second,
+				Delay:      0,
 				MinTimeout: 3 * time.Second,
 			}
 
@@ -1211,7 +1211,7 @@ func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData
 						Target:     []string{"DETACHED"},
 						Refresh:    computeInterfaceAttachV2DetachFunc(ctx, computeClient, d.Id(), network.Port),
 						Timeout:    d.Timeout(schema.TimeoutDelete),
-						Delay:      5 * time.Second,
+						Delay:      0,
 						MinTimeout: 5 * time.Second,
 					}
 					if _, err = stateConf.WaitForStateContext(ctx); err != nil {
@@ -1246,7 +1246,7 @@ func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData
 		Target:     []string{"DELETED", "SOFT_DELETED"},
 		Refresh:    ServerV2StateRefreshFunc(ctx, computeClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      10 * time.Second,
+		Delay:      0,
 		MinTimeout: 3 * time.Second,
 	}
 

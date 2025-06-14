@@ -200,7 +200,7 @@ func resourceContainerInfraNodeGroupV1Create(ctx context.Context, d *schema.Reso
 		Target:       []string{"CREATE_COMPLETE"},
 		Refresh:      containerInfraNodeGroupV1StateRefreshFunc(ctx, containerInfraClient, clusterID, nodeGroup.UUID),
 		Timeout:      d.Timeout(schema.TimeoutCreate),
-		Delay:        1 * time.Minute,
+		Delay:        0,
 		PollInterval: 20 * time.Second,
 	}
 
@@ -336,7 +336,7 @@ func resourceContainerInfraNodeGroupV1Update(ctx context.Context, d *schema.Reso
 			Target:       []string{"UPDATE_COMPLETE"},
 			Refresh:      containerInfraNodeGroupV1StateRefreshFunc(ctx, containerInfraClient, clusterID, nodeGroupID),
 			Timeout:      d.Timeout(schema.TimeoutUpdate),
-			Delay:        1 * time.Minute,
+			Delay:        0,
 			PollInterval: 20 * time.Second,
 		}
 
@@ -374,7 +374,7 @@ func resourceContainerInfraNodeGroupV1Delete(ctx context.Context, d *schema.Reso
 		Target:       []string{"DELETE_COMPLETE"},
 		Refresh:      containerInfraNodeGroupV1StateRefreshFunc(ctx, containerInfraClient, clusterID, nodeGroupID),
 		Timeout:      d.Timeout(schema.TimeoutDelete),
-		Delay:        30 * time.Second,
+		Delay:        0,
 		PollInterval: 10 * time.Second,
 	}
 

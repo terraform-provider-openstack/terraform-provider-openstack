@@ -142,7 +142,7 @@ func resourceSharedFilesystemShareAccessV2Create(ctx context.Context, d *schema.
 		Pending:    []string{"new", "queued_to_apply", "applying"},
 		Refresh:    sharedFilesystemShareAccessV2StateRefreshFunc(ctx, sfsClient, shareID, access.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      1 * time.Second,
+		Delay:      0,
 		MinTimeout: 1 * time.Second,
 	}
 
@@ -250,7 +250,7 @@ func resourceSharedFilesystemShareAccessV2Delete(ctx context.Context, d *schema.
 		Pending:    []string{"active", "new", "queued_to_deny", "denying"},
 		Refresh:    sharedFilesystemShareAccessV2StateRefreshFunc(ctx, sfsClient, shareID, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      1 * time.Second,
+		Delay:      0,
 		MinTimeout: 1 * time.Second,
 	}
 
