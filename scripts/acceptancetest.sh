@@ -24,24 +24,22 @@ fi
 # Source credentials as admin
 source `dirname $0`/stackenv.sh admin
 
-for acceptance_test in "${ACCEPTANCE_TESTS[@]}"; do
-  OS_DEBUG=1 TF_LOG=DEBUG TF_ACC=1 go test ./openstack -v -timeout 120m -run $(echo "$acceptance_test" | tr " " "|") |& tee -a ${LOG_DIR}/acceptance_tests.log
-  # Check the error code after each suite, but do not exit early if a suite failed.
-  if [[ $? != 0 ]]; then
-    failed=1
-  fi
-done
+TEST_REGEX=$(IFS='|'; echo "${ACCEPTANCE_TESTS[*]}")
+
+OS_DEBUG=1 TF_LOG=DEBUG TF_ACC=1 go test ./openstack -v -timeout 120m -parallel 1 -run "${TEST_REGEX}" |& tee -a ${LOG_DIR}/acceptance_tests.log
+# Check the error code after each suite, but do not exit early if a suite failed.
+if [[ $? != 0 ]]; then
+  failed=1
+fi
 
 # Source credentials as user (demo)
 source `dirname $0`/stackenv.sh demo
 
-for acceptance_test in "${ACCEPTANCE_TESTS[@]}"; do
-  OS_DEBUG=1 TF_LOG=DEBUG TF_ACC=1 go test ./openstack -v -timeout 120m -run $(echo "$acceptance_test" | tr " " "|") |& tee -a ${LOG_DIR}/acceptance_tests.log
-  # Check the error code after each suite, but do not exit early if a suite failed.
-  if [[ $? != 0 ]]; then
-    failed=1
-  fi
-done
+OS_DEBUG=1 TF_LOG=DEBUG TF_ACC=1 go test ./openstack -v -timeout 120m -parallel 1 -run "${TEST_REGEX}" |& tee -a ${LOG_DIR}/acceptance_tests.log
+# Check the error code after each suite, but do not exit early if a suite failed.
+if [[ $? != 0 ]]; then
+  failed=1
+fi
 
 # If any of the test suites failed, exit 1
 if [[ -n $failed ]]; then
