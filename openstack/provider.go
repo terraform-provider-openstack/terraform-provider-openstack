@@ -2,10 +2,14 @@ package openstack
 
 import (
 	"context"
+	"net"
+	"net/http"
 	"os"
 	"runtime/debug"
+	"time"
 
 	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/utils/v2/client"
 	"github.com/gophercloud/utils/v2/terraform/auth"
 	"github.com/gophercloud/utils/v2/terraform/mutexkv"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -328,6 +332,12 @@ func Provider() *schema.Provider {
 				Default:     false,
 				Description: descriptions["enable_logging"],
 			},
+
+			// undocumented
+			"disable_keepalives": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -588,6 +598,21 @@ func configureProvider(ctx context.Context, d *schema.ResourceData, terraformVer
 
 	if err := config.LoadAndValidate(ctx); err != nil {
 		return nil, diag.FromErr(err)
+	}
+
+	// set custom HTTP transport settings
+	transport := config.OsClient.HTTPClient.Transport.(*client.RoundTripper).Rt.(*http.Transport)
+	transport.TLSHandshakeTimeout = 5 * time.Second
+	transport.ResponseHeaderTimeout = 10 * time.Second
+	transport.ExpectContinueTimeout = 1 * time.Second
+	transport.DialContext = (&net.Dialer{
+		Timeout:   5 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}).DialContext
+
+	// disable keep-alives if requested
+	if d.Get("disable_keepalives").(bool) {
+		transport.DisableKeepAlives = true
 	}
 
 	return &config, nil

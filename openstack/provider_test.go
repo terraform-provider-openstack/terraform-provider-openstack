@@ -62,6 +62,10 @@ func init() {
 	gophercloud.ServiceTypeAliases["shared-file-system"] = []string{"sharev2"}
 
 	testAccProvider = Provider()
+
+	// disable keepalives by default to avoid issues with neutron uwsgi during long tests
+	testAccProvider.Schema["disable_keepalives"].Default = true
+
 	testAccProviders = map[string]func() (*schema.Provider, error){
 		"openstack": func() (*schema.Provider, error) {
 			return testAccProvider, nil
