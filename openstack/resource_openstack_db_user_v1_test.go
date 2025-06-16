@@ -24,14 +24,14 @@ func TestAccDatabaseV1User_basic(t *testing.T) {
 			testAccPreCheckDatabase(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckDatabaseV1UserDestroy,
+		CheckDestroy:      testAccCheckDatabaseV1UserDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatabaseV1UserBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDatabaseV1InstanceExists(
+					testAccCheckDatabaseV1InstanceExists(t.Context(),
 						"openstack_db_instance_v1.basic", &instance),
-					testAccCheckDatabaseV1UserExists(
+					testAccCheckDatabaseV1UserExists(t.Context(),
 						"openstack_db_user_v1.basic", &instance, &user),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_db_user_v1.basic", "name", &user.Name),
@@ -41,7 +41,7 @@ func TestAccDatabaseV1User_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckDatabaseV1UserExists(n string, instance *instances.Instance, user *users.User) resource.TestCheckFunc {
+func testAccCheckDatabaseV1UserExists(ctx context.Context, n string, instance *instances.Instance, user *users.User) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -59,12 +59,12 @@ func testAccCheckDatabaseV1UserExists(n string, instance *instances.Instance, us
 
 		config := testAccProvider.Meta().(*Config)
 
-		databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
+		databaseV1Client, err := config.DatabaseV1Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating cloud database client: %w", err)
 		}
 
-		pages, err := users.List(databaseV1Client, instance.ID).AllPages(context.TODO())
+		pages, err := users.List(databaseV1Client, instance.ID).AllPages(ctx)
 		if err != nil {
 			return fmt.Errorf("Unable to retrieve users: %w", err)
 		}
@@ -86,48 +86,50 @@ func testAccCheckDatabaseV1UserExists(n string, instance *instances.Instance, us
 	}
 }
 
-func testAccCheckDatabaseV1UserDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckDatabaseV1UserDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating cloud database client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_db_user_v1" {
-			continue
-		}
-
-		id, userName, err := parsePairedIDs(rs.Primary.ID, "openstack_db_user_v1")
+		databaseV1Client, err := config.DatabaseV1Client(ctx, osRegionName)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error creating cloud database client: %w", err)
 		}
 
-		pages, err := users.List(databaseV1Client, id).AllPages(context.TODO())
-		if err != nil {
-			return nil
-		}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_db_user_v1" {
+				continue
+			}
 
-		allUsers, err := users.ExtractUsers(pages)
-		if err != nil {
-			return fmt.Errorf("Unable to extract users: %w", err)
-		}
+			id, userName, err := parsePairedIDs(rs.Primary.ID, "openstack_db_user_v1")
+			if err != nil {
+				return err
+			}
 
-		var exists bool
+			pages, err := users.List(databaseV1Client, id).AllPages(ctx)
+			if err != nil {
+				return nil
+			}
 
-		for _, v := range allUsers {
-			if v.Name == userName {
-				exists = true
+			allUsers, err := users.ExtractUsers(pages)
+			if err != nil {
+				return fmt.Errorf("Unable to extract users: %w", err)
+			}
+
+			var exists bool
+
+			for _, v := range allUsers {
+				if v.Name == userName {
+					exists = true
+				}
+			}
+
+			if exists {
+				return errors.New("User still exists")
 			}
 		}
 
-		if exists {
-			return errors.New("User still exists")
-		}
+		return nil
 	}
-
-	return nil
 }
 
 func testAccDatabaseV1UserBasic() string {

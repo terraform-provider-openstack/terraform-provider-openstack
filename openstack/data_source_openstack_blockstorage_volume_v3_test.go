@@ -26,7 +26,7 @@ func TestAccBlockStorageV3VolumeDataSource_basic(t *testing.T) {
 	if os.Getenv("TF_ACC") != "" {
 		var err error
 
-		volumeID, err = testAccBlockStorageV3CreateVolume(volumeName)
+		volumeID, err = testAccBlockStorageV3CreateVolume(t.Context(), volumeName)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -53,13 +53,13 @@ func TestAccBlockStorageV3VolumeDataSource_basic(t *testing.T) {
 	})
 }
 
-func testAccBlockStorageV3CreateVolume(volumeName string) (string, error) {
-	config, err := testAccAuthFromEnv()
+func testAccBlockStorageV3CreateVolume(ctx context.Context, volumeName string) (string, error) {
+	config, err := testAccAuthFromEnv(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	bsClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
+	bsClient, err := config.BlockStorageV3Client(ctx, osRegionName)
 	if err != nil {
 		return "", err
 	}
@@ -69,15 +69,15 @@ func testAccBlockStorageV3CreateVolume(volumeName string) (string, error) {
 		Name: volumeName,
 	}
 
-	volume, err := volumes.Create(context.TODO(), bsClient, volCreateOpts, nil).Extract()
+	volume, err := volumes.Create(ctx, bsClient, volCreateOpts, nil).Extract()
 	if err != nil {
 		return "", err
 	}
 
-	ctx, cancel := context.WithTimeout(context.TODO(), 60*time.Second)
+	ctx1, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
-	err = volumes.WaitForStatus(ctx, bsClient, volume.ID, "available")
+	err = volumes.WaitForStatus(ctx1, bsClient, volume.ID, "available")
 	if err != nil {
 		return "", err
 	}
@@ -86,7 +86,7 @@ func testAccBlockStorageV3CreateVolume(volumeName string) (string, error) {
 }
 
 func testAccBlockStorageV3DeleteVolume(t *testing.T, volumeID string) {
-	config, err := testAccAuthFromEnv()
+	config, err := testAccAuthFromEnv(t.Context())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,10 +101,10 @@ func testAccBlockStorageV3DeleteVolume(t *testing.T, volumeID string) {
 		t.Fatal(err)
 	}
 
-	ctx, cancel := context.WithTimeout(t.Context(), 60*time.Second)
+	ctx1, cancel := context.WithTimeout(t.Context(), 60*time.Second)
 	defer cancel()
 
-	err = volumes.WaitForStatus(ctx, bsClient, volumeID, "DELETED")
+	err = volumes.WaitForStatus(ctx1, bsClient, volumeID, "DELETED")
 	if err != nil {
 		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			t.Fatal(err)
@@ -144,12 +144,12 @@ func TestAccBlockStorageV3VolumeDataSource_attachment(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV3VolumeDataSourceAttachment(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("data.openstack_blockstorage_volume_v3.volume_1", &dataVolume),
+					testAccCheckBlockStorageV3VolumeExists(t.Context(), "data.openstack_blockstorage_volume_v3.volume_1", &dataVolume),
 					resource.TestCheckResourceAttrPair("data.openstack_blockstorage_volume_v3.volume_1", "attachment", "openstack_blockstorage_volume_v3.volume_1", "attachment"),
 					testAccCheckBlockStorageV3VolumeAttachment(&dataVolume, *regexp.MustCompile(`\/dev\/.dc`)),
 				),

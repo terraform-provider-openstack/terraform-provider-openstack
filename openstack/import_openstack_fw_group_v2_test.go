@@ -16,7 +16,7 @@ func TestAccFWGroupV2_importBasic(t *testing.T) {
 			testAccPreCheckFW(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckFWGroupV2Destroy,
+		CheckDestroy:      testAccCheckFWGroupV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWGroupV2Basic1,

@@ -13,10 +13,9 @@ func TestAccNetworkingV2QoSDSCPMarkingRule_importBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
-			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2QoSDSCPMarkingRuleDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2QoSDSCPMarkingRuleDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2QoSDSCPMarkingRuleBasic,

@@ -18,7 +18,7 @@ func TestAccNetworkingV2RBACPolicy_importBasic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2RBACPolicyDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2RBACPolicyDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RBACPolicyBasic(projectName),

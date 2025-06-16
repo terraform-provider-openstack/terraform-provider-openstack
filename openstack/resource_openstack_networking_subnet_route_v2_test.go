@@ -30,31 +30,31 @@ func TestAccNetworkingV2SubnetRoute_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingV2SubnetRouteCreate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
-					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
-					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
-					testAccCheckNetworkingV2SubnetRouteExists("openstack_networking_subnet_route_v2.subnet_route_1"),
+					testAccCheckNetworkingV2RouterExists(t.Context(), "openstack_networking_router_v2.router_1", &router),
+					testAccCheckNetworkingV2NetworkExists(t.Context(), "openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2RouterInterfaceExists(t.Context(), "openstack_networking_router_interface_v2.int_1"),
+					testAccCheckNetworkingV2SubnetRouteExists(t.Context(), "openstack_networking_subnet_route_v2.subnet_route_1"),
 				),
 			},
 			{
 				Config: testAccNetworkingV2SubnetRouteUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetRouteExists("openstack_networking_subnet_route_v2.subnet_route_1"),
-					testAccCheckNetworkingV2SubnetRouteExists("openstack_networking_subnet_route_v2.subnet_route_2"),
+					testAccCheckNetworkingV2SubnetRouteExists(t.Context(), "openstack_networking_subnet_route_v2.subnet_route_1"),
+					testAccCheckNetworkingV2SubnetRouteExists(t.Context(), "openstack_networking_subnet_route_v2.subnet_route_2"),
 				),
 			},
 			{
 				Config: testAccNetworkingV2SubnetRouteDestroy,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetRouteEmpty("openstack_networking_subnet_v2.subnet_1"),
+					testAccCheckNetworkingV2SubnetRouteEmpty(t.Context(), "openstack_networking_subnet_v2.subnet_1"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckNetworkingV2SubnetRouteEmpty(n string) resource.TestCheckFunc {
+func testAccCheckNetworkingV2SubnetRouteEmpty(ctx context.Context, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -67,12 +67,12 @@ func testAccCheckNetworkingV2SubnetRouteEmpty(n string) resource.TestCheckFunc {
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		subnet, err := subnets.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+		subnet, err := subnets.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -89,7 +89,7 @@ func testAccCheckNetworkingV2SubnetRouteEmpty(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckNetworkingV2SubnetRouteExists(n string) resource.TestCheckFunc {
+func testAccCheckNetworkingV2SubnetRouteExists(ctx context.Context, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -102,12 +102,12 @@ func testAccCheckNetworkingV2SubnetRouteExists(n string) resource.TestCheckFunc 
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		subnet, err := subnets.Get(context.TODO(), networkingClient, rs.Primary.Attributes["subnet_id"]).Extract()
+		subnet, err := subnets.Get(ctx, networkingClient, rs.Primary.Attributes["subnet_id"]).Extract()
 		if err != nil {
 			return err
 		}
@@ -132,39 +132,41 @@ func testAccCheckNetworkingV2SubnetRouteExists(n string) resource.TestCheckFunc 
 	}
 }
 
-func testAccCheckNetworkingV2SubnetRouteDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckNetworkingV2SubnetRouteDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_networking_subnet_route_v2" {
-			continue
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		routeExists := false
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_networking_subnet_route_v2" {
+				continue
+			}
 
-		subnet, err := subnets.Get(context.TODO(), networkingClient, rs.Primary.Attributes["subnet_id"]).Extract()
-		if err == nil {
-			rts := subnet.HostRoutes
-			for _, r := range rts {
-				if r.DestinationCIDR == rs.Primary.Attributes["destination_cidr"] && r.NextHop == rs.Primary.Attributes["next_hop"] {
-					routeExists = true
+			routeExists := false
 
-					break
+			subnet, err := subnets.Get(ctx, networkingClient, rs.Primary.Attributes["subnet_id"]).Extract()
+			if err == nil {
+				rts := subnet.HostRoutes
+				for _, r := range rts {
+					if r.DestinationCIDR == rs.Primary.Attributes["destination_cidr"] && r.NextHop == rs.Primary.Attributes["next_hop"] {
+						routeExists = true
+
+						break
+					}
 				}
+			}
+
+			if routeExists {
+				return errors.New("Route still exists")
 			}
 		}
 
-		if routeExists {
-			return errors.New("Route still exists")
-		}
+		return nil
 	}
-
-	return nil
 }
 
 const testAccNetworkingV2SubnetRouteCreate = `

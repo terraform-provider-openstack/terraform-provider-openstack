@@ -15,7 +15,7 @@ func TestAccIdentityV3Ec2Credential_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3Ec2CredentialDestroy,
+		CheckDestroy:      testAccCheckIdentityV3Ec2CredentialDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3Ec2CredentialBasic,

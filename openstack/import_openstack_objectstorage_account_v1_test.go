@@ -16,7 +16,7 @@ func TestAccObjectStorageV1Account_importBasic(t *testing.T) {
 			testAccPreCheckSwift(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckObjectStorageV1AccountDestroy,
+		CheckDestroy:      testAccCheckObjectStorageV1AccountDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObjectStorageV1AccountBasic,

@@ -16,7 +16,7 @@ func TestAccDatabaseV1Database_importBasic(t *testing.T) {
 			testAccPreCheckDatabase(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckDatabaseV1DatabaseDestroy,
+		CheckDestroy:      testAccCheckDatabaseV1DatabaseDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatabaseV1DatabaseBasic(),

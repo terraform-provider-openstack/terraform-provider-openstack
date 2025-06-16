@@ -17,7 +17,7 @@ func TestAccSFSV2ShareDataSource_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSFSV2ShareDestroy,
+		CheckDestroy:      testAccCheckSFSV2ShareDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSV2ShareDataSourceBasic,

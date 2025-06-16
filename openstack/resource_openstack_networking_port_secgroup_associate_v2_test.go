@@ -27,7 +27,7 @@ func TestAccNetworkingV2PortSecGroupAssociate_update(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		defer testAccCheckNetworkingV2PortSecGroupDeletePort(t, hiddenPort) //nolint:errcheck
+		defer testAccCheckNetworkingV2PortSecGroupDeletePort(t, hiddenPort)
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -41,14 +41,14 @@ func TestAccNetworkingV2PortSecGroupAssociate_update(t *testing.T) {
 			{ // step 0
 				Config: testAccNetworkingV2PortSecGroupAssociateManifestUpdate0(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2PortSecGroupAssociateExists("openstack_networking_port_secgroup_associate_v2.port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "openstack_networking_port_secgroup_associate_v2.port_1", &port),
 					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 3),
 				),
 			},
 			{ // step 1
 				Config: testAccNetworkingV2PortSecGroupAssociateManifestUpdate1(), // unset user defined security groups only
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2PortSecGroupAssociateExists("data.openstack_networking_port_v2.hidden_port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "data.openstack_networking_port_v2.hidden_port_1", &port),
 					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 2),
 				),
 			},
@@ -56,35 +56,35 @@ func TestAccNetworkingV2PortSecGroupAssociate_update(t *testing.T) {
 			{ // step 2
 				Config: testAccNetworkingV2PortSecGroupAssociateManifestUpdate2(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2PortSecGroupAssociateExists("openstack_networking_port_secgroup_associate_v2.port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "openstack_networking_port_secgroup_associate_v2.port_1", &port),
 					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 1),
 				),
 			},
 			{ // step 3
 				Config: testAccNetworkingV2PortSecGroupAssociateManifestUpdate3(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2PortSecGroupAssociateExists("openstack_networking_port_secgroup_associate_v2.port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "openstack_networking_port_secgroup_associate_v2.port_1", &port),
 					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 3),
 				),
 			},
 			{ // step 4
 				Config: testAccNetworkingV2PortSecGroupAssociateManifestUpdate4(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2PortSecGroupAssociateExists("openstack_networking_port_secgroup_associate_v2.port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "openstack_networking_port_secgroup_associate_v2.port_1", &port),
 					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 1),
 				),
 			},
 			{ // step 5
 				Config: testAccNetworkingV2PortSecGroupAssociateManifestUpdate5(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2PortSecGroupAssociateExists("openstack_networking_port_secgroup_associate_v2.port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "openstack_networking_port_secgroup_associate_v2.port_1", &port),
 					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 0),
 				),
 			},
 			{ // step 6
 				Config: testAccNetworkingV2PortSecGroupAssociateManifestUpdate6(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2PortSecGroupAssociateExists("openstack_networking_port_secgroup_associate_v2.port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "openstack_networking_port_secgroup_associate_v2.port_1", &port),
 					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 1),
 				),
 			},
@@ -92,42 +92,42 @@ func TestAccNetworkingV2PortSecGroupAssociate_update(t *testing.T) {
 			{ // step 7
 				Config: testAccNetworkingV2PortSecGroupAssociateManifestUpdate7(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2PortSecGroupAssociateExists("openstack_networking_port_secgroup_associate_v2.port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "openstack_networking_port_secgroup_associate_v2.port_1", &port),
 					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 1),
 				),
 			},
 			{ // step 8
 				Config: testAccNetworkingV2PortSecGroupAssociateManifestUpdate8(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2PortSecGroupAssociateExists("openstack_networking_port_secgroup_associate_v2.port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "openstack_networking_port_secgroup_associate_v2.port_1", &port),
 					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 3),
 				),
 			},
 			{ // step 9
 				Config: testAccNetworkingV2PortSecGroupAssociateManifestUpdate9(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2PortSecGroupAssociateExists("openstack_networking_port_secgroup_associate_v2.port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "openstack_networking_port_secgroup_associate_v2.port_1", &port),
 					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 1),
 				),
 			},
 			{ // step 10
 				Config: testAccNetworkingV2PortSecGroupAssociateManifestUpdate10(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2PortSecGroupAssociateExists("openstack_networking_port_secgroup_associate_v2.port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "openstack_networking_port_secgroup_associate_v2.port_1", &port),
 					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 0),
 				),
 			},
 			{ // step 11
 				Config: testAccNetworkingV2PortSecGroupAssociateManifestUpdate11(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2PortSecGroupAssociateExists("openstack_networking_port_secgroup_associate_v2.port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "openstack_networking_port_secgroup_associate_v2.port_1", &port),
 					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 1),
 				),
 			},
 			{ // step 12
 				Config: testAccNetworkingV2PortSecGroupAssociateManifestUpdate12(), // cleanup all the ports
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2PortSecGroupAssociateExists("data.openstack_networking_port_v2.hidden_port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "data.openstack_networking_port_v2.hidden_port_1", &port),
 					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 0),
 				),
 			},
@@ -136,10 +136,7 @@ func TestAccNetworkingV2PortSecGroupAssociate_update(t *testing.T) {
 }
 
 func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName string, defaultSecGroups bool) (*ports.Port, error) {
-	config, err := testAccAuthFromEnv()
-	if err != nil {
-		return nil, err
-	}
+	config := testAccProvider.Meta().(*Config)
 
 	client, err := config.NetworkingV2Client(t.Context(), osRegionName)
 	if err != nil {
@@ -210,20 +207,20 @@ func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName strin
 	return port, nil
 }
 
-func testAccCheckNetworkingV2PortSecGroupDeletePort(t *testing.T, port *ports.Port) error {
-	config, err := testAccAuthFromEnv()
+func testAccCheckNetworkingV2PortSecGroupDeletePort(t *testing.T, port *ports.Port) {
+	config, err := testAccAuthFromEnv(t.Context())
 	if err != nil {
-		return err
+		t.Fatal(err)
 	}
 
 	client, err := config.NetworkingV2Client(t.Context(), osRegionName)
 	if err != nil {
-		return err
+		t.Fatal(err)
 	}
 
 	err = ports.Delete(t.Context(), client, port.ID).ExtractErr()
 	if err != nil {
-		return err
+		t.Fatal(err)
 	}
 
 	t.Logf("Port %s deleted", port.ID)
@@ -232,7 +229,7 @@ func testAccCheckNetworkingV2PortSecGroupDeletePort(t *testing.T, port *ports.Po
 	for _, secGroupID := range port.SecurityGroups {
 		err = groups.Delete(t.Context(), client, secGroupID).ExtractErr()
 		if err != nil {
-			return err
+			t.Fatal(err)
 		}
 
 		t.Logf("Default security group %s deleted", secGroupID)
@@ -240,15 +237,13 @@ func testAccCheckNetworkingV2PortSecGroupDeletePort(t *testing.T, port *ports.Po
 
 	err = networks.Delete(t.Context(), client, port.NetworkID).ExtractErr()
 	if err != nil {
-		return err
+		t.Fatal(err)
 	}
 
 	t.Logf("Network %s deleted", port.NetworkID)
-
-	return nil
 }
 
-func testAccCheckNetworkingV2PortSecGroupAssociateExists(n string, port *ports.Port) resource.TestCheckFunc {
+func testAccCheckNetworkingV2PortSecGroupAssociateExists(ctx context.Context, n string, port *ports.Port) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -261,12 +256,12 @@ func testAccCheckNetworkingV2PortSecGroupAssociateExists(n string, port *ports.P
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		found, err := ports.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+		found, err := ports.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

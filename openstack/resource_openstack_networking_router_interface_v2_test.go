@@ -27,15 +27,15 @@ func TestAccNetworkingV2RouterInterface_basic_subnet(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2RouterInterfaceDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2RouterInterfaceDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterInterfaceBasicSubnet,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
-					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
-					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
+					testAccCheckNetworkingV2NetworkExists(t.Context(), "openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2RouterExists(t.Context(), "openstack_networking_router_v2.router_1", &router),
+					testAccCheckNetworkingV2RouterInterfaceExists(t.Context(), "openstack_networking_router_interface_v2.int_1"),
 				),
 			},
 		},
@@ -55,17 +55,17 @@ func TestAccNetworkingV2RouterInterface_force_destroy(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2RouterInterfaceDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2RouterInterfaceDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterInterfaceForceDestroy,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
-					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
-					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
+					testAccCheckNetworkingV2NetworkExists(t.Context(), "openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2RouterExists(t.Context(), "openstack_networking_router_v2.router_1", &router),
+					testAccCheckNetworkingV2RouterInterfaceExists(t.Context(), "openstack_networking_router_interface_v2.int_1"),
 					resource.TestCheckResourceAttr("openstack_networking_router_interface_v2.int_1", "force_destroy", "true"),
-					testAccCheckNetworkingV2RouterInterfaceAddExtraRoutes("openstack_networking_router_interface_v2.int_1"),
+					testAccCheckNetworkingV2RouterInterfaceAddExtraRoutes(t.Context(), "openstack_networking_router_interface_v2.int_1"),
 				),
 			},
 		},
@@ -89,23 +89,23 @@ func TestAccNetworkingV2RouterInterface_v6_subnet(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2RouterInterfaceDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2RouterInterfaceDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterInterfaceV6Subnet + testAccNetworkingV2RouterInterfaceV6SubnetSecondInterface,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet1),
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_2", &subnet2),
-					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
-					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
-					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_2"),
+					testAccCheckNetworkingV2NetworkExists(t.Context(), "openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet1),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_2", &subnet2),
+					testAccCheckNetworkingV2RouterExists(t.Context(), "openstack_networking_router_v2.router_1", &router),
+					testAccCheckNetworkingV2RouterInterfaceExists(t.Context(), "openstack_networking_router_interface_v2.int_1"),
+					testAccCheckNetworkingV2RouterInterfaceExists(t.Context(), "openstack_networking_router_interface_v2.int_2"),
 				),
 			},
 			{ // Make sure deleting one of the router interfaces does not remove the other one.
 				Config: testAccNetworkingV2RouterInterfaceV6Subnet,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
+					testAccCheckNetworkingV2RouterInterfaceExists(t.Context(), "openstack_networking_router_interface_v2.int_1"),
 				),
 			},
 		},
@@ -127,16 +127,16 @@ func TestAccNetworkingV2RouterInterface_basic_port(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2RouterInterfaceDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2RouterInterfaceDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterInterfaceBasicPort,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
-					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
-					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
+					testAccCheckNetworkingV2NetworkExists(t.Context(), "openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2RouterExists(t.Context(), "openstack_networking_router_v2.router_1", &router),
+					testAccCheckNetworkingV2PortExists(t.Context(), "openstack_networking_port_v2.port_1", &port),
+					testAccCheckNetworkingV2RouterInterfaceExists(t.Context(), "openstack_networking_router_interface_v2.int_1"),
 				),
 			},
 		},
@@ -156,44 +156,46 @@ func TestAccNetworkingV2RouterInterface_timeout(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2RouterInterfaceDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2RouterInterfaceDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterInterfaceTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
-					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
-					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
+					testAccCheckNetworkingV2NetworkExists(t.Context(), "openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2RouterExists(t.Context(), "openstack_networking_router_v2.router_1", &router),
+					testAccCheckNetworkingV2RouterInterfaceExists(t.Context(), "openstack_networking_router_interface_v2.int_1"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckNetworkingV2RouterInterfaceDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckNetworkingV2RouterInterfaceDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_networking_router_interface_v2" {
-			continue
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		_, err := ports.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Router interface still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_networking_router_interface_v2" {
+				continue
+			}
 
-	return nil
+			_, err := ports.Get(ctx, networkingClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Router interface still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckNetworkingV2RouterInterfaceExists(n string) resource.TestCheckFunc {
+func testAccCheckNetworkingV2RouterInterfaceExists(ctx context.Context, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -206,12 +208,12 @@ func testAccCheckNetworkingV2RouterInterfaceExists(n string) resource.TestCheckF
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		found, err := ports.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+		found, err := ports.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -224,7 +226,7 @@ func testAccCheckNetworkingV2RouterInterfaceExists(n string) resource.TestCheckF
 	}
 }
 
-func testAccCheckNetworkingV2RouterInterfaceAddExtraRoutes(n string) resource.TestCheckFunc {
+func testAccCheckNetworkingV2RouterInterfaceAddExtraRoutes(ctx context.Context, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -237,12 +239,12 @@ func testAccCheckNetworkingV2RouterInterfaceAddExtraRoutes(n string) resource.Te
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		found, err := ports.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+		found, err := ports.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -262,7 +264,7 @@ func testAccCheckNetworkingV2RouterInterfaceAddExtraRoutes(n string) resource.Te
 			Routes: &routes,
 		}
 
-		_, err = routers.Update(context.TODO(), networkingClient, found.DeviceID, opts).Extract()
+		_, err = routers.Update(ctx, networkingClient, found.DeviceID, opts).Extract()
 		if err != nil {
 			return fmt.Errorf("Router cannot be updated: %w", err)
 		}

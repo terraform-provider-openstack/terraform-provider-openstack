@@ -24,7 +24,7 @@ func TestAccContainerInfraV1NodeGroupDataSource_basic(t *testing.T) {
 			testAccPreCheckContainerInfra(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
+		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerInfraV1NodeGroupBasic(keypairName, clusterTemplateName, clusterName, nodeGroupName, 1),

@@ -20,7 +20,7 @@ func TestAccDNSV2Zone_importBasic(t *testing.T) {
 			testAccPreCheckDNS(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
+		CheckDestroy:      testAccCheckDNSV2ZoneDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2ZoneBasic(zoneName),

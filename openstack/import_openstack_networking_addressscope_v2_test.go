@@ -17,7 +17,7 @@ func TestAccNetworkingV2AddressScopeImport_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2AddressScopeDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2AddressScopeDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2AddressScopeBasic(name),

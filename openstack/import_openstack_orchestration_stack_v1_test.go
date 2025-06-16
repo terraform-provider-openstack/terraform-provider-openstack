@@ -15,7 +15,7 @@ func TestAccOrchestrationStackV1_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckOrchestrationV1StackDestroy,
+		CheckDestroy:      testAccCheckOrchestrationV1StackDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrchestrationV1StackBasic,

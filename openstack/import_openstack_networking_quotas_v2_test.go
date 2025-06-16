@@ -15,7 +15,7 @@ func TestAccNetworkingQuotaV2_importBasic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3ProjectDestroy,
+		CheckDestroy:      testAccCheckIdentityV3ProjectDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingQuotaV2Basic,

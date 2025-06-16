@@ -22,19 +22,18 @@ func TestAccNetworkingV2QoSBandwidthLimitRule_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
-			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2QoSBandwidthLimitRuleDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2QoSBandwidthLimitRuleDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2QoSBandwidthLimitRuleBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2QoSPolicyExists(
+					testAccCheckNetworkingV2QoSPolicyExists(t.Context(),
 						"openstack_networking_qos_policy_v2.qos_policy_1", &policy),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_qos_policy_v2.qos_policy_1", "name", "qos_policy_1"),
-					testAccCheckNetworkingV2QoSBandwidthLimitRuleExists(
+					testAccCheckNetworkingV2QoSBandwidthLimitRuleExists(t.Context(),
 						"openstack_networking_qos_bandwidth_limit_rule_v2.bw_limit_rule_1", &rule),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_qos_bandwidth_limit_rule_v2.bw_limit_rule_1", "max_kbps", "3000"),
@@ -47,11 +46,11 @@ func TestAccNetworkingV2QoSBandwidthLimitRule_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingV2QoSBandwidthLimitRuleUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2QoSPolicyExists(
+					testAccCheckNetworkingV2QoSPolicyExists(t.Context(),
 						"openstack_networking_qos_policy_v2.qos_policy_1", &policy),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_qos_policy_v2.qos_policy_1", "name", "qos_policy_1"),
-					testAccCheckNetworkingV2QoSBandwidthLimitRuleExists(
+					testAccCheckNetworkingV2QoSBandwidthLimitRuleExists(t.Context(),
 						"openstack_networking_qos_bandwidth_limit_rule_v2.bw_limit_rule_1", &rule),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_qos_bandwidth_limit_rule_v2.bw_limit_rule_1", "max_kbps", "2000"),
@@ -65,7 +64,7 @@ func TestAccNetworkingV2QoSBandwidthLimitRule_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckNetworkingV2QoSBandwidthLimitRuleExists(n string, rule *rules.BandwidthLimitRule) resource.TestCheckFunc {
+func testAccCheckNetworkingV2QoSBandwidthLimitRuleExists(ctx context.Context, n string, rule *rules.BandwidthLimitRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -78,7 +77,7 @@ func testAccCheckNetworkingV2QoSBandwidthLimitRuleExists(n string, rule *rules.B
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
@@ -88,7 +87,7 @@ func testAccCheckNetworkingV2QoSBandwidthLimitRuleExists(n string, rule *rules.B
 			return err
 		}
 
-		found, err := rules.GetBandwidthLimitRule(context.TODO(), networkingClient, qosPolicyID, qosRuleID).ExtractBandwidthLimitRule()
+		found, err := rules.GetBandwidthLimitRule(ctx, networkingClient, qosPolicyID, qosRuleID).ExtractBandwidthLimitRule()
 		if err != nil {
 			return err
 		}
@@ -105,31 +104,33 @@ func testAccCheckNetworkingV2QoSBandwidthLimitRuleExists(n string, rule *rules.B
 	}
 }
 
-func testAccCheckNetworkingV2QoSBandwidthLimitRuleDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckNetworkingV2QoSBandwidthLimitRuleDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_networking_qos_bandwidth_limit_rule_v2" {
-			continue
-		}
-
-		qosPolicyID, qosRuleID, err := parsePairedIDs(rs.Primary.ID, "openstack_networking_qos_bandwidth_limit_rule_v2")
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		_, err = rules.GetBandwidthLimitRule(context.TODO(), networkingClient, qosPolicyID, qosRuleID).ExtractBandwidthLimitRule()
-		if err == nil {
-			return errors.New("QoS rule still exists")
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_networking_qos_bandwidth_limit_rule_v2" {
+				continue
+			}
+
+			qosPolicyID, qosRuleID, err := parsePairedIDs(rs.Primary.ID, "openstack_networking_qos_bandwidth_limit_rule_v2")
+			if err != nil {
+				return err
+			}
+
+			_, err = rules.GetBandwidthLimitRule(ctx, networkingClient, qosPolicyID, qosRuleID).ExtractBandwidthLimitRule()
+			if err == nil {
+				return errors.New("QoS rule still exists")
+			}
 		}
+
+		return nil
 	}
-
-	return nil
 }
 
 const testAccNetworkingV2QoSBandwidthLimitRuleBasic = `

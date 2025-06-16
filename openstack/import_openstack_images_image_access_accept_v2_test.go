@@ -15,7 +15,7 @@ func TestAccImagesImageAccessAcceptV2_importBasic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckImagesImageAccessAcceptV2Destroy,
+		CheckDestroy:      testAccCheckImagesImageAccessAcceptV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageAccessAcceptV2Basic(),

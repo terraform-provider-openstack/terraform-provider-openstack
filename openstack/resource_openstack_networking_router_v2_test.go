@@ -21,12 +21,12 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
+					testAccCheckNetworkingV2RouterExists(t.Context(), "openstack_networking_router_v2.router_1", &router),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_router_v2.router_1", "description", "router description"),
 				),
@@ -53,12 +53,12 @@ func TestAccNetworkingV2Router_updateExternalGateway(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterUpdateExternalGateway1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
+					testAccCheckNetworkingV2RouterExists(t.Context(), "openstack_networking_router_v2.router_1", &router),
 				),
 			},
 			{
@@ -81,12 +81,12 @@ func TestAccNetworkingV2Router_vendor_opts(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterVendorOpts(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
+					testAccCheckNetworkingV2RouterExists(t.Context(), "openstack_networking_router_v2.router_1", &router),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_router_v2.router_1", "external_network_id", osExtGwID),
 				),
@@ -106,12 +106,12 @@ func TestAccNetworkingV2Router_vendor_opts_no_snat(t *testing.T) {
 			t.Skip("Currently failing in GH-A: Cannot enable DVR + OVN on devstack")
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterVendorOptsNoSnat(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
+					testAccCheckNetworkingV2RouterExists(t.Context(), "openstack_networking_router_v2.router_1", &router),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_router_v2.router_1", "external_network_id", osExtGwID),
 				),
@@ -127,7 +127,7 @@ func TestAccNetworkingV2Router_extFixedIPs(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterExtFixedIPs(),
@@ -151,7 +151,7 @@ func TestAccNetworkingV2Router_extSubnetIDs(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterExtSubnetIDs(),
@@ -177,12 +177,12 @@ func TestAccNetworkingV2Router_extQoSPolicy(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterExtQoSPolicy(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2QoSPolicyExists(
+					testAccCheckNetworkingV2QoSPolicyExists(t.Context(),
 						"openstack_networking_qos_policy_v2.qos_policy_1", &policy),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_router_v2.router_1", "name", "router_1"),
@@ -198,29 +198,31 @@ func TestAccNetworkingV2Router_extQoSPolicy(t *testing.T) {
 	})
 }
 
-func testAccCheckNetworkingV2RouterDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckNetworkingV2RouterDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_networking_router_v2" {
-			continue
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		_, err := routers.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Router still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_networking_router_v2" {
+				continue
+			}
 
-	return nil
+			_, err := routers.Get(ctx, networkingClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Router still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckNetworkingV2RouterExists(n string, router *routers.Router) resource.TestCheckFunc {
+func testAccCheckNetworkingV2RouterExists(ctx context.Context, n string, router *routers.Router) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -233,12 +235,12 @@ func testAccCheckNetworkingV2RouterExists(n string, router *routers.Router) reso
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		found, err := routers.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+		found, err := routers.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

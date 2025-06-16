@@ -24,18 +24,18 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 			testAccPreCheckSFS(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSFSV2ShareAccessDestroy,
+		CheckDestroy:      testAccCheckSFSV2ShareAccessDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSV2ShareAccessConfigBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSFSV2ShareAccessExists("openstack_sharedfilesystem_share_access_v2.share_access_1", &shareAccess1),
+					testAccCheckSFSV2ShareAccessExists(t.Context(), "openstack_sharedfilesystem_share_access_v2.share_access_1", &shareAccess1),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_type", "ip"),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_to", "192.168.199.10"),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_level", "rw"),
 					resource.TestMatchResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "share_id",
 						regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
-					testAccCheckSFSV2ShareAccessExists("openstack_sharedfilesystem_share_access_v2.share_access_2", &shareAccess2),
+					testAccCheckSFSV2ShareAccessExists(t.Context(), "openstack_sharedfilesystem_share_access_v2.share_access_2", &shareAccess2),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_2", "access_type", "ip"),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_2", "access_to", "192.168.199.11"),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_2", "access_level", "rw"),
@@ -47,13 +47,13 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 			{
 				Config: testAccSFSV2ShareAccessConfigUpdate(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSFSV2ShareAccessExists("openstack_sharedfilesystem_share_access_v2.share_access_1", &shareAccess1),
+					testAccCheckSFSV2ShareAccessExists(t.Context(), "openstack_sharedfilesystem_share_access_v2.share_access_1", &shareAccess1),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_type", "ip"),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_to", "192.168.199.10"),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_level", "ro"),
 					resource.TestMatchResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "share_id",
 						regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
-					testAccCheckSFSV2ShareAccessExists("openstack_sharedfilesystem_share_access_v2.share_access_2", &shareAccess2),
+					testAccCheckSFSV2ShareAccessExists(t.Context(), "openstack_sharedfilesystem_share_access_v2.share_access_2", &shareAccess2),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_2", "access_type", "ip"),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_2", "access_to", "192.168.199.11"),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_2", "access_level", "ro"),
@@ -66,43 +66,45 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckSFSV2ShareAccessDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckSFSV2ShareAccessDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_sharedfilesystem_share_access_v2" {
-			continue
+		sfsClient, err := config.SharedfilesystemV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %w", err)
 		}
 
-		var shareID string
-
-		for k, v := range rs.Primary.Attributes {
-			if k == "share_id" {
-				shareID = v
-
-				break
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_sharedfilesystem_share_access_v2" {
+				continue
 			}
-		}
 
-		access, err := shares.ListAccessRights(context.TODO(), sfsClient, shareID).Extract()
-		if err == nil {
-			for _, v := range access {
-				if v.ID == rs.Primary.ID {
-					return fmt.Errorf("Manila share access still exists: %s", rs.Primary.ID)
+			var shareID string
+
+			for k, v := range rs.Primary.Attributes {
+				if k == "share_id" {
+					shareID = v
+
+					break
+				}
+			}
+
+			access, err := shares.ListAccessRights(ctx, sfsClient, shareID).Extract()
+			if err == nil {
+				for _, v := range access {
+					if v.ID == rs.Primary.ID {
+						return fmt.Errorf("Manila share access still exists: %s", rs.Primary.ID)
+					}
 				}
 			}
 		}
-	}
 
-	return nil
+		return nil
+	}
 }
 
-func testAccCheckSFSV2ShareAccessExists(n string, share *shares.AccessRight) resource.TestCheckFunc {
+func testAccCheckSFSV2ShareAccessExists(ctx context.Context, n string, share *shares.AccessRight) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -115,7 +117,7 @@ func testAccCheckSFSV2ShareAccessExists(n string, share *shares.AccessRight) res
 
 		config := testAccProvider.Meta().(*Config)
 
-		sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
+		sfsClient, err := config.SharedfilesystemV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %w", err)
 		}
@@ -132,7 +134,7 @@ func testAccCheckSFSV2ShareAccessExists(n string, share *shares.AccessRight) res
 
 		sfsClient.Microversion = sharedFilesystemV2MinMicroversion
 
-		access, err := shares.ListAccessRights(context.TODO(), sfsClient, shareID).Extract()
+		access, err := shares.ListAccessRights(ctx, sfsClient, shareID).Extract()
 		if err != nil {
 			return fmt.Errorf("Unable to get %s share: %w", shareID, err)
 		}

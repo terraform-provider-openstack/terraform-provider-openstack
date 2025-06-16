@@ -23,12 +23,12 @@ func TestAccBGPVPNNetworkAssociateV2_basic(t *testing.T) {
 			testAccPreCheckBGPVPN(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBGPVPNNetworkAssociateV2Destroy,
+		CheckDestroy:      testAccCheckBGPVPNNetworkAssociateV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBGPVPNNetworkAssociateV2Config,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBGPVPNNetworkAssociateV2Exists(
+					testAccCheckBGPVPNNetworkAssociateV2Exists(t.Context(),
 						"openstack_bgpvpn_network_associate_v2.association_1", &na),
 					resource.TestCheckResourceAttrPtr("openstack_bgpvpn_network_associate_v2.association_1", "network_id", &na.NetworkID),
 				),
@@ -37,38 +37,40 @@ func TestAccBGPVPNNetworkAssociateV2_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckBGPVPNNetworkAssociateV2Destroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckBGPVPNNetworkAssociateV2Destroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_bgpvpn_network_associate_v2" {
-			continue
-		}
-
-		bgpvpnID, id, err := parsePairedIDs(rs.Primary.ID, "openstack_bgpvpn_network_associate_v2")
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		_, err = bgpvpns.GetNetworkAssociation(context.TODO(), networkingClient, bgpvpnID, id).Extract()
-		if err == nil {
-			return fmt.Errorf("BGP VPN network association (%s) still exists", id)
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_bgpvpn_network_associate_v2" {
+				continue
+			}
+
+			bgpvpnID, id, err := parsePairedIDs(rs.Primary.ID, "openstack_bgpvpn_network_associate_v2")
+			if err != nil {
+				return err
+			}
+
+			_, err = bgpvpns.GetNetworkAssociation(ctx, networkingClient, bgpvpnID, id).Extract()
+			if err == nil {
+				return fmt.Errorf("BGP VPN network association (%s) still exists", id)
+			}
+
+			if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+				return err
+			}
 		}
 
-		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
-			return err
-		}
+		return nil
 	}
-
-	return nil
 }
 
-func testAccCheckBGPVPNNetworkAssociateV2Exists(n string, na *bgpvpns.NetworkAssociation) resource.TestCheckFunc {
+func testAccCheckBGPVPNNetworkAssociateV2Exists(ctx context.Context, n string, na *bgpvpns.NetworkAssociation) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -81,7 +83,7 @@ func testAccCheckBGPVPNNetworkAssociateV2Exists(n string, na *bgpvpns.NetworkAss
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
@@ -91,7 +93,7 @@ func testAccCheckBGPVPNNetworkAssociateV2Exists(n string, na *bgpvpns.NetworkAss
 			return err
 		}
 
-		found, err := bgpvpns.GetNetworkAssociation(context.TODO(), networkingClient, bgpvpnID, id).Extract()
+		found, err := bgpvpns.GetNetworkAssociation(ctx, networkingClient, bgpvpnID, id).Extract()
 		if err != nil {
 			return err
 		}

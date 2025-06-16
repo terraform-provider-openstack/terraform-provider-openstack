@@ -14,7 +14,6 @@ func TestAccNetworkingV2QoSPolicyDataSource_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
-			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
@@ -40,7 +39,6 @@ func TestAccNetworkingV2QoSPolicyDataSource_description(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
-			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{

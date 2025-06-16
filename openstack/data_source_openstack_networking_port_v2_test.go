@@ -13,7 +13,7 @@ func TestAccNetworkingV2PortDataSource_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2PortDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2PortDataSourceBasic,

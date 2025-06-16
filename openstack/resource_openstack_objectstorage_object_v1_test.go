@@ -48,13 +48,13 @@ func TestAccObjectStorageV1Object_basic(t *testing.T) {
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy: func(s *terraform.State) error {
-			return testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test/myfile.txt")
+			return testAccCheckObjectStorageV1ObjectDestroy(t.Context(), s, "terraform/test/myfile.txt")
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObjectStorageV1ObjectBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckObjectStorageV1ObjectExists(
+					testAccCheckObjectStorageV1ObjectExists(t.Context(),
 						"openstack_objectstorage_object_v1.myfile", &object),
 					testAccCheckObjectStorageV1ObjectDeleteAtMatches(deleteAt, &object),
 					resource.TestCheckResourceAttr(
@@ -108,7 +108,7 @@ func TestAccObjectStorageV1Object_basic_check_destroy(t *testing.T) {
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy: func(s *terraform.State) error {
-			return testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test/myfile.txt")
+			return testAccCheckObjectStorageV1ObjectDestroy(t.Context(), s, "terraform/test/myfile.txt")
 		},
 		Steps: []resource.TestStep{
 			{
@@ -123,7 +123,7 @@ func TestAccObjectStorageV1Object_basic_check_destroy(t *testing.T) {
 			{
 				Config:             testAccObjectStorageV1ObjectBasic(),
 				ExpectNonEmptyPlan: true,
-				Check:              testAccCheckObjectStorageV1DestroyContainer("tf_test_container_1", "terraform/test/myfile.txt"),
+				Check:              testAccCheckObjectStorageV1DestroyContainer(t.Context(), "tf_test_container_1", "terraform/test/myfile.txt"),
 			},
 			{
 				Config:                    testAccObjectStorageV1ObjectBasic(),
@@ -162,7 +162,7 @@ func TestAccObjectStorageV1Object_fromSource(t *testing.T) {
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy: func(s *terraform.State) error {
-			return testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test/myfile")
+			return testAccCheckObjectStorageV1ObjectDestroy(t.Context(), s, "terraform/test/myfile")
 		},
 		Steps: []resource.TestStep{
 			{
@@ -191,7 +191,7 @@ func TestAccObjectStorageV1Object_detectContentType(t *testing.T) {
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy: func(s *terraform.State) error {
-			return testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test/myfile.csv")
+			return testAccCheckObjectStorageV1ObjectDestroy(t.Context(), s, "terraform/test/myfile.csv")
 		},
 		Steps: []resource.TestStep{
 			{
@@ -218,11 +218,11 @@ func TestAccObjectStorageV1Object_copyFrom(t *testing.T) {
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy: func(s *terraform.State) error {
-			if err := testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test/myfile.txt"); err != nil {
+			if err := testAccCheckObjectStorageV1ObjectDestroy(t.Context(), s, "terraform/test/myfile.txt"); err != nil {
 				return err
 			}
 
-			return testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test/myfilecopied.txt")
+			return testAccCheckObjectStorageV1ObjectDestroy(t.Context(), s, "terraform/test/myfilecopied.txt")
 		},
 		Steps: []resource.TestStep{
 			{
@@ -247,13 +247,13 @@ func TestAccObjectStorageV1Object_objectManifest(t *testing.T) {
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy: func(s *terraform.State) error {
-			if err := testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test.csv/part001"); err != nil {
+			if err := testAccCheckObjectStorageV1ObjectDestroy(t.Context(), s, "terraform/test.csv/part001"); err != nil {
 				return err
 			}
-			if err := testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test.csv/part002"); err != nil {
+			if err := testAccCheckObjectStorageV1ObjectDestroy(t.Context(), s, "terraform/test.csv/part002"); err != nil {
 				return err
 			}
-			if err := testAccCheckObjectStorageV1ObjectDestroy(s, "terraform/test.csv"); err != nil {
+			if err := testAccCheckObjectStorageV1ObjectDestroy(t.Context(), s, "terraform/test.csv"); err != nil {
 				return err
 			}
 
@@ -275,10 +275,10 @@ func TestAccObjectStorageV1Object_objectManifest(t *testing.T) {
 	})
 }
 
-func testAccCheckObjectStorageV1ObjectDestroy(s *terraform.State, objectname string) error {
+func testAccCheckObjectStorageV1ObjectDestroy(ctx context.Context, s *terraform.State, objectname string) error {
 	config := testAccProvider.Meta().(*Config)
 
-	objectStorageClient, err := config.ObjectStorageV1Client(context.TODO(), osRegionName)
+	objectStorageClient, err := config.ObjectStorageV1Client(ctx, osRegionName)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack object storage client: %w", err)
 	}
@@ -288,7 +288,7 @@ func testAccCheckObjectStorageV1ObjectDestroy(s *terraform.State, objectname str
 			continue
 		}
 
-		_, err := objects.Get(context.TODO(), objectStorageClient, "tf_test_container_1", objectname, &objects.GetOpts{}).Extract()
+		_, err := objects.Get(ctx, objectStorageClient, "tf_test_container_1", objectname, &objects.GetOpts{}).Extract()
 		if err == nil {
 			return errors.New("Container object still exists")
 		}
@@ -297,7 +297,7 @@ func testAccCheckObjectStorageV1ObjectDestroy(s *terraform.State, objectname str
 	return nil
 }
 
-func testAccCheckObjectStorageV1ObjectExists(n string, object *objects.GetHeader) resource.TestCheckFunc {
+func testAccCheckObjectStorageV1ObjectExists(ctx context.Context, n string, object *objects.GetHeader) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -310,7 +310,7 @@ func testAccCheckObjectStorageV1ObjectExists(n string, object *objects.GetHeader
 
 		config := testAccProvider.Meta().(*Config)
 
-		objectStorageClient, err := config.ObjectStorageV1Client(context.TODO(), osRegionName)
+		objectStorageClient, err := config.ObjectStorageV1Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack object storage client: %w", err)
 		}
@@ -320,7 +320,7 @@ func testAccCheckObjectStorageV1ObjectExists(n string, object *objects.GetHeader
 			return err
 		}
 
-		found, err := objects.Get(context.TODO(), objectStorageClient, container, obj, nil).Extract()
+		found, err := objects.Get(ctx, objectStorageClient, container, obj, nil).Extract()
 		if err != nil {
 			return err
 		}
@@ -346,21 +346,21 @@ func testAccCheckObjectStorageV1ObjectDeleteAtMatches(expected string, object *o
 	}
 }
 
-func testAccCheckObjectStorageV1DestroyContainer(container, object string) resource.TestCheckFunc {
+func testAccCheckObjectStorageV1DestroyContainer(ctx context.Context, container, object string) resource.TestCheckFunc {
 	return func(_ *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
 
-		objectStorageClient, err := config.ObjectStorageV1Client(context.TODO(), osRegionName)
+		objectStorageClient, err := config.ObjectStorageV1Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack object storage client: %w", err)
 		}
 
-		_, err = objects.Delete(context.TODO(), objectStorageClient, container, object, nil).Extract()
+		_, err = objects.Delete(ctx, objectStorageClient, container, object, nil).Extract()
 		if err != nil {
 			return err
 		}
 
-		_, err = containers.Delete(context.TODO(), objectStorageClient, container).Extract()
+		_, err = containers.Delete(ctx, objectStorageClient, container).Extract()
 		if err != nil {
 			return err
 		}

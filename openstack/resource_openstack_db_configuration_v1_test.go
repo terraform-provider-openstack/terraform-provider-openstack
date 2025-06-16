@@ -21,12 +21,12 @@ func TestAccDatabaseV1Configuration_basic(t *testing.T) {
 			testAccPreCheckDatabase(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckDatabaseV1ConfigurationDestroy,
+		CheckDestroy:      testAccCheckDatabaseV1ConfigurationDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatabaseV1ConfigurationBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDatabaseV1ConfigurationExists(
+					testAccCheckDatabaseV1ConfigurationExists(t.Context(),
 						"openstack_db_configuration_v1.basic", &configuration),
 					resource.TestCheckResourceAttr(
 						"openstack_db_configuration_v1.basic", "name", "basic"),
@@ -40,7 +40,7 @@ func TestAccDatabaseV1Configuration_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckDatabaseV1ConfigurationExists(n string, configuration *configurations.Config) resource.TestCheckFunc {
+func testAccCheckDatabaseV1ConfigurationExists(ctx context.Context, n string, configuration *configurations.Config) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -53,12 +53,12 @@ func testAccCheckDatabaseV1ConfigurationExists(n string, configuration *configur
 
 		config := testAccProvider.Meta().(*Config)
 
-		databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
+		databaseV1Client, err := config.DatabaseV1Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
-		found, err := configurations.Get(context.TODO(), databaseV1Client, rs.Primary.ID).Extract()
+		found, err := configurations.Get(ctx, databaseV1Client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -73,26 +73,28 @@ func testAccCheckDatabaseV1ConfigurationExists(n string, configuration *configur
 	}
 }
 
-func testAccCheckDatabaseV1ConfigurationDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckDatabaseV1ConfigurationDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating database client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_db_configuration_v1" {
-			continue
+		databaseV1Client, err := config.DatabaseV1Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating database client: %w", err)
 		}
 
-		_, err := configurations.Get(context.TODO(), databaseV1Client, rs.Primary.ID).Extract()
-		if err.Error() != "Resource not found" {
-			return fmt.Errorf("Destroy check failed: %w", err)
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_db_configuration_v1" {
+				continue
+			}
 
-	return nil
+			_, err := configurations.Get(ctx, databaseV1Client, rs.Primary.ID).Extract()
+			if err.Error() != "Resource not found" {
+				return fmt.Errorf("Destroy check failed: %w", err)
+			}
+		}
+
+		return nil
+	}
 }
 
 func testAccDatabaseV1ConfigurationBasic() string {

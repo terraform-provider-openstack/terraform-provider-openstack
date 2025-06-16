@@ -23,12 +23,12 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3ProjectDestroy,
+		CheckDestroy:      testAccCheckIdentityV3ProjectDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3ProjectBasic(projectName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_project_v3.project_1", "name", &project.Name),
 					resource.TestCheckResourceAttrPtr(
@@ -44,7 +44,7 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 			{
 				Config: testAccIdentityV3ProjectUpdate(projectName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_project_v3.project_1", "name", &project.Name),
 					resource.TestCheckResourceAttrPtr(
@@ -55,9 +55,9 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 						"openstack_identity_project_v3.project_1", "enabled", "false"),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_project_v3.project_1", "is_domain", "false"),
-					testAccCheckIdentityV3ProjectHasTag("openstack_identity_project_v3.project_1", "tag1"),
-					testAccCheckIdentityV3ProjectHasTag("openstack_identity_project_v3.project_1", "tag2"),
-					testAccCheckIdentityV3ProjectTagCount("openstack_identity_project_v3.project_1", 2),
+					testAccCheckIdentityV3ProjectHasTag(t.Context(), "openstack_identity_project_v3.project_1", "tag1"),
+					testAccCheckIdentityV3ProjectHasTag(t.Context(), "openstack_identity_project_v3.project_1", "tag2"),
+					testAccCheckIdentityV3ProjectTagCount(t.Context(), "openstack_identity_project_v3.project_1", 2),
 				),
 			},
 		},
@@ -75,12 +75,12 @@ func TestAccIdentityV3ProjectDomain_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3ProjectDestroy,
+		CheckDestroy:      testAccCheckIdentityV3ProjectDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3ProjectDomainBasic(projectName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_project_v3.project_1", "name", &project.Name),
 					resource.TestCheckResourceAttrPtr(
@@ -95,29 +95,31 @@ func TestAccIdentityV3ProjectDomain_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckIdentityV3ProjectDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckIdentityV3ProjectDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_identity_project_v3" {
-			continue
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		_, err := projects.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Project still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_identity_project_v3" {
+				continue
+			}
 
-	return nil
+			_, err := projects.Get(ctx, identityClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Project still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) resource.TestCheckFunc {
+func testAccCheckIdentityV3ProjectExists(ctx context.Context, n string, project *projects.Project) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -130,12 +132,12 @@ func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) re
 
 		config := testAccProvider.Meta().(*Config)
 
-		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		found, err := projects.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
+		found, err := projects.Get(ctx, identityClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -150,7 +152,7 @@ func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) re
 	}
 }
 
-func testAccCheckIdentityV3ProjectHasTag(n, tag string) resource.TestCheckFunc {
+func testAccCheckIdentityV3ProjectHasTag(ctx context.Context, n, tag string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -163,12 +165,12 @@ func testAccCheckIdentityV3ProjectHasTag(n, tag string) resource.TestCheckFunc {
 
 		config := testAccProvider.Meta().(*Config)
 
-		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		found, err := projects.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
+		found, err := projects.Get(ctx, identityClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -187,7 +189,7 @@ func testAccCheckIdentityV3ProjectHasTag(n, tag string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckIdentityV3ProjectTagCount(n string, expected int) resource.TestCheckFunc {
+func testAccCheckIdentityV3ProjectTagCount(ctx context.Context, n string, expected int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -200,12 +202,12 @@ func testAccCheckIdentityV3ProjectTagCount(n string, expected int) resource.Test
 
 		config := testAccProvider.Meta().(*Config)
 
-		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		found, err := projects.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
+		found, err := projects.Get(ctx, identityClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

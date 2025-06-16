@@ -16,7 +16,7 @@ func TestAccLBV2FlavorProfile_importBasic(t *testing.T) {
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2FlavorProfileDestroy,
+		CheckDestroy:      testAccCheckLBV2FlavorProfileDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLbV2FlavorProfile,

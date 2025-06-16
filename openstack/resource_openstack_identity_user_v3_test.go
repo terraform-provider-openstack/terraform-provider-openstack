@@ -28,13 +28,13 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3UserDestroy,
+		CheckDestroy:      testAccCheckIdentityV3UserDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3UserBasic(projectName, userName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3UserExists("openstack_identity_user_v3.user_1", &user),
-					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
+					testAccCheckIdentityV3UserExists(t.Context(), "openstack_identity_user_v3.user_1", &user),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_user_v3.user_1", "name", &user.Name),
 					resource.TestCheckResourceAttrPtr(
@@ -62,7 +62,7 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 			{
 				Config: testAccIdentityV3UserUpdate(projectName, userName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3UserExists("openstack_identity_user_v3.user_1", &user),
+					testAccCheckIdentityV3UserExists(t.Context(), "openstack_identity_user_v3.user_1", &user),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_user_v3.user_1", "name", &user.Name),
 					resource.TestCheckResourceAttrPtr(
@@ -85,29 +85,31 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckIdentityV3UserDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckIdentityV3UserDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_identity_user_v3" {
-			continue
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		_, err := users.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("User still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_identity_user_v3" {
+				continue
+			}
 
-	return nil
+			_, err := users.Get(ctx, identityClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("User still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckIdentityV3UserExists(n string, user *users.User) resource.TestCheckFunc {
+func testAccCheckIdentityV3UserExists(ctx context.Context, n string, user *users.User) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -120,12 +122,12 @@ func testAccCheckIdentityV3UserExists(n string, user *users.User) resource.TestC
 
 		config := testAccProvider.Meta().(*Config)
 
-		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		found, err := users.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
+		found, err := users.Get(ctx, identityClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

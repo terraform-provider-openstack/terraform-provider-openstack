@@ -19,7 +19,7 @@ func TestAccIdentityV3UserMembership_importBasic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3UserMembershipDestroy,
+		CheckDestroy:      testAccCheckIdentityV3UserMembershipDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3UserMembershipBasic(groupName, userName),

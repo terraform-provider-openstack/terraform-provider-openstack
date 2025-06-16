@@ -15,7 +15,7 @@ func TestAccComputeV2ServerGroup_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy,
+		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2ServerGroupBasic,

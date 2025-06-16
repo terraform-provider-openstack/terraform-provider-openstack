@@ -29,12 +29,12 @@ func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
 			testAccPreCheckContainerInfra(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
+		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, 1),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerInfraV1ClusterExists(resourceName, &cluster),
+					testAccCheckContainerInfraV1ClusterExists(t.Context(), resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "region", osRegionName),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
 					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
@@ -68,7 +68,7 @@ func TestAccContainerInfraV1Cluster_basic(t *testing.T) {
 			{
 				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, 2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerInfraV1ClusterExists(resourceName, &cluster),
+					testAccCheckContainerInfraV1ClusterExists(t.Context(), resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "region", osRegionName),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
 					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
@@ -119,12 +119,12 @@ func TestAccContainerInfraV1Cluster_mergeLabels(t *testing.T) {
 			testAccPreCheckContainerInfra(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
+		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerInfraV1ClusterLabels(keypairName, clusterTemplateName, clusterName, 1, true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerInfraV1ClusterExists(resourceName, &cluster),
+					testAccCheckContainerInfraV1ClusterExists(t.Context(), resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "region", osRegionName),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
 					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
@@ -159,7 +159,7 @@ func TestAccContainerInfraV1Cluster_mergeLabels(t *testing.T) {
 			{
 				Config: testAccContainerInfraV1ClusterLabels(keypairName, clusterTemplateName, clusterName, 2, true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerInfraV1ClusterExists(resourceName, &cluster),
+					testAccCheckContainerInfraV1ClusterExists(t.Context(), resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "region", osRegionName),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
 					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
@@ -211,12 +211,12 @@ func TestAccContainerInfraV1Cluster_overrideLabels(t *testing.T) {
 			testAccPreCheckContainerInfra(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
+		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerInfraV1ClusterLabels(keypairName, clusterTemplateName, clusterName, 1, false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerInfraV1ClusterExists(resourceName, &cluster),
+					testAccCheckContainerInfraV1ClusterExists(t.Context(), resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "region", osRegionName),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
 					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
@@ -251,7 +251,7 @@ func TestAccContainerInfraV1Cluster_overrideLabels(t *testing.T) {
 			{
 				Config: testAccContainerInfraV1ClusterLabels(keypairName, clusterTemplateName, clusterName, 2, false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerInfraV1ClusterExists(resourceName, &cluster),
+					testAccCheckContainerInfraV1ClusterExists(t.Context(), resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "region", osRegionName),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
 					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
@@ -287,7 +287,7 @@ func TestAccContainerInfraV1Cluster_overrideLabels(t *testing.T) {
 	})
 }
 
-func testAccCheckContainerInfraV1ClusterExists(n string, cluster *clusters.Cluster) resource.TestCheckFunc {
+func testAccCheckContainerInfraV1ClusterExists(ctx context.Context, n string, cluster *clusters.Cluster) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -300,12 +300,12 @@ func testAccCheckContainerInfraV1ClusterExists(n string, cluster *clusters.Clust
 
 		config := testAccProvider.Meta().(*Config)
 
-		containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
+		containerInfraClient, err := config.ContainerInfraV1Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack container infra client: %w", err)
 		}
 
-		found, err := clusters.Get(context.TODO(), containerInfraClient, rs.Primary.ID).Extract()
+		found, err := clusters.Get(ctx, containerInfraClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -320,26 +320,28 @@ func testAccCheckContainerInfraV1ClusterExists(n string, cluster *clusters.Clust
 	}
 }
 
-func testAccCheckContainerInfraV1ClusterDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckContainerInfraV1ClusterDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack container infra client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_containerinfra_cluster_v1" {
-			continue
+		containerInfraClient, err := config.ContainerInfraV1Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack container infra client: %w", err)
 		}
 
-		_, err := clusters.Get(context.TODO(), containerInfraClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Cluster still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_containerinfra_cluster_v1" {
+				continue
+			}
 
-	return nil
+			_, err := clusters.Get(ctx, containerInfraClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Cluster still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
 func testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName string, nodeCount int) string {

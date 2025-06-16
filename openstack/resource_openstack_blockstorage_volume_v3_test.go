@@ -21,12 +21,12 @@ func TestAccBlockStorageV3Volume_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV3VolumeBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
+					testAccCheckBlockStorageV3VolumeExists(t.Context(), "openstack_blockstorage_volume_v3.volume_1", &volume),
 					testAccCheckBlockStorageV3VolumeMetadata(&volume, "foo", "bar"),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "name", "volume_1"),
@@ -37,7 +37,7 @@ func TestAccBlockStorageV3Volume_basic(t *testing.T) {
 			{
 				Config: testAccBlockStorageV3VolumeUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
+					testAccCheckBlockStorageV3VolumeExists(t.Context(), "openstack_blockstorage_volume_v3.volume_1", &volume),
 					testAccCheckBlockStorageV3VolumeMetadata(&volume, "foo", "bar"),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "name", "volume_1-updated"),
@@ -57,7 +57,7 @@ func TestAccBlockStorageV3Volume_online_resize(t *testing.T) {
 			testAccPreOnlineResize(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV3VolumeOnlineResize(),
@@ -86,12 +86,12 @@ func TestAccBlockStorageV3Volume_image(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV3VolumeImage(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
+					testAccCheckBlockStorageV3VolumeExists(t.Context(), "openstack_blockstorage_volume_v3.volume_1", &volume),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "name", "volume_1"),
 				),
@@ -109,12 +109,12 @@ func TestAccBlockStorageV3Volume_timeout(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV3VolumeTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
+					testAccCheckBlockStorageV3VolumeExists(t.Context(), "openstack_blockstorage_volume_v3.volume_1", &volume),
 				),
 			},
 		},
@@ -130,12 +130,12 @@ func TestAccBlockStorageV3Volume_attachment(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV3VolumeAttachment(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
+					testAccCheckBlockStorageV3VolumeExists(t.Context(), "openstack_blockstorage_volume_v3.volume_1", &volume),
 					testAccCheckBlockStorageV3VolumeAttachment(&volume, *regexp.MustCompile(`\/dev\/.dc`)),
 				),
 			},
@@ -156,12 +156,12 @@ func TestAccBlockStorageV3VolumeFromBackup(t *testing.T) {
 			t.Skip("Currently Cinder Backup is not configured properly on GH-A devstack")
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV3VolumeFromBackup(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
+					testAccCheckBlockStorageV3VolumeExists(t.Context(), "openstack_blockstorage_volume_v3.volume_1", &volume),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "name", "volume_1"),
 				),
@@ -170,29 +170,31 @@ func TestAccBlockStorageV3VolumeFromBackup(t *testing.T) {
 	})
 }
 
-func testAccCheckBlockStorageV3VolumeDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckBlockStorageV3VolumeDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_blockstorage_volume_v3" {
-			continue
+		blockStorageClient, err := config.BlockStorageV3Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 		}
 
-		_, err := volumes.Get(context.TODO(), blockStorageClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Volume still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_blockstorage_volume_v3" {
+				continue
+			}
 
-	return nil
+			_, err := volumes.Get(ctx, blockStorageClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Volume still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckBlockStorageV3VolumeExists(n string, volume *volumes.Volume) resource.TestCheckFunc {
+func testAccCheckBlockStorageV3VolumeExists(ctx context.Context, n string, volume *volumes.Volume) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -205,12 +207,12 @@ func testAccCheckBlockStorageV3VolumeExists(n string, volume *volumes.Volume) re
 
 		config := testAccProvider.Meta().(*Config)
 
-		blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
+		blockStorageClient, err := config.BlockStorageV3Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 		}
 
-		found, err := volumes.Get(context.TODO(), blockStorageClient, rs.Primary.ID).Extract()
+		found, err := volumes.Get(ctx, blockStorageClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -281,12 +283,12 @@ func TestAccBlockStorageV3Volume_VolumeTypeUpdate(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV3VolumeRetype(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
+					testAccCheckBlockStorageV3VolumeExists(t.Context(), "openstack_blockstorage_volume_v3.volume_1", &volume),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "volume_type", "initial_type"),
 				),
@@ -294,7 +296,7 @@ func TestAccBlockStorageV3Volume_VolumeTypeUpdate(t *testing.T) {
 			{
 				Config: testAccBlockStorageV3VolumeRetypeUpdate(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV3VolumeExists("openstack_blockstorage_volume_v3.volume_1", &volume),
+					testAccCheckBlockStorageV3VolumeExists(t.Context(), "openstack_blockstorage_volume_v3.volume_1", &volume),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "volume_type", "new_type"),
 				),

@@ -16,7 +16,7 @@ func TestAccKeyManagerContainerV1_importBasic(t *testing.T) {
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerV1Destroy,
+		CheckDestroy:      testAccCheckContainerV1Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerContainerV1Basic(),
@@ -40,7 +40,7 @@ func TestAccKeyManagerContainerV1_importACLs(t *testing.T) {
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerV1Destroy,
+		CheckDestroy:      testAccCheckContainerV1Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerContainerV1Acls(),

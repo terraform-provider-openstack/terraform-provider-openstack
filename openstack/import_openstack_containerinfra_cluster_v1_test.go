@@ -21,7 +21,7 @@ func TestAccContainerInfraV1ClusterImport_basic(t *testing.T) {
 			testAccPreCheckContainerInfra(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
+		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerInfraV1ClusterBasic(keypairName, clusterTemplateName, clusterName, 1),
@@ -50,7 +50,7 @@ func TestAccContainerInfraV1ClusterImport_mergeLabels(t *testing.T) {
 			testAccPreCheckContainerInfra(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
+		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerInfraV1ClusterLabels(keypairName, clusterTemplateName, clusterName, 1, true),
@@ -79,7 +79,7 @@ func TestAccContainerInfraV1ClusterImport_overrideLabels(t *testing.T) {
 			testAccPreCheckContainerInfra(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy,
+		CheckDestroy:      testAccCheckContainerInfraV1ClusterDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerInfraV1ClusterLabels(keypairName, clusterTemplateName, clusterName, 1, false),

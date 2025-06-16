@@ -15,7 +15,7 @@ func TestAccComputeV2Instance_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceBasic(),
@@ -43,7 +43,7 @@ func TestAccComputeV2Instance_DetachPortsBeforeDelete(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceDetachPortsBeforeDestroy(),
@@ -68,7 +68,7 @@ func TestAccComputeV2Instance_importbootFromVolumeForceNew_1(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceBootFromVolumeForceNew1(),
@@ -95,7 +95,7 @@ func TestAccComputeV2Instance_importbootFromVolumeImage(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2InstanceDestroy,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InstanceBootFromVolumeImage(),

@@ -24,12 +24,12 @@ func TestAccDNSV2TransferRequest_basic(t *testing.T) {
 			testAccPreCheckDNS(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckDNSV2TransferRequestDestroy,
+		CheckDestroy:      testAccCheckDNSV2TransferRequestDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2TransferRequestBasic(zoneName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2TransferRequestExists(
+					testAccCheckDNSV2TransferRequestExists(t.Context(),
 						"openstack_dns_transfer_request_v2.request_1", &transferRequest),
 					resource.TestCheckResourceAttr(
 						"openstack_dns_transfer_request_v2.request_1", "description", "a transfer request"),
@@ -58,12 +58,12 @@ func TestAccDNSV2TransferRequest_ignoreStatusCheck(t *testing.T) {
 			testAccPreCheckDNS(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckDNSV2TransferRequestDestroy,
+		CheckDestroy:      testAccCheckDNSV2TransferRequestDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2TransferRequestDisableCheck(zoneName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2TransferRequestExists("openstack_dns_transfer_request_v2.request_1", &transferRequest),
+					testAccCheckDNSV2TransferRequestExists(t.Context(), "openstack_dns_transfer_request_v2.request_1", &transferRequest),
 					resource.TestCheckResourceAttr(
 						"openstack_dns_transfer_request_v2.request_1", "disable_status_check", "true"),
 				),
@@ -71,7 +71,7 @@ func TestAccDNSV2TransferRequest_ignoreStatusCheck(t *testing.T) {
 			{
 				Config: testAccDNSV2TransferRequestBasic(zoneName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2TransferRequestExists("openstack_dns_transfer_request_v2.request_1", &transferRequest),
+					testAccCheckDNSV2TransferRequestExists(t.Context(), "openstack_dns_transfer_request_v2.request_1", &transferRequest),
 					resource.TestCheckResourceAttr(
 						"openstack_dns_transfer_request_v2.request_1", "disable_status_check", "false"),
 				),
@@ -80,29 +80,31 @@ func TestAccDNSV2TransferRequest_ignoreStatusCheck(t *testing.T) {
 	})
 }
 
-func testAccCheckDNSV2TransferRequestDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckDNSV2TransferRequestDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	dnsClient, err := config.DNSV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_dns_transfer_request_v2" {
-			continue
+		dnsClient, err := config.DNSV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack DNS client: %w", err)
 		}
 
-		_, err := request.Get(context.TODO(), dnsClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Transfer request still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_dns_transfer_request_v2" {
+				continue
+			}
 
-	return nil
+			_, err := request.Get(ctx, dnsClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Transfer request still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckDNSV2TransferRequestExists(n string, transferRequest *request.TransferRequest) resource.TestCheckFunc {
+func testAccCheckDNSV2TransferRequestExists(ctx context.Context, n string, transferRequest *request.TransferRequest) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -115,12 +117,12 @@ func testAccCheckDNSV2TransferRequestExists(n string, transferRequest *request.T
 
 		config := testAccProvider.Meta().(*Config)
 
-		dnsClient, err := config.DNSV2Client(context.TODO(), osRegionName)
+		dnsClient, err := config.DNSV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack DNS client: %w", err)
 		}
 
-		found, err := request.Get(context.TODO(), dnsClient, rs.Primary.ID).Extract()
+		found, err := request.Get(ctx, dnsClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

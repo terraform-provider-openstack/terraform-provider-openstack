@@ -18,7 +18,7 @@ func TestAccContainerInfraV1ClusterTemplateImportBasic(t *testing.T) {
 			testAccPreCheckContainerInfra(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerInfraV1ClusterTemplateDestroy,
+		CheckDestroy:      testAccCheckContainerInfraV1ClusterTemplateDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerInfraV1ClusterTemplateBasic(clusterTemplateName),

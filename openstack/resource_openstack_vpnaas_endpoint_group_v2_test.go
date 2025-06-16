@@ -25,12 +25,12 @@ func TestAccGroupVPNaaSV2_basic(t *testing.T) {
 			testAccPreCheckVPN(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckEndpointGroupV2Destroy,
+		CheckDestroy:      testAccCheckEndpointGroupV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEndpointGroupV2Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEndpointGroupV2Exists(
+					testAccCheckEndpointGroupV2Exists(t.Context(),
 						"openstack_vpnaas_endpoint_group_v2.group_1", &group),
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_endpoint_group_v2.group_1", "name", &group.Name),
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_endpoint_group_v2.group_1", "type", &group.Type),
@@ -51,12 +51,12 @@ func TestAccGroupVPNaaSV2_update(t *testing.T) {
 			testAccPreCheckVPN(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckEndpointGroupV2Destroy,
+		CheckDestroy:      testAccCheckEndpointGroupV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEndpointGroupV2Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEndpointGroupV2Exists(
+					testAccCheckEndpointGroupV2Exists(t.Context(),
 						"openstack_vpnaas_endpoint_group_v2.group_1", &group),
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_endpoint_group_v2.group_1", "name", &group.Name),
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_endpoint_group_v2.group_1", "type", &group.Type),
@@ -66,7 +66,7 @@ func TestAccGroupVPNaaSV2_update(t *testing.T) {
 			{
 				Config: testAccEndpointGroupV2Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEndpointGroupV2Exists(
+					testAccCheckEndpointGroupV2Exists(t.Context(),
 						"openstack_vpnaas_endpoint_group_v2.group_1", &group),
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_endpoint_group_v2.group_1", "name", &group.Name),
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_endpoint_group_v2.group_1", "type", &group.Type),
@@ -77,33 +77,35 @@ func TestAccGroupVPNaaSV2_update(t *testing.T) {
 	})
 }
 
-func testAccCheckEndpointGroupV2Destroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckEndpointGroupV2Destroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
+		}
+
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_vpnaas_group" {
+				continue
+			}
+
+			_, err = endpointgroups.Get(ctx, networkingClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return fmt.Errorf("EndpointGroup (%s) still exists", rs.Primary.ID)
+			}
+
+			if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+				return err
+			}
+		}
+
+		return nil
 	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_vpnaas_group" {
-			continue
-		}
-
-		_, err = endpointgroups.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("EndpointGroup (%s) still exists", rs.Primary.ID)
-		}
-
-		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
-			return err
-		}
-	}
-
-	return nil
 }
 
-func testAccCheckEndpointGroupV2Exists(n string, group *endpointgroups.EndpointGroup) resource.TestCheckFunc {
+func testAccCheckEndpointGroupV2Exists(ctx context.Context, n string, group *endpointgroups.EndpointGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -116,14 +118,14 @@ func testAccCheckEndpointGroupV2Exists(n string, group *endpointgroups.EndpointG
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		var found *endpointgroups.EndpointGroup
 
-		found, err = endpointgroups.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+		found, err = endpointgroups.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

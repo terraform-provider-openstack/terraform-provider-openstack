@@ -16,7 +16,7 @@ func TestAccBGPVPNV2_Import(t *testing.T) {
 			testAccPreCheckBGPVPN(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBGPVPNV2Destroy,
+		CheckDestroy:      testAccCheckBGPVPNV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBGPVPNV2Config,

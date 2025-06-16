@@ -20,12 +20,12 @@ func TestAccImagesImageAccessV2_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckImagesImageAccessV2Destroy,
+		CheckDestroy:      testAccCheckImagesImageAccessV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageAccessV2Basic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_v2.image_access_1", &member),
+					testAccCheckImagesImageAccessV2Exists(t.Context(), "openstack_images_image_access_v2.image_access_1", &member),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_images_image_access_v2.image_access_1", "status", &member.Status),
 					resource.TestCheckResourceAttr(
@@ -35,7 +35,7 @@ func TestAccImagesImageAccessV2_basic(t *testing.T) {
 			{
 				Config: testAccImagesImageAccessV2Update(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_v2.image_access_1", &member),
+					testAccCheckImagesImageAccessV2Exists(t.Context(), "openstack_images_image_access_v2.image_access_1", &member),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_images_image_access_v2.image_access_1", "status", &member.Status),
 					resource.TestCheckResourceAttr(
@@ -46,34 +46,36 @@ func TestAccImagesImageAccessV2_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckImagesImageAccessV2Destroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckImagesImageAccessV2Destroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	imageClient, err := config.ImageV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Image: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_images_image_access_v2" {
-			continue
-		}
-
-		imageID, memberID, err := parsePairedIDs(rs.Primary.ID, "openstack_images_image_access_v2")
+		imageClient, err := config.ImageV2Client(ctx, osRegionName)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error creating OpenStack Image: %w", err)
 		}
 
-		_, err = members.Get(context.TODO(), imageClient, imageID, memberID).Extract()
-		if err == nil {
-			return errors.New("Image still exists")
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_images_image_access_v2" {
+				continue
+			}
+
+			imageID, memberID, err := parsePairedIDs(rs.Primary.ID, "openstack_images_image_access_v2")
+			if err != nil {
+				return err
+			}
+
+			_, err = members.Get(ctx, imageClient, imageID, memberID).Extract()
+			if err == nil {
+				return errors.New("Image still exists")
+			}
 		}
+
+		return nil
 	}
-
-	return nil
 }
 
-func testAccCheckImagesImageAccessV2Exists(n string, member *members.Member) resource.TestCheckFunc {
+func testAccCheckImagesImageAccessV2Exists(ctx context.Context, n string, member *members.Member) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -86,7 +88,7 @@ func testAccCheckImagesImageAccessV2Exists(n string, member *members.Member) res
 
 		config := testAccProvider.Meta().(*Config)
 
-		imageClient, err := config.ImageV2Client(context.TODO(), osRegionName)
+		imageClient, err := config.ImageV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack Image: %w", err)
 		}
@@ -96,7 +98,7 @@ func testAccCheckImagesImageAccessV2Exists(n string, member *members.Member) res
 			return err
 		}
 
-		found, err := members.Get(context.TODO(), imageClient, imageID, memberID).Extract()
+		found, err := members.Get(ctx, imageClient, imageID, memberID).Extract()
 		if err != nil {
 			return err
 		}

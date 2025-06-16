@@ -15,7 +15,7 @@ func TestAccNetworkingV2SubnetRoute_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetRouteDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetRouteDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetRouteCreate,

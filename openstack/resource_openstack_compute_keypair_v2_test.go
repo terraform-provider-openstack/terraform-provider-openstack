@@ -21,12 +21,12 @@ func TestAccComputeV2Keypair_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2KeypairDestroy,
+		CheckDestroy:      testAccCheckComputeV2KeypairDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2KeypairBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2KeypairExists("openstack_compute_keypair_v2.kp_1", &keypair),
+					testAccCheckComputeV2KeypairExists(t.Context(), "openstack_compute_keypair_v2.kp_1", &keypair),
 				),
 			},
 		},
@@ -45,12 +45,12 @@ func TestAccComputeV2Keypair_generatePrivate(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2KeypairDestroy,
+		CheckDestroy:      testAccCheckComputeV2KeypairDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2KeypairGeneratePrivate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2KeypairExists("openstack_compute_keypair_v2.kp_1", &keypair),
+					testAccCheckComputeV2KeypairExists(t.Context(), "openstack_compute_keypair_v2.kp_1", &keypair),
 					resource.TestMatchResourceAttr(
 						"openstack_compute_keypair_v2.kp_1", "fingerprint", fingerprintRe),
 					resource.TestMatchResourceAttr(
@@ -61,29 +61,31 @@ func TestAccComputeV2Keypair_generatePrivate(t *testing.T) {
 	})
 }
 
-func testAccCheckComputeV2KeypairDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckComputeV2KeypairDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_compute_keypair_v2" {
-			continue
+		computeClient, err := config.ComputeV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
-		_, err := keypairs.Get(context.TODO(), computeClient, rs.Primary.ID, keypairs.GetOpts{}).Extract()
-		if err == nil {
-			return errors.New("Keypair still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_compute_keypair_v2" {
+				continue
+			}
 
-	return nil
+			_, err := keypairs.Get(ctx, computeClient, rs.Primary.ID, keypairs.GetOpts{}).Extract()
+			if err == nil {
+				return errors.New("Keypair still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckComputeV2KeypairExists(n string, kp *keypairs.KeyPair) resource.TestCheckFunc {
+func testAccCheckComputeV2KeypairExists(ctx context.Context, n string, kp *keypairs.KeyPair) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -96,12 +98,12 @@ func testAccCheckComputeV2KeypairExists(n string, kp *keypairs.KeyPair) resource
 
 		config := testAccProvider.Meta().(*Config)
 
-		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
+		computeClient, err := config.ComputeV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
-		found, err := keypairs.Get(context.TODO(), computeClient, rs.Primary.ID, keypairs.GetOpts{}).Extract()
+		found, err := keypairs.Get(ctx, computeClient, rs.Primary.ID, keypairs.GetOpts{}).Extract()
 		if err != nil {
 			return err
 		}

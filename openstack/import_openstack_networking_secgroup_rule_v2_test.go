@@ -15,7 +15,7 @@ func TestAccNetworkingV2SecGroupRule_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroupRuleBasic,

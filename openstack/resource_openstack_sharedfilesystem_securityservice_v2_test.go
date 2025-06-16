@@ -21,12 +21,12 @@ func TestAccSFSV2SecurityService_basic(t *testing.T) {
 			testAccPreCheckSFS(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSFSV2SecurityServiceDestroy,
+		CheckDestroy:      testAccCheckSFSV2SecurityServiceDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSV2SecurityServiceConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSFSV2SecurityServiceExists("openstack_sharedfilesystem_securityservice_v2.securityservice_1", &securityservice),
+					testAccCheckSFSV2SecurityServiceExists(t.Context(), "openstack_sharedfilesystem_securityservice_v2.securityservice_1", &securityservice),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_securityservice_v2.securityservice_1", "name", "security"),
 					resource.TestCheckResourceAttr(
@@ -50,7 +50,7 @@ func TestAccSFSV2SecurityService_basic(t *testing.T) {
 			{
 				Config: testAccSFSV2SecurityServiceConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSFSV2SecurityServiceExists("openstack_sharedfilesystem_securityservice_v2.securityservice_1", &securityservice),
+					testAccCheckSFSV2SecurityServiceExists(t.Context(), "openstack_sharedfilesystem_securityservice_v2.securityservice_1", &securityservice),
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_securityservice_v2.securityservice_1", "name", "security_through_obscurity"),
 					resource.TestCheckResourceAttr(
@@ -75,29 +75,31 @@ func TestAccSFSV2SecurityService_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckSFSV2SecurityServiceDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckSFSV2SecurityServiceDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_sharedfilesystem_securityservice_v2" {
-			continue
+		sfsClient, err := config.SharedfilesystemV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %w", err)
 		}
 
-		_, err := securityservices.Get(context.TODO(), sfsClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("Manila securityservice still exists: %s", rs.Primary.ID)
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_sharedfilesystem_securityservice_v2" {
+				continue
+			}
 
-	return nil
+			_, err := securityservices.Get(ctx, sfsClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return fmt.Errorf("Manila securityservice still exists: %s", rs.Primary.ID)
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckSFSV2SecurityServiceExists(n string, securityservice *securityservices.SecurityService) resource.TestCheckFunc {
+func testAccCheckSFSV2SecurityServiceExists(ctx context.Context, n string, securityservice *securityservices.SecurityService) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -110,12 +112,12 @@ func testAccCheckSFSV2SecurityServiceExists(n string, securityservice *securitys
 
 		config := testAccProvider.Meta().(*Config)
 
-		sfsClient, err := config.SharedfilesystemV2Client(context.TODO(), osRegionName)
+		sfsClient, err := config.SharedfilesystemV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack sharedfilesystem client: %w", err)
 		}
 
-		found, err := securityservices.Get(context.TODO(), sfsClient, rs.Primary.ID).Extract()
+		found, err := securityservices.Get(ctx, sfsClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

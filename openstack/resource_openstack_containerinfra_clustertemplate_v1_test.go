@@ -25,12 +25,12 @@ func TestAccContainerInfraV1ClusterTemplate_basic(t *testing.T) {
 			testAccPreCheckContainerInfra(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerInfraV1ClusterTemplateDestroy,
+		CheckDestroy:      testAccCheckContainerInfraV1ClusterTemplateDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerInfraV1ClusterTemplateBasic(clusterTemplateName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerInfraV1ClusterTemplateExists(resourceName, &clusterTemplate),
+					testAccCheckContainerInfraV1ClusterTemplateExists(t.Context(), resourceName, &clusterTemplate),
 					resource.TestCheckResourceAttr(resourceName, "region", osRegionName),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterTemplateName),
 					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
@@ -114,7 +114,7 @@ func TestAccContainerInfraV1ClusterTemplate_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckContainerInfraV1ClusterTemplateExists(n string, clustertemplate *clustertemplates.ClusterTemplate) resource.TestCheckFunc {
+func testAccCheckContainerInfraV1ClusterTemplateExists(ctx context.Context, n string, clustertemplate *clustertemplates.ClusterTemplate) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -127,12 +127,12 @@ func testAccCheckContainerInfraV1ClusterTemplateExists(n string, clustertemplate
 
 		config := testAccProvider.Meta().(*Config)
 
-		containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
+		containerInfraClient, err := config.ContainerInfraV1Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack container infra client: %w", err)
 		}
 
-		found, err := clustertemplates.Get(context.TODO(), containerInfraClient, rs.Primary.ID).Extract()
+		found, err := clustertemplates.Get(ctx, containerInfraClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -147,26 +147,28 @@ func testAccCheckContainerInfraV1ClusterTemplateExists(n string, clustertemplate
 	}
 }
 
-func testAccCheckContainerInfraV1ClusterTemplateDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckContainerInfraV1ClusterTemplateDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	containerInfraClient, err := config.ContainerInfraV1Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack container infra client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_containerinfra_clustertemplate_v1" {
-			continue
+		containerInfraClient, err := config.ContainerInfraV1Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack container infra client: %w", err)
 		}
 
-		_, err := clustertemplates.Get(context.TODO(), containerInfraClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Cluster template still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_containerinfra_clustertemplate_v1" {
+				continue
+			}
 
-	return nil
+			_, err := clustertemplates.Get(ctx, containerInfraClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Cluster template still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
 func testAccContainerInfraV1ClusterTemplateBasic(clusterTemplateName string) string {

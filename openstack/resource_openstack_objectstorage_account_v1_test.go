@@ -19,7 +19,7 @@ func TestAccObjectStorageV1Account_basic(t *testing.T) {
 			testAccPreCheckSwift(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckObjectStorageV1AccountDestroy,
+		CheckDestroy:      testAccCheckObjectStorageV1AccountDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObjectStorageV1AccountBasic,
@@ -54,7 +54,7 @@ func TestAccObjectStorageV1Account_quota(t *testing.T) {
 			t.Skip("Works only in selected environments")
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckObjectStorageV1AccountDestroy,
+		CheckDestroy:      testAccCheckObjectStorageV1AccountDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObjectStorageV1AccountQuota,
@@ -71,32 +71,34 @@ func TestAccObjectStorageV1Account_quota(t *testing.T) {
 	})
 }
 
-func testAccCheckObjectStorageV1AccountDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckObjectStorageV1AccountDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	objectStorageClient, err := config.ObjectStorageV1Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack object storage client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_objectstorage_account_v1" {
-			continue
-		}
-
-		res := accounts.Get(context.TODO(), objectStorageClient, nil)
-
-		metadata, err := res.ExtractMetadata()
+		objectStorageClient, err := config.ObjectStorageV1Client(ctx, osRegionName)
 		if err != nil {
-			return fmt.Errorf("failed to retrieve account metadata: %w", err)
+			return fmt.Errorf("Error creating OpenStack object storage client: %w", err)
 		}
 
-		if len(metadata) > 1 {
-			return errors.New("account metadata still exists")
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_objectstorage_account_v1" {
+				continue
+			}
+
+			res := accounts.Get(ctx, objectStorageClient, nil)
+
+			metadata, err := res.ExtractMetadata()
+			if err != nil {
+				return fmt.Errorf("failed to retrieve account metadata: %w", err)
+			}
+
+			if len(metadata) > 1 {
+				return errors.New("account metadata still exists")
+			}
 		}
+
+		return nil
 	}
-
-	return nil
 }
 
 const testAccObjectStorageV1AccountBasic = `

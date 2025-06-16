@@ -27,12 +27,12 @@ func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3RoleAssignmentDestroy,
+		CheckDestroy:      testAccCheckIdentityV3RoleAssignmentDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3RoleAssignmentBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3RoleAssignmentExists("openstack_identity_role_assignment_v3.role_assignment_1", &role, &user, &project),
+					testAccCheckIdentityV3RoleAssignmentExists(t.Context(), "openstack_identity_role_assignment_v3.role_assignment_1", &role, &user, &project),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_role_assignment_v3.role_assignment_1", "project_id", &project.ID),
 					resource.TestCheckResourceAttrPtr(
@@ -45,29 +45,31 @@ func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckIdentityV3RoleAssignmentDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckIdentityV3RoleAssignmentDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_identity_role_assignment_v3" {
-			continue
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		_, err := roles.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Role assignment still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_identity_role_assignment_v3" {
+				continue
+			}
 
-	return nil
+			_, err := roles.Get(ctx, identityClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Role assignment still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user *users.User, project *projects.Project) resource.TestCheckFunc {
+func testAccCheckIdentityV3RoleAssignmentExists(ctx context.Context, n string, role *roles.Role, user *users.User, project *projects.Project) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -80,7 +82,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 
 		config := testAccProvider.Meta().(*Config)
 
-		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
@@ -101,7 +103,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 
 		var assignment roles.RoleAssignment
 
-		err = pager.EachPage(context.TODO(), func(_ context.Context, page pagination.Page) (bool, error) {
+		err = pager.EachPage(ctx, func(_ context.Context, page pagination.Page) (bool, error) {
 			assignmentList, err := roles.ExtractRoleAssignments(page)
 			if err != nil {
 				return false, err
@@ -121,21 +123,21 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 			return err
 		}
 
-		p, err := projects.Get(context.TODO(), identityClient, assignment.Scope.Project.ID).Extract()
+		p, err := projects.Get(ctx, identityClient, assignment.Scope.Project.ID).Extract()
 		if err != nil {
 			return errors.New("Project not found")
 		}
 
 		*project = *p
 
-		u, err := users.Get(context.TODO(), identityClient, assignment.User.ID).Extract()
+		u, err := users.Get(ctx, identityClient, assignment.User.ID).Extract()
 		if err != nil {
 			return errors.New("User not found")
 		}
 
 		*user = *u
 
-		r, err := roles.Get(context.TODO(), identityClient, assignment.Role.ID).Extract()
+		r, err := roles.Get(ctx, identityClient, assignment.Role.ID).Extract()
 		if err != nil {
 			return errors.New("Role not found")
 		}

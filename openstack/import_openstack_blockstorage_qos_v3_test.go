@@ -15,7 +15,7 @@ func TestAccBlockStorageQosV3_importBasic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockStorageQosV3Destroy,
+		CheckDestroy:      testAccCheckBlockStorageQosV3Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageQosV3Basic,

@@ -14,7 +14,6 @@ func TestAccNetworkingV2QoSBandwidthLimitRuleDataSource_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
-			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{

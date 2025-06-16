@@ -15,7 +15,7 @@ func TestAccBlockStorageV3Volume_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV3VolumeBasic,
@@ -39,7 +39,7 @@ func TestAccBlockStorageV3Volume_importImage(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy,
+		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV3VolumeImage(),

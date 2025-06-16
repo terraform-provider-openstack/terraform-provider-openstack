@@ -15,7 +15,7 @@ func TestAccNetworkingV2Port_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2PortDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2PortBasic,
@@ -42,7 +42,7 @@ func TestAccNetworkingV2Port_importAllowedAddressPairs(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2PortDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2PortAllowedAddressPairs1,
@@ -69,7 +69,7 @@ func TestAccNetworkingV2Port_importAllowedAddressPairsNoMAC(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2PortDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2PortAllowedAddressPairsNoMAC,
@@ -96,7 +96,7 @@ func TestAccNetworkingV2Port_importDHCPOpts(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2PortDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2PortCreateExtraDhcpOpts,

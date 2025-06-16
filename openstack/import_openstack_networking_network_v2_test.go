@@ -15,7 +15,7 @@ func TestAccNetworkingV2Network_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkBasic,
@@ -39,7 +39,7 @@ func TestAccNetworkingV2Network_importSegments(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2NetworkMultipleSegmentMappings,

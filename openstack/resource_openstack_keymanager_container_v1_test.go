@@ -23,12 +23,12 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerV1Destroy,
+		CheckDestroy:      testAccCheckContainerV1Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerContainerV1Basic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerV1Exists(
+					testAccCheckContainerV1Exists(t.Context(),
 						"openstack_keymanager_container_v1.container_1", &container),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "name", &container.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "type", &container.Type),
@@ -38,7 +38,7 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 			{
 				Config: testAccKeyManagerContainerV1Update(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerV1Exists(
+					testAccCheckContainerV1Exists(t.Context(),
 						"openstack_keymanager_container_v1.container_1", &container),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "name", &container.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "type", &container.Type),
@@ -48,7 +48,7 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 			{
 				Config: testAccKeyManagerContainerV1Update1(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerV1Exists(
+					testAccCheckContainerV1Exists(t.Context(),
 						"openstack_keymanager_container_v1.container_1", &container),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "name", &container.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "type", &container.Type),
@@ -58,7 +58,7 @@ func TestAccKeyManagerContainerV1_basic(t *testing.T) {
 			{
 				Config: testAccKeyManagerContainerV1Update2(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerV1Exists(
+					testAccCheckContainerV1Exists(t.Context(),
 						"openstack_keymanager_container_v1.container_1", &container),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "name", &container.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "type", &container.Type),
@@ -79,12 +79,12 @@ func TestAccKeyManagerContainerV1_acls(t *testing.T) {
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSecretV1Destroy,
+		CheckDestroy:      testAccCheckSecretV1Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerContainerV1Acls(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerV1Exists(
+					testAccCheckContainerV1Exists(t.Context(),
 						"openstack_keymanager_container_v1.container_1", &container),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "name", &container.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "type", &container.Type),
@@ -107,12 +107,12 @@ func TestAccKeyManagerContainerV1_certificate_type(t *testing.T) {
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSecretV1Destroy,
+		CheckDestroy:      testAccCheckSecretV1Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerContainerV1CertificateType(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerV1Exists(
+					testAccCheckContainerV1Exists(t.Context(),
 						"openstack_keymanager_container_v1.container_1", &container),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "name", &container.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "type", &container.Type),
@@ -133,12 +133,12 @@ func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSecretV1Destroy,
+		CheckDestroy:      testAccCheckSecretV1Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerContainerV1Acls(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerV1Exists(
+					testAccCheckContainerV1Exists(t.Context(),
 						"openstack_keymanager_container_v1.container_1", &container),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "name", &container.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "type", &container.Type),
@@ -150,7 +150,7 @@ func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
 			{
 				Config: testAccKeyManagerContainerV1AclsUpdate(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerV1Exists(
+					testAccCheckContainerV1Exists(t.Context(),
 						"openstack_keymanager_container_v1.container_1", &container),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "name", &container.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_container_v1.container_1", "type", &container.Type),
@@ -163,33 +163,35 @@ func TestAccKeyManagerContainerV1_acls_update(t *testing.T) {
 	})
 }
 
-func testAccCheckContainerV1Destroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckContainerV1Destroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack KeyManager client: %w", err)
+		kmClient, err := config.KeyManagerV1Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack KeyManager client: %w", err)
+		}
+
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_keymanager_container" {
+				continue
+			}
+
+			_, err = containers.Get(ctx, kmClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return fmt.Errorf("Container (%s) still exists", rs.Primary.ID)
+			}
+
+			if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+				return err
+			}
+		}
+
+		return nil
 	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_keymanager_container" {
-			continue
-		}
-
-		_, err = containers.Get(context.TODO(), kmClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("Container (%s) still exists", rs.Primary.ID)
-		}
-
-		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
-			return err
-		}
-	}
-
-	return nil
 }
 
-func testAccCheckContainerV1Exists(n string, container *containers.Container) resource.TestCheckFunc {
+func testAccCheckContainerV1Exists(ctx context.Context, n string, container *containers.Container) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -202,14 +204,14 @@ func testAccCheckContainerV1Exists(n string, container *containers.Container) re
 
 		config := testAccProvider.Meta().(*Config)
 
-		kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
+		kmClient, err := config.KeyManagerV1Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack KeyManager client: %w", err)
 		}
 
 		var found *containers.Container
 
-		found, err = containers.Get(context.TODO(), kmClient, rs.Primary.ID).Extract()
+		found, err = containers.Get(ctx, kmClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

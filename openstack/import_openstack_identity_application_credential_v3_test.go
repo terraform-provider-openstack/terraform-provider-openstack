@@ -15,7 +15,7 @@ func TestAccIdentityV3ApplicationCredential_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3ApplicationCredentialDestroy,
+		CheckDestroy:      testAccCheckIdentityV3ApplicationCredentialDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3ApplicationCredentialBasic,
@@ -40,7 +40,7 @@ func TestAccIdentityV3ApplicationCredential_importCustomSecret(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3ApplicationCredentialDestroy,
+		CheckDestroy:      testAccCheckIdentityV3ApplicationCredentialDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3ApplicationCredentialCustomSecret,

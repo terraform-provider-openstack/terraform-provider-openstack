@@ -16,7 +16,7 @@ func TestAccDNSV2TransferRequest_importBasic(t *testing.T) {
 			testAccPreCheckDNS(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckDNSV2TransferRequestDestroy,
+		CheckDestroy:      testAccCheckDNSV2TransferRequestDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2TransferRequestBasic(zoneName),

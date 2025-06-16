@@ -16,7 +16,7 @@ func TestAccSFSV2ShareNetwork_importBasic(t *testing.T) {
 			testAccPreCheckSFS(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSFSV2ShareNetworkDestroy,
+		CheckDestroy:      testAccCheckSFSV2ShareNetworkDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSV2ShareNetworkConfigBasic(),

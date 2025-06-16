@@ -20,12 +20,12 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2SubnetDNSConsistency("openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "allocation_pool.0.start", "192.168.199.100"),
@@ -61,12 +61,12 @@ func TestAccNetworkingV2Subnet_enableDHCP(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetEnableDhcp,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "enable_dhcp", "true"),
 				),
@@ -84,12 +84,12 @@ func TestAccNetworkingV2Subnet_disableDHCP(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetDisableDhcp,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "enable_dhcp", "false"),
 				),
@@ -107,12 +107,12 @@ func TestAccNetworkingV2Subnet_noGateway(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetNoGateway,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "gateway_ip", ""),
 				),
@@ -130,12 +130,12 @@ func TestAccNetworkingV2Subnet_impliedGateway(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetImpliedGateway,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "gateway_ip", "192.168.199.1"),
 				),
@@ -153,12 +153,12 @@ func TestAccNetworkingV2Subnet_timeout(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
 				),
 			},
 		},
@@ -174,12 +174,12 @@ func TestAccNetworkingV2Subnet_subnetPool(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetPool,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
 				),
 			},
 		},
@@ -195,12 +195,12 @@ func TestAccNetworkingV2Subnet_subnetPoolNoCIDR(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetPoolNoCIDR,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
 				),
 			},
 		},
@@ -216,13 +216,13 @@ func TestAccNetworkingV2Subnet_subnetPrefixLength(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetPrefixLength,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet[0]),
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_2", &subnet[1]),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet[0]),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_2", &subnet[1]),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "prefix_length", "27"),
 					resource.TestCheckResourceAttr(
@@ -240,7 +240,7 @@ func TestAccNetworkingV2Subnet_multipleAllocationPools(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetMultipleAllocationPools1,
@@ -275,7 +275,7 @@ func TestAccNetworkingV2Subnet_multipleAllocationPools(t *testing.T) {
 //			testAccPreCheckNonAdminOnly(t)
 //		},
 //		ProviderFactories: testAccProviders,
-//		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+//		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy(t.Context()),
 //		Steps: []resource.TestStep{
 //			{
 //				Config: testAccNetworkingV2SubnetAllocationPool1,
@@ -316,12 +316,12 @@ func TestAccNetworkingV2Subnet_clearDNSNameservers(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetClearDNSNameservers1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2SubnetDNSConsistency("openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "dns_nameservers.#", "2"),
@@ -347,12 +347,12 @@ func TestAccNetworkingV2Subnet_ServiceTypes(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetServiceTypes,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2SubnetDNSConsistency("openstack_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_subnet_v2.subnet_1", "service_types.#", "1"),
@@ -369,29 +369,31 @@ func TestAccNetworkingV2Subnet_ServiceTypes(t *testing.T) {
 	})
 }
 
-func testAccCheckNetworkingV2SubnetDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckNetworkingV2SubnetDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_networking_subnet_v2" {
-			continue
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		_, err := subnets.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Subnet still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_networking_subnet_v2" {
+				continue
+			}
 
-	return nil
+			_, err := subnets.Get(ctx, networkingClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Subnet still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckNetworkingV2SubnetExists(n string, subnet *subnets.Subnet) resource.TestCheckFunc {
+func testAccCheckNetworkingV2SubnetExists(ctx context.Context, n string, subnet *subnets.Subnet) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -404,12 +406,12 @@ func testAccCheckNetworkingV2SubnetExists(n string, subnet *subnets.Subnet) reso
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		found, err := subnets.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+		found, err := subnets.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

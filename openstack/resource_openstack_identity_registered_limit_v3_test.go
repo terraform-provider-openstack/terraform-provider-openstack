@@ -21,12 +21,12 @@ func TestAccIdentityV3RegisteredLimit_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3RegisteredLimitDestroy,
+		CheckDestroy:      testAccCheckIdentityV3RegisteredLimitDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3RegisteredLimitBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3RegisteredLimitExists("openstack_identity_registered_limit_v3.limit_1", &service),
+					testAccCheckIdentityV3RegisteredLimitExists(t.Context(), "openstack_identity_registered_limit_v3.limit_1", &service),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_registered_limit_v3.limit_1", "service_id", &service.ID),
 					resource.TestCheckResourceAttr(
@@ -40,7 +40,7 @@ func TestAccIdentityV3RegisteredLimit_basic(t *testing.T) {
 			{
 				Config: testAccIdentityV3RegisteredLimitUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3RegisteredLimitExists("openstack_identity_registered_limit_v3.limit_1", &service),
+					testAccCheckIdentityV3RegisteredLimitExists(t.Context(), "openstack_identity_registered_limit_v3.limit_1", &service),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_registered_limit_v3.limit_1", "service_id", &service.ID),
 					resource.TestCheckResourceAttr(
@@ -55,29 +55,31 @@ func TestAccIdentityV3RegisteredLimit_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckIdentityV3RegisteredLimitDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckIdentityV3RegisteredLimitDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_identity_registered_limit_v3" {
-			continue
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		_, err := registeredlimits.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Registered limit still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_identity_registered_limit_v3" {
+				continue
+			}
 
-	return nil
+			_, err := registeredlimits.Get(ctx, identityClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Registered limit still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckIdentityV3RegisteredLimitExists(n string, service *services.Service) resource.TestCheckFunc {
+func testAccCheckIdentityV3RegisteredLimitExists(ctx context.Context, n string, service *services.Service) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -90,12 +92,12 @@ func testAccCheckIdentityV3RegisteredLimitExists(n string, service *services.Ser
 
 		config := testAccProvider.Meta().(*Config)
 
-		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		found, err := registeredlimits.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
+		found, err := registeredlimits.Get(ctx, identityClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -104,7 +106,7 @@ func testAccCheckIdentityV3RegisteredLimitExists(n string, service *services.Ser
 			return errors.New("Registered limit not found")
 		}
 
-		svc, err := services.Get(context.TODO(), identityClient, found.ServiceID).Extract()
+		svc, err := services.Get(ctx, identityClient, found.ServiceID).Extract()
 		if err != nil {
 			return fmt.Errorf("Error retrieving OpenStack service %s: %w", found.ServiceID, err)
 		}

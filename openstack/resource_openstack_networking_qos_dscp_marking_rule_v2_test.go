@@ -22,19 +22,18 @@ func TestAccNetworkingV2QoSDSCPMarkingRule_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
-			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2QoSDSCPMarkingRuleDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2QoSDSCPMarkingRuleDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2QoSDSCPMarkingRuleBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2QoSPolicyExists(
+					testAccCheckNetworkingV2QoSPolicyExists(t.Context(),
 						"openstack_networking_qos_policy_v2.qos_policy_1", &policy),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_qos_policy_v2.qos_policy_1", "name", "qos_policy_1"),
-					testAccCheckNetworkingV2QoSDSCPMarkingRuleExists(
+					testAccCheckNetworkingV2QoSDSCPMarkingRuleExists(t.Context(),
 						"openstack_networking_qos_dscp_marking_rule_v2.dscp_marking_rule_1", &rule),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_qos_dscp_marking_rule_v2.dscp_marking_rule_1", "dscp_mark", "26"),
@@ -43,11 +42,11 @@ func TestAccNetworkingV2QoSDSCPMarkingRule_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingV2QoSDSCPMarkingRuleUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2QoSPolicyExists(
+					testAccCheckNetworkingV2QoSPolicyExists(t.Context(),
 						"openstack_networking_qos_policy_v2.qos_policy_1", &policy),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_qos_policy_v2.qos_policy_1", "name", "qos_policy_1"),
-					testAccCheckNetworkingV2QoSDSCPMarkingRuleExists(
+					testAccCheckNetworkingV2QoSDSCPMarkingRuleExists(t.Context(),
 						"openstack_networking_qos_dscp_marking_rule_v2.dscp_marking_rule_1", &rule),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_qos_dscp_marking_rule_v2.dscp_marking_rule_1", "dscp_mark", "20"),
@@ -57,7 +56,7 @@ func TestAccNetworkingV2QoSDSCPMarkingRule_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckNetworkingV2QoSDSCPMarkingRuleExists(n string, rule *rules.DSCPMarkingRule) resource.TestCheckFunc {
+func testAccCheckNetworkingV2QoSDSCPMarkingRuleExists(ctx context.Context, n string, rule *rules.DSCPMarkingRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -70,7 +69,7 @@ func testAccCheckNetworkingV2QoSDSCPMarkingRuleExists(n string, rule *rules.DSCP
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
@@ -80,7 +79,7 @@ func testAccCheckNetworkingV2QoSDSCPMarkingRuleExists(n string, rule *rules.DSCP
 			return err
 		}
 
-		found, err := rules.GetDSCPMarkingRule(context.TODO(), networkingClient, qosPolicyID, qosRuleID).ExtractDSCPMarkingRule()
+		found, err := rules.GetDSCPMarkingRule(ctx, networkingClient, qosPolicyID, qosRuleID).ExtractDSCPMarkingRule()
 		if err != nil {
 			return err
 		}
@@ -97,31 +96,33 @@ func testAccCheckNetworkingV2QoSDSCPMarkingRuleExists(n string, rule *rules.DSCP
 	}
 }
 
-func testAccCheckNetworkingV2QoSDSCPMarkingRuleDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckNetworkingV2QoSDSCPMarkingRuleDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_networking_qos_dscp_marking_rule_v2" {
-			continue
-		}
-
-		qosPolicyID, qosRuleID, err := parsePairedIDs(rs.Primary.ID, "openstack_networking_qos_dscp_marking_rule_v2")
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		_, err = rules.GetDSCPMarkingRule(context.TODO(), networkingClient, qosPolicyID, qosRuleID).ExtractDSCPMarkingRule()
-		if err == nil {
-			return errors.New("QoS rule still exists")
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_networking_qos_dscp_marking_rule_v2" {
+				continue
+			}
+
+			qosPolicyID, qosRuleID, err := parsePairedIDs(rs.Primary.ID, "openstack_networking_qos_dscp_marking_rule_v2")
+			if err != nil {
+				return err
+			}
+
+			_, err = rules.GetDSCPMarkingRule(ctx, networkingClient, qosPolicyID, qosRuleID).ExtractDSCPMarkingRule()
+			if err == nil {
+				return errors.New("QoS rule still exists")
+			}
 		}
+
+		return nil
 	}
-
-	return nil
 }
 
 const testAccNetworkingV2QoSDSCPMarkingRuleBasic = `

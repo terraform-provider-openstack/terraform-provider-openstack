@@ -16,12 +16,12 @@ func TestAccNetworkingQuotaV2_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3ProjectDestroy,
+		CheckDestroy:      testAccCheckIdentityV3ProjectDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingQuotaV2Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_quota_v2.quota_1", "floatingip", "2"),
 					resource.TestCheckResourceAttr(
@@ -45,7 +45,7 @@ func TestAccNetworkingQuotaV2_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingQuotaV2Update1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_quota_v2.quota_1", "floatingip", "3"),
 					resource.TestCheckResourceAttr(
@@ -69,7 +69,7 @@ func TestAccNetworkingQuotaV2_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingQuotaV2Update2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_quota_v2.quota_1", "floatingip", "2"),
 					resource.TestCheckResourceAttr(

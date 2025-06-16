@@ -16,7 +16,7 @@ func TestAccKeyManagerOrderV1_importBasic(t *testing.T) {
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckOrderV1Destroy,
+		CheckDestroy:      testAccCheckOrderV1Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerOrderV1Symmetric,

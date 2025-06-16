@@ -23,12 +23,12 @@ func TestAccKeyManagerSecretV1_basic(t *testing.T) {
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSecretV1Destroy,
+		CheckDestroy:      testAccCheckSecretV1Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerSecretV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSecretV1Exists(
+					testAccCheckSecretV1Exists(t.Context(),
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
@@ -49,12 +49,12 @@ func TestAccKeyManagerSecretV1_basicWithMetadata(t *testing.T) {
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSecretV1Destroy,
+		CheckDestroy:      testAccCheckSecretV1Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerSecretV1BasicWithMetadata,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSecretV1Exists(
+					testAccCheckSecretV1Exists(t.Context(),
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
@@ -75,28 +75,28 @@ func TestAccKeyManagerSecretV1_updateMetadata(t *testing.T) {
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSecretV1Destroy,
+		CheckDestroy:      testAccCheckSecretV1Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerSecretV1BasicWithMetadata,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSecretV1Exists(
+					testAccCheckSecretV1Exists(t.Context(),
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
 					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "payload", "foobar"),
-					testAccCheckMetadataEquals("foo", "bar", &secret),
+					testAccCheckMetadataEquals(t.Context(), "foo", "bar", &secret),
 				),
 			},
 			{
 				Config: testAccKeyManagerSecretV1UpdateMetadata,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSecretV1Exists(
+					testAccCheckSecretV1Exists(t.Context(),
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
 					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "payload", "foobar"),
-					testAccCheckMetadataEquals("foo", "update", &secret),
+					testAccCheckMetadataEquals(t.Context(), "foo", "update", &secret),
 				),
 			},
 		},
@@ -113,39 +113,39 @@ func TestAccKeyManagerSecretV1_updatePayload(t *testing.T) {
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSecretV1Destroy,
+		CheckDestroy:      testAccCheckSecretV1Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerSecretV1Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSecretV1Exists(
+					testAccCheckSecretV1Exists(t.Context(),
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
 					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "payload", "updatedfoobar"),
-					testAccCheckPayloadEquals("updatedfoobar", &secret),
+					testAccCheckPayloadEquals(t.Context(), "updatedfoobar", &secret),
 				),
 			},
 			{
 				Config: testAccKeyManagerSecretV1UpdateWhitespace,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSecretV1Exists(
+					testAccCheckSecretV1Exists(t.Context(),
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
 					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "payload", "updatedfoobar"),
-					testAccCheckPayloadEquals("updatedfoobar", &secret),
+					testAccCheckPayloadEquals(t.Context(), "updatedfoobar", &secret),
 				),
 			},
 			{
 				Config: testAccKeyManagerSecretV1UpdateBase64,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSecretV1Exists(
+					testAccCheckSecretV1Exists(t.Context(),
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
 					resource.TestCheckResourceAttr("openstack_keymanager_secret_v1.secret_1", "payload", "cDOycRBFnh4="),
-					testAccCheckPayloadEquals("p3\xb2q\x10E\x9e\x1e", &secret),
+					testAccCheckPayloadEquals(t.Context(), "p3\xb2q\x10E\x9e\x1e", &secret),
 				),
 			},
 		},
@@ -162,12 +162,12 @@ func TestAccKeyManagerSecretV1_acls(t *testing.T) {
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSecretV1Destroy,
+		CheckDestroy:      testAccCheckSecretV1Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerSecretV1Acls,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSecretV1Exists(
+					testAccCheckSecretV1Exists(t.Context(),
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
@@ -191,12 +191,12 @@ func TestAccKeyManagerSecretV1_acls_update(t *testing.T) {
 			testAccPreCheckKeyManager(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSecretV1Destroy,
+		CheckDestroy:      testAccCheckSecretV1Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerSecretV1Acls,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSecretV1Exists(
+					testAccCheckSecretV1Exists(t.Context(),
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
@@ -209,7 +209,7 @@ func TestAccKeyManagerSecretV1_acls_update(t *testing.T) {
 			{
 				Config: testAccKeyManagerSecretV1AclsUpdate1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSecretV1Exists(
+					testAccCheckSecretV1Exists(t.Context(),
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
@@ -222,7 +222,7 @@ func TestAccKeyManagerSecretV1_acls_update(t *testing.T) {
 			{
 				Config: testAccKeyManagerSecretV1AclsUpdate2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSecretV1Exists(
+					testAccCheckSecretV1Exists(t.Context(),
 						"openstack_keymanager_secret_v1.secret_1", &secret),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "name", &secret.Name),
 					resource.TestCheckResourceAttrPtr("openstack_keymanager_secret_v1.secret_1", "secret_type", &secret.SecretType),
@@ -236,33 +236,35 @@ func TestAccKeyManagerSecretV1_acls_update(t *testing.T) {
 	})
 }
 
-func testAccCheckSecretV1Destroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckSecretV1Destroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack KeyManager client: %w", err)
+		kmClient, err := config.KeyManagerV1Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack KeyManager client: %w", err)
+		}
+
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_keymanager_secret" {
+				continue
+			}
+
+			_, err = secrets.Get(ctx, kmClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return fmt.Errorf("Secret (%s) still exists", rs.Primary.ID)
+			}
+
+			if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+				return err
+			}
+		}
+
+		return nil
 	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_keymanager_secret" {
-			continue
-		}
-
-		_, err = secrets.Get(context.TODO(), kmClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("Secret (%s) still exists", rs.Primary.ID)
-		}
-
-		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
-			return err
-		}
-	}
-
-	return nil
 }
 
-func testAccCheckSecretV1Exists(n string, secret *secrets.Secret) resource.TestCheckFunc {
+func testAccCheckSecretV1Exists(ctx context.Context, n string, secret *secrets.Secret) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -275,14 +277,14 @@ func testAccCheckSecretV1Exists(n string, secret *secrets.Secret) resource.TestC
 
 		config := testAccProvider.Meta().(*Config)
 
-		kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
+		kmClient, err := config.KeyManagerV1Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack KeyManager client: %w", err)
 		}
 
 		var found *secrets.Secret
 
-		found, err = secrets.Get(context.TODO(), kmClient, rs.Primary.ID).Extract()
+		found, err = secrets.Get(ctx, kmClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -293,11 +295,11 @@ func testAccCheckSecretV1Exists(n string, secret *secrets.Secret) resource.TestC
 	}
 }
 
-func testAccCheckPayloadEquals(payload string, secret *secrets.Secret) resource.TestCheckFunc {
+func testAccCheckPayloadEquals(ctx context.Context, payload string, secret *secrets.Secret) resource.TestCheckFunc {
 	return func(_ *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
 
-		kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
+		kmClient, err := config.KeyManagerV1Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack KeyManager client: %w", err)
 		}
@@ -308,7 +310,7 @@ func testAccCheckPayloadEquals(payload string, secret *secrets.Secret) resource.
 
 		uuid := keyManagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
 
-		secretPayload, _ := secrets.GetPayload(context.TODO(), kmClient, uuid, opts).Extract()
+		secretPayload, _ := secrets.GetPayload(ctx, kmClient, uuid, opts).Extract()
 		if string(secretPayload) != payload {
 			return fmt.Errorf("Payloads do not match. Expected %s but got %s", payload, secretPayload)
 		}
@@ -317,18 +319,18 @@ func testAccCheckPayloadEquals(payload string, secret *secrets.Secret) resource.
 	}
 }
 
-func testAccCheckMetadataEquals(key string, value string, secret *secrets.Secret) resource.TestCheckFunc {
+func testAccCheckMetadataEquals(ctx context.Context, key string, value string, secret *secrets.Secret) resource.TestCheckFunc {
 	return func(_ *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
 
-		kmClient, err := config.KeyManagerV1Client(context.TODO(), osRegionName)
+		kmClient, err := config.KeyManagerV1Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		uuid := keyManagerSecretV1GetUUIDfromSecretRef(secret.SecretRef)
 
-		metadatum, err := secrets.GetMetadatum(context.TODO(), kmClient, uuid, key).Extract()
+		metadatum, err := secrets.GetMetadatum(ctx, kmClient, uuid, key).Extract()
 		if err != nil {
 			return err
 		}

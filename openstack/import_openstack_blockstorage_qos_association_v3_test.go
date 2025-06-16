@@ -20,7 +20,7 @@ func TestAccBlockStorageV3QosAssociation_importBasic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockstorageV3QosAssociationDestroy,
+		CheckDestroy:      testAccCheckBlockstorageV3QosAssociationDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockstorageV3QosAssociationBasic(qosName, vtName),

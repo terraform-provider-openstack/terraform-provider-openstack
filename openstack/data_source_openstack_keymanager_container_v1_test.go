@@ -13,7 +13,7 @@ func TestAccKeyManagerContainerV1DataSource_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerV1Destroy,
+		CheckDestroy:      testAccCheckContainerV1Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerContainerV1DataSourceBasic,
@@ -39,7 +39,7 @@ func TestAccKeyManagerContainerV1DataSource_acls(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerV1Destroy,
+		CheckDestroy:      testAccCheckContainerV1Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKeyManagerContainerV1DataSourceAcls,

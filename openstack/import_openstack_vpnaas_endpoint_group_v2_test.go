@@ -16,7 +16,7 @@ func TestAccEndpointGroup_importBasic(t *testing.T) {
 			testAccPreCheckVPN(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckEndpointGroupV2Destroy,
+		CheckDestroy:      testAccCheckEndpointGroupV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEndpointGroupV2Basic,

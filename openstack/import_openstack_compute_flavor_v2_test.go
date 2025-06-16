@@ -18,7 +18,7 @@ func TestAccComputeV2Flavor_importBasic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2FlavorDestroy,
+		CheckDestroy:      testAccCheckComputeV2FlavorDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2FlavorBasic(flavorName),
