@@ -20,12 +20,12 @@ func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
+		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2VolumeAttachBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2VolumeAttachExists("openstack_compute_volume_attach_v2.va_1", &va),
+					testAccCheckComputeV2VolumeAttachExists(t.Context(), "openstack_compute_volume_attach_v2.va_1", &va),
 				),
 			},
 		},
@@ -41,12 +41,12 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
+		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2VolumeAttachDevice(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2VolumeAttachExists("openstack_compute_volume_attach_v2.va_1", &va),
+					testAccCheckComputeV2VolumeAttachExists(t.Context(), "openstack_compute_volume_attach_v2.va_1", &va),
 					testAccCheckComputeV2VolumeAttachDevice(&va, "/dev/vdc"),
 				),
 			},
@@ -63,46 +63,48 @@ func TestAccComputeV2VolumeAttach_ignore_volume_confirmation(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
+		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2VolumeAttachIgnoreVolumeConfirmation(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2VolumeAttachExists("openstack_compute_volume_attach_v2.va_1", &va),
+					testAccCheckComputeV2VolumeAttachExists(t.Context(), "openstack_compute_volume_attach_v2.va_1", &va),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckComputeV2VolumeAttachDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckComputeV2VolumeAttachDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_compute_volume_attach_v2" {
-			continue
-		}
-
-		instanceID, volumeID, err := parsePairedIDs(rs.Primary.ID, "openstack_compute_volume_attach_v2")
+		computeClient, err := config.ComputeV2Client(ctx, osRegionName)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
-		_, err = volumeattach.Get(context.TODO(), computeClient, instanceID, volumeID).Extract()
-		if err == nil {
-			return errors.New("Volume attachment still exists")
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_compute_volume_attach_v2" {
+				continue
+			}
+
+			instanceID, volumeID, err := parsePairedIDs(rs.Primary.ID, "openstack_compute_volume_attach_v2")
+			if err != nil {
+				return err
+			}
+
+			_, err = volumeattach.Get(ctx, computeClient, instanceID, volumeID).Extract()
+			if err == nil {
+				return errors.New("Volume attachment still exists")
+			}
 		}
+
+		return nil
 	}
-
-	return nil
 }
 
-func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAttachment) resource.TestCheckFunc {
+func testAccCheckComputeV2VolumeAttachExists(ctx context.Context, n string, va *volumeattach.VolumeAttachment) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -115,7 +117,7 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 
 		config := testAccProvider.Meta().(*Config)
 
-		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
+		computeClient, err := config.ComputeV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
@@ -125,7 +127,7 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 			return err
 		}
 
-		found, err := volumeattach.Get(context.TODO(), computeClient, instanceID, volumeID).Extract()
+		found, err := volumeattach.Get(ctx, computeClient, instanceID, volumeID).Extract()
 		if err != nil {
 			return err
 		}

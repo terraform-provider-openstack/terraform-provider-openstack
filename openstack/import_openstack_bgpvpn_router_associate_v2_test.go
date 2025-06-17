@@ -16,7 +16,7 @@ func TestAccBGPVPNRouterAssociateV2_Import(t *testing.T) {
 			testAccPreCheckBGPVPN(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBGPVPNRouterAssociateV2Destroy,
+		CheckDestroy:      testAccCheckBGPVPNRouterAssociateV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBGPVPNRouterAssociateV2Config,

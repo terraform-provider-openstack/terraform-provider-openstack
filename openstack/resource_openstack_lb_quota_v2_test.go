@@ -17,12 +17,12 @@ func TestAccLBQuotaV2_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3ProjectDestroy,
+		CheckDestroy:      testAccCheckIdentityV3ProjectDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLBQuotaV2Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_quota_v2.quota_1", "loadbalancer", "1"),
 					resource.TestCheckResourceAttr(
@@ -42,7 +42,7 @@ func TestAccLBQuotaV2_basic(t *testing.T) {
 			{
 				Config: testAccLBQuotaV2Update1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_quota_v2.quota_1", "loadbalancer", "6"),
 					resource.TestCheckResourceAttr(
@@ -62,7 +62,7 @@ func TestAccLBQuotaV2_basic(t *testing.T) {
 			{
 				Config: testAccLBQuotaV2Update2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_1", &project),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_quota_v2.quota_1", "loadbalancer", "11"),
 					resource.TestCheckResourceAttr(

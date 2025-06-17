@@ -20,12 +20,12 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckImagesImageV2Destroy,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "name", "Rancher TerraformAccTest"),
 					resource.TestCheckResourceAttr(
@@ -39,7 +39,7 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 			{
 				Config: testAccImagesImageV2BasicWithID,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "name", "Rancher TerraformAccTest"),
 					resource.TestCheckResourceAttr(
@@ -55,7 +55,7 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 			{
 				Config: testAccImagesImageV2BasicHidden,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "name", "Rancher TerraformAccTest"),
 					resource.TestCheckResourceAttr(
@@ -81,12 +81,12 @@ func TestAccImagesImageV2_name(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckImagesImageV2Destroy,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2Name1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "name", "Rancher TerraformAccTest"),
 				),
@@ -94,7 +94,7 @@ func TestAccImagesImageV2_name(t *testing.T) {
 			{
 				Config: testAccImagesImageV2Name2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "name", "TerraformAccTest Rancher"),
 				),
@@ -112,34 +112,34 @@ func TestAccImagesImageV2_tags(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckImagesImageV2Destroy,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2Tags1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
-					testAccCheckImagesImageV2HasTag("openstack_images_image_v2.image_1", "foo"),
-					testAccCheckImagesImageV2HasTag("openstack_images_image_v2.image_1", "bar"),
-					testAccCheckImagesImageV2TagCount("openstack_images_image_v2.image_1", 2),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image),
+					testAccCheckImagesImageV2HasTag(t.Context(), "openstack_images_image_v2.image_1", "foo"),
+					testAccCheckImagesImageV2HasTag(t.Context(), "openstack_images_image_v2.image_1", "bar"),
+					testAccCheckImagesImageV2TagCount(t.Context(), "openstack_images_image_v2.image_1", 2),
 				),
 			},
 			{
 				Config: testAccImagesImageV2Tags2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
-					testAccCheckImagesImageV2HasTag("openstack_images_image_v2.image_1", "foo"),
-					testAccCheckImagesImageV2HasTag("openstack_images_image_v2.image_1", "bar"),
-					testAccCheckImagesImageV2HasTag("openstack_images_image_v2.image_1", "baz"),
-					testAccCheckImagesImageV2TagCount("openstack_images_image_v2.image_1", 3),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image),
+					testAccCheckImagesImageV2HasTag(t.Context(), "openstack_images_image_v2.image_1", "foo"),
+					testAccCheckImagesImageV2HasTag(t.Context(), "openstack_images_image_v2.image_1", "bar"),
+					testAccCheckImagesImageV2HasTag(t.Context(), "openstack_images_image_v2.image_1", "baz"),
+					testAccCheckImagesImageV2TagCount(t.Context(), "openstack_images_image_v2.image_1", 3),
 				),
 			},
 			{
 				Config: testAccImagesImageV2Tags3,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
-					testAccCheckImagesImageV2HasTag("openstack_images_image_v2.image_1", "foo"),
-					testAccCheckImagesImageV2HasTag("openstack_images_image_v2.image_1", "baz"),
-					testAccCheckImagesImageV2TagCount("openstack_images_image_v2.image_1", 2),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image),
+					testAccCheckImagesImageV2HasTag(t.Context(), "openstack_images_image_v2.image_1", "foo"),
+					testAccCheckImagesImageV2HasTag(t.Context(), "openstack_images_image_v2.image_1", "baz"),
+					testAccCheckImagesImageV2TagCount(t.Context(), "openstack_images_image_v2.image_1", 2),
 				),
 			},
 		},
@@ -155,12 +155,12 @@ func TestAccImagesImageV2_visibility(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckImagesImageV2Destroy,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2Visibility1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "visibility", "private"),
 				),
@@ -168,7 +168,7 @@ func TestAccImagesImageV2_visibility(t *testing.T) {
 			{
 				Config: testAccImagesImageV2Visibility2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "visibility", "public"),
 				),
@@ -194,12 +194,12 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckImagesImageV2Destroy,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image1),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image1),
 					resource.TestCheckResourceAttrSet(
 						"openstack_images_image_v2.image_1", "properties.os_hash_value"),
 				),
@@ -207,7 +207,7 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 			{
 				Config: testAccImagesImageV2Properties1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image2),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image2),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "properties.foo", "bar"),
 					resource.TestCheckResourceAttr(
@@ -219,7 +219,7 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 			{
 				Config: testAccImagesImageV2Properties2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image3),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image3),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "properties.foo", "bar"),
 					resource.TestCheckResourceAttrSet(
@@ -229,7 +229,7 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 			{
 				Config: testAccImagesImageV2Properties3,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image4),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image4),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "properties.foo", "baz"),
 					resource.TestCheckResourceAttrSet(
@@ -239,7 +239,7 @@ func TestAccImagesImageV2_properties(t *testing.T) {
 			{
 				Config: testAccImagesImageV2Properties4,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image5),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image5),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "properties.foo", "baz"),
 					resource.TestCheckResourceAttr(
@@ -263,12 +263,12 @@ func TestAccImagesImageV2_webdownload(t *testing.T) {
 			t.Skip("OpenStack dev env seems to not support web-download anymore")
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckImagesImageV2Destroy,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2Webdownload,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_1", &image),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
 						"openstack_images_image_v2.image_1", "name", "Rancher TerraformAccTest"),
 					resource.TestCheckResourceAttr(
@@ -292,12 +292,12 @@ func TestAccImagesImageV2_decompress_xz(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckImagesImageV2Destroy,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2DecompressOctetStreamXZ,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_xz", &image),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_xz", &image),
 				),
 			},
 		},
@@ -313,41 +313,43 @@ func TestAccImagesImageV2_decompress_zst(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckImagesImageV2Destroy,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2DecompressOctetStreamZST,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageV2Exists("openstack_images_image_v2.image_zst", &image),
+					testAccCheckImagesImageV2Exists(t.Context(), "openstack_images_image_v2.image_zst", &image),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckImagesImageV2Destroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckImagesImageV2Destroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	imageClient, err := config.ImageV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Image: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_images_image_v2" {
-			continue
+		imageClient, err := config.ImageV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack Image: %w", err)
 		}
 
-		_, err := images.Get(context.TODO(), imageClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Image still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_images_image_v2" {
+				continue
+			}
 
-	return nil
+			_, err := images.Get(ctx, imageClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Image still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckImagesImageV2Exists(n string, image *images.Image) resource.TestCheckFunc {
+func testAccCheckImagesImageV2Exists(ctx context.Context, n string, image *images.Image) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -360,12 +362,12 @@ func testAccCheckImagesImageV2Exists(n string, image *images.Image) resource.Tes
 
 		config := testAccProvider.Meta().(*Config)
 
-		imageClient, err := config.ImageV2Client(context.TODO(), osRegionName)
+		imageClient, err := config.ImageV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack Image: %w", err)
 		}
 
-		found, err := images.Get(context.TODO(), imageClient, rs.Primary.ID).Extract()
+		found, err := images.Get(ctx, imageClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -380,7 +382,7 @@ func testAccCheckImagesImageV2Exists(n string, image *images.Image) resource.Tes
 	}
 }
 
-func testAccCheckImagesImageV2HasTag(n, tag string) resource.TestCheckFunc {
+func testAccCheckImagesImageV2HasTag(ctx context.Context, n, tag string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -393,12 +395,12 @@ func testAccCheckImagesImageV2HasTag(n, tag string) resource.TestCheckFunc {
 
 		config := testAccProvider.Meta().(*Config)
 
-		imageClient, err := config.ImageV2Client(context.TODO(), osRegionName)
+		imageClient, err := config.ImageV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack Image: %w", err)
 		}
 
-		found, err := images.Get(context.TODO(), imageClient, rs.Primary.ID).Extract()
+		found, err := images.Get(ctx, imageClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -417,7 +419,7 @@ func testAccCheckImagesImageV2HasTag(n, tag string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckImagesImageV2TagCount(n string, expected int) resource.TestCheckFunc {
+func testAccCheckImagesImageV2TagCount(ctx context.Context, n string, expected int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -430,12 +432,12 @@ func testAccCheckImagesImageV2TagCount(n string, expected int) resource.TestChec
 
 		config := testAccProvider.Meta().(*Config)
 
-		imageClient, err := config.ImageV2Client(context.TODO(), osRegionName)
+		imageClient, err := config.ImageV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack Image: %w", err)
 		}
 
-		found, err := images.Get(context.TODO(), imageClient, rs.Primary.ID).Extract()
+		found, err := images.Get(ctx, imageClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

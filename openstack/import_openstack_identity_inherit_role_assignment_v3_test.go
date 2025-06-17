@@ -15,7 +15,7 @@ func TestAccIdentityV3InheritRoleAssignment_importBasic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3InheritRoleAssignmentDestroy,
+		CheckDestroy:      testAccCheckIdentityV3InheritRoleAssignmentDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3InheritRoleAssignmentBasic,

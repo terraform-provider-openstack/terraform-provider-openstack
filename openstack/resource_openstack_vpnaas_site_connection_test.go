@@ -25,12 +25,12 @@ func TestAccSiteConnectionVPNaaSV2_basic(t *testing.T) {
 			t.Skip("Currently failing in GH-A")
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSiteConnectionV2Destroy,
+		CheckDestroy:      testAccCheckSiteConnectionV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSiteConnectionV2Basic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSiteConnectionV2Exists(
+					testAccCheckSiteConnectionV2Exists(t.Context(),
 						"openstack_vpnaas_site_connection_v2.conn_1", &conn),
 					resource.TestCheckResourceAttrPtr("openstack_vpnaas_site_connection_v2.conn_1", "ikepolicy_id", &conn.IKEPolicyID),
 					resource.TestCheckResourceAttr("openstack_vpnaas_site_connection_v2.conn_1", "admin_state_up", strconv.FormatBool(conn.AdminStateUp)),
@@ -50,33 +50,35 @@ func TestAccSiteConnectionVPNaaSV2_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckSiteConnectionV2Destroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckSiteConnectionV2Destroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
+		}
+
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_vpnaas_site_connection_v2" {
+				continue
+			}
+
+			_, err = siteconnections.Get(ctx, networkingClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return fmt.Errorf("Site connection (%s) still exists", rs.Primary.ID)
+			}
+
+			if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+				return err
+			}
+		}
+
+		return nil
 	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_vpnaas_site_connection_v2" {
-			continue
-		}
-
-		_, err = siteconnections.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("Site connection (%s) still exists", rs.Primary.ID)
-		}
-
-		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
-			return err
-		}
-	}
-
-	return nil
 }
 
-func testAccCheckSiteConnectionV2Exists(n string, conn *siteconnections.Connection) resource.TestCheckFunc {
+func testAccCheckSiteConnectionV2Exists(ctx context.Context, n string, conn *siteconnections.Connection) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -89,14 +91,14 @@ func testAccCheckSiteConnectionV2Exists(n string, conn *siteconnections.Connecti
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		var found *siteconnections.Connection
 
-		found, err = siteconnections.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+		found, err = siteconnections.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

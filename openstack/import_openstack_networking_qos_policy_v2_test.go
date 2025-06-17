@@ -13,10 +13,9 @@ func TestAccNetworkingV2QoSPolicyImportBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
-			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2QoSPolicyDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2QoSPolicyDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2QoSPolicyBasic,

@@ -29,7 +29,7 @@ func TestAccOpenStackObjectStorageTempurlV1_basic(t *testing.T) {
 				Config: testAccOpenStackObjectstorageTempurlV1ResourceBasic(containerName, objectName, "get", ttl),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObjectstorageTempurlV1ResourceID("openstack_objectstorage_tempurl_v1.tempurl_1"),
-					testAccCheckObjectstorageTempurlV1Get("openstack_objectstorage_tempurl_v1.tempurl_1"),
+					testAccCheckObjectstorageTempurlV1Get(t.Context(), "openstack_objectstorage_tempurl_v1.tempurl_1"),
 					resource.TestCheckResourceAttr(
 						"openstack_objectstorage_tempurl_v1.tempurl_1", "method", "get"),
 					resource.TestCheckResourceAttr(
@@ -74,7 +74,7 @@ func testAccCheckObjectstorageTempurlV1ResourceID(n string) resource.TestCheckFu
 	}
 }
 
-func testAccCheckObjectstorageTempurlV1Get(n string) resource.TestCheckFunc {
+func testAccCheckObjectstorageTempurlV1Get(ctx context.Context, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -91,14 +91,14 @@ func testAccCheckObjectstorageTempurlV1Get(n string) resource.TestCheckFunc {
 			return errors.New("Temp URL is not set")
 		}
 
-		httpClient := &http.Client{}
+		config := testAccProvider.Meta().(*Config)
 
-		req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, url, nil)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 		if err != nil {
 			return fmt.Errorf("Failed to create request for tempurl: %s", url)
 		}
 
-		resp, err := httpClient.Do(req)
+		resp, err := config.OsClient.HTTPClient.Do(req)
 		if err != nil {
 			return fmt.Errorf("Failed to retrieve tempurl: %s", url)
 		}

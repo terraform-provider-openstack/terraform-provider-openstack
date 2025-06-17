@@ -15,7 +15,7 @@ func TestAccNetworkingV2AddressGroup_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2AddressGroupDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2AddressGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2AddressGroupBasic,

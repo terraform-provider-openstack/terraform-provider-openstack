@@ -19,7 +19,7 @@ func TestAccSFSV2ShareAccess_importBasic(t *testing.T) {
 			testAccPreCheckSFS(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSFSV2ShareAccessDestroy,
+		CheckDestroy:      testAccCheckSFSV2ShareAccessDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSV2ShareAccessConfigBasic(),

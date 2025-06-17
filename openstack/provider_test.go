@@ -256,69 +256,6 @@ func testAccPreCheckHypervisor(t *testing.T) {
 	}
 }
 
-// testAccSkipReleasesBelow will have the test be skipped on releases below a certain
-// one. Releases are named such as 'stable/mitaka', master, etc.
-func testAccSkipReleasesBelow(t *testing.T, release string) {
-	currentBranch := os.Getenv("OS_BRANCH")
-
-	if IsReleasesBelow(t, release) {
-		t.Skipf("this is not supported below %s, testing in %s", release, currentBranch)
-	}
-}
-
-// IsReleasesBelow will return true on releases below a certain
-// one. Releases are named such as 'stable/mitaka', master, etc.
-func IsReleasesBelow(t *testing.T, release string) bool {
-	currentBranch := os.Getenv("OS_BRANCH")
-
-	if SetReleaseNumber(t, currentBranch) < SetReleaseNumber(t, release) {
-		return true
-	}
-
-	t.Logf("Target release %s is above the current branch %s", release, currentBranch)
-
-	return false
-}
-
-// IsReleasesAbove will return true on releases above a certain
-// one. The result is always true on master release. Releases are named such
-// as 'stable/mitaka', master, etc.
-func IsReleasesAbove(t *testing.T, release string) bool {
-	currentBranch := os.Getenv("OS_BRANCH")
-
-	// Assume master is always too new
-	if SetReleaseNumber(t, currentBranch) > SetReleaseNumber(t, release) {
-		return true
-	}
-
-	t.Logf("Target release %s is below the current branch %s", release, currentBranch)
-
-	return false
-}
-
-// SetReleaseNumber returns a number based on the release.
-// This is to allow comparing between releases as with the
-// 2023.1(antelope) release simple string comparisons are
-// not possible.
-func SetReleaseNumber(t *testing.T, release string) int {
-	switch release {
-	case "stable/zed":
-		return 1
-	case "stable/2023.1":
-		return 2
-	case "stable/2023.2":
-		return 3
-	case "stable/2024.1":
-		return 4
-	case "master":
-		return 5
-	default:
-		t.Logf("Release %s is not within the known/expected releases", release)
-
-		return 0
-	}
-}
-
 func TestUnitProvider(t *testing.T) {
 	if err := Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
@@ -483,7 +420,12 @@ func envVarFile(varName string) (string, error) {
 	return tmpFile.Name(), nil
 }
 
-func testAccAuthFromEnv() (*Config, error) {
+func testAccAuthFromEnv(ctx context.Context) (*Config, error) {
+	// If the provider has already been configured, return the existing config.
+	if v, ok := testAccProvider.Meta().(*Config); ok {
+		return v, nil
+	}
+
 	tenantID := os.Getenv("OS_TENANT_ID")
 	if tenantID == "" {
 		tenantID = os.Getenv("OS_PROJECT_ID")
@@ -531,7 +473,7 @@ func testAccAuthFromEnv() (*Config, error) {
 		},
 	}
 
-	if err := config.LoadAndValidate(context.TODO()); err != nil {
+	if err := config.LoadAndValidate(ctx); err != nil {
 		return nil, err
 	}
 

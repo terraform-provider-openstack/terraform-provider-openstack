@@ -18,7 +18,7 @@ func TestAccNetworkingV2_tags(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2ConfigCreate(),

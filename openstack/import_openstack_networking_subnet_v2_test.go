@@ -15,7 +15,7 @@ func TestAccNetworkingV2Subnet_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetBasic,

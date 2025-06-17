@@ -20,12 +20,12 @@ func TestAccBlockStorageQosV3_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockStorageQosV3Destroy,
+		CheckDestroy:      testAccCheckBlockStorageQosV3Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageQosV3Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageQosV3Exists("openstack_blockstorage_qos_v3.qos", &qosTest),
+					testAccCheckBlockStorageQosV3Exists(t.Context(), "openstack_blockstorage_qos_v3.qos", &qosTest),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_qos_v3.qos", "name", "foo"),
 					resource.TestCheckResourceAttr(
@@ -39,7 +39,7 @@ func TestAccBlockStorageQosV3_basic(t *testing.T) {
 			{
 				Config: testAccBlockStorageQosV3Update1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageQosV3Exists("openstack_blockstorage_qos_v3.qos", &qosTest),
+					testAccCheckBlockStorageQosV3Exists(t.Context(), "openstack_blockstorage_qos_v3.qos", &qosTest),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_qos_v3.qos", "name", "foo"),
 					resource.TestCheckResourceAttr(
@@ -55,7 +55,7 @@ func TestAccBlockStorageQosV3_basic(t *testing.T) {
 			{
 				Config: testAccBlockStorageQosV3Update2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageQosV3Exists("openstack_blockstorage_qos_v3.qos", &qosTest),
+					testAccCheckBlockStorageQosV3Exists(t.Context(), "openstack_blockstorage_qos_v3.qos", &qosTest),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_qos_v3.qos", "name", "foo"),
 					resource.TestCheckResourceAttr(
@@ -68,29 +68,31 @@ func TestAccBlockStorageQosV3_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckBlockStorageQosV3Destroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckBlockStorageQosV3Destroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_blockstorage_qos_v3" {
-			continue
+		blockStorageClient, err := config.BlockStorageV3Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 		}
 
-		_, err := qos.Get(context.TODO(), blockStorageClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Qos still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_blockstorage_qos_v3" {
+				continue
+			}
 
-	return nil
+			_, err := qos.Get(ctx, blockStorageClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Qos still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckBlockStorageQosV3Exists(n string, qosTest *qos.QoS) resource.TestCheckFunc {
+func testAccCheckBlockStorageQosV3Exists(ctx context.Context, n string, qosTest *qos.QoS) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -103,12 +105,12 @@ func testAccCheckBlockStorageQosV3Exists(n string, qosTest *qos.QoS) resource.Te
 
 		config := testAccProvider.Meta().(*Config)
 
-		blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
+		blockStorageClient, err := config.BlockStorageV3Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 		}
 
-		found, err := qos.Get(context.TODO(), blockStorageClient, rs.Primary.ID).Extract()
+		found, err := qos.Get(ctx, blockStorageClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

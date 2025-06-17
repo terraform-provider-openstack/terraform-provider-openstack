@@ -20,12 +20,12 @@ func TestAccNetworkingV2AddressGroup_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2AddressGroupDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2AddressGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2AddressGroupBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2AddressGroupExists("openstack_networking_address_group_v2.group_1", &addressGroup),
+					testAccCheckNetworkingV2AddressGroupExists(t.Context(), "openstack_networking_address_group_v2.group_1", &addressGroup),
 					resource.TestCheckResourceAttrPtr("openstack_networking_address_group_v2.group_1", "id", &addressGroup.ID),
 					resource.TestCheckResourceAttr("openstack_networking_address_group_v2.group_1", "name", "group_1"),
 					resource.TestCheckResourceAttr("openstack_networking_address_group_v2.group_1", "description", "test"),
@@ -54,29 +54,31 @@ func TestAccNetworkingV2AddressGroup_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckNetworkingV2AddressGroupDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckNetworkingV2AddressGroupDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_networking_address_group_v2" {
-			continue
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		_, err := addressgroups.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Security address group still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_networking_address_group_v2" {
+				continue
+			}
 
-	return nil
+			_, err := addressgroups.Get(ctx, networkingClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Security address group still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckNetworkingV2AddressGroupExists(n string, ag *addressgroups.AddressGroup) resource.TestCheckFunc {
+func testAccCheckNetworkingV2AddressGroupExists(ctx context.Context, n string, ag *addressgroups.AddressGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -89,12 +91,12 @@ func testAccCheckNetworkingV2AddressGroupExists(n string, ag *addressgroups.Addr
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		found, err := addressgroups.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+		found, err := addressgroups.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

@@ -23,7 +23,7 @@ func TestAccResourceDNSZoneShareV2_importBasic(t *testing.T) {
 			testAccPreCheckDNS(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckDNSZoneShareV2Destroy,
+		CheckDestroy:      testAccCheckDNSZoneShareV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceDNSZoneShareV2Config(zoneName, targetProjectName),
@@ -53,7 +53,7 @@ func TestAccResourceDNSZoneShareV2_importProjectID(t *testing.T) {
 			testAccPreCheckDNS(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckDNSZoneShareV2Destroy,
+		CheckDestroy:      testAccCheckDNSZoneShareV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceDNSZoneShareV2Config(zoneName, targetProjectName),

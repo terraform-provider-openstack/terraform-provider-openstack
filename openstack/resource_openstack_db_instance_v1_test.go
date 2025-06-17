@@ -24,12 +24,12 @@ func TestAccDatabaseV1Instance_basic(t *testing.T) {
 			testAccPreCheckDatabase(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckDatabaseV1InstanceDestroy,
+		CheckDestroy:      testAccCheckDatabaseV1InstanceDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatabaseV1InstanceBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDatabaseV1InstanceExists(
+					testAccCheckDatabaseV1InstanceExists(t.Context(),
 						"openstack_db_instance_v1.basic", &instance),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_db_instance_v1.basic", "name", &instance.Name),
@@ -53,7 +53,7 @@ func TestAccDatabaseV1Instance_basic(t *testing.T) {
 						"openstack_db_instance_v1.basic", "database.1.collate", "utf8_general_ci"),
 					resource.TestCheckResourceAttrSet(
 						"openstack_db_instance_v1.basic", "configuration_id"),
-					testAccCheckDatabaseV1ConfigurationExists(
+					testAccCheckDatabaseV1ConfigurationExists(t.Context(),
 						"openstack_db_configuration_v1.basic", &configuration),
 				),
 			},
@@ -61,7 +61,7 @@ func TestAccDatabaseV1Instance_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckDatabaseV1InstanceExists(n string, instance *instances.Instance) resource.TestCheckFunc {
+func testAccCheckDatabaseV1InstanceExists(ctx context.Context, n string, instance *instances.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -74,12 +74,12 @@ func testAccCheckDatabaseV1InstanceExists(n string, instance *instances.Instance
 
 		config := testAccProvider.Meta().(*Config)
 
-		databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
+		databaseV1Client, err := config.DatabaseV1Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
-		found, err := instances.Get(context.TODO(), databaseV1Client, rs.Primary.ID).Extract()
+		found, err := instances.Get(ctx, databaseV1Client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -94,26 +94,28 @@ func testAccCheckDatabaseV1InstanceExists(n string, instance *instances.Instance
 	}
 }
 
-func testAccCheckDatabaseV1InstanceDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckDatabaseV1InstanceDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_db_instance_v1" {
-			continue
+		databaseV1Client, err := config.DatabaseV1Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
-		_, err := instances.Get(context.TODO(), databaseV1Client, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Instance still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_db_instance_v1" {
+				continue
+			}
 
-	return nil
+			_, err := instances.Get(ctx, databaseV1Client, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Instance still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
 func testAccDatabaseV1InstanceBasic() string {

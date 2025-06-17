@@ -16,7 +16,7 @@ func TestAccSiteConnectionV2_importBasic(t *testing.T) {
 			testAccPreCheckVPN(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckSiteConnectionV2Destroy,
+		CheckDestroy:      testAccCheckSiteConnectionV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSiteConnectionV2Basic(),

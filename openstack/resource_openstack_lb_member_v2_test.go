@@ -23,18 +23,18 @@ func TestAccLBV2Member_basic(t *testing.T) {
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2MemberDestroy,
+		CheckDestroy:      testAccCheckLBV2MemberDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccLbV2MemberConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2MemberExists("openstack_lb_member_v2.member_1", &member1),
-					testAccCheckLBV2MemberExists("openstack_lb_member_v2.member_2", &member2),
-					testAccCheckLBV2MemberHasTag("openstack_lb_member_v2.member_1", "foo"),
-					testAccCheckLBV2MemberTagCount("openstack_lb_member_v2.member_1", 1),
-					testAccCheckLBV2MemberHasTag("openstack_lb_member_v2.member_2", "foo"),
-					testAccCheckLBV2MemberTagCount("openstack_lb_member_v2.member_2", 1),
-					testAccCheckLBV2MemberExists("openstack_lb_member_v2.member_2", &member2),
+					testAccCheckLBV2MemberExists(t.Context(), "openstack_lb_member_v2.member_1", &member1),
+					testAccCheckLBV2MemberExists(t.Context(), "openstack_lb_member_v2.member_2", &member2),
+					testAccCheckLBV2MemberHasTag(t.Context(), "openstack_lb_member_v2.member_1", "foo"),
+					testAccCheckLBV2MemberTagCount(t.Context(), "openstack_lb_member_v2.member_1", 1),
+					testAccCheckLBV2MemberHasTag(t.Context(), "openstack_lb_member_v2.member_2", "foo"),
+					testAccCheckLBV2MemberTagCount(t.Context(), "openstack_lb_member_v2.member_2", 1),
+					testAccCheckLBV2MemberExists(t.Context(), "openstack_lb_member_v2.member_2", &member2),
 					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "backup", "true"),
 				),
 			},
@@ -44,10 +44,10 @@ func TestAccLBV2Member_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "weight", "10"),
 					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "backup", "false"),
 					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_2", "weight", "15"),
-					testAccCheckLBV2MemberHasTag("openstack_lb_member_v2.member_1", "bar"),
-					testAccCheckLBV2MemberTagCount("openstack_lb_member_v2.member_1", 2),
-					testAccCheckLBV2MemberHasTag("openstack_lb_member_v2.member_2", "bar"),
-					testAccCheckLBV2MemberTagCount("openstack_lb_member_v2.member_2", 1),
+					testAccCheckLBV2MemberHasTag(t.Context(), "openstack_lb_member_v2.member_1", "bar"),
+					testAccCheckLBV2MemberTagCount(t.Context(), "openstack_lb_member_v2.member_1", 2),
+					testAccCheckLBV2MemberHasTag(t.Context(), "openstack_lb_member_v2.member_2", "bar"),
+					testAccCheckLBV2MemberTagCount(t.Context(), "openstack_lb_member_v2.member_2", 1),
 				),
 			},
 		},
@@ -66,13 +66,13 @@ func TestAccLBV2Member_monitor(t *testing.T) {
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2MemberDestroy,
+		CheckDestroy:      testAccCheckLBV2MemberDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccLbV2MemberMonitor,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2MemberExists("openstack_lb_member_v2.member_1", &member1),
-					testAccCheckLBV2MemberExists("openstack_lb_member_v2.member_2", &member2),
+					testAccCheckLBV2MemberExists(t.Context(), "openstack_lb_member_v2.member_1", &member1),
+					testAccCheckLBV2MemberExists(t.Context(), "openstack_lb_member_v2.member_2", &member2),
 					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "monitor_address", "192.168.199.110"),
 					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_1", "monitor_port", "8080"),
 					resource.TestCheckResourceAttr("openstack_lb_member_v2.member_2", "monitor_address", "192.168.199.111"),
@@ -92,7 +92,7 @@ func TestAccLBV2Member_monitor(t *testing.T) {
 	})
 }
 
-func testAccCheckLBV2MemberHasTag(n, tag string) resource.TestCheckFunc {
+func testAccCheckLBV2MemberHasTag(ctx context.Context, n, tag string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -105,14 +105,14 @@ func testAccCheckLBV2MemberHasTag(n, tag string) resource.TestCheckFunc {
 
 		config := testAccProvider.Meta().(*Config)
 
-		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
 		poolID := rs.Primary.Attributes["pool_id"]
 
-		found, err := pools.GetMember(context.TODO(), lbClient, poolID, rs.Primary.ID).Extract()
+		found, err := pools.GetMember(ctx, lbClient, poolID, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -131,7 +131,7 @@ func testAccCheckLBV2MemberHasTag(n, tag string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckLBV2MemberTagCount(n string, expected int) resource.TestCheckFunc {
+func testAccCheckLBV2MemberTagCount(ctx context.Context, n string, expected int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -144,14 +144,14 @@ func testAccCheckLBV2MemberTagCount(n string, expected int) resource.TestCheckFu
 
 		config := testAccProvider.Meta().(*Config)
 
-		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
 		poolID := rs.Primary.Attributes["pool_id"]
 
-		found, err := pools.GetMember(context.TODO(), lbClient, poolID, rs.Primary.ID).Extract()
+		found, err := pools.GetMember(ctx, lbClient, poolID, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -168,31 +168,33 @@ func testAccCheckLBV2MemberTagCount(n string, expected int) resource.TestCheckFu
 	}
 }
 
-func testAccCheckLBV2MemberDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckLBV2MemberDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_lb_member_v2" {
-			continue
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
-		poolID := rs.Primary.Attributes["pool_id"]
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_lb_member_v2" {
+				continue
+			}
 
-		_, err := pools.GetMember(context.TODO(), lbClient, poolID, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("Member still exists: %s", rs.Primary.ID)
+			poolID := rs.Primary.Attributes["pool_id"]
+
+			_, err := pools.GetMember(ctx, lbClient, poolID, rs.Primary.ID).Extract()
+			if err == nil {
+				return fmt.Errorf("Member still exists: %s", rs.Primary.ID)
+			}
 		}
-	}
 
-	return nil
+		return nil
+	}
 }
 
-func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestCheckFunc {
+func testAccCheckLBV2MemberExists(ctx context.Context, n string, member *pools.Member) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -205,14 +207,14 @@ func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestC
 
 		config := testAccProvider.Meta().(*Config)
 
-		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
 		poolID := rs.Primary.Attributes["pool_id"]
 
-		found, err := pools.GetMember(context.TODO(), lbClient, poolID, rs.Primary.ID).Extract()
+		found, err := pools.GetMember(ctx, lbClient, poolID, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

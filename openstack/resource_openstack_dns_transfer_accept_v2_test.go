@@ -24,12 +24,12 @@ func TestAccDNSV2TransferAccept_basic(t *testing.T) {
 			testAccPreCheckDNS(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckDNSV2TransferAcceptDestroy,
+		CheckDestroy:      testAccCheckDNSV2TransferAcceptDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2TransferAcceptBasic(zoneName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2TransferAcceptExists(
+					testAccCheckDNSV2TransferAcceptExists(t.Context(),
 						"openstack_dns_transfer_accept_v2.accept_1", &transferAccept),
 				),
 			},
@@ -49,12 +49,12 @@ func TestAccDNSV2TransferAccept_ignoreStatusCheck(t *testing.T) {
 			testAccPreCheckDNS(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckDNSV2TransferAcceptDestroy,
+		CheckDestroy:      testAccCheckDNSV2TransferAcceptDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2TransferAcceptDisableCheck(zoneName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2TransferAcceptExists(
+					testAccCheckDNSV2TransferAcceptExists(t.Context(),
 						"openstack_dns_transfer_accept_v2.accept_1", &transferAccept),
 					resource.TestCheckResourceAttr(
 						"openstack_dns_transfer_accept_v2.accept_1", "disable_status_check", "true"),
@@ -64,7 +64,7 @@ func TestAccDNSV2TransferAccept_ignoreStatusCheck(t *testing.T) {
 	})
 }
 
-func testAccCheckDNSV2TransferAcceptExists(n string, transferAccept *accept.TransferAccept) resource.TestCheckFunc {
+func testAccCheckDNSV2TransferAcceptExists(ctx context.Context, n string, transferAccept *accept.TransferAccept) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -77,12 +77,12 @@ func testAccCheckDNSV2TransferAcceptExists(n string, transferAccept *accept.Tran
 
 		config := testAccProvider.Meta().(*Config)
 
-		dnsClient, err := config.DNSV2Client(context.TODO(), osRegionName)
+		dnsClient, err := config.DNSV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack DNS client: %w", err)
 		}
 
-		found, err := accept.Get(context.TODO(), dnsClient, rs.Primary.ID).Extract()
+		found, err := accept.Get(ctx, dnsClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -97,26 +97,28 @@ func testAccCheckDNSV2TransferAcceptExists(n string, transferAccept *accept.Tran
 	}
 }
 
-func testAccCheckDNSV2TransferAcceptDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckDNSV2TransferAcceptDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	dnsClient, err := config.DNSV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack DNS client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_dns_transfer_accept_v2" {
-			continue
+		dnsClient, err := config.DNSV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack DNS client: %w", err)
 		}
 
-		_, err := accept.Get(context.TODO(), dnsClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Transfer accept still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_dns_transfer_accept_v2" {
+				continue
+			}
 
-	return nil
+			_, err := accept.Get(ctx, dnsClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Transfer accept still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
 func testAccDNSV2TransferAcceptBasic(zoneName string) string {

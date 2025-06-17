@@ -24,12 +24,12 @@ func TestAccIdentityV3Endpoint_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3EndpointDestroy,
+		CheckDestroy:      testAccCheckIdentityV3EndpointDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3EndpointBasic(endpointName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3EndpointExists("openstack_identity_endpoint_v3.endpoint_1", &endpoint),
+					testAccCheckIdentityV3EndpointExists(t.Context(), "openstack_identity_endpoint_v3.endpoint_1", &endpoint),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_endpoint_v3.endpoint_1", "name", &endpoint.Name),
 					resource.TestCheckResourceAttrPair(
@@ -45,7 +45,7 @@ func TestAccIdentityV3Endpoint_basic(t *testing.T) {
 			{
 				Config: testAccIdentityV3EndpointUpdate(endpointName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3EndpointExists("openstack_identity_endpoint_v3.endpoint_1", &endpoint),
+					testAccCheckIdentityV3EndpointExists(t.Context(), "openstack_identity_endpoint_v3.endpoint_1", &endpoint),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_endpoint_v3.endpoint_1", "name", &endpoint.Name),
 					resource.TestCheckResourceAttrPair(
@@ -61,47 +61,52 @@ func TestAccIdentityV3Endpoint_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckIdentityV3EndpointDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckIdentityV3EndpointDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_identity_endpoint_v3" {
-			continue
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		var endpoint endpoints.Endpoint
-
-		endpoints.List(identityClient, nil).EachPage(context.TODO(), func(_ context.Context, page pagination.Page) (bool, error) { //nolint:errcheck
-			endpointList, err := endpoints.ExtractEndpoints(page)
-			if err != nil {
-				return false, err
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_identity_endpoint_v3" {
+				continue
 			}
 
-			for _, v := range endpointList {
-				if v.ID == rs.Primary.ID {
-					endpoint = v
+			var endpoint endpoints.Endpoint
 
-					break
+			err = endpoints.List(identityClient, nil).EachPage(ctx, func(_ context.Context, page pagination.Page) (bool, error) {
+				endpointList, err := endpoints.ExtractEndpoints(page)
+				if err != nil {
+					return false, err
 				}
+
+				for _, v := range endpointList {
+					if v.ID == rs.Primary.ID {
+						endpoint = v
+
+						break
+					}
+				}
+
+				return true, nil
+			})
+			if err != nil {
+				return fmt.Errorf("Error retrieving OpenStack identity endpoints: %w", err)
 			}
 
-			return true, nil
-		})
-
-		if endpoint != (endpoints.Endpoint{}) {
-			return errors.New("Endpoint still exists")
+			if endpoint != (endpoints.Endpoint{}) {
+				return errors.New("Endpoint still exists")
+			}
 		}
-	}
 
-	return nil
+		return nil
+	}
 }
 
-func testAccCheckIdentityV3EndpointExists(n string, endpoint *endpoints.Endpoint) resource.TestCheckFunc {
+func testAccCheckIdentityV3EndpointExists(ctx context.Context, n string, endpoint *endpoints.Endpoint) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -114,14 +119,14 @@ func testAccCheckIdentityV3EndpointExists(n string, endpoint *endpoints.Endpoint
 
 		config := testAccProvider.Meta().(*Config)
 
-		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
 		var found *endpoints.Endpoint
 
-		err = endpoints.List(identityClient, nil).EachPage(context.TODO(), func(_ context.Context, page pagination.Page) (bool, error) {
+		err = endpoints.List(identityClient, nil).EachPage(ctx, func(_ context.Context, page pagination.Page) (bool, error) {
 			endpointList, err := endpoints.ExtractEndpoints(page)
 			if err != nil {
 				return false, err

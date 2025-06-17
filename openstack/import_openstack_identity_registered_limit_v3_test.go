@@ -15,7 +15,7 @@ func TestAccIdentityV3RegisteredLimit_importBasic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3RegisteredLimitDestroy,
+		CheckDestroy:      testAccCheckIdentityV3RegisteredLimitDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3RegisteredLimitBasic,

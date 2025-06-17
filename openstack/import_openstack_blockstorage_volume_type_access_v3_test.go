@@ -20,7 +20,7 @@ func TestAccBlockStorageV3VolumeTypeAccess_importBasic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockstorageV3VolumeTypeAccessDestroy,
+		CheckDestroy:      testAccCheckBlockstorageV3VolumeTypeAccessDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockstorageV3VolumeTypeAccessBasic(projectName, vtName),

@@ -23,13 +23,13 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2L7RuleDestroy,
+		CheckDestroy:      testAccCheckLBV2L7RuleDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLbV2L7RuleConfigBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
-					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7Policy.ID, &l7Rule),
+					testAccCheckLBV2L7PolicyExists(t.Context(), "openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
+					testAccCheckLBV2L7RuleExists(t.Context(), "openstack_lb_l7rule_v2.l7rule_1", &l7Policy.ID, &l7Rule),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_l7rule_v2.l7rule_1", "admin_state_up", "true"),
 					resource.TestCheckResourceAttr(
@@ -45,8 +45,8 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 			{
 				Config: testAccCheckLbV2L7RuleConfigUpdate1(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
-					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7Policy.ID, &l7Rule),
+					testAccCheckLBV2L7PolicyExists(t.Context(), "openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
+					testAccCheckLBV2L7RuleExists(t.Context(), "openstack_lb_l7rule_v2.l7rule_1", &l7Policy.ID, &l7Rule),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_l7rule_v2.l7rule_1", "admin_state_up", "false"),
 					resource.TestCheckResourceAttr(
@@ -62,8 +62,8 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 			{
 				Config: testAccCheckLbV2L7RuleConfigUpdate2(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
-					testAccCheckLBV2L7RuleExists("openstack_lb_l7rule_v2.l7rule_1", &l7Policy.ID, &l7Rule),
+					testAccCheckLBV2L7PolicyExists(t.Context(), "openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
+					testAccCheckLBV2L7RuleExists(t.Context(), "openstack_lb_l7rule_v2.l7rule_1", &l7Policy.ID, &l7Rule),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_l7rule_v2.l7rule_1", "admin_state_up", "true"),
 					resource.TestCheckResourceAttr(
@@ -80,29 +80,31 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckLBV2L7RuleDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckLBV2L7RuleDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_lb_l7rule_v2" {
-			continue
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
-		_, err := l7policies.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("L7 Rule still exists: %s", rs.Primary.ID)
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_lb_l7rule_v2" {
+				continue
+			}
 
-	return nil
+			_, err := l7policies.Get(ctx, lbClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return fmt.Errorf("L7 Rule still exists: %s", rs.Primary.ID)
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckLBV2L7RuleExists(n string, l7PolicyID *string, l7Rule *l7policies.Rule) resource.TestCheckFunc {
+func testAccCheckLBV2L7RuleExists(ctx context.Context, n string, l7PolicyID *string, l7Rule *l7policies.Rule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -115,12 +117,12 @@ func testAccCheckLBV2L7RuleExists(n string, l7PolicyID *string, l7Rule *l7polici
 
 		config := testAccProvider.Meta().(*Config)
 
-		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
-		found, err := l7policies.GetRule(context.TODO(), lbClient, *l7PolicyID, rs.Primary.ID).Extract()
+		found, err := l7policies.GetRule(ctx, lbClient, *l7PolicyID, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

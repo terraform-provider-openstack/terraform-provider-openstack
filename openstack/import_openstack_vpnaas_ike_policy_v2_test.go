@@ -16,7 +16,7 @@ func TestAccIKEPolicy_importBasic(t *testing.T) {
 			testAccPreCheckVPN(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIKEPolicyV2Destroy,
+		CheckDestroy:      testAccCheckIKEPolicyV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIKEPolicyV2Basic,

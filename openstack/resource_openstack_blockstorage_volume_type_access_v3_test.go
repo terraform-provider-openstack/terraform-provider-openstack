@@ -28,14 +28,14 @@ func TestAccBlockstorageV3VolumeTypeAccess_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockstorageV3VolumeTypeAccessDestroy,
+		CheckDestroy:      testAccCheckBlockstorageV3VolumeTypeAccessDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockstorageV3VolumeTypeAccessBasic(projectName, vtName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
-					testAccCheckBlockStorageVolumeTypeV3Exists("openstack_blockstorage_volume_type_v3.volume_type_1", &vt),
-					testAccCheckBlockstorageV3VolumeTypeAccessExists("openstack_blockstorage_volume_type_access_v3.volume_type_access"),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_1", &project),
+					testAccCheckBlockStorageVolumeTypeV3Exists(t.Context(), "openstack_blockstorage_volume_type_v3.volume_type_1", &vt),
+					testAccCheckBlockstorageV3VolumeTypeAccessExists(t.Context(), "openstack_blockstorage_volume_type_access_v3.volume_type_access"),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_blockstorage_volume_type_access_v3.volume_type_access", "project_id", &project.ID),
 					resource.TestCheckResourceAttrPtr(
@@ -46,41 +46,43 @@ func TestAccBlockstorageV3VolumeTypeAccess_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckBlockstorageV3VolumeTypeAccessDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckBlockstorageV3VolumeTypeAccessDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_blockstorage_volume_type_access_v3" {
-			continue
-		}
-
-		vtid, pid, err := parsePairedIDs(rs.Primary.ID, "openstack_blockstorage_volume_type_access_v3")
+		blockStorageClient, err := config.BlockStorageV3Client(ctx, osRegionName)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 		}
 
-		allPages, err := volumetypes.ListAccesses(blockStorageClient, vtid).AllPages(context.TODO())
-		if err == nil {
-			allAccesses, err := volumetypes.ExtractAccesses(allPages)
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_blockstorage_volume_type_access_v3" {
+				continue
+			}
+
+			vtid, pid, err := parsePairedIDs(rs.Primary.ID, "openstack_blockstorage_volume_type_access_v3")
+			if err != nil {
+				return err
+			}
+
+			allPages, err := volumetypes.ListAccesses(blockStorageClient, vtid).AllPages(ctx)
 			if err == nil {
-				for _, access := range allAccesses {
-					if access.VolumeTypeID == vtid && access.ProjectID == pid {
-						return errors.New("VolumeType access still exists")
+				allAccesses, err := volumetypes.ExtractAccesses(allPages)
+				if err == nil {
+					for _, access := range allAccesses {
+						if access.VolumeTypeID == vtid && access.ProjectID == pid {
+							return errors.New("VolumeType access still exists")
+						}
 					}
 				}
 			}
 		}
-	}
 
-	return nil
+		return nil
+	}
 }
 
-func testAccCheckBlockstorageV3VolumeTypeAccessExists(n string) resource.TestCheckFunc {
+func testAccCheckBlockstorageV3VolumeTypeAccessExists(ctx context.Context, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -93,7 +95,7 @@ func testAccCheckBlockstorageV3VolumeTypeAccessExists(n string) resource.TestChe
 
 		config := testAccProvider.Meta().(*Config)
 
-		blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
+		blockStorageClient, err := config.BlockStorageV3Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 		}
@@ -103,7 +105,7 @@ func testAccCheckBlockstorageV3VolumeTypeAccessExists(n string) resource.TestChe
 			return err
 		}
 
-		allPages, err := volumetypes.ListAccesses(blockStorageClient, vtid).AllPages(context.TODO())
+		allPages, err := volumetypes.ListAccesses(blockStorageClient, vtid).AllPages(ctx)
 		if err != nil {
 			return fmt.Errorf("Error retrieving accesses for vt: %s", vtid)
 		}

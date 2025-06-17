@@ -15,7 +15,7 @@ func TestAccNetworkingV2SubnetPoolImportBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetPoolDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetPoolDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetPoolBasic,

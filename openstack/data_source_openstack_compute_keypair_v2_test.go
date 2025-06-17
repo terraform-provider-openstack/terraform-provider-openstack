@@ -17,7 +17,7 @@ func TestAccComputeV2KeypairDataSource_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2KeypairDestroy,
+		CheckDestroy:      testAccCheckComputeV2KeypairDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2KeypairDataSourceBasic,
@@ -44,13 +44,13 @@ func TestAccComputeV2KeypairDataSourceOtherUser(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2KeypairDestroy,
+		CheckDestroy:      testAccCheckComputeV2KeypairDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2KeypairDataSourceOtherUser,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2KeypairDataSourceID("data.openstack_compute_keypair_v2.kp"),
-					testAccCheckIdentityV3UserExists("openstack_identity_user_v3.user_1", &user),
+					testAccCheckIdentityV3UserExists(t.Context(), "openstack_identity_user_v3.user_1", &user),
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_keypair_v2.kp", "name", "the-key-name"),
 					resource.TestCheckResourceAttr(

@@ -20,12 +20,12 @@ func TestAccNetworkingV2SubnetPool_Basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetPoolDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetPoolDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SubnetPoolBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetPoolExists("openstack_networking_subnetpool_v2.subnetpool_1", &subnetPool),
+					testAccCheckNetworkingV2SubnetPoolExists(t.Context(), "openstack_networking_subnetpool_v2.subnetpool_1", &subnetPool),
 					testAccCheckNetworkingV2SubnetPoolPrefixesConsistency("openstack_networking_subnetpool_v2.subnetpool_1", &subnetPool),
 				),
 			},
@@ -67,7 +67,7 @@ func TestAccNetworkingV2SubnetPool_Basic(t *testing.T) {
 	})
 }
 
-func testAccCheckNetworkingV2SubnetPoolExists(n string, subnetPool *subnetpools.SubnetPool) resource.TestCheckFunc {
+func testAccCheckNetworkingV2SubnetPoolExists(ctx context.Context, n string, subnetPool *subnetpools.SubnetPool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -80,12 +80,12 @@ func testAccCheckNetworkingV2SubnetPoolExists(n string, subnetPool *subnetpools.
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		found, err := subnetpools.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+		found, err := subnetpools.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -100,26 +100,28 @@ func testAccCheckNetworkingV2SubnetPoolExists(n string, subnetPool *subnetpools.
 	}
 }
 
-func testAccCheckNetworkingV2SubnetPoolDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckNetworkingV2SubnetPoolDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_networking_subnetpool_v2" {
-			continue
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		_, err := subnetpools.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Subnetpool still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_networking_subnetpool_v2" {
+				continue
+			}
 
-	return nil
+			_, err := subnetpools.Get(ctx, networkingClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Subnetpool still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
 func testAccCheckNetworkingV2SubnetPoolPrefixesConsistency(n string, subnetpool *subnetpools.SubnetPool) resource.TestCheckFunc {

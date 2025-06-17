@@ -21,12 +21,12 @@ func TestAccDataSourceDNSZoneShareV2_basic(t *testing.T) {
 			testAccPreCheckDNS(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckDNSZoneShareV2Destroy,
+		CheckDestroy:      testAccCheckDNSZoneShareV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceDNSZoneShareV2Config(zoneName, targetProjectName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2ZoneExists("openstack_dns_zone_v2.zone", &zone),
+					testAccCheckDNSV2ZoneExists(t.Context(), "openstack_dns_zone_v2.zone", &zone),
 					resource.TestCheckResourceAttrPtr("data.openstack_dns_zone_share_v2.zone_only", "zone_id", &zone.ID),
 
 					resource.TestCheckResourceAttrPtr("data.openstack_dns_zone_share_v2.zone_and_project_id", "zone_id", &zone.ID),

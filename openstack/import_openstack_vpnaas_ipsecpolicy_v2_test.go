@@ -16,7 +16,7 @@ func TestAccIPSecPolicy_importBasic(t *testing.T) {
 			testAccPreCheckVPN(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIPSecPolicyV2Destroy,
+		CheckDestroy:      testAccCheckIPSecPolicyV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIPSecPolicyV2Basic,

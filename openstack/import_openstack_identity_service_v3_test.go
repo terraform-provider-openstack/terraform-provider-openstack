@@ -18,7 +18,7 @@ func TestAccIdentityV3Service_importBasic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3ServiceDestroy,
+		CheckDestroy:      testAccCheckIdentityV3ServiceDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3ServiceBasic(serviceName),

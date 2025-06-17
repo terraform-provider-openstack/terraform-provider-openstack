@@ -15,7 +15,7 @@ func TestAccIdentityV3Group_importBasic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3GroupDestroy,
+		CheckDestroy:      testAccCheckIdentityV3GroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3GroupBasic,

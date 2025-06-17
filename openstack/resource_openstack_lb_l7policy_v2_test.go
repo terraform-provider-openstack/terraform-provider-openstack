@@ -22,12 +22,12 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2L7PolicyDestroy,
+		CheckDestroy:      testAccCheckLBV2L7PolicyDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLbV2L7PolicyConfigBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
+					testAccCheckLBV2L7PolicyExists(t.Context(), "openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_l7policy_v2.l7policy_1", "name", "test"),
 					resource.TestCheckResourceAttr(
@@ -44,7 +44,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 			{
 				Config: testAccCheckLbV2L7PolicyConfigUpdate1(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
+					testAccCheckLBV2L7PolicyExists(t.Context(), "openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_l7policy_v2.l7policy_1", "name", "test"),
 					resource.TestCheckResourceAttr(
@@ -63,7 +63,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 			{
 				Config: testAccCheckLbV2L7PolicyConfigUpdate2(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
+					testAccCheckLBV2L7PolicyExists(t.Context(), "openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_l7policy_v2.l7policy_1", "name", "test_updated"),
 					resource.TestCheckResourceAttr(
@@ -83,7 +83,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 			{
 				Config: testAccCheckLbV2L7PolicyConfigUpdate3(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
+					testAccCheckLBV2L7PolicyExists(t.Context(), "openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_l7policy_v2.l7policy_1", "name", "test_updated"),
 					resource.TestCheckResourceAttr(
@@ -100,7 +100,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 			{
 				Config: testAccCheckLbV2L7PolicyConfigUpdate4(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
+					testAccCheckLBV2L7PolicyExists(t.Context(), "openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_l7policy_v2.l7policy_1", "name", "test_updated"),
 					resource.TestCheckResourceAttr(
@@ -116,7 +116,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 			{
 				Config: testAccCheckLbV2L7PolicyConfigUpdate5(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2L7PolicyExists("openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
+					testAccCheckLBV2L7PolicyExists(t.Context(), "openstack_lb_l7policy_v2.l7policy_1", &l7Policy),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_l7policy_v2.l7policy_1", "name", "test_updated"),
 					resource.TestCheckResourceAttr(
@@ -135,29 +135,31 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckLBV2L7PolicyDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckLBV2L7PolicyDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_lb_l7policy_v2" {
-			continue
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
-		_, err := l7policies.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("L7 Policy still exists: %s", rs.Primary.ID)
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_lb_l7policy_v2" {
+				continue
+			}
 
-	return nil
+			_, err := l7policies.Get(ctx, lbClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return fmt.Errorf("L7 Policy still exists: %s", rs.Primary.ID)
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckLBV2L7PolicyExists(n string, l7Policy *l7policies.L7Policy) resource.TestCheckFunc {
+func testAccCheckLBV2L7PolicyExists(ctx context.Context, n string, l7Policy *l7policies.L7Policy) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -170,12 +172,12 @@ func testAccCheckLBV2L7PolicyExists(n string, l7Policy *l7policies.L7Policy) res
 
 		config := testAccProvider.Meta().(*Config)
 
-		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
-		found, err := l7policies.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
+		found, err := l7policies.Get(ctx, lbClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

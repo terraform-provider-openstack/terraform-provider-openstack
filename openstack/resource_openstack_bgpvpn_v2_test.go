@@ -23,12 +23,12 @@ func TestAccBGPVPNV2_basic(t *testing.T) {
 			testAccPreCheckBGPVPN(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBGPVPNV2Destroy,
+		CheckDestroy:      testAccCheckBGPVPNV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBGPVPNV2Config,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBGPVPNV2Exists(
+					testAccCheckBGPVPNV2Exists(t.Context(),
 						"openstack_bgpvpn_v2.bgpvpn_1", &bgpvpn),
 					resource.TestCheckResourceAttrPtr("openstack_bgpvpn_v2.bgpvpn_1", "name", &bgpvpn.Name),
 					resource.TestCheckResourceAttr("openstack_bgpvpn_v2.bgpvpn_1", "type", "l3"),
@@ -38,33 +38,35 @@ func TestAccBGPVPNV2_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckBGPVPNV2Destroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckBGPVPNV2Destroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
+		}
+
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_bgpvpn_v2" {
+				continue
+			}
+
+			_, err = bgpvpns.Get(ctx, networkingClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return fmt.Errorf("BGPVPN (%s) still exists", rs.Primary.ID)
+			}
+
+			if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+				return err
+			}
+		}
+
+		return nil
 	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_bgpvpn_v2" {
-			continue
-		}
-
-		_, err = bgpvpns.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("BGPVPN (%s) still exists", rs.Primary.ID)
-		}
-
-		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
-			return err
-		}
-	}
-
-	return nil
 }
 
-func testAccCheckBGPVPNV2Exists(n string, bgpvpn *bgpvpns.BGPVPN) resource.TestCheckFunc {
+func testAccCheckBGPVPNV2Exists(ctx context.Context, n string, bgpvpn *bgpvpns.BGPVPN) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -77,14 +79,14 @@ func testAccCheckBGPVPNV2Exists(n string, bgpvpn *bgpvpns.BGPVPN) resource.TestC
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
 		var found *bgpvpns.BGPVPN
 
-		found, err = bgpvpns.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+		found, err = bgpvpns.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

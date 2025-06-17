@@ -20,12 +20,12 @@ func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroupBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SecGroupExists("openstack_networking_secgroup_v2.secgroup_1", &securityGroup),
+					testAccCheckNetworkingV2SecGroupExists(t.Context(), "openstack_networking_secgroup_v2.secgroup_1", &securityGroup),
 					testAccCheckNetworkingV2SecGroupRuleCount(&securityGroup, 2),
 					resource.TestCheckResourceAttr("openstack_networking_secgroup_v2.secgroup_1", "stateful", "true"),
 				),
@@ -51,12 +51,12 @@ func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroupNoDefaultRules,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SecGroupExists(
+					testAccCheckNetworkingV2SecGroupExists(t.Context(),
 						"openstack_networking_secgroup_v2.secgroup_1", &securityGroup),
 					testAccCheckNetworkingV2SecGroupRuleCount(&securityGroup, 0),
 				),
@@ -71,7 +71,7 @@ func TestAccNetworkingV2SecGroup_statefulNotSet(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroupStatefulNotSet,
@@ -98,7 +98,7 @@ func TestAccNetworkingV2SecGroup_statefulSetTrue(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroupStatefulSetTrue,
@@ -124,7 +124,7 @@ func TestAccNetworkingV2SecGroup_statefulSetFalse(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroupStatefulSetFalse,
@@ -152,12 +152,12 @@ func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroupTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SecGroupExists(
+					testAccCheckNetworkingV2SecGroupExists(t.Context(),
 						"openstack_networking_secgroup_v2.secgroup_1", &securityGroup),
 				),
 			},
@@ -165,29 +165,31 @@ func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 	})
 }
 
-func testAccCheckNetworkingV2SecGroupDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckNetworkingV2SecGroupDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_networking_secgroup_v2" {
-			continue
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		_, err := groups.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Security group still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_networking_secgroup_v2" {
+				continue
+			}
 
-	return nil
+			_, err := groups.Get(ctx, networkingClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Security group still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckNetworkingV2SecGroupExists(n string, sg *groups.SecGroup) resource.TestCheckFunc {
+func testAccCheckNetworkingV2SecGroupExists(ctx context.Context, n string, sg *groups.SecGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -200,12 +202,12 @@ func testAccCheckNetworkingV2SecGroupExists(n string, sg *groups.SecGroup) resou
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		found, err := groups.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+		found, err := groups.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

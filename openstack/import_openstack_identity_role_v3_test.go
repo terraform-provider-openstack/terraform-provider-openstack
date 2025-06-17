@@ -15,7 +15,7 @@ func TestAccIdentityV3Role_importBasic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3UserDestroy,
+		CheckDestroy:      testAccCheckIdentityV3UserDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3RoleBasic,

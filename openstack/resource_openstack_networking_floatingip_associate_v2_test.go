@@ -22,12 +22,12 @@ func TestAccNetworkingV2FloatingIPAssociate_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2FloatingIPAssociateDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2FloatingIPAssociateDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2FloatingIPAssociateBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2FloatingIPExists(
+					testAccCheckNetworkingV2FloatingIPExists(t.Context(),
 						"openstack_networking_floatingip_associate_v2.fip_1", &fip),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_networking_floatingip_associate_v2.fip_1", "floating_ip", &fip.FloatingIP),
@@ -48,12 +48,12 @@ func TestAccNetworkingV2FloatingIPAssociate_twoFixedIPs(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2FloatingIPAssociateDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2FloatingIPAssociateDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2FloatingIPAssociateTwoFixedIPs1(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2FloatingIPExists(
+					testAccCheckNetworkingV2FloatingIPExists(t.Context(),
 						"openstack_networking_floatingip_associate_v2.fip_1", &fip),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_networking_floatingip_associate_v2.fip_1", "floating_ip", &fip.FloatingIP),
@@ -66,7 +66,7 @@ func TestAccNetworkingV2FloatingIPAssociate_twoFixedIPs(t *testing.T) {
 			{
 				Config: testAccNetworkingV2FloatingIPAssociateTwoFixedIPs2(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2FloatingIPExists(
+					testAccCheckNetworkingV2FloatingIPExists(t.Context(),
 						"openstack_networking_floatingip_associate_v2.fip_1", &fip),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_networking_floatingip_associate_v2.fip_1", "floating_ip", &fip.FloatingIP),
@@ -80,34 +80,36 @@ func TestAccNetworkingV2FloatingIPAssociate_twoFixedIPs(t *testing.T) {
 	})
 }
 
-func testAccCheckNetworkingV2FloatingIPAssociateDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckNetworkingV2FloatingIPAssociateDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack network client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_networking_floatingip_v2" {
-			continue
+		networkClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack network client: %w", err)
 		}
 
-		fip, err := floatingips.Get(context.TODO(), networkClient, rs.Primary.ID).Extract()
-		if err != nil {
-			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
-				return nil
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_networking_floatingip_v2" {
+				continue
 			}
 
-			return fmt.Errorf("Error retrieving Floating IP: %w", err)
+			fip, err := floatingips.Get(ctx, networkClient, rs.Primary.ID).Extract()
+			if err != nil {
+				if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+					return nil
+				}
+
+				return fmt.Errorf("Error retrieving Floating IP: %w", err)
+			}
+
+			if fip.PortID != "" {
+				return errors.New("Floating IP is still associated")
+			}
 		}
 
-		if fip.PortID != "" {
-			return errors.New("Floating IP is still associated")
-		}
+		return nil
 	}
-
-	return nil
 }
 
 func testAccNetworkingV2FloatingIPAssociateBasic() string {

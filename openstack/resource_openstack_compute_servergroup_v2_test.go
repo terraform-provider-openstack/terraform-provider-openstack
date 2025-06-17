@@ -22,12 +22,12 @@ func TestAccComputeV2ServerGroup_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy,
+		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2ServerGroupBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
+					testAccCheckComputeV2ServerGroupExists(t.Context(), "openstack_compute_servergroup_v2.sg_1", &sg),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_servergroup_v2.sg_1", "policies.#", "1"),
 					resource.TestCheckResourceAttr(
@@ -47,12 +47,12 @@ func TestAccComputeV2ServerGroup_basic_v2_64(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy,
+		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2ServerGroupV264Policy,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
+					testAccCheckComputeV2ServerGroupExists(t.Context(), "openstack_compute_servergroup_v2.sg_1", &sg),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_servergroup_v2.sg_1", "policies.0", "affinity"),
 				),
@@ -70,12 +70,12 @@ func TestAccComputeV2ServerGroup_v2_64_anti_affinity(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy,
+		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2ServerGroupV264PolicyAntiAffinity,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
+					testAccCheckComputeV2ServerGroupExists(t.Context(), "openstack_compute_servergroup_v2.sg_1", &sg),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_servergroup_v2.sg_1", "policies.0", "anti-affinity"),
 				),
@@ -93,12 +93,12 @@ func TestAccComputeV2ServerGroup_v2_64_with_rules(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy,
+		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2ServerGroupV264PolicyRules,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
+					testAccCheckComputeV2ServerGroupExists(t.Context(), "openstack_compute_servergroup_v2.sg_1", &sg),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_servergroup_v2.sg_1", "policies.0", "anti-affinity"),
 					resource.TestCheckResourceAttr(
@@ -116,7 +116,7 @@ func TestAccComputeV2ServerGroup_v2_64_with_invalid_rules(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy,
+		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccComputeV2ServerGroupV264InvalidPolicyRules,
@@ -137,13 +137,13 @@ func TestAccComputeV2ServerGroup_affinity(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy,
+		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2ServerGroupAffinity(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
-					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2ServerGroupExists(t.Context(), "openstack_compute_servergroup_v2.sg_1", &sg),
+					testAccCheckComputeV2InstanceExists(t.Context(), "openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckComputeV2InstanceInServerGroup(&instance, &sg),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_servergroup_v2.sg_1", "policies.#", "1"),
@@ -166,13 +166,13 @@ func TestAccComputeV2ServerGroup_affinity_v2_64(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy,
+		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2ServerGroupAffinityV264(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
-					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2ServerGroupExists(t.Context(), "openstack_compute_servergroup_v2.sg_1", &sg),
+					testAccCheckComputeV2InstanceExists(t.Context(), "openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckComputeV2InstanceInServerGroup(&instance, &sg),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_servergroup_v2.sg_1", "policies.0", "affinity"),
@@ -193,13 +193,13 @@ func TestAccComputeV2ServerGroup_soft_affinity(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy,
+		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2ServerGroupSoftAffinity(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2ServerGroupExists("openstack_compute_servergroup_v2.sg_1", &sg),
-					testAccCheckComputeV2InstanceExists("openstack_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2ServerGroupExists(t.Context(), "openstack_compute_servergroup_v2.sg_1", &sg),
+					testAccCheckComputeV2InstanceExists(t.Context(), "openstack_compute_instance_v2.instance_1", &instance),
 					testAccCheckComputeV2InstanceInServerGroup(&instance, &sg),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_servergroup_v2.sg_1", "policies.#", "1"),
@@ -211,29 +211,31 @@ func TestAccComputeV2ServerGroup_soft_affinity(t *testing.T) {
 	})
 }
 
-func testAccCheckComputeV2ServerGroupDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckComputeV2ServerGroupDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_compute_servergroup_v2" {
-			continue
+		computeClient, err := config.ComputeV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
-		_, err := servergroups.Get(context.TODO(), computeClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("ServerGroup still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_compute_servergroup_v2" {
+				continue
+			}
 
-	return nil
+			_, err := servergroups.Get(ctx, computeClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("ServerGroup still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckComputeV2ServerGroupExists(n string, kp *servergroups.ServerGroup) resource.TestCheckFunc {
+func testAccCheckComputeV2ServerGroupExists(ctx context.Context, n string, kp *servergroups.ServerGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -246,12 +248,12 @@ func testAccCheckComputeV2ServerGroupExists(n string, kp *servergroups.ServerGro
 
 		config := testAccProvider.Meta().(*Config)
 
-		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
+		computeClient, err := config.ComputeV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
-		found, err := servergroups.Get(context.TODO(), computeClient, rs.Primary.ID).Extract()
+		found, err := servergroups.Get(ctx, computeClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

@@ -20,12 +20,12 @@ func TestAccIdentityV3Group_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3GroupDestroy,
+		CheckDestroy:      testAccCheckIdentityV3GroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3GroupBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3GroupExists("openstack_identity_group_v3.group_1", &group),
+					testAccCheckIdentityV3GroupExists(t.Context(), "openstack_identity_group_v3.group_1", &group),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_group_v3.group_1", "name", &group.Name),
 					resource.TestCheckResourceAttrPtr(
@@ -35,7 +35,7 @@ func TestAccIdentityV3Group_basic(t *testing.T) {
 			{
 				Config: testAccIdentityV3GroupUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3GroupExists("openstack_identity_group_v3.group_1", &group),
+					testAccCheckIdentityV3GroupExists(t.Context(), "openstack_identity_group_v3.group_1", &group),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_group_v3.group_1", "name", &group.Name),
 					resource.TestCheckResourceAttrPtr(
@@ -46,29 +46,31 @@ func TestAccIdentityV3Group_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckIdentityV3GroupDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckIdentityV3GroupDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_identity_group_v3" {
-			continue
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		_, err := groups.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Group still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_identity_group_v3" {
+				continue
+			}
 
-	return nil
+			_, err := groups.Get(ctx, identityClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Group still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckIdentityV3GroupExists(n string, group *groups.Group) resource.TestCheckFunc {
+func testAccCheckIdentityV3GroupExists(ctx context.Context, n string, group *groups.Group) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -81,12 +83,12 @@ func testAccCheckIdentityV3GroupExists(n string, group *groups.Group) resource.T
 
 		config := testAccProvider.Meta().(*Config)
 
-		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		found, err := groups.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
+		found, err := groups.Get(ctx, identityClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

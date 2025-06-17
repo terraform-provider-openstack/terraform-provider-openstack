@@ -15,7 +15,7 @@ func TestAccComputeV2InterfaceAttachImport_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2InterfaceAttachDestroy,
+		CheckDestroy:      testAccCheckComputeV2InterfaceAttachDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InterfaceAttachBasic(),

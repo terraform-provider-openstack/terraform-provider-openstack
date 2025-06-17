@@ -21,12 +21,12 @@ func TestAccLBV2FlavorProfile_basic(t *testing.T) {
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2FlavorProfileDestroy,
+		CheckDestroy:      testAccCheckLBV2FlavorProfileDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLbV2FlavorProfile,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2FlavorProfileExists("openstack_lb_flavorprofile_v2.fp_1", &fp),
+					testAccCheckLBV2FlavorProfileExists(t.Context(), "openstack_lb_flavorprofile_v2.fp_1", &fp),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_flavorprofile_v2.fp_1", "name", "test"),
 					resource.TestCheckResourceAttr(
@@ -38,7 +38,7 @@ func TestAccLBV2FlavorProfile_basic(t *testing.T) {
 			{
 				Config: testAccCheckLbV2FlavorProfileUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2FlavorProfileExists("openstack_lb_flavorprofile_v2.fp_1", &fp),
+					testAccCheckLBV2FlavorProfileExists(t.Context(), "openstack_lb_flavorprofile_v2.fp_1", &fp),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_flavorprofile_v2.fp_1", "name", "test-2"),
 					resource.TestCheckResourceAttr(
@@ -51,29 +51,31 @@ func TestAccLBV2FlavorProfile_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckLBV2FlavorProfileDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckLBV2FlavorProfileDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_lb_flavorprofile_v2" {
-			continue
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
-		_, err := flavorprofiles.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("Flavor profile still exists: %s", rs.Primary.ID)
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_lb_flavorprofile_v2" {
+				continue
+			}
 
-	return nil
+			_, err := flavorprofiles.Get(ctx, lbClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return fmt.Errorf("Flavor profile still exists: %s", rs.Primary.ID)
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckLBV2FlavorProfileExists(n string, fp *flavorprofiles.FlavorProfile) resource.TestCheckFunc {
+func testAccCheckLBV2FlavorProfileExists(ctx context.Context, n string, fp *flavorprofiles.FlavorProfile) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -86,12 +88,12 @@ func testAccCheckLBV2FlavorProfileExists(n string, fp *flavorprofiles.FlavorProf
 
 		config := testAccProvider.Meta().(*Config)
 
-		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
-		found, err := flavorprofiles.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
+		found, err := flavorprofiles.Get(ctx, lbClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

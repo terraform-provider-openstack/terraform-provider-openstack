@@ -18,7 +18,7 @@ func TestAccIdentityV3Endpoint_importBasic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3EndpointDestroy,
+		CheckDestroy:      testAccCheckIdentityV3EndpointDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3EndpointBasic(endpointName),

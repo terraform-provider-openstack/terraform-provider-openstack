@@ -20,12 +20,12 @@ func TestAccComputeV2InterfaceAttach_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2InterfaceAttachDestroy,
+		CheckDestroy:      testAccCheckComputeV2InterfaceAttachDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InterfaceAttachBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InterfaceAttachExists("openstack_compute_interface_attach_v2.ai_1", &ai),
+					testAccCheckComputeV2InterfaceAttachExists(t.Context(), "openstack_compute_interface_attach_v2.ai_1", &ai),
 				),
 			},
 		},
@@ -41,12 +41,12 @@ func TestAccComputeV2InterfaceAttach_IP(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2InterfaceAttachDestroy,
+		CheckDestroy:      testAccCheckComputeV2InterfaceAttachDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2InterfaceAttachIP(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InterfaceAttachExists("openstack_compute_interface_attach_v2.ai_1", &ai),
+					testAccCheckComputeV2InterfaceAttachExists(t.Context(), "openstack_compute_interface_attach_v2.ai_1", &ai),
 					testAccCheckComputeV2InterfaceAttachIP(&ai, "192.168.1.100"),
 				),
 			},
@@ -54,34 +54,36 @@ func TestAccComputeV2InterfaceAttach_IP(t *testing.T) {
 	})
 }
 
-func testAccCheckComputeV2InterfaceAttachDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckComputeV2InterfaceAttachDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_compute_interface_attach_v2" {
-			continue
-		}
-
-		instanceID, portID, err := parsePairedIDs(rs.Primary.ID, "openstack_compute_interface_attach_v2")
+		computeClient, err := config.ComputeV2Client(ctx, osRegionName)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
-		_, err = attachinterfaces.Get(context.TODO(), computeClient, instanceID, portID).Extract()
-		if err == nil {
-			return errors.New("Volume attachment still exists")
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_compute_interface_attach_v2" {
+				continue
+			}
+
+			instanceID, portID, err := parsePairedIDs(rs.Primary.ID, "openstack_compute_interface_attach_v2")
+			if err != nil {
+				return err
+			}
+
+			_, err = attachinterfaces.Get(ctx, computeClient, instanceID, portID).Extract()
+			if err == nil {
+				return errors.New("Volume attachment still exists")
+			}
 		}
+
+		return nil
 	}
-
-	return nil
 }
 
-func testAccCheckComputeV2InterfaceAttachExists(n string, ai *attachinterfaces.Interface) resource.TestCheckFunc {
+func testAccCheckComputeV2InterfaceAttachExists(ctx context.Context, n string, ai *attachinterfaces.Interface) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -94,7 +96,7 @@ func testAccCheckComputeV2InterfaceAttachExists(n string, ai *attachinterfaces.I
 
 		config := testAccProvider.Meta().(*Config)
 
-		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
+		computeClient, err := config.ComputeV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
@@ -104,7 +106,7 @@ func testAccCheckComputeV2InterfaceAttachExists(n string, ai *attachinterfaces.I
 			return err
 		}
 
-		found, err := attachinterfaces.Get(context.TODO(), computeClient, instanceID, portID).Extract()
+		found, err := attachinterfaces.Get(ctx, computeClient, instanceID, portID).Extract()
 		if err != nil {
 			return err
 		}

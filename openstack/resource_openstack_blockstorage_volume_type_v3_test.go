@@ -20,12 +20,12 @@ func TestAccBlockStorageVolumeTypeV3_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckBlockStorageVolumeTypeV3Destroy,
+		CheckDestroy:      testAccCheckBlockStorageVolumeTypeV3Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageVolumeTypeV3Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageVolumeTypeV3Exists("openstack_blockstorage_volume_type_v3.volume_type_1", &volumetype),
+					testAccCheckBlockStorageVolumeTypeV3Exists(t.Context(), "openstack_blockstorage_volume_type_v3.volume_type_1", &volumetype),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_type_v3.volume_type_1", "name", "foo"),
 					resource.TestCheckResourceAttr(
@@ -37,7 +37,7 @@ func TestAccBlockStorageVolumeTypeV3_basic(t *testing.T) {
 			{
 				Config: testAccBlockStorageVolumeTypeV3Update1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageVolumeTypeV3Exists("openstack_blockstorage_volume_type_v3.volume_type_1", &volumetype),
+					testAccCheckBlockStorageVolumeTypeV3Exists(t.Context(), "openstack_blockstorage_volume_type_v3.volume_type_1", &volumetype),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_type_v3.volume_type_1", "name", "bar-baz"),
 					resource.TestCheckResourceAttr(
@@ -55,7 +55,7 @@ func TestAccBlockStorageVolumeTypeV3_basic(t *testing.T) {
 			{
 				Config: testAccBlockStorageVolumeTypeV3Update2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageVolumeTypeV3Exists("openstack_blockstorage_volume_type_v3.volume_type_1", &volumetype),
+					testAccCheckBlockStorageVolumeTypeV3Exists(t.Context(), "openstack_blockstorage_volume_type_v3.volume_type_1", &volumetype),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_type_v3.volume_type_1", "name", "foo-foo"),
 					resource.TestCheckResourceAttr(
@@ -74,29 +74,31 @@ func TestAccBlockStorageVolumeTypeV3_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckBlockStorageVolumeTypeV3Destroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckBlockStorageVolumeTypeV3Destroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_blockstorage_volume_type_v3" {
-			continue
+		blockStorageClient, err := config.BlockStorageV3Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 		}
 
-		_, err := volumetypes.Get(context.TODO(), blockStorageClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("VolumeType still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_blockstorage_volume_type_v3" {
+				continue
+			}
 
-	return nil
+			_, err := volumetypes.Get(ctx, blockStorageClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("VolumeType still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckBlockStorageVolumeTypeV3Exists(n string, volumetype *volumetypes.VolumeType) resource.TestCheckFunc {
+func testAccCheckBlockStorageVolumeTypeV3Exists(ctx context.Context, n string, volumetype *volumetypes.VolumeType) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -109,12 +111,12 @@ func testAccCheckBlockStorageVolumeTypeV3Exists(n string, volumetype *volumetype
 
 		config := testAccProvider.Meta().(*Config)
 
-		blockStorageClient, err := config.BlockStorageV3Client(context.TODO(), osRegionName)
+		blockStorageClient, err := config.BlockStorageV3Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack block storage client: %w", err)
 		}
 
-		found, err := volumetypes.Get(context.TODO(), blockStorageClient, rs.Primary.ID).Extract()
+		found, err := volumetypes.Get(ctx, blockStorageClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

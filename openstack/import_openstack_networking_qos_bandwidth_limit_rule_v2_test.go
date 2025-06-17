@@ -13,10 +13,9 @@ func TestAccNetworkingV2QoSBandwidthLimitRule_importBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
-			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2QoSBandwidthLimitRuleDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2QoSBandwidthLimitRuleDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2QoSBandwidthLimitRuleBasic,

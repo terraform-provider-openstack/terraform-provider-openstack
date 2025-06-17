@@ -15,7 +15,7 @@ func TestAccComputeV2Keypair_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2KeypairDestroy,
+		CheckDestroy:      testAccCheckComputeV2KeypairDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2KeypairBasic,

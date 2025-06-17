@@ -15,7 +15,7 @@ func TestAccNetworkingV2Router_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RouterBasic,

@@ -24,12 +24,12 @@ func TestAccFWRuleV2_basic(t *testing.T) {
 			testAccPreCheckFW(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckFWRuleV2Destroy,
+		CheckDestroy:      testAccCheckFWRuleV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWRuleV2Basic1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV2Exists("openstack_fw_rule_v2.rule_1", &rule),
+					testAccCheckFWRuleV2Exists(t.Context(), "openstack_fw_rule_v2.rule_1", &rule),
 					resource.TestCheckResourceAttr(
 						"openstack_fw_rule_v2.rule_1", "name", "rule_1"),
 					resource.TestCheckResourceAttr(
@@ -46,7 +46,7 @@ func TestAccFWRuleV2_basic(t *testing.T) {
 			{
 				Config: testAccFWRuleV2Basic2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV2Exists("openstack_fw_rule_v2.rule_1", &rule),
+					testAccCheckFWRuleV2Exists(t.Context(), "openstack_fw_rule_v2.rule_1", &rule),
 					resource.TestCheckResourceAttr(
 						"openstack_fw_rule_v2.rule_1", "name", "rule_1"),
 					resource.TestCheckResourceAttr(
@@ -73,7 +73,7 @@ func TestAccFWRuleV2_basic(t *testing.T) {
 			{
 				Config: testAccFWRuleV2Basic3,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV2Exists("openstack_fw_rule_v2.rule_1", &rule),
+					testAccCheckFWRuleV2Exists(t.Context(), "openstack_fw_rule_v2.rule_1", &rule),
 					resource.TestCheckResourceAttr(
 						"openstack_fw_rule_v2.rule_1", "name", "rule_1"),
 					resource.TestCheckResourceAttr(
@@ -100,7 +100,7 @@ func TestAccFWRuleV2_basic(t *testing.T) {
 			{
 				Config: testAccFWRuleV2Basic4,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV2Exists("openstack_fw_rule_v2.rule_1", &rule),
+					testAccCheckFWRuleV2Exists(t.Context(), "openstack_fw_rule_v2.rule_1", &rule),
 					resource.TestCheckResourceAttr(
 						"openstack_fw_rule_v2.rule_1", "name", "rule_1"),
 					resource.TestCheckResourceAttr(
@@ -127,7 +127,7 @@ func TestAccFWRuleV2_basic(t *testing.T) {
 			{
 				Config: testAccFWRuleV2Basic5,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV2Exists("openstack_fw_rule_v2.rule_1", &rule),
+					testAccCheckFWRuleV2Exists(t.Context(), "openstack_fw_rule_v2.rule_1", &rule),
 					resource.TestCheckResourceAttr(
 						"openstack_fw_rule_v2.rule_1", "name", "rule_1"),
 					resource.TestCheckResourceAttr(
@@ -162,12 +162,12 @@ func TestAccFWRuleV2_shared(t *testing.T) {
 			testAccPreCheckFW(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckFWRuleV2Destroy,
+		CheckDestroy:      testAccCheckFWRuleV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWRuleV2Shared,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV2Exists("openstack_fw_rule_v2.rule_1", &rule),
+					testAccCheckFWRuleV2Exists(t.Context(), "openstack_fw_rule_v2.rule_1", &rule),
 					resource.TestCheckResourceAttr(
 						"openstack_fw_rule_v2.rule_1", "name", "shared_rule"),
 					resource.TestCheckResourceAttr(
@@ -196,12 +196,12 @@ func TestAccFWRuleV2_anyProtocol(t *testing.T) {
 			testAccPreCheckFW(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckFWRuleV2Destroy,
+		CheckDestroy:      testAccCheckFWRuleV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWRuleV2AnyProtocol,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV2Exists("openstack_fw_rule_v2.rule_1", &rule),
+					testAccCheckFWRuleV2Exists(t.Context(), "openstack_fw_rule_v2.rule_1", &rule),
 					resource.TestCheckResourceAttr(
 						"openstack_fw_rule_v2.rule_1", "name", "rule_1"),
 					resource.TestCheckResourceAttr(
@@ -232,12 +232,12 @@ func TestAccFWRuleV2_updateName(t *testing.T) {
 			testAccPreCheckFW(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckFWRuleV2Destroy,
+		CheckDestroy:      testAccCheckFWRuleV2Destroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWRuleV2UpdateName1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV2Exists("openstack_fw_rule_v2.rule_1", &rule),
+					testAccCheckFWRuleV2Exists(t.Context(), "openstack_fw_rule_v2.rule_1", &rule),
 					resource.TestCheckResourceAttr(
 						"openstack_fw_rule_v2.rule_1", "name", "rule_1"),
 					resource.TestCheckResourceAttr(
@@ -264,7 +264,7 @@ func TestAccFWRuleV2_updateName(t *testing.T) {
 			{
 				Config: testAccFWRuleV2UpdateName2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV2Exists("openstack_fw_rule_v2.rule_1", &rule),
+					testAccCheckFWRuleV2Exists(t.Context(), "openstack_fw_rule_v2.rule_1", &rule),
 					resource.TestCheckResourceAttr(
 						"openstack_fw_rule_v2.rule_1", "name", "updated_rule_1"),
 					resource.TestCheckResourceAttr(
@@ -291,33 +291,35 @@ func TestAccFWRuleV2_updateName(t *testing.T) {
 	})
 }
 
-func testAccCheckFWRuleV2Destroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckFWRuleV2Destroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
+		}
+
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_fw_rule_v2" {
+				continue
+			}
+
+			_, err = rules.Get(ctx, networkingClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return fmt.Errorf("Firewall rule (%s) still exists", rs.Primary.ID)
+			}
+
+			if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+				return err
+			}
+		}
+
+		return nil
 	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_fw_rule_v2" {
-			continue
-		}
-
-		_, err = rules.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("Firewall rule (%s) still exists", rs.Primary.ID)
-		}
-
-		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
-			return err
-		}
-	}
-
-	return nil
 }
 
-func testAccCheckFWRuleV2Exists(n string, rule *rules.Rule) resource.TestCheckFunc {
+func testAccCheckFWRuleV2Exists(ctx context.Context, n string, rule *rules.Rule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -330,7 +332,7 @@ func testAccCheckFWRuleV2Exists(n string, rule *rules.Rule) resource.TestCheckFu
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
@@ -339,7 +341,7 @@ func testAccCheckFWRuleV2Exists(n string, rule *rules.Rule) resource.TestCheckFu
 		for range 5 {
 			// Firewall rule creation is asynchronous. Retry some times
 			// if we get a 404 error. Fail on any other error.
-			found, err = rules.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+			found, err = rules.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 			if err != nil {
 				if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 					time.Sleep(time.Second)

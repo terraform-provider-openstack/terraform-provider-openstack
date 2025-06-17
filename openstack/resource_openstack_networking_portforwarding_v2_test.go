@@ -31,17 +31,17 @@ func TestAccNetworkingV2Portforwarding_basic(t *testing.T) {
 			testAccPreCheckPortForwarding(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2PortForwardingDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2PortForwardingDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2PortForwardingBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet),
-					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
-					testAccCheckNetworkingV2PortExists("openstack_networking_port_v2.port_1", &port),
-					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
-					testAccCheckNetworkingV2PortForwardingExists("openstack_networking_portforwarding_v2.pf_1", "openstack_networking_floatingip_v2.fip_1", &pf),
+					testAccCheckNetworkingV2NetworkExists(t.Context(), "openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet),
+					testAccCheckNetworkingV2RouterExists(t.Context(), "openstack_networking_router_v2.router_1", &router),
+					testAccCheckNetworkingV2PortExists(t.Context(), "openstack_networking_port_v2.port_1", &port),
+					testAccCheckNetworkingV2RouterInterfaceExists(t.Context(), "openstack_networking_router_interface_v2.int_1"),
+					testAccCheckNetworkingV2PortForwardingExists(t.Context(), "openstack_networking_portforwarding_v2.pf_1", "openstack_networking_floatingip_v2.fip_1", &pf),
 					resource.TestCheckResourceAttr("openstack_networking_portforwarding_v2.pf_1", "internal_port", "25"),
 					resource.TestCheckResourceAttr("openstack_networking_portforwarding_v2.pf_1", "description", "pf_1"),
 				),
@@ -58,32 +58,34 @@ func TestAccNetworkingV2Portforwarding_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckNetworkingV2PortForwardingDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckNetworkingV2PortForwardingDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack portforwarding: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_networking_portforwarding_v2" {
-			continue
+		networkClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack portforwarding: %w", err)
 		}
 
-		fipID := rs.Primary.Attributes["floatingip_id"]
-		primID := rs.Primary.ID
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_networking_portforwarding_v2" {
+				continue
+			}
 
-		_, err := portforwarding.Get(context.TODO(), networkClient, fipID, primID).Extract()
-		if err == nil {
-			return errors.New("Port Forwarding still exists")
+			fipID := rs.Primary.Attributes["floatingip_id"]
+			primID := rs.Primary.ID
+
+			_, err := portforwarding.Get(ctx, networkClient, fipID, primID).Extract()
+			if err == nil {
+				return errors.New("Port Forwarding still exists")
+			}
 		}
-	}
 
-	return nil
+		return nil
+	}
 }
 
-func testAccCheckNetworkingV2PortForwardingExists(n string, fipID string, kp *portforwarding.PortForwarding) resource.TestCheckFunc {
+func testAccCheckNetworkingV2PortForwardingExists(ctx context.Context, n string, fipID string, kp *portforwarding.PortForwarding) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -101,12 +103,12 @@ func testAccCheckNetworkingV2PortForwardingExists(n string, fipID string, kp *po
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		found, err := portforwarding.Get(context.TODO(), networkClient, fip.Primary.ID, rs.Primary.ID).Extract()
+		found, err := portforwarding.Get(ctx, networkClient, fip.Primary.ID, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

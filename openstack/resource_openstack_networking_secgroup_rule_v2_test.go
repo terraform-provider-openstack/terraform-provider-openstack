@@ -28,18 +28,18 @@ func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroupRuleBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SecGroupExists(
+					testAccCheckNetworkingV2SecGroupExists(t.Context(),
 						"openstack_networking_secgroup_v2.secgroup_1", &secgroup1),
-					testAccCheckNetworkingV2SecGroupExists(
+					testAccCheckNetworkingV2SecGroupExists(t.Context(),
 						"openstack_networking_secgroup_v2.secgroup_2", &secgroup2),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", &secgroupRule1),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_2", &secgroupRule2),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", "description", "secgroup_rule_1"),
@@ -62,14 +62,14 @@ func TestAccNetworkingV2SecGroupRule_lowerCaseCIDR(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroupRuleLowerCaseCidr,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SecGroupExists(
+					testAccCheckNetworkingV2SecGroupExists(t.Context(),
 						"openstack_networking_secgroup_v2.secgroup_1", &secgroup1),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", &secgroupRule1),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", "remote_ip_prefix", "2001:558:fc00::/39"),
@@ -90,14 +90,14 @@ func TestAccNetworkingV2SecGroupRule_timeout(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroupRuleTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SecGroupExists(
+					testAccCheckNetworkingV2SecGroupExists(t.Context(),
 						"openstack_networking_secgroup_v2.secgroup_1", &secgroup1),
-					testAccCheckNetworkingV2SecGroupExists(
+					testAccCheckNetworkingV2SecGroupExists(t.Context(),
 						"openstack_networking_secgroup_v2.secgroup_2", &secgroup2),
 				),
 			},
@@ -150,48 +150,48 @@ func TestAccNetworkingV2SecGroupRule_protocols(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroupRuleProtocols,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SecGroupExists(
+					testAccCheckNetworkingV2SecGroupExists(t.Context(),
 						"openstack_networking_secgroup_v2.secgroup_1", &secgroup1),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_ah", &secgroupRuleAh),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_dccp", &secgroupRuleDccp),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_egp", &secgroupRuleEgp),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_esp", &secgroupRuleEsp),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_gre", &secgroupRuleGre),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_igmp", &secgroupRuleIgmp),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_ipv6_encap", &secgroupRuleIPv6Encap),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_ipv6_frag", &secgroupRuleIPv6Frag),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_ipv6_icmp", &secgroupRuleIPv6Icmp),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_ipv6_nonxt", &secgroupRuleIPv6Nonxt),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_ipv6_opts", &secgroupRuleIPv6Opts),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_ipv6_route", &secgroupRuleIPv6Route),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_ospf", &secgroupRuleOspf),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_pgm", &secgroupRulePgm),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_rsvp", &secgroupRuleRsvp),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_sctp", &secgroupRuleSctp),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_udplite", &secgroupRuleUdplite),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_vrrp", &secgroupRuleVrrp),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_ah", "protocol", "ah"),
@@ -246,14 +246,14 @@ func TestAccNetworkingV2SecGroupRule_numericProtocol(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroupRuleNumericProtocol,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SecGroupExists(
+					testAccCheckNetworkingV2SecGroupExists(t.Context(),
 						"openstack_networking_secgroup_v2.secgroup_1", &secgroup1),
-					testAccCheckNetworkingV2SecGroupRuleExists(
+					testAccCheckNetworkingV2SecGroupRuleExists(t.Context(),
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", &secgroupRule1),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", "protocol", "6"),
@@ -272,12 +272,12 @@ func TestAccNetworkingV2SecGroupRule_addressgroup(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroupRuleAddressGroup,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2AddressGroupExists("openstack_networking_address_group_v2.group_1", &addressGroup),
+					testAccCheckNetworkingV2AddressGroupExists(t.Context(), "openstack_networking_address_group_v2.group_1", &addressGroup),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_networking_secgroup_rule_v2.secgroup_rule_1", "remote_address_group_id", &addressGroup.ID),
 				),
@@ -286,29 +286,31 @@ func TestAccNetworkingV2SecGroupRule_addressgroup(t *testing.T) {
 	})
 }
 
-func testAccCheckNetworkingV2SecGroupRuleDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckNetworkingV2SecGroupRuleDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_networking_secgroup_rule_v2" {
-			continue
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		_, err := rules.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Security group rule still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_networking_secgroup_rule_v2" {
+				continue
+			}
 
-	return nil
+			_, err := rules.Get(ctx, networkingClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Security group rule still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckNetworkingV2SecGroupRuleExists(n string, securityGroupRule *rules.SecGroupRule) resource.TestCheckFunc {
+func testAccCheckNetworkingV2SecGroupRuleExists(ctx context.Context, n string, securityGroupRule *rules.SecGroupRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -321,12 +323,12 @@ func testAccCheckNetworkingV2SecGroupRuleExists(n string, securityGroupRule *rul
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		found, err := rules.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+		found, err := rules.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

@@ -12,10 +12,9 @@ func TestAccNetworkingV2TrunkDataSource_nosubports(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
-			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2TrunkDataSourceNoSubports(),
@@ -40,10 +39,9 @@ func TestAccNetworkingV2TrunkDataSource_subports(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
-			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2TrunkDataSourceSubports(),
@@ -70,10 +68,9 @@ func TestAccNetworkingV2TrunkDataSource_tags(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
-			testAccSkipReleasesBelow(t, "stable/yoga")
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2TrunkDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2TrunkDataSourceTags(),

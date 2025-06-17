@@ -17,7 +17,7 @@ func TestAccDNSV2RecordSet_importBasic(t *testing.T) {
 			testAccPreCheckDNS(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
+		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2RecordSetBasic(zoneName),

@@ -24,14 +24,14 @@ func TestAccDatabaseV1Database_basic(t *testing.T) {
 			testAccPreCheckDatabase(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckDatabaseV1DatabaseDestroy,
+		CheckDestroy:      testAccCheckDatabaseV1DatabaseDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatabaseV1DatabaseBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDatabaseV1InstanceExists(
+					testAccCheckDatabaseV1InstanceExists(t.Context(),
 						"openstack_db_instance_v1.basic", &instance),
-					testAccCheckDatabaseV1DatabaseExists(
+					testAccCheckDatabaseV1DatabaseExists(t.Context(),
 						"openstack_db_database_v1.basic", &instance, &db),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_db_database_v1.basic", "name", &db.Name),
@@ -41,7 +41,7 @@ func TestAccDatabaseV1Database_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckDatabaseV1DatabaseExists(n string, instance *instances.Instance, db *databases.Database) resource.TestCheckFunc {
+func testAccCheckDatabaseV1DatabaseExists(ctx context.Context, n string, instance *instances.Instance, db *databases.Database) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -59,12 +59,12 @@ func testAccCheckDatabaseV1DatabaseExists(n string, instance *instances.Instance
 
 		config := testAccProvider.Meta().(*Config)
 
-		databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
+		databaseV1Client, err := config.DatabaseV1Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
-		pages, err := databases.List(databaseV1Client, instance.ID).AllPages(context.TODO())
+		pages, err := databases.List(databaseV1Client, instance.ID).AllPages(ctx)
 		if err != nil {
 			return fmt.Errorf("Unable to retrieve databases: %w", err)
 		}
@@ -86,48 +86,50 @@ func testAccCheckDatabaseV1DatabaseExists(n string, instance *instances.Instance
 	}
 }
 
-func testAccCheckDatabaseV1DatabaseDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckDatabaseV1DatabaseDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	databaseV1Client, err := config.DatabaseV1Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_db_database_v1" {
-			continue
-		}
-
-		id, userName, err := parsePairedIDs(rs.Primary.ID, "openstack_db_database_v1")
+		databaseV1Client, err := config.DatabaseV1Client(ctx, osRegionName)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
-		pages, err := databases.List(databaseV1Client, id).AllPages(context.TODO())
-		if err != nil {
-			return nil
-		}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_db_database_v1" {
+				continue
+			}
 
-		allDatabases, err := databases.ExtractDBs(pages)
-		if err != nil {
-			return fmt.Errorf("Unable to extract databases: %w", err)
-		}
+			id, userName, err := parsePairedIDs(rs.Primary.ID, "openstack_db_database_v1")
+			if err != nil {
+				return err
+			}
 
-		var exists bool
+			pages, err := databases.List(databaseV1Client, id).AllPages(ctx)
+			if err != nil {
+				return nil
+			}
 
-		for _, v := range allDatabases {
-			if v.Name == userName {
-				exists = true
+			allDatabases, err := databases.ExtractDBs(pages)
+			if err != nil {
+				return fmt.Errorf("Unable to extract databases: %w", err)
+			}
+
+			var exists bool
+
+			for _, v := range allDatabases {
+				if v.Name == userName {
+					exists = true
+				}
+			}
+
+			if exists {
+				return errors.New("database still exists")
 			}
 		}
 
-		if exists {
-			return errors.New("database still exists")
-		}
+		return nil
 	}
-
-	return nil
 }
 
 func testAccDatabaseV1DatabaseBasic() string {

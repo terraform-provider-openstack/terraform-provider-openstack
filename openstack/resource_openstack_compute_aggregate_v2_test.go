@@ -49,7 +49,7 @@ func TestAccComputeV2Aggregate(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAggregateConfig,
-				Check:  testAccCheckAggregateExists("openstack_compute_aggregate_v2.test", &aggregate),
+				Check:  testAccCheckAggregateExists(t.Context(), "openstack_compute_aggregate_v2.test", &aggregate),
 			},
 			{
 				ResourceName: "openstack_compute_aggregate_v2.test",
@@ -71,12 +71,12 @@ func TestAccComputeV2AggregateWithHypervisor(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAggregateConfig,
-				Check:  testAccCheckAggregateExists("openstack_compute_aggregate_v2.test", &aggregate),
+				Check:  testAccCheckAggregateExists(t.Context(), "openstack_compute_aggregate_v2.test", &aggregate),
 			},
 			{
 				Config: testAccAggregateHypervisorConfig(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAggregateExists("openstack_compute_aggregate_v2.test", &aggregate),
+					testAccCheckAggregateExists(t.Context(), "openstack_compute_aggregate_v2.test", &aggregate),
 					resource.TestCheckResourceAttr("openstack_compute_aggregate_v2.test", "hosts.#", "1"),
 					resource.TestCheckResourceAttr("openstack_compute_aggregate_v2.test", "metadata.test", "123"),
 				),
@@ -84,7 +84,7 @@ func TestAccComputeV2AggregateWithHypervisor(t *testing.T) {
 			{
 				Config: testAccAggregateConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAggregateExists("openstack_compute_aggregate_v2.test", &aggregate),
+					testAccCheckAggregateExists(t.Context(), "openstack_compute_aggregate_v2.test", &aggregate),
 					resource.TestCheckResourceAttr("openstack_compute_aggregate_v2.test", "hosts.#", "0"),
 					resource.TestCheckNoResourceAttr("openstack_compute_aggregate_v2.test", "metadata.test"),
 				),
@@ -103,7 +103,7 @@ func TestAccComputeV2AggregateWithRegion(t *testing.T) {
 			{
 				Config: testAccAggregateRegionConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAggregateExists("openstack_compute_aggregate_v2.test", &aggregate),
+					testAccCheckAggregateExists(t.Context(), "openstack_compute_aggregate_v2.test", &aggregate),
 					resource.TestCheckResourceAttr("openstack_compute_aggregate_v2.test", "region", "RegionOne"),
 				),
 			},
@@ -111,7 +111,7 @@ func TestAccComputeV2AggregateWithRegion(t *testing.T) {
 	})
 }
 
-func testAccCheckAggregateExists(n string, aggregate *aggregates.Aggregate) resource.TestCheckFunc {
+func testAccCheckAggregateExists(ctx context.Context, n string, aggregate *aggregates.Aggregate) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -124,7 +124,7 @@ func testAccCheckAggregateExists(n string, aggregate *aggregates.Aggregate) reso
 
 		config := testAccProvider.Meta().(*Config)
 
-		computeClient, err := config.ComputeV2Client(context.TODO(), osRegionName)
+		computeClient, err := config.ComputeV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
@@ -134,7 +134,7 @@ func testAccCheckAggregateExists(n string, aggregate *aggregates.Aggregate) reso
 			return fmt.Errorf("Can't convert ID to integer: %w", err)
 		}
 
-		found, err := aggregates.Get(context.TODO(), computeClient, id).Extract()
+		found, err := aggregates.Get(ctx, computeClient, id).Extract()
 		if err != nil {
 			return err
 		}

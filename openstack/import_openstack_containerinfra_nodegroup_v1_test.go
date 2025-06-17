@@ -22,7 +22,7 @@ func TestAccContainerInfraV1NodeGroupImport_basic(t *testing.T) {
 			testAccPreCheckContainerInfra(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerInfraV1NodeGroupDestroy,
+		CheckDestroy:      testAccCheckContainerInfraV1NodeGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerInfraV1NodeGroupBasic(keypairName, clusterTemplateName, clusterName, nodeGroupName, 1),
@@ -51,7 +51,7 @@ func TestAccContainerInfraV1NodeGroupImport_mergeLabels(t *testing.T) {
 			testAccPreCheckContainerInfra(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerInfraV1NodeGroupDestroy,
+		CheckDestroy:      testAccCheckContainerInfraV1NodeGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerInfraV1NodeGroupMergeLabels(keypairName, clusterTemplateName, clusterName, nodeGroupName, 1),
@@ -81,7 +81,7 @@ func TestAccContainerInfraV1NodeGroupImport_overrideLabels(t *testing.T) {
 			testAccPreCheckContainerInfra(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckContainerInfraV1NodeGroupDestroy,
+		CheckDestroy:      testAccCheckContainerInfraV1NodeGroupDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerInfraV1NodeGroupOverrideLabels(keypairName, clusterTemplateName, clusterName, nodeGroupName, 1),

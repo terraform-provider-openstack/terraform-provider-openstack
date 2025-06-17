@@ -16,7 +16,7 @@ func TestAccLBV2Members_importBasic(t *testing.T) {
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2MembersDestroy,
+		CheckDestroy:      testAccCheckLBV2MembersDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccLbV2MembersConfigBasic,

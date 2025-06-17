@@ -30,34 +30,34 @@ func TestAccNetworkingV2RouterRoute_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingV2RouterRouteCreate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2RouterExists("openstack_networking_router_v2.router_1", &router),
-					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network[0]),
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet[0]),
-					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network[1]),
-					testAccCheckNetworkingV2SubnetExists("openstack_networking_subnet_v2.subnet_1", &subnet[1]),
-					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_1"),
-					testAccCheckNetworkingV2RouterInterfaceExists("openstack_networking_router_interface_v2.int_2"),
-					testAccCheckNetworkingV2RouterRouteExists("openstack_networking_router_route_v2.router_route_1"),
+					testAccCheckNetworkingV2RouterExists(t.Context(), "openstack_networking_router_v2.router_1", &router),
+					testAccCheckNetworkingV2NetworkExists(t.Context(), "openstack_networking_network_v2.network_1", &network[0]),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet[0]),
+					testAccCheckNetworkingV2NetworkExists(t.Context(), "openstack_networking_network_v2.network_1", &network[1]),
+					testAccCheckNetworkingV2SubnetExists(t.Context(), "openstack_networking_subnet_v2.subnet_1", &subnet[1]),
+					testAccCheckNetworkingV2RouterInterfaceExists(t.Context(), "openstack_networking_router_interface_v2.int_1"),
+					testAccCheckNetworkingV2RouterInterfaceExists(t.Context(), "openstack_networking_router_interface_v2.int_2"),
+					testAccCheckNetworkingV2RouterRouteExists(t.Context(), "openstack_networking_router_route_v2.router_route_1"),
 				),
 			},
 			{
 				Config: testAccNetworkingV2RouterRouteUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2RouterRouteExists("openstack_networking_router_route_v2.router_route_1"),
-					testAccCheckNetworkingV2RouterRouteExists("openstack_networking_router_route_v2.router_route_2"),
+					testAccCheckNetworkingV2RouterRouteExists(t.Context(), "openstack_networking_router_route_v2.router_route_1"),
+					testAccCheckNetworkingV2RouterRouteExists(t.Context(), "openstack_networking_router_route_v2.router_route_2"),
 				),
 			},
 			{
 				Config: testAccNetworkingV2RouterRouteDestroy,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2RouterRouteEmpty("openstack_networking_router_v2.router_1"),
+					testAccCheckNetworkingV2RouterRouteEmpty(t.Context(), "openstack_networking_router_v2.router_1"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckNetworkingV2RouterRouteEmpty(n string) resource.TestCheckFunc {
+func testAccCheckNetworkingV2RouterRouteEmpty(ctx context.Context, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -70,12 +70,12 @@ func testAccCheckNetworkingV2RouterRouteEmpty(n string) resource.TestCheckFunc {
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		router, err := routers.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+		router, err := routers.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -92,7 +92,7 @@ func testAccCheckNetworkingV2RouterRouteEmpty(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckNetworkingV2RouterRouteExists(n string) resource.TestCheckFunc {
+func testAccCheckNetworkingV2RouterRouteExists(ctx context.Context, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -105,12 +105,12 @@ func testAccCheckNetworkingV2RouterRouteExists(n string) resource.TestCheckFunc 
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		router, err := routers.Get(context.TODO(), networkingClient, rs.Primary.Attributes["router_id"]).Extract()
+		router, err := routers.Get(ctx, networkingClient, rs.Primary.Attributes["router_id"]).Extract()
 		if err != nil {
 			return err
 		}
@@ -135,39 +135,41 @@ func testAccCheckNetworkingV2RouterRouteExists(n string) resource.TestCheckFunc 
 	}
 }
 
-func testAccCheckNetworkingV2RouterRouteDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckNetworkingV2RouterRouteDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_networking_router_route_v2" {
-			continue
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		routeExists := false
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_networking_router_route_v2" {
+				continue
+			}
 
-		router, err := routers.Get(context.TODO(), networkingClient, rs.Primary.Attributes["router_id"]).Extract()
-		if err == nil {
-			rts := router.Routes
-			for _, r := range rts {
-				if r.DestinationCIDR == rs.Primary.Attributes["destination_cidr"] && r.NextHop == rs.Primary.Attributes["next_hop"] {
-					routeExists = true
+			routeExists := false
 
-					break
+			router, err := routers.Get(ctx, networkingClient, rs.Primary.Attributes["router_id"]).Extract()
+			if err == nil {
+				rts := router.Routes
+				for _, r := range rts {
+					if r.DestinationCIDR == rs.Primary.Attributes["destination_cidr"] && r.NextHop == rs.Primary.Attributes["next_hop"] {
+						routeExists = true
+
+						break
+					}
 				}
+			}
+
+			if routeExists {
+				return errors.New("Route still exists")
 			}
 		}
 
-		if routeExists {
-			return errors.New("Route still exists")
-		}
+		return nil
 	}
-
-	return nil
 }
 
 const testAccNetworkingV2RouterRouteCreate = `

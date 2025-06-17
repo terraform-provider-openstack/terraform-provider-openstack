@@ -497,14 +497,7 @@ func Provider() *schema.Provider {
 	}
 
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
-		terraformVersion := provider.TerraformVersion
-		if terraformVersion == "" {
-			// Terraform 0.12 introduced this field to the protocol
-			// We can therefore assume that if it's missing it's 0.10 or 0.11
-			terraformVersion = "0.11+compatible"
-		}
-
-		return configureProvider(ctx, d, terraformVersion)
+		return configureProvider(ctx, provider, d)
 	}
 
 	return provider
@@ -513,7 +506,7 @@ func Provider() *schema.Provider {
 func getSDKVersion() string {
 	buildInfo, ok := debug.ReadBuildInfo()
 	if !ok {
-		return ""
+		return version
 	}
 
 	for _, v := range buildInfo.Deps {
@@ -522,10 +515,22 @@ func getSDKVersion() string {
 		}
 	}
 
-	return ""
+	return version
 }
 
-func configureProvider(ctx context.Context, d *schema.ResourceData, terraformVersion string) (any, diag.Diagnostics) {
+func configureProvider(ctx context.Context, provider *schema.Provider, d *schema.ResourceData) (any, diag.Diagnostics) {
+	// If the provider has already been configured, return the existing config.
+	if v, ok := provider.Meta().(*Config); ok {
+		return v, nil
+	}
+
+	terraformVersion := provider.TerraformVersion
+	if terraformVersion == "" {
+		// Terraform 0.12 introduced this field to the protocol
+		// We can therefore assume that if it's missing it's 0.10 or 0.11
+		terraformVersion = "0.11+compatible"
+	}
+
 	enableLogging := d.Get("enable_logging").(bool)
 	if !enableLogging {
 		// enforce logging (similar to OS_DEBUG) when TF_LOG is 'DEBUG' or 'TRACE'

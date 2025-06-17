@@ -21,14 +21,14 @@ func TestAccLBV2Pool_basic(t *testing.T) {
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2PoolDestroy,
+		CheckDestroy:      testAccCheckLBV2PoolDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccLbV2PoolConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2PoolExists("openstack_lb_pool_v2.pool_1", &pool),
-					testAccCheckLBV2PoolHasTag("openstack_lb_pool_v2.pool_1", "foo"),
-					testAccCheckLBV2PoolTagCount("openstack_lb_pool_v2.pool_1", 1),
+					testAccCheckLBV2PoolExists(t.Context(), "openstack_lb_pool_v2.pool_1", &pool),
+					testAccCheckLBV2PoolHasTag(t.Context(), "openstack_lb_pool_v2.pool_1", "foo"),
+					testAccCheckLBV2PoolTagCount(t.Context(), "openstack_lb_pool_v2.pool_1", 1),
 					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "persistence.#", "1"),
 					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "persistence.0.type", "APP_COOKIE"),
 					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "persistence.0.cookie_name", "testCookie"),
@@ -42,8 +42,8 @@ func TestAccLBV2Pool_basic(t *testing.T) {
 				Config: TestAccLbV2PoolConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "name", "pool_1_updated"),
-					testAccCheckLBV2PoolHasTag("openstack_lb_pool_v2.pool_1", "bar"),
-					testAccCheckLBV2PoolTagCount("openstack_lb_pool_v2.pool_1", 1),
+					testAccCheckLBV2PoolHasTag(t.Context(), "openstack_lb_pool_v2.pool_1", "bar"),
+					testAccCheckLBV2PoolTagCount(t.Context(), "openstack_lb_pool_v2.pool_1", 1),
 					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "persistence.#", "0"),
 					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "tls_enabled", "false"),
 					// tls_versions reset to Octavia default value
@@ -58,7 +58,7 @@ func TestAccLBV2Pool_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckLBV2PoolHasTag(n, tag string) resource.TestCheckFunc {
+func testAccCheckLBV2PoolHasTag(ctx context.Context, n, tag string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -71,12 +71,12 @@ func testAccCheckLBV2PoolHasTag(n, tag string) resource.TestCheckFunc {
 
 		config := testAccProvider.Meta().(*Config)
 
-		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
-		found, err := pools.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
+		found, err := pools.Get(ctx, lbClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -95,7 +95,7 @@ func testAccCheckLBV2PoolHasTag(n, tag string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckLBV2PoolTagCount(n string, expected int) resource.TestCheckFunc {
+func testAccCheckLBV2PoolTagCount(ctx context.Context, n string, expected int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -108,12 +108,12 @@ func testAccCheckLBV2PoolTagCount(n string, expected int) resource.TestCheckFunc
 
 		config := testAccProvider.Meta().(*Config)
 
-		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
-		found, err := pools.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
+		found, err := pools.Get(ctx, lbClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -140,12 +140,12 @@ func TestAccLBV2Pool_octavia_udp(t *testing.T) {
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2PoolDestroy,
+		CheckDestroy:      testAccCheckLBV2PoolDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccLbV2PoolConfigOctaviaUDP,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2PoolExists("openstack_lb_pool_v2.pool_1", &pool),
+					testAccCheckLBV2PoolExists(t.Context(), "openstack_lb_pool_v2.pool_1", &pool),
 					resource.TestCheckResourceAttr("openstack_lb_pool_v2.pool_1", "protocol", "UDP"),
 				),
 			},
@@ -153,29 +153,31 @@ func TestAccLBV2Pool_octavia_udp(t *testing.T) {
 	})
 }
 
-func testAccCheckLBV2PoolDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckLBV2PoolDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_lb_pool_v2" {
-			continue
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
-		_, err := pools.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("Pool still exists: %s", rs.Primary.ID)
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_lb_pool_v2" {
+				continue
+			}
 
-	return nil
+			_, err := pools.Get(ctx, lbClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return fmt.Errorf("Pool still exists: %s", rs.Primary.ID)
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckLBV2PoolExists(n string, pool *pools.Pool) resource.TestCheckFunc {
+func testAccCheckLBV2PoolExists(ctx context.Context, n string, pool *pools.Pool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -188,12 +190,12 @@ func testAccCheckLBV2PoolExists(n string, pool *pools.Pool) resource.TestCheckFu
 
 		config := testAccProvider.Meta().(*Config)
 
-		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
-		found, err := pools.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
+		found, err := pools.Get(ctx, lbClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

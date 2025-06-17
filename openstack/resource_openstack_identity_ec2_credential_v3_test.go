@@ -21,12 +21,12 @@ func TestAccIdentityV3Ec2Credential_basic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3Ec2CredentialDestroy,
+		CheckDestroy:      testAccCheckIdentityV3Ec2CredentialDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3Ec2CredentialBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3Ec2CredentialExists("openstack_identity_ec2_credential_v3.ec2_cred_1", &Ec2Credential),
+					testAccCheckIdentityV3Ec2CredentialExists(t.Context(), "openstack_identity_ec2_credential_v3.ec2_cred_1", &Ec2Credential),
 					resource.TestCheckResourceAttrSet(
 						"openstack_identity_ec2_credential_v3.ec2_cred_1", "secret"),
 					resource.TestCheckResourceAttrSet(
@@ -41,39 +41,41 @@ func TestAccIdentityV3Ec2Credential_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckIdentityV3Ec2CredentialDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckIdentityV3Ec2CredentialDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
-	}
-
-	token := tokens.Get(context.TODO(), identityClient, config.OsClient.TokenID)
-	if token.Err != nil {
-		return token.Err
-	}
-
-	user, err := token.ExtractUser()
-	if err != nil {
-		return err
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_identity_ec2_credential_v3" {
-			continue
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		_, err := ec2credentials.Get(context.TODO(), identityClient, user.ID, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Ec2Credential still exists")
+		token := tokens.Get(ctx, identityClient, config.OsClient.TokenID)
+		if token.Err != nil {
+			return token.Err
 		}
-	}
 
-	return nil
+		user, err := token.ExtractUser()
+		if err != nil {
+			return err
+		}
+
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_identity_ec2_credential_v3" {
+				continue
+			}
+
+			_, err := ec2credentials.Get(ctx, identityClient, user.ID, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Ec2Credential still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckIdentityV3Ec2CredentialExists(n string, ec2Credential *ec2credentials.Credential) resource.TestCheckFunc {
+func testAccCheckIdentityV3Ec2CredentialExists(ctx context.Context, n string, ec2Credential *ec2credentials.Credential) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -86,12 +88,12 @@ func testAccCheckIdentityV3Ec2CredentialExists(n string, ec2Credential *ec2crede
 
 		config := testAccProvider.Meta().(*Config)
 
-		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		token := tokens.Get(context.TODO(), identityClient, config.OsClient.TokenID)
+		token := tokens.Get(ctx, identityClient, config.OsClient.TokenID)
 		if token.Err != nil {
 			return token.Err
 		}
@@ -101,7 +103,7 @@ func testAccCheckIdentityV3Ec2CredentialExists(n string, ec2Credential *ec2crede
 			return err
 		}
 
-		found, err := ec2credentials.Get(context.TODO(), identityClient, user.ID, rs.Primary.ID).Extract()
+		found, err := ec2credentials.Get(ctx, identityClient, user.ID, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

@@ -15,7 +15,7 @@ func TestAccComputeV2VolumeAttach_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
+		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2VolumeAttachBasic(),

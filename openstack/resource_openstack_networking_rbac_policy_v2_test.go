@@ -31,14 +31,14 @@ func TestAccNetworkingV2RBACPolicy_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2RBACPolicyDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2RBACPolicyDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2RBACPolicyBasic(projectOneName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_1", &project),
-					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2RBACPolicyExists("openstack_networking_rbac_policy_v2.rbac_policy_1", &rbac),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_1", &project),
+					testAccCheckNetworkingV2NetworkExists(t.Context(), "openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2RBACPolicyExists(t.Context(), "openstack_networking_rbac_policy_v2.rbac_policy_1", &rbac),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_rbac_policy_v2.rbac_policy_1", "action", "access_as_shared"),
 					resource.TestCheckResourceAttrPtr(
@@ -56,9 +56,9 @@ func TestAccNetworkingV2RBACPolicy_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingV2RBACPolicyUpdate(projectTwoName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3ProjectExists("openstack_identity_project_v3.project_2", &project),
-					testAccCheckNetworkingV2NetworkExists("openstack_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2RBACPolicyExists("openstack_networking_rbac_policy_v2.rbac_policy_1", &rbac),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_2", &project),
+					testAccCheckNetworkingV2NetworkExists(t.Context(), "openstack_networking_network_v2.network_1", &network),
+					testAccCheckNetworkingV2RBACPolicyExists(t.Context(), "openstack_networking_rbac_policy_v2.rbac_policy_1", &rbac),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_rbac_policy_v2.rbac_policy_1", "action", "access_as_shared"),
 					resource.TestCheckResourceAttrPtr(
@@ -77,29 +77,31 @@ func TestAccNetworkingV2RBACPolicy_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckNetworkingV2RBACPolicyDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckNetworkingV2RBACPolicyDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack networking client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_networking_rbac_policy_v2" {
-			continue
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		_, err := rbacpolicies.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Project still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_networking_rbac_policy_v2" {
+				continue
+			}
 
-	return nil
+			_, err := rbacpolicies.Get(ctx, networkingClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Project still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckNetworkingV2RBACPolicyExists(n string, rbac *rbacpolicies.RBACPolicy) resource.TestCheckFunc {
+func testAccCheckNetworkingV2RBACPolicyExists(ctx context.Context, n string, rbac *rbacpolicies.RBACPolicy) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -112,12 +114,12 @@ func testAccCheckNetworkingV2RBACPolicyExists(n string, rbac *rbacpolicies.RBACP
 
 		config := testAccProvider.Meta().(*Config)
 
-		networkingClient, err := config.NetworkingV2Client(context.TODO(), osRegionName)
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack networking client: %w", err)
 		}
 
-		found, err := rbacpolicies.Get(context.TODO(), networkingClient, rs.Primary.ID).Extract()
+		found, err := rbacpolicies.Get(ctx, networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

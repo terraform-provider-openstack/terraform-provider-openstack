@@ -15,7 +15,7 @@ func TestAccNetworkingV2FloatingIP_importBasic(t *testing.T) {
 			testAccPreCheckNonAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckNetworkingV2FloatingIPDestroy,
+		CheckDestroy:      testAccCheckNetworkingV2FloatingIPDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2FloatingIPBasic,

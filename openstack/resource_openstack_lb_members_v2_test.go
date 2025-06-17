@@ -45,12 +45,12 @@ func TestAccLBV2Members_basic(t *testing.T) {
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2MembersDestroy,
+		CheckDestroy:      testAccCheckLBV2MembersDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccLbV2MembersConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2MembersExists("openstack_lb_members_v2.members_1", &members),
+					testAccCheckLBV2MembersExists(t.Context(), "openstack_lb_members_v2.members_1", &members),
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.#", "2"),
 					testAccCheckLBV2MembersComputeHash(&members, 0, "192.168.199.110", &idx1),
 					testAccCheckLBV2MembersComputeHash(&members, 1, "192.168.199.111", &idx2),
@@ -67,7 +67,7 @@ func TestAccLBV2Members_basic(t *testing.T) {
 			{
 				Config: TestAccLbV2MembersConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2MembersExists("openstack_lb_members_v2.members_1", &members),
+					testAccCheckLBV2MembersExists(t.Context(), "openstack_lb_members_v2.members_1", &members),
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.#", "2"),
 					testAccCheckLBV2MembersComputeHash(&members, 10, "192.168.199.110", &idx1),
 					testAccCheckLBV2MembersComputeHash(&members, 15, "192.168.199.111", &idx2),
@@ -84,7 +84,7 @@ func TestAccLBV2Members_basic(t *testing.T) {
 			{
 				Config: TestAccLbV2MembersConfigUnsetSubnet,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2MembersExists("openstack_lb_members_v2.members_1", &members),
+					testAccCheckLBV2MembersExists(t.Context(), "openstack_lb_members_v2.members_1", &members),
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.#", "2"),
 					testAccCheckLBV2MembersComputeHash(&members, 10, "192.168.199.110", &idx1),
 					testAccCheckLBV2MembersComputeHash(&members, 15, "192.168.199.111", &idx2),
@@ -97,7 +97,7 @@ func TestAccLBV2Members_basic(t *testing.T) {
 			{
 				Config: TestAccLbV2MembersConfigDeleteMembers,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2MembersExists("openstack_lb_members_v2.members_1", &members),
+					testAccCheckLBV2MembersExists(t.Context(), "openstack_lb_members_v2.members_1", &members),
 					resource.TestCheckResourceAttr("openstack_lb_members_v2.members_1", "member.#", "0"),
 				),
 			},
@@ -105,44 +105,46 @@ func TestAccLBV2Members_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckLBV2MembersDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckLBV2MembersDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_lb_members_v2" {
-			continue
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
-		poolID := rs.Primary.Attributes["pool_id"]
-
-		allPages, err := pools.ListMembers(lbClient, poolID, pools.ListMembersOpts{}).AllPages(context.TODO())
-		if err != nil {
-			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
-				return nil
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_lb_members_v2" {
+				continue
 			}
 
-			return fmt.Errorf("Error getting openstack_lb_members_v2: %w", err)
+			poolID := rs.Primary.Attributes["pool_id"]
+
+			allPages, err := pools.ListMembers(lbClient, poolID, pools.ListMembersOpts{}).AllPages(ctx)
+			if err != nil {
+				if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+					return nil
+				}
+
+				return fmt.Errorf("Error getting openstack_lb_members_v2: %w", err)
+			}
+
+			members, err := pools.ExtractMembers(allPages)
+			if err != nil {
+				return fmt.Errorf("Unable to retrieve openstack_lb_members_v2: %w", err)
+			}
+
+			if len(members) > 0 {
+				return fmt.Errorf("Members still exist: %s", rs.Primary.ID)
+			}
 		}
 
-		members, err := pools.ExtractMembers(allPages)
-		if err != nil {
-			return fmt.Errorf("Unable to retrieve openstack_lb_members_v2: %w", err)
-		}
-
-		if len(members) > 0 {
-			return fmt.Errorf("Members still exist: %s", rs.Primary.ID)
-		}
+		return nil
 	}
-
-	return nil
 }
 
-func testAccCheckLBV2MembersExists(n string, members *[]pools.Member) resource.TestCheckFunc {
+func testAccCheckLBV2MembersExists(ctx context.Context, n string, members *[]pools.Member) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -155,14 +157,14 @@ func testAccCheckLBV2MembersExists(n string, members *[]pools.Member) resource.T
 
 		config := testAccProvider.Meta().(*Config)
 
-		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
 		poolID := rs.Primary.Attributes["pool_id"]
 
-		allPages, err := pools.ListMembers(lbClient, poolID, pools.ListMembersOpts{}).AllPages(context.TODO())
+		allPages, err := pools.ListMembers(lbClient, poolID, pools.ListMembersOpts{}).AllPages(ctx)
 		if err != nil {
 			return fmt.Errorf("Error getting openstack_lb_members_v2: %w", err)
 		}

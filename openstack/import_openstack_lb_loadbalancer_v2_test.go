@@ -18,7 +18,7 @@ func TestAccLBV2LoadBalancer_importBasic(t *testing.T) {
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
+		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2LoadBalancerConfigBasic(lbProvider),

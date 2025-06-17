@@ -21,12 +21,12 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
+		CheckDestroy:      testAccCheckLBV2ListenerDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2ListenerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
+					testAccCheckLBV2ListenerExists(t.Context(), "openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "connection_limit", "-1"),
 				),
@@ -54,12 +54,12 @@ func TestAccLBV2Listener_octavia(t *testing.T) {
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
+		CheckDestroy:      testAccCheckLBV2ListenerDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2ListenerConfigOctavia,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
+					testAccCheckLBV2ListenerExists(t.Context(), "openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "tags.#", "1"),
 					resource.TestCheckResourceAttr(
@@ -107,12 +107,12 @@ func TestAccLBV2Listener_octavia_udp(t *testing.T) {
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
+		CheckDestroy:      testAccCheckLBV2ListenerDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2ListenerConfigOctaviaUDP,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
+					testAccCheckLBV2ListenerExists(t.Context(), "openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "protocol", "UDP"),
 				),
@@ -131,12 +131,12 @@ func TestAccLBV2ListenerConfig_octavia_insert_headers(t *testing.T) {
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
+		CheckDestroy:      testAccCheckLBV2ListenerDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2ListenerConfigOctaviaInsertHeaders1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
+					testAccCheckLBV2ListenerExists(t.Context(), "openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "insert_headers.X-Forwarded-For", "true"),
 					resource.TestCheckResourceAttr(
@@ -146,7 +146,7 @@ func TestAccLBV2ListenerConfig_octavia_insert_headers(t *testing.T) {
 			{
 				Config: testAccLbV2ListenerConfigOctaviaInsertHeaders2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
+					testAccCheckLBV2ListenerExists(t.Context(), "openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "insert_headers.X-Forwarded-For", "false"),
 					resource.TestCheckResourceAttr(
@@ -156,7 +156,7 @@ func TestAccLBV2ListenerConfig_octavia_insert_headers(t *testing.T) {
 			{
 				Config: testAccLbV2ListenerConfigOctavia,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
+					testAccCheckLBV2ListenerExists(t.Context(), "openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckNoResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "insert_headers.X-Forwarded-For"),
 					resource.TestCheckNoResourceAttr(
@@ -172,19 +172,18 @@ func TestAccLBV2Listener_hsts(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccSkipReleasesBelow(t, "stable/2023.2")
 			t.Skip("Secret creation attempt not allowed - please review your user/project privileges")
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
+		CheckDestroy:      testAccCheckLBV2ListenerDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLbV2ListenerConfigHSTS,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2ListenerExists("openstack_lb_listener_v2.listener_1", &listener),
+					testAccCheckLBV2ListenerExists(t.Context(), "openstack_lb_listener_v2.listener_1", &listener),
 					resource.TestCheckResourceAttr(
 						"openstack_lb_listener_v2.listener_1", "connection_limit", "-1"),
 					resource.TestCheckResourceAttr(
@@ -235,29 +234,31 @@ func TestAccLBV2Listener_hsts(t *testing.T) {
 	})
 }
 
-func testAccCheckLBV2ListenerDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckLBV2ListenerDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_lb_listener_v2" {
-			continue
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
-		_, err := listeners.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("Listener still exists: %s", rs.Primary.ID)
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_lb_listener_v2" {
+				continue
+			}
 
-	return nil
+			_, err := listeners.Get(ctx, lbClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return fmt.Errorf("Listener still exists: %s", rs.Primary.ID)
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckLBV2ListenerExists(n string, listener *listeners.Listener) resource.TestCheckFunc {
+func testAccCheckLBV2ListenerExists(ctx context.Context, n string, listener *listeners.Listener) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -270,12 +271,12 @@ func testAccCheckLBV2ListenerExists(n string, listener *listeners.Listener) reso
 
 		config := testAccProvider.Meta().(*Config)
 
-		lbClient, err := config.LoadBalancerV2Client(context.TODO(), osRegionName)
+		lbClient, err := config.LoadBalancerV2Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack load balancing client: %w", err)
 		}
 
-		found, err := listeners.Get(context.TODO(), lbClient, rs.Primary.ID).Extract()
+		found, err := listeners.Get(ctx, lbClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

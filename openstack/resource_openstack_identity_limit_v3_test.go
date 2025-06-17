@@ -24,12 +24,12 @@ func TestAccIdentityV3Limit_basic(t *testing.T) {
 			testAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: testAccProviders,
-		CheckDestroy:      testAccCheckIdentityV3LimitDestroy,
+		CheckDestroy:      testAccCheckIdentityV3LimitDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3LimitBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3LimitExists("openstack_identity_limit_v3.limit_1", &project, &service),
+					testAccCheckIdentityV3LimitExists(t.Context(), "openstack_identity_limit_v3.limit_1", &project, &service),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_limit_v3.limit_1", "service_id", &service.ID),
 					resource.TestCheckResourceAttrPtr(
@@ -45,7 +45,7 @@ func TestAccIdentityV3Limit_basic(t *testing.T) {
 			{
 				Config: testAccIdentityV3LimitUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3LimitExists("openstack_identity_limit_v3.limit_1", &project, &service),
+					testAccCheckIdentityV3LimitExists(t.Context(), "openstack_identity_limit_v3.limit_1", &project, &service),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_limit_v3.limit_1", "service_id", &service.ID),
 					resource.TestCheckResourceAttrPtr(
@@ -62,29 +62,31 @@ func TestAccIdentityV3Limit_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckIdentityV3LimitDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckIdentityV3LimitDestroy(ctx context.Context) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
 
-	identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_identity_limit_v3" {
-			continue
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		_, err := limits.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
-		if err == nil {
-			return errors.New("Limit still exists")
-		}
-	}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "openstack_identity_limit_v3" {
+				continue
+			}
 
-	return nil
+			_, err := limits.Get(ctx, identityClient, rs.Primary.ID).Extract()
+			if err == nil {
+				return errors.New("Limit still exists")
+			}
+		}
+
+		return nil
+	}
 }
 
-func testAccCheckIdentityV3LimitExists(n string, project *projects.Project, service *services.Service) resource.TestCheckFunc {
+func testAccCheckIdentityV3LimitExists(ctx context.Context, n string, project *projects.Project, service *services.Service) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -97,12 +99,12 @@ func testAccCheckIdentityV3LimitExists(n string, project *projects.Project, serv
 
 		config := testAccProvider.Meta().(*Config)
 
-		identityClient, err := config.IdentityV3Client(context.TODO(), osRegionName)
+		identityClient, err := config.IdentityV3Client(ctx, osRegionName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenStack identity client: %w", err)
 		}
 
-		found, err := limits.Get(context.TODO(), identityClient, rs.Primary.ID).Extract()
+		found, err := limits.Get(ctx, identityClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -111,14 +113,14 @@ func testAccCheckIdentityV3LimitExists(n string, project *projects.Project, serv
 			return errors.New("Limit not found")
 		}
 
-		prj, err := projects.Get(context.TODO(), identityClient, found.ProjectID).Extract()
+		prj, err := projects.Get(ctx, identityClient, found.ProjectID).Extract()
 		if err != nil {
 			return fmt.Errorf("Error retrieving OpenStack project %s: %w", found.ProjectID, err)
 		}
 
 		*project = *prj
 
-		svc, err := services.Get(context.TODO(), identityClient, found.ServiceID).Extract()
+		svc, err := services.Get(ctx, identityClient, found.ServiceID).Extract()
 		if err != nil {
 			return fmt.Errorf("Error retrieving OpenStack service %s: %w", found.ServiceID, err)
 		}
