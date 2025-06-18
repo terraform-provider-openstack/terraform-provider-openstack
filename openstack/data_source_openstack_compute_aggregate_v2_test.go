@@ -33,7 +33,7 @@ resource "openstack_compute_aggregate_v2" "test2" {
 }
 `
 
-func TestAccAggregateDataSource(t *testing.T) {
+func TestAccComputeV2AggregateDataSource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckAdminOnly(t) },
 		ProviderFactories: testAccProviders,
@@ -78,7 +78,7 @@ resource "openstack_compute_aggregate_v2" "test3" {
     `, osHypervisorEnvironment)
 }
 
-func TestAccAggregateDataSourceWithHypervisor(t *testing.T) {
+func TestAccComputeV2AggregateDataSourceWithHypervisor(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckAdminOnly(t)

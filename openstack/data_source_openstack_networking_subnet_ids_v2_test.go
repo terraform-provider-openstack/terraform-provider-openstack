@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestAccOpenStackSubnetsV2SubnetIDsDataSource_basic(t *testing.T) {
+func TestAccNetworkingV2SubnetIDsDataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)

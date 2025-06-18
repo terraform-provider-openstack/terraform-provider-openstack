@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestAccEndpointGroup_importBasic(t *testing.T) {
+func TestAccVPNaaSV2EndpointGroup_importBasic(t *testing.T) {
 	resourceName := "openstack_vpnaas_endpoint_group_v2.group_1"
 
 	resource.Test(t, resource.TestCase{

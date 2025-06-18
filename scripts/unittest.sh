@@ -5,6 +5,20 @@ set -o pipefail
 
 failed=
 
+# Ensure that workflows execute proper functional tests
+# for the OpenStack provider.
+
+TESTS_FILTER=$(grep FILTER .github/workflows/functional-*.yml | awk -F'"' '{print $(NF-1)}' | paste -sd "|")
+EGREP_SKIP="terraform-provider-openstack|database|loadbalancer|TestUnit|TestAccProvider"
+
+DIFF="$(diff -u <(go test ./openstack/ -list "(?i)${TESTS_FILTER}" | egrep -vi "${EGREP_SKIP}") <(go test ./openstack/ -list "Test" | egrep -vi "${EGREP_SKIP}"))"
+
+if [[ -n $DIFF ]]; then
+  echo "The following tests are not covered by the functional tests:"
+  echo "$DIFF"
+  echo "Please update the functional test names to cover these tests."
+  exit 1
+fi
 
 UNIT_TESTS=$(go test ./openstack/ -v -list 'Unit' | grep -i "Unit")
 UNIT_TESTS=($UNIT_TESTS)
