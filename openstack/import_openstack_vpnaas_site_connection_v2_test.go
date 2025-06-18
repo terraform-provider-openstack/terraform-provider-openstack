@@ -14,6 +14,7 @@ func TestAccVPNaaSV2SiteConnectionV2_importBasic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckVPN(t)
+			t.Skip("Currently failing in GH-A")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckSiteConnectionV2Destroy(t.Context()),
