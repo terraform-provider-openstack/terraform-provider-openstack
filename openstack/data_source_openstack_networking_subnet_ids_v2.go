@@ -239,8 +239,8 @@ func dataSourceNetworkingSubnetIDsV2Read(ctx context.Context, d *schema.Resource
 	subnetIDs := make([]string, 0, len(allSubnets))
 
 	if nameRegex, ok := d.GetOk("name_regex"); !ok {
-		for i, subnet := range allSubnets {
-			subnetIDs[i] = subnet.ID
+		for _, subnet := range allSubnets {
+			subnetIDs = append(subnetIDs, subnet.ID)
 		}
 	} else {
 		r := regexp.MustCompile(nameRegex.(string))
