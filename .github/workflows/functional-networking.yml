@@ -52,6 +52,8 @@ jobs:
           branch: ${{ matrix.openstack_version }}
           conf_overrides: |
             Q_ML2_PLUGIN_EXT_DRIVERS=qos,port_security,dns_domain_keywords
+            Q_ML2_PLUGIN_MECHANISM_DRIVERS=ovn
+            Q_DVR_MODE=dvr_snat
             enable_plugin neutron-dynamic-routing https://github.com/openstack/neutron-dynamic-routing ${{ matrix.openstack_version }}
 
             [[post-config|\$NEUTRON_CONF]]
