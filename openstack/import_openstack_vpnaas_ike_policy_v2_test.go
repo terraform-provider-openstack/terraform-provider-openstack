@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestAccIKEPolicy_importBasic(t *testing.T) {
+func TestAccVPNaaSV2IKEPolicy_importBasic(t *testing.T) {
 	resourceName := "openstack_vpnaas_ike_policy_v2.policy_1"
 
 	resource.Test(t, resource.TestCase{

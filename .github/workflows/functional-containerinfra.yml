@@ -64,7 +64,7 @@ jobs:
               MAGNUMCLIENT_BRANCH=stable/2024.1
             additional_services: ""
     runs-on: ubuntu-${{ matrix.ubuntu_version }}
-    name: containerinfra on OpenStack ${{ matrix.name }} with Magnum and run containerinfra acceptance tests
+    name: Magnum on OpenStack ${{ matrix.name }}
     steps:
       - name: Checkout TPO
         uses: actions/checkout@v4

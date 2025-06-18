@@ -83,7 +83,7 @@ func TestUnitMapDiffWithNilValues(t *testing.T) {
 	assert.Len(t, result, 3)
 }
 
-func TestBuildRequestBoolType(t *testing.T) {
+func TestUnitBuildRequestBoolType(t *testing.T) {
 	v := SubnetCreateOpts{
 		ValueSpecs: map[string]string{
 			"key1": "value1",
