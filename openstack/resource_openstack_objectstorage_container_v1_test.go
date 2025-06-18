@@ -14,7 +14,6 @@ import (
 func TestAccObjectStorageV1Container_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSwift(t)
 		},
@@ -48,7 +47,6 @@ func TestAccObjectStorageV1Container_basic(t *testing.T) {
 func TestAccObjectStorageV1Container_versioning(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSwift(t)
 		},
@@ -77,7 +75,6 @@ func TestAccObjectStorageV1Container_versioning(t *testing.T) {
 func TestAccObjectStorageV1Container_storagePolicy(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSwift(t)
 		},

@@ -14,7 +14,6 @@ import (
 func TestAccObjectStorageV1Account_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSwift(t)
 		},
@@ -48,10 +47,8 @@ func TestAccObjectStorageV1Account_basic(t *testing.T) {
 func TestAccObjectStorageV1Account_quota(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccPreCheckAdminOnly(t)
 			testAccPreCheckSwift(t)
-			t.Skip("Works only in selected environments")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckObjectStorageV1AccountDestroy(t.Context()),
