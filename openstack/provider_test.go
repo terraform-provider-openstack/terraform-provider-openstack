@@ -41,7 +41,6 @@ var (
 	osSfsEnvironment             = os.Getenv("OS_SFS_ENVIRONMENT")
 	osTransparentVlanEnvironment = os.Getenv("OS_TRANSPARENT_VLAN_ENVIRONMENT")
 	osKeymanagerEnvironment      = os.Getenv("OS_KEYMANAGER_ENVIRONMENT")
-	osGlanceimportEnvironment    = os.Getenv("OS_GLANCEIMPORT_ENVIRONMENT")
 	osHypervisorEnvironment      = os.Getenv("OS_HYPERVISOR_HOSTNAME")
 	osPortForwardingEnvironment  = os.Getenv("OS_PORT_FORWARDING_ENVIRONMENT")
 	osWorkflowEnvironment        = os.Getenv("OS_WORKFLOW_ENVIRONMENT")
@@ -241,12 +240,6 @@ func testAccPreCheckNonAdminOnly(t *testing.T) {
 	v := os.Getenv("OS_USERNAME")
 	if v != "demo" {
 		t.Skip("Skipping test because it requires the demo (non-admin) user")
-	}
-}
-
-func testAccPreCheckGlanceImport(t *testing.T) {
-	if osGlanceimportEnvironment == "" {
-		t.Skip("This environment does not support Glance import tests")
 	}
 }
 
