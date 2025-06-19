@@ -108,7 +108,10 @@ func testAccPreCheckDNS(t *testing.T) {
 }
 
 func testAccPreCheckSwift(t *testing.T) {
-	testAccPreCheckRequiredEnvVars(t)
+	v := os.Getenv("OS_AUTH_URL")
+	if v == "" {
+		t.Fatal("OS_AUTH_URL must be set for acceptance tests")
+	}
 
 	if osSwiftEnvironment == "" {
 		t.Skip("This environment does not support Swift tests")

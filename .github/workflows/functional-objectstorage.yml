@@ -47,7 +47,10 @@ jobs:
             [[post-config|\$SWIFT_CONFIG_PROXY_SERVER]]
             [filter:versioned_writes]
             allow_object_versioning = true
-          enabled_services: 's-account,s-container,s-object,s-proxy'
+
+            [filter:keystoneauth]
+            reseller_admin_role = admin
+          enabled_services: '-n-api,-n-cpu,-n-cond,-n-sch,-n-novnc,-n-api-meta,-placement-api,-placement-client,-g-api,-c-sch,-c-api,-c-vol,-ovn-controller,-ovn-northd,-ovs-vswitchd,-ovsdb-server,-q-svc,-q-ovn-metadata-agent,-rabbit,-etcd3,s-account,s-container,s-object,s-proxy'
       - name: Checkout go
         uses: actions/setup-go@v5
         with:

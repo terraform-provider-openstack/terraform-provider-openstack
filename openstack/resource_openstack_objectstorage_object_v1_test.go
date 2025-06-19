@@ -42,7 +42,6 @@ func TestAccObjectStorageV1Object_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSwift(t)
 		},
@@ -103,7 +102,6 @@ func TestAccObjectStorageV1Object_basic(t *testing.T) {
 func TestAccObjectStorageV1Object_basic_check_destroy(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccPreCheckSwift(t)
 		},
 		ProviderFactories: testAccProviders,
@@ -156,7 +154,6 @@ func TestAccObjectStorageV1Object_fromSource(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSwift(t)
 		},
@@ -185,7 +182,6 @@ func TestAccObjectStorageV1Object_fromSource(t *testing.T) {
 func TestAccObjectStorageV1Object_detectContentType(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSwift(t)
 		},
@@ -212,7 +208,6 @@ func TestAccObjectStorageV1Object_detectContentType(t *testing.T) {
 func TestAccObjectStorageV1Object_copyFrom(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSwift(t)
 		},
@@ -241,7 +236,6 @@ func TestAccObjectStorageV1Object_copyFrom(t *testing.T) {
 func TestAccObjectStorageV1Object_objectManifest(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckSwift(t)
 		},
