@@ -14,7 +14,7 @@ LOG_DIR=/tmp/devstack-logs
 mkdir -p "${LOG_DIR}"
 
 if [[ -n ${ACCEPTANCE_TESTS_FILTER} ]]; then
-    ACCEPTANCE_TESTS="(?i)${ACCEPTANCE_TESTS_FILTER}"
+    ACCEPTANCE_TESTS="(?i)(?:${ACCEPTANCE_TESTS_FILTER})"
 fi
 
 if [[ -z ${ACCEPTANCE_TESTS} ]]; then
@@ -46,6 +46,11 @@ fi
 
 # If any of the test suites failed, exit 1
 if [[ -n $failed ]]; then
+  exit 1
+fi
+
+# Check if there were no tests to run
+if grep -q 'no tests to run' "${LOG_DIR}/acceptance_tests.log"; then
   exit 1
 fi
 
