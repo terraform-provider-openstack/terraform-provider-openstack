@@ -112,7 +112,7 @@ func testAccOpenStackIdentityProjectV3DataSourceBasic(name, description, tag1, t
 	%s
 
 	data "openstack_identity_project_v3" "project_1" {
-      name = "${openstack_identity_project_v3.project_1.name}"
+      name = openstack_identity_project_v3.project_1.name
 	}
 `, testAccOpenStackIdentityProjectV3DataSourceProject(name, description, tag1, tag2))
 }
@@ -122,7 +122,7 @@ func testAccOpenStackIdentityProjectV3DataSourceWithProjectID(name, description,
 	%s
 
 	data "openstack_identity_project_v3" "project_1" {
-      project_id = "${openstack_identity_project_v3.project_1.id}"
+      project_id = openstack_identity_project_v3.project_1.id
 	}
 `, testAccOpenStackIdentityProjectV3DataSourceProject(name, description, tag1, tag2))
 }

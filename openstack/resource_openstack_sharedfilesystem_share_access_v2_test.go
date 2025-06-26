@@ -184,14 +184,14 @@ func testAccSFSV2ShareAccessConfigBasic() string {
 %s
 
 resource "openstack_sharedfilesystem_share_access_v2" "share_access_1" {
-  share_id     = "${openstack_sharedfilesystem_share_v2.share_1.id}"
+  share_id     = openstack_sharedfilesystem_share_v2.share_1.id
   access_type  = "ip"
   access_to    = "192.168.199.10"
   access_level = "rw"
 }
 
 resource "openstack_sharedfilesystem_share_access_v2" "share_access_2" {
-  share_id     = "${openstack_sharedfilesystem_share_v2.share_1.id}"
+  share_id     = openstack_sharedfilesystem_share_v2.share_1.id
   access_type  = "ip"
   access_to    = "192.168.199.11"
   access_level = "rw"
@@ -204,14 +204,14 @@ func testAccSFSV2ShareAccessConfigUpdate() string {
 %s
 
 resource "openstack_sharedfilesystem_share_access_v2" "share_access_1" {
-  share_id     = "${openstack_sharedfilesystem_share_v2.share_1.id}"
+  share_id     = openstack_sharedfilesystem_share_v2.share_1.id
   access_type  = "ip"
   access_to    = "192.168.199.10"
   access_level = "ro"
 }
 
 resource "openstack_sharedfilesystem_share_access_v2" "share_access_2" {
-  share_id     = "${openstack_sharedfilesystem_share_v2.share_1.id}"
+  share_id     = openstack_sharedfilesystem_share_v2.share_1.id
   access_type  = "ip"
   access_to    = "192.168.199.11"
   access_level = "ro"

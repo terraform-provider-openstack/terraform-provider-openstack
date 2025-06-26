@@ -122,7 +122,7 @@ func testAccDatabaseV1InstanceBasic() string {
 	return fmt.Sprintf(`
 resource "openstack_db_instance_v1" "basic" {
   name             = "basic"
-  configuration_id = "${openstack_db_configuration_v1.basic.id}"
+  configuration_id = openstack_db_configuration_v1.basic.id
 
   datastore {
     version = "%[1]s"

@@ -45,7 +45,7 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name       = "subnet_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   cidr       = "10.0.0.0/24"
   ip_version = 4
 }
@@ -57,26 +57,26 @@ data "openstack_networking_secgroup_v2" "default" {
 resource "openstack_networking_port_v2" "port_1" {
   name           = "port"
   description    = "test port"
-  network_id     = "${openstack_networking_network_v2.network_1.id}"
+  network_id     = openstack_networking_network_v2.network_1.id
   admin_state_up = "true"
 
   security_group_ids = [
-    "${data.openstack_networking_secgroup_v2.default.id}",
+    data.openstack_networking_secgroup_v2.default.id,
   ]
 
   fixed_ip {
-    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id = openstack_networking_subnet_v2.subnet_1.id
   }
 
   fixed_ip {
-    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id = openstack_networking_subnet_v2.subnet_1.id
   }
 }
 
 resource "openstack_networking_port_v2" "port_2" {
   name               = "port"
   description        = "test port"
-  network_id         = "${openstack_networking_network_v2.network_1.id}"
+  network_id         = openstack_networking_network_v2.network_1.id
   admin_state_up     = "true"
   no_security_groups = "true"
 
@@ -97,17 +97,17 @@ resource "openstack_networking_port_v2" "port_2" {
 }
 
 data "openstack_networking_port_v2" "port_1" {
-  name           = "${openstack_networking_port_v2.port_1.name}"
-  admin_state_up = "${openstack_networking_port_v2.port_2.admin_state_up}"
+  name           = openstack_networking_port_v2.port_1.name
+  admin_state_up = openstack_networking_port_v2.port_2.admin_state_up
 
   security_group_ids = [
-    "${data.openstack_networking_secgroup_v2.default.id}",
+    data.openstack_networking_secgroup_v2.default.id,
   ]
 }
 
 data "openstack_networking_port_v2" "port_2" {
-  name           = "${openstack_networking_port_v2.port_1.name}"
-  admin_state_up = "${openstack_networking_port_v2.port_2.admin_state_up}"
+  name           = openstack_networking_port_v2.port_1.name
+  admin_state_up = openstack_networking_port_v2.port_2.admin_state_up
 
   tags = [
     "foo",
@@ -116,6 +116,6 @@ data "openstack_networking_port_v2" "port_2" {
 }
 
 data "openstack_networking_port_v2" "port_3" {
-  fixed_ip = "${openstack_networking_port_v2.port_1.all_fixed_ips.1}"
+  fixed_ip = openstack_networking_port_v2.port_1.all_fixed_ips.1
 }
 `

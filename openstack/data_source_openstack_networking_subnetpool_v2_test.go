@@ -117,7 +117,7 @@ func testAccOpenStackNetworkingSubnetPoolV2DataSourceBasic() string {
 %s
 
 data "openstack_networking_subnetpool_v2" "subnetpool_1" {
-  name = "${openstack_networking_subnetpool_v2.subnetpool_1.name}"
+  name = openstack_networking_subnetpool_v2.subnetpool_1.name
 }
 `, testAccOpenStackNetworkingSubnetPoolV2DataSourceSubnetPool)
 }
@@ -152,7 +152,7 @@ func testAccOpenStackNetworkingSubnetPoolV2DataSourceDescription() string {
 %s
 
 data "openstack_networking_subnetpool_v2" "subnetpool_1" {
-  description = "${openstack_networking_subnetpool_v2.subnetpool_1.description}"
+  description = openstack_networking_subnetpool_v2.subnetpool_1.description
   tags = [
     "bar",
   ]

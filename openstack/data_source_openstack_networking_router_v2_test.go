@@ -74,7 +74,7 @@ func testAccOpenStackNetworkingRouterV2DataSourceName() string {
 %s
 
 data "openstack_networking_router_v2" "router" {
-  name           = "${openstack_networking_router_v2.router.name}"
+  name           = openstack_networking_router_v2.router.name
   description    = "description"
   admin_state_up = "true"
   tags = [

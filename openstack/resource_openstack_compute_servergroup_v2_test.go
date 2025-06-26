@@ -334,7 +334,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   scheduler_hints {
-    group = "${openstack_compute_servergroup_v2.sg_1.id}"
+    group = openstack_compute_servergroup_v2.sg_1.id
   }
   network {
     uuid = "%s"
@@ -354,7 +354,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   scheduler_hints {
-    group = "${openstack_compute_servergroup_v2.sg_1.id}"
+    group = openstack_compute_servergroup_v2.sg_1.id
   }
   network {
     uuid = "%s"
@@ -374,7 +374,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   scheduler_hints {
-    group = "${openstack_compute_servergroup_v2.sg_1.id}"
+    group = openstack_compute_servergroup_v2.sg_1.id
   }
   network {
     uuid = "%s"

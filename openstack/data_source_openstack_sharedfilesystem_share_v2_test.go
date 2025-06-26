@@ -64,7 +64,7 @@ resource "openstack_sharedfilesystem_share_v2" "share_1" {
 }
 
 data "openstack_sharedfilesystem_share_v2" "share_1" {
-  name        = "${openstack_sharedfilesystem_share_v2.share_1.name}"
-  description = "${openstack_sharedfilesystem_share_v2.share_1.description}"
+  name        = openstack_sharedfilesystem_share_v2.share_1.name
+  description = openstack_sharedfilesystem_share_v2.share_1.description
 }
 `

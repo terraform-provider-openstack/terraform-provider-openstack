@@ -71,7 +71,7 @@ func testAccOpenStackDNSZoneV2DataSourceBasic(zoneName string) string {
 	return fmt.Sprintf(`
 %s
 data "openstack_dns_zone_v2" "z1" {
-	name = "${openstack_dns_zone_v2.z1.name}"
+	name = openstack_dns_zone_v2.z1.name
 }
 `, testAccOpenStackDNSZoneV2DataSourceZone(zoneName))
 }

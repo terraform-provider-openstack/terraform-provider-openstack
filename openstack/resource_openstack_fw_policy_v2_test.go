@@ -440,8 +440,8 @@ resource "openstack_fw_policy_v2" "policy_1" {
   description = "terraform acceptance test"
   audited     = true
   rules       = [
-    "${openstack_fw_rule_v2.udp_deny.id}",
-    "${openstack_fw_rule_v2.tcp_allow.id}"
+    openstack_fw_rule_v2.udp_deny.id,
+    openstack_fw_rule_v2.tcp_allow.id
   ]
 }
 `
@@ -470,7 +470,7 @@ resource "openstack_fw_policy_v2" "policy_1" {
   name        = "policy_1"
   description = "terraform acceptance test"
   rules       = [
-    "${openstack_fw_rule_v2.udp_deny.id}"
+    openstack_fw_rule_v2.udp_deny.id
   ]
 }
 `
@@ -500,15 +500,15 @@ resource "openstack_fw_policy_v2" "policy_1" {
   name        = "policy_1"
   description = "terraform acceptance test"
   rules       = [
-    "${openstack_fw_rule_v2.rule_1.id}",
-	"${openstack_fw_rule_v2.rule_2.id}",
-	"${openstack_fw_rule_v2.rule_3.id}",
-	"${openstack_fw_rule_v2.rule_4.id}"
+    openstack_fw_rule_v2.rule_1.id,
+	openstack_fw_rule_v2.rule_2.id,
+	openstack_fw_rule_v2.rule_3.id,
+	openstack_fw_rule_v2.rule_4.id
   ]
 }
 
 data "openstack_fw_policy_v2" "policy_1" {
-  policy_id = "${openstack_fw_policy_v2.policy_1.id}"
+  policy_id = openstack_fw_policy_v2.policy_1.id
 }
 `
 
@@ -537,14 +537,14 @@ resource "openstack_fw_policy_v2" "policy_1" {
   name        = "policy_1"
   description = "terraform acceptance test"
   rules       = [
-    "${openstack_fw_rule_v2.rule_4.id}",
-	"${openstack_fw_rule_v2.rule_2.id}",
-	"${openstack_fw_rule_v2.rule_1.id}"
+    openstack_fw_rule_v2.rule_4.id,
+	openstack_fw_rule_v2.rule_2.id,
+	openstack_fw_rule_v2.rule_1.id
   ]
 }
 
 data "openstack_fw_policy_v2" "policy_1" {
-  policy_id = "${openstack_fw_policy_v2.policy_1.id}"
+  policy_id = openstack_fw_policy_v2.policy_1.id
 }
 `
 
@@ -573,15 +573,15 @@ resource "openstack_fw_policy_v2" "policy_1" {
   name        = "policy_1"
   description = "terraform acceptance test"
   rules       = [
-    "${openstack_fw_rule_v2.rule_4.id}",
-	"${openstack_fw_rule_v2.rule_3.id}",
-	"${openstack_fw_rule_v2.rule_2.id}",
-	"${openstack_fw_rule_v2.rule_1.id}"
+    openstack_fw_rule_v2.rule_4.id,
+	openstack_fw_rule_v2.rule_3.id,
+	openstack_fw_rule_v2.rule_2.id,
+	openstack_fw_rule_v2.rule_1.id
   ]
 }
 
 data "openstack_fw_policy_v2" "policy_1" {
-  policy_id = "${openstack_fw_policy_v2.policy_1.id}"
+  policy_id = openstack_fw_policy_v2.policy_1.id
 }
 `
 
@@ -610,14 +610,14 @@ resource "openstack_fw_policy_v2" "policy_1" {
   name        = "policy_1"
   description = "terraform acceptance test"
   rules       = [
-    "${openstack_fw_rule_v2.rule_1.id}",
-	"${openstack_fw_rule_v2.rule_4.id}",
-	"${openstack_fw_rule_v2.rule_2.id}",
-	"${openstack_fw_rule_v2.rule_3.id}"
+    openstack_fw_rule_v2.rule_1.id,
+	openstack_fw_rule_v2.rule_4.id,
+	openstack_fw_rule_v2.rule_2.id,
+	openstack_fw_rule_v2.rule_3.id
   ]
 }
 
 data "openstack_fw_policy_v2" "policy_1" {
-  policy_id = "${openstack_fw_policy_v2.policy_1.id}"
+  policy_id = openstack_fw_policy_v2.policy_1.id
 }
 `

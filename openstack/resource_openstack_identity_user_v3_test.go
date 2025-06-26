@@ -149,7 +149,7 @@ func testAccIdentityV3UserBasic(projectName, userName string) string {
     }
 
     resource "openstack_identity_user_v3" "user_1" {
-      default_project_id = "${openstack_identity_project_v3.project_1.id}"
+      default_project_id = openstack_identity_project_v3.project_1.id
       name = "%s"
       description = "A user"
       password = "password123"
@@ -178,7 +178,7 @@ func testAccIdentityV3UserUpdate(projectName, userName string) string {
     }
 
     resource "openstack_identity_user_v3" "user_1" {
-      default_project_id = "${openstack_identity_project_v3.project_1.id}"
+      default_project_id = openstack_identity_project_v3.project_1.id
       name = "%s"
       description = "Some user"
       enabled = false

@@ -143,8 +143,8 @@ resource "openstack_identity_role_v3" "role_1" {
 }
 
 resource "openstack_identity_inherit_role_assignment_v3" "role_assignment_1" {
-  user_id = "${openstack_identity_user_v3.user_1.id}"
+  user_id = openstack_identity_user_v3.user_1.id
   domain_id = "default"
-  role_id = "${openstack_identity_role_v3.role_1.id}"
+  role_id = openstack_identity_role_v3.role_1.id
 }
 `

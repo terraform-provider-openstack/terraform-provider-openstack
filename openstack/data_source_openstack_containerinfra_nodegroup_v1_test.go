@@ -75,8 +75,8 @@ func testAccContainerInfraV1NodeGroupDataSourceBasic(nodeGroupResource string) s
 %s
 
 data "openstack_containerinfra_nodegroup_v1" "nodegroup_1" {
-  cluster_id = "${openstack_containerinfra_cluster_v1.cluster_1.name}"
-  name = "${openstack_containerinfra_nodegroup_v1.nodegroup_1.name}"
+  cluster_id = openstack_containerinfra_cluster_v1.cluster_1.name
+  name = openstack_containerinfra_nodegroup_v1.nodegroup_1.name
 }
 `, nodeGroupResource)
 }

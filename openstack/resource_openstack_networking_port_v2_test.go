@@ -1190,16 +1190,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -1215,16 +1215,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id = openstack_networking_subnet_v2.subnet_1.id
   }
 }
 `
@@ -1239,13 +1239,13 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 `
 
@@ -1259,24 +1259,24 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
   }
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
   }
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
   }
 }
 `
@@ -1291,7 +1291,7 @@ resource "openstack_networking_subnet_v2" "vrrp_subnet" {
   name = "vrrp_subnet"
   cidr = "10.0.0.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   allocation_pool {
     start = "10.0.0.2"
@@ -1309,18 +1309,18 @@ resource "openstack_networking_router_v2" "vrrp_router" {
 }
 
 resource "openstack_networking_router_interface_v2" "vrrp_interface" {
-  router_id = "${openstack_networking_router_v2.vrrp_router.id}"
-  subnet_id = "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+  router_id = openstack_networking_router_v2.vrrp_router.id
+  subnet_id = openstack_networking_subnet_v2.vrrp_subnet.id
 }
 
 resource "openstack_networking_port_v2" "vrrp_port_1" {
   name = "vrrp_port_1"
   description = "test vrrp port"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+    subnet_id =  openstack_networking_subnet_v2.vrrp_subnet.id
     ip_address = "10.0.0.202"
   }
 }
@@ -1328,10 +1328,10 @@ resource "openstack_networking_port_v2" "vrrp_port_1" {
 resource "openstack_networking_port_v2" "vrrp_port_2" {
   name = "vrrp_port_2"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+    subnet_id =  openstack_networking_subnet_v2.vrrp_subnet.id
     ip_address = "10.0.0.201"
   }
 }
@@ -1339,16 +1339,16 @@ resource "openstack_networking_port_v2" "vrrp_port_2" {
 resource "openstack_networking_port_v2" "instance_port" {
   name = "instance_port"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   allowed_address_pairs {
-    ip_address = "${openstack_networking_port_v2.vrrp_port_1.fixed_ip.0.ip_address}"
-    mac_address = "${openstack_networking_port_v2.vrrp_port_1.mac_address}"
+    ip_address = openstack_networking_port_v2.vrrp_port_1.fixed_ip.0.ip_address
+    mac_address = openstack_networking_port_v2.vrrp_port_1.mac_address
   }
 
   allowed_address_pairs {
-    ip_address = "${openstack_networking_port_v2.vrrp_port_2.fixed_ip.0.ip_address}"
-    mac_address = "${openstack_networking_port_v2.vrrp_port_2.mac_address}"
+    ip_address = openstack_networking_port_v2.vrrp_port_2.fixed_ip.0.ip_address
+    mac_address = openstack_networking_port_v2.vrrp_port_2.mac_address
   }
 }
 `
@@ -1363,7 +1363,7 @@ resource "openstack_networking_subnet_v2" "vrrp_subnet" {
   name = "vrrp_subnet"
   cidr = "10.0.0.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   allocation_pool {
     start = "10.0.0.2"
@@ -1381,17 +1381,17 @@ resource "openstack_networking_router_v2" "vrrp_router" {
 }
 
 resource "openstack_networking_router_interface_v2" "vrrp_interface" {
-  router_id = "${openstack_networking_router_v2.vrrp_router.id}"
-  subnet_id = "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+  router_id = openstack_networking_router_v2.vrrp_router.id
+  subnet_id = openstack_networking_subnet_v2.vrrp_subnet.id
 }
 
 resource "openstack_networking_port_v2" "vrrp_port_1" {
   name = "vrrp_port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+    subnet_id =  openstack_networking_subnet_v2.vrrp_subnet.id
     ip_address = "10.0.0.202"
   }
 }
@@ -1399,10 +1399,10 @@ resource "openstack_networking_port_v2" "vrrp_port_1" {
 resource "openstack_networking_port_v2" "vrrp_port_2" {
   name = "vrrp_port_2"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+    subnet_id =  openstack_networking_subnet_v2.vrrp_subnet.id
     ip_address = "10.0.0.201"
   }
 }
@@ -1410,16 +1410,16 @@ resource "openstack_networking_port_v2" "vrrp_port_2" {
 resource "openstack_networking_port_v2" "instance_port" {
   name = "instance_port"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   allowed_address_pairs {
-    ip_address = "${openstack_networking_port_v2.vrrp_port_1.fixed_ip.0.ip_address}"
-    mac_address = "${openstack_networking_port_v2.vrrp_port_1.mac_address}"
+    ip_address = openstack_networking_port_v2.vrrp_port_1.fixed_ip.0.ip_address
+    mac_address = openstack_networking_port_v2.vrrp_port_1.mac_address
   }
 
   allowed_address_pairs {
-    ip_address = "${openstack_networking_port_v2.vrrp_port_2.fixed_ip.0.ip_address}"
-    mac_address = "${openstack_networking_port_v2.vrrp_port_2.mac_address}"
+    ip_address = openstack_networking_port_v2.vrrp_port_2.fixed_ip.0.ip_address
+    mac_address = openstack_networking_port_v2.vrrp_port_2.mac_address
   }
 }
 `
@@ -1434,7 +1434,7 @@ resource "openstack_networking_subnet_v2" "vrrp_subnet" {
   name = "vrrp_subnet"
   cidr = "10.0.0.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   allocation_pool {
     start = "10.0.0.2"
@@ -1452,17 +1452,17 @@ resource "openstack_networking_router_v2" "vrrp_router" {
 }
 
 resource "openstack_networking_router_interface_v2" "vrrp_interface" {
-  router_id = "${openstack_networking_router_v2.vrrp_router.id}"
-  subnet_id = "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+  router_id = openstack_networking_router_v2.vrrp_router.id
+  subnet_id = openstack_networking_subnet_v2.vrrp_subnet.id
 }
 
 resource "openstack_networking_port_v2" "vrrp_port_1" {
   name = "vrrp_port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+    subnet_id =  openstack_networking_subnet_v2.vrrp_subnet.id
     ip_address = "10.0.0.202"
   }
 }
@@ -1470,10 +1470,10 @@ resource "openstack_networking_port_v2" "vrrp_port_1" {
 resource "openstack_networking_port_v2" "vrrp_port_2" {
   name = "vrrp_port_2"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+    subnet_id =  openstack_networking_subnet_v2.vrrp_subnet.id
     ip_address = "10.0.0.201"
   }
 }
@@ -1481,17 +1481,17 @@ resource "openstack_networking_port_v2" "vrrp_port_2" {
 resource "openstack_networking_port_v2" "instance_port" {
   name = "instance_port"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
-  security_group_ids = ["${openstack_networking_secgroup_v2.secgroup_1.id}"]
+  network_id = openstack_networking_network_v2.vrrp_network.id
+  security_group_ids = [openstack_networking_secgroup_v2.secgroup_1.id]
 
   allowed_address_pairs {
-    ip_address = "${openstack_networking_port_v2.vrrp_port_1.fixed_ip.0.ip_address}"
-    mac_address = "${openstack_networking_port_v2.vrrp_port_1.mac_address}"
+    ip_address = openstack_networking_port_v2.vrrp_port_1.fixed_ip.0.ip_address
+    mac_address = openstack_networking_port_v2.vrrp_port_1.mac_address
   }
 
   allowed_address_pairs {
-    ip_address = "${openstack_networking_port_v2.vrrp_port_2.fixed_ip.0.ip_address}"
-    mac_address = "${openstack_networking_port_v2.vrrp_port_2.mac_address}"
+    ip_address = openstack_networking_port_v2.vrrp_port_2.fixed_ip.0.ip_address
+    mac_address = openstack_networking_port_v2.vrrp_port_2.mac_address
   }
 }
 `
@@ -1506,7 +1506,7 @@ resource "openstack_networking_subnet_v2" "vrrp_subnet" {
   name = "vrrp_subnet"
   cidr = "10.0.0.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   allocation_pool {
     start = "10.0.0.2"
@@ -1524,17 +1524,17 @@ resource "openstack_networking_router_v2" "vrrp_router" {
 }
 
 resource "openstack_networking_router_interface_v2" "vrrp_interface" {
-  router_id = "${openstack_networking_router_v2.vrrp_router.id}"
-  subnet_id = "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+  router_id = openstack_networking_router_v2.vrrp_router.id
+  subnet_id = openstack_networking_subnet_v2.vrrp_subnet.id
 }
 
 resource "openstack_networking_port_v2" "vrrp_port_1" {
   name = "vrrp_port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+    subnet_id =  openstack_networking_subnet_v2.vrrp_subnet.id
     ip_address = "10.0.0.202"
   }
 }
@@ -1542,10 +1542,10 @@ resource "openstack_networking_port_v2" "vrrp_port_1" {
 resource "openstack_networking_port_v2" "vrrp_port_2" {
   name = "vrrp_port_2"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+    subnet_id =  openstack_networking_subnet_v2.vrrp_subnet.id
     ip_address = "10.0.0.201"
   }
 }
@@ -1553,12 +1553,12 @@ resource "openstack_networking_port_v2" "vrrp_port_2" {
 resource "openstack_networking_port_v2" "instance_port" {
   name = "instance_port"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
-  security_group_ids = ["${openstack_networking_secgroup_v2.secgroup_1.id}"]
+  network_id = openstack_networking_network_v2.vrrp_network.id
+  security_group_ids = [openstack_networking_secgroup_v2.secgroup_1.id]
 
   allowed_address_pairs {
-    ip_address = "${openstack_networking_port_v2.vrrp_port_1.fixed_ip.0.ip_address}"
-    mac_address = "${openstack_networking_port_v2.vrrp_port_1.mac_address}"
+    ip_address = openstack_networking_port_v2.vrrp_port_1.fixed_ip.0.ip_address
+    mac_address = openstack_networking_port_v2.vrrp_port_1.mac_address
   }
 }
 `
@@ -1573,7 +1573,7 @@ resource "openstack_networking_subnet_v2" "vrrp_subnet" {
   name = "vrrp_subnet"
   cidr = "10.0.0.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   allocation_pool {
     start = "10.0.0.2"
@@ -1591,17 +1591,17 @@ resource "openstack_networking_router_v2" "vrrp_router" {
 }
 
 resource "openstack_networking_router_interface_v2" "vrrp_interface" {
-  router_id = "${openstack_networking_router_v2.vrrp_router.id}"
-  subnet_id = "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+  router_id = openstack_networking_router_v2.vrrp_router.id
+  subnet_id = openstack_networking_subnet_v2.vrrp_subnet.id
 }
 
 resource "openstack_networking_port_v2" "vrrp_port_1" {
   name = "vrrp_port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+    subnet_id =  openstack_networking_subnet_v2.vrrp_subnet.id
     ip_address = "10.0.0.202"
   }
 }
@@ -1609,10 +1609,10 @@ resource "openstack_networking_port_v2" "vrrp_port_1" {
 resource "openstack_networking_port_v2" "vrrp_port_2" {
   name = "vrrp_port_2"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+    subnet_id =  openstack_networking_subnet_v2.vrrp_subnet.id
     ip_address = "10.0.0.201"
   }
 }
@@ -1620,7 +1620,7 @@ resource "openstack_networking_port_v2" "vrrp_port_2" {
 resource "openstack_networking_port_v2" "instance_port" {
   name = "instance_port"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 }
 `
 
@@ -1634,26 +1634,26 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.20"
   }
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.40"
   }
 }
@@ -1669,16 +1669,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 
@@ -1699,21 +1699,21 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.24"
   }
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -1729,7 +1729,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
@@ -1745,10 +1745,10 @@ resource "openstack_networking_secgroup_v2" "secgroup_2" {
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -1764,7 +1764,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
@@ -1780,11 +1780,11 @@ resource "openstack_networking_secgroup_v2" "secgroup_2" {
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-  security_group_ids = ["${openstack_networking_secgroup_v2.secgroup_1.id}"]
+  network_id = openstack_networking_network_v2.network_1.id
+  security_group_ids = [openstack_networking_secgroup_v2.secgroup_1.id]
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -1800,7 +1800,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
@@ -1816,14 +1816,14 @@ resource "openstack_networking_secgroup_v2" "secgroup_2" {
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   security_group_ids = [
-    "${openstack_networking_secgroup_v2.secgroup_1.id}",
-    "${openstack_networking_secgroup_v2.secgroup_2.id}"
+    openstack_networking_secgroup_v2.secgroup_1.id,
+    openstack_networking_secgroup_v2.secgroup_2.id
   ]
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -1839,7 +1839,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
@@ -1855,11 +1855,11 @@ resource "openstack_networking_secgroup_v2" "secgroup_2" {
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-  security_group_ids = ["${openstack_networking_secgroup_v2.secgroup_2.id}"]
+  network_id = openstack_networking_network_v2.network_1.id
+  security_group_ids = [openstack_networking_secgroup_v2.secgroup_2.id]
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -1875,7 +1875,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
@@ -1891,11 +1891,11 @@ resource "openstack_networking_secgroup_v2" "secgroup_2" {
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   security_group_ids = []
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -1911,7 +1911,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
@@ -1927,11 +1927,11 @@ resource "openstack_networking_secgroup_v2" "secgroup_2" {
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   no_security_groups = true
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -1947,7 +1947,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
@@ -1963,12 +1963,12 @@ resource "openstack_networking_secgroup_v2" "secgroup_2" {
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   no_security_groups = false
-  security_group_ids = ["${openstack_networking_secgroup_v2.secgroup_1.id}"]
+  security_group_ids = [openstack_networking_secgroup_v2.secgroup_1.id]
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -1984,7 +1984,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
@@ -2000,15 +2000,15 @@ resource "openstack_networking_secgroup_v2" "secgroup_2" {
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   no_security_groups = false
   security_group_ids = [
-    "${openstack_networking_secgroup_v2.secgroup_1.id}",
-    "${openstack_networking_secgroup_v2.secgroup_2.id}"
+    openstack_networking_secgroup_v2.secgroup_1.id,
+    openstack_networking_secgroup_v2.secgroup_2.id
   ]
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -2024,7 +2024,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_secgroup_v2" "secgroup_1" {
@@ -2040,11 +2040,11 @@ resource "openstack_networking_secgroup_v2" "secgroup_2" {
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   no_security_groups = true
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -2060,7 +2060,7 @@ resource "openstack_networking_subnet_v2" "vrrp_subnet" {
   name = "vrrp_subnet"
   cidr = "10.0.0.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   allocation_pool {
     start = "10.0.0.2"
@@ -2078,17 +2078,17 @@ resource "openstack_networking_router_v2" "vrrp_router" {
 }
 
 resource "openstack_networking_router_interface_v2" "vrrp_interface" {
-  router_id = "${openstack_networking_router_v2.vrrp_router.id}"
-  subnet_id = "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+  router_id = openstack_networking_router_v2.vrrp_router.id
+  subnet_id = openstack_networking_subnet_v2.vrrp_subnet.id
 }
 
 resource "openstack_networking_port_v2" "vrrp_port_1" {
   name = "vrrp_port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+    subnet_id =  openstack_networking_subnet_v2.vrrp_subnet.id
     ip_address = "10.0.0.202"
   }
 }
@@ -2096,10 +2096,10 @@ resource "openstack_networking_port_v2" "vrrp_port_1" {
 resource "openstack_networking_port_v2" "vrrp_port_2" {
   name = "vrrp_port_2"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.vrrp_subnet.id}"
+    subnet_id =  openstack_networking_subnet_v2.vrrp_subnet.id
     ip_address = "10.0.0.201"
   }
 }
@@ -2107,14 +2107,14 @@ resource "openstack_networking_port_v2" "vrrp_port_2" {
 resource "openstack_networking_port_v2" "instance_port" {
   name = "instance_port"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.vrrp_network.id}"
+  network_id = openstack_networking_network_v2.vrrp_network.id
 
   allowed_address_pairs {
-    ip_address = "${openstack_networking_port_v2.vrrp_port_1.fixed_ip.0.ip_address}"
+    ip_address = openstack_networking_port_v2.vrrp_port_1.fixed_ip.0.ip_address
   }
 
   allowed_address_pairs {
-    ip_address = "${openstack_networking_port_v2.vrrp_port_2.fixed_ip.0.ip_address}"
+    ip_address = openstack_networking_port_v2.vrrp_port_2.fixed_ip.0.ip_address
   }
 }
 `
@@ -2129,13 +2129,13 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   no_fixed_ip = true
 }
 `
@@ -2150,16 +2150,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -2175,21 +2175,21 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.24"
   }
 }
@@ -2205,13 +2205,13 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   fixed_ip {}
 }
 `
@@ -2226,16 +2226,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 
@@ -2261,16 +2261,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 
@@ -2291,16 +2291,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 
@@ -2326,16 +2326,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 
@@ -2361,16 +2361,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 
@@ -2396,16 +2396,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 
@@ -2431,16 +2431,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -2455,15 +2455,15 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -2478,16 +2478,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -2502,16 +2502,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "false"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -2526,16 +2526,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   no_security_groups = true
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -2550,17 +2550,17 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   no_security_groups = true
   port_security_enabled = false
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -2575,17 +2575,17 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   no_security_groups = true
   port_security_enabled = true
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -2600,16 +2600,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "false"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 
@@ -2638,16 +2638,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "false"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 
@@ -2688,16 +2688,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "false"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 
@@ -2717,16 +2717,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "false"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 
@@ -2745,16 +2745,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "false"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 
@@ -2775,7 +2775,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
@@ -2785,13 +2785,13 @@ resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 
-  qos_policy_id  = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
+  qos_policy_id  = openstack_networking_qos_policy_v2.qos_policy_1.id
 }
 `

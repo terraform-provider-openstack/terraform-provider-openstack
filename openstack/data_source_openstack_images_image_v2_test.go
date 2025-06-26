@@ -160,7 +160,7 @@ func testAccOpenStackImagesV2ImageDataSourceBasic() string {
 
 data "openstack_images_image_v2" "image_1" {
 	most_recent = true
-	name = "${openstack_images_image_v2.image_1.name}"
+	name = openstack_images_image_v2.image_1.name
 }
 `, testAccOpenStackImagesV2ImageDataSourceCirros)
 }

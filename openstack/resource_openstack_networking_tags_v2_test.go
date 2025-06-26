@@ -124,7 +124,7 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   dns_nameservers = ["10.0.16.4", "213.186.33.99"]
 
@@ -154,10 +154,10 @@ resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 

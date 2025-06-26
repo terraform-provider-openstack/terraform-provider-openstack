@@ -53,7 +53,7 @@ resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
 }
 
 resource "openstack_networking_qos_minimum_bandwidth_rule_v2" "min_bw_rule_1" {
-  qos_policy_id  = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
+  qos_policy_id  = openstack_networking_qos_policy_v2.qos_policy_1.id
   min_kbps       = 3000
 }
 `
@@ -62,8 +62,8 @@ func testAccOpenStackNetworkingQoSMinimumBandwidthRuleV2DataSourceBasic() string
 	return fmt.Sprintf(`
 %s
 data "openstack_networking_qos_minimum_bandwidth_rule_v2" "min_bw_rule_1" {
-  qos_policy_id = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
-  min_kbps      = "${openstack_networking_qos_minimum_bandwidth_rule_v2.min_bw_rule_1.min_kbps}"
+  qos_policy_id = openstack_networking_qos_policy_v2.qos_policy_1.id
+  min_kbps      = openstack_networking_qos_minimum_bandwidth_rule_v2.min_bw_rule_1.min_kbps
 }
 `, testAccNetworkingV2QoSMinimumBandwidthRuleDataSource)
 }

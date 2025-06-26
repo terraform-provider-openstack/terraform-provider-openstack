@@ -56,7 +56,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
@@ -82,33 +82,33 @@ resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_2" {
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
   name                = "test_sharenetwork_secure"
   description         = "share the secure love"
-  neutron_net_id      = "${openstack_networking_network_v2.network_1.id}"
-  neutron_subnet_id   = "${openstack_networking_subnet_v2.subnet_1.id}"
+  neutron_net_id      = openstack_networking_network_v2.network_1.id
+  neutron_subnet_id   = openstack_networking_subnet_v2.subnet_1.id
   security_service_ids = [
-    "${openstack_sharedfilesystem_securityservice_v2.securityservice_1.id}",
-    "${openstack_sharedfilesystem_securityservice_v2.securityservice_2.id}",
+    openstack_sharedfilesystem_securityservice_v2.securityservice_1.id,
+    openstack_sharedfilesystem_securityservice_v2.securityservice_2.id,
   ]
 }
 
 resource "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_2" {
   name                = "test_sharenetwork_secure"
   description         = "share the less secure love"
-  neutron_net_id      = "${openstack_networking_network_v2.network_1.id}"
-  neutron_subnet_id   = "${openstack_networking_subnet_v2.subnet_1.id}"
+  neutron_net_id      = openstack_networking_network_v2.network_1.id
+  neutron_subnet_id   = openstack_networking_subnet_v2.subnet_1.id
   security_service_ids = [
-    "${openstack_sharedfilesystem_securityservice_v2.securityservice_1.id}",
+    openstack_sharedfilesystem_securityservice_v2.securityservice_1.id,
   ]
 }
 
 data "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_1" {
-  name                = "${openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1.name}"
-  security_service_id = "${openstack_sharedfilesystem_securityservice_v2.securityservice_2.id}"
-  ip_version          = "${openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1.ip_version}"
+  name                = openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1.name
+  security_service_id = openstack_sharedfilesystem_securityservice_v2.securityservice_2.id
+  ip_version          = openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_1.ip_version
 }
 
 data "openstack_sharedfilesystem_sharenetwork_v2" "sharenetwork_2" {
   name                = "test_sharenetwork_secure"
-  description         = "${openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_2.description}"
-  security_service_id = "${openstack_sharedfilesystem_securityservice_v2.securityservice_1.id}"
+  description         = openstack_sharedfilesystem_sharenetwork_v2.sharenetwork_2.description
+  security_service_id = openstack_sharedfilesystem_securityservice_v2.securityservice_1.id
 }
 `

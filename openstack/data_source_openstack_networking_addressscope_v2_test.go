@@ -91,7 +91,7 @@ func testAccOpenStackNetworkingAddressScopeV2DataSourceName() string {
 %s
 
 data "openstack_networking_addressscope_v2" "addressscope_1" {
-  name = "${openstack_networking_addressscope_v2.addressscope_1.name}"
+  name = openstack_networking_addressscope_v2.addressscope_1.name
 }
 `, testAccOpenStackNetworkingAddressScopeV2DataSourceAddressscope)
 }
@@ -101,7 +101,7 @@ func testAccOpenStackNetworkingAddressScopeV2DataSourceIPVersion() string {
 %s
 
 data "openstack_networking_addressscope_v2" "addressscope_1" {
-  ip_version = "${openstack_networking_addressscope_v2.addressscope_1.ip_version}"
+  ip_version = openstack_networking_addressscope_v2.addressscope_1.ip_version
 }
 `, testAccOpenStackNetworkingAddressScopeV2DataSourceAddressscope)
 }
@@ -111,7 +111,7 @@ func testAccOpenStackNetworkingAddressScopeV2DataSourceShared() string {
 %s
 
 data "openstack_networking_addressscope_v2" "addressscope_1" {
-  shared = "${openstack_networking_addressscope_v2.addressscope_1.shared}"
+  shared = openstack_networking_addressscope_v2.addressscope_1.shared
 }
 `, testAccOpenStackNetworkingAddressScopeV2DataSourceAddressscope)
 }

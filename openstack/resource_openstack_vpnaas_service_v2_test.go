@@ -108,7 +108,7 @@ func testAccServiceV2Basic() string {
 	}
 
 	resource "openstack_vpnaas_service_v2" "service_1" {
-		router_id = "${openstack_networking_router_v2.router_1.id}"
+		router_id = openstack_networking_router_v2.router_1.id
 		admin_state_up = "false"
 	}
 	`, osExtGwID)

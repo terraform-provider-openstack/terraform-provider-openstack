@@ -93,8 +93,8 @@ resource "openstack_images_image_v2" "image_1" {
 }
 
 resource "openstack_images_image_access_v2" "image_access_1" {
-  image_id  = "${openstack_images_image_v2.image_1.id}"
-  member_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
+  image_id  = openstack_images_image_v2.image_1.id
+  member_id = data.openstack_identity_auth_scope_v3.scope.project_id
 }
 `
 
@@ -103,7 +103,7 @@ func testAccImagesImageAccessAcceptV2Basic() string {
 %s
 
 resource "openstack_images_image_access_accept_v2" "image_access_accept_1" {
-  image_id  = "${openstack_images_image_access_v2.image_access_1.image_id}"
+  image_id  = openstack_images_image_access_v2.image_access_1.image_id
   status    = "accepted"
 }
 `, testAccImagesImageAccessAcceptV2)
@@ -114,7 +114,7 @@ func testAccImagesImageAccessAcceptV2Update() string {
 %s
 
 resource "openstack_images_image_access_accept_v2" "image_access_accept_1" {
-  image_id  = "${openstack_images_image_access_v2.image_access_1.image_id}"
+  image_id  = openstack_images_image_access_v2.image_access_1.image_id
   status    = "rejected"
 }
 `, testAccImagesImageAccessAcceptV2)

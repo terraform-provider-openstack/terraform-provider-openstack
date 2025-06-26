@@ -132,14 +132,14 @@ func testAccDNSV2TransferAcceptBasic(zoneName string) string {
 		}
 
 		resource "openstack_dns_transfer_request_v2" "request_1" {
-			zone_id = "${openstack_dns_zone_v2.zone_1.id}"
-			target_project_id = "${openstack_dns_zone_v2.zone_1.project_id}"
+			zone_id = openstack_dns_zone_v2.zone_1.id
+			target_project_id = openstack_dns_zone_v2.zone_1.project_id
 			description = "a transfer request"
         }
 
 		resource "openstack_dns_transfer_accept_v2" "accept_1" {
-			zone_transfer_request_id = "${openstack_dns_transfer_request_v2.request_1.id}"
-			key = "${openstack_dns_transfer_request_v2.request_1.key}"
+			zone_transfer_request_id = openstack_dns_transfer_request_v2.request_1.id
+			key = openstack_dns_transfer_request_v2.request_1.key
         }
 	`, zoneName)
 }
@@ -155,14 +155,14 @@ func testAccDNSV2TransferAcceptDisableCheck(zoneName string) string {
 		}
 
 		resource "openstack_dns_transfer_request_v2" "request_1" {
-			zone_id = "${openstack_dns_zone_v2.zone_1.id}"
-			target_project_id = "${openstack_dns_zone_v2.zone_1.project_id}"
+			zone_id = openstack_dns_zone_v2.zone_1.id
+			target_project_id = openstack_dns_zone_v2.zone_1.project_id
 			description = "a transfer request"
         }
 
 		resource "openstack_dns_transfer_accept_v2" "accept_1" {
-			zone_transfer_request_id = "${openstack_dns_transfer_request_v2.request_1.id}"
-			key = "${openstack_dns_transfer_request_v2.request_1.key}"
+			zone_transfer_request_id = openstack_dns_transfer_request_v2.request_1.id
+			key = openstack_dns_transfer_request_v2.request_1.key
 			disable_status_check = true
         }
 	`, zoneName)

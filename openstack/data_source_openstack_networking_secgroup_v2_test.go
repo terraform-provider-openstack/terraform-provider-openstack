@@ -131,7 +131,7 @@ func testAccOpenStackNetworkingSecGroupV2DataSourceBasic() string {
 %s
 
 data "openstack_networking_secgroup_v2" "secgroup_1" {
-  name = "${openstack_networking_secgroup_v2.secgroup_1.name}"
+  name = openstack_networking_secgroup_v2.secgroup_1.name
   tags = [
     "bar",
   ]
@@ -144,7 +144,7 @@ func testAccOpenStackNetworkingSecGroupV2DataSourceSecGroupID() string {
 %s
 
 data "openstack_networking_secgroup_v2" "secgroup_1" {
-  secgroup_id = "${openstack_networking_secgroup_v2.secgroup_1.id}"
+  secgroup_id = openstack_networking_secgroup_v2.secgroup_1.id
   tags = [
     "foo",
   ]
@@ -159,7 +159,7 @@ resource "openstack_networking_secgroup_v2" "secgroup_1" {
 }
 
 data "openstack_networking_secgroup_v2" "secgroup_1" {
-  name = "${openstack_networking_secgroup_v2.secgroup_1.name}"
+  name = openstack_networking_secgroup_v2.secgroup_1.name
 }
 `
 
@@ -171,7 +171,7 @@ resource "openstack_networking_secgroup_v2" "secgroup_1" {
 }
 
 data "openstack_networking_secgroup_v2" "secgroup_1" {
-  name     = "${openstack_networking_secgroup_v2.secgroup_1.name}"
+  name     = openstack_networking_secgroup_v2.secgroup_1.name
   stateful = false
 }
 `
@@ -190,8 +190,8 @@ resource "openstack_networking_secgroup_v2" "secgroup_2" {
 }
 
 data "openstack_networking_secgroup_v2" "secgroup_1" {
-  name     = "${openstack_networking_secgroup_v2.secgroup_2.name}"
-  description = "${openstack_networking_secgroup_v2.secgroup_1.description}"
+  name     = openstack_networking_secgroup_v2.secgroup_2.name
+  description = openstack_networking_secgroup_v2.secgroup_1.description
   stateful = false
 }
 `

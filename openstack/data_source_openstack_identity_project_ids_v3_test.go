@@ -80,7 +80,7 @@ func testAccOpenStackIdentityProjectIDsV3DataSourceName() string {
 %s
 
 data "openstack_identity_project_ids_v3" "projects_by_name" {
-	name = "${openstack_identity_project_v3.project_1.name}"
+	name = openstack_identity_project_v3.project_1.name
 }
 `, testAccOpenStackIdentityProjectIDsV3DataSourceProjects)
 }

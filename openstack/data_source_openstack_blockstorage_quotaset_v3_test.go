@@ -64,7 +64,7 @@ func testAccBlockStorageV3QuotasetDataSourceSource() string {
 %s
 
 data "openstack_blockstorage_quotaset_v3" "source" {
-  project_id = "${openstack_identity_project_v3.project.id}"
+  project_id = openstack_identity_project_v3.project.id
 }
 `, testAccBlockStorageV3QuotasetDataSourceBasic)
 }

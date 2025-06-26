@@ -90,7 +90,7 @@ resource "openstack_compute_volume_attach_v2" "attach_2" {
 }
 
 output "volume_devices" {
-  value = "${openstack_compute_volume_attach_v2.attachments.*.device}"
+  value = openstack_compute_volume_attach_v2.attachments.*.device
 }
 ```
 

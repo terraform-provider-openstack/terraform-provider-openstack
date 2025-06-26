@@ -208,7 +208,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "tf_test_subnet"
   cidr = "192.168.199.0/24"
   no_gateway = true
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 `
 
@@ -217,8 +217,8 @@ func testAccOpenStackNetworkingNetworkV2DataSourceBasic() string {
 %s
 
 data "openstack_networking_network_v2" "network_1" {
-  name = "${openstack_networking_network_v2.network_1.name}"
-  description = "${openstack_networking_network_v2.network_1.description}"
+  name = openstack_networking_network_v2.network_1.name
+  description = openstack_networking_network_v2.network_1.description
 }
 `, testAccOpenStackNetworkingNetworkV2DataSourceNetwork)
 }
@@ -228,7 +228,7 @@ func testAccOpenStackNetworkingNetworkV2DataSourceSubnet() string {
 %s
 
 data "openstack_networking_network_v2" "network_1" {
-  matching_subnet_cidr = "${openstack_networking_subnet_v2.subnet_1.cidr}"
+  matching_subnet_cidr = openstack_networking_subnet_v2.subnet_1.cidr
   tags = [
     "foo",
     "bar",
@@ -242,7 +242,7 @@ func testAccOpenStackNetworkingNetworkV2DataSourceNetworkID() string {
 %s
 
 data "openstack_networking_network_v2" "network_1" {
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 `, testAccOpenStackNetworkingNetworkV2DataSourceNetwork)
 }
@@ -269,7 +269,7 @@ func testAccOpenStackNetworkingNetworkV2DataSourceTransparentVlan() string {
 %s
 
 data "openstack_networking_network_v2" "network_1" {
-  transparent_vlan = "${openstack_networking_network_v2.network_1.transparent_vlan}"
+  transparent_vlan = openstack_networking_network_v2.network_1.transparent_vlan
   tags = [
     "bar",
   ]

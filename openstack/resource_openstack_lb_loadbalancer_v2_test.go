@@ -333,13 +333,13 @@ func testAccLbV2LoadBalancerConfigBasic(lbProvider string) string {
       name = "subnet_1"
       cidr = "192.168.199.0/24"
       ip_version = 4
-      network_id = "${openstack_networking_network_v2.network_1.id}"
+      network_id = openstack_networking_network_v2.network_1.id
     }
 
     resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
       name = "loadbalancer_1"
       loadbalancer_provider = "%s"
-      vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+      vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
 	  tags = ["tag1"]
 
       timeouts {
@@ -361,14 +361,14 @@ func testAccLbV2LoadBalancerConfigUpdate(lbProvider string) string {
       name = "subnet_1"
       cidr = "192.168.199.0/24"
       ip_version = 4
-      network_id = "${openstack_networking_network_v2.network_1.id}"
+      network_id = openstack_networking_network_v2.network_1.id
     }
 
     resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
       name = "loadbalancer_1_updated"
       loadbalancer_provider = "%s"
       admin_state_up = "true"
-      vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+      vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
 	  tags = ["tag1", "tag2"]
 
       timeouts {
@@ -397,15 +397,15 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   cidr = "192.168.199.0/24"
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
     name = "loadbalancer_1"
-    vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
     security_group_ids = [
-      "${openstack_networking_secgroup_v2.secgroup_1.id}"
+      openstack_networking_secgroup_v2.secgroup_1.id
     ]
 
     timeouts {
@@ -434,16 +434,16 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   cidr = "192.168.199.0/24"
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
   security_group_ids = [
-    "${openstack_networking_secgroup_v2.secgroup_1.id}",
-    "${openstack_networking_secgroup_v2.secgroup_2.id}"
+    openstack_networking_secgroup_v2.secgroup_1.id,
+    openstack_networking_secgroup_v2.secgroup_2.id
   ]
 
   timeouts {
@@ -472,15 +472,15 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   cidr = "192.168.199.0/24"
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
   security_group_ids = [
-    "${openstack_networking_secgroup_v2.secgroup_2.id}"
+    openstack_networking_secgroup_v2.secgroup_2.id
   ]
   depends_on = ["openstack_networking_secgroup_v2.secgroup_1"]
 
@@ -502,13 +502,13 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
   loadbalancer_provider = "octavia"
-  vip_network_id = "${openstack_networking_network_v2.network_1.id}"
+  vip_network_id = openstack_networking_network_v2.network_1.id
   depends_on = ["openstack_networking_subnet_v2.subnet_1"]
   timeouts {
     create = "15m"
@@ -528,12 +528,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_port_v2" "port_1" {
   name           = "port_1"
-  network_id     = "${openstack_networking_network_v2.network_1.id}"
+  network_id     = openstack_networking_network_v2.network_1.id
   admin_state_up = "true"
   depends_on = ["openstack_networking_subnet_v2.subnet_1"]
 }
@@ -541,7 +541,7 @@ resource "openstack_networking_port_v2" "port_1" {
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
   loadbalancer_provider = "octavia"
-  vip_port_id = "${openstack_networking_port_v2.port_1.id}"
+  vip_port_id = openstack_networking_port_v2.port_1.id
   depends_on = ["openstack_networking_port_v2.port_1"]
   timeouts {
     create = "15m"
