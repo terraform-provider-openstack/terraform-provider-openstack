@@ -69,7 +69,7 @@ resource "openstack_compute_instance_v2" "terraform" {
   image_name      = var.image
   flavor_name     = var.flavor
   key_pair        = openstack_compute_keypair_v2.terraform.name
-  security_groups = ["${openstack_networking_secgroup_v2.terraform.name}"]
+  security_groups = [openstack_networking_secgroup_v2.terraform.name]
 
   network {
     uuid = openstack_networking_network_v2.terraform.id

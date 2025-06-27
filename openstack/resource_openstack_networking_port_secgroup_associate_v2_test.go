@@ -315,10 +315,10 @@ func testAccNetworkingV2PortSecGroupAssociateManifestUpdate0() string {
 %s
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
-  port_id = "${data.openstack_networking_port_v2.hidden_port_1.id}"
+  port_id = data.openstack_networking_port_v2.hidden_port_1.id
   enforce = "false"
   security_group_ids = [
-    "${openstack_networking_secgroup_v2.secgroup_1.id}",
+    openstack_networking_secgroup_v2.secgroup_1.id,
   ]
 }
 `, testAccNetworkingV2PortSecGroupAssociate)
@@ -335,10 +335,10 @@ func testAccNetworkingV2PortSecGroupAssociateManifestUpdate2() string {
 %s
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
-  port_id = "${data.openstack_networking_port_v2.hidden_port_1.id}"
+  port_id = data.openstack_networking_port_v2.hidden_port_1.id
   enforce = "true"
   security_group_ids = [
-    "${openstack_networking_secgroup_v2.secgroup_1.id}",
+    openstack_networking_secgroup_v2.secgroup_1.id,
   ]
 }
 `, testAccNetworkingV2PortSecGroupAssociate)
@@ -349,12 +349,12 @@ func testAccNetworkingV2PortSecGroupAssociateManifestUpdate3() string {
 %s
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
-  port_id = "${data.openstack_networking_port_v2.hidden_port_1.id}"
+  port_id = data.openstack_networking_port_v2.hidden_port_1.id
   enforce = "true"
   security_group_ids = [
-    "${openstack_networking_secgroup_v2.secgroup_1.id}",
-    "${openstack_networking_secgroup_v2.secgroup_2.id}",
-    "${data.openstack_networking_secgroup_v2.default_2.id}",
+    openstack_networking_secgroup_v2.secgroup_1.id,
+    openstack_networking_secgroup_v2.secgroup_2.id,
+    data.openstack_networking_secgroup_v2.default_2.id,
   ]
 }
 `, testAccNetworkingV2PortSecGroupAssociate)
@@ -365,10 +365,10 @@ func testAccNetworkingV2PortSecGroupAssociateManifestUpdate4() string {
 %s
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
-  port_id = "${data.openstack_networking_port_v2.hidden_port_1.id}"
+  port_id = data.openstack_networking_port_v2.hidden_port_1.id
   enforce = "true"
   security_group_ids = [
-    "${openstack_networking_secgroup_v2.secgroup_2.id}",
+    openstack_networking_secgroup_v2.secgroup_2.id,
   ]
 }
 `, testAccNetworkingV2PortSecGroupAssociate)
@@ -379,11 +379,11 @@ func testAccNetworkingV2PortSecGroupAssociateManifestUpdate5() string {
 %s
 
 data "openstack_networking_port_v2" "port_1" {
-  port_id = "${openstack_networking_port_secgroup_associate_v2.port_1.id}"
+  port_id = openstack_networking_port_secgroup_associate_v2.port_1.id
 }
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
-  port_id = "${data.openstack_networking_port_v2.hidden_port_1.id}"
+  port_id = data.openstack_networking_port_v2.hidden_port_1.id
   enforce = "true"
   security_group_ids = []
 }
@@ -395,10 +395,10 @@ func testAccNetworkingV2PortSecGroupAssociateManifestUpdate6() string {
 %s
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
-  port_id = "${data.openstack_networking_port_v2.hidden_port_1.id}"
+  port_id = data.openstack_networking_port_v2.hidden_port_1.id
   enforce = "true"
   security_group_ids = [
-    "${data.openstack_networking_secgroup_v2.default_2.id}",
+    data.openstack_networking_secgroup_v2.default_2.id,
   ]
 }
 `, testAccNetworkingV2PortSecGroupAssociate)
@@ -409,10 +409,10 @@ func testAccNetworkingV2PortSecGroupAssociateManifestUpdate7() string {
 %s
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
-  port_id = "${data.openstack_networking_port_v2.hidden_port_1.id}"
+  port_id = data.openstack_networking_port_v2.hidden_port_1.id
   enforce = "false"
   security_group_ids = [
-    "${openstack_networking_secgroup_v2.secgroup_1.id}",
+    openstack_networking_secgroup_v2.secgroup_1.id,
   ]
 }
 `, testAccNetworkingV2PortSecGroupAssociate)
@@ -423,12 +423,12 @@ func testAccNetworkingV2PortSecGroupAssociateManifestUpdate8() string {
 %s
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
-  port_id = "${data.openstack_networking_port_v2.hidden_port_1.id}"
+  port_id = data.openstack_networking_port_v2.hidden_port_1.id
   enforce = "false"
   security_group_ids = [
-    "${openstack_networking_secgroup_v2.secgroup_1.id}",
-    "${openstack_networking_secgroup_v2.secgroup_2.id}",
-    "${data.openstack_networking_secgroup_v2.default_2.id}",
+    openstack_networking_secgroup_v2.secgroup_1.id,
+    openstack_networking_secgroup_v2.secgroup_2.id,
+    data.openstack_networking_secgroup_v2.default_2.id,
   ]
 }
 `, testAccNetworkingV2PortSecGroupAssociate)
@@ -439,10 +439,10 @@ func testAccNetworkingV2PortSecGroupAssociateManifestUpdate9() string {
 %s
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
-  port_id = "${data.openstack_networking_port_v2.hidden_port_1.id}"
+  port_id = data.openstack_networking_port_v2.hidden_port_1.id
   enforce = "false"
   security_group_ids = [
-    "${openstack_networking_secgroup_v2.secgroup_2.id}",
+    openstack_networking_secgroup_v2.secgroup_2.id,
   ]
 }
 `, testAccNetworkingV2PortSecGroupAssociate)
@@ -453,7 +453,7 @@ func testAccNetworkingV2PortSecGroupAssociateManifestUpdate10() string {
 %s
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
-  port_id = "${data.openstack_networking_port_v2.hidden_port_1.id}"
+  port_id = data.openstack_networking_port_v2.hidden_port_1.id
   enforce = "false"
   security_group_ids = []
 }
@@ -465,10 +465,10 @@ func testAccNetworkingV2PortSecGroupAssociateManifestUpdate11() string {
 %s
 
 resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
-  port_id = "${data.openstack_networking_port_v2.hidden_port_1.id}"
+  port_id = data.openstack_networking_port_v2.hidden_port_1.id
   enforce = "false"
   security_group_ids = [
-    "${data.openstack_networking_secgroup_v2.default_2.id}",
+    data.openstack_networking_secgroup_v2.default_2.id,
   ]
 }
 `, testAccNetworkingV2PortSecGroupAssociate)

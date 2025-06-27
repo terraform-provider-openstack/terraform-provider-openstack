@@ -89,7 +89,7 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_lb_quota_v2" "quota_1" {
-  project_id          = "${openstack_identity_project_v3.project_1.id}"
+  project_id          = openstack_identity_project_v3.project_1.id
   loadbalancer        = 1
   listener            = 2
   member              = 3
@@ -106,7 +106,7 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_lb_quota_v2" "quota_1" {
-  project_id          = "${openstack_identity_project_v3.project_1.id}"
+  project_id          = openstack_identity_project_v3.project_1.id
   loadbalancer        = 6
   listener            = 7
   member              = 8
@@ -123,7 +123,7 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_lb_quota_v2" "quota_1" {
-  project_id          = "${openstack_identity_project_v3.project_1.id}"
+  project_id          = openstack_identity_project_v3.project_1.id
   loadbalancer        = 11
   listener            = 12
   member              = 13

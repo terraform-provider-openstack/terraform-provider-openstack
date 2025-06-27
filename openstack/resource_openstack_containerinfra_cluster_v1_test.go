@@ -396,12 +396,12 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
 resource "openstack_containerinfra_cluster_v1" "cluster_1" {
   region               = "%s"
   name                 = "%s"
-  cluster_template_id  = "${openstack_containerinfra_clustertemplate_v1.clustertemplate_1.id}"
+  cluster_template_id  = openstack_containerinfra_clustertemplate_v1.clustertemplate_1.id
   create_timeout       = "40"
   docker_volume_size   = "10"
   flavor                = "%s"
   master_flavor         = "%s"
-  keypair              = "${openstack_compute_keypair_v2.keypair_1.name}"
+  keypair              = openstack_compute_keypair_v2.keypair_1.name
   master_count         = 1
   node_count           = %d
   floating_ip_enabled  = true
@@ -437,12 +437,12 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
 resource "openstack_containerinfra_cluster_v1" "cluster_1" {
   region               = "%s"
   name                 = "%s"
-  cluster_template_id  = "${openstack_containerinfra_clustertemplate_v1.clustertemplate_1.id}"
+  cluster_template_id  = openstack_containerinfra_clustertemplate_v1.clustertemplate_1.id
   create_timeout       = "40"
   docker_volume_size   = "10"
   flavor                = "%s"
   master_flavor         = "%s"
-  keypair              = "${openstack_compute_keypair_v2.keypair_1.name}"
+  keypair              = openstack_compute_keypair_v2.keypair_1.name
   master_count         = 1
   node_count           = %d
   floating_ip_enabled  = true

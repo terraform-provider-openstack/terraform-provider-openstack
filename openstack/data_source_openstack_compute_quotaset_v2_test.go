@@ -63,7 +63,7 @@ func testAccComputeV2QuotasetDataSourceSource() string {
 %s
 
 data "openstack_compute_quotaset_v2" "source" {
-  project_id = "${openstack_identity_project_v3.project.id}"
+  project_id = openstack_identity_project_v3.project.id
 }
 `, testAccComputeV2QuotasetDataSourceBasic)
 }

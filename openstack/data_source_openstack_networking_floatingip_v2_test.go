@@ -75,7 +75,7 @@ func testAccOpenStackNetworkingFloatingIPV2DataSourceAddress() string {
 %s
 
 data "openstack_networking_floatingip_v2" "fip_1" {
-  address = "${openstack_networking_floatingip_v2.fip_1.address}"
+  address = openstack_networking_floatingip_v2.fip_1.address
   description = "test fip"
   tags = [
     "foo",

@@ -117,7 +117,7 @@ func testAccSiteConnectionV2Basic() string {
 	}
 
 	resource "openstack_networking_subnet_v2" "subnet_1" {
-  		network_id = "${openstack_networking_network_v2.network_1.id}"
+  		network_id = openstack_networking_network_v2.network_1.id
   		cidr       = "192.168.199.0/24"
   		ip_version = 4
 	}
@@ -128,12 +128,12 @@ func testAccSiteConnectionV2Basic() string {
 	}
 
 	resource "openstack_networking_router_interface_v2" "router_interface_1" {
-  		router_id = "${openstack_networking_router_v2.router_1.id}"
-  		subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  		router_id = openstack_networking_router_v2.router_1.id
+  		subnet_id = openstack_networking_subnet_v2.subnet_1.id
 	}
 
 	resource "openstack_vpnaas_service_v2" "service_1" {
-		router_id = "${openstack_networking_router_v2.router_1.id}"
+		router_id = openstack_networking_router_v2.router_1.id
 		admin_state_up = "false"
 	}
 
@@ -149,19 +149,19 @@ func testAccSiteConnectionV2Basic() string {
 	}
 	resource "openstack_vpnaas_endpoint_group_v2" "group_2" {
 		type = "subnet"
-		endpoints = [ "${openstack_networking_subnet_v2.subnet_1.id}" ]
+		endpoints = [ openstack_networking_subnet_v2.subnet_1.id ]
 	}
 
 	resource "openstack_vpnaas_site_connection_v2" "conn_1" {
 		name = "connection_1"
-		ikepolicy_id = "${openstack_vpnaas_ike_policy_v2.policy_2.id}"
-		ipsecpolicy_id = "${openstack_vpnaas_ipsec_policy_v2.policy_1.id}"
-		vpnservice_id = "${openstack_vpnaas_service_v2.service_1.id}"
+		ikepolicy_id = openstack_vpnaas_ike_policy_v2.policy_2.id
+		ipsecpolicy_id = openstack_vpnaas_ipsec_policy_v2.policy_1.id
+		vpnservice_id = openstack_vpnaas_service_v2.service_1.id
 		psk = "secret"
 		peer_address = "192.168.10.1"
 		peer_id = "192.168.10.1"
-		local_ep_group_id = "${openstack_vpnaas_endpoint_group_v2.group_2.id}"
-		peer_ep_group_id = "${openstack_vpnaas_endpoint_group_v2.group_1.id}"
+		local_ep_group_id = openstack_vpnaas_endpoint_group_v2.group_2.id
+		peer_ep_group_id = openstack_vpnaas_endpoint_group_v2.group_1.id
 		dpd {
 			action   = "restart"
 			timeout  = 42

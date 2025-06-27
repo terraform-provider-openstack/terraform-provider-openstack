@@ -188,14 +188,14 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   cidr = "192.168.199.0/24"
   ip_version = 4
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
   vip_address = "192.168.199.10"
 }
 
@@ -203,25 +203,25 @@ resource "openstack_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "openstack_lb_pool_v2" "pool_1" {
   name = "pool_1"
   protocol = "HTTP"
   lb_method = "ROUND_ROBIN"
-  listener_id = "${openstack_lb_listener_v2.listener_1.id}"
+  listener_id = openstack_lb_listener_v2.listener_1.id
 }
 
 resource "openstack_lb_members_v2" "members_1" {
-  pool_id = "${openstack_lb_pool_v2.pool_1.id}"
+  pool_id = openstack_lb_pool_v2.pool_1.id
 
   member {
     address = "192.168.199.110"
     protocol_port = 8080
     monitor_address = "192.168.199.110"
     monitor_port = 8088
-    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id = openstack_networking_subnet_v2.subnet_1.id
     weight = 0
   }
 
@@ -230,7 +230,7 @@ resource "openstack_lb_members_v2" "members_1" {
     protocol_port = 8080
     monitor_address = "192.168.199.111"
     monitor_port = 8088
-    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id = openstack_networking_subnet_v2.subnet_1.id
     backup = true
   }
 
@@ -252,30 +252,30 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "openstack_lb_pool_v2" "pool_1" {
   name = "pool_1"
   protocol = "HTTP"
   lb_method = "ROUND_ROBIN"
-  listener_id = "${openstack_lb_listener_v2.listener_1.id}"
+  listener_id = openstack_lb_listener_v2.listener_1.id
 }
 
 resource "openstack_lb_members_v2" "members_1" {
-  pool_id = "${openstack_lb_pool_v2.pool_1.id}"
+  pool_id = openstack_lb_pool_v2.pool_1.id
 
   member {
     address = "192.168.199.110"
@@ -284,7 +284,7 @@ resource "openstack_lb_members_v2" "members_1" {
     monitor_port = 8080
     weight = 10
     admin_state_up = "true"
-    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id = openstack_networking_subnet_v2.subnet_1.id
 	backup = true
 }
 
@@ -295,7 +295,7 @@ resource "openstack_lb_members_v2" "members_1" {
     monitor_port = 8080
     weight = 15
     admin_state_up = "true"
-    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id = openstack_networking_subnet_v2.subnet_1.id
     backup = false
   }
 
@@ -317,30 +317,30 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "openstack_lb_pool_v2" "pool_1" {
   name = "pool_1"
   protocol = "HTTP"
   lb_method = "ROUND_ROBIN"
-  listener_id = "${openstack_lb_listener_v2.listener_1.id}"
+  listener_id = openstack_lb_listener_v2.listener_1.id
 }
 
 resource "openstack_lb_members_v2" "members_1" {
-  pool_id = "${openstack_lb_pool_v2.pool_1.id}"
+  pool_id = openstack_lb_pool_v2.pool_1.id
 
   member {
     address = "192.168.199.110"
@@ -374,30 +374,30 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "openstack_lb_pool_v2" "pool_1" {
   name = "pool_1"
   protocol = "HTTP"
   lb_method = "ROUND_ROBIN"
-  listener_id = "${openstack_lb_listener_v2.listener_1.id}"
+  listener_id = openstack_lb_listener_v2.listener_1.id
 }
 
 resource "openstack_lb_members_v2" "members_1" {
-  pool_id = "${openstack_lb_pool_v2.pool_1.id}"
+  pool_id = openstack_lb_pool_v2.pool_1.id
 
   timeouts {
     create = "10m"

@@ -231,7 +231,7 @@ func testAccComputeV2FlavorDataSourceExtraSpecs(flavorName string) string {
           %s
 
           data "openstack_compute_flavor_v2" "flavor_1" {
-            name = "${openstack_compute_flavor_v2.flavor_1.name}"
+            name = openstack_compute_flavor_v2.flavor_1.name
           }
           `, flavorResource)
 }
@@ -243,7 +243,7 @@ func testAccComputeV2FlavorDataSourceFlavorID(flavorName string) string {
           %s
 
           data "openstack_compute_flavor_v2" "flavor_1" {
-            flavor_id = "${openstack_compute_flavor_v2.flavor_1.id}"
+            flavor_id = openstack_compute_flavor_v2.flavor_1.id
           }
           `, flavorResource)
 }

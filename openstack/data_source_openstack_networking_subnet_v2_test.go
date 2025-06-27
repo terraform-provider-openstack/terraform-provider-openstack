@@ -204,7 +204,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   description = "my subnet description"
   cidr = "192.168.199.0/24"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   tags = [
     "foo",
     "bar",
@@ -232,8 +232,8 @@ resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "10.11.12.0/25"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-  subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
+  subnetpool_id = openstack_networking_subnetpool_v2.subnetpool_1.id
   tags = [
     "foo",
     "bar",
@@ -246,7 +246,7 @@ func testAccOpenStackNetworkingSubnetV2DataSourceBasic() string {
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
-  name = "${openstack_networking_subnet_v2.subnet_1.name}"
+  name = openstack_networking_subnet_v2.subnet_1.name
 }
 `, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
 }
@@ -267,7 +267,7 @@ func testAccOpenStackNetworkingSubnetV2DataSourceDhcpEnabled() string {
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   dhcp_enabled = true
   tags = [
     "bar",
@@ -281,7 +281,7 @@ func testAccOpenStackNetworkingSubnetV2DataSourceIPVersion() string {
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   ip_version = 4
 }
 `, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
@@ -292,7 +292,7 @@ func testAccOpenStackNetworkingSubnetV2DataSourceGatewayIP() string {
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
-  gateway_ip = "${openstack_networking_subnet_v2.subnet_1.gateway_ip}"
+  gateway_ip = openstack_networking_subnet_v2.subnet_1.gateway_ip
 }
 `, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
 }
@@ -302,7 +302,7 @@ func testAccOpenStackNetworkingSubnetV2DataSourceNetworkIDAttribute() string {
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
-  subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  subnet_id = openstack_networking_subnet_v2.subnet_1.id
   tags = [
     "foo",
   ]
@@ -310,7 +310,7 @@ data "openstack_networking_subnet_v2" "subnet_1" {
 
 resource "openstack_networking_port_v2" "port_1" {
   name            = "test_port"
-  network_id      = "${data.openstack_networking_subnet_v2.subnet_1.network_id}"
+  network_id      = data.openstack_networking_subnet_v2.subnet_1.network_id
   admin_state_up  = "true"
 }
 
@@ -322,7 +322,7 @@ func testAccOpenStackNetworkingSubnetV2DataSourceSubnetPoolIDAttribute() string 
 %s
 
 data "openstack_networking_subnet_v2" "subnet_1" {
-  subnetpool_id = "${openstack_networking_subnet_v2.subnet_1.subnetpool_id}"
+  subnetpool_id = openstack_networking_subnet_v2.subnet_1.subnetpool_id
   tags = [
     "foo",
     "bar",

@@ -312,15 +312,15 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
 
 resource "openstack_containerinfra_cluster_v1" "cluster_1" {
   name                 = "%s"
-  cluster_template_id  = "${openstack_containerinfra_clustertemplate_v1.clustertemplate_1.id}"
+  cluster_template_id  = openstack_containerinfra_clustertemplate_v1.clustertemplate_1.id
   master_count         = 1
   node_count           = 1
-  keypair              = "${openstack_compute_keypair_v2.keypair_1.name}"
+  keypair              = openstack_compute_keypair_v2.keypair_1.name
 }
 
 resource "openstack_containerinfra_nodegroup_v1" "nodegroup_1" {
   name                 = "%s"
-  cluster_id           = "${openstack_containerinfra_cluster_v1.cluster_1.id}"
+  cluster_id           = openstack_containerinfra_cluster_v1.cluster_1.id
   node_count           = %d
   docker_volume_size   = 10
   role				   = "myRole"
@@ -361,15 +361,15 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
 
 resource "openstack_containerinfra_cluster_v1" "cluster_1" {
   name                 = "%s"
-  cluster_template_id  = "${openstack_containerinfra_clustertemplate_v1.clustertemplate_1.id}"
+  cluster_template_id  = openstack_containerinfra_clustertemplate_v1.clustertemplate_1.id
   master_count         = 1
   node_count           = 1
-  keypair              = "${openstack_compute_keypair_v2.keypair_1.name}"
+  keypair              = openstack_compute_keypair_v2.keypair_1.name
 }
 
 resource "openstack_containerinfra_nodegroup_v1" "nodegroup_1" {
   name                 = "%s"
-  cluster_id           = "${openstack_containerinfra_cluster_v1.cluster_1.id}"
+  cluster_id           = openstack_containerinfra_cluster_v1.cluster_1.id
   node_count           = %d
   docker_volume_size   = 10
   role				   = "myRole"
@@ -414,15 +414,15 @@ resource "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
 
 resource "openstack_containerinfra_cluster_v1" "cluster_1" {
   name                 = "%s"
-  cluster_template_id  = "${openstack_containerinfra_clustertemplate_v1.clustertemplate_1.id}"
+  cluster_template_id  = openstack_containerinfra_clustertemplate_v1.clustertemplate_1.id
   master_count         = 1
   node_count           = 1
-  keypair              = "${openstack_compute_keypair_v2.keypair_1.name}"
+  keypair              = openstack_compute_keypair_v2.keypair_1.name
 }
 
 resource "openstack_containerinfra_nodegroup_v1" "nodegroup_1" {
   name                 = "%s"
-  cluster_id           = "${openstack_containerinfra_cluster_v1.cluster_1.id}"
+  cluster_id           = openstack_containerinfra_cluster_v1.cluster_1.id
   node_count           = %d
   docker_volume_size   = 10
   role				   = "myRole"

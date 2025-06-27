@@ -131,7 +131,7 @@ resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
 }
 
 resource "openstack_networking_qos_minimum_bandwidth_rule_v2" "minimum_bandwidth_rule_1" {
-  qos_policy_id  = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
+  qos_policy_id  = openstack_networking_qos_policy_v2.qos_policy_1.id
   min_kbps       = 200
 }
 `
@@ -142,7 +142,7 @@ resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
 }
 
 resource "openstack_networking_qos_minimum_bandwidth_rule_v2" "minimum_bandwidth_rule_1" {
-  qos_policy_id  = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
+  qos_policy_id  = openstack_networking_qos_policy_v2.qos_policy_1.id
   min_kbps       = 300
 }
 `

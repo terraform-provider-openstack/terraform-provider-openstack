@@ -69,7 +69,7 @@ resource "openstack_networking_qos_policy_v2" "qos_policy_1" {
 }
 
 resource "openstack_networking_qos_bandwidth_limit_rule_v2" "bw_limit_rule_1" {
-  qos_policy_id  = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
+  qos_policy_id  = openstack_networking_qos_policy_v2.qos_policy_1.id
   max_kbps       = 3000
   max_burst_kbps = 300
   direction      = "egress"
@@ -81,8 +81,8 @@ func testAccOpenStackNetworkingQoSBandwidthLimitRuleV2DataSourceMaxKbps() string
 %s
 
 data "openstack_networking_qos_bandwidth_limit_rule_v2" "bw_limit_rule_1" {
-  qos_policy_id = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
-  max_kbps      = "${openstack_networking_qos_bandwidth_limit_rule_v2.bw_limit_rule_1.max_kbps}"
+  qos_policy_id = openstack_networking_qos_policy_v2.qos_policy_1.id
+  max_kbps      = openstack_networking_qos_bandwidth_limit_rule_v2.bw_limit_rule_1.max_kbps
 }
 `, testAccNetworkingV2QoSBandwidthLimitRuleDataSource)
 }
@@ -92,8 +92,8 @@ func testAccOpenStackNetworkingQoSBandwidthLimitRuleV2DataSourceMaxBurstKbps() s
 %s
 
 data "openstack_networking_qos_bandwidth_limit_rule_v2" "bw_limit_rule_1" {
-  qos_policy_id  = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
-  max_burst_kbps = "${openstack_networking_qos_bandwidth_limit_rule_v2.bw_limit_rule_1.max_burst_kbps}"
+  qos_policy_id  = openstack_networking_qos_policy_v2.qos_policy_1.id
+  max_burst_kbps = openstack_networking_qos_bandwidth_limit_rule_v2.bw_limit_rule_1.max_burst_kbps
 }
 `, testAccNetworkingV2QoSBandwidthLimitRuleDataSource)
 }

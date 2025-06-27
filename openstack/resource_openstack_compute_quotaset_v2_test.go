@@ -177,7 +177,7 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_compute_quotaset_v2" "quotaset_1" {
-  project_id                  = "${openstack_identity_project_v3.project_1.id}"
+  project_id                  = openstack_identity_project_v3.project_1.id
   fixed_ips                   = 2
   floating_ips                = 2
   injected_file_content_bytes = 2
@@ -201,7 +201,7 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_compute_quotaset_v2" "quotaset_1" {
-  project_id           = "${openstack_identity_project_v3.project_1.id}"
+  project_id           = openstack_identity_project_v3.project_1.id
   fixed_ips                   = 4
   floating_ips                = 4
   injected_file_content_bytes = 4
@@ -225,7 +225,7 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_compute_quotaset_v2" "quotaset_1" {
-  project_id           = "${openstack_identity_project_v3.project_1.id}"
+  project_id           = openstack_identity_project_v3.project_1.id
   fixed_ips                   = 5
   floating_ips                = 5
   injected_file_content_bytes = 5

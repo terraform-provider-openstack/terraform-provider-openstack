@@ -111,7 +111,7 @@ func testAccFWRuleV2DataSourceName() string {
 data "openstack_fw_rule_v2" "rule_1" {
   name                   = "rule_1"
   description            = "My firewall rule"
-  tenant_id              = "${openstack_fw_rule_v2.rule_1.tenant_id}"
+  tenant_id              = openstack_fw_rule_v2.rule_1.tenant_id
   protocol               = "TCP"
   action                 = "deny"
   ip_version             = 4
@@ -130,7 +130,7 @@ func testAccFWRuleV2DataSourceRuleID() string {
 %s
 
 data "openstack_fw_rule_v2" "rule_1" {
-  rule_id = "${openstack_fw_rule_v2.rule_1.id}"
+  rule_id = openstack_fw_rule_v2.rule_1.id
 }
 `, testAccFWRuleV2DataSourceBasic)
 }

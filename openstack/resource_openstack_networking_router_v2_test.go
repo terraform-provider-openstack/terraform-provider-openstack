@@ -344,11 +344,11 @@ resource "openstack_networking_router_v2" "router_2" {
   external_network_id = "%s"
 
   external_fixed_ip {
-    subnet_id = "${openstack_networking_router_v2.router_1.external_fixed_ip.0.subnet_id}"
+    subnet_id = openstack_networking_router_v2.router_1.external_fixed_ip.0.subnet_id
   }
 
   external_fixed_ip {
-    subnet_id = "${openstack_networking_router_v2.router_1.external_fixed_ip.0.subnet_id}"
+    subnet_id = openstack_networking_router_v2.router_1.external_fixed_ip.0.subnet_id
   }
 
   timeouts {
@@ -379,7 +379,7 @@ resource "openstack_networking_router_v2" "router_2" {
 
   external_subnet_ids = [
     "%s", # wrong UUID
-    "${openstack_networking_router_v2.router_1.external_fixed_ip.0.subnet_id}",
+    openstack_networking_router_v2.router_1.external_fixed_ip.0.subnet_id,
     "%s", # wrong UUID again
   ]
 

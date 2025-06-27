@@ -85,7 +85,7 @@ func testAccContainerInfraV1ClusterDataSourceBasic(clusterResource string) strin
 %s
 
 data "openstack_containerinfra_cluster_v1" "cluster_1" {
-  name = "${openstack_containerinfra_cluster_v1.cluster_1.name}"
+  name = openstack_containerinfra_cluster_v1.cluster_1.name
 }
 `, clusterResource)
 }

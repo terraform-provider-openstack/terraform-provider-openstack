@@ -100,14 +100,14 @@ resource "openstack_keymanager_secret_v1" "secret_2" {
 }
 
 data "openstack_keymanager_secret_v1" "secret_1" {
-  bit_length  = "${openstack_keymanager_secret_v1.secret_1.bit_length}"
+  bit_length  = openstack_keymanager_secret_v1.secret_1.bit_length
   secret_type = "passphrase"
 }
 
 data "openstack_keymanager_secret_v1" "secret_2" {
   mode              = "cbc"
   secret_type       = "passphrase"
-  expiration_filter = "${openstack_keymanager_secret_v1.secret_2.expiration}"
+  expiration_filter = openstack_keymanager_secret_v1.secret_2.expiration
 }
 `
 
@@ -150,13 +150,13 @@ resource "openstack_keymanager_secret_v1" "secret_2" {
 }
 
 data "openstack_keymanager_secret_v1" "secret_1" {
-  bit_length  = "${openstack_keymanager_secret_v1.secret_1.bit_length}"
+  bit_length  = openstack_keymanager_secret_v1.secret_1.bit_length
   secret_type = "passphrase"
 }
 
 data "openstack_keymanager_secret_v1" "secret_2" {
   mode              = "cbc"
   secret_type       = "passphrase"
-  expiration_filter = "${openstack_keymanager_secret_v1.secret_2.expiration}"
+  expiration_filter = openstack_keymanager_secret_v1.secret_2.expiration
 }
 `

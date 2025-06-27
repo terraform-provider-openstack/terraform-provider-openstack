@@ -79,7 +79,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_one"
   description = "my subnet description"
   cidr = "192.168.198.0/24"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   tags = [
     "foo",
   ]
@@ -89,7 +89,7 @@ resource "openstack_networking_subnet_v2" "subnet_2" {
   name = "subnet_two"
   description = "my subnet description"
   cidr = "192.168.199.0/24"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   tags = [
     "foo",
     "bar",
@@ -112,8 +112,8 @@ func testAccOpenStackSubnetsV2SubnetIDsDataSourceName() string {
 %s
 
 data "openstack_networking_subnet_ids_v2" "subnets_by_name" {
-    name = "${openstack_networking_subnet_v2.subnet_1.name}"
-    description = "${openstack_networking_subnet_v2.subnet_2.description}" # to avoid race condition for further tests
+    name = openstack_networking_subnet_v2.subnet_1.name
+    description = openstack_networking_subnet_v2.subnet_2.description # to avoid race condition for further tests
 }
 `, testAccOpenStackSubnetsV2SubnetIDsDataSource)
 }

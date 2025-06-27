@@ -1124,7 +1124,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   block_device {
-    uuid = "${openstack_blockstorage_volume_v3.vol_1.id}"
+    uuid = openstack_blockstorage_volume_v3.vol_1.id
     source_type = "volume"
     boot_index = 0
     destination_type = "volume"
@@ -1251,7 +1251,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
     delete_on_termination = true
   }
   block_device {
-    uuid = "${openstack_blockstorage_volume_v3.volume_1.id}"
+    uuid = openstack_blockstorage_volume_v3.volume_1.id
     source_type = "volume"
     destination_type = "volume"
     boot_index = 1
@@ -1325,7 +1325,7 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   cidr = "192.168.1.0/24"
   ip_version = 4
   enable_dhcp = true
@@ -1343,7 +1343,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 
   network {
-    uuid = "${openstack_networking_network_v2.network_1.id}"
+    uuid = openstack_networking_network_v2.network_1.id
     fixed_ip_v4 = "192.168.1.100"
     access_network = true
   }
@@ -1359,7 +1359,7 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   cidr = "2560:d0c2:9d26:eb77:f3d5:8ca3:2069:7783/128"
   ip_version = 6
   enable_dhcp = false
@@ -1377,7 +1377,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 
   network {
-	uuid = "${openstack_networking_network_v2.network_1.id}"
+	uuid = openstack_networking_network_v2.network_1.id
 	fixed_ip_v6 = "2560:d0c2:9d26:eb77:f3d5:8ca3:2069:7783"
 	access_network = true
   }
@@ -1441,7 +1441,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
     detach_ports_before_destroy = true
   }
   network {
-    port = "${openstack_networking_port_v2.port_1.id}"
+    port = openstack_networking_port_v2.port_1.id
   }
 }
 `, osNetworkID)
@@ -1535,7 +1535,7 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   cidr = "192.168.1.0/24"
   ip_version = 4
   enable_dhcp = true
@@ -1553,7 +1553,7 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 
   network {
-    name = "${openstack_networking_network_v2.network_1.name}"
+    name = openstack_networking_network_v2.network_1.name
   }
 
 }
@@ -1568,7 +1568,7 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   cidr = "192.168.1.0/24"
   ip_version = 4
   enable_dhcp = true
@@ -1581,7 +1581,7 @@ resource "openstack_networking_network_v2" "network_2" {
 
 resource "openstack_networking_subnet_v2" "subnet_2" {
   name = "subnet_2"
-  network_id = "${openstack_networking_network_v2.network_2.id}"
+  network_id = openstack_networking_network_v2.network_2.id
   cidr = "192.168.2.0/24"
   ip_version = 4
   enable_dhcp = true
@@ -1590,44 +1590,44 @@ resource "openstack_networking_subnet_v2" "subnet_2" {
 
 resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   admin_state_up = "true"
 
   fixed_ip {
-    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id = openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.1.103"
   }
 }
 
 resource "openstack_networking_port_v2" "port_2" {
   name = "port_2"
-  network_id = "${openstack_networking_network_v2.network_2.id}"
+  network_id = openstack_networking_network_v2.network_2.id
   admin_state_up = "true"
 
   fixed_ip {
-    subnet_id = "${openstack_networking_subnet_v2.subnet_2.id}"
+    subnet_id = openstack_networking_subnet_v2.subnet_2.id
     ip_address = "192.168.2.103"
   }
 }
 
 resource "openstack_networking_port_v2" "port_3" {
   name = "port_3"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   admin_state_up = "true"
 
   fixed_ip {
-    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id = openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.1.104"
   }
 }
 
 resource "openstack_networking_port_v2" "port_4" {
   name = "port_4"
-  network_id = "${openstack_networking_network_v2.network_2.id}"
+  network_id = openstack_networking_network_v2.network_2.id
   admin_state_up = "true"
 
   fixed_ip {
-    subnet_id = "${openstack_networking_subnet_v2.subnet_2.id}"
+    subnet_id = openstack_networking_subnet_v2.subnet_2.id
     ip_address = "192.168.2.104"
   }
 }
@@ -1648,39 +1648,39 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 
   network {
-    uuid = "${openstack_networking_network_v2.network_1.id}"
+    uuid = openstack_networking_network_v2.network_1.id
     fixed_ip_v4 = "192.168.1.100"
   }
 
   network {
-    uuid = "${openstack_networking_network_v2.network_2.id}"
+    uuid = openstack_networking_network_v2.network_2.id
     fixed_ip_v4 = "192.168.2.100"
   }
 
   network {
-    uuid = "${openstack_networking_network_v2.network_1.id}"
+    uuid = openstack_networking_network_v2.network_1.id
     fixed_ip_v4 = "192.168.1.101"
   }
 
   network {
-    uuid = "${openstack_networking_network_v2.network_2.id}"
+    uuid = openstack_networking_network_v2.network_2.id
     fixed_ip_v4 = "192.168.2.101"
   }
 
   network {
-    port = "${openstack_networking_port_v2.port_1.id}"
+    port = openstack_networking_port_v2.port_1.id
   }
 
   network {
-    port = "${openstack_networking_port_v2.port_2.id}"
+    port = openstack_networking_port_v2.port_2.id
   }
 
   network {
-    port = "${openstack_networking_port_v2.port_3.id}"
+    port = openstack_networking_port_v2.port_3.id
   }
 
   network {
-    port = "${openstack_networking_port_v2.port_4.id}"
+    port = openstack_networking_port_v2.port_4.id
   }
 }
 `, osNetworkID)

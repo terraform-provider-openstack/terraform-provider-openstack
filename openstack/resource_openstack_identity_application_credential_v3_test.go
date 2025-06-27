@@ -266,9 +266,9 @@ resource "openstack_identity_application_credential_v3" "app_cred_2" {
     }]
 
     content {
-      path = "${access_rules.value.path}"
-      service = "${access_rules.value.service}"
-      method = "${access_rules.value.method}"
+      path = access_rules.value.path
+      service = access_rules.value.service
+      method = access_rules.value.method
     }
   }
 }

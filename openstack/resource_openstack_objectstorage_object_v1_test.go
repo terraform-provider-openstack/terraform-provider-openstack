@@ -372,7 +372,7 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 
 resource "openstack_objectstorage_object_v1" "myfile" {
   name = "terraform/test/myfile.txt"
-  container_name = "${openstack_objectstorage_container_v1.container_1.name}"
+  container_name = openstack_objectstorage_container_v1.container_1.name
   content = "foo"
 
   content_disposition = "foo"
@@ -391,7 +391,7 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 
 resource "openstack_objectstorage_object_v1" "myfile" {
   name = "terraform/test/myfile.csv"
-  container_name = "${openstack_objectstorage_container_v1.container_1.name}"
+  container_name = openstack_objectstorage_container_v1.container_1.name
   detect_content_type = true
   content = "foo"
   content_disposition = "foo"
@@ -410,7 +410,7 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 
 resource "openstack_objectstorage_object_v1" "myfile" {
   name = "terraform/test/myfile.txt"
-  container_name = "${openstack_objectstorage_container_v1.container_1.name}"
+  container_name = openstack_objectstorage_container_v1.container_1.name
   content_type = "application/octet-stream"
   content = "foo"
   content_disposition = "foo"
@@ -428,7 +428,7 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 
 resource "openstack_objectstorage_object_v1" "myfile" {
   name = "terraform/test/myfile.txt"
-  container_name = "${openstack_objectstorage_container_v1.container_1.name}"
+  container_name = openstack_objectstorage_container_v1.container_1.name
   content_type = "application/octet-stream"
   content = "foo"
   content_encoding = "utf8"
@@ -444,7 +444,7 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 
 resource "openstack_objectstorage_object_v1" "myfile" {
   name = "terraform/test/myfile.txt"
-  container_name = "${openstack_objectstorage_container_v1.container_1.name}"
+  container_name = openstack_objectstorage_container_v1.container_1.name
   content_type = "application/octet-stream"
   content = "foobar"
 
@@ -458,7 +458,7 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 
 resource "openstack_objectstorage_object_v1" "myfile" {
   name = "terraform/test/myfile.txt"
-  container_name = "${openstack_objectstorage_container_v1.container_1.name}"
+  container_name = openstack_objectstorage_container_v1.container_1.name
   detect_content_type = true
   source = "%s"
 }
@@ -471,13 +471,13 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 
 resource "openstack_objectstorage_object_v1" "myfilesource" {
   name = "terraform/test/myfile.txt"
-  container_name = "${openstack_objectstorage_container_v1.container_1.name}"
+  container_name = openstack_objectstorage_container_v1.container_1.name
   content = "foo"
 }
 
 resource "openstack_objectstorage_object_v1" "myfilecopied" {
   name = "terraform/test/myfilecopied.txt"
-  container_name = "${openstack_objectstorage_container_v1.container_1.name}"
+  container_name = openstack_objectstorage_container_v1.container_1.name
   copy_from = "${openstack_objectstorage_container_v1.container_1.name}/${openstack_objectstorage_object_v1.myfilesource.name}"
 }
 `
@@ -489,23 +489,23 @@ resource "openstack_objectstorage_container_v1" "container_1" {
 
 resource "openstack_objectstorage_object_v1" "myfile_part1" {
   name = "terraform/test.csv/part001"
-  container_name = "${openstack_objectstorage_container_v1.container_1.name}"
+  container_name = openstack_objectstorage_container_v1.container_1.name
   content = "foo"
 }
 resource "openstack_objectstorage_object_v1" "myfile_part2" {
   name = "terraform/test.csv/part002"
-  container_name = "${openstack_objectstorage_container_v1.container_1.name}"
+  container_name = openstack_objectstorage_container_v1.container_1.name
   content = "bar"
 }
 
 resource "openstack_objectstorage_object_v1" "myfile" {
   name = "terraform/test.csv"
-  container_name = "${openstack_objectstorage_container_v1.container_1.name}"
-  object_manifest = "${format("%s/terraform/test.csv/part",openstack_objectstorage_container_v1.container_1.name)}"
+  container_name = openstack_objectstorage_container_v1.container_1.name
+  object_manifest = format("%s/terraform/test.csv/part",openstack_objectstorage_container_v1.container_1.name)
 
   metadata = {
-    race = "${openstack_objectstorage_object_v1.myfile_part1.id}"
-    condition = "${openstack_objectstorage_object_v1.myfile_part2.id}"
+    race = openstack_objectstorage_object_v1.myfile_part1.id
+    condition = openstack_objectstorage_object_v1.myfile_part2.id
   }
 }
 `

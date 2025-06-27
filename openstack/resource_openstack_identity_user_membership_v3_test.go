@@ -118,8 +118,8 @@ func testAccIdentityV3UserMembershipBasic(groupName, userName string) string {
 	}
 
 	resource "openstack_identity_user_membership_v3" "user_membership_1" {
-	user_id = "${openstack_identity_user_v3.user_1.id}"
-	group_id = "${openstack_identity_group_v3.group_1.id}"
+	user_id = openstack_identity_user_v3.user_1.id
+	group_id = openstack_identity_group_v3.group_1.id
 	}
     `, groupName, userName)
 }

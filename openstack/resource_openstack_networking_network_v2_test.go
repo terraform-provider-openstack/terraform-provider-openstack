@@ -629,7 +629,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.10.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_router_v2" "router_1" {
@@ -637,8 +637,8 @@ resource "openstack_networking_router_v2" "router_1" {
 }
 
 resource "openstack_networking_router_interface_v2" "ri_1" {
-  router_id = "${openstack_networking_router_v2.router_1.id}"
-  subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  router_id = openstack_networking_router_v2.router_1.id
+  subnet_id = openstack_networking_subnet_v2.subnet_1.id
 }
 `
 
@@ -724,6 +724,6 @@ resource "openstack_networking_network_v2" "network_1" {
   name           = "network_1"
   description    = "my network description"
   admin_state_up = "true"
-  qos_policy_id  = "${openstack_networking_qos_policy_v2.qos_policy_1.id}"
+  qos_policy_id  = openstack_networking_qos_policy_v2.qos_policy_1.id
 }
 `

@@ -68,7 +68,7 @@ func testAccComputeV2InstanceDataSourceSource() string {
 %s
 
 data "openstack_compute_instance_v2" "source_1" {
-  id = "${openstack_compute_instance_v2.instance_1.id}"
+  id = openstack_compute_instance_v2.instance_1.id
 }
 `, testAccComputeV2InstanceDataSourceBasic())
 }

@@ -65,7 +65,7 @@ func testAccNetworkingV2QuotaDataSourceSource() string {
 %s
 
 data "openstack_networking_quota_v2" "source" {
-  project_id = "${openstack_identity_project_v3.project.id}"
+  project_id = openstack_identity_project_v3.project.id
 }
 `, testAccNetworkingV2QuotaDataSourceBasic)
 }

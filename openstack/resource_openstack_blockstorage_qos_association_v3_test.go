@@ -148,8 +148,8 @@ resource "openstack_blockstorage_volume_type_v3" "volume_type_1" {
 }
 
 resource "openstack_blockstorage_qos_association_v3" "qos_association" {
-  qos_id         = "${openstack_blockstorage_qos_v3.qos.id}"
-  volume_type_id = "${openstack_blockstorage_volume_type_v3.volume_type_1.id}"
+  qos_id         = openstack_blockstorage_qos_v3.qos.id
+  volume_type_id = openstack_blockstorage_volume_type_v3.volume_type_1.id
 }
 `, qosName, vtName)
 }

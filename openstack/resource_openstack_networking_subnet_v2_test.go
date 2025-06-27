@@ -456,7 +456,7 @@ resource "openstack_networking_network_v2" "network_1" {
 resource "openstack_networking_subnet_v2" "subnet_1" {
   description = "my subnet description"
   cidr = "192.168.199.0/24"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   dns_nameservers = ["10.0.16.4", "213.186.33.99"]
 
@@ -477,7 +477,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   gateway_ip = "192.168.199.1"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   dns_nameservers = ["10.0.16.4", "213.186.33.99"]
 
@@ -499,7 +499,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
   gateway_ip = "192.168.199.1"
   enable_dhcp = true
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 `
 
@@ -513,7 +513,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   enable_dhcp = false
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 `
 
@@ -527,7 +527,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   no_gateway = true
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 `
 
@@ -539,7 +539,7 @@ resource "openstack_networking_network_v2" "network_1" {
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 `
 
@@ -551,7 +551,7 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   allocation_pool {
     start = "192.168.199.100"
@@ -580,8 +580,8 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "10.11.12.0/25"
   no_gateway = true
-	network_id = "${openstack_networking_network_v2.network_1.id}"
-	subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+	network_id = openstack_networking_network_v2.network_1.id
+	subnetpool_id = openstack_networking_subnetpool_v2.subnetpool_1.id
 }
 `
 
@@ -599,8 +599,8 @@ resource "openstack_networking_subnetpool_v2" "subnetpool_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
-	network_id = "${openstack_networking_network_v2.network_1.id}"
-	subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+	network_id = openstack_networking_network_v2.network_1.id
+	subnetpool_id = openstack_networking_subnetpool_v2.subnetpool_1.id
 }
 `
 
@@ -619,16 +619,16 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name          = "subnet_1"
   prefix_length = 27
   enable_dhcp   = false
-  network_id    = "${openstack_networking_network_v2.network_1.id}"
-  subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+  network_id    = openstack_networking_network_v2.network_1.id
+  subnetpool_id = openstack_networking_subnetpool_v2.subnetpool_1.id
 }
 
 resource "openstack_networking_subnet_v2" "subnet_2" {
   name          = "subnet_2"
   prefix_length = 32
   enable_dhcp   = false
-  network_id    = "${openstack_networking_network_v2.network_1.id}"
-  subnetpool_id = "${openstack_networking_subnetpool_v2.subnetpool_1.id}"
+  network_id    = openstack_networking_network_v2.network_1.id
+  subnetpool_id = openstack_networking_subnetpool_v2.subnetpool_1.id
 }
 `
 
@@ -641,7 +641,7 @@ resource "openstack_networking_network_v2" "network_1" {
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "10.3.0.0/16"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   allocation_pool {
     start = "10.3.0.2"
@@ -664,7 +664,7 @@ resource "openstack_networking_network_v2" "network_1" {
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "10.3.0.0/16"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   allocation_pool {
     start = "10.3.255.0"
@@ -687,7 +687,7 @@ resource "openstack_networking_network_v2" "network_1" {
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "10.3.0.0/16"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   allocation_pool {
     start = "10.3.255.10"
@@ -710,7 +710,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 // resource "openstack_networking_subnet_v2" "subnet_1" {
 //  name = "subnet_1"
 //  cidr = "10.3.0.0/16"
-//  network_id = "${openstack_networking_network_v2.network_1.id}"
+//  network_id = openstack_networking_network_v2.network_1.id
 //
 //  allocation_pool {
 //    start = "10.3.0.2"
@@ -733,7 +733,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 // resource "openstack_networking_subnet_v2" "subnet_1" {
 //  name = "subnet_1"
 //  cidr = "10.3.0.0/16"
-//  network_id = "${openstack_networking_network_v2.network_1.id}"
+//  network_id = openstack_networking_network_v2.network_1.id
 //
 //  allocation_pool {
 //    start = "10.3.255.10"
@@ -755,7 +755,7 @@ resource "openstack_networking_network_v2" "network_1" {
 
 resource "openstack_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   dns_nameservers = ["10.0.16.4", "213.186.33.99"]
 
@@ -775,7 +775,7 @@ resource "openstack_networking_network_v2" "network_1" {
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   allocation_pool {
     start = "192.168.199.100"
@@ -793,7 +793,7 @@ resource "openstack_networking_network_v2" "network_1" {
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   service_types = ["network:distributed"]
 }
@@ -808,7 +808,7 @@ resource "openstack_networking_network_v2" "network_1" {
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   service_types = []
 }

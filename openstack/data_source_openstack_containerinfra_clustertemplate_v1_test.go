@@ -93,7 +93,7 @@ func testAccContainerInfraV1ClusterTemplateDataSourceBasic(clusterTemplateResour
 %s
 
 data "openstack_containerinfra_clustertemplate_v1" "clustertemplate_1" {
-  name = "${openstack_containerinfra_clustertemplate_v1.clustertemplate_1.name}"
+  name = openstack_containerinfra_clustertemplate_v1.clustertemplate_1.name
 }
 `, clusterTemplateResource)
 }

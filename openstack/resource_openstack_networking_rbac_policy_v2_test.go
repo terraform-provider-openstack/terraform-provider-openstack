@@ -148,9 +148,9 @@ func testAccNetworkingV2RBACPolicyBasic(projectName string) string {
 
     resource "openstack_networking_rbac_policy_v2" "rbac_policy_1" {
       action        = "access_as_shared"
-      object_id     = "${openstack_networking_network_v2.network_1.id}"
+      object_id     = openstack_networking_network_v2.network_1.id
       object_type   = "network"
-      target_tenant = "${openstack_identity_project_v3.project_1.id}"
+      target_tenant = openstack_identity_project_v3.project_1.id
     }
   `, projectName)
 }
@@ -169,9 +169,9 @@ func testAccNetworkingV2RBACPolicyUpdate(projectName string) string {
 
     resource "openstack_networking_rbac_policy_v2" "rbac_policy_1" {
       action        = "access_as_shared"
-      object_id     = "${openstack_networking_network_v2.network_1.id}"
+      object_id     = openstack_networking_network_v2.network_1.id
       object_type   = "network"
-      target_tenant = "${openstack_identity_project_v3.project_2.id}"
+      target_tenant = openstack_identity_project_v3.project_2.id
     }
   `, projectName)
 }

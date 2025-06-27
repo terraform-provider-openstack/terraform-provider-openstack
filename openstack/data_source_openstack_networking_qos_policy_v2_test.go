@@ -86,7 +86,7 @@ func testAccOpenStackNetworkingQoSPolicyV2DataSourceBasic() string {
 %s
 
 data "openstack_networking_qos_policy_v2" "qos_policy_1" {
-  name = "${openstack_networking_qos_policy_v2.qos_policy_1.name}"
+  name = openstack_networking_qos_policy_v2.qos_policy_1.name
 }
 `, testAccNetworkingV2QoSPolicyDataSource)
 }
@@ -96,7 +96,7 @@ func testAccOpenStackNetworkingQoSPolicyV2DataSourceDescription() string {
 %s
 
 data "openstack_networking_qos_policy_v2" "qos_policy_1" {
-  description = "${openstack_networking_qos_policy_v2.qos_policy_1.description}"
+  description = openstack_networking_qos_policy_v2.qos_policy_1.description
 }
 `, testAccNetworkingV2QoSPolicyDataSource)
 }

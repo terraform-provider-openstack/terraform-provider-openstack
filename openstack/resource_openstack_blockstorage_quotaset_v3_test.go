@@ -171,7 +171,7 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_blockstorage_quotaset_v3" "quotaset_1" {
-  project_id            = "${openstack_identity_project_v3.project_1.id}"
+  project_id            = openstack_identity_project_v3.project_1.id
   volumes               = 2
   snapshots             = 2
   gigabytes             = 2
@@ -222,7 +222,7 @@ resource "openstack_blockstorage_volume_type_v3" "volume_type_1" {
 }
 
 resource "openstack_blockstorage_quotaset_v3" "quotaset_1" {
-  project_id           = "${openstack_identity_project_v3.project_1.id}"
+  project_id           = openstack_identity_project_v3.project_1.id
   volumes              = 3
   snapshots            = 3
   gigabytes            = 4
@@ -258,7 +258,7 @@ resource "openstack_blockstorage_volume_type_v3" "volume_type_1" {
 }
 
 resource "openstack_blockstorage_quotaset_v3" "quotaset_1" {
-  project_id           = "${openstack_identity_project_v3.project_1.id}"
+  project_id           = openstack_identity_project_v3.project_1.id
   volumes              = 3
   snapshots            = 3
   gigabytes            = 4

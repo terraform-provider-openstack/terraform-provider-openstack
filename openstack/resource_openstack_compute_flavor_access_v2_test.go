@@ -161,8 +161,8 @@ func testAccComputeV2FlavorAccessBasic(flavorName, tenantName string) string {
     }
 
     resource "openstack_compute_flavor_access_v2" "access_1" {
-      flavor_id = "${openstack_compute_flavor_v2.flavor_1.id}"
-      tenant_id = "${openstack_identity_project_v3.project_1.id}"
+      flavor_id = openstack_compute_flavor_v2.flavor_1.id
+      tenant_id = openstack_identity_project_v3.project_1.id
     }
     `, flavorName, tenantName)
 }

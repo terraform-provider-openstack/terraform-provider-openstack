@@ -114,7 +114,7 @@ resource "openstack_networking_network_v2" "network_1" {
 resource "openstack_networking_segment_v2" "segment_1" {
   name = "segment_1"
   description = "my segment description"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   network_type = "geneve"
 }
 `
@@ -126,7 +126,7 @@ resource "openstack_networking_network_v2" "network_1" {
 }
 
 resource "openstack_networking_segment_v2" "segment_1" {
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
   network_type = "geneve"
 }
 
@@ -134,7 +134,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.10.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
-  segment_id = "${openstack_networking_segment_v2.segment_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
+  segment_id = openstack_networking_segment_v2.segment_1.id
 }
 `

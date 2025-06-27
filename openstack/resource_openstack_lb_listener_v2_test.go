@@ -301,12 +301,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
 
   timeouts {
     create = "15m"
@@ -319,15 +319,15 @@ resource "openstack_lb_pool_v2" "pool_1" {
   name            = "pool_1"
   protocol        = "HTTP"
   lb_method       = "ROUND_ROBIN"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  default_pool_id = openstack_lb_pool_v2.pool_1.id
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 
   timeouts {
     create = "5m"
@@ -347,12 +347,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
 
   timeouts {
     create = "15m"
@@ -367,7 +367,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
   protocol_port = 8080
   connection_limit = 100
   admin_state_up = "true"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 
   timeouts {
     create = "5m"
@@ -387,12 +387,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
 
   timeouts {
     create = "15m"
@@ -405,7 +405,7 @@ resource "openstack_lb_pool_v2" "pool_1" {
   name            = "pool_1"
   protocol        = "HTTP"
   lb_method       = "ROUND_ROBIN"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
@@ -417,8 +417,8 @@ resource "openstack_lb_listener_v2" "listener_1" {
   timeout_member_connect = 2000
   timeout_member_data = 3000
   timeout_tcp_inspect = 4000
-  default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  default_pool_id = openstack_lb_pool_v2.pool_1.id
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
   tags = ["tag1"]
 
   timeouts {
@@ -439,12 +439,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
 
   timeouts {
     create = "15m"
@@ -457,7 +457,7 @@ resource "openstack_lb_pool_v2" "pool_1" {
   name            = "pool_1"
   protocol        = "HTTP"
   lb_method       = "ROUND_ROBIN"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
@@ -470,8 +470,8 @@ resource "openstack_lb_listener_v2" "listener_1" {
   timeout_member_data = 2000
   timeout_tcp_inspect = 1000
   admin_state_up = "true"
-  default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  default_pool_id = openstack_lb_pool_v2.pool_1.id
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
   tags = ["tag1", "tag2"]
 
   timeouts {
@@ -492,12 +492,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
 
   timeouts {
     create = "15m"
@@ -510,15 +510,15 @@ resource "openstack_lb_pool_v2" "pool_1" {
   name            = "pool_1"
   protocol        = "UDP"
   lb_method       = "ROUND_ROBIN"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "UDP"
   protocol_port = 53
-  default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  default_pool_id = openstack_lb_pool_v2.pool_1.id
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 
   timeouts {
     create = "5m"
@@ -538,12 +538,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
 
   timeouts {
     create = "15m"
@@ -556,15 +556,15 @@ resource "openstack_lb_pool_v2" "pool_1" {
   name            = "pool_1"
   protocol        = "HTTP"
   lb_method       = "ROUND_ROBIN"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  default_pool_id = openstack_lb_pool_v2.pool_1.id
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 
   insert_headers = {
     X-Forwarded-For = "true"
@@ -589,12 +589,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
 
   timeouts {
     create = "15m"
@@ -607,15 +607,15 @@ resource "openstack_lb_pool_v2" "pool_1" {
   name            = "pool_1"
   protocol        = "HTTP"
   lb_method       = "ROUND_ROBIN"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  default_pool_id = openstack_lb_pool_v2.pool_1.id
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 
   insert_headers = {
     X-Forwarded-For = "false"
@@ -676,12 +676,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
 
   timeouts {
     create = "15m"
@@ -694,15 +694,15 @@ resource "openstack_lb_pool_v2" "pool_1" {
   name            = "pool_1"
   protocol        = "HTTP"
   lb_method       = "ROUND_ROBIN"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "openstack_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "TERMINATED_HTTPS"
   protocol_port = 8080
-  default_pool_id = "${openstack_lb_pool_v2.pool_1.id}"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  default_pool_id = openstack_lb_pool_v2.pool_1.id
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 
   client_authentication = "OPTIONAL"
   client_ca_tls_container_ref = openstack_keymanager_secret_v1.certificate_2.secret_ref
@@ -735,12 +735,12 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
 
   timeouts {
     create = "15m"
@@ -755,7 +755,7 @@ resource "openstack_lb_listener_v2" "listener_1" {
   protocol_port = 8080
   connection_limit = 100
   admin_state_up = "true"
-  loadbalancer_id = "${openstack_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 
   // we need to keep them, since Octavia has a bug
   tls_versions   = ["TLSv1.2"]

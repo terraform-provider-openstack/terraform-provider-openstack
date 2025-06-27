@@ -100,7 +100,7 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_networking_quota_v2" "quota_1" {
-  project_id          = "${openstack_identity_project_v3.project_1.id}"
+  project_id          = openstack_identity_project_v3.project_1.id
   floatingip          = 2
   network             = 2
   port                = 2
@@ -119,7 +119,7 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_networking_quota_v2" "quota_1" {
-  project_id          = "${openstack_identity_project_v3.project_1.id}"
+  project_id          = openstack_identity_project_v3.project_1.id
   floatingip          = 3
   network             = 3
   port                = 4
@@ -138,7 +138,7 @@ resource "openstack_identity_project_v3" "project_1" {
 }
 
 resource "openstack_networking_quota_v2" "quota_1" {
-  project_id          = "${openstack_identity_project_v3.project_1.id}"
+  project_id          = openstack_identity_project_v3.project_1.id
   floatingip          = 2
   network             = 2
   port                = 2

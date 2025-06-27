@@ -136,7 +136,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   gateway_ip = "192.168.199.1"
   enable_dhcp = "false"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_router_v2" "router_1" {
@@ -147,17 +147,17 @@ resource "openstack_networking_router_v2" "router_1" {
 
 resource "openstack_networking_port_v2" "port_1" {
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id = openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.3"
   }
 }
 
 resource "openstack_networking_router_interface_v2" "router_interface_1" {
-  router_id = "${openstack_networking_router_v2.router_1.id}"
-  port_id = "${openstack_networking_port_v2.port_1.id}"
+  router_id = openstack_networking_router_v2.router_1.id
+  port_id = openstack_networking_port_v2.port_1.id
 }
 
 resource "openstack_networking_floatingip_v2" "fip_1" {
@@ -170,11 +170,11 @@ resource "openstack_networking_floatingip_v2" "fip_1" {
 resource "openstack_networking_portforwarding_v2" "pf_1" {
   description = "pf_1"
   protocol = "tcp"
-  internal_ip_address = "${openstack_networking_port_v2.port_1.fixed_ip[0].ip_address}"
+  internal_ip_address = openstack_networking_port_v2.port_1.fixed_ip[0].ip_address
   internal_port = 25
-  internal_port_id = "${openstack_networking_port_v2.port_1.id}"
+  internal_port_id = openstack_networking_port_v2.port_1.id
   external_port = 2230
-  floatingip_id = "${openstack_networking_floatingip_v2.fip_1.id}"
+  floatingip_id = openstack_networking_floatingip_v2.fip_1.id
   depends_on = [openstack_networking_port_v2.port_1, openstack_networking_floatingip_v2.fip_1]
 }
 `, osExtGwID, osPoolName)
@@ -192,7 +192,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   gateway_ip = "192.168.199.1"
   enable_dhcp = "false"
   ip_version = 4
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 }
 
 resource "openstack_networking_router_v2" "router_1" {
@@ -203,17 +203,17 @@ resource "openstack_networking_router_v2" "router_1" {
 
 resource "openstack_networking_port_v2" "port_1" {
   admin_state_up = "true"
-  network_id = "${openstack_networking_network_v2.network_1.id}"
+  network_id = openstack_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id = "${openstack_networking_subnet_v2.subnet_1.id}"
+    subnet_id = openstack_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.3"
   }
 }
 
 resource "openstack_networking_router_interface_v2" "router_interface_1" {
-  router_id = "${openstack_networking_router_v2.router_1.id}"
-  port_id = "${openstack_networking_port_v2.port_1.id}"
+  router_id = openstack_networking_router_v2.router_1.id
+  port_id = openstack_networking_port_v2.port_1.id
 }
 
 resource "openstack_networking_floatingip_v2" "fip_1" {
@@ -225,11 +225,11 @@ resource "openstack_networking_floatingip_v2" "fip_1" {
 
 resource "openstack_networking_portforwarding_v2" "pf_1" {
   protocol = "tcp"
-  internal_ip_address = "${openstack_networking_port_v2.port_1.fixed_ip[0].ip_address}"
+  internal_ip_address = openstack_networking_port_v2.port_1.fixed_ip[0].ip_address
   internal_port = 26
-  internal_port_id = "${openstack_networking_port_v2.port_1.id}"
+  internal_port_id = openstack_networking_port_v2.port_1.id
   external_port = 2231
-  floatingip_id = "${openstack_networking_floatingip_v2.fip_1.id}"
+  floatingip_id = openstack_networking_floatingip_v2.fip_1.id
   depends_on = [openstack_networking_port_v2.port_1, openstack_networking_floatingip_v2.fip_1]
 }
 `, osExtGwID, osPoolName)
