@@ -114,7 +114,7 @@ func resourceNetworkingBGPSpeakerV2Create(ctx context.Context, d *schema.Resourc
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	opts := speakersCreateOpts{
+	opts := speakers.CreateOpts{
 		TenantID:  d.Get("tenant_id").(string),
 		Name:      d.Get("name").(string),
 		IPVersion: d.Get("ip_version").(int),
@@ -227,7 +227,7 @@ func resourceNetworkingBGPSpeakerV2Update(ctx context.Context, d *schema.Resourc
 	}
 
 	var (
-		updateOpts speakersUpdateOpts
+		updateOpts speakers.UpdateOpts
 		changed    bool
 	)
 

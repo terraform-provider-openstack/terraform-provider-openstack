@@ -16,7 +16,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/flavors"
-	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/keypairs"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/secgroups"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/tags"
@@ -560,12 +559,8 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		createOpts.BlockDevice = blockDevices
 	}
 
-	var createOptsBuilder servers.CreateOptsBuilder = createOpts
 	if keyName, ok := d.Get("key_pair").(string); ok && keyName != "" {
-		createOptsBuilder = &keypairs.CreateOptsExt{
-			CreateOptsBuilder: createOptsBuilder,
-			KeyName:           keyName,
-		}
+		createOpts.KeyName = keyName
 	}
 
 	var schedulerHints servers.SchedulerHintOpts
@@ -580,7 +575,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 
 	// If a block_device is used, use the bootfromvolume.Create function as it allows an empty ImageRef.
 	// Otherwise, use the normal servers.Create function.
-	server, err := servers.Create(ctx, computeClient, createOptsBuilder, schedulerHints).Extract()
+	server, err := servers.Create(ctx, computeClient, createOpts, schedulerHints).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack server: %s", err)
 	}
@@ -790,8 +785,10 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 	}
 
 	var updateOpts servers.UpdateOpts
+
 	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
+		v := d.Get("name").(string)
+		updateOpts.Name = &v
 	}
 
 	if updateOpts != (servers.UpdateOpts{}) {

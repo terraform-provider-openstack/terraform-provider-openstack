@@ -103,7 +103,7 @@ func resourceNetworkingBGPPeerV2Create(ctx context.Context, d *schema.ResourceDa
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	opts := peersCreateOpts{
+	opts := peers.CreateOpts{
 		Name:     d.Get("name").(string),
 		AuthType: d.Get("auth_type").(string),
 		PeerIP:   d.Get("peer_ip").(string),
@@ -161,7 +161,7 @@ func resourceNetworkingBGPPeerV2Update(ctx context.Context, d *schema.ResourceDa
 	}
 
 	var (
-		updateOpts peersUpdateOpts
+		updateOpts peers.UpdateOpts
 		changed    bool
 	)
 

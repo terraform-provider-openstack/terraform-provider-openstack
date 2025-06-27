@@ -147,12 +147,15 @@ func resourceComputeAggregateV2Update(ctx context.Context, d *schema.ResourceDat
 	}
 
 	var updateOpts aggregates.UpdateOpts
+
 	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
+		v := d.Get("name").(string)
+		updateOpts.Name = &v
 	}
 
 	if d.HasChange("zone") {
-		updateOpts.AvailabilityZone = d.Get("zone").(string)
+		v := d.Get("zone").(string)
+		updateOpts.AvailabilityZone = &v
 	}
 
 	if updateOpts != (aggregates.UpdateOpts{}) {
