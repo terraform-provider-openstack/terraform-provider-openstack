@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -81,6 +82,13 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
+			},
+			"hostname": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[a-zA-Z0-9\.-]{1,255}$`), "Invalid hostname. only alphanumeric, . (dot) and - (dash) are allowed characters in the hostname."),
 			},
 			"user_data": {
 				Type:     schema.TypeString,
@@ -513,6 +521,15 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		computeClient.Microversion = computeV2InstanceCreateServerWithHypervisorHostnameMicroversion
 	}
 
+	var hostname string
+	if v, ok := getOkExists(d, "hostname"); ok {
+		hostname = v.(string)
+		computeClient.Microversion = computeV2InstanceCreateServerWithHostnameMicroversion
+		if strings.Contains(hostname, ".") {
+			computeClient.Microversion = computeV2InstanceCreateServerWithHostnameIsFqdnMicroversion
+		}
+	}
+
 	if v, ok := getOkExists(d, "availability_zone"); ok {
 		availabilityZone = v.(string)
 	} else {
@@ -521,6 +538,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 
 	createOpts := &servers.CreateOpts{
 		Name:               d.Get("name").(string),
+		Hostname:           hostname,
 		ImageRef:           imageID,
 		FlavorRef:          flavorID,
 		SecurityGroups:     resourceInstanceSecGroupsV2(d),

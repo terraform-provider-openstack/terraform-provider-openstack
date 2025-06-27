@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 	"testing"
@@ -829,6 +830,52 @@ func TestAccComputeInstanceV2_hypervisorHostname(t *testing.T) {
 					resource.TestCheckResourceAttrPtr(
 						"openstack_compute_instance_v2.instance_1", "hypervisor_hostname", &instance.HypervisorHostname,
 					),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_hostname(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy(t.Context()),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeInstanceV2InvalidHostnameConfig(),
+				ExpectError: regexp.MustCompile("Invalid hostname"),
+			},
+			{
+				Config: testAccComputeInstanceV2HostnameConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(t.Context(), "openstack_compute_instance_v2.instance_1", &instance),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_hostnameFqdn(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy(t.Context()),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceV2HostnameFqdnConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(t.Context(), "openstack_compute_instance_v2.instance_1", &instance),
 				),
 			},
 		},
@@ -1800,6 +1847,51 @@ resource "openstack_compute_instance_v2" "instance_1" {
   flavor_id       = "%s"
 
   hypervisor_hostname = data.openstack_compute_hypervisor_v2.host01.hostname
+
+  network {
+    uuid = "%s"
+  }
+}
+`, osImageID, osFlavorID, osNetworkID)
+}
+
+func testAccComputeInstanceV2HostnameConfig() string {
+	return fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name            = "instance_1"
+  hostname  	  = "test-hostname"
+  image_id        = "%s"
+  flavor_id       = "%s"
+
+  network {
+    uuid = "%s"
+  }
+}
+`, osImageID, osFlavorID, osNetworkID)
+}
+
+func testAccComputeInstanceV2InvalidHostnameConfig() string {
+	return fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_invalid_hostname" {
+  name            = "instance_invalid_hostname"
+  hostname  	  = "test_hostname"
+  image_id        = "%s"
+  flavor_id       = "%s"
+
+  network {
+    uuid = "%s"
+  }
+}
+`, osImageID, osFlavorID, osNetworkID)
+}
+
+func testAccComputeInstanceV2HostnameFqdnConfig() string {
+	return fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name            = "instance_1"
+  hostname  	  = "test-hostname.example.org"
+  image_id        = "%s"
+  flavor_id       = "%s"
 
   network {
     uuid = "%s"
