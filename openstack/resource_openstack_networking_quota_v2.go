@@ -42,6 +42,30 @@ func resourceNetworkingQuotaV2() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"bgpvpn": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+
+			"firewall_group": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+
+			"firewall_policy": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+
+			"firewall_rule": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+
 			"floatingip": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -95,6 +119,12 @@ func resourceNetworkingQuotaV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+
+			"trunk": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -110,6 +140,26 @@ func resourceNetworkingQuotaV2Create(ctx context.Context, d *schema.ResourceData
 
 	updateOpts := quotas.UpdateOpts{}
 	projectID := d.Get("project_id").(string)
+
+	if v, ok := getOkExists(d, "bgpvpn"); ok {
+		pbgpvpn := v.(int)
+		updateOpts.BGPVPN = &pbgpvpn
+	}
+
+	if v, ok := getOkExists(d, "firewall_group"); ok {
+		pfirewallGroup := v.(int)
+		updateOpts.FirewallGroup = &pfirewallGroup
+	}
+
+	if v, ok := getOkExists(d, "firewall_policy"); ok {
+		pfirewallPolicy := v.(int)
+		updateOpts.FirewallPolicy = &pfirewallPolicy
+	}
+
+	if v, ok := getOkExists(d, "firewall_rule"); ok {
+		pfirewallRule := v.(int)
+		updateOpts.FirewallRule = &pfirewallRule
+	}
 
 	if v, ok := getOkExists(d, "floatingip"); ok {
 		pfloatingIP := v.(int)
@@ -156,6 +206,11 @@ func resourceNetworkingQuotaV2Create(ctx context.Context, d *schema.ResourceData
 		updateOpts.SubnetPool = &psubnetPool
 	}
 
+	if v, ok := getOkExists(d, "trunk"); ok {
+		ptrunk := v.(int)
+		updateOpts.Trunk = &ptrunk
+	}
+
 	q, err := quotas.Update(ctx, networkingClient, projectID, updateOpts).Extract()
 	if err != nil {
 		return diag.Errorf("Error creating openstack_networking_quota_v2: %s", err)
@@ -192,6 +247,10 @@ func resourceNetworkingQuotaV2Read(ctx context.Context, d *schema.ResourceData, 
 
 	d.Set("project_id", projectID)
 	d.Set("region", region)
+	d.Set("bgpvpn", q.BGPVPN)
+	d.Set("firewall_group", q.FirewallGroup)
+	d.Set("firewall_policy", q.FirewallPolicy)
+	d.Set("firewall_rule", q.FirewallRule)
 	d.Set("floatingip", q.FloatingIP)
 	d.Set("network", q.Network)
 	d.Set("port", q.Port)
@@ -201,6 +260,7 @@ func resourceNetworkingQuotaV2Read(ctx context.Context, d *schema.ResourceData, 
 	d.Set("security_group_rule", q.SecurityGroupRule)
 	d.Set("subnet", q.Subnet)
 	d.Set("subnetpool", q.SubnetPool)
+	d.Set("trunk", q.Trunk)
 
 	return nil
 }
@@ -217,6 +277,30 @@ func resourceNetworkingQuotaV2Update(ctx context.Context, d *schema.ResourceData
 		hasChange  bool
 		updateOpts quotas.UpdateOpts
 	)
+
+	if d.HasChange("bgpvpn") {
+		hasChange = true
+		bgpvpn := d.Get("bgpvpn").(int)
+		updateOpts.BGPVPN = &bgpvpn
+	}
+
+	if d.HasChange("firewall_group") {
+		hasChange = true
+		firewallGroup := d.Get("firewall_group").(int)
+		updateOpts.FirewallGroup = &firewallGroup
+	}
+
+	if d.HasChange("firewall_policy") {
+		hasChange = true
+		firewallPolicy := d.Get("firewall_policy").(int)
+		updateOpts.FirewallPolicy = &firewallPolicy
+	}
+
+	if d.HasChange("firewall_rule") {
+		hasChange = true
+		firewallRule := d.Get("firewall_rule").(int)
+		updateOpts.FirewallRule = &firewallRule
+	}
 
 	if d.HasChange("floatingip") {
 		hasChange = true
@@ -270,6 +354,12 @@ func resourceNetworkingQuotaV2Update(ctx context.Context, d *schema.ResourceData
 		hasChange = true
 		subnetPool := d.Get("subnetpool").(int)
 		updateOpts.SubnetPool = &subnetPool
+	}
+
+	if d.HasChange("trunk") {
+		hasChange = true
+		trunk := d.Get("trunk").(int)
+		updateOpts.Trunk = &trunk
 	}
 
 	if hasChange {
