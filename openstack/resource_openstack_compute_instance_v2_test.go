@@ -1874,7 +1874,7 @@ func testAccComputeInstanceV2InvalidHostnameConfig() string {
 	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_invalid_hostname" {
   name            = "instance_invalid_hostname"
-  hostname  	  = "test_hostname"
+  hostname  	  = "test+hostname"
   image_id        = "%s"
   flavor_id       = "%s"
 
