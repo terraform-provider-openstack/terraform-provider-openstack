@@ -97,6 +97,7 @@ func resourceNetworkingRouterV2() *schema.Resource {
 						"subnet_id": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"ip_address": {
 							Type:     schema.TypeString,
@@ -176,11 +177,13 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 	}
 
 	createOpts := RouterCreateOpts{
-		routers.CreateOpts{
-			Name:                  d.Get("name").(string),
-			Description:           d.Get("description").(string),
-			TenantID:              d.Get("tenant_id").(string),
-			AvailabilityZoneHints: resourceNetworkingAvailabilityZoneHintsV2(d),
+		routersCreateOpts{
+			CreateOpts: routers.CreateOpts{
+				Name:                  d.Get("name").(string),
+				Description:           d.Get("description").(string),
+				TenantID:              d.Get("tenant_id").(string),
+				AvailabilityZoneHints: resourceNetworkingAvailabilityZoneHintsV2(d),
+			},
 		},
 		MapValueSpecs(d),
 	}
@@ -208,7 +211,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 	// Gateway settings
 	var externalNetworkID string
 
-	var gatewayInfo routers.GatewayInfo
+	var gatewayInfo routersGatewayInfo
 
 	if v := d.Get("external_network_id").(string); v != "" {
 		externalNetworkID = v
@@ -252,7 +255,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 	} else {
 		// create a router in a loop with the first available external subnet
 		for i, externalSubnetID := range externalSubnetIDs {
-			gatewayInfo.ExternalFixedIPs = []routers.ExternalFixedIP{externalSubnetID}
+			gatewayInfo.ExternalFixedIPs = []routersExternalFixedIP{externalSubnetID}
 
 			log.Printf("[DEBUG] openstack_networking_router_v2 create options (try %d): %#v", i+1, createOpts)
 
@@ -296,7 +299,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 	if vendorUpdateGateway && externalNetworkID != "" {
 		log.Printf("[DEBUG] Adding external_network %s to openstack_networking_router_v2 %s", externalNetworkID, r.ID)
 
-		var updateOpts routers.UpdateOpts
+		var updateOpts routersUpdateOpts
 		updateOpts.GatewayInfo = &gatewayInfo
 
 		_, err = routers.Update(ctx, networkingClient, r.ID, updateOpts).Extract()
@@ -383,7 +386,7 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 
 	var hasChange bool
 
-	var updateOpts routers.UpdateOpts
+	var updateOpts routersUpdateOpts
 
 	if d.HasChange("name") {
 		hasChange = true
@@ -407,7 +410,7 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 
 	var externalNetworkID string
 
-	gatewayInfo := routers.GatewayInfo{}
+	gatewayInfo := routersGatewayInfo{}
 
 	if v := d.Get("external_network_id").(string); v != "" {
 		externalNetworkID = v

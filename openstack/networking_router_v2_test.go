@@ -23,7 +23,7 @@ func TestUnitExpandNetworkingRouterExternalFixedIPsV2(t *testing.T) {
 	externalFixedIPs := []map[string]string{fixedIPs1, fixedIPs2}
 	d.Set("external_fixed_ip", externalFixedIPs)
 
-	expectedExternalFixedIPs := []routers.ExternalFixedIP{
+	expectedExternalFixedIPs := []routersExternalFixedIP{
 		{
 			SubnetID:  "subnet_1",
 			IPAddress: "192.168.101.1",

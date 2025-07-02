@@ -24,13 +24,13 @@ func resourceNetworkingRouterV2StateRefreshFunc(ctx context.Context, client *gop
 	}
 }
 
-func expandNetworkingRouterExternalFixedIPsV2(externalFixedIPs []any) []routers.ExternalFixedIP {
-	fixedIPs := make([]routers.ExternalFixedIP, len(externalFixedIPs))
+func expandNetworkingRouterExternalFixedIPsV2(externalFixedIPs []any) []routersExternalFixedIP {
+	fixedIPs := make([]routersExternalFixedIP, len(externalFixedIPs))
 
 	for i, raw := range externalFixedIPs {
 		rawMap := raw.(map[string]any)
 
-		fixedIPs[i] = routers.ExternalFixedIP{
+		fixedIPs[i] = routersExternalFixedIP{
 			SubnetID:  rawMap["subnet_id"].(string),
 			IPAddress: rawMap["ip_address"].(string),
 		}
@@ -39,11 +39,11 @@ func expandNetworkingRouterExternalFixedIPsV2(externalFixedIPs []any) []routers.
 	return fixedIPs
 }
 
-func expandNetworkingRouterExternalSubnetIDsV2(externalSubnetIDs []any) []routers.ExternalFixedIP {
-	subnetIDs := make([]routers.ExternalFixedIP, len(externalSubnetIDs))
+func expandNetworkingRouterExternalSubnetIDsV2(externalSubnetIDs []any) []routersExternalFixedIP {
+	subnetIDs := make([]routersExternalFixedIP, len(externalSubnetIDs))
 
 	for i, raw := range externalSubnetIDs {
-		subnetIDs[i] = routers.ExternalFixedIP{
+		subnetIDs[i] = routersExternalFixedIP{
 			SubnetID: raw.(string),
 		}
 	}

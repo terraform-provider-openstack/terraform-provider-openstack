@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/subnetpools"
@@ -64,7 +65,7 @@ func (opts PortCreateOpts) ToPortCreateMap() (map[string]any, error) {
 
 // RouterCreateOpts represents the attributes used when creating a new router.
 type RouterCreateOpts struct {
-	routers.CreateOpts
+	routersCreateOpts
 	ValueSpecs map[string]string `json:"value_specs,omitempty"`
 }
 
@@ -72,6 +73,34 @@ type RouterCreateOpts struct {
 // It overrides routers.ToRouterCreateMap to add the ValueSpecs field.
 func (opts RouterCreateOpts) ToRouterCreateMap() (map[string]any, error) {
 	return BuildRequest(opts, "router")
+}
+
+type routersCreateOpts struct {
+	routers.CreateOpts
+	GatewayInfo *routersGatewayInfo `json:"external_gateway_info,omitempty"`
+}
+
+func (opts routersCreateOpts) ToRouterCreateMap() (map[string]any, error) {
+	return gophercloud.BuildRequestBody(opts, "router")
+}
+
+type routersGatewayInfo struct {
+	routers.GatewayInfo
+	ExternalFixedIPs []routersExternalFixedIP `json:"external_fixed_ips,omitempty"`
+}
+
+type routersExternalFixedIP struct {
+	IPAddress string `json:"ip_address,omitempty"`
+	SubnetID  string `json:"subnet_id,omitempty"`
+}
+
+type routersUpdateOpts struct {
+	routers.UpdateOpts
+	GatewayInfo *routersGatewayInfo `json:"external_gateway_info,omitempty"`
+}
+
+func (opts routersUpdateOpts) ToRouterUpdateMap() (map[string]any, error) {
+	return gophercloud.BuildRequestBody(opts, "router")
 }
 
 // SubnetCreateOpts represents the attributes used when creating a new subnet.

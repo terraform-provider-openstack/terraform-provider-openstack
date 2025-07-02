@@ -198,6 +198,28 @@ func TestAccNetworkingV2Router_extQoSPolicy(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Router_extIPAddress(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy(t.Context()),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2RouterExtIPAddress(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "name", "router_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "external_fixed_ip.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2RouterDestroy(ctx context.Context) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
@@ -409,4 +431,28 @@ resource "openstack_networking_router_v2" "router_1" {
   }
 }
 `, osExtGwID)
+}
+
+func testAccNetworkingV2RouterExtIPAddress() string {
+	return fmt.Sprintf(`
+data "openstack_networking_subnet_v2" "subnet_1" {
+  name = "public-subnet"
+  network_id = "%s"
+}
+
+resource "openstack_networking_router_v2" "router_1" {
+  name = "router_1"
+  admin_state_up = "true"
+  external_network_id = "%s"
+
+  external_fixed_ip {
+    ip_address = cidrhost(format("%%s/24", data.openstack_networking_subnet_v2.subnet_1.allocation_pools.0.end),-100)
+  }
+
+  timeouts {
+    create = "5m"
+    delete = "5m"
+  }
+}
+`, osExtGwID, osExtGwID)
 }
