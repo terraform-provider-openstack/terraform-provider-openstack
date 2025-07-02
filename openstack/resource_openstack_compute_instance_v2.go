@@ -84,13 +84,11 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Computed: true,
 			},
 			"hostname": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: false,
-				Computed: true,
-				// While underscores are not allowed in RFC952, nova accepts them as valid hostname.
-				// https://github.com/openstack/nova/blob/0d586ccca88ae90b9634ee00b8f7f86a78b09cd0/nova/api/validation/parameter_types.py#L269-L279
-				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[a-zA-Z0-9-\._]{1,255}$`), "Invalid hostname. only alphanumeric, . (dot), - (dash) and _ (underscore) are allowed characters in the hostname."),
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     false,
+				Computed:     true,
+				ValidateFunc: validateHostname(),
 			},
 			"user_data": {
 				Type:     schema.TypeString,
@@ -526,7 +524,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	var hostname string
 	if v, ok := getOkExists(d, "hostname"); ok {
 		hostname = v.(string)
-		if isValidHostname(&hostname) {
+		if isValidHostname(hostname) {
 			computeClient.Microversion = computeV2InstanceCreateServerWithHostnameMicroversion
 		} else {
 			computeClient.Microversion = computeV2InstanceCreateServerWithHostnameIsFqdnMicroversion
@@ -820,7 +818,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 		updateOpts.Hostname = &hostname
 
 		// Set the required microversion.
-		if isValidHostname(updateOpts.Hostname) {
+		if isValidHostname(*updateOpts.Hostname) {
 			computeClient.Microversion = computeV2InstanceCreateServerWithHostnameMicroversion
 		} else {
 			computeClient.Microversion = computeV2InstanceCreateServerWithHostnameIsFqdnMicroversion
@@ -1789,12 +1787,21 @@ func suppressPowerStateDiffs(_, old, _ string, _ *schema.ResourceData) bool {
 	return false
 }
 
+// validateHostname retruns a validation function which checks if the supplied hostname is a
+// valid FQDN or hostname. While underscores are not allowed in RFC952, nova accepts them.
+// https://github.com/openstack/nova/blob/0d586ccca88ae90b9634ee00b8f7f86a78b09cd0/nova/api/validation/parameter_types.py#L269-L279
+func validateHostname() schema.SchemaValidateFunc {
+	r := regexp.MustCompile(`^[a-zA-Z0-9-\._]{1,255}$`)
+
+	return validation.StringMatch(r, "Invalid hostname. only alphanumeric, . (dot), - (dash) and _ (underscore) are allowed characters in the hostname.")
+}
+
 // isValidHostname checks if the supplied hostname matches the regexp defined in the nova API.
 // https://github.com/openstack/nova/blob/0d586ccca88ae90b9634ee00b8f7f86a78b09cd0/nova/api/validation/parameter_types.py#L262-L266
-func isValidHostname(hostname *string) bool {
-	if len(*hostname) < 2 || len(*hostname) > 63 {
+func isValidHostname(hostname string) bool {
+	if len(hostname) < 2 || len(hostname) > 63 {
 		return false
 	}
 
-	return regexp.MustCompile(`^[a-zA-Z0-9]+[a-zA-Z0-9-]*[a-zA-Z0-9]+$`).MatchString(*hostname)
+	return regexp.MustCompile(`^[a-zA-Z0-9]+[a-zA-Z0-9-]*[a-zA-Z0-9]+$`).MatchString(hostname)
 }
