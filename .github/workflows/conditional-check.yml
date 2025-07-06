@@ -1,0 +1,56 @@
+on:
+  workflow_call:
+    inputs:
+      patterns:
+        description: "Multiple regex patterns, one per line"
+        required: true
+        type: string
+    outputs:
+      run_tests:
+        type: boolean
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      run_tests: ${{ steps.check.outputs.run_tests }}
+    steps:
+      - name: Check changed files with multiple patterns
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const trigger = process.env.EVENT_NAME;
+
+            // Always run on schedule
+            if (trigger === 'schedule') {
+              core.setOutput('run_tests', true);
+              return;
+            }
+
+            const run = github.context.payload.workflow_run;
+            if (run.event !== 'pull_request' || run.conclusion !== 'success') {
+              core.setOutput('run_tests', false);
+              return;
+            }
+
+            const commitSha = run.head_sha;
+            const response = await github.rest.repos.getCommit({
+              owner: github.context.repo.owner,
+              repo: github.context.repo.repo,
+              ref: commitSha,
+            });
+
+            const changedFiles = response.data.files.map(f => f.filename);
+
+            // Split multi-line input into array of patterns
+            const patternsRaw = process.env.PATTERNS.trim().split('\n').map(p => p.trim()).filter(Boolean);
+
+            // Combine all patterns into one big regex (joined by OR)
+            const combinedPattern = new RegExp(patternsRaw.map(p => `(${p})`).join('|'));
+
+            // Check if any changed file matches combined pattern
+            const match = changedFiles.some(f => combinedPattern.test(f));
+            core.setOutput('run_tests', match);
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PATTERNS: ${{ inputs.patterns }}
