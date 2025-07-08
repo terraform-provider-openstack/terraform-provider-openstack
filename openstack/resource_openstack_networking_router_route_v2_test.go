@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/extraroutes"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
@@ -55,6 +56,52 @@ func TestAccNetworkingV2RouterRoute_basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccNetworkingV2RouterRoute_deleted(t *testing.T) {
+	var router routers.Router
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2RouterRouteCreate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2RouterExists(t.Context(), "openstack_networking_router_v2.router_1", &router),
+				),
+			},
+			{
+				PreConfig:          testAccNetworkingV2RouterRouteManualDelete(t, &router),
+				Config:             testAccNetworkingV2RouterRouteCreate,
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
+func testAccNetworkingV2RouterRouteManualDelete(t *testing.T, router *routers.Router) func() {
+	return func() {
+		config := testAccProvider.Meta().(*Config)
+		ctx := t.Context()
+
+		networkingClient, err := config.NetworkingV2Client(ctx, osRegionName)
+		if err != nil {
+			t.Errorf("Error creating OpenStack networking client: %v", err)
+		}
+
+		opts := extraroutes.Opts{
+			Routes: &router.Routes,
+		}
+		_, err = extraroutes.Remove(ctx, networkingClient, router.ID, opts).Extract()
+		if err != nil {
+			t.Errorf("Error removing route from router %s: %v", router.ID, err)
+		}
+	}
 }
 
 func testAccCheckNetworkingV2RouterRouteEmpty(ctx context.Context, n string) resource.TestCheckFunc {
