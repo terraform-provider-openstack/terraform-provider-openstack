@@ -77,6 +77,22 @@ func dataSourceNetworkingRouterV2() *schema.Resource {
 					},
 				},
 			},
+			"routes": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"destination_cidr": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"next_hop": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 			"external_qos_policy_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -173,6 +189,7 @@ func dataSourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceDat
 	d.Set("enable_snat", router.GatewayInfo.EnableSNAT)
 	d.Set("external_qos_policy_id", router.GatewayInfo.QoSPolicyID)
 	d.Set("all_tags", router.Tags)
+	d.Set("routes", expandNetworkingRouterRoutesV2(router.Routes))
 	d.Set("region", GetRegion(d, config))
 
 	if err := d.Set("availability_zone_hints", router.AvailabilityZoneHints); err != nil {

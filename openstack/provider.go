@@ -466,6 +466,7 @@ func Provider() *schema.Provider {
 			"openstack_networking_router_v2":                     resourceNetworkingRouterV2(),
 			"openstack_networking_router_interface_v2":           resourceNetworkingRouterInterfaceV2(),
 			"openstack_networking_router_route_v2":               resourceNetworkingRouterRouteV2(),
+			"openstack_networking_router_routes_v2":              resourceNetworkingRouterRoutesV2(),
 			"openstack_networking_secgroup_v2":                   resourceNetworkingSecGroupV2(),
 			"openstack_networking_secgroup_rule_v2":              resourceNetworkingSecGroupRuleV2(),
 			"openstack_networking_address_group_v2":              resourceNetworkingAddressGroupV2(),

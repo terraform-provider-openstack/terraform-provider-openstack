@@ -62,4 +62,6 @@ The `external_fixed_ip` block supports:
 
 * `ip_address` - The IP address to set on the router.
 
+* `routes` - The list of static routes set on the router.
+
 * `all_tags` - The set of string tags applied on the router.
