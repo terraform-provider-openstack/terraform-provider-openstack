@@ -3,8 +3,10 @@ package openstack
 import (
 	"context"
 	"log"
+	"net/http"
 	"strings"
 
+	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/tags"
@@ -210,10 +212,17 @@ func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData
 
 	flavor, err := flavors.Get(ctx, computeClient, flavorID).Extract()
 	if err != nil {
-		return diag.FromErr(err)
+		if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+			// Original flavor was deleted, but it is possible that instance started
+			// with this flavor is still running
+			log.Printf("[DEBUG] Original instance flavor id %s could not be found", d.Id())
+			d.Set("flavor_name", "")
+		} else {
+			return diag.FromErr(err)
+		}
+	} else {
+		d.Set("flavor_name", flavor.Name)
 	}
-
-	d.Set("flavor_name", flavor.Name)
 
 	// Set the instance's image information appropriately
 	if err := setImageInformation(ctx, imageClient, server, d); err != nil {
