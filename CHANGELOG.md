@@ -1,3 +1,27 @@
+## 3.3.0 (9 July, 2025)
+
+NOTES
+
+* Bumped Gophercloud dependency to latest version ([#1922](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1922))
+* Improved performance by eliminating redundant delay in resource state refresh logic ([#1893](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1893))
+
+IMPROVEMENTS
+
+* Added `openstack_networking_router_routes_v2` resource ([#1921](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1921))
+* Added `routes` attribute in the `openstack_networking_router_v2` data source ([#1921](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1921))
+* Added `openstack_networking_bgp_speaker_v2` resource ([#1892](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1892))
+* Added `openstack_networking_bgp_peer_v2` resource ([#1892](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1892))
+* Added `openstack_networking_segment_v2` resource ([#1891](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1891))
+* Added `openstack_networking_segment_v2` data source ([#1891](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1891))
+* Added `openstack_dns_quota_v2` resource ([#1924](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1924))
+* Marked the `subnet_id` argument of the `external_fixed_ip` block as computed in `openstack_networking_router_v2` resource ([#1915](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1915))
+
+BUG FIXES
+
+* Properly handle missing flavor in `openstack_compute_instance_v2` data source ([#1919](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1919))
+* Properly handle missing route in `openstack_networking_router_route_v2` resource ([#1920](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1920))
+* Fixed panic regression in `openstack_networking_subnet_ids_v2` data source ([#1902](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1902))
+
 ## 3.2.0 ( 10 June, 2025 )
 
 NOTES
