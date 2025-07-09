@@ -1032,6 +1032,28 @@ func TestAccNetworkingV2Port_qos_policy_update(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Port_IPAddress(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2PortDestroy(t.Context()),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2PortIPAddress,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "name", "port_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "fixed_ip.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2PortDestroy(ctx context.Context) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
@@ -2793,5 +2815,28 @@ resource "openstack_networking_port_v2" "port_1" {
   }
 
   qos_policy_id  = openstack_networking_qos_policy_v2.qos_policy_1.id
+}
+`
+
+const testAccNetworkingV2PortIPAddress = `
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = openstack_networking_network_v2.network_1.id
+}
+
+resource "openstack_networking_port_v2" "port_1" {
+  name = "port_1"
+  network_id = openstack_networking_network_v2.network_1.id
+
+  fixed_ip {
+    ip_address = cidrhost(openstack_networking_subnet_v2.subnet_1.cidr,250)
+  }
 }
 `
