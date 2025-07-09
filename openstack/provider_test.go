@@ -100,7 +100,10 @@ func testAccPreCheck(t *testing.T) {
 }
 
 func testAccPreCheckDNS(t *testing.T) {
-	testAccPreCheckRequiredEnvVars(t)
+	v := os.Getenv("OS_AUTH_URL")
+	if v == "" {
+		t.Fatal("OS_AUTH_URL must be set for acceptance tests")
+	}
 
 	if osDNSEnvironment == "" {
 		t.Skip("This environment does not support DNS tests")
