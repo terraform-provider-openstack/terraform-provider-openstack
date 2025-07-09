@@ -420,6 +420,7 @@ func Provider() *schema.Provider {
 			"openstack_dns_zone_share_v2":                        resourceDNSZoneShareV2(),
 			"openstack_dns_transfer_request_v2":                  resourceDNSTransferRequestV2(),
 			"openstack_dns_transfer_accept_v2":                   resourceDNSTransferAcceptV2(),
+			"openstack_dns_quota_v2":                             resourceDNSQuotaV2(),
 			"openstack_fw_group_v2":                              resourceFWGroupV2(),
 			"openstack_fw_policy_v2":                             resourceFWPolicyV2(),
 			"openstack_fw_rule_v2":                               resourceFWRuleV2(),
