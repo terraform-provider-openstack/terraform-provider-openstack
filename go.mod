@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/google/go-cmp v0.7.0
-	github.com/gophercloud/gophercloud/v2 v2.7.1-0.20250627135154-01ba8ed1a932
+	github.com/gophercloud/gophercloud/v2 v2.7.1-0.20250709163744-323818108b46
 	github.com/gophercloud/utils/v2 v2.0.0-20250617123236-b0c67de63928
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.37.0
 	github.com/hashicorp/terraform-plugin-testing v1.13.2
