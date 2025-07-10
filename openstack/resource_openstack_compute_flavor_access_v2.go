@@ -62,7 +62,11 @@ func resourceComputeFlavorAccessV2Create(ctx context.Context, d *schema.Resource
 	log.Printf("[DEBUG] Flavor Access Options: %#v", accessOpts)
 
 	if _, err := flavors.AddAccess(ctx, computeClient, flavorID, accessOpts).Extract(); err != nil {
-		return diag.Errorf("Error adding access to tenant %s for flavor %s: %s", tenantID, flavorID, err)
+		if !gophercloud.ResponseCodeIs(err, http.StatusConflict) {
+			return diag.Errorf("Error adding access to tenant %s for flavor %s: %s", tenantID, flavorID, err)
+		}
+
+		log.Printf("[DEBUG] Tenant %s already has access to flavor %s: %s", tenantID, flavorID, err)
 	}
 
 	id := fmt.Sprintf("%s/%s", flavorID, tenantID)
