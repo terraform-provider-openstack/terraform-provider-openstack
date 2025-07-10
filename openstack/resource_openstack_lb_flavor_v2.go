@@ -74,12 +74,10 @@ func resourceLoadBalancerFlavorV2Create(ctx context.Context, d *schema.ResourceD
 		enabled = &v
 	}
 
-	// TODO: remove custom struct when gophercloud support pointers,
-	// e.g. gophercloud/v3 is released, see https://github.com/gophercloud/gophercloud/pull/3190
-	createOpts := flavorsCreateOpts{
+	createOpts := flavors.CreateOpts{
 		Name:            d.Get("name").(string),
 		Description:     d.Get("description").(string),
-		FlavorProfileID: d.Get("flavor_profile_id").(string),
+		FlavorProfileId: d.Get("flavor_profile_id").(string),
 		Enabled:         enabled,
 	}
 
@@ -128,10 +126,8 @@ func resourceLoadBalancerFlavorV2Update(ctx context.Context, d *schema.ResourceD
 	}
 
 	var (
-		hasChange bool
-		// TODO: remove custom struct when gophercloud support pointers,
-		// e.g. gophercloud/v3 is released, see https://github.com/gophercloud/gophercloud/pull/3190
-		updateOpts flavorsUpdateOpts
+		hasChange  bool
+		updateOpts flavors.UpdateOpts
 	)
 
 	if d.HasChange("name") {
