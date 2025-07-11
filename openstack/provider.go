@@ -6,11 +6,11 @@ import (
 	"runtime/debug"
 
 	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/utils/v2/terraform/auth"
-	"github.com/gophercloud/utils/v2/terraform/mutexkv"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/terraform-provider-openstack/utils/v2/auth"
+	"github.com/terraform-provider-openstack/utils/v2/mutexkv"
 )
 
 var version = "dev"

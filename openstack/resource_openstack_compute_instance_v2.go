@@ -23,12 +23,12 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
 	flavorsutils "github.com/gophercloud/utils/v2/openstack/compute/v2/flavors"
 	imagesutils "github.com/gophercloud/utils/v2/openstack/image/v2/images"
-	"github.com/gophercloud/utils/v2/terraform/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/terraform-provider-openstack/utils/v2/hashcode"
 )
 
 func resourceComputeInstanceV2() *schema.Resource {

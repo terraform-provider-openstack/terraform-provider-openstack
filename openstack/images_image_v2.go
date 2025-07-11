@@ -20,10 +20,10 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
 	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/members"
-	"github.com/gophercloud/utils/v2/terraform/mutexkv"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/klauspost/compress/zstd"
+	"github.com/terraform-provider-openstack/utils/v2/mutexkv"
 	"github.com/ulikunitz/xz"
 )
 

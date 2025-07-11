@@ -149,6 +149,7 @@ linters:
           allow:
             - $gostd
             - github.com/terraform-provider-openstack/terraform-provider-openstack
+            - github.com/terraform-provider-openstack/utils
             - github.com/gophercloud/gophercloud/v2
             - github.com/gophercloud/utils/v2
             - github.com/mitchellh/go-homedir
@@ -163,6 +164,7 @@ linters:
           allow:
             - $gostd
             - github.com/terraform-provider-openstack/terraform-provider-openstack
+            - github.com/terraform-provider-openstack/utils
             - github.com/gophercloud/gophercloud/v2
             - github.com/gophercloud/utils/v2
             - github.com/mitchellh/go-homedir
