@@ -8,10 +8,10 @@ import (
 	"strings"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
-	"github.com/gophercloud/utils/v2/terraform/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/terraform-provider-openstack/utils/v2/hashcode"
 )
 
 func dataSourceNetworkingSubnetIDsV2() *schema.Resource {

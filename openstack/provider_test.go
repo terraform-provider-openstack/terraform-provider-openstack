@@ -8,11 +8,11 @@ import (
 	"testing"
 
 	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/utils/v2/terraform/auth"
-	"github.com/gophercloud/utils/v2/terraform/mutexkv"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/terraform-provider-openstack/terraform-provider-openstack/v3/openstack/internal/pathorcontents"
+	"github.com/terraform-provider-openstack/utils/v2/auth"
+	"github.com/terraform-provider-openstack/utils/v2/mutexkv"
 )
 
 var (
