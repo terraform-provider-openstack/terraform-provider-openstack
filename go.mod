@@ -11,7 +11,7 @@ require (
 	github.com/klauspost/compress v1.18.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.10.0
-	github.com/terraform-provider-openstack/utils/v2 v2.0.0-20250711121431-9f547d42b55c
+	github.com/terraform-provider-openstack/utils/v2 v2.0.0-20250716121629-738e4d5edfff
 	github.com/ulikunitz/xz v0.5.12
 	gopkg.in/yaml.v2 v2.4.0
 )
