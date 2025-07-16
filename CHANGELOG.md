@@ -1,3 +1,14 @@
+## 3.3.1 (16 July, 2025)
+
+NOTES
+
+* Switch from `gophercloud/utils/v2/terraform` to `openstack-provider-openstack/utils/v2` package ([#1927](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1927))
+
+BUG FIXES
+
+* Properly handle existing flavor access in `openstack_compute_flavor_access_v2` resource ([#1925](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1925))
+* Properly prioritize service types when multiple service type versions are returned in the service catalog ([#1931](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1931))
+
 ## 3.3.0 (9 July, 2025)
 
 NOTES
