@@ -74,6 +74,31 @@ func TestAccBlockStorageVolumeTypeV3_basic(t *testing.T) {
 	})
 }
 
+func TestAccBlockStorageVolumeTypeV3_EndpointCheck(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageVolumeTypeV3Destroy(t.Context()),
+		Steps: []resource.TestStep{
+			{
+				// register the volumev2 service and endpoint
+				Config: testAccBlockStorageVolumeTypeV3EndpointCheck,
+			},
+			{
+				// test endpoint locator to pick up volumev3
+				Config: testAccBlockStorageVolumeTypeV3EndpointCheck + testAccBlockStorageVolumeTypeV3Basic,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_volume_type_v3.volume_type_1", "name", "foo"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckBlockStorageVolumeTypeV3Destroy(ctx context.Context) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
@@ -133,34 +158,47 @@ func testAccCheckBlockStorageVolumeTypeV3Exists(ctx context.Context, n string, v
 
 const testAccBlockStorageVolumeTypeV3Basic = `
 resource "openstack_blockstorage_volume_type_v3" "volume_type_1" {
-	name = "foo"
-	description = "foo"
-	is_public = true
-
+  name = "foo"
+  description = "foo"
+  is_public = true
 }
 `
 
 const testAccBlockStorageVolumeTypeV3Update1 = `
 resource "openstack_blockstorage_volume_type_v3" "volume_type_1" {
-	name = "bar-baz"
-	description = "bar-baz"
-	is_public = false
-	extra_specs = {
-	  bar = "bar"
-	  baz = "baz"
-	}
+  name = "bar-baz"
+  description = "bar-baz"
+  is_public = false
+  extra_specs = {
+    bar = "bar"
+    baz = "baz"
+  }
 
 }
 `
 
 const testAccBlockStorageVolumeTypeV3Update2 = `
 resource "openstack_blockstorage_volume_type_v3" "volume_type_1" {
-	name = "foo-foo"
-	description = "bar-bar"
-	is_public = false
-	extra_specs = {
-      bar = "baz"
-	  foo = "foo"
-	}
+  name = "foo-foo"
+  description = "bar-bar"
+  is_public = false
+  extra_specs = {
+    bar = "baz"
+    foo = "foo"
+  }
+}
+`
+
+const testAccBlockStorageVolumeTypeV3EndpointCheck = `
+resource "openstack_identity_service_v3" "service_1" {
+  name = "cinderv2"
+  type = "volumev2"
+}
+
+resource "openstack_identity_endpoint_v3" "endpoint_1" {
+  name            = "volumev2"
+  service_id      = openstack_identity_service_v3.service_1.id
+  endpoint_region = openstack_identity_service_v3.service_1.region
+  url             = "http://my-endpoint"
 }
 `
