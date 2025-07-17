@@ -75,6 +75,32 @@ func TestAccSFSV2SecurityService_basic(t *testing.T) {
 	})
 }
 
+func TestAccSFSV2SecurityService_EndpointCheck(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+			testAccPreCheckSFS(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckSFSV2SecurityServiceDestroy(t.Context()),
+		Steps: []resource.TestStep{
+			{
+				// register the volumev2 service and endpoint
+				Config: testAccSFSV2SecurityServiceConfigUpdateEndpointCheck,
+			},
+			{
+				// test endpoint locator to pick up sharev2
+				Config: testAccSFSV2SecurityServiceConfigUpdateEndpointCheck + testAccSFSV2SecurityServiceConfigBasic,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"openstack_sharedfilesystem_securityservice_v2.securityservice_1", "name", "security"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckSFSV2SecurityServiceDestroy(ctx context.Context) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
@@ -153,5 +179,19 @@ resource "openstack_sharedfilesystem_securityservice_v2" "securityservice_1" {
   type        = "kerberos"
   server      = "192.168.199.11"
   dns_ip      = "192.168.199.11"
+}
+`
+
+const testAccSFSV2SecurityServiceConfigUpdateEndpointCheck = `
+resource "openstack_identity_service_v3" "service_1" {
+  name = "manilav2"
+  type = "sharev2"
+}
+
+resource "openstack_identity_endpoint_v3" "endpoint_1" {
+  name            = "sharev2"
+  service_id      = openstack_identity_service_v3.service_1.id
+  endpoint_region = openstack_identity_service_v3.service_1.region
+  url             = "http://my-endpoint"
 }
 `
