@@ -235,6 +235,8 @@ func resourceBlockStorageVolumeV3Create(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("Error creating openstack_blockstorage_volume_v3: %s", err)
 	}
 
+	d.SetId(v.ID)
+
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"downloading", "creating"},
 		Target:     []string{"available"},
@@ -249,8 +251,6 @@ func resourceBlockStorageVolumeV3Create(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf(
 			"Error waiting for openstack_blockstorage_volume_v3 %s to become ready: %s", v.ID, err)
 	}
-
-	d.SetId(v.ID)
 
 	return resourceBlockStorageVolumeV3Read(ctx, d, meta)
 }
