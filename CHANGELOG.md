@@ -1,3 +1,11 @@
+## 3.3.2 (17 July, 2025)
+
+BUG FIXES
+
+* Properly prioritize service types when multiple service type versions are returned in the service catalog ([#1935](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1935))
+* Removed 65535 limit for BGP Autonomous System in `openstack_networking_bgp_speaker_v2` and `openstack_networking_bgp_peer_v2` resources ([#1934](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1934))
+* Register volume ID immediately after creation to avoid orphaned volume in error status in `openstack_blockstorage_volume_v3` resource ([#1936](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1936))
+
 ## 3.3.1 (16 July, 2025)
 
 NOTES
