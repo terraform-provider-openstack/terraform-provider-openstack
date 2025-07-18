@@ -513,7 +513,6 @@ func resourceContainerInfraClusterV1Delete(ctx context.Context, d *schema.Resour
 	}
 
 	stateConf := &retry.StateChangeConf{
-		Pending:      []string{"DELETE_IN_PROGRESS"},
 		Target:       []string{"DELETE_COMPLETE"},
 		Refresh:      containerInfraClusterV1StateRefreshFunc(ctx, containerInfraClient, d.Id()),
 		Timeout:      d.Timeout(schema.TimeoutDelete),
