@@ -483,6 +483,7 @@ func Provider() *schema.Provider {
 			"openstack_objectstorage_object_v1":                  resourceObjectStorageObjectV1(),
 			"openstack_objectstorage_tempurl_v1":                 resourceObjectstorageTempurlV1(),
 			"openstack_orchestration_stack_v1":                   resourceOrchestrationStackV1(),
+			"openstack_taas_tap_mirror_v2":                       resourceTapMirrorV2(),
 			"openstack_vpnaas_ipsec_policy_v2":                   resourceIPSecPolicyV2(),
 			"openstack_vpnaas_service_v2":                        resourceServiceV2(),
 			"openstack_vpnaas_ike_policy_v2":                     resourceIKEPolicyV2(),
