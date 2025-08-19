@@ -36,8 +36,8 @@ func TestUnitComputeServerGroupV2CreateOpts(t *testing.T) {
 }
 
 func TestUnitExpandComputeServerGroupV2PoliciesMicroversions(t *testing.T) {
-	th.SetupHTTP()
-	defer th.TeardownHTTP()
+	fakeServer := th.SetupHTTP()
+	defer fakeServer.Teardown()
 
 	raw := []any{
 		"affinity",
@@ -45,7 +45,7 @@ func TestUnitExpandComputeServerGroupV2PoliciesMicroversions(t *testing.T) {
 		"soft-affinity",
 		"custom-policy",
 	}
-	client := thclient.ServiceClient()
+	client := thclient.ServiceClient(fakeServer)
 
 	expectedPolicies := []string{
 		"affinity",
@@ -63,14 +63,14 @@ func TestUnitExpandComputeServerGroupV2PoliciesMicroversions(t *testing.T) {
 }
 
 func TestUnitExpandComputeServerGroupV2PoliciesMicroversionsLegacy(t *testing.T) {
-	th.SetupHTTP()
-	defer th.TeardownHTTP()
+	fakeServer := th.SetupHTTP()
+	defer fakeServer.Teardown()
 
 	raw := []any{
 		"anti-affinity",
 		"affinity",
 	}
-	client := thclient.ServiceClient()
+	client := thclient.ServiceClient(fakeServer)
 
 	expectedPolicies := []string{
 		"anti-affinity",
