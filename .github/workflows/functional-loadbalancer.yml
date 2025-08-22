@@ -57,6 +57,10 @@ jobs:
         with:
           branch: ${{ matrix.openstack_version }}
           conf_overrides: |
+            # enable default barbican policies to allow users to create secrets
+            BARBICAN_ENFORCE_SCOPE=True
+            ENFORCE_SCOPE=True
+
             enable_plugin octavia https://github.com/openstack/octavia ${{ matrix.openstack_version }}
             enable_plugin neutron https://github.com/openstack/neutron ${{ matrix.openstack_version }}
             enable_plugin barbican https://github.com/openstack/barbican ${{ matrix.openstack_version }}
