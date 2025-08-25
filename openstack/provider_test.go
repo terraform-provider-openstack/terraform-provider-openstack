@@ -43,6 +43,7 @@ var (
 	osKeymanagerEnvironment      = os.Getenv("OS_KEYMANAGER_ENVIRONMENT")
 	osHypervisorEnvironment      = os.Getenv("OS_HYPERVISOR_HOSTNAME")
 	osPortForwardingEnvironment  = os.Getenv("OS_PORT_FORWARDING_ENVIRONMENT")
+	osTaaSEnvironment            = os.Getenv("OS_TAAS_ENVIRONMENT")
 	osWorkflowEnvironment        = os.Getenv("OS_WORKFLOW_ENVIRONMENT")
 	osMagnumHTTPProxy            = os.Getenv("OS_MAGNUM_HTTP_PROXY")
 	osMagnumHTTPSProxy           = os.Getenv("OS_MAGNUM_HTTPS_PROXY")
@@ -220,6 +221,14 @@ func testAccPreCheckPortForwarding(t *testing.T) {
 
 	if osPortForwardingEnvironment == "" {
 		t.Skip("This environment does not support 'portforwarding' extension tests")
+	}
+}
+
+func testAccPreCheckTaas(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if osTaaSEnvironment == "" {
+		t.Skip("This environment does not support 'taas' extension tests")
 	}
 }
 
