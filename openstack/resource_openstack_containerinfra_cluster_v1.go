@@ -441,7 +441,6 @@ func resourceContainerInfraClusterV1Update(ctx context.Context, d *schema.Resour
 		}
 
 		stateConf := &retry.StateChangeConf{
-			Pending:      []string{"UPDATE_IN_PROGRESS"},
 			Target:       []string{"UPDATE_COMPLETE"},
 			Refresh:      containerInfraClusterV1StateRefreshFunc(ctx, containerInfraClient, d.Id()),
 			Timeout:      d.Timeout(schema.TimeoutUpdate),
@@ -482,7 +481,6 @@ func resourceContainerInfraClusterV1Update(ctx context.Context, d *schema.Resour
 		}
 
 		stateConf := &retry.StateChangeConf{
-			Pending:      []string{"UPDATE_IN_PROGRESS"},
 			Target:       []string{"UPDATE_COMPLETE"},
 			Refresh:      containerInfraClusterV1StateRefreshFunc(ctx, containerInfraClient, d.Id()),
 			Timeout:      d.Timeout(schema.TimeoutUpdate),
