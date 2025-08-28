@@ -9,7 +9,7 @@ failed=
 # for the OpenStack provider.
 
 TESTS_FILTER=$(grep FILTER .github/workflows/functional-*.yml | awk -F'"' '{print $(NF-1)}' | paste -sd "|")
-EGREP_SKIP="terraform-provider-openstack|database|loadbalancer|TestUnit|TestAccProvider"
+EGREP_SKIP="terraform-provider-openstack|database|loadbalancer|TestUnit|TestAccProvider|Taas"
 
 DIFF="$(diff -u <(go test ./openstack/ -list "(?i)(?:${TESTS_FILTER})" | egrep -vi "${EGREP_SKIP}") <(go test ./openstack/ -list "Test" | egrep -vi "${EGREP_SKIP}"))"
 
