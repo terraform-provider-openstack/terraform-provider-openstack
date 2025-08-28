@@ -29,6 +29,11 @@ resource "openstack_taas_tap_mirror_v2" "tap_mirror_1" {
 
 The following arguments are supported:
 
+* `region` - (Optional) The region in which to obtain the V2 Networking client.
+    A Networking client is needed to create an endpoint group. If omitted, the
+    `region` argument of the provider is used. Changing this creates a new
+    group.
+
 * `name` - (Optional) The name of the Tap Mirror. Changing this updates the name of
     the existing Tap Mirror.
 
@@ -69,6 +74,7 @@ The following attributes are exported:
 
 * `id` - Id of the Tap Mirror.
 * `project_id` - Id of the OpenStack project.
+* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.

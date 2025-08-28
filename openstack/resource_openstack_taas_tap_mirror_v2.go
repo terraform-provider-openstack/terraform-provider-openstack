@@ -21,6 +21,12 @@ func resourceTapMirrorV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -172,12 +178,10 @@ func resourceTapMirrorV2Update(ctx context.Context, d *schema.ResourceData, meta
 		hasChange = true
 	}
 
-	var updateOpts tapmirrors.UpdateOptsBuilder = opts
-
-	log.Printf("[DEBUG] Updating tapMirror with id %s: %#v", d.Id(), updateOpts)
+	log.Printf("[DEBUG] Updating tapMirror with id %s: %#v", d.Id(), opts)
 
 	if hasChange {
-		_, err := tapmirrors.Update(ctx, networkingClient, d.Id(), updateOpts).Extract()
+		_, err := tapmirrors.Update(ctx, networkingClient, d.Id(), opts).Extract()
 		if err != nil {
 			return diag.FromErr(err)
 		}

@@ -206,5 +206,4 @@ resource "openstack_taas_tap_mirror_v2" "tap_mirror_1" {
 		out = 1001
 	}
 }
-
 `
