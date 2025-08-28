@@ -227,6 +227,7 @@ func resourceTapMirrorV2Directions(directions []any) tapmirrors.Directions {
 		if value, exists := binding["in"]; exists {
 			result.In = value.(int)
 		}
+
 		if value, exists := binding["out"]; exists {
 			result.Out = value.(int)
 		}
