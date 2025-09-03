@@ -13,6 +13,12 @@ func dataSourceLBLoadbalancerV2() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceLBLoadbalancerV2Read,
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
 			"loadbalancer_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -136,11 +142,6 @@ func dataSourceLBLoadbalancerV2() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-
-			"region": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -154,8 +155,6 @@ func dataSourceLBLoadbalancerV2Read(ctx context.Context, d *schema.ResourceData,
 	}
 
 	listOpts := loadbalancers.ListOpts{}
-
-	var listOptsBuilder loadbalancers.ListOptsBuilder
 
 	if v, ok := d.GetOk("loadbalancer_id"); ok {
 		listOpts.ID = v.(string)
@@ -173,9 +172,7 @@ func dataSourceLBLoadbalancerV2Read(ctx context.Context, d *schema.ResourceData,
 		listOpts.Description = v.(string)
 	}
 
-	listOptsBuilder = listOpts
-
-	allPages, err := loadbalancers.List(lbClient, listOptsBuilder).AllPages(ctx)
+	allPages, err := loadbalancers.List(lbClient, listOpts).AllPages(ctx)
 	if err != nil {
 		return diag.Errorf("Unable to query OpenStack loadbalancer: %s", err)
 	}

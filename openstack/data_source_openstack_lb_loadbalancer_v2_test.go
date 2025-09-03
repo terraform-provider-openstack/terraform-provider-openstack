@@ -30,6 +30,10 @@ func TestAccDataSourceLBV2LoadBalancer_basic(t *testing.T) {
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "vip_subnet_id"),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "vip_port_id"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_lb_loadbalancer_v2.lb_ds", "pools.#", "1"),
+					resource.TestCheckResourceAttrSet(
+						"data.openstack_lb_loadbalancer_v2.lb_ds", "pools.0.id"),
 				),
 			},
 		},
@@ -129,6 +133,20 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
     update = "15m"
     delete = "15m"
   }
+}
+
+resource "openstack_lb_listener_v2" "listener_1" {
+  name            = "listener_1"
+  protocol        = "HTTP"
+  protocol_port   = 80
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
+}
+
+resource "openstack_lb_pool_v2" "pool_1" {
+  name        = "pool_1"
+  protocol    = "HTTP"
+  lb_method   = "ROUND_ROBIN"
+  listener_id = openstack_lb_listener_v2.listener_1.id
 }
 
 data "openstack_lb_loadbalancer_v2" "lb_ds" {

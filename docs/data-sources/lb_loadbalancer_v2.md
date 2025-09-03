@@ -23,6 +23,9 @@ data "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
 
 The following arguments are supported:
 
+* `region` - (Optional) The region in which to obtain the V2 Load Balancer client.
+    If omitted, the `region` argument of the provider is used.
+
 * `loadbalancer_id` - (Optional) The ID of the loadbalancer. Exactly one of `name`, `loadbalancer_id` is required to be set.
 
 * `name` - (Optional) The name of the loadbalancer. Exactly one of `name`, `loadbalancer_id` is required to be set.
