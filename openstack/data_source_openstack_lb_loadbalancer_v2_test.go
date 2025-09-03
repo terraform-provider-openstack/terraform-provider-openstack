@@ -34,6 +34,10 @@ func TestAccDataSourceLBV2LoadBalancer_basic(t *testing.T) {
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "pools.#", "1"),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "pools.0.id"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_lb_loadbalancer_v2.lb_ds", "listeners.#", "1"),
+					resource.TestCheckResourceAttrSet(
+						"data.openstack_lb_loadbalancer_v2.lb_ds", "listeners.0.id"),
 				),
 			},
 		},
