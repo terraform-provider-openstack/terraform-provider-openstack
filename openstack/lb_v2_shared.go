@@ -134,6 +134,30 @@ func expandLBMembersV2(members *schema.Set) []pools.BatchUpdateMemberOpts {
 	return m
 }
 
+func flattenLBPoolsV2(pools []pools.Pool) []map[string]any {
+	p := make([]map[string]any, len(pools))
+
+	for i, pool := range pools {
+		p[i] = map[string]any{
+			"id": pool.ID,
+		}
+	}
+
+	return p
+}
+
+func flattenLBListenersV2(listeners []listeners.Listener) []map[string]any {
+	l := make([]map[string]any, len(listeners))
+
+	for i, listener := range listeners {
+		l[i] = map[string]any{
+			"id": listener.ID,
+		}
+	}
+
+	return l
+}
+
 func getListenerIDForL7Policy(ctx context.Context, lbClient *gophercloud.ServiceClient, id string) (string, error) {
 	log.Printf("[DEBUG] Trying to get Listener ID associated with the %s L7 Policy ID", id)
 
