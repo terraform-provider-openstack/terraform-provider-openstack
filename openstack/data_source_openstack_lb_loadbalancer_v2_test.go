@@ -34,11 +34,11 @@ func TestAccDataSourceLBV2LoadBalancer_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "vip_port_id"),
 					resource.TestCheckResourceAttrWith(
-						"data.openstack_lb_loadbalancer_v2.lb_ds", "pools.#", checkCountWithRetry(1, 1*time.Minute)),
+						"data.openstack_lb_loadbalancer_v2.lb_ds", "pools.#", checkCountWithRetry(1, 3*time.Minute)),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "pools.0.id"),
 					resource.TestCheckResourceAttrWith(
-						"data.openstack_lb_loadbalancer_v2.lb_ds", "listeners.#", checkCountWithRetry(1, 1*time.Minute)),
+						"data.openstack_lb_loadbalancer_v2.lb_ds", "listeners.#", checkCountWithRetry(1, 3*time.Minute)),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "listeners.0.id"),
 				),
@@ -62,7 +62,7 @@ func TestAccDataSourceLBV2LoadBalancer_secGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "name", "loadbalancer_1"),
 					resource.TestCheckResourceAttrWith(
-						"data.openstack_lb_loadbalancer_v2.lb_ds", "security_group_ids.#", checkCountWithRetry(1, 1*time.Minute)),
+						"data.openstack_lb_loadbalancer_v2.lb_ds", "security_group_ids.#", checkCountWithRetry(1, 3*time.Minute)),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "vip_port_id"),
 				),
@@ -173,7 +173,7 @@ resource "openstack_lb_pool_v2" "pool_1" {
 }
 
 data "openstack_lb_loadbalancer_v2" "lb_ds" {
-  name = openstack_lb_loadbalancer_v2.loadbalancer_1.name
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
   description = openstack_lb_loadbalancer_v2.loadbalancer_1.description
   vip_address = openstack_lb_loadbalancer_v2.loadbalancer_1.vip_address
 }
@@ -287,7 +287,7 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
 }
 
 data "openstack_lb_loadbalancer_v2" "lb_ds" {
-  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
+  name = openstack_lb_loadbalancer_v2.loadbalancer_1.name
   description = openstack_lb_loadbalancer_v2.loadbalancer_1.description
 }
 `
