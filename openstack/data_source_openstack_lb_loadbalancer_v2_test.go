@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
@@ -117,15 +118,16 @@ func TestAccDataSourceLBV2LoadBalancer_vipPortID(t *testing.T) {
 func checkCountWithRetry(expected int, timeout time.Duration) func(string) error {
 	return func(v string) error {
 		start := time.Now()
-		for {
-			if v == fmt.Sprintf("%d", expected) {
+
+		for time.Since(start) <= timeout {
+			if v == strconv.Itoa(expected) {
 				return nil
 			}
-			if time.Since(start) > timeout {
-				return fmt.Errorf("expected count = %d, got %s after %s", expected, v, timeout)
-			}
+
 			time.Sleep(2 * time.Second)
 		}
+
+		return fmt.Errorf("expected count = %d, got %s after %s", expected, v, timeout)
 	}
 }
 
