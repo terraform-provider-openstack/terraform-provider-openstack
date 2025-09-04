@@ -1,10 +1,7 @@
 package openstack
 
 import (
-	"fmt"
-	"strconv"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -33,12 +30,17 @@ func TestAccDataSourceLBV2LoadBalancer_basic(t *testing.T) {
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "vip_subnet_id"),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "vip_port_id"),
-					resource.TestCheckResourceAttrWith(
-						"data.openstack_lb_loadbalancer_v2.lb_ds", "pools.#", checkCountWithRetry(1, 3*time.Minute)),
+				),
+			},
+			{
+				Config: testAccDataSourceLbV2LoadBalancerConfigData,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"data.openstack_lb_loadbalancer_v2.lb_ds", "pools.#", "1"),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "pools.0.id"),
-					resource.TestCheckResourceAttrWith(
-						"data.openstack_lb_loadbalancer_v2.lb_ds", "listeners.#", checkCountWithRetry(1, 3*time.Minute)),
+					resource.TestCheckResourceAttr(
+						"data.openstack_lb_loadbalancer_v2.lb_ds", "listeners.#", "1"),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "listeners.0.id"),
 				),
@@ -61,10 +63,15 @@ func TestAccDataSourceLBV2LoadBalancer_secGroup(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "name", "loadbalancer_1"),
-					resource.TestCheckResourceAttrWith(
-						"data.openstack_lb_loadbalancer_v2.lb_ds", "security_group_ids.#", checkCountWithRetry(1, 3*time.Minute)),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "vip_port_id"),
+				),
+			},
+			{
+				Config: testAccDataSourceLbV2LoadBalancerConfigData,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"data.openstack_lb_loadbalancer_v2.lb_ds", "security_group_ids.#", "1"),
 				),
 			},
 		},
@@ -113,22 +120,6 @@ func TestAccDataSourceLBV2LoadBalancer_vipPortID(t *testing.T) {
 			},
 		},
 	})
-}
-
-func checkCountWithRetry(expected int, timeout time.Duration) func(string) error {
-	return func(v string) error {
-		start := time.Now()
-
-		for time.Since(start) <= timeout {
-			if v == strconv.Itoa(expected) {
-				return nil
-			}
-
-			time.Sleep(2 * time.Second)
-		}
-
-		return fmt.Errorf("expected count = %d, got %s after %s", expected, v, timeout)
-	}
 }
 
 const testAccDataSourceLbV2LoadBalancerConfigBasic = `
@@ -289,5 +280,13 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
 data "openstack_lb_loadbalancer_v2" "lb_ds" {
   name = openstack_lb_loadbalancer_v2.loadbalancer_1.name
   description = openstack_lb_loadbalancer_v2.loadbalancer_1.description
+}
+`
+
+const testAccDataSourceLbV2LoadBalancerConfigData = `
+data "openstack_lb_loadbalancer_v2" "lb_ds" {
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
+  description = openstack_lb_loadbalancer_v2.loadbalancer_1.description
+  vip_address = openstack_lb_loadbalancer_v2.loadbalancer_1.vip_address
 }
 `
