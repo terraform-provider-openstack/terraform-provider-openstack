@@ -150,7 +150,7 @@ resource "openstack_lb_pool_v2" "pool_1" {
   name        = "pool_1"
   protocol    = "HTTP"
   lb_method   = "ROUND_ROBIN"
-  listener_id = openstack_lb_listener_v2.listener_1.id
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 data "openstack_lb_loadbalancer_v2" "lb_ds" {
