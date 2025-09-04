@@ -180,6 +180,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
   description = "loadbalancer_1 description"
+  loadbalancer_provider = "octavia"
   vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
   security_group_ids = [
     openstack_networking_secgroup_v2.secgroup_1.id
@@ -193,7 +194,7 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
 }
 
 data "openstack_lb_loadbalancer_v2" "lb_ds" {
-  id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
   description = openstack_lb_loadbalancer_v2.loadbalancer_1.description
   vip_address = openstack_lb_loadbalancer_v2.loadbalancer_1.vip_address
 }
@@ -227,7 +228,7 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
 }
 
 data "openstack_lb_loadbalancer_v2" "lb_ds" {
-  id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
   vip_address = openstack_lb_loadbalancer_v2.loadbalancer_1.vip_address
 }
 `
@@ -267,7 +268,7 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
 }
 
 data "openstack_lb_loadbalancer_v2" "lb_ds" {
-  id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
+  loadbalancer_id = openstack_lb_loadbalancer_v2.loadbalancer_1.id
   description = openstack_lb_loadbalancer_v2.loadbalancer_1.description
 }
 `
