@@ -146,6 +146,43 @@ func flattenLBPoolsV2(pools []pools.Pool) []map[string]any {
 	return p
 }
 
+func flattenLBLoadbalancerIDsV2(loadbalancerIDs []listeners.LoadBalancerID) []map[string]any {
+	l := make([]map[string]any, len(loadbalancerIDs))
+
+	for i, loadbalancerID := range loadbalancerIDs {
+		l[i] = map[string]any{
+			"id": loadbalancerID.ID,
+		}
+	}
+
+	return l
+}
+
+func flattenLBAdditionalVIPsV2(additionalVIPs []loadbalancers.AdditionalVip) []map[string]any {
+	a := make([]map[string]any, len(additionalVIPs))
+
+	for i, additionalVIP := range additionalVIPs {
+		a[i] = map[string]any{
+			"subnet_id":  additionalVIP.SubnetID,
+			"ip_address": additionalVIP.IPAddress,
+		}
+	}
+
+	return a
+}
+
+func flattenLBPoliciesV2(policies []l7policies.L7Policy) []map[string]any {
+	p := make([]map[string]any, len(policies))
+
+	for i, policy := range policies {
+		p[i] = map[string]any{
+			"id": policy.ID,
+		}
+	}
+
+	return p
+}
+
 func flattenLBListenersV2(listeners []listeners.Listener) []map[string]any {
 	l := make([]map[string]any, len(listeners))
 
@@ -156,6 +193,22 @@ func flattenLBListenersV2(listeners []listeners.Listener) []map[string]any {
 	}
 
 	return l
+}
+
+func expandTagsList(d *schema.ResourceData, key string) []string {
+	v, ok := d.GetOk(key)
+	if !ok {
+		return nil
+	}
+
+	rawListInterface := v.([]any)
+	result := make([]string, len(rawListInterface))
+
+	for i := range rawListInterface {
+		result[i] = rawListInterface[i].(string)
+	}
+
+	return result
 }
 
 func getListenerIDForL7Policy(ctx context.Context, lbClient *gophercloud.ServiceClient, id string) (string, error) {
