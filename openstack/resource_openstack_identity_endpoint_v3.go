@@ -190,7 +190,7 @@ func resourceIdentityEndpointV3Update(ctx context.Context, d *schema.ResourceDat
 
 	if d.HasChange("name") {
 		hasChange = true
-		updateOpts.Region = d.Get("name").(string)
+		updateOpts.Name = d.Get("name").(string)
 	}
 
 	if d.HasChange("endpoint_region") {
