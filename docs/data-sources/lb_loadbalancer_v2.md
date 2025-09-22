@@ -34,9 +34,17 @@ The following arguments are supported:
 
 * `vip_address` - (Optional) The IP address of the loadbalancer's virtual IP (VIP).
 
+* `tags` - (Optional) A set of tags applied to the loadbalancer. The load balancer will be returned if it has all of the specified tags.
+
+* `tags_any` - (Optional) A set of tags. The load balancer will be returned if it has at least one of the specified tags.
+
+* `tags_not` - (Optional) A set of tags. The load balancer will be returned if it does not have all of the specified tags.
+
+* `tags_not_any` - (Optional) A set of tags. The load balancer will be returned if it does not have any of the specified tags.
+
 ## Attributes Reference
 
-`id` is set to the ID of the found flavor. In addition, the following attributes
+`id` is set to the ID of the found loadbalancer. In addition, the following attributes
 are exported:
 
 * `name` - The name of the loadbalancer.

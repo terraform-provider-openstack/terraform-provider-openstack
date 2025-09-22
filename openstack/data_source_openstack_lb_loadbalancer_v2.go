@@ -22,7 +22,6 @@ func dataSourceLBLoadbalancerV2() *schema.Resource {
 			"loadbalancer_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     true,
 				Computed:     true,
 				ExactlyOneOf: []string{"name"},
 			},
@@ -30,7 +29,6 @@ func dataSourceLBLoadbalancerV2() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     true,
 				Computed:     true,
 				ExactlyOneOf: []string{"loadbalancer_id"},
 			},
@@ -44,7 +42,6 @@ func dataSourceLBLoadbalancerV2() *schema.Resource {
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Computed: true,
-				ForceNew: true,
 			},
 
 			"project_id": {
@@ -55,7 +52,6 @@ func dataSourceLBLoadbalancerV2() *schema.Resource {
 			"provisioning_status": {
 				Type:     schema.TypeString,
 				Computed: true,
-				ForceNew: true,
 			},
 
 			"vip_address": {
@@ -87,7 +83,6 @@ func dataSourceLBLoadbalancerV2() *schema.Resource {
 			"operating_status": {
 				Type:     schema.TypeString,
 				Computed: true,
-				ForceNew: true,
 			},
 
 			"flavor_id": {
@@ -132,8 +127,27 @@ func dataSourceLBLoadbalancerV2() *schema.Resource {
 			},
 
 			"tags": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
+				Optional: true,
 				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"tags_any": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"tags_not": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"tags_not_any": {
+				Type:     schema.TypeList,
+				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
@@ -154,7 +168,12 @@ func dataSourceLBLoadbalancerV2Read(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("Error creating OpenStack loadbalancer client: %s", err)
 	}
 
-	listOpts := loadbalancers.ListOpts{}
+	listOpts := loadbalancers.ListOpts{
+		Tags:       expandTagsList(d, "tags"),
+		TagsAny:    expandTagsList(d, "tags_any"),
+		TagsNot:    expandTagsList(d, "tags_not"),
+		TagsNotAny: expandTagsList(d, "tags_not_any"),
+	}
 
 	if v, ok := d.GetOk("loadbalancer_id"); ok {
 		listOpts.ID = v.(string)
@@ -221,5 +240,5 @@ func dataSourceLBLoadbalancerV2Attributes(d *schema.ResourceData, loadbalancer *
 	d.Set("listeners", flattenLBListenersV2(loadbalancer.Listeners))
 	d.Set("pools", flattenLBPoolsV2(loadbalancer.Pools))
 	d.Set("tags", loadbalancer.Tags)
-	d.Set("additional_vips", loadbalancer.AdditionalVips)
+	d.Set("additional_vips", flattenLBAdditionalVIPsV2(loadbalancer.AdditionalVips))
 }

@@ -389,6 +389,7 @@ func Provider() *schema.Provider {
 			"openstack_lb_flavor_v2":                             dataSourceLBFlavorV2(),
 			"openstack_lb_flavorprofile_v2":                      dataSourceLBFlavorProfileV2(),
 			"openstack_lb_loadbalancer_v2":                       dataSourceLBLoadbalancerV2(),
+			"openstack_lb_listener_v2":                           dataSourceLBListenerV2(),
 			"openstack_workflow_workflow_v2":                     dataSourceWorkflowWorkflowV2(),
 		},
 
