@@ -55,7 +55,6 @@ func TestAccBGPVPNRouterAssociateV2_no_routes_advertise(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckBGPVPN(t)
-			t.Skip(`bug in OpenStack which ignores {"advertise_extra_routes": false} on POST request, while handles on PUT request.`)
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckBGPVPNRouterAssociateV2Destroy(t.Context()),
