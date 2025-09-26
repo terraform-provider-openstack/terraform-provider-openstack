@@ -166,11 +166,12 @@ func expandNetworkingPortFixedIPV2(d *schema.ResourceData) any {
 		return []any{}
 	}
 
-	rawIP := d.Get("fixed_ip").([]any)
-
-	if len(rawIP) == 0 {
+	v, ok := getOkExists(d, "fixed_ip")
+	if !ok {
 		return nil
 	}
+
+	rawIP, ok := v.([]any)
 
 	ip := make([]ports.IP, 0, len(rawIP))
 
