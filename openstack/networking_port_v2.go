@@ -214,6 +214,19 @@ func expandNetworkingPortFixedIPToStringSlice(fixedIPs []ports.IP) []string {
 	return s
 }
 
+func flattenNetworkingPortFixedIPs(fixedIPs []ports.IP) []map[string]any {
+	f := make([]map[string]any, len(fixedIPs))
+
+	for i, fixedIP := range fixedIPs {
+		f[i] = map[string]any{
+			"subnet_id":  fixedIP.SubnetID,
+			"ip_address": fixedIP.IPAddress,
+		}
+	}
+
+	return f
+}
+
 func flattenNetworkingPortBindingV2(port portExtended) any {
 	var portBinding []map[string]any
 
