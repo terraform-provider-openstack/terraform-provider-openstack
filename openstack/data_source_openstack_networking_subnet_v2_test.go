@@ -312,6 +312,7 @@ resource "openstack_networking_port_v2" "port_1" {
   name            = "test_port"
   network_id      = data.openstack_networking_subnet_v2.subnet_1.network_id
   admin_state_up  = "true"
+  no_fixed_ip     = "true"
 }
 
 `, testAccOpenStackNetworkingSubnetV2DataSourceSubnet)
