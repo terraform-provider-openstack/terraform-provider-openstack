@@ -26,13 +26,17 @@ The following arguments are supported:
 * `region` - (Optional) The region in which to obtain the V2 Load Balancer client.
     If omitted, the `region` argument of the provider is used.
 
-* `listener_id` - (Optional) The ID of the listener. Exactly one of `name`, `listener_id` is required to be set.
+* `listener_id` - (Optional) The ID of the listener. Exactly one of `name`,
+  `listener_id` is required to be set.
 
-* `name` - (Optional) The name of the listener. Exactly one of `name`, `listener_id` is required to be set.
+* `name` - (Optional) The name of the listener. Exactly one of `name`,
+  `listener_id` is required to be set.
 
-* `tags` - (Optional) A set of tags applied to the loadbalancer's listener. The loadbalancer' listener will be returned if it has all of the specified tags.
+* `tags` - (Optional) A set of tags applied to the loadbalancer's listener.
+  The loadbalancer' listener will be returned if it has all of the specified tags.
 
-* `loadbalancer_id` - (Optional) The ID of the load balancer associated with the requested listener.
+* `loadbalancer_id` - (Optional) The ID of the load balancer associated with
+  the requested listener.
 
 * `protocol` - The protocol of the requested listener.
 
@@ -51,7 +55,8 @@ are exported:
 
 * `protocol` - The protocol to loadbalance.
 
-* `protocol_port` - The port on which to listen to client traffic that is associated with the Loadbalancer.
+* `protocol_port` - The port on which to listen to client traffic that is
+  associated with the Loadbalancer.
 
 * `default_pool_id` - The UUID of default pool.
 
@@ -79,9 +84,11 @@ are exported:
 
 * `timeout_member_connect` - Backend member connection timeout in milliseconds.
 
-* `timeout_tcp_inspect` - Time, in milliseconds, to wait for additional TCP packets for content inspection.
+* `timeout_tcp_inspect` - Time, in milliseconds, to wait for additional TCP
+  packets for content inspection.
 
-* `insert_headers` - A dictionary of optional headers to insert into the request before it is sent to the backend member.
+* `insert_headers` - A dictionary of optional headers to insert into the request
+  before it is sent to the backend member.
 
 * `allowed_cidrs` - A list of IPv4, IPv6 or mix of both CIDRs.
 
@@ -95,14 +102,19 @@ are exported:
 
 * `client_authentication` - The TLS client authentication mode.
 
-* `client_ca_tls_container_ref` - The ref of the key manager service secret containing a PEM format client CA certificate bundle for TERMINATED_HTTPS listeners.
+* `client_ca_tls_container_ref` - The ref of the key manager service secret
+  containing a PEM format client CA certificate bundle for TERMINATED_HTTPS listeners.
 
-* `client_crl_container_ref` - The URI of the key manager service secret containing a PEM format CA revocation list file for TERMINATED_HTTPS listeners.
+* `client_crl_container_ref` - The URI of the key manager service secret
+  containing a PEM format CA revocation list file for TERMINATED_HTTPS listeners.
 
-* `hsts_include_subdomains` - Defines whether the includeSubDomains directive should be added to the Strict-Transport-Security HTTP response header.
+* `hsts_include_subdomains` - Defines whether the includeSubDomains directive
+  should be added to the Strict-Transport-Security HTTP response header.
 
-* `hsts_max_age` - The value of the max_age directive for the Strict-Transport-Security HTTP response header.
+* `hsts_max_age` - The value of the max_age directive for the
+  Strict-Transport-Security HTTP response header.
 
-* `hsts_preload` - Defines whether the preload directive should be added to the Strict-Transport-Security HTTP response header.
+* `hsts_preload` - Defines whether the preload directive should be added to the
+  Strict-Transport-Security HTTP response header.
 
 * `operating_status` - The operating status of the resource.

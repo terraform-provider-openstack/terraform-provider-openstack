@@ -146,7 +146,19 @@ func flattenLBPoolsV2(pools []pools.Pool) []map[string]any {
 	return p
 }
 
-func flattenLBLoadbalancerIDsV2(loadbalancerIDs []listeners.LoadBalancerID) []map[string]any {
+func flattenLBListenerLoadbalancerIDsV2(loadbalancerIDs []listeners.LoadBalancerID) []map[string]any {
+	l := make([]map[string]any, len(loadbalancerIDs))
+
+	for i, loadbalancerID := range loadbalancerIDs {
+		l[i] = map[string]any{
+			"id": loadbalancerID.ID,
+		}
+	}
+
+	return l
+}
+
+func flattenLBPoolLoadbalancerIDsV2(loadbalancerIDs []pools.LoadBalancerID) []map[string]any {
 	l := make([]map[string]any, len(loadbalancerIDs))
 
 	for i, loadbalancerID := range loadbalancerIDs {
@@ -184,6 +196,18 @@ func flattenLBPoliciesV2(policies []l7policies.L7Policy) []map[string]any {
 }
 
 func flattenLBListenersV2(listeners []listeners.Listener) []map[string]any {
+	l := make([]map[string]any, len(listeners))
+
+	for i, listener := range listeners {
+		l[i] = map[string]any{
+			"id": listener.ID,
+		}
+	}
+
+	return l
+}
+
+func flattenLBListenerIDsV2(listeners []pools.ListenerID) []map[string]any {
 	l := make([]map[string]any, len(listeners))
 
 	for i, listener := range listeners {

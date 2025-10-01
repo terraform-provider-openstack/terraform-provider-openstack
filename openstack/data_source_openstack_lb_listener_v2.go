@@ -301,7 +301,7 @@ func dataSourceLBListenerV2Attributes(d *schema.ResourceData, listener *listener
 	d.Set("protocol_port", listener.ProtocolPort)
 	d.Set("default_pool_id", listener.DefaultPoolID)
 	d.Set("default_pool", listener.DefaultPool)
-	d.Set("loadbalancers", flattenLBLoadbalancerIDsV2(listener.Loadbalancers))
+	d.Set("loadbalancers", flattenLBListenerLoadbalancerIDsV2(listener.Loadbalancers))
 	d.Set("connection_limit", listener.ConnLimit)
 	d.Set("sni_container_refs", listener.SniContainerRefs)
 	d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
