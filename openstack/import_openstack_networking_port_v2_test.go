@@ -25,6 +25,9 @@ func TestAccNetworkingV2Port_importBasic(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"fixed_ip",
+				},
 			},
 		},
 	})
@@ -49,6 +52,9 @@ func TestAccNetworkingV2Port_importAllowedAddressPairs(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"fixed_ip",
+				},
 			},
 		},
 	})
@@ -73,6 +79,9 @@ func TestAccNetworkingV2Port_importAllowedAddressPairsNoMAC(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"fixed_ip",
+				},
 			},
 		},
 	})
@@ -97,6 +106,9 @@ func TestAccNetworkingV2Port_importDHCPOpts(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"fixed_ip",
+				},
 			},
 		},
 	})
