@@ -249,7 +249,7 @@ func testAccPreCheckAdminOnly(t *testing.T) {
 
 func testAccPreCheckNonAdminOnly(t *testing.T) {
 	v := os.Getenv("OS_USERNAME")
-	if v != "eremin_terraform" {
+	if v != "demo" {
 		t.Skip("Skipping test because it requires the demo (non-admin) user")
 	}
 }
