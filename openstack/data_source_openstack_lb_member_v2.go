@@ -50,6 +50,13 @@ func dataSourceLBMemberV2() *schema.Resource {
 				Computed: true,
 			},
 
+			"tags": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
 			"project_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -94,12 +101,6 @@ func dataSourceLBMemberV2() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-
-			"tags": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
 		},
 	}
 }
@@ -130,6 +131,17 @@ func dataSourceLBMemberV2Read(ctx context.Context, d *schema.ResourceData, meta 
 	allMembers, err := pools.ExtractMembers(allPages)
 	if err != nil {
 		return diag.Errorf("Unable to retrieve Openstack loadbalancer members: %s", err)
+	}
+
+	requestedTags := expandTagsList(d, "tags")
+	if len(requestedTags) > 0 {
+		var filtered []pools.Member
+		for _, m := range allMembers {
+			if hasAllRequestedTags(m.Tags, requestedTags) {
+				filtered = append(filtered, m)
+			}
+		}
+		allMembers = filtered
 	}
 
 	if len(allMembers) < 1 {

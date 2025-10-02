@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -40,6 +41,23 @@ func TestAccDataSourceLBV2Member_basic(t *testing.T) {
 						"data.openstack_lb_member_v2.mb_ds_1", "protocol_port", "8080"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_lb_member_v2.mb_ds_2", "protocol_port", "9090"),
+				),
+			},
+			{
+				Config: testAccDataSourceLBV2MemberManifestUpdate1(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"data.openstack_lb_member_v2.mb_ds_3", "name", "member_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_lb_member_v2.mb_ds_4", "name", "member_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_lb_member_v2.mb_ds_3", "tags.#", "2"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_lb_member_v2.mb_ds_3", "tags.0", "tag11"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_lb_member_v2.mb_ds_4", "tags.#", "2"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_lb_member_v2.mb_ds_4", "tags.0", "tag13"),
 				),
 			},
 		},
@@ -126,6 +144,11 @@ resource "openstack_lb_monitor_v2" "monitor_1" {
 data "openstack_lb_member_v2" "mb_ds_1" {
   name = openstack_lb_member_v2.member_1.name
   pool_id = openstack_lb_pool_v2.pool_1.id
+  tags = [
+	  "tag1",
+    "tag2",
+    "tag3",
+  ]
 }
 
 data "openstack_lb_member_v2" "mb_ds_2" {
@@ -133,3 +156,50 @@ data "openstack_lb_member_v2" "mb_ds_2" {
   pool_id = openstack_lb_pool_v2.pool_1.id
 }
 `
+
+func testAccDataSourceLBV2MemberManifestUpdate1() string {
+	return fmt.Sprintf(`
+%s
+resource "openstack_lb_member_v2" "member_3" {
+  pool_id         = openstack_lb_pool_v2.pool_1.id
+  name            = "member_1"
+  address         = "192.168.199.33"
+  protocol_port   = 8080
+  monitor_address = "192.168.199.93"
+  monitor_port    = 8181
+  tags = [
+	  "tag11",
+    "tag12",
+  ]
+}
+
+resource "openstack_lb_member_v2" "member_4" {
+  pool_id       = openstack_lb_pool_v2.pool_1.id
+  name          = "member_1"
+  address       = "192.168.199.43"
+  protocol_port = 9090
+  subnet_id     = openstack_networking_subnet_v2.subnet_1.id
+  tags = [
+	  "tag13",
+    "tag14",
+  ]
+}
+
+data "openstack_lb_member_v2" "mb_ds_3" {
+  name = openstack_lb_member_v2.member_3.name
+  pool_id = openstack_lb_pool_v2.pool_1.id
+  tags = [
+	  "tag11",
+  ]
+}
+
+data "openstack_lb_member_v2" "mb_ds_4" {
+  member_id = openstack_lb_member_v2.member_4.id
+  pool_id = openstack_lb_pool_v2.pool_1.id
+  tags = [
+	  "tag13",
+    "tag14",
+  ]
+}
+`, testAccDataSourceLbV2MemberConfigBasic)
+}
