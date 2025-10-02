@@ -288,9 +288,9 @@ func TestAccNetworkingV2Port_fixedIPs(t *testing.T) {
 				Config: testAccNetworkingV2PortFixedIPs,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "all_fixed_ips.0", "192.168.199.23"),
+						"openstack_networking_port_v2.port_1", "all_fixed_ips.0.ip_address", "192.168.199.23"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "all_fixed_ips.1", "192.168.199.24"),
+						"openstack_networking_port_v2.port_1", "all_fixed_ips.1.ip_address", "192.168.199.24"),
 				),
 			},
 		},
