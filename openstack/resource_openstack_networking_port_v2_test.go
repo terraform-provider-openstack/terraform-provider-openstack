@@ -2212,7 +2212,7 @@ resource "openstack_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
   network_id = openstack_networking_network_v2.network_1.id
-  fixed_ip {}
+  no_fixed_ip = true
 }
 `
 
