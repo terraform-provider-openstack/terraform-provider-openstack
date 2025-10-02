@@ -136,11 +136,13 @@ func dataSourceLBMemberV2Read(ctx context.Context, d *schema.ResourceData, meta 
 	requestedTags := expandTagsList(d, "tags")
 	if len(requestedTags) > 0 {
 		var filtered []pools.Member
+
 		for _, m := range allMembers {
 			if hasAllRequestedTags(m.Tags, requestedTags) {
 				filtered = append(filtered, m)
 			}
 		}
+
 		allMembers = filtered
 	}
 
