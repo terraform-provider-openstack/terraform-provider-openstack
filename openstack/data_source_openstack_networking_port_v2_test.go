@@ -116,6 +116,6 @@ data "openstack_networking_port_v2" "port_2" {
 }
 
 data "openstack_networking_port_v2" "port_3" {
-  fixed_ip = openstack_networking_port_v2.port_1.all_fixed_ips.1
+  fixed_ip = openstack_networking_port_v2.port_1.all_fixed_ips[1].ip_address
 }
 `

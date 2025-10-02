@@ -118,7 +118,18 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 			"all_fixed_ips": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"ip_address": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"subnet_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
 			},
 
 			"all_security_group_ids": {

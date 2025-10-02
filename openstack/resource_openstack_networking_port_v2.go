@@ -35,6 +35,15 @@ func resourceNetworkingPortV2() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceNetworkingPortV2V0().CoreConfigSchema().ImpliedType(),
+				Upgrade: upgradeNetworkingPortV2StateV0toV1,
+				Version: 0,
+			},
+		},
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -188,7 +197,18 @@ func resourceNetworkingPortV2() *schema.Resource {
 			"all_fixed_ips": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"ip_address": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"subnet_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
 			},
 
 			"all_security_group_ids": {
@@ -466,8 +486,6 @@ func resourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData, m
 	// This will be in the order returned by the API,
 	// which is usually alpha-numeric.
 	d.Set("all_fixed_ips", expandNetworkingPortFixedIPToStringSlice(port.FixedIPs))
-
-	d.Set("fixed_ip", flattenNetworkingPortFixedIPs(port.FixedIPs))
 
 	// Set all security groups.
 	// This can be different from what the user specified since

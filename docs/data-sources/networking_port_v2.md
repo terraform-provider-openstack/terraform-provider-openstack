@@ -83,8 +83,8 @@ are exported:
     addresses that can be active on this port. The structure is described
     below.
 
-* `all_fixed_ips` - The collection of Fixed IP addresses on the port in the
-  order returned by the Network v2 API.
+* `all_fixed_ips` - The collection of Fixed IP addresses and subnet IDs on the
+  port in the order returned by the Network v2 API.
 
 * `all_security_group_ids` - The set of security group IDs applied on the port.
 
