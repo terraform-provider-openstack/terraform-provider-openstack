@@ -11,6 +11,8 @@ description: |-
 
 Use this data source to get information about an existing volume type.
 
+~> **Note:** This usually requires admin privileges.
+
 ## Example Usage
 
 ```hcl
