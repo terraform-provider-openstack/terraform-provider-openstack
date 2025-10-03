@@ -72,7 +72,7 @@ data "openstack_blockstorage_volume_type_v3" "vt_ds_1" {
 }
 
 data "openstack_blockstorage_volume_type_v3" "vt_ds_2" {
-  is_public = true
+  is_public = openstack_blockstorage_volume_type_v3.volume_type_2.is_public
   extra_specs = {
     spec4 = "bar"
   }
