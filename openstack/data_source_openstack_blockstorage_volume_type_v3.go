@@ -106,12 +106,15 @@ func dataSourceBlockStorageVolumeTypeV3Read(ctx context.Context, d *schema.Resou
 
 		for _, vt := range allVolumeTypes {
 			match := true
+
 			for k, v := range filterMap {
 				if vtVal, ok := vt.ExtraSpecs[k]; !ok || vtVal != v.(string) {
 					match = false
+
 					break
 				}
 			}
+
 			if match {
 				filtered = append(filtered, vt)
 			}
