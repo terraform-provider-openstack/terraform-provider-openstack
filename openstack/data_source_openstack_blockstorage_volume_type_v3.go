@@ -31,6 +31,13 @@ func dataSourceBlockStorageVolumeTypeV3() *schema.Resource {
 				Computed: true,
 			},
 
+			"extra_specs": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
 			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -39,12 +46,6 @@ func dataSourceBlockStorageVolumeTypeV3() *schema.Resource {
 			"qos_specs_id": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-
-			"extra_specs": {
-				Type:     schema.TypeMap,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
 			"public_access": {
@@ -92,6 +93,26 @@ func dataSourceBlockStorageVolumeTypeV3Read(ctx context.Context, d *schema.Resou
 
 		for _, vt := range allVolumeTypes {
 			if vt.Name == name.(string) {
+				filtered = append(filtered, vt)
+			}
+		}
+
+		allVolumeTypes = filtered
+	}
+
+	if filter, ok := d.GetOk("extra_specs"); ok {
+		filtered := make([]volumetypes.VolumeType, 0, len(allVolumeTypes))
+		filterMap := filter.(map[string]any)
+
+		for _, vt := range allVolumeTypes {
+			match := true
+			for k, v := range filterMap {
+				if vtVal, ok := vt.ExtraSpecs[k]; !ok || vtVal != v.(string) {
+					match = false
+					break
+				}
+			}
+			if match {
 				filtered = append(filtered, vt)
 			}
 		}
