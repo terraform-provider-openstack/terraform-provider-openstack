@@ -116,6 +116,13 @@ func dataSourceNetworkingPortV2() *schema.Resource {
 			},
 
 			"all_fixed_ips": {
+				Type:       schema.TypeList,
+				Computed:   true,
+				Elem:       &schema.Schema{Type: schema.TypeString},
+				Deprecated: "Use `fixed_ips` instead. This field will be removed in a future release.",
+			},
+
+			"fixed_ips": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -360,7 +367,8 @@ func dataSourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData,
 	d.Set("region", GetRegion(d, config))
 	d.Set("all_tags", port.Tags)
 	d.Set("all_security_group_ids", port.SecurityGroups)
-	d.Set("all_fixed_ips", expandNetworkingPortFixedIPToStringSlice(port.FixedIPs))
+	d.Set("all_fixed_ips", expandNetworkingPortAllFixedIPToStringSlice(port.FixedIPs))
+	d.Set("fixed_ips", expandNetworkingPortFixedIPToStringSlice(port.FixedIPs))
 	d.Set("allowed_address_pairs", flattenNetworkingPortAllowedAddressPairsV2(port.MACAddress, port.AllowedAddressPairs))
 	d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDHCPOptsExt))
 	d.Set("binding", flattenNetworkingPortBindingV2(port))

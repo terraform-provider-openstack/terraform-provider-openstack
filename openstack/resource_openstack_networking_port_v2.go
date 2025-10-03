@@ -35,15 +35,6 @@ func resourceNetworkingPortV2() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
-		SchemaVersion: 1,
-		StateUpgraders: []schema.StateUpgrader{
-			{
-				Type:    resourceNetworkingPortV2V0().CoreConfigSchema().ImpliedType(),
-				Upgrade: upgradeNetworkingPortV2StateV0toV1,
-				Version: 0,
-			},
-		},
-
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -195,6 +186,13 @@ func resourceNetworkingPortV2() *schema.Resource {
 			},
 
 			"all_fixed_ips": {
+				Type:       schema.TypeList,
+				Computed:   true,
+				Elem:       &schema.Schema{Type: schema.TypeString},
+				Deprecated: "Use `fixed_ips` instead. This field will be removed in a future release.",
+			},
+
+			"fixed_ips": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -485,7 +483,14 @@ func resourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData, m
 	// Set a slice of all returned Fixed IPs.
 	// This will be in the order returned by the API,
 	// which is usually alpha-numeric.
-	d.Set("all_fixed_ips", expandNetworkingPortFixedIPToStringSlice(port.FixedIPs))
+	// Deprecated: Use fixed_ips instead. all_fixed_ips will be removed in a future release.
+	d.Set("all_fixed_ips", expandNetworkingPortAllFixedIPToStringSlice(port.FixedIPs))
+
+	// Set a slice of all returned Fixed IPs with subnet IDs.
+	// This will be in the order returned by the API, which is usually alpha-numeric.
+	// Unlike `all_fixed_ips`, `fixed_ips` includes both the IP address and the subnet ID.
+	// `all_fixed_ips` will eventually be deprecated in favor of `fixed_ips`.
+	d.Set("fixed_ips", expandNetworkingPortFixedIPToStringSlice(port.FixedIPs))
 
 	// Set all security groups.
 	// This can be different from what the user specified since

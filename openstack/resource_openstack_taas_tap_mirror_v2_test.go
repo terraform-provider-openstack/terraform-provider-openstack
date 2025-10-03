@@ -166,7 +166,7 @@ resource "openstack_taas_tap_mirror_v2" "tap_mirror_1" {
     description = "desc"
 	mirror_type = "erspanv1"
 	port_id = openstack_networking_port_v2.port_1.id
-	remote_ip = openstack_networking_port_v2.port_1.all_fixed_ips[0].ip_address
+	remote_ip = openstack_networking_port_v2.port_1.all_fixed_ips[0]
 	directions {
 		in = 1000
 		out = 1001
@@ -200,7 +200,7 @@ resource "openstack_taas_tap_mirror_v2" "tap_mirror_1" {
     description = "updated desc"
 	mirror_type = "erspanv1"
 	port_id = openstack_networking_port_v2.port_1.id
-	remote_ip = openstack_networking_port_v2.port_1.all_fixed_ips[0].ip_address
+	remote_ip = openstack_networking_port_v2.port_1.all_fixed_ips[0]
 	directions {
 		in = 1000
 		out = 1001

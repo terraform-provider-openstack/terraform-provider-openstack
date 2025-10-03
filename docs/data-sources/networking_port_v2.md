@@ -83,8 +83,12 @@ are exported:
     addresses that can be active on this port. The structure is described
     below.
 
-* `all_fixed_ips` - The collection of Fixed IP addresses and subnet IDs on the
-  port in the order returned by the Network v2 API.
+* `all_fixed_ips` - The collection of Fixed IP addresses on the port in the
+  order returned by the Network v2 API.
+
+* `fixed_ips` - The collection of objects containing both IP addresses and
+  their corresponding subnet IDs on the port, in the order returned by the
+  Network v2 API. Extends the functionality of all_fixed_ips.
 
 * `all_security_group_ids` - The set of security group IDs applied on the port.
 
@@ -125,3 +129,7 @@ The `binding` attribute has fields below:
     specific binding.
 
 * `vif_type` - The VNIC type of the port binding.
+
+## Deprecated Attributes
+
+* `all_fixed_ips`: Will be removed in a future release. Use `fixed_ips` instead.

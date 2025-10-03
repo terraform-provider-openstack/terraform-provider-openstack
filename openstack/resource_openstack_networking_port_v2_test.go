@@ -288,9 +288,17 @@ func TestAccNetworkingV2Port_fixedIPs(t *testing.T) {
 				Config: testAccNetworkingV2PortFixedIPs,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "all_fixed_ips.0.ip_address", "192.168.199.23"),
+						"openstack_networking_port_v2.port_1", "all_fixed_ips.0", "192.168.199.23"),
 					resource.TestCheckResourceAttr(
-						"openstack_networking_port_v2.port_1", "all_fixed_ips.1.ip_address", "192.168.199.24"),
+						"openstack_networking_port_v2.port_1", "all_fixed_ips.1", "192.168.199.24"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "fixed_ips.0.ip_address", "192.168.199.23"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "fixed_ips.1.ip_address", "192.168.199.24"),
+					resource.TestCheckResourceAttrSet(
+						"openstack_networking_port_v2.port_1", "fixed_ips.0.subnet_id"),
+					resource.TestCheckResourceAttrSet(
+						"openstack_networking_port_v2.port_1", "fixed_ips.1.subnet_id"),
 				),
 			},
 		},
@@ -473,6 +481,8 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 					testAccCheckNetworkingV2PortExists(t.Context(), "openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_port_v2.port_1", "all_fixed_ips.#", "0"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "fixed_ips.#", "0"),
 				),
 			},
 			{
@@ -481,6 +491,8 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 					testAccCheckNetworkingV2PortExists(t.Context(), "openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_port_v2.port_1", "all_fixed_ips.#", "1"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "fixed_ips.#", "1"),
 				),
 			},
 			{
@@ -489,6 +501,8 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 					testAccCheckNetworkingV2PortExists(t.Context(), "openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_port_v2.port_1", "all_fixed_ips.#", "0"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "fixed_ips.#", "0"),
 				),
 			},
 			{
@@ -497,6 +511,8 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 					testAccCheckNetworkingV2PortExists(t.Context(), "openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_port_v2.port_1", "all_fixed_ips.#", "2"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "fixed_ips.#", "2"),
 				),
 			},
 			{
@@ -505,6 +521,8 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 					testAccCheckNetworkingV2PortExists(t.Context(), "openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_port_v2.port_1", "all_fixed_ips.#", "0"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "fixed_ips.#", "0"),
 				),
 			},
 			{
@@ -513,6 +531,8 @@ func TestAccNetworkingV2Port_noFixedIP(t *testing.T) {
 					testAccCheckNetworkingV2PortExists(t.Context(), "openstack_networking_port_v2.port_1", &port),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_port_v2.port_1", "all_fixed_ips.#", "0"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_port_v2.port_1", "fixed_ips.#", "0"),
 				),
 			},
 		},
