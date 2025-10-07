@@ -25,13 +25,31 @@ data "openstack_compute_instance_v2" "instance" {
 * `region` - (Optional) The region in which to obtain the V2 Compute client.
   If omitted, the `region` argument of the provider is used.
 
-* `id` - (Required) The UUID of the instance
+* `id` - (Optional) The UUID of the instance. Exactly one of `name`, `id`
+  is required to be set.
+
+* `name` - (Optional) The name of the instance. Exactly one of `name`, `id`
+  is required to be set.
+
+* `tags_all` - (Optional) A set of tags. The instance will be returned if
+  it has all of the specified tags.
+
+* `tags_any` - (Optional) A set of tags. The instance will be returned if
+  it has at least one of the specified tags.
+
+* `not_tags_all` - (Optional) A set of tags. The instance will be returned
+  if it does not have all of the specified tags.
+
+* `not_tags_any` - (Optional) A set of tags. The instance will be returned
+  if it does not have any of the specified tags.
 
 ## Attributes Reference
 
 In addition to the above, the following attributes are exported:
 
 * `region` - See Argument Reference above.
+
+* `id` - The UUID of the server.
 
 * `name` - The name of the server.
 
@@ -79,4 +97,3 @@ The `network` block is defined as:
 * `port` - The port UUID for this network
 
 * `mac` - The MAC address assigned to this network interface.
-
