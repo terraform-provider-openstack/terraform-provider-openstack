@@ -510,7 +510,7 @@ func joinInstanceTags(tagsList []string) string {
 	return strings.Join(clean, ",")
 }
 
-func expandInstanceTagsList(i interface{}) []string {
+func expandInstanceTagsList(i any) []string {
 	if i == nil {
 		return nil
 	}
