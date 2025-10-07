@@ -34,7 +34,7 @@ func TestAccComputeV2InstanceDataSource(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeV2InstanceDataSourceSource(),
+				Config: testAccComputeV2InstanceDataSourceName(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceV2DataSourceID(
 						"data.openstack_compute_instance_v2.source_2"),
