@@ -103,7 +103,7 @@ func testAccComputeV2InstanceDataSourceName() string {
 %s
 
 data "openstack_compute_instance_v2" "source_2" {
-  name = openstack_compute_instance_v2.instance_1.name
+  name = "^instance.*$"
 
   tags_all = [
     "tag1",
@@ -121,6 +121,10 @@ data "openstack_compute_instance_v2" "source_2" {
 
   not_tags_any = [
 	"tag5",
+  ]
+
+  depends_on = [
+    openstack_compute_instance_v2.instance_1
   ]
 }
 `, testAccComputeV2InstanceDataSourceBasic())
