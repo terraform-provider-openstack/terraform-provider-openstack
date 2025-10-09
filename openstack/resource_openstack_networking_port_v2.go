@@ -250,7 +250,7 @@ func resourceNetworkingPortV2() *schema.Resource {
 							Optional: true,
 							Default:  "normal",
 							ValidateFunc: validation.StringInSlice([]string{
-								"direct", "direct-physical", "macvtap", "normal", "baremetal", "virtio-forwarder",
+								"direct", "direct-physical", "macvtap", "normal", "baremetal", "virtio-forwarder", "remote-managed",
 							}, true),
 						},
 					},
