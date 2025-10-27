@@ -86,6 +86,22 @@ func flattenLBMembersV2(members []pools.Member) []map[string]any {
 	return m
 }
 
+func hasAllRequestedTags(memberTags []string, requestedTags []string) bool {
+	tagSet := make(map[string]struct{}, len(memberTags))
+
+	for _, t := range memberTags {
+		tagSet[t] = struct{}{}
+	}
+
+	for _, rt := range requestedTags {
+		if _, ok := tagSet[rt]; !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
 func expandLBMembersV2(members *schema.Set) []pools.BatchUpdateMemberOpts {
 	var m []pools.BatchUpdateMemberOpts
 
