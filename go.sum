@@ -154,8 +154,8 @@ github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.7.2/go.mod h1:R6va5+xMeoiuVRoj+gSkQ7d3FALtqAAGI1FQKckRals=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-github.com/terraform-provider-openstack/utils/v2 v2.0.0-20250717163156-83cd74412d2e h1:57CFV+CNuEV2md5AgyuPD6goPEq1itzRQPMAI43kKPI=
-github.com/terraform-provider-openstack/utils/v2 v2.0.0-20250717163156-83cd74412d2e/go.mod h1:+QIVEo1bjR7v797mcW0ebuak7yi7enUGwQTr+Itt8rQ=
+github.com/terraform-provider-openstack/utils/v2 v2.0.0-20251008071556-6ca14d74255d h1:fnGtVQAKkL3FUlyklO754jVu5q+0RN8H1evEHUZfNq4=
+github.com/terraform-provider-openstack/utils/v2 v2.0.0-20251008071556-6ca14d74255d/go.mod h1:uLfRC2Pe3C1wOqA6q+fFbq5XyYI+i+fm/BTiOs73JPo=
 github.com/ulikunitz/xz v0.5.15 h1:9DNdB5s+SgV3bQ2ApL10xRc35ck0DuIX/isZvIk+ubY=
 github.com/ulikunitz/xz v0.5.15/go.mod h1:nbz6k7qbPmH4IRqmfOplQw/tblSgqTqBwxkY0oWt/14=
 github.com/vmihailenco/msgpack v3.3.3+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=
