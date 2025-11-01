@@ -174,7 +174,7 @@ The following arguments are supported:
 
 * `dns_name` - (Optional) The port DNS name. Available, when Neutron DNS extension
     is enabled.
-    
+
 * `qos_policy_id` - (Optional) Reference to the associated QoS policy.
 
 The `fixed_ip` block supports:
@@ -231,8 +231,11 @@ The following attributes are exported:
 * `security_group_ids` - See Argument Reference above.
 * `device_id` - See Argument Reference above.
 * `fixed_ip` - See Argument Reference above.
-* `all_fixed_ips` - The collection of Fixed IP addresses on the port in the
-  order returned by the Network v2 API.
+* `all_fixed_ips` - The collection of Fixed IP addresses and sibnet IDs on the
+  port in the order returned by the Network v2 API.
+* `fixed_ips` - The collection of objects containing both IP addresses and
+  their corresponding subnet IDs on the port, in the order returned by the
+  Network v2 API. Extends the functionality of all_fixed_ips.
 * `all_security_group_ids` - The collection of Security Group IDs on the port
   which have been explicitly and implicitly added.
 * `extra_dhcp_option` - See Argument Reference above.
@@ -243,6 +246,10 @@ The following attributes are exported:
 * `dns_name` - See Argument Reference above.
 * `dns_assignment` - The list of maps representing port DNS assignments.
 * `qos_policy_id` - See Argument Reference above.
+
+## Deprecated Attributes
+
+* `all_fixed_ips`: Will be removed in a future release. Use `fixed_ips` instead.
 
 ## Import
 
