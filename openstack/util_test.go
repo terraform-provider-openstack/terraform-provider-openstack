@@ -116,3 +116,44 @@ func TestUnitparsePairedIDs(t *testing.T) {
 	assert.Equal(t, expectedParentID, actualParentID)
 	assert.Equal(t, expectedChildID, actualChildID)
 }
+
+func TestUnitStringSliceToSet(t *testing.T) {
+	tests := []struct {
+		name     string
+		in       []string
+		expected []string
+	}{
+		{
+			name:     "basic",
+			in:       []string{"a", "b", "c"},
+			expected: []string{"a", "b", "c"},
+		},
+		{
+			name:     "dedupe",
+			in:       []string{"a", "a", "b"},
+			expected: []string{"a", "b"},
+		},
+		{
+			name:     "empty",
+			in:       []string{},
+			expected: []string{},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			set := stringSliceToSet(tc.in)
+
+			if set.Len() != len(tc.expected) {
+				t.Fatalf("expected length %d, got %d", len(tc.expected), set.Len())
+			}
+
+			for _, want := range tc.expected {
+				if !set.Contains(want) {
+					t.Fatalf("expected set to contain %q, but it did not (set=%v)",
+						want, set.List())
+				}
+			}
+		})
+	}
+}
