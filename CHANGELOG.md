@@ -1,3 +1,27 @@
+## 3.4.0 (11 November, 2025)
+
+NOTES
+
+* CI: Add `flamingo` jobs and remove `caracal` ([#1977](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1977))
+* This release includes a fix for a **security vulnerability** on `networking_port_secgroup_associate_v2`. If you are using this resource upgrade to this release is recommended. For more info see [#1979](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/1979)
+
+IMPROVEMENTS
+
+* Add support for `remote-managed` vnic_type on `openstack_networking_port_v2` ([#1973](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1973))
+* Add new data source `data_source_openstack_lb_pool_v2` ([#1966](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1966))
+* Add new data source `data_source_openstack_lb_listener_v2` ([#1957](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1957))
+* Add new data source `data_source_openstack_lb_loadbalancer_v2` ([#1954](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1954))
+* Add new resource `resource_openstack_taas_tap_mirror_v2` ([#1948](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1948))
+
+
+BUG FIXES
+
+* Add lock on `networking_port_secgroup_associate_v2` ([#1980](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1980))
+* Use `auth_url` in provider when defined ([#1974](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1974))
+* Update `name` correctly in `resource_openstack_identity_endpoint_v3` ([#1961](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1961))
+* Correctly handle status of `resource_openstack_containerinfra_cluster_v1` during update ([#1940](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1940))
+* Correctly handle status of `resource_openstack_containerinfra_cluster_v1` during delete ([#1937](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1937))
+
 ## 3.3.2 (17 July, 2025)
 
 BUG FIXES
