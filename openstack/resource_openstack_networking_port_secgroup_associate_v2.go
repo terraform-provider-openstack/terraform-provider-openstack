@@ -68,6 +68,9 @@ func resourceNetworkingPortSecGroupAssociateV2Create(ctx context.Context, d *sch
 	securityGroups := expandToStringSlice(d.Get("security_group_ids").(*schema.Set).List())
 	portID := d.Get("port_id").(string)
 
+	config.Lock(portID)
+	defer config.Unlock(portID)
+
 	port, err := ports.Get(ctx, networkingClient, portID).Extract()
 	if err != nil {
 		return diag.Errorf("Unable to get %s Port: %s", portID, err)
@@ -151,6 +154,10 @@ func resourceNetworkingPortSecGroupAssociateV2Update(ctx context.Context, d *sch
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	portID := d.Id()
+	config.Lock(portID)
+	defer config.Unlock(portID)
+
 	var updateOpts ports.UpdateOpts
 
 	var enforce bool
@@ -162,7 +169,14 @@ func resourceNetworkingPortSecGroupAssociateV2Update(ctx context.Context, d *sch
 		securityGroups := expandToStringSlice(d.Get("security_group_ids").(*schema.Set).List())
 		updateOpts.SecurityGroups = &securityGroups
 	} else {
-		allSet := d.Get("all_security_group_ids").(*schema.Set)
+		// Get current security groups within lock to avoid
+		// race conditions and updates with stale data
+		port, err := ports.Get(ctx, networkingClient, d.Id()).Extract()
+		if err != nil {
+			return diag.FromErr(CheckDeleted(d, err, "Error fetching port security groups"))
+		}
+
+		allSet := stringSliceToSet(port.SecurityGroups)
 		oldIDs, newIDs := d.GetChange("security_group_ids")
 		oldSet, newSet := oldIDs.(*schema.Set), newIDs.(*schema.Set)
 
@@ -193,6 +207,10 @@ func resourceNetworkingPortSecGroupAssociateV2Delete(ctx context.Context, d *sch
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	portID := d.Id()
+	config.Lock(portID)
+	defer config.Unlock(portID)
+
 	var updateOpts ports.UpdateOpts
 
 	var enforce bool
@@ -203,7 +221,14 @@ func resourceNetworkingPortSecGroupAssociateV2Delete(ctx context.Context, d *sch
 	if enforce {
 		updateOpts.SecurityGroups = &[]string{}
 	} else {
-		allSet := d.Get("all_security_group_ids").(*schema.Set)
+		// Get current security groups within lock to avoid
+		// race conditions and updates with stale data
+		port, err := ports.Get(ctx, networkingClient, d.Id()).Extract()
+		if err != nil {
+			return diag.FromErr(CheckDeleted(d, err, "Error fetching port security groups"))
+		}
+
+		allSet := stringSliceToSet(port.SecurityGroups)
 		oldSet := d.Get("security_group_ids").(*schema.Set)
 
 		allWithoutOld := allSet.Difference(oldSet)

@@ -355,3 +355,15 @@ func getOkExists(d *schema.ResourceData, key string) (any, bool) {
 
 	return d.Get(key), true
 }
+
+// stringSliceToSet converts a slice of strings to
+// *schema.Set.
+func stringSliceToSet(in []string) *schema.Set {
+	result := make([]any, len(in))
+
+	for i, v := range in {
+		result[i] = v
+	}
+
+	return schema.NewSet(schema.HashString, result)
+}
