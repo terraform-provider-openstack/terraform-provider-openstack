@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 	"testing"
@@ -17,6 +18,7 @@ import (
 	"github.com/gophercloud/gophercloud/v2/pagination"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAccComputeV2Instance_basic(t *testing.T) {
@@ -835,6 +837,100 @@ func TestAccComputeInstanceV2_hypervisorHostname(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2Instance_hostname(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy(t.Context()),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeInstanceV2InvalidHostnameConfig(),
+				ExpectError: regexp.MustCompile("Invalid hostname"),
+			},
+			{
+				Config: testAccComputeInstanceV2HostnameConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceHostnameExists(t.Context(), "openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttrWith("openstack_compute_instance_v2.instance_1", "hostname", testAccCheckComputeV2InstanceHostname(&instance)),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_changeHostname(t *testing.T) {
+	var instance1 servers.Server
+
+	var instance2 servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy(t.Context()),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceV2HostnameConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceHostnameExists(t.Context(), "openstack_compute_instance_v2.instance_1", &instance1),
+					resource.TestCheckResourceAttrWith("openstack_compute_instance_v2.instance_1", "hostname", testAccCheckComputeV2InstanceHostname(&instance1)),
+				),
+			},
+			{
+				Config: testAccComputeInstanceV2ChangeHostnameConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceHostnameExists(t.Context(), "openstack_compute_instance_v2.instance_1", &instance2),
+					testAccCheckComputeV2InstanceInstanceIDsDoMatch(&instance1, &instance2),
+					resource.TestCheckResourceAttrWith("openstack_compute_instance_v2.instance_1", "hostname", testAccCheckComputeV2InstanceHostname(&instance2)),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_hostnameFqdn(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy(t.Context()),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceV2HostnameFqdnConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceHostnameExists(t.Context(), "openstack_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttrWith("openstack_compute_instance_v2.instance_1", "hostname", testAccCheckComputeV2InstanceHostname(&instance)),
+				),
+			},
+		},
+	})
+}
+
+func testAccCheckComputeV2InstanceHostname(instance *servers.Server) resource.CheckResourceAttrWithFunc {
+	return func(v string) error {
+		if instance.Hostname == nil {
+			return errors.New("Empty hostname")
+		}
+
+		if *instance.Hostname != v {
+			return fmt.Errorf("Expected hostname: %s but received %s", v, *instance.Hostname)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckComputeV2InstanceDestroy(ctx context.Context) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
@@ -879,6 +975,40 @@ func testAccCheckComputeV2InstanceExists(ctx context.Context, n string, instance
 			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
+		found, err := servers.Get(ctx, computeClient, rs.Primary.ID).Extract()
+		if err != nil {
+			return err
+		}
+
+		if found.ID != rs.Primary.ID {
+			return errors.New("Instance not found")
+		}
+
+		*instance = *found
+
+		return nil
+	}
+}
+
+func testAccCheckComputeV2InstanceHostnameExists(ctx context.Context, n string, instance *servers.Server) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return errors.New("No ID is set")
+		}
+
+		config := testAccProvider.Meta().(*Config)
+
+		computeClient, err := config.ComputeV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
+		}
+
+		computeClient.Microversion = computeV2InstanceCreateServerWithHostnameMicroversion
 		found, err := servers.Get(ctx, computeClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
@@ -968,6 +1098,18 @@ func testAccCheckComputeV2InstanceBootVolumeAttachment(ctx context.Context, inst
 		}
 
 		return errors.New("No attached volume found")
+	}
+}
+
+func testAccCheckComputeV2InstanceInstanceIDsDoMatch(
+	instance1, instance2 *servers.Server,
+) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
+		if instance1.ID == instance2.ID {
+			return nil
+		}
+
+		return errors.New("Instance was recreated")
 	}
 }
 
@@ -1075,6 +1217,32 @@ func testAccCheckComputeV2InstanceNetworkDoesNotExist(n string, _ *servers.Serve
 
 		return nil
 	}
+}
+
+func TestUnitIsValidHostname(t *testing.T) {
+	expected := true
+	actual := isValidHostname("test-hostname")
+	assert.Equal(t, expected, actual)
+
+	expected = false
+	actual = isValidHostname("test.fqdn.example.org")
+	assert.Equal(t, expected, actual)
+}
+
+func TestUnitValidateHostname(t *testing.T) {
+	var err []error
+
+	_, err = validateHostname("test-hostname", "")
+	assert.Empty(t, err)
+
+	_, err = validateHostname("test.fqdn.example.org", "")
+	assert.Empty(t, err)
+
+	_, err = validateHostname("invalid+hostname", "")
+	assert.NotEmpty(t, err)
+
+	_, err = validateHostname("invalid+fqdn.example.org", "")
+	assert.NotEmpty(t, err)
 }
 
 func testAccComputeV2InstanceBasic() string {
@@ -1800,6 +1968,66 @@ resource "openstack_compute_instance_v2" "instance_1" {
   flavor_id       = "%s"
 
   hypervisor_hostname = data.openstack_compute_hypervisor_v2.host01.hostname
+
+  network {
+    uuid = "%s"
+  }
+}
+`, osImageID, osFlavorID, osNetworkID)
+}
+
+func testAccComputeInstanceV2HostnameConfig() string {
+	return fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name            = "instance_1"
+  hostname  	  = "test-hostname"
+  image_id        = "%s"
+  flavor_id       = "%s"
+
+  network {
+    uuid = "%s"
+  }
+}
+`, osImageID, osFlavorID, osNetworkID)
+}
+
+func testAccComputeInstanceV2ChangeHostnameConfig() string {
+	return fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name            = "instance_1"
+  hostname  	  = "hostname.is.now.a.fqdn.example.org"
+  image_id        = "%s"
+  flavor_id       = "%s"
+
+  network {
+    uuid = "%s"
+  }
+}
+`, osImageID, osFlavorID, osNetworkID)
+}
+
+func testAccComputeInstanceV2InvalidHostnameConfig() string {
+	return fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_invalid_hostname" {
+  name            = "instance_invalid_hostname"
+  hostname  	  = "test+hostname"
+  image_id        = "%s"
+  flavor_id       = "%s"
+
+  network {
+    uuid = "%s"
+  }
+}
+`, osImageID, osFlavorID, osNetworkID)
+}
+
+func testAccComputeInstanceV2HostnameFqdnConfig() string {
+	return fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name            = "instance_1"
+  hostname  	  = "test-hostname.example.org"
+  image_id        = "%s"
+  flavor_id       = "%s"
 
   network {
     uuid = "%s"
