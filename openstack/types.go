@@ -65,6 +65,7 @@ func (opts PortCreateOpts) ToPortCreateMap() (map[string]any, error) {
 // RouterCreateOpts represents the attributes used when creating a new router.
 type RouterCreateOpts struct {
 	routers.CreateOpts
+	FlavorID   string            `json:"flavor_id,omitempty"`
 	ValueSpecs map[string]string `json:"value_specs,omitempty"`
 }
 

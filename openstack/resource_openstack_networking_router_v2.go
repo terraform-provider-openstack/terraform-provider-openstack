@@ -108,6 +108,13 @@ func resourceNetworkingRouterV2() *schema.Resource {
 				},
 			},
 
+			"flavor_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+				ForceNew: true,
+				Optional: true,
+			},
+
 			"external_subnet_ids": {
 				Type:          schema.TypeList,
 				Optional:      true,
@@ -168,6 +175,15 @@ func resourceNetworkingRouterV2() *schema.Resource {
 	}
 }
 
+type RouterFlavor struct {
+	FlavorID string `json:"flavor_id,omitempty"`
+}
+
+type routerExtended struct {
+	routers.Router
+	RouterFlavor
+}
+
 func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
 
@@ -177,13 +193,14 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 	}
 
 	createOpts := RouterCreateOpts{
-		routers.CreateOpts{
+		CreateOpts: routers.CreateOpts{
 			Name:                  d.Get("name").(string),
 			Description:           d.Get("description").(string),
 			TenantID:              d.Get("tenant_id").(string),
 			AvailabilityZoneHints: resourceNetworkingAvailabilityZoneHintsV2(d),
 		},
-		MapValueSpecs(d),
+		FlavorID:   d.Get("flavor_id").(string),
+		ValueSpecs: MapValueSpecs(d),
 	}
 
 	if asuRaw, ok := d.GetOk("admin_state_up"); ok {
@@ -240,13 +257,13 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 		createOpts.GatewayInfo = &gatewayInfo
 	}
 
-	var r *routers.Router
+	var router routerExtended
 
 	log.Printf("[DEBUG] openstack_networking_router_v2 create options: %#v", createOpts)
 
 	if len(externalSubnetIDs) == 0 {
 		// router creation without a retry
-		r, err = routers.Create(ctx, networkingClient, createOpts).Extract()
+		err = routers.Create(ctx, networkingClient, createOpts).ExtractIntoStructPtr(&router, "router")
 		if err != nil {
 			return diag.Errorf("Error creating openstack_networking_router_v2: %s", err)
 		}
@@ -257,7 +274,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 
 			log.Printf("[DEBUG] openstack_networking_router_v2 create options (try %d): %#v", i+1, createOpts)
 
-			r, err = routers.Create(ctx, networkingClient, createOpts).Extract()
+			err = routers.Create(ctx, networkingClient, createOpts).ExtractIntoStructPtr(&router, "router")
 			if err != nil {
 				if retryOn409(err) {
 					continue
@@ -274,12 +291,12 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 		}
 	}
 
-	log.Printf("[DEBUG] Waiting for openstack_networking_router_v2 %s to become available.", r.ID)
+	log.Printf("[DEBUG] Waiting for openstack_networking_router_v2 %s to become available.", router.ID)
 
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"BUILD", "PENDING_CREATE", "PENDING_UPDATE"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    resourceNetworkingRouterV2StateRefreshFunc(ctx, networkingClient, r.ID),
+		Refresh:    resourceNetworkingRouterV2StateRefreshFunc(ctx, networkingClient, router.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      0,
 		MinTimeout: 3 * time.Second,
@@ -287,20 +304,20 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return diag.Errorf("Error waiting for openstack_networking_router_v2 %s to become available: %s", r.ID, err)
+		return diag.Errorf("Error waiting for openstack_networking_router_v2 %s to become available: %s", router.ID, err)
 	}
 
-	d.SetId(r.ID)
+	d.SetId(router.ID)
 
 	// If the vendorUpdateGateway flag was specified and if an external network
 	// was specified, then set the gateway information after router creation.
 	if vendorUpdateGateway && externalNetworkID != "" {
-		log.Printf("[DEBUG] Adding external_network %s to openstack_networking_router_v2 %s", externalNetworkID, r.ID)
+		log.Printf("[DEBUG] Adding external_network %s to openstack_networking_router_v2 %s", externalNetworkID, router.ID)
 
 		var updateOpts routers.UpdateOpts
 		updateOpts.GatewayInfo = &gatewayInfo
 
-		_, err = routers.Update(ctx, networkingClient, r.ID, updateOpts).Extract()
+		_, err = routers.Update(ctx, networkingClient, router.ID, updateOpts).Extract()
 		if err != nil {
 			return diag.Errorf("Error updating openstack_networking_router_v2: %s", err)
 		}
@@ -310,15 +327,15 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 	if len(tags) > 0 {
 		tagOpts := attributestags.ReplaceAllOpts{Tags: tags}
 
-		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "routers", r.ID, tagOpts).Extract()
+		tags, err := attributestags.ReplaceAll(ctx, networkingClient, "routers", router.ID, tagOpts).Extract()
 		if err != nil {
-			return diag.Errorf("Error setting tags on openstack_networking_router_v2 %s: %s", r.ID, err)
+			return diag.Errorf("Error setting tags on openstack_networking_router_v2 %s: %s", router.ID, err)
 		}
 
-		log.Printf("[DEBUG] Set tags %s on openstack_networking_router_v2 %s", tags, r.ID)
+		log.Printf("[DEBUG] Set tags %s on openstack_networking_router_v2 %s", tags, router.ID)
 	}
 
-	log.Printf("[DEBUG] Created openstack_networking_router_v2 %s: %#v", r.ID, r)
+	log.Printf("[DEBUG] Created openstack_networking_router_v2 %s: %#v", router.ID, router)
 
 	return resourceNetworkingRouterV2Read(ctx, d, meta)
 }
@@ -331,7 +348,8 @@ func resourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	r, err := routers.Get(ctx, networkingClient, d.Id()).Extract()
+	var router routerExtended
+	err = routers.Get(ctx, networkingClient, d.Id()).ExtractIntoStructPtr(&router, "router")
 	if err != nil {
 		if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			d.SetId("")
@@ -342,27 +360,28 @@ func resourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("Error retrieving openstack_networking_router_v2: %s", err)
 	}
 
-	log.Printf("[DEBUG] Retrieved openstack_networking_router_v2 %s: %#v", d.Id(), r)
+	log.Printf("[DEBUG] Retrieved openstack_networking_router_v2 %s: %#v", d.Id(), router)
 
 	// Basic settings.
-	d.Set("name", r.Name)
-	d.Set("description", r.Description)
-	d.Set("admin_state_up", r.AdminStateUp)
-	d.Set("distributed", r.Distributed)
-	d.Set("tenant_id", r.TenantID)
+	d.Set("name", router.Name)
+	d.Set("description", router.Description)
+	d.Set("admin_state_up", router.AdminStateUp)
+	d.Set("distributed", router.Distributed)
+	d.Set("tenant_id", router.TenantID)
 	d.Set("region", GetRegion(d, config))
+	d.Set("flavor_id", router.FlavorID)
 
-	networkingV2ReadAttributesTags(d, r.Tags)
+	networkingV2ReadAttributesTags(d, router.Tags)
 
-	if err := d.Set("availability_zone_hints", r.AvailabilityZoneHints); err != nil {
+	if err := d.Set("availability_zone_hints", router.AvailabilityZoneHints); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_networking_router_v2 %s availability_zone_hints: %s", d.Id(), err)
 	}
 
 	// Gateway settings.
-	d.Set("external_network_id", r.GatewayInfo.NetworkID)
-	d.Set("enable_snat", r.GatewayInfo.EnableSNAT)
+	d.Set("external_network_id", router.GatewayInfo.NetworkID)
+	d.Set("enable_snat", router.GatewayInfo.EnableSNAT)
 
-	externalFixedIPs := flattenNetworkingRouterExternalFixedIPsV2(r.GatewayInfo.ExternalFixedIPs)
+	externalFixedIPs := flattenNetworkingRouterExternalFixedIPsV2(router.GatewayInfo.ExternalFixedIPs)
 	if err = d.Set("external_fixed_ip", externalFixedIPs); err != nil {
 		log.Printf("[DEBUG] Unable to set openstack_networking_router_v2 %s external_fixed_ip: %s", d.Id(), err)
 	}

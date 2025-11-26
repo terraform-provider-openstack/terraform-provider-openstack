@@ -72,6 +72,29 @@ func TestAccNetworkingV2Router_updateExternalGateway(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Router_flavor_id(t *testing.T) {
+	var router routers.Router
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy(t.Context()),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2RouterFlavorID(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2RouterExists(t.Context(), "openstack_networking_router_v2.router_1", &router),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_router_v2.router_1", "flavor_id", osNetworkFlavorID),
+				),
+			},
+		},
+	})
+}
+
 func TestAccNetworkingV2Router_vendor_opts(t *testing.T) {
 	var router routers.Router
 
@@ -301,6 +324,16 @@ resource "openstack_networking_router_v2" "router_1" {
   }
 }
 `
+
+func testAccNetworkingV2RouterFlavorID() string {
+	return fmt.Sprintf(`
+resource "openstack_networking_router_v2" "router_1" {
+  name = "router_1"
+  admin_state_up = "true"
+  flavor_id = "%s"
+}
+`, osNetworkFlavorID)
+}
 
 func testAccNetworkingV2RouterVendorOpts() string {
 	return fmt.Sprintf(`

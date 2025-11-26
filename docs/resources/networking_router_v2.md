@@ -84,6 +84,9 @@ The following arguments are supported:
   so that they are scheduled on different availability zones. Changing this
   creates a new router.
 
+* `flavor_id` - (Optional) The flavor ID to use for the router. Changing this
+  creates a new router.
+
 The `external_fixed_ip` block supports:
 
 * `subnet_id` - (Optional) Subnet in which the fixed IP belongs to.
@@ -114,6 +117,7 @@ The following attributes are exported:
 * `tags` - See Argument Reference above.
 * `all_tags` - The collection of tags assigned on the router, which have been
   explicitly and implicitly added.
+* `flavor_id` - See Argument Reference above.
 
 ## Import
 

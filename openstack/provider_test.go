@@ -22,6 +22,7 @@ var (
 	osDBDatastoreType            = os.Getenv("OS_DB_DATASTORE_TYPE")
 	osDNSEnvironment             = os.Getenv("OS_DNS_ENVIRONMENT")
 	osExtGwID                    = os.Getenv("OS_EXTGW_ID")
+	osNetworkFlavorID            = os.Getenv("OS_NETWORK_FLAVOR_ID")
 	osFlavorID                   = os.Getenv("OS_FLAVOR_ID")
 	osFlavorName                 = os.Getenv("OS_FLAVOR_NAME")
 	osImageID                    = os.Getenv("OS_IMAGE_ID")
@@ -89,6 +90,10 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 
 	if osExtGwID == "" {
 		t.Fatal("OS_EXTGW_ID must be set for acceptance tests")
+	}
+
+	if osNetworkFlavorID == "" {
+		t.Fatal("OS_NETWORK_FLAVOR_ID must be set for acceptance tests")
 	}
 }
 
