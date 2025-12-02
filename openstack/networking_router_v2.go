@@ -9,6 +9,29 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 )
 
+type RouterFlavor struct {
+	FlavorID string `json:"flavor_id,omitempty"`
+}
+
+type routerExtended struct {
+	routers.Router
+	RouterFlavor
+}
+
+type routerListOpts struct {
+	routers.ListOpts
+	FlavorID string `q:"flavor_id"`
+}
+
+func (opts routerListOpts) ToRouterListQuery() (string, error) {
+	q, err := gophercloud.BuildQueryString(&opts)
+	if err != nil {
+		return "", err
+	}
+
+	return q.String(), nil
+}
+
 func resourceNetworkingRouterV2StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, routerID string) retry.StateRefreshFunc {
 	return func() (any, string, error) {
 		n, err := routers.Get(ctx, client, routerID).Extract()

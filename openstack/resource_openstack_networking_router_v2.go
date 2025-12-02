@@ -175,15 +175,6 @@ func resourceNetworkingRouterV2() *schema.Resource {
 	}
 }
 
-type RouterFlavor struct {
-	FlavorID string `json:"flavor_id,omitempty"`
-}
-
-type routerExtended struct {
-	routers.Router
-	RouterFlavor
-}
-
 func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
 
