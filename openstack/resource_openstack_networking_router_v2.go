@@ -110,7 +110,6 @@ func resourceNetworkingRouterV2() *schema.Resource {
 
 			"flavor_id": {
 				Type:     schema.TypeString,
-				Computed: true,
 				ForceNew: true,
 				Optional: true,
 			},
