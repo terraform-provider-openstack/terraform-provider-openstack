@@ -18,9 +18,13 @@ type routerExtended struct {
 	RouterFlavor
 }
 
+type RouterFlavorQuery struct {
+	FlavorID string `q:"flavor_id"`
+}
+
 type routerListOpts struct {
 	routers.ListOpts
-	FlavorID string `q:"flavor_id"`
+	RouterFlavorQuery
 }
 
 func (opts routerListOpts) ToRouterListQuery() (string, error) {
