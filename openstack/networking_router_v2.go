@@ -3,6 +3,7 @@ package openstack
 import (
 	"context"
 	"net/http"
+	"net/url"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
@@ -18,20 +19,24 @@ type routerExtended struct {
 	RouterFlavor
 }
 
-type RouterFlavorQuery struct {
+type routerListOpts struct {
+	routers.ListOpts
 	FlavorID string `q:"flavor_id"`
 }
 
-type routerListOpts struct {
-	routers.ListOpts
-	RouterFlavorQuery
-}
-
 func (opts routerListOpts) ToRouterListQuery() (string, error) {
-	q, err := gophercloud.BuildQueryString(&opts)
+	q, err := gophercloud.BuildQueryString(opts.ListOpts)
 	if err != nil {
 		return "", err
 	}
+
+	params := q.Query()
+
+	if opts.FlavorID != "" {
+		params.Add("flavor_id", opts.FlavorID)
+	}
+
+	q = &url.URL{RawQuery: params.Encode()}
 
 	return q.String(), nil
 }
