@@ -77,6 +77,11 @@ func dataSourceNetworkingRouterV2() *schema.Resource {
 					},
 				},
 			},
+			"flavor_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+				Optional: true,
+			},
 			"routes": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -119,7 +124,7 @@ func dataSourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceDat
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
-	listOpts := routers.ListOpts{}
+	listOpts := routerListOpts{}
 
 	if v, ok := d.GetOk("router_id"); ok {
 		listOpts.ID = v.(string)
@@ -151,6 +156,10 @@ func dataSourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceDat
 		listOpts.TenantID = v.(string)
 	}
 
+	if v, ok := d.GetOk("flavor_id"); ok {
+		listOpts.FlavorID = v.(string)
+	}
+
 	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		listOpts.Tags = strings.Join(tags, ",")
@@ -161,7 +170,8 @@ func dataSourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceDat
 		return diag.Errorf("Unable to list Routers: %s", err)
 	}
 
-	allRouters, err := routers.ExtractRouters(pages)
+	var allRouters []routerExtended
+	err = routers.ExtractRoutersInto(pages, &allRouters)
 	if err != nil {
 		return diag.Errorf("Unable to retrieve Routers: %s", err)
 	}
@@ -186,6 +196,7 @@ func dataSourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceDat
 	d.Set("status", router.Status)
 	d.Set("tenant_id", router.TenantID)
 	d.Set("external_network_id", router.GatewayInfo.NetworkID)
+	d.Set("flavor_id", router.FlavorID)
 	d.Set("enable_snat", router.GatewayInfo.EnableSNAT)
 	d.Set("external_qos_policy_id", router.GatewayInfo.QoSPolicyID)
 	d.Set("all_tags", router.Tags)

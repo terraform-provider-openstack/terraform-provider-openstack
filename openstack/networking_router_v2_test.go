@@ -5,6 +5,7 @@ import (
 
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUnitExpandNetworkingRouterExternalFixedIPsV2(t *testing.T) {
@@ -65,4 +66,20 @@ func TestUnitFlattenNetworkingRouterExternalFixedIPsV2(t *testing.T) {
 	actualExternalFixedIPs := flattenNetworkingRouterExternalFixedIPsV2(externalFixedIPs)
 
 	assert.ElementsMatch(t, expectedExternalFixedIPs, actualExternalFixedIPs)
+}
+
+// TestUnitBuildRouterListOptsV2 tests the building of query string from routerListOpts.
+func TestUnitBuildRouterListOptsV2(t *testing.T) {
+	opts := routerListOpts{
+		ListOpts: routers.ListOpts{
+			Name: "test-router",
+		},
+		FlavorID: "flavor-123",
+	}
+
+	query, err := opts.ToRouterListQuery()
+	require.NoError(t, err)
+
+	expectedQuery := "?flavor_id=flavor-123&name=test-router"
+	assert.Equal(t, expectedQuery, query)
 }

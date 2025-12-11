@@ -3,11 +3,43 @@ package openstack
 import (
 	"context"
 	"net/http"
+	"net/url"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 )
+
+type RouterFlavor struct {
+	FlavorID string `json:"flavor_id,omitempty"`
+}
+
+type routerExtended struct {
+	routers.Router
+	RouterFlavor
+}
+
+type routerListOpts struct {
+	routers.ListOpts
+	FlavorID string `q:"flavor_id"`
+}
+
+func (opts routerListOpts) ToRouterListQuery() (string, error) {
+	q, err := gophercloud.BuildQueryString(opts.ListOpts)
+	if err != nil {
+		return "", err
+	}
+
+	params := q.Query()
+
+	if opts.FlavorID != "" {
+		params.Add("flavor_id", opts.FlavorID)
+	}
+
+	q = &url.URL{RawQuery: params.Encode()}
+
+	return q.String(), nil
+}
 
 func resourceNetworkingRouterV2StateRefreshFunc(ctx context.Context, client *gophercloud.ServiceClient, routerID string) retry.StateRefreshFunc {
 	return func() (any, string, error) {

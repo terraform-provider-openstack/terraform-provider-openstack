@@ -57,6 +57,8 @@ jobs:
             [[post-config|\$NEUTRON_CONF]]
             [oslo_policy]
             policy_dirs = /tmp/neutron-policies
+            [service_providers]
+            service_provider = L3_ROUTER_NAT:user-defined:neutron.services.ovn_l3.service_providers.user_defined.UserDefined
           enabled_services: 'neutron-dhcp,neutron-dns,neutron-qos,neutron-segments,neutron-trunk,neutron-uplink-status-propagation,neutron-network-segment-range,neutron-port-forwarding'
       - name: Checkout go
         uses: actions/setup-go@v5

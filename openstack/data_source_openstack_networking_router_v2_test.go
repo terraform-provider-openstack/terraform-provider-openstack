@@ -18,7 +18,7 @@ func TestAccOpenStackNetworkingRouterV2DataSource_name(t *testing.T) {
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackNetworkingRouterV2DataSourceRouter,
+				Config: testAccOpenStackNetworkingRouterV2DataSourceRouter(),
 			},
 			{
 				Config: testAccOpenStackNetworkingRouterV2DataSourceName(),
@@ -32,6 +32,8 @@ func TestAccOpenStackNetworkingRouterV2DataSource_name(t *testing.T) {
 						"data.openstack_networking_router_v2.router", "admin_state_up"),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_networking_router_v2.router", "status"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_router_v2.router", "flavor_id", osNetworkFlavorID),
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_router_v2.router", "tags.#", "1"),
 					resource.TestCheckResourceAttr(
@@ -57,17 +59,20 @@ func testAccCheckNetworkingRouterV2DataSourceID(n string) resource.TestCheckFunc
 	}
 }
 
-const testAccOpenStackNetworkingRouterV2DataSourceRouter = `
+func testAccOpenStackNetworkingRouterV2DataSourceRouter() string {
+	return fmt.Sprintf(`
 resource "openstack_networking_router_v2" "router" {
   name           = "router_tf"
   description    = "description"
   admin_state_up = "true"
+  flavor_id      = "%s"
   tags = [
     "foo",
     "bar",
   ]
 }
-`
+`, osNetworkFlavorID)
+}
 
 func testAccOpenStackNetworkingRouterV2DataSourceName() string {
 	return fmt.Sprintf(`
@@ -77,9 +82,10 @@ data "openstack_networking_router_v2" "router" {
   name           = openstack_networking_router_v2.router.name
   description    = "description"
   admin_state_up = "true"
+  flavor_id      = "%s"
   tags = [
     "foo",
   ]
 }
-`, testAccOpenStackNetworkingRouterV2DataSourceRouter)
+`, testAccOpenStackNetworkingRouterV2DataSourceRouter(), osNetworkFlavorID)
 }

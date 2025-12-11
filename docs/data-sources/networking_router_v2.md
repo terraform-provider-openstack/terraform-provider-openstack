@@ -41,6 +41,8 @@ data "openstack_networking_router_v2" "router" {
 
 * `tenant_id` - (Optional) The owner of the router.
 
+* `flavor_id` - (Optional) The flavor ID of the router.
+
 ## Attributes Reference
 
 `id` is set to the ID of the found router. In addition, the following attributes
@@ -55,6 +57,8 @@ are exported:
 * `availability_zone_hints` - The availability zone that is used to make router resources highly available.
 
 * `external_fixed_ip` - The external fixed IPs of the router.
+
+* `flavor_id` - The flavor ID of the router.
 
 The `external_fixed_ip` block supports:
 
