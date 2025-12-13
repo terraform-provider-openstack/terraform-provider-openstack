@@ -70,7 +70,7 @@ The following arguments are supported:
     creates a new volume. Requires microversion >= 3.47.
 
 * `volume_type` - (Optional) The type of volume to create or update.
-    Changing this will attempt an in-place retype operation; migration depends on `volume_retype_policy`.  
+    Changing this will attempt an in-place retype operation; migration depends on `volume_retype_policy`.
 
 * `volume_retype_policy` - (Optional) Migration policy when changing `volume_type`.
     `"never"` *(default)* prevents migration to another storage backend, while `"on-demand"`
@@ -78,16 +78,16 @@ The following arguments are supported:
 
 * `scheduler_hints` - (Optional) Provide the Cinder scheduler with hints on where
     to instantiate a volume in the OpenStack cloud. The available hints are described below.
-    
+
 The `scheduler_hints` block supports:
 
-* `different_host` - (Optional) The volume should be scheduled on a 
+* `different_host` - (Optional) The volume should be scheduled on a
     different host from the set of volumes specified in the list provided.
 
 * `same_host` - (Optional) A list of volume UUIDs. The volume should be
     scheduled on the same host as another volume specified in the list provided.
 
-* `local_to_instance` - (Optional) An instance UUID. The volume should be 
+* `local_to_instance` - (Optional) An instance UUID. The volume should be
     scheduled on the same host as the instance.
 
 * `query` - (Optional) A conditional query that a back-end must pass in
@@ -97,8 +97,8 @@ The `scheduler_hints` block supports:
     At this time, only simple queries are supported. Compound queries using
     `and`, `or`, or `not` are not supported. An example of a simple query is:
 
-    ```
-    [“=”, “$backend_id”, “rbd:vol@ceph#cloud”]
+    ```json
+    ["=", "$backend_id", "rbd:vol@ceph#cloud"]
     ```
 
 * `additional_properties` - (Optional) Arbitrary key/value pairs of additional
@@ -127,6 +127,6 @@ The following attributes are exported:
 
 Volumes can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_blockstorage_volume_v3.volume_1 ea257959-eeb1-4c10-8d33-26f0409a755d
+```shell
+terraform import openstack_blockstorage_volume_v3.volume_1 ea257959-eeb1-4c10-8d33-26f0409a755d
 ```

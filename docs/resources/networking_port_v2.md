@@ -13,7 +13,7 @@ Manages a V2 port resource within OpenStack.
 
 ~> **Note:** Ports do not get an IP if the network they are attached
 to does not have a subnet. If you create the subnet resource in the
-same run as the port, make sure to use `fixed_ip.subnet_id` or 
+same run as the port, make sure to use `fixed_ip.subnet_id` or
 `depends_on` to enforce the subnet resource creation before the port
 creation is triggered. More info [here](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/1606#issuecomment-1790945191)
 
@@ -174,7 +174,7 @@ The following arguments are supported:
 
 * `dns_name` - (Optional) The port DNS name. Available, when Neutron DNS extension
     is enabled.
-    
+
 * `qos_policy_id` - (Optional) Reference to the associated QoS policy.
 
 The `fixed_ip` block supports:
@@ -248,8 +248,8 @@ The following attributes are exported:
 
 Ports can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_networking_port_v2.port_1 eae26a3e-1c33-4cc1-9c31-0cd729c438a1
+```shell
+terraform import openstack_networking_port_v2.port_1 eae26a3e-1c33-4cc1-9c31-0cd729c438a1
 ```
 
 ## Notes

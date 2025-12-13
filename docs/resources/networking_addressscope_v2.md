@@ -74,6 +74,6 @@ The following attributes are exported:
 
 Address-scopes can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_networking_addressscope_v2.addressscope_1 9cc35860-522a-4d35-974d-51d4b011801e
+```shell
+terraform import openstack_networking_addressscope_v2.addressscope_1 9cc35860-522a-4d35-974d-51d4b011801e
 ```

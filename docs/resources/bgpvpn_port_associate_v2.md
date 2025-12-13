@@ -80,6 +80,6 @@ The following attributes are exported:
 BGP VPN port associations can be imported using the BGP VPN ID and BGP VPN port
 association ID separated by a slash, e.g.:
 
-```hcl
-$ terraform import openstack_bgpvpn_port_associate_v2.association_1 5bb44ecf-f8fe-4d75-8fc5-313f96ee2696/8f8fc660-3f28-414e-896a-0c7c51162fcf
+```shell
+terraform import openstack_bgpvpn_port_associate_v2.association_1 5bb44ecf-f8fe-4d75-8fc5-313f96ee2696/8f8fc660-3f28-414e-896a-0c7c51162fcf
 ```

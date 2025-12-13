@@ -105,6 +105,6 @@ The following attributes are exported:
 
 Users can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_identity_user_v3.user_1 89c60255-9bd6-460c-822a-e2b959ede9d2
+```shell
+terraform import openstack_identity_user_v3.user_1 89c60255-9bd6-460c-822a-e2b959ede9d2
 ```

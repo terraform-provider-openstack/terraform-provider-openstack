@@ -175,7 +175,7 @@ argument of the provider is used. Changing this creates a new Listener.
 
 * `tls_ciphers` - (Optional) List of ciphers in OpenSSL format
   (colon-separated). See
-  https://www.openssl.org/docs/man1.1.1/man1/ciphers.html for more information.
+  <https://docs.openssl.org/1.1.1/man1/ciphers/> for more information.
   Supported only in **Octavia minor version >= 2.15**.
 
 * `tls_versions` - (Optional) A list of TLS protocol versions. Available
@@ -222,6 +222,6 @@ The following attributes are exported:
 
 Load Balancer Listener can be imported using the Listener ID, e.g.:
 
-```
-$ terraform import openstack_lb_listener_v2.listener_1 b67ce64e-8b26-405d-afeb-4a078901f15a
+```shell
+terraform import openstack_lb_listener_v2.listener_1 b67ce64e-8b26-405d-afeb-4a078901f15a
 ```

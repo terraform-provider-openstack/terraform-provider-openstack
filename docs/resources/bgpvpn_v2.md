@@ -84,6 +84,6 @@ The following attributes are exported:
 
 BGP VPNs can be imported using the `id`, e.g.
 
-```hcl
-$ terraform import openstack_bgpvpn_v2.bgpvpn_1 1eec2c66-6be2-4305-af3f-354c9b81f18c
+```shell
+terraform import openstack_bgpvpn_v2.bgpvpn_1 1eec2c66-6be2-4305-af3f-354c9b81f18c
 ```

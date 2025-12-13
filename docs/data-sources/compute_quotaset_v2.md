@@ -26,7 +26,6 @@ data "openstack_compute_quotaset_v2" "quota" {
 
 * `project_id` - (Required) The id of the project to retrieve the quotaset.
 
-
 ## Attributes Reference
 
 The following attributes are exported:
