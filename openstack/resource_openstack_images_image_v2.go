@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/imagedata"
@@ -472,7 +471,7 @@ func resourceImagesImageV2Update(ctx context.Context, d *schema.ResourceData, me
 			// os_ keys are provided by the OpenStack Image service.
 			// These are read-only properties that cannot be modified.
 			// Ignore them here and let CustomizeDiff handle them.
-			if strings.HasPrefix(newKey, "os_") {
+			if resourceImagesImageV2PropertyIsReadOnly(newKey) {
 				found = true
 				changed = false
 			}
