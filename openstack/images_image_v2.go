@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/gophercloud/gophercloud/v2"
@@ -283,6 +284,27 @@ func resourceImagesImageV2ExpandProperties(v map[string]any) map[string]string {
 	return properties
 }
 
+func resourceImagesImageV2PropertyIsReadOnly(key string) bool {
+	// https://github.com/openstack/glance/blob/ba82d3591d8a69f6eef62ad03f764d3385b85dba/glance/api/v2/images.py#L1254-L1259
+	protectedKeys := []string{
+		// _disallowed_properties
+		"direct_url", "self", "file", "schema", "stores",
+
+		// _readonly_properties
+		"created_at", "updated_at", "status", "checksum",
+		"size", "virtual_size", "direct_url", "self",
+		"file", "schema", "id", "os_hash_algo",
+		"os_hash_value",
+
+		// _reserved_properties
+		"location", "deleted", "deleted_at",
+	}
+
+	// os_glance keys are provided by the OpenStack Image service.
+	// These are read-only properties that cannot be modified.
+	return strings.HasPrefix(key, "os_glance") || slices.Contains(protectedKeys, key)
+}
+
 func resourceImagesImageV2UpdateComputedAttributes(_ context.Context, diff *schema.ResourceDiff, _ any) error {
 	if diff.HasChange("properties") {
 		// Only check if the image has been created.
@@ -298,7 +320,7 @@ func resourceImagesImageV2UpdateComputedAttributes(_ context.Context, diff *sche
 
 			for oldKey, oldValue := range o.(map[string]any) {
 				// os_ keys are provided by the OpenStack Image service.
-				if strings.HasPrefix(oldKey, "os_") {
+				if resourceImagesImageV2PropertyIsReadOnly(oldKey) {
 					if v, ok := oldValue.(string); ok {
 						newProperties[oldKey] = v
 					}
