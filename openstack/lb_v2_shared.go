@@ -162,6 +162,18 @@ func flattenLBPoolsV2(pools []pools.Pool) []map[string]any {
 	return p
 }
 
+func flattenLBMonitorPoolsIDsV2(poolIDs []monitors.PoolID) []map[string]any {
+	p := make([]map[string]any, len(poolIDs))
+
+	for i, poolID := range poolIDs {
+		p[i] = map[string]any{
+			"id": poolID.ID,
+		}
+	}
+
+	return p
+}
+
 func flattenLBListenerLoadbalancerIDsV2(loadbalancerIDs []listeners.LoadBalancerID) []map[string]any {
 	l := make([]map[string]any, len(loadbalancerIDs))
 
