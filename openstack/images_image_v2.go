@@ -285,12 +285,24 @@ func resourceImagesImageV2ExpandProperties(v map[string]any) map[string]string {
 }
 
 func resourceImagesImageV2PropertyIsReadOnly(key string) bool {
-	// https://docs.openstack.org/glance/latest/admin/useful-image-properties.html
-	exceptKeys := []string{"os_admin_user", "os_distro", "os_version", "os_secure_boot", "os_shutdown_timeout", "os_type", "os_command_line"}
+	// https://github.com/openstack/glance/blob/ba82d3591d8a69f6eef62ad03f764d3385b85dba/glance/api/v2/images.py#L1254-L1259
+	protectedKeys := []string{
+		// _disallowed_properties
+		"direct_url", "self", "file", "schema", "stores",
 
-	// os_ keys are provided by the OpenStack Image service.
+		// _readonly_properties
+		"created_at", "updated_at", "status", "checksum",
+		"size", "virtual_size", "direct_url", "self",
+		"file", "schema", "id", "os_hash_algo",
+		"os_hash_value",
+
+		// _reserved_properties
+		"location", "deleted", "deleted_at",
+	}
+
+	// os_glance keys are provided by the OpenStack Image service.
 	// These are read-only properties that cannot be modified.
-	return strings.HasPrefix(key, "os_") && !slices.Contains(exceptKeys, key)
+	return strings.HasPrefix(key, "os_glance") || slices.Contains(protectedKeys, key)
 }
 
 func resourceImagesImageV2UpdateComputedAttributes(_ context.Context, diff *schema.ResourceDiff, _ any) error {
