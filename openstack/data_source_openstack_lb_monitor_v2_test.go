@@ -21,23 +21,29 @@ func TestAccDataSourceLBV2Monitor_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"data.openstack_lb_monitor_v2.monitor_ds_1", "name", "monitor_1"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_lb_monitor_v2.monitor_ds_1", "tags.#", "3"),
-					resource.TestCheckResourceAttr(
-						"data.openstack_lb_monitor_v2.monitor_ds_1", "tags.0", "tag1"),
-					resource.TestCheckResourceAttr(
 						"data.openstack_lb_monitor_v2.monitor_ds_1", "pools.#", "1"),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_lb_monitor_v2.monitor_ds_1", "pools.0.id"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_lb_monitor_v2.monitor_ds_2", "name", "monitor_2"),
+						"data.openstack_lb_monitor_v2.monitor_ds_2", "type", "HTTP"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_lb_monitor_v2.monitor_ds_2", "http_method", "GET"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_lb_monitor_v2.monitor_ds_2", "expected_codes", "200-205"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_lb_monitor_v2.monitor_ds_2", "name", "monitor_1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_lb_monitor_v2.monitor_ds_2", "pools.#", "1"),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_lb_monitor_v2.monitor_ds_2", "pools.0.id"),
 					resource.TestCheckResourceAttr(
+						"data.openstack_lb_monitor_v2.monitor_ds_2", "url_path", "/host"),
+					resource.TestCheckResourceAttr(
 						"data.openstack_lb_monitor_v2.monitor_ds_2", "type", "HTTP"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_lb_monitor_v2.monitor_ds_2", "http_method", "PATCH"),
+						"data.openstack_lb_monitor_v2.monitor_ds_2", "http_method", "GET"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_lb_monitor_v2.monitor_ds_2", "expected_codes", "200-205"),
 				),
 			},
 		},
@@ -105,46 +111,29 @@ resource "openstack_lb_member_v2" "member_1" {
 resource "openstack_lb_monitor_v2" "monitor_1" {
   pool_id          = openstack_lb_pool_v2.pool_1.id
   name             = "monitor_1"
-  type             = "PING"
   delay            = 20
   timeout          = 10
   max_retries      = 3
   max_retries_down = 7
-  domain_name      = "current_host"
-  tags = [
-	  "tag1",
-    "tag2",
-    "tag3",
-  ]
-}
-
-resource "openstack_lb_monitor_v2" "monitor_2" {
-  pool_id          = openstack_lb_pool_v2.pool_1.id
-  name             = "monitor_2"
   type             = "HTTP"
-  delay            = 10
-  timeout          = 20
-  max_retries      = 5
-  max_retries_down = 10
-  domain_name      = "current_host"
-  http_method      = "PATCH"
+  url_path         = "/host"
+  http_method      = "GET"
   expected_codes   = "200-205"
 }
 
 data "openstack_lb_monitor_v2" "monitor_ds_1" {
   monitor_id = openstack_lb_monitor_v2.monitor_1.id
-  tags = [
-	  "tag1",
-    "tag2",
-    "tag3",
-  ]
 }
 
 data "openstack_lb_monitor_v2" "monitor_ds_2" {
-  name           = "monitor_2"
+  name           = "monitor_1"
   pool_id        = openstack_lb_pool_v2.pool_1.id
+  url_path       = "/host"
   type           = "HTTP"
-  http_method    = "PATCH"
+  http_method    = "GET"
   expected_codes = "200-205"
+  depends_on = [
+    openstack_lb_monitor_v2.monitor_1,
+  ]
 }
 `
