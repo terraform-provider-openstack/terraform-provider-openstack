@@ -253,6 +253,9 @@ func testAccCheckComputeV2ServerGroupExists(ctx context.Context, n string, kp *s
 			return fmt.Errorf("Error creating OpenStack compute client: %w", err)
 		}
 
+		// Attempt to read with microversion 2.64
+		computeClient.Microversion = "2.64"
+
 		found, err := servergroups.Get(ctx, computeClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
