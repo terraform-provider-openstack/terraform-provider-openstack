@@ -9,13 +9,13 @@ description: |-
 
 # openstack\_workflow\_workflow_v2
 
-Use this data source to get the ID of an available workflow.
+Use this data source to get the ID of an available Mistral workflow.
 
 ## Example Usage
 
 ```hcl
-data "openstack_workflow_workflow_v2" "workflow_1" {
-  name = "workflow_1"
+data "openstack_workflow_workflow_v2" "hello_workflow" {
+  name = "hello_workflow"
 }
 ```
 

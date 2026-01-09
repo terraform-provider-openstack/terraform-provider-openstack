@@ -37,11 +37,11 @@ func TestAccWorkflowV2WorkflowDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"data.openstack_workflow_workflow_v2.workflow_1", "id", workflowID),
 					resource.TestCheckResourceAttr(
-						"data.openstack_workflow_workflow_v2.workflow_1", "name", "my_workflow"),
+						"data.openstack_workflow_workflow_v2.workflow_1", "name", "hello_workflow"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_workflow_workflow_v2.workflow_1", "namespace", "my_namespace"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_workflow_workflow_v2.workflow_1", "input", "my_arg1, my_arg2"),
+						"data.openstack_workflow_workflow_v2.workflow_1", "input", "message"),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_workflow_workflow_v2.workflow_1", "definition"),
 					resource.TestCheckResourceAttr(
@@ -104,7 +104,7 @@ func testAccWorkflowV2WorkflowDelete(t *testing.T, workflowID string) {
 
 const testAccWorkflowV2WorkflowDataSourceBasic = `
 data "openstack_workflow_workflow_v2" "workflow_1" {
-	name      = "my_workflow"
+	name      = "hello_workflow"
 	namespace = "my_namespace"
 }
 `
@@ -112,12 +112,11 @@ data "openstack_workflow_workflow_v2" "workflow_1" {
 const testAccWorkflowV2WorkflowDataSourceBasicDefinition = `
 version: '2.0'
 
-my_workflow:
+hello_workflow:
   description: Simple echo example
 
   input:
-    - my_arg1
-    - my_arg2
+    - message
 
   tags:
     - echo
@@ -127,6 +126,5 @@ my_workflow:
       action: std.echo
       input:
         output:
-          my_arg1: <% $.my_arg1 %>
-          my_arg2: <% $.my_arg2 %>
+          my_message: <% $.message %>
 `
