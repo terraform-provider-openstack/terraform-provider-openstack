@@ -75,6 +75,6 @@ The following attributes are exported:
 This resource can be imported by specifying all two arguments, separated
 by a forward slash:
 
-```
-$ terraform import openstack_identity_user_membership_v3.user_membership_1 user_id/group_id
+```shell
+terraform import openstack_identity_user_membership_v3.user_membership_1 user_id/group_id
 ```

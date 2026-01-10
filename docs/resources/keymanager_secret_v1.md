@@ -42,7 +42,7 @@ resource "openstack_keymanager_secret_v1" "secret_1" {
 it's recommended to store it in a base64 encoding. Plain text payload can also
 work, but further addind or removing of the leading or trailing whitespaces
 won't be detected as a state change, e.g. changing plain text payload from
-`password ` to `password` won't recreate the secret.
+`password` to `password` won't recreate the secret.
 
 ```hcl
 resource "openstack_keymanager_secret_v1" "secret_1" {
@@ -106,7 +106,7 @@ The following arguments are supported:
 
 * `name` - (Optional) Human-readable name for the Secret. Does not have
     to be unique.
-    
+
 * `bit_length` - (Optional) Metadata provided by a user or system for informational purposes.
 
 * `algorithm` - (Optional) Metadata provided by a user or system for informational purposes.
@@ -114,7 +114,7 @@ The following arguments are supported:
 * `mode` - (Optional) Metadata provided by a user or system for informational purposes.
 
 * `secret_type` - (Optional) Used to indicate the type of secret being stored. For more information see [Secret types](https://docs.openstack.org/barbican/latest/api/reference/secret_types.html).
- 
+
 * `payload` - (Optional) The secret's data to be stored. **payload\_content\_type** must also be supplied if **payload** is included.
 
 * `payload_content_type` - (Optional) (required if **payload** is included) The media type for the content of the payload. Must be one of `text/plain`, `text/plain;charset=utf-8`, `text/plain; charset=utf-8`, `application/octet-stream`, `application/pkcs8`.
@@ -169,6 +169,6 @@ The following attributes are exported:
 
 Secrets can be imported using the secret id (the last part of the secret reference), e.g.:
 
-```
-$ terraform import openstack_keymanager_secret_v1.secret_1 8a7a79c2-cf17-4e65-b2ae-ddc8bfcf6c74
+```shell
+terraform import openstack_keymanager_secret_v1.secret_1 8a7a79c2-cf17-4e65-b2ae-ddc8bfcf6c74
 ```

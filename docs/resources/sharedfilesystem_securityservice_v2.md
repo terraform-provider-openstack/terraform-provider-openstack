@@ -90,6 +90,6 @@ The following arguments are supported:
 
 This resource can be imported by specifying the ID of the security service:
 
-```
-$ terraform import openstack_sharedfilesystem_securityservice_v2.securityservice_1 id
+```shell
+terraform import openstack_sharedfilesystem_securityservice_v2.securityservice_1 id
 ```

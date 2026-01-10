@@ -32,7 +32,7 @@ from the current auth scope.
 
 ```hcl
 resource "openstack_identity_ec2_credential_v3" "ec2_key1" {
-    project_id = "f7ac731cc11f40efbc03a9f9e1d1d21f"
+  project_id = "f7ac731cc11f40efbc03a9f9e1d1d21f"
 }
 ```
 
@@ -66,6 +66,6 @@ The following attributes are exported:
 
 EC2 Credentials can be imported using the `access`, e.g.
 
-```
-$ terraform import openstack_identity_ec2_credential_v3.ec2_cred_1 2d0ac4a2f81b4b0f9513ee49e780647d
+```shell
+terraform import openstack_identity_ec2_credential_v3.ec2_cred_1 2d0ac4a2f81b4b0f9513ee49e780647d
 ```

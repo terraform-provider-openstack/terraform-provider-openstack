@@ -80,5 +80,5 @@ The following attributes are exported:
 This resource can be imported by specifying the segment ID:
 
 ```shell
-$ terraform import openstack_networking_segment_v2.segment1 a5e3a494-26ee-4fde-ad26-2d846c47072e
+terraform import openstack_networking_segment_v2.segment1 a5e3a494-26ee-4fde-ad26-2d846c47072e
 ```

@@ -87,12 +87,12 @@ The following arguments are supported:
 * `redirect_url` - (Optional) Requests matching this policy will be redirected to this URL.
     Only valid if action is REDIRECT\_TO\_URL.
 
-* `redirect_prefix` - (Optional) Requests matching this policy will be redirected to 
+* `redirect_prefix` - (Optional) Requests matching this policy will be redirected to
     this Prefix URL. Only valid if action is REDIRECT\_PREFIX.
 
-* `redirect_http_code` - (Optional) Integer. Requests matching this policy will be  
-    redirected to the specified URL or Prefix URL with the HTTP response code.  
-    Valid if action is REDIRECT\_TO\_URL or REDIRECT\_PREFIX. Valid options are: 
+* `redirect_http_code` - (Optional) Integer. Requests matching this policy will be
+    redirected to the specified URL or Prefix URL with the HTTP response code.
+    Valid if action is REDIRECT\_TO\_URL or REDIRECT\_PREFIX. Valid options are:
     301, 302, 303, 307, or 308. Default is 302. New in octavia version 2.9
 
 * `admin_state_up` - (Optional) The administrative state of the L7 Policy.
@@ -120,6 +120,6 @@ The following attributes are exported:
 
 Load Balancer L7 Policy can be imported using the L7 Policy ID, e.g.:
 
-```
-$ terraform import openstack_lb_l7policy_v2.l7policy_1 8a7a79c2-cf17-4e65-b2ae-ddc8bfcf6c74
+```shell
+terraform import openstack_lb_l7policy_v2.l7policy_1 8a7a79c2-cf17-4e65-b2ae-ddc8bfcf6c74
 ```

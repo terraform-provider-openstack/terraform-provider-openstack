@@ -6,6 +6,8 @@ description: |-
   Terraform Openstack Provider Version 2 Upgrade Guide
 ---
 
+# Terraform Openstack Provider Version 2 Upgrade Guide
+
 ~> **Note:** The provider go module version has been updated to `v2` in the `2.1.0` release. Downstream users should check the changelog of the `2.1.0` release as well before changing to the `v2` module.
 
 Version 2.0.0 of the Openstack provider for Terraform is a major release and includes some changes that you will need to consider when upgrading. We intend this guide to help with that process.
@@ -13,6 +15,7 @@ Version 2.0.0 of the Openstack provider for Terraform is a major release and inc
 We previously marked most of the changes we outline in this guide as deprecated in the Terraform plan/apply output throughout previous provider releases. You can find these changes, including deprecation notices, in the [Terraform Openstack Provider CHANGELOG](https://github.com/terraform-provider-openstack/terraform-provider-openstack/blob/main/CHANGELOG.md).
 
 Upgrade topics:
+
 - [Provider Version Configuration](#provider-version-configuration)
 - [Neutron LBaaS Deprecation](#neutron-lbaas-deprecation)
   - [Provider configuration option](#provider-configuration-option)
@@ -29,7 +32,6 @@ Upgrade topics:
   - [Remove floating_ip from instance_v2](#remove-floatingip-from-computeinstancev2)
   - [Remove volume from instance_v2](#remove-volume-from-computeinstancev2)
   - [Remove sort_key and sort_dir from glance data sources](#remove-sortkey-and-sortdir-from-glance-data-sources)
-
 
 ## Provider Version Configuration
 
@@ -81,7 +83,7 @@ The provider configuration option `use_octavia` has been removed, since the prov
 
 ```terraform
 provider "openstack" {
-  ...
+  # ...
   use_octavia = false/true
 }
 ```
@@ -90,7 +92,7 @@ Should be updated into:
 
 ```terraform
 provider "openstack" {
-  ...
+  # ...
 }
 ```
 
@@ -101,7 +103,6 @@ The upgrade should be transparent for all loadbalancer resources that are alread
 ### Changes for users of Neutron-LBaaS
 
 Neutron-LBaaS will not be supported, therefore any loadbalancer resources **cannot be managed** through terraform-provider-openstack in 2.0.0 and beyond. Cloud-administrator should consider upgrading from Neutron-LBaaS to Octavia.
-
 
 ## Other removals
 
@@ -137,7 +138,7 @@ More details on [multiattach volumes types](https://docs.openstack.org/cinder/la
 
 ### Remove member from lb_pool_v1
 
-`member` block has been removed from `openstack_lb_pool_v1` resource. `openstack_lb_member_v1` resource should be used instead. 
+`member` block has been removed from `openstack_lb_pool_v1` resource. `openstack_lb_member_v1` resource should be used instead.
 
 ### Remove allocation_pools from networking_subnet_v2
 
@@ -160,6 +161,7 @@ More details on [multiattach volumes types](https://docs.openstack.org/cinder/la
 `sort_key` and `sort_dir` has been removed from `openstack_images_image_v2` and `openstack_images_image_ids_v2` data sources. `sort` should be used instead.
 
 For example:
+
 ```terraform
 data "openstack_images_image_ids_v2" "images" {
   name_regex = "^Ubuntu 16\\.04.*-amd64"
@@ -169,6 +171,7 @@ data "openstack_images_image_ids_v2" "images" {
 ```
 
 Should be changed into:
+
 ```terraform
 data "openstack_images_image_ids_v2" "images" {
   name_regex = "^Ubuntu 16\\.04.*-amd64"
@@ -195,6 +198,7 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
 ```
 
 should be changed into:
+
 ```terraform
 resource "openstack_networking_subnet_v2" "subnet_1" {
   name       = "subnet_1"

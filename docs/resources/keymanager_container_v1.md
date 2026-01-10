@@ -161,6 +161,6 @@ The `consumers` block supports:
 
 Containers can be imported using the container id (the last part of the container reference), e.g.:
 
-```
-$ terraform import openstack_keymanager_container_v1.container_1 0c6cd26a-c012-4d7b-8034-057c0f1c2953
+```shell
+terraform import openstack_keymanager_container_v1.container_1 0c6cd26a-c012-4d7b-8034-057c0f1c2953
 ```

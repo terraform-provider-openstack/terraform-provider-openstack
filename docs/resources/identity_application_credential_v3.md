@@ -63,8 +63,8 @@ starting from [Train](https://releases.openstack.org/train/highlights.html#keyst
 
 ```hcl
 resource "openstack_identity_application_credential_v3" "monitoring" {
-  name        = "monitoring"
-  expires_at  = "2019-02-13T12:12:12Z"
+  name       = "monitoring"
+  expires_at = "2019-02-13T12:12:12Z"
 
   access_rules {
     path    = "/v2.0/metrics"
@@ -157,6 +157,6 @@ The following attributes are exported:
 
 Application Credentials can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_identity_application_credential_v3.application_credential_1 c17304b7-0953-4738-abb0-67005882b0a0
+```shell
+terraform import openstack_identity_application_credential_v3.application_credential_1 c17304b7-0953-4738-abb0-67005882b0a0
 ```

@@ -515,7 +515,7 @@ The `scheduler_hints` block supports:
     At this time, only simple queries are supported. Compound queries using
     `and`, `or`, or `not` are not supported. An example of a simple query is:
 
-    ```
+    ```json
     [">=", "$free_ram_mb", "1024"]
     ```
 
@@ -620,7 +620,7 @@ resource "openstack_compute_instance_v2" "foo" {
 ### Instances and Security Groups
 
 When referencing a security group resource in an instance resource, always
-use the _name_ of the security group. If you specify the ID of the security
+use the *name* of the security group. If you specify the ID of the security
 group, Terraform will remove and reapply the security group upon each call.
 This is because the OpenStack Compute API returns the names of the associated
 security groups and not their IDs.
@@ -708,7 +708,7 @@ launch the instance on this network.
 with a `network` block. Not specifying a network will result in the following
 error:
 
-```
+```text
 * openstack_compute_instance_v2.instance: Error creating OpenStack server:
 Expected HTTP response code [201 202] when accessing [POST https://example.com:8774/v2.1/servers], but got 409 instead
 {"conflictingRequest": {"message": "Multiple possible networks found, use a Network ID to be more specific.", "code": 409}}
@@ -727,6 +727,7 @@ Network interface attachment order, and number and sizes of ephemeral
 disks are examples of this.
 
 ### Importing basic instance
+
 Assume you want to import an instance with one ephemeral root disk,
 and one network interface.
 
@@ -738,16 +739,17 @@ resource "openstack_compute_instance_v2" "basic_instance" {
   flavor_id       = "<flavor_id>"
   key_pair        = "<keyname>"
   security_groups = ["default"]
-  image_id =  "<image_id>"
+  image_id        = "<image_id>"
 
   network {
     name = "<network_name>"
   }
 }
+```
 
-```
 Then you execute
-```
+
+```shell
 terraform import openstack_compute_instance_v2.basic_instance instance_id
 ```
 
@@ -757,13 +759,12 @@ The importer cannot read the emphemeral disk configuration
 of an instance, so just specify image_id as in the configuration
 of the basic instance example.
 
-### Importing instance with multiple network interfaces.
+### Importing instance with multiple network interfaces
 
 Nova returns the network interfaces grouped by network, thus not in creation
 order.
 That means that if you have multiple network interfaces you must take
 care of the order of networks in your configuration.
-
 
 As example we want to import an instance with one ephemeral root disk,
 and 3 network interfaces.
@@ -785,7 +786,7 @@ resource "openstack_compute_instance_v2" "boot-from-volume" {
     name = "<network2>"
   }
   network {
-    name = "<network1>"
+    name        = "<network1>"
     fixed_ip_v4 = "<fixed_ip_v4>"
   }
 
@@ -800,14 +801,13 @@ So either with care check the plan and modify configuration, or read the
 network order in the state file after import and modify your
 configuration accordingly.
 
- * A note on ports. If you have created a neutron port independent of an
+* A note on ports. If you have created a neutron port independent of an
  instance, then the import code has no way to detect that the port is created
  idenpendently, and therefore on deletion of imported instances you might have
  port resources in your project, which you expected to be created by the
  instance and thus to also be deleted with the instance.
 
-
-### Importing instances with multiple block storage volumes.
+### Importing instances with multiple block storage volumes
 
 We have an instance with two block storage volumes, one bootable and one
 non-bootable.
@@ -830,7 +830,7 @@ resource "openstack_compute_instance_v2" "instance_2" {
     delete_on_termination = true
   }
 
-   network {
+  network {
     name = "<network_name>"
   }
 }
@@ -843,14 +843,14 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
   instance_id = openstack_compute_instance_v2.instance_2.id
 }
 ```
+
 To import the instance outlined in the above configuration
 do the following:
 
-```
+```shell
 terraform import openstack_compute_instance_v2.instance_2 instance_id
-import openstack_blockstorage_volume_v3.volume_1 volume_id
-terraform import openstack_compute_volume_attach_v2.va_1
-instance_id/volume_id
+terraform import openstack_blockstorage_volume_v3.volume_1 volume_id
+terraform import openstack_compute_volume_attach_v2.va_1 instance_id/volume_id
 ```
 
 * A note on block storage volumes, the importer does not read

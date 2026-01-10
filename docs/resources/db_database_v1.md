@@ -45,6 +45,6 @@ The following attributes are exported:
 
 Databases can be imported by using `instance-id/db-name`, e.g.
 
-```
-$ terraform import openstack_db_database_v1.mydb 7b9e3cd3-00d9-449c-b074-8439f8e274fa/mydb
+```shell
+terraform import openstack_db_database_v1.mydb 7b9e3cd3-00d9-449c-b074-8439f8e274fa/mydb
 ```
