@@ -153,6 +153,7 @@ linters:
             - github.com/gophercloud/gophercloud/v2
             - github.com/gophercloud/utils/v2
             - github.com/mitchellh/go-homedir
+            - github.com/hashicorp/terraform-plugin-log
             - github.com/hashicorp/terraform-plugin-sdk/v2
             - github.com/ulikunitz/xz
             - github.com/klauspost/compress
