@@ -354,6 +354,30 @@ OpenStack Provider contributors aren't!) and we're happy to provide
 guidance. Don't be afraid if this is your first contribution to the OpenStack
 provider or even your first contribution to an open source project!
 
+#### Go Code Style
+
+The Go code in this repository is checked using [golangci-lint](https://golangci-lint.run/), which performs static analysis and enforces coding standards.
+
+Before running these checks locally, you need to install golangci-lint locally using the [installation instructions](https://golangci-lint.run/docs/welcome/install/local/).
+
+Once installed, you can run:
+
+```shell
+make lint-golang
+```
+
+#### Markdown Documentation Style
+
+We use [markdownlint-cli2](https://github.com/DavidAnson/markdownlint-cli2) to ensure all Markdown documentation follows a consistent style.
+All Markdown files are checked for linting issues by GitHub Actions for every pull request.
+
+You can also run the linting locally before submitting a PR:
+
+```shell
+npm install -g markdownlint-cli2
+make lint-markdown
+```
+
 ### Testing Environment
 
 In order to start fixing bugs or adding features, you need access to an
