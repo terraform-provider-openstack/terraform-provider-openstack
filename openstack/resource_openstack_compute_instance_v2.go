@@ -483,8 +483,9 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 
 	if networkMode := d.Get("network_mode").(string); networkMode == "auto" || networkMode == "none" {
 		// Use special string for network option
-		computeClient.Microversion = computeV2InstanceCreateServerWithNetworkModeMicroversion
 		networks = networkMode
+
+		bumpClientMicroversion(computeClient, computeV2InstanceCreateServerWithNetworkModeMicroversion)
 		log.Printf("[DEBUG] Create with network options %s", networks)
 	} else {
 		log.Printf("[DEBUG] Create with specified network options")
@@ -504,13 +505,14 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	// Retrieve tags and set microversion if they're provided.
 	instanceTags := computeV2InstanceTags(d)
 	if len(instanceTags) > 0 {
-		computeClient.Microversion = computeV2InstanceCreateServerWithTagsMicroversion
+		bumpClientMicroversion(computeClient, computeV2InstanceCreateServerWithTagsMicroversion)
 	}
 
 	var hypervisorHostname string
 	if v, ok := getOkExists(d, "hypervisor_hostname"); ok {
 		hypervisorHostname = v.(string)
-		computeClient.Microversion = computeV2InstanceCreateServerWithHypervisorHostnameMicroversion
+
+		bumpClientMicroversion(computeClient, computeV2InstanceCreateServerWithHypervisorHostnameMicroversion)
 	}
 
 	if v, ok := getOkExists(d, "availability_zone"); ok {
@@ -545,7 +547,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		// If so, set the client's microversion appropriately.
 		for _, bd := range d.Get("block_device").([]any) {
 			if bd.(map[string]any)["multiattach"].(bool) {
-				computeClient.Microversion = computeV2InstanceBlockDeviceMultiattachMicroversion
+				bumpClientMicroversion(computeClient, computeV2InstanceBlockDeviceMultiattachMicroversion)
 			}
 		}
 
@@ -553,7 +555,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		// If so, set the client's microversion appropriately.
 		for _, bd := range blockDevices {
 			if bd.VolumeType != "" {
-				computeClient.Microversion = computeV2InstanceBlockDeviceVolumeTypeMicroversion
+				bumpClientMicroversion(computeClient, computeV2InstanceBlockDeviceVolumeTypeMicroversion)
 			}
 		}
 
@@ -766,7 +768,7 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	// Populate tags.
-	computeClient.Microversion = computeV2TagsExtensionMicroversion
+	bumpClientMicroversion(computeClient, computeV2TagsExtensionMicroversion)
 
 	instanceTags, err := tags.List(ctx, computeClient, server.ID).Extract()
 	if err != nil {
@@ -1146,7 +1148,8 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 	if d.HasChange("tags") {
 		instanceTags := computeV2InstanceUpdateTags(d)
 		instanceTagsOpts := tags.ReplaceAllOpts{Tags: instanceTags}
-		computeClient.Microversion = computeV2TagsExtensionMicroversion
+
+		bumpClientMicroversion(computeClient, computeV2TagsExtensionMicroversion)
 
 		instanceTags, err := tags.ReplaceAll(ctx, computeClient, d.Id(), instanceTagsOpts).Extract()
 		if err != nil {
