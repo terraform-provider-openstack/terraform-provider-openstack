@@ -74,6 +74,6 @@ The following attributes are exported:
 
 QoS Policies can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_networking_qos_policy_v2.qos_policy_1 d6ae28ce-fcb5-4180-aa62-d260a27e09ae
+```shell
+terraform import openstack_networking_qos_policy_v2.qos_policy_1 d6ae28ce-fcb5-4180-aa62-d260a27e09ae
 ```

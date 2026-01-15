@@ -126,7 +126,7 @@ The following arguments are supported:
     extension is enabled. The `dns_domain` of a network in conjunction with the
     `dns_name` attribute of its ports will be published in an external DNS
     service when Neutron is configured to integrate with such a service.
-    
+
 * `qos_policy_id` - (Optional) Reference to the associated QoS policy.
 
 The `segments` block supports:
@@ -161,6 +161,6 @@ The following attributes are exported:
 
 Networks can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_networking_network_v2.network_1 d90ce693-5ccf-4136-a0ed-152ce412b6b9
+```shell
+terraform import openstack_networking_network_v2.network_1 d90ce693-5ccf-4136-a0ed-152ce412b6b9
 ```

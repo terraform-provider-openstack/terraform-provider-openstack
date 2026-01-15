@@ -29,7 +29,6 @@ data "openstack_networking_qos_dscp_marking_rule_v2" "qos_dscp_marking_rule_1" {
 
 * `dscp_mark` - (Optional) The value of a DSCP mark.
 
-
 ## Attributes Reference
 
 `id` is set to the `qos_policy_id/dscp_marking_rule_id` format of the found QoS DSCP marking rule.

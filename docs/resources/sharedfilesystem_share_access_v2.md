@@ -15,7 +15,7 @@ Use this resource to control the share access lists.
 be stored *unencrypted* in your Terraform state file. If you use this resource
 in production, please make sure your state file is sufficiently protected.
 [Read more about sensitive data in
-state](https://www.terraform.io/docs/language/state/sensitive-data.html).
+state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 
 ## Example Usage
 
@@ -155,6 +155,6 @@ The following arguments are supported:
 This resource can be imported by specifying the ID of the share and the ID of the
 share access, separated by a slash, e.g.:
 
-```
-$ terraform import openstack_sharedfilesystem_share_access_v2.share_access_1 share_id/share_access_id
+```shell
+terraform import openstack_sharedfilesystem_share_access_v2.share_access_1 share_id/share_access_id
 ```

@@ -13,7 +13,7 @@ Manages a V1 Magnum cluster resource within OpenStack.
 
 ~> **Note:** All arguments including the `kubeconfig` computed attribute will be
 stored in the raw state as plain-text. [Read more about sensitive data in
-state](https://www.terraform.io/docs/language/state/sensitive-data.html).
+state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 
 ## Example Usage
 
@@ -85,7 +85,7 @@ The following arguments are supported:
   for the master nodes. Changing this creates a new cluster.
 
 * `node_count` - (Optional) The number of nodes for the cluster.
-    
+
 * `fixed_network` - (Optional) The fixed network that will be attached to the
     cluster. Changing this creates a new cluster.
 
@@ -135,6 +135,6 @@ The following attributes are exported:
 
 Clusters can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_containerinfra_cluster_v1.cluster_1 ce0f9463-dd25-474b-9fe8-94de63e5e42b
+```shell
+terraform import openstack_containerinfra_cluster_v1.cluster_1 ce0f9463-dd25-474b-9fe8-94de63e5e42b
 ```

@@ -31,7 +31,6 @@ data "openstack_identity_group_v3" "admins" {
 * `region` - (Optional) The region in which to obtain the V3 Keystone client.
     If omitted, the `region` argument of the provider is used.
 
-
 ## Attributes Reference
 
 `id` is set to the ID of the found group. In addition, the following attributes

@@ -57,6 +57,6 @@ The following attributes are exported:
 
 Address Groups can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_networking_address_group_v2.group_1 782fef9c-d03c-400a-9735-2f9af5681cb3
+```shell
+terraform import openstack_networking_address_group_v2.group_1 782fef9c-d03c-400a-9735-2f9af5681cb3
 ```
