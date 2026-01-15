@@ -55,9 +55,9 @@ The following arguments are supported:
     Changing this updates the existing policy.
 
 * `lifetime` - (Optional) The lifetime of the security association. Consists of Unit and Value.
-    - `unit` - (Optional) The units for the lifetime of the security association. Can be either seconds or kilobytes.
+  * `unit` - (Optional) The units for the lifetime of the security association. Can be either seconds or kilobytes.
     Default is seconds.
-    - `value` - (Optional) The value for the lifetime of the security association. Must be a positive integer.
+  * `value` - (Optional) The value for the lifetime of the security association. Must be a positive integer.
     Default is 3600.
 
 * `value_specs` - (Optional) Map of additional options.
@@ -76,15 +76,14 @@ The following attributes are exported:
 * `pfs` - See Argument Reference above.
 * `transform_protocol` - See Argument Reference above.
 * `lifetime` - See Argument Reference above.
-    - `unit` - See Argument Reference above.
-    - `value` - See Argument Reference above.
+  * `unit` - See Argument Reference above.
+  * `value` - See Argument Reference above.
 * `value_specs` - See Argument Reference above.
-
 
 ## Import
 
 Services can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_vpnaas_ike_policy_v2.policy_1 832cb7f3-59fe-40cf-8f64-8350ffc03272
+```shell
+terraform import openstack_vpnaas_ike_policy_v2.policy_1 832cb7f3-59fe-40cf-8f64-8350ffc03272
 ```

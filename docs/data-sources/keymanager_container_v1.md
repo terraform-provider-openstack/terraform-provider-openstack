@@ -50,9 +50,9 @@ The following attributes are exported:
 
 The `secret_refs` block supports:
 
-* `name` - The name of the secret reference. The reference names must correspond
-  the container type, more details are available
-  [here](https://docs.openstack.org/barbican/stein/api/reference/containers.html).
+* `name` - The name of the secret reference.
+  The reference name must correspond the container type. See the
+  [Barbican container reference documentation][barbican-containers].
 
 * `secret_ref` - The secret reference / where to find the secret, URL.
 
@@ -72,3 +72,5 @@ The `acl` `read` attribute supports:
 * `created_at` - The date the container ACL was created.
 
 * `updated_at` - The date the container ACL was last updated.
+
+[barbican-containers]: https://docs.openstack.org/barbican/latest/api/reference/containers.html

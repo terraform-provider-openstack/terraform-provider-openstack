@@ -113,16 +113,14 @@ argument of the provider is used. Changing this creates a new Listener.
 * `timeout_tcp_inspect` - (Optional) The time in milliseconds, to wait for
   additional TCP packets for content inspection.
 
-* `default_tls_container_ref` - (Optional) A reference to a Barbican Secrets
-  container which stores TLS information. This is required if the protocol is
-  `TERMINATED_HTTPS`. See
-  [here](https://docs.openstack.org/octavia/latest/user/guides/basic-cookbook.html#deploy-a-tls-terminated-https-load-balancer)
-  for more information.
+* `default_tls_container_ref` – (Optional) A reference to a Barbican Secrets
+  container that stores TLS information. This is required when the protocol is
+  `TERMINATED_HTTPS`. For more information, see the
+  [Octavia TLS-terminated HTTPS load balancer guide][octavia-tls-guide].
 
-* `sni_container_refs` - (Optional) A list of references to Barbican Secrets
-  containers which store SNI information. See
-  [here](https://docs.openstack.org/octavia/latest/user/guides/basic-cookbook.html#deploy-a-tls-terminated-https-load-balancer)
-  for more information.
+* `sni_container_refs` – (Optional) A list of references to Barbican Secrets
+  containers that store SNI information. For more information, see the
+  [Octavia TLS-terminated HTTPS load balancer guide][octavia-tls-guide].
 
 * `admin_state_up` - (Optional) The administrative state of the Listener. A
   valid value is true (UP) or false (DOWN).
@@ -175,7 +173,7 @@ argument of the provider is used. Changing this creates a new Listener.
 
 * `tls_ciphers` - (Optional) List of ciphers in OpenSSL format
   (colon-separated). See
-  https://www.openssl.org/docs/man1.1.1/man1/ciphers.html for more information.
+  <https://docs.openssl.org/1.1.1/man1/ciphers/> for more information.
   Supported only in **Octavia minor version >= 2.15**.
 
 * `tls_versions` - (Optional) A list of TLS protocol versions. Available
@@ -222,6 +220,8 @@ The following attributes are exported:
 
 Load Balancer Listener can be imported using the Listener ID, e.g.:
 
+```shell
+terraform import openstack_lb_listener_v2.listener_1 b67ce64e-8b26-405d-afeb-4a078901f15a
 ```
-$ terraform import openstack_lb_listener_v2.listener_1 b67ce64e-8b26-405d-afeb-4a078901f15a
-```
+
+[octavia-tls-guide]: https://docs.openstack.org/octavia/latest/user/guides/basic-cookbook.html#deploy-a-tls-terminated-https-load-balancer

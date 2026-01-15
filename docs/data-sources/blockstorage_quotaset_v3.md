@@ -26,7 +26,6 @@ data "openstack_blockstorage_quotaset_v3" "quota" {
 
 * `project_id` - (Required) The id of the project to retrieve the quotaset.
 
-
 ## Attributes Reference
 
 The following attributes are exported:

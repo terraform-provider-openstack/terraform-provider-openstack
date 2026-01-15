@@ -85,7 +85,7 @@ The following attributes are exported:
 
 This resource can be imported by specifying the zone ID and recordset ID with an optional project ID as a prefix:
 
-```
-$ terraform import openstack_dns_recordset_v2.recordset_1 project_id/zone_id/recordset_id
-$ terraform import openstack_dns_recordset_v2.recordset_1 zone_id/recordset_id
+```shell
+terraform import openstack_dns_recordset_v2.recordset_1 project_id/zone_id/recordset_id
+terraform import openstack_dns_recordset_v2.recordset_1 zone_id/recordset_id
 ```

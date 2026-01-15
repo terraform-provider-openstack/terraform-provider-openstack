@@ -25,15 +25,14 @@ resource "openstack_dns_zone_v2" "example_zone" {
 }
 
 resource "openstack_dns_transfer_request_v2" "request_1" {
-  zone_id           = openstack_dns_zone_v2.example_zone.id
-  description       = "a transfer accept"
+  zone_id     = openstack_dns_zone_v2.example_zone.id
+  description = "a transfer accept"
 }
 
 resource "openstack_dns_transfer_accept_v2" "accept_1" {
   zone_transfer_request_id = openstack_dns_transfer_request_v2.request_1.id
   key                      = openstack_dns_transfer_request_v2.request_1.key
 }
-
 ```
 
 ## Argument Reference
@@ -68,6 +67,6 @@ The following attributes are exported:
 
 This resource can be imported by specifying the transferAccept ID:
 
-```
-$ terraform import openstack_dns_transfer_accept_v2.accept_1 accept_id
+```shell
+terraform import openstack_dns_transfer_accept_v2.accept_1 accept_id
 ```

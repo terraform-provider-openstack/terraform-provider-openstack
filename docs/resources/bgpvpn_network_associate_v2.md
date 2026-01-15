@@ -55,6 +55,6 @@ The following attributes are exported:
 BGP VPN network associations can be imported using the BGP VPN ID and BGP VPN
 network association ID separated by a slash, e.g.:
 
-```hcl
-$ terraform import openstack_bgpvpn_network_associate_v2.association_1 2145aaa9-edaa-44fb-9815-e47a96677a72/67bb952a-f9d1-4fc8-ae84-082253a879d4
+```shell
+terraform import openstack_bgpvpn_network_associate_v2.association_1 2145aaa9-edaa-44fb-9815-e47a96677a72/67bb952a-f9d1-4fc8-ae84-082253a879d4
 ```

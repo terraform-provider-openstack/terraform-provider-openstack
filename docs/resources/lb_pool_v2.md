@@ -88,7 +88,7 @@ The following arguments are supported:
 
 * `tls_ciphers` - (Optional) List of ciphers in OpenSSL format
   (colon-separated). See
-  https://www.openssl.org/docs/man1.1.1/man1/ciphers.html for more information.
+  <https://docs.openssl.org/1.1.1/man1/ciphers/> for more information.
   Supported only in **Octavia minor version >= 2.15**.
 
 * `tls_versions` - (Optional) A list of TLS protocol versions. Available
@@ -132,6 +132,6 @@ The following attributes are exported:
 
 Load Balancer Pool can be imported using the Pool ID, e.g.:
 
-```
-$ terraform import openstack_lb_pool_v2.pool_1 60ad9ee4-249a-4d60-a45b-aa60e046c513
+```shell
+terraform import openstack_lb_pool_v2.pool_1 60ad9ee4-249a-4d60-a45b-aa60e046c513
 ```

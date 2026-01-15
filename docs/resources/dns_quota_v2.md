@@ -37,7 +37,6 @@ resource "openstack_dns_quota_v2" "quota_1" {
 
 The following arguments are supported:
 
-
 * `region` - (Optional) The region in which to obtain the V2 DNS client. If
   omitted, the `region` argument of the provider is used. Changing this creates
   a new DNS quota.
@@ -73,6 +72,6 @@ The following attributes are exported:
 
 Quotas can be imported using the `project_id/region_name`, e.g.
 
-```
-$ terraform import openstack_dns_quota_v2.quota_1 2a0f2240-c5e6-41de-896d-e80d97428d6b/region_1
+```shell
+terraform import openstack_dns_quota_v2.quota_1 2a0f2240-c5e6-41de-896d-e80d97428d6b/region_1
 ```

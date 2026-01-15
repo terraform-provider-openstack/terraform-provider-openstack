@@ -103,7 +103,7 @@ provider "openstack" {
 }
 
 resource "openstack_objectstorage_container_v1" "container_1" {
-  name   = "tf-test-container-1"
+  name = "tf-test-container-1"
 
   storage_policy = "az1"
   storage_class  = "SSD"
@@ -166,11 +166,10 @@ The following arguments are supported:
 
 The `versioning_legacy` block supports:
 
-  * `type` - (Required) Versioning type which can be `versions` or `history`
+* `type` - (Required) Versioning type which can be `versions` or `history`
     according to [OpenStack
     documentation](https://docs.openstack.org/swift/latest/api/object_versioning.html).
-  * `location` - (Required) Container in which versions will be stored.
-
+* `location` - (Required) Container in which versions will be stored.
 
 ## Attributes Reference
 
@@ -194,6 +193,7 @@ The following attributes are exported:
 This resource can be imported by specifying the name of the container:
 
 Some attributes can't be imported :
+
 * `force_destroy`
 * `content_type`
 * `metadata`
@@ -202,6 +202,6 @@ Some attributes can't be imported :
 
 So you'll have to `terraform plan` and `terraform apply` after the import to fix those missing attributes.
 
-```
-$ terraform import openstack_objectstorage_container_v1.container_1 container_name
+```shell
+terraform import openstack_objectstorage_container_v1.container_1 container_name
 ```
