@@ -15,8 +15,8 @@ Manages a V2 BGP VPN router association resource within OpenStack.
 
 ```hcl
 resource "openstack_bgpvpn_router_associate_v2" "association_1" {
-  bgpvpn_id  = "d57d39e1-dc63-44fd-8cbd-a4e1488100c5"
-  router_id  = "423fa80f-e0d7-4d02-a9a5-8b8c05812bf6"
+  bgpvpn_id = "d57d39e1-dc63-44fd-8cbd-a4e1488100c5"
+  router_id = "423fa80f-e0d7-4d02-a9a5-8b8c05812bf6"
 }
 ```
 
@@ -59,6 +59,6 @@ The following attributes are exported:
 BGP VPN router associations can be imported using the BGP VPN ID and BGP VPN
 router association ID separated by a slash, e.g.:
 
-```hcl
-$ terraform import openstack_bgpvpn_router_associate_v2.association_1 e26d509e-fc2d-4fb5-8562-619911a9a6bc/3cc9df2d-80db-4536-8ba6-295d1d0f723f
+```shell
+terraform import openstack_bgpvpn_router_associate_v2.association_1 e26d509e-fc2d-4fb5-8562-619911a9a6bc/3cc9df2d-80db-4536-8ba6-295d1d0f723f
 ```

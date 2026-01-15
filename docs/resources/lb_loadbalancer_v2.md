@@ -34,17 +34,17 @@ The following arguments are supported:
 * `vip_subnet_id` - (Optional) The subnet on which to allocate the
     Loadbalancer's address. A tenant can only create Loadbalancers on networks
     authorized by policy (e.g. networks that belong to them or networks that
-    are shared).  Changing this creates a new loadbalancer. Exactly one of 
+    are shared).  Changing this creates a new loadbalancer. Exactly one of
     `vip_subnet_id`, `vip_network_id` or `vip_port_id` has to be defined.
 
 * `vip_network_id` - (Optional) The network on which to allocate the
     Loadbalancer's address. A tenant can only create Loadbalancers on networks
     authorized by policy (e.g. networks that belong to them or networks that
-    are shared).  Changing this creates a new loadbalancer. Exactly one of 
+    are shared).  Changing this creates a new loadbalancer. Exactly one of
     `vip_subnet_id`, `vip_network_id` or `vip_port_id` has to be defined.
 
 * `vip_port_id` - (Optional) The port UUID that the loadbalancer will use.
-    Changing this creates a new loadbalancer. Exactly one of 
+    Changing this creates a new loadbalancer. Exactly one of
     `vip_subnet_id`, `vip_network_id` or `vip_port_id` has to be defined.
 
 * `name` - (Optional) Human-readable name for the Loadbalancer. Does not have
@@ -59,7 +59,7 @@ The following arguments are supported:
 * `vip_address` - (Optional) The ip address of the load balancer.
     Changing this creates a new loadbalancer.
 
-* `vip_qos_policy_id` - (Optional) The ID of the QoS Policy which will 
+* `vip_qos_policy_id` - (Optional) The ID of the QoS Policy which will
     be applied to the Virtual IP (VIP).
 
 * `admin_state_up` - (Optional) The administrative state of the Loadbalancer.
@@ -106,6 +106,6 @@ The following attributes are exported:
 
 Load Balancer can be imported using the Load Balancer ID, e.g.:
 
-```
-$ terraform import openstack_lb_loadbalancer_v2.loadbalancer_1 19bcfdc7-c521-4a7e-9459-6750bd16df76
+```shell
+terraform import openstack_lb_loadbalancer_v2.loadbalancer_1 19bcfdc7-c521-4a7e-9459-6750bd16df76
 ```

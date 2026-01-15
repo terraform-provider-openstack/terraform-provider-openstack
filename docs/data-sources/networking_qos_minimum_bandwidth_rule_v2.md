@@ -29,7 +29,6 @@ data "openstack_networking_qos_minimum_bandwidth_rule_v2" "qos_min_bw_rule_1" {
 
 * `min_kbps` - (Optional) The value of a minimum kbps bandwidth.
 
-
 ## Attributes Reference
 
 `id` is set to the `qos_policy_id/minimum_bandwidth_rule_id` format of the found QoS minimum bandwidth rule.

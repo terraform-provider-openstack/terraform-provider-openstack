@@ -13,12 +13,12 @@ Manages a V3 Application Credential resource within OpenStack Keystone.
 
 ~> **Note:** All arguments including the application credential name and secret
 will be stored in the raw state as plain-text. [Read more about sensitive data
-in state](https://www.terraform.io/docs/language/state/sensitive-data.html).
+in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 
 ~> **Note:** An Application Credential is created within the authenticated user
 project scope and is not visible by an admin or other accounts.
 The Application Credential visibility is similar to
-[`openstack_compute_keypair_v2`](compute_keypair_v2.html).
+[`openstack_compute_keypair_v2`](./compute_keypair_v2.md).
 
 ## Example Usage
 
@@ -63,8 +63,8 @@ starting from [Train](https://releases.openstack.org/train/highlights.html#keyst
 
 ```hcl
 resource "openstack_identity_application_credential_v3" "monitoring" {
-  name        = "monitoring"
-  expires_at  = "2019-02-13T12:12:12Z"
+  name       = "monitoring"
+  expires_at = "2019-02-13T12:12:12Z"
 
   access_rules {
     path    = "/v2.0/metrics"
@@ -157,6 +157,6 @@ The following attributes are exported:
 
 Application Credentials can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_identity_application_credential_v3.application_credential_1 c17304b7-0953-4738-abb0-67005882b0a0
+```shell
+terraform import openstack_identity_application_credential_v3.application_credential_1 c17304b7-0953-4738-abb0-67005882b0a0
 ```

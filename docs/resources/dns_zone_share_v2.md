@@ -18,7 +18,7 @@ resource "openstack_dns_zone_share_v2" "example" {
   zone_id           = "00000000-0000-0000-0000-000000000000"
   target_project_id = "11111111-1111-1111-1111-111111111111"
   # project_id is optional; if omitted, the provider derives it from the zone details.
-  project_id        = "22222222-2222-2222-2222-222222222222"
+  project_id = "22222222-2222-2222-2222-222222222222"
 }
 ```
 
@@ -52,7 +52,7 @@ The following attributes are exported:
 
 DNS zone share can be imported by specifying the zone ID with share ID and optional project ID:
 
-```bash
-$ terraform import openstack_dns_zone_share_v2.share_1 60cbdc69-64f9-49ee-b294-352e71e22827/0e1dae51-aee2-4b44-962f-885bb69f3a5c
-$ terraform import openstack_dns_zone_share_v2.share_1 60cbdc69-64f9-49ee-b294-352e71e22827/0e1dae51-aee2-4b44-962f-885bb69f3a5c/eb92139f6c054a878852ac9e8cbe612a
+```shell
+terraform import openstack_dns_zone_share_v2.share_1 60cbdc69-64f9-49ee-b294-352e71e22827/0e1dae51-aee2-4b44-962f-885bb69f3a5c
+terraform import openstack_dns_zone_share_v2.share_1 60cbdc69-64f9-49ee-b294-352e71e22827/0e1dae51-aee2-4b44-962f-885bb69f3a5c/eb92139f6c054a878852ac9e8cbe612a
 ```
