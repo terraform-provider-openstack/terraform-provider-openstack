@@ -368,7 +368,7 @@ func stringSliceToSet(in []string) *schema.Set {
 	return schema.NewSet(schema.HashString, result)
 }
 
-// update the computeClient microversion properly by checking if it already was set.
+// Update the client microversion properly by checking if it already was set.
 // If it was set only update it when the currently set microversion is less than the required one.
 func bumpClientMicroversion(client *gophercloud.ServiceClient, requiredMicroversion string) {
 	if client.Microversion == "" {
