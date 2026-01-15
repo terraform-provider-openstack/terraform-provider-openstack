@@ -50,7 +50,6 @@ data "openstack_compute_flavor_v2" "small" {
 
 * `is_public` - (Optional) The flavor visibility.
 
-
 ## Attributes Reference
 
 `id` is set to the ID of the found flavor. In addition, the following attributes

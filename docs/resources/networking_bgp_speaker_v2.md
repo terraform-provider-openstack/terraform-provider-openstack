@@ -22,11 +22,11 @@ resource "openstack_networking_network_v2" "network1" {
 }
 
 resource "openstack_networking_bgp_peer_v2" "peer_1" {
-  name       = "bgp_peer_1"
-  peer_ip    = "192.0.2.10"
-  remote_as  = 65001
-  auth_type  = "md5"
-  password   = "supersecret"
+  name      = "bgp_peer_1"
+  peer_ip   = "192.0.2.10"
+  remote_as = 65001
+  auth_type = "md5"
+  password  = "supersecret"
 }
 
 resource "openstack_networking_bgp_speaker_v2" "speaker_1" {
@@ -98,5 +98,5 @@ The following attributes are exported:
 BGP speakers can be imported using their ID:
 
 ```shell
-$ terraform import openstack_networking_bgp_speaker_v2.speaker_1 8a2ad402-b805-46bf-a60b-008573ca2844
+terraform import openstack_networking_bgp_speaker_v2.speaker_1 8a2ad402-b805-46bf-a60b-008573ca2844
 ```

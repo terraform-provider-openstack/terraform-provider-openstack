@@ -4,7 +4,7 @@ This provides a template for attaching, formating, and mounting a Block Storage 
 
 ## Usage
 
-Download and install [Terraform](https://www.terraform.io/downloads.html):
+Download and install [Terraform](https://developer.hashicorp.com/terraform/install):
 
 ```sh
 wget -P /tmp/ https://releases.hashicorp.com/terraform/0.12.9/terraform_0.12.9_linux_amd64.zip

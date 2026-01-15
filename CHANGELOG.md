@@ -1,3 +1,5 @@
+# Changelog
+
 ## 3.4.0 (11 November, 2025)
 
 NOTES
@@ -12,7 +14,6 @@ IMPROVEMENTS
 * Add new data source `data_source_openstack_lb_listener_v2` ([#1957](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1957))
 * Add new data source `data_source_openstack_lb_loadbalancer_v2` ([#1954](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1954))
 * Add new resource `resource_openstack_taas_tap_mirror_v2` ([#1948](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1948))
-
 
 BUG FIXES
 
@@ -256,25 +257,21 @@ BREAKING CHANGES
 * Remove `external_gateway` from `networking_router_v2` ([#1685](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1685))
 * Remove `floating_ip` from `compute_instance_v2` ([#1686](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1686))
 * Remove `volume` from `compute_instance_v2` ([#1687](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1687))
-* Remove `sort_key` and `sort_dir` from glance data sources (#1661)(https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1661))
-
+* Remove `sort_key` and `sort_dir` from glance data sources (#1661)(<https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1661>))
 
 FEATURES
 
-* __New Data Source__: `openstack_lb_flavor_v2` ([#1679](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1679))
-
+* **New Data Source**: `openstack_lb_flavor_v2` ([#1679](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1679))
 
 IMPROVEMENTS
 
 * Added `tag` on `openstack_compute_volume_attach_v2` ([#1713](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1713))
-
 
 NOTES
 
 * Added Openstack Caracal jobs to CI ([#1705](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1705))
 * Removed Openstack Zed jobs from CI ([#1705](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1710))
 * Removed Openstack Yoga jobs from CI ([#1705](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1671))
-
 
 ## 1.54.1 (31 January, 2024)
 
@@ -290,7 +287,6 @@ NOTES
 * Added deprecation notice for `multiattach` on `openstack_blockstorage_volume_v3` ([#1629](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1629)). Support for it **will be removed on next major release**.
 * Added deprecation notice for various nova resources. Support for them will **not** be removed, but users are notified to use the new resources instead ([#1639](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1639)).
 
-
 IMPROVEMENTS
 
 * Updated Terraform SDK to `v2.30.0` ([#1631](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1631))
@@ -300,7 +296,6 @@ IMPROVEMENTS
 * Added extra validations on `openstack_lb_pool_v2` ([#1628](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1628))
 * Added attachment information on `data_source_blockstorage_volume_v3` ([#1624](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1624))
 * Added `backup_id` to `openstack_blockstorage_volume_v3` ([#1641](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1641))
-
 
 BUG FIXES
 
@@ -317,7 +312,6 @@ IMPROVEMENTS
 * Added `project_id` argument to the `openstack_fw_policy_v2` data source ([#1594](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1594))
 * Added `project_id` argument to the `openstack_fw_policy_v2` resource ([#1594](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1594))
 * Updated `openstack_compute_instance_v2` to use Glance client instead of deprecated Nova client for images ([#1615](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1615))
-
 
 BUG FIXES
 
@@ -444,9 +438,9 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `containerinfra_nodegroup_v1` ([#1364](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1364))
-* __New Data Source__: `containerinfra_nodegroup_v1` ([#1364](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1364))
-* __New Data Source__: `openstack_compute_limits_v2` ([#1418](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1418))
+* **New Resource**: `containerinfra_nodegroup_v1` ([#1364](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1364))
+* **New Data Source**: `containerinfra_nodegroup_v1` ([#1364](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1364))
+* **New Data Source**: `openstack_compute_limits_v2` ([#1418](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1418))
 
 IMPROVEMENTS
 
@@ -484,10 +478,10 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `blockstorage_qos_v3` ([#1325](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1325))
-* __New Resource__: `blockstorage_qos_association_v3` ([#1331](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1331))
-* __New Data Source__: `blockstorage_quotaset_v3` ([#1319](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1319))
-* __New Data Source__: `networking_quota_v2` ([#1318](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1318))
+* **New Resource**: `blockstorage_qos_v3` ([#1325](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1325))
+* **New Resource**: `blockstorage_qos_association_v3` ([#1331](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1331))
+* **New Data Source**: `blockstorage_quotaset_v3` ([#1319](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1319))
+* **New Data Source**: `networking_quota_v2` ([#1318](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1318))
 
 IMPROVEMENTS
 
@@ -503,7 +497,7 @@ IMPROVEMENTS
 
 FEATURES
 
-* __New Data Source__: `openstack_compute_quotaset_v2` ([#1302](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1302))
+* **New Data Source**: `openstack_compute_quotaset_v2` ([#1302](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1302))
 
 IMPROVEMENTS
 
@@ -536,8 +530,8 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `dns_transfer_request_v2` ([#1268](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1268))
-* __New Resource__: `dns_transfer_accept_v2` ([#1268](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1268))
+* **New Resource**: `dns_transfer_request_v2` ([#1268](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1268))
+* **New Resource**: `dns_transfer_accept_v2` ([#1268](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1268))
 
 IMPROVEMENTS
 
@@ -568,7 +562,7 @@ IMPROVEMENTS
 
 FEATURES
 
-* __New Resource__: `blockstorage_volume_type_access_v3` ([#1223](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1223))
+* **New Resource**: `blockstorage_volume_type_access_v3` ([#1223](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1223))
 
 IMPROVEMENTS
 
@@ -580,8 +574,8 @@ IMPROVEMENTS
 
 FEATURES
 
-* __New Resource__: `networking_portforwarding_v2` ([#940](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/940))
-* __New Resource__: `blockstorage_volume_type_v3` ([#1204](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1204))
+* **New Resource**: `networking_portforwarding_v2` ([#940](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/940))
+* **New Resource**: `blockstorage_volume_type_v3` ([#1204](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1204))
 
 IMPROVEMENTS
 
@@ -611,7 +605,7 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `openstack_lb_quota_v2` ([#1169](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1169))
+* **New Resource**: `openstack_lb_quota_v2` ([#1169](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1169))
 
 IMPROVEMENTS
 
@@ -643,8 +637,8 @@ NOTES
 
 FEATURES
 
-* __New Resource__: `openstack_identity_user_membership_v3` ([#1149](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1149))
-* __New Data Source__: `openstack_networking_subnet_ids_v2` ([#1153](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1153))
+* **New Resource**: `openstack_identity_user_membership_v3` ([#1149](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1149))
+* **New Data Source**: `openstack_networking_subnet_ids_v2` ([#1153](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1153))
 
 IMPROVEMENTS
 
@@ -665,9 +659,9 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `openstack_compute_aggregate_v2` ([#1121](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1121))
-* __New Data Source__: `openstack_compute_aggregate_v2` ([#1121](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1121))
-* __New Data Source__: `openstack_compute_hypervisor_v2` ([#1126](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1126))
+* **New Resource**: `openstack_compute_aggregate_v2` ([#1121](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1121))
+* **New Data Source**: `openstack_compute_aggregate_v2` ([#1121](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1121))
+* **New Data Source**: `openstack_compute_hypervisor_v2` ([#1126](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1126))
 
 IMPROVEMENTS
 
@@ -729,7 +723,7 @@ IMPROVEMENTS
 
 FEATURES
 
-* __New Resource__: `identity_ec2_credential_v3` ([#1033](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/1033))
+* **New Resource**: `identity_ec2_credential_v3` ([#1033](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/1033))
 
 IMPROVEMENTS
 
@@ -748,8 +742,8 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `openstack_identity_group_v3` ([#1028](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/1028))
-* __New Data Source__: `openstack_images_image_ids_v2` ([#139](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/139))
+* **New Resource**: `openstack_identity_group_v3` ([#1028](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/1028))
+* **New Data Source**: `openstack_images_image_ids_v2` ([#139](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/139))
 
 IMPROVEMENTS
 
@@ -760,7 +754,7 @@ IMPROVEMENTS
 
 FEATURES
 
-* __New Data Source__: `compute_instance_v2` ([#984](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/984))
+* **New Data Source**: `compute_instance_v2` ([#984](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/984))
 
 IMPROVEMENTS
 
@@ -802,8 +796,8 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `openstack_keymanager_order_v1` ([#992](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/992))
-* __New Resource__: `openstack_lb_members_v2` ([#898](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/898))
+* **New Resource**: `openstack_keymanager_order_v1` ([#992](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/992))
+* **New Resource**: `openstack_lb_members_v2` ([#898](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/898))
 
 IMPROVEMENTS
 
@@ -837,9 +831,9 @@ NOTES
 
 FEATURES
 
-* __New Resource__: `openstack_orchestration_stack_v1` ([#944](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/944))
-* __New Data Source__: `openstack_blockstorage_volume_v2` ([#928](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/928))
-* __New Data Source__: `openstack_blockstorage_volume_v3` ([#947](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/947))
+* **New Resource**: `openstack_orchestration_stack_v1` ([#944](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/944))
+* **New Data Source**: `openstack_blockstorage_volume_v2` ([#928](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/928))
+* **New Data Source**: `openstack_blockstorage_volume_v3` ([#947](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/947))
 
 IMPROVEMENTS
 
@@ -860,8 +854,8 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `openstack_networking_quota_v2` ([#915](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/915))
-* __New Resource__: `openstack_compute_quotaset_v2` ([#914](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/914))
+* **New Resource**: `openstack_networking_quota_v2` ([#915](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/915))
+* **New Resource**: `openstack_compute_quotaset_v2` ([#914](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/914))
 
 IMPROVEMENTS
 
@@ -885,8 +879,8 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `openstack_images_image_access_accept_v2` ([#872](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/872))
-* __New Resource__: `openstack_images_image_access_v2` ([#872](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/872))
+* **New Resource**: `openstack_images_image_access_accept_v2` ([#872](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/872))
+* **New Resource**: `openstack_images_image_access_v2` ([#872](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/872))
 
 IMPROVEMENTS
 
@@ -909,7 +903,7 @@ BUG FIXES
 
 FEATURES
 
-* __New Data Source__: `openstack_keymanager_container_v1` ([#846](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/846))
+* **New Data Source**: `openstack_keymanager_container_v1` ([#846](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/846))
 
 IMPROVEMENTS
 
@@ -933,15 +927,15 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `openstack_keymanager_secret_v1` ([#650](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/650)), ([#807](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/807))
-* __New Resource__: `openstack_keymanager_container_v1` ([#808](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/808))
-* __New Resource__: `openstack_identity_service_v3` ([#821](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/821))
-* __New Resource__: `openstack_identity_endpoint_v3` ([#823](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/823))
-* __New Resource__: `openstack_networking_rbac_policy_v2` ([#811](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/811))
-* __New Resource__: `openstack_blockstorage_quotaset_v2` ([#806](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/806))
-* __New Resource__: `openstack_blockstorage_quotaset_v3` ([#828](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/828))
-* __New Data Source__: `openstack_keymanager_secret_v1` ([#815](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/815))
-* __New Data Source__: `openstack_identity_service_v3` ([#819](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/819))
+* **New Resource**: `openstack_keymanager_secret_v1` ([#650](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/650)), ([#807](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/807))
+* **New Resource**: `openstack_keymanager_container_v1` ([#808](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/808))
+* **New Resource**: `openstack_identity_service_v3` ([#821](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/821))
+* **New Resource**: `openstack_identity_endpoint_v3` ([#823](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/823))
+* **New Resource**: `openstack_networking_rbac_policy_v2` ([#811](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/811))
+* **New Resource**: `openstack_blockstorage_quotaset_v2` ([#806](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/806))
+* **New Resource**: `openstack_blockstorage_quotaset_v3` ([#828](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/828))
+* **New Data Source**: `openstack_keymanager_secret_v1` ([#815](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/815))
+* **New Data Source**: `openstack_identity_service_v3` ([#819](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/819))
 
 IMPROVEMENTS
 
@@ -963,14 +957,14 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `openstack_networking_qos_policy_v2` ([#774](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/774))
-* __New Resource__: `openstack_networking_qos_bandwidth_limit_rule_v2` ([#783](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/783))
-* __New Resource__: `openstack_networking_qos_dscp_marking_rule_v2` ([#784](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/784))
-* __New Resource__: `openstack_networking_qos_minimum_bandwidth_rule_v2` ([#790](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/790))
-* __New Data Source__: `openstack_networking_qos_policy_v2`([#779](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/779))
-* __New Data Source__: `openstack_networking_qos_bandwidth_limit_rule_v2` ([#788](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/788))
-* __New Data Source__: `openstack_networking_qos_dscp_marking_rule_v2` ([#789](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/789))
-* __New Data Source__: `openstack_networking_qos_minimum_bandwidth_rule_v2` ([#793](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/793))
+* **New Resource**: `openstack_networking_qos_policy_v2` ([#774](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/774))
+* **New Resource**: `openstack_networking_qos_bandwidth_limit_rule_v2` ([#783](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/783))
+* **New Resource**: `openstack_networking_qos_dscp_marking_rule_v2` ([#784](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/784))
+* **New Resource**: `openstack_networking_qos_minimum_bandwidth_rule_v2` ([#790](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/790))
+* **New Data Source**: `openstack_networking_qos_policy_v2`([#779](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/779))
+* **New Data Source**: `openstack_networking_qos_bandwidth_limit_rule_v2` ([#788](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/788))
+* **New Data Source**: `openstack_networking_qos_dscp_marking_rule_v2` ([#789](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/789))
+* **New Data Source**: `openstack_networking_qos_minimum_bandwidth_rule_v2` ([#793](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/793))
 
 IMPROVEMENTS
 
@@ -1005,7 +999,7 @@ NOTES
 
 FEATURES
 
-* __New Data Source__: `openstack_networking_addressscope_v2` ([#741](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/741))
+* **New Data Source**: `openstack_networking_addressscope_v2` ([#741](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/741))
 
 BUG FIXES
 
@@ -1015,20 +1009,18 @@ BUG FIXES
 * Fixed a bug where `dns_nameservers` could not be cleared in `openstack_networking_subnet_v2` ([#728](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/728))
 * Fixed a bug where a port's `dns_name` was being unset by Terraform ([#748](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/748))
 
-
 ## 1.17.0 (April 01, 2019)
 
 NOTES
 
 * `extra_dhcp_option` in the `openstack_networking_port_v2` data source has been changed to a List. This is to resolve a bug where multiple DHCP options were not being rendered.
 
-
 FEATURES
 
-* __New Resource__: `openstack_identity_application_credential_v3` ([#660](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/660))
-* __New Data Source__: `openstack_blockstorage_availability_zones_v3` ([#652](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/652))
-* __New Data Source__: `openstack_sharedfilesystem_availability_zones_v2` ([#652](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/652))
-* __New Data Source__: `openstack_networking_trunk_v2` ([#626](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/626))
+* **New Resource**: `openstack_identity_application_credential_v3` ([#660](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/660))
+* **New Data Source**: `openstack_blockstorage_availability_zones_v3` ([#652](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/652))
+* **New Data Source**: `openstack_sharedfilesystem_availability_zones_v2` ([#652](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/652))
+* **New Data Source**: `openstack_networking_trunk_v2` ([#626](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/626))
 
 IMPROVEMENTS
 
@@ -1064,7 +1056,7 @@ NOTES
 
 FEATURES
 
-* __New Data Source__: `openstack_compute_availability_zones_v2` ([#655](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/655))
+* **New Data Source**: `openstack_compute_availability_zones_v2` ([#655](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/655))
 
 BUG FIXES
 
@@ -1086,8 +1078,8 @@ NOTES
 
 FEATURES
 
-* __New Resource__: `openstack_networking_addressscope_v2` ([#634](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/634))
-* __New Resource__: `openstack_networking_port_secgroup_associate_v2` ([#574](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/574))
+* **New Resource**: `openstack_networking_addressscope_v2` ([#634](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/634))
+* **New Resource**: `openstack_networking_port_secgroup_associate_v2` ([#574](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/574))
 
 IMPROVEMENTS
 
@@ -1129,15 +1121,15 @@ NOTES
 
 FEATURES
 
-* __New Resource__: `openstack_lb_l7policy_v2` ([#527](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/527))
-* __New Resource__: `openstack_lb_l7rule_v2` ([#522](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/522))
-* __New Resource__: `openstack_sharedfilesystem_share_v2` ([#525](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/525))
-* __New Resource__: `openstack_sharedfilesystem_share_access_v2` ([#526](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/526))
-* __New Data Source__: `openstack_sharedfilesystem_share_v2` ([#564](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/564))
-* __New Data Source__: `openstack_networking_port_v2` ([#567](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/567))
-* __New Data Source__: `openstack_sharedfilesystem_sharenetwork_v2` ([#576](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/576))
-* __New Data Source__: `openstack_networking_port_ids_v2` ([#569](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/569))
-* __New Data Source__: `openstack_sharedfilesystem_snapshot_v2` ([#577](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/577))
+* **New Resource**: `openstack_lb_l7policy_v2` ([#527](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/527))
+* **New Resource**: `openstack_lb_l7rule_v2` ([#522](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/522))
+* **New Resource**: `openstack_sharedfilesystem_share_v2` ([#525](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/525))
+* **New Resource**: `openstack_sharedfilesystem_share_access_v2` ([#526](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/526))
+* **New Data Source**: `openstack_sharedfilesystem_share_v2` ([#564](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/564))
+* **New Data Source**: `openstack_networking_port_v2` ([#567](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/567))
+* **New Data Source**: `openstack_sharedfilesystem_sharenetwork_v2` ([#576](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/576))
+* **New Data Source**: `openstack_networking_port_ids_v2` ([#569](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/569))
+* **New Data Source**: `openstack_sharedfilesystem_snapshot_v2` ([#577](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/577))
 
 IMPROVEMENTS
 
@@ -1167,11 +1159,11 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `openstack_sharedfilesystem_securityservice_v2` ([#515](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/515))
-* __New Resource__: `openstack_sharedfilesystem_sharenetwork_v2` ([#515](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/515))
-* __New Data Source__: `openstack_containerinfra_cluster_v1` ([#488](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/488))
-* __New Data Source__: `openstack_blockstorage_snapshot_v2` ([#448](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/448))
-* __New Data Source__: `openstack_blockstorage_snapshot_v3` ([#448](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/448))
+* **New Resource**: `openstack_sharedfilesystem_securityservice_v2` ([#515](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/515))
+* **New Resource**: `openstack_sharedfilesystem_sharenetwork_v2` ([#515](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/515))
+* **New Data Source**: `openstack_containerinfra_cluster_v1` ([#488](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/488))
+* **New Data Source**: `openstack_blockstorage_snapshot_v2` ([#448](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/448))
+* **New Data Source**: `openstack_blockstorage_snapshot_v3` ([#448](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/448))
 
 IMPROVEMENTS
 
@@ -1198,7 +1190,7 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `openstack_compute_interface_attach_v2` ([#470](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/470))
+* **New Resource**: `openstack_compute_interface_attach_v2` ([#470](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/470))
 
 IMPROVEMENTS
 
@@ -1217,13 +1209,12 @@ BUG FIXES
 
 * Fixed issue with nova-network based environments having the `tenantnetworks` API disabled ([#485](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/485))
 
-
 ## 1.11.0 (October 29, 2018)
 
 FEATURES
 
-* __New Resource__: `openstack_networking_trunk_v2` ([#446](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/446))
-* __New Resource__: `openstack_compute_flavor_access_v2` ([#447](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/447))
+* **New Resource**: `openstack_networking_trunk_v2` ([#446](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/446))
+* **New Resource**: `openstack_compute_flavor_access_v2` ([#447](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/447))
 
 IMPROVEMENTS
 
@@ -1241,8 +1232,8 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `openstack_containerinfra_cluster_v1` ([#421](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/421))
-* __New Data Source__: `openstack_containerinfra_clustertemplate_v1` ([#415](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/415))
+* **New Resource**: `openstack_containerinfra_cluster_v1` ([#421](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/421))
+* **New Data Source**: `openstack_containerinfra_clustertemplate_v1` ([#415](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/415))
 
 IMPROVEMENTS
 
@@ -1259,10 +1250,10 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `openstack_objectstorage_tempurl_v1` ([#379](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/379))
-* __New Resource__: `openstack_containerinfra_clustertemplate_v1` ([#403](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/403))
-* __New Data Source__: `openstack_fw_policy_v1` ([#398](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/398))
-* __New Data Source__: `openstack_networking_router_v2` ([#401](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/401))
+* **New Resource**: `openstack_objectstorage_tempurl_v1` ([#379](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/379))
+* **New Resource**: `openstack_containerinfra_clustertemplate_v1` ([#403](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/403))
+* **New Data Source**: `openstack_fw_policy_v1` ([#398](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/398))
+* **New Data Source**: `openstack_networking_router_v2` ([#401](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/401))
 
 IMPROVEMENTS
 
@@ -1277,8 +1268,8 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 FEATURES
 
-* __New Data Source__: `openstack_identity_group_v3` ([#385](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/385))
-* __New Data Source__: `openstack_networking_floatingip_v2` ([#387](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/387))
+* **New Data Source**: `openstack_identity_group_v3` ([#385](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/385))
+* **New Data Source**: `openstack_networking_floatingip_v2` ([#387](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/387))
 
 IMPROVEMENTS
 
@@ -1294,7 +1285,7 @@ BUG FIXES
 
 FEATURES
 
-* __New Data Source__: `openstack_identity_endpoint_v3` ([#377](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/377))
+* **New Data Source**: `openstack_identity_endpoint_v3` ([#377](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/377))
 
 IMPROVEMENTS
 
@@ -1315,7 +1306,7 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource__: `openstack_vpnaas_site_connection_v2` ([#330](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/330))
+* **New Resource**: `openstack_vpnaas_site_connection_v2` ([#330](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/330))
 
 IMPROVEMENTS
 
@@ -1326,16 +1317,16 @@ IMPROVEMENTS
 
 FEATURES
 
-* __New Resource__: `openstack_blockstorage_volume_v3` ([#324](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/324))
-* __New Resource__: `openstack_blockstorage_volume_attach_v3` ([#324](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/324))
-* __New Resource__: `openstack_networking_subnet_route_v2` ([#314](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/314))
-* __New Resource__: `openstack_networking_floatingip_associate_v2` ([#313](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/313))
-* __New Resource__: `openstack_vpnaas_ipsec_policy_v2` ([#270](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/270))
-* __New Resource__: `openstack_vpnaas_service_v2` ([#300](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/300))
-* __New Resource__: `openstack_vpnaas_ike_policy_v2` ([#316](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/316))
-* __New Resource__: `openstack_vpnaas_endpoint_group_v2` ([#321](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/321))
-* __New Data Source__: `openstack_compute_keypair_v2` ([#307](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/307))
-* __New Data Source__: `openstack_identity_auth_scope_v3` ([#204](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/204))
+* **New Resource**: `openstack_blockstorage_volume_v3` ([#324](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/324))
+* **New Resource**: `openstack_blockstorage_volume_attach_v3` ([#324](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/324))
+* **New Resource**: `openstack_networking_subnet_route_v2` ([#314](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/314))
+* **New Resource**: `openstack_networking_floatingip_associate_v2` ([#313](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/313))
+* **New Resource**: `openstack_vpnaas_ipsec_policy_v2` ([#270](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/270))
+* **New Resource**: `openstack_vpnaas_service_v2` ([#300](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/300))
+* **New Resource**: `openstack_vpnaas_ike_policy_v2` ([#316](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/316))
+* **New Resource**: `openstack_vpnaas_endpoint_group_v2` ([#321](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/321))
+* **New Data Source**: `openstack_compute_keypair_v2` ([#307](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/307))
+* **New Data Source**: `openstack_identity_auth_scope_v3` ([#204](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/204))
 
 IMPROVEMENTS
 
@@ -1357,9 +1348,9 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 FEATURES
 
-* __New Resource__: `openstack_identity_role_assignment_v3` ([#265](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/265))
-* __New Data Source__: `openstack_identity_project_v3` ([#251](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/251))
-* __New Data Source__: `openstack_identity_user_v3` ([#252](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/252))
+* **New Resource**: `openstack_identity_role_assignment_v3` ([#265](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/265))
+* **New Data Source**: `openstack_identity_project_v3` ([#251](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/251))
+* **New Data Source**: `openstack_identity_user_v3` ([#252](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/252))
 
 IMPROVEMENTS
 
@@ -1383,10 +1374,10 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 FEATURES
 
-* __New Resource:__ `openstack_networking_subnetpool_v2` ([#243](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/243))
-* __New Resource:__ `openstack_identity_role_v3` ([#250](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/250))
-* __New Data Source:__ `openstack_networking_subnetpool_v2` ([#243](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/243))
-* __New Data Source:__ `openstack_identity_role_v3` ([#250](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/250))
+* **New Resource:** `openstack_networking_subnetpool_v2` ([#243](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/243))
+* **New Resource:** `openstack_identity_role_v3` ([#250](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/250))
+* **New Data Source:** `openstack_networking_subnetpool_v2` ([#243](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/243))
+* **New Data Source:** `openstack_identity_role_v3` ([#250](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/250))
 
 IMPROVEMENTS
 
@@ -1413,11 +1404,10 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 FEATURES
 
-* __New Resource:__ `openstack_db_database_v1` ([#179](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/179))
-* __New Resource:__ `openstack_db_user_v1` ([#180](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/180))
-* __New Resource:__ `openstack_db_configuration_v1` ([#185](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/185))
-* __New Data Source:__ `openstack_compute_flavor_v2` ([#190](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/190))
-
+* **New Resource:** `openstack_db_database_v1` ([#179](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/179))
+* **New Resource:** `openstack_db_user_v1` ([#180](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/180))
+* **New Resource:** `openstack_db_configuration_v1` ([#185](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/185))
+* **New Data Source:** `openstack_compute_flavor_v2` ([#190](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/190))
 
 IMPROVEMENTS
 
@@ -1442,8 +1432,8 @@ BUG FIXES
 
 FEATURES
 
-* __New Resource:__ `openstack_objectstorage_object_v1` ([#146](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/146))
-* __New Resource:__ `openstack_db_instance_v1` ([#155](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/155))
+* **New Resource:** `openstack_objectstorage_object_v1` ([#146](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/146))
+* **New Resource:** `openstack_db_instance_v1` ([#155](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/155))
 
 IMPROVEMENTS
 
@@ -1463,8 +1453,8 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 FEATURES
 
-* __New Data Source:__ `openstack_networking_subnet_v2` ([#135](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/135))
-* __New Data Source:__ `openstack_dns_zone_v2` ([#145](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/145))
+* **New Data Source:** `openstack_networking_subnet_v2` ([#135](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/135))
+* **New Data Source:** `openstack_dns_zone_v2` ([#145](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/145))
 
 IMPROVEMENTS
 
@@ -1479,13 +1469,13 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 IMPROVEMENTS
 
- * `openstack_networking_router_interface_v2` will now set `subnet_id` when importing ([#119](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/119))
- * `openstack_networking_router_route_v2` can now be imported ([#120](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/120))
- * `openstack_images_image_v2` resource and data source now supports reading and setting properties ([#113](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/113))
+* `openstack_networking_router_interface_v2` will now set `subnet_id` when importing ([#119](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/119))
+* `openstack_networking_router_route_v2` can now be imported ([#120](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/120))
+* `openstack_images_image_v2` resource and data source now supports reading and setting properties ([#113](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/113))
 
 BUG FIXES
 
-  * `openstack_networking_port_v2`: Fixed issues with how security groups and allowed address pairs are applied and updated [[#114](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/114)].
+* `openstack_networking_port_v2`: Fixed issues with how security groups and allowed address pairs are applied and updated [[#114](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/114)].
 
 ## 0.2.2 (September 15, 2017)
 
@@ -1495,13 +1485,14 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 FEATURES:
 
-* __New Data Source:__ `openstack_networking_secgroup_v2` ([#86](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/86))
-* __New Resource:__: `openstack_compute_flavor_v2` ([#83](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/83))
+* **New Data Source:** `openstack_networking_secgroup_v2` ([#86](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/86))
+* **New Resource:**: `openstack_compute_flavor_v2` ([#83](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/83))
 
 IMPROVEMENTS
- * Added `status` field to `openstack_networking_network_v2` data source ([#105](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/105))
- * `openstack_networking_router_v2` can now be imported ([#111](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/111))
- * `openstack_networking_router_interface_v2` can now be imported ([#112](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/112))
+
+* Added `status` field to `openstack_networking_network_v2` data source ([#105](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/105))
+* `openstack_networking_router_v2` can now be imported ([#111](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/111))
+* `openstack_networking_router_interface_v2` can now be imported ([#112](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/112))
 
 BUG FIXES
 
@@ -1533,8 +1524,8 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 FEATURES:
 
-* __New Resource:__ `openstack_identity_project_v3` ([#50](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/50))
-* __New Resource:__ `openstack_identity_user_v3` ([#52](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/52))
+* **New Resource:** `openstack_identity_project_v3` ([#50](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/50))
+* **New Resource:** `openstack_identity_user_v3` ([#52](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/52))
 
 IMPROVEMENTS:
 
@@ -1545,6 +1536,7 @@ IMPROVEMENTS:
 * `openstack_lb_loadbalancer_v2.provider` has been removed. See notes above. ([#65](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/65))
 
 BUG FIXES:
+
 * `openstack_lb_pool_v2` handling of `persistence` updated, `cookie_name` is now optional. ([#57](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/57))
 * `openstack_fw_firewall_v1.associated_routers` is now computed. ([#53](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/53))
 * All `openstack_fw_rule_v1` attributes are now passed during an update phase. ([#53](https://github.com/terraform-provider-openstack/terraform-provider-openstack/issues/53))
@@ -1559,7 +1551,6 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 * `floating_ip` has been removed from `openstack_compute_instance_v2`. You must now use `openstack_compute_floatingip_associate_v2` to associate a Floating IP with an Instance.
 * `volume` has been removed from `openstack_compute_instance_v2`. You must now use `openstack_compute_volume_attach_v2` to attach a Volume with an Instance.
 * `member` has been removed from `openstack_lb_pool_v1`. You must now use `openstack_lb_member_v1` to add a LBaaS v1 Member to a Pool.
-
 
 IMPROVEMENTS:
 

@@ -13,7 +13,7 @@ Manages a V2 Image resource within OpenStack Glance.
 
 ~> **Note:** All arguments including the source image URL password will be
 stored in the raw state as plain-text. [Read more about sensitive data in
-state](https://www.terraform.io/docs/language/state/sensitive-data.html).
+state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 
 ## Example Usage
 
@@ -120,7 +120,7 @@ The following attributes are exported:
 * `id` - A unique ID assigned by Glance.
 * `metadata` - The metadata associated with the image.
    Image metadata allow for meaningfully define the image properties
-   and tags. See https://docs.openstack.org/glance/latest/user/metadefs-concepts.html.
+   and tags. See <https://docs.openstack.org/glance/latest/user/metadefs-concepts.html>.
 * `min_disk_gb` - See Argument Reference above.
 * `min_ram_mb` - See Argument Reference above.
 * `name` - See Argument Reference above.
@@ -158,6 +158,6 @@ Image Service set it.
 
 Images can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_images_image_v2.rancheros 89c60255-9bd6-460c-822a-e2b959ede9d2
+```shell
+terraform import openstack_images_image_v2.rancheros 89c60255-9bd6-460c-822a-e2b959ede9d2
 ```

@@ -13,7 +13,7 @@ Manages a V1 DB instance resource within OpenStack.
 
 ~> **Note:** All arguments including the instance user password will be stored
 in the raw state as plain-text. [Read more about sensitive data in
-state](https://www.terraform.io/docs/language/state/sensitive-data.html).
+state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 
 ## Example Usage
 
