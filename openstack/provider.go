@@ -393,6 +393,7 @@ func Provider() *schema.Provider {
 			"openstack_lb_member_v2":                             dataSourceLBMemberV2(),
 			"openstack_lb_monitor_v2":                            dataSourceLBMonitorV2(),
 			"openstack_lb_pool_v2":                               dataSourceLBPoolV2(),
+			"openstack_workflow_cron_trigger_v2":                 dataSourceWorkflowCronTriggerV2(),
 			"openstack_workflow_workflow_v2":                     dataSourceWorkflowWorkflowV2(),
 		},
 
