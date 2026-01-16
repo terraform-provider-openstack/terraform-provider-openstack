@@ -7,7 +7,7 @@ description: |-
   Get information on a workflow.
 ---
 
-# openstack\_workflow\_workflow_v2
+# openstack\_workflow\_workflow\_v2
 
 Use this data source to get the ID of an available Mistral workflow.
 

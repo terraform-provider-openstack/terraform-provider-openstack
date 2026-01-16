@@ -65,7 +65,7 @@ The following attributes are exported:
 
 * `id` - The unique ID of the cron trigger.
 * `region` - See Argument Reference above.
-* `project_id` - The owner of the Cron Trigger.
+* `project_id` - The owner of the cron trigger.
 * `name` - See Argument Reference above.
 * `workflow_id` - See Argument Reference above.
 * `pattern` - See Argument Reference above.
