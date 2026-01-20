@@ -172,7 +172,6 @@ func TestAccLBV2Listener_hsts(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			t.Skip("Secret creation attempt not allowed - please review your user/project privileges")
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
 			testAccPreCheckLB(t)
