@@ -335,6 +335,12 @@ The following arguments are supported:
 
 * `name` - (Required) A unique name for the resource.
 
+* `hostname` - (Optional) The hostname used for the server. Note: This requires
+    compute microversion 2.90. With microversion 2.94 it allows the hostname to
+    be a FQDN with up to 255 characters. This information is published via the
+    metadata service and requires application such as cloud-init to propagate it
+    through to the instance.
+
 * `image_id` - (Optional; Required if `image_name` is empty and not booting
     from a volume. Do not specify if booting from a volume.) The image ID of
     the desired image for the server. Changing this rebuilds the existing
