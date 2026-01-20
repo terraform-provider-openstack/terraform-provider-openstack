@@ -4,10 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+	"os"
 	"regexp"
 	"testing"
+	"time"
 
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/backups"
 	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
@@ -143,11 +149,24 @@ func TestAccBlockStorageV3Volume_attachment(t *testing.T) {
 	})
 }
 
-// Test fails as devstack does not configure backup service properly
-// It can be tested locally by creating a backup from a volume first
-// and then exporting its ID to `OS_BACKUP_ID` env var.
 func TestAccBlockStorageV3VolumeFromBackup(t *testing.T) {
 	var volume volumes.Volume
+
+	volumeName := acctest.RandomWithPrefix("tf-acc-volume")
+	backupName := acctest.RandomWithPrefix("tf-acc-backup")
+
+	var volumeID, backupID string
+
+	if os.Getenv("TF_ACC") != "" {
+		var err error
+
+		volumeID, backupID, err = testAccBlockStorageV3CreateVolumeAndBackup(t.Context(), volumeName, backupName)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		defer testAccBlockStorageV3DeleteVolumeAndBackup(t, volumeID, backupID)
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -159,7 +178,7 @@ func TestAccBlockStorageV3VolumeFromBackup(t *testing.T) {
 		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy(t.Context()),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV3VolumeFromBackup(),
+				Config: testAccBlockStorageV3VolumeFromBackup(backupID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV3VolumeExists(t.Context(), "openstack_blockstorage_volume_v3.volume_1", &volume),
 					resource.TestCheckResourceAttr(
@@ -167,6 +186,113 @@ func TestAccBlockStorageV3VolumeFromBackup(t *testing.T) {
 				),
 			},
 		},
+	})
+}
+
+func testAccBlockStorageV3CreateVolumeAndBackup(ctx context.Context, volumeName, backupName string) (string, string, error) {
+	config, err := testAccAuthFromEnv(ctx)
+	if err != nil {
+		return "", "", err
+	}
+
+	bsClient, err := config.BlockStorageV3Client(ctx, osRegionName)
+	if err != nil {
+		return "", "", err
+	}
+
+	volCreateOpts := volumes.CreateOpts{
+		Size: 1,
+		Name: volumeName,
+	}
+
+	volume, err := volumes.Create(ctx, bsClient, volCreateOpts, nil).Extract()
+	if err != nil {
+		return "", "", err
+	}
+
+	ctx1, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
+
+	err = volumes.WaitForStatus(ctx1, bsClient, volume.ID, "available")
+	if err != nil {
+		return "", "", err
+	}
+
+	snapCreateOpts := backups.CreateOpts{
+		VolumeID: volume.ID,
+		Name:     backupName,
+	}
+
+	backup, err := backups.Create(ctx, bsClient, snapCreateOpts).Extract()
+	if err != nil {
+		return volume.ID, "", err
+	}
+
+	ctx2, cancel1 := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel1()
+
+	err = testAccBlockStorageV3BackupWaitForStatus(ctx2, bsClient, backup.ID, "available")
+	if err != nil {
+		return volume.ID, "", err
+	}
+
+	return volume.ID, backup.ID, nil
+}
+
+func testAccBlockStorageV3DeleteVolumeAndBackup(t *testing.T, volumeID, backupID string) {
+	config, err := testAccAuthFromEnv(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bsClient, err := config.BlockStorageV3Client(t.Context(), osRegionName)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = backups.Delete(t.Context(), bsClient, backupID).ExtractErr()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx1, cancel := context.WithTimeout(t.Context(), 60*time.Second)
+	defer cancel()
+
+	err = testAccBlockStorageV3BackupWaitForStatus(ctx1, bsClient, backupID, "DELETED")
+	if err != nil {
+		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+			t.Fatal(err)
+		}
+	}
+
+	err = volumes.Delete(t.Context(), bsClient, volumeID, nil).ExtractErr()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx2, cancel1 := context.WithTimeout(t.Context(), 60*time.Second)
+	defer cancel1()
+
+	err = volumes.WaitForStatus(ctx2, bsClient, volumeID, "DELETED")
+	if err != nil {
+		if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+			t.Fatal(err)
+		}
+	}
+}
+
+func testAccBlockStorageV3BackupWaitForStatus(ctx context.Context, c *gophercloud.ServiceClient, id, status string) error {
+	return gophercloud.WaitFor(ctx, func(ctx context.Context) (bool, error) {
+		current, err := backups.Get(ctx, c, id).Extract()
+		if err != nil {
+			return false, err
+		}
+
+		if current.Status == status {
+			return true, nil
+		}
+
+		return false, nil
 	})
 }
 
@@ -418,14 +544,14 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
 `, osNetworkID)
 }
 
-func testAccBlockStorageV3VolumeFromBackup() string {
+func testAccBlockStorageV3VolumeFromBackup(backupID string) string {
 	return fmt.Sprintf(`
 resource "openstack_blockstorage_volume_v3" "volume_1" {
   name = "volume_1"
   backup_id = "%s"
   size = 2
 }
-`, osBackupID)
+`, backupID)
 }
 
 func testAccBlockStorageV3VolumeRetype() string {
