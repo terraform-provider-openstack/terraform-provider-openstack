@@ -84,7 +84,7 @@ func dataSourceWorkflowWorkflowV2Read(ctx context.Context, d *schema.ResourceDat
 	name := d.Get("name").(string)
 	if name != "" {
 		listOpts.Name = &workflows.ListFilter{
-			Filter: "eq",
+			Filter: workflows.FilterEQ,
 			Value:  name,
 		}
 	}
@@ -92,7 +92,7 @@ func dataSourceWorkflowWorkflowV2Read(ctx context.Context, d *schema.ResourceDat
 	namespace := d.Get("namespace").(string)
 	if namespace != "" {
 		listOpts.Namespace = &workflows.ListFilter{
-			Filter: "eq",
+			Filter: workflows.FilterEQ,
 			Value:  namespace,
 		}
 	}
