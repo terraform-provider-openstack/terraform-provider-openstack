@@ -1,14 +1,17 @@
-name: Golangci-lint
+name: Lint
+
 on:
   push:
     branches:
       - main
   pull_request:
+
 permissions:
   contents: read
+
 jobs:
   golangci-lint:
-    name: Lint
+    name: Golang Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,3 +27,15 @@ jobs:
         uses: golangci/golangci-lint-action@v8
         with:
           version: 'v2.1'
+
+  markdown-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: DavidAnson/markdownlint-cli2-action@v22
+        with:
+          globs: '**/*.md'
+          config: '.github/.markdownlint-cli2.jsonc'

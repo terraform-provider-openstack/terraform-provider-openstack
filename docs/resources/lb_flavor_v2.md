@@ -17,17 +17,17 @@ Manages a V2 load balancer flavor resource within OpenStack.
 
 ```hcl
 resource "openstack_lb_flavorprofile_v2" "fp_1" {
-	name          = "test"
-	provider_name = "amphora"
-	flavor_data   = jsonencode({
-	  "loadbalancer_topology": "ACTIVE_STANDBY",
-	})
+  name          = "test"
+  provider_name = "amphora"
+  flavor_data   = jsonencode({
+    "loadbalancer_topology" : "ACTIVE_STANDBY",
+  })
 }
 
 resource "openstack_lb_flavor_v2" "flavor_1" {
-	name              = "test"
-	description       = "This is a test flavor"
-	flavor_profile_id = openstack_lb_flavorprofile_v2.fp_1.id
+  name              = "test"
+  description       = "This is a test flavor"
+  flavor_profile_id = openstack_lb_flavorprofile_v2.fp_1.id
 }
 ```
 
@@ -61,12 +61,12 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `flavor_profile_id` - See Argument Reference above.
 * `description` - See Argument Reference above.
-* `enabled` -  See Argument Reference above.
+* `enabled` - See Argument Reference above.
 
 ## Import
 
 flavors can be imported using their `id`. Example:
 
-```
-$ terraform import openstack_lb_flavor_v2.flavor_1 2a0f2240-c5e6-41de-896d-e80d97428d6b
+```shell
+terraform import openstack_lb_flavor_v2.flavor_1 2a0f2240-c5e6-41de-896d-e80d97428d6b
 ```

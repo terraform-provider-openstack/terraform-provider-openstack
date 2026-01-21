@@ -87,6 +87,6 @@ The following attributes are exported:
 
 Tap Mirrors can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_taas_tap_mirror_v2.tap_mirror_1 0837b488-f0e2-4689-99b3-e3ed531f9b10
+```shell
+terraform import openstack_taas_tap_mirror_v2.tap_mirror_1 0837b488-f0e2-4689-99b3-e3ed531f9b10
 ```
