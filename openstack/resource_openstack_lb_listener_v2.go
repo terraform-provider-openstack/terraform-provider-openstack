@@ -99,7 +99,7 @@ func resourceListenerV2() *schema.Resource {
 			},
 
 			"alpn_protocols": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true, // unsetting this parameter results in a default value
 				Elem: &schema.Schema{
@@ -246,7 +246,7 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		Description:             d.Get("description").(string),
 		DefaultTlsContainerRef:  d.Get("default_tls_container_ref").(string),
 		SniContainerRefs:        expandToStringSlice(d.Get("sni_container_refs").([]any)),
-		ALPNProtocols:           expandToStringSlice(d.Get("alpn_protocols").(*schema.Set).List()),
+		ALPNProtocols:           expandToStringSlice(d.Get("alpn_protocols").([]any)),
 		ClientAuthentication:    listeners.ClientAuthentication(d.Get("client_authentication").(string)),
 		ClientCATLSContainerRef: d.Get("client_ca_tls_container_ref").(string),
 		ClientCRLContainerRef:   d.Get("client_crl_container_ref").(string),
@@ -476,7 +476,7 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("alpn_protocols") {
 		hasChange = true
-		v := expandToStringSlice(d.Get("alpn_protocols").(*schema.Set).List())
+		v := expandToStringSlice(d.Get("alpn_protocols").([]any))
 		updateOpts.ALPNProtocols = &v
 	}
 
