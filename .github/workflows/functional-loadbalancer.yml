@@ -40,6 +40,9 @@ jobs:
     steps:
       - name: Checkout TPO
         uses: actions/checkout@v4
+      - name: Download Octavia Amphora test image
+        run: |
+          curl -Lso amphora-x64-haproxy.qcow2 https://tarballs.opendev.org/openstack/octavia/test-images/test-only-amphora-x64-haproxy-ubuntu-noble.qcow2
       - name: Deploy devstack
         uses: gophercloud/devstack-action@v0.19
         with:
@@ -48,6 +51,8 @@ jobs:
             enable_plugin octavia https://github.com/openstack/octavia ${{ matrix.openstack_version }}
             enable_plugin neutron https://github.com/openstack/neutron ${{ matrix.openstack_version }}
             enable_plugin barbican https://github.com/openstack/barbican ${{ matrix.openstack_version }}
+
+            OCTAVIA_AMP_IMAGE_FILE="${{ github.workspace }}/amphora-x64-haproxy.qcow2"
 
             ${{ matrix.devstack_conf_overrides }}
           enabled_services: 'octavia,o-api,o-cw,o-hk,o-hm,o-da,barbican-svc,barbican-retry,barbican-keystone-listener'
