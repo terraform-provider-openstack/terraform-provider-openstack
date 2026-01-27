@@ -45,6 +45,9 @@ data "openstack_networking_port_v2" "port_1" {
 
 * `fixed_ip` - (Optional) The port IP address filter.
 
+* `fixed_ips` - (Optional) The advanced port address filter. The structure is
+  described below.
+
 * `status` - (Optional) The status of the port.
 
 * `security_group_ids` - (Optional) The list of port security group IDs to filter.
@@ -53,6 +56,12 @@ data "openstack_networking_port_v2" "port_1" {
 
 * `dns_name` - (Optional) The port DNS name to filter. Available, when Neutron
     DNS extension is enabled.
+
+The `fixed_ips` block supports:
+
+* `subnet_id` - (Optional) Subnet in which the IP address is allocated.
+
+* `ip_address` - (Optional) IP address filter for this port.
 
 ## Attributes Reference
 
