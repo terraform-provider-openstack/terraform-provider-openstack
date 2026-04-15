@@ -382,8 +382,19 @@ The following arguments are supported:
 * `metadata` - (Optional) Metadata key/value pairs to make available from
     within the instance. Changing this updates the existing server metadata.
 
-* `config_drive` - (Optional) Whether to use the config_drive feature to
-    configure the instance. Changing this creates a new server.
+* `config_drive` - (Optional) Whether to attach a [config drive](https://docs.openstack.org/nova/latest/user/config-drive.html)
+    to the instance. A config drive is a small read-only disk that Nova attaches
+    at boot to deliver instance metadata. Defaults to `false`, in which case the guest
+    fetches metadata from the network metadata service at `169.254.169.254`.
+    Changing this creates a new server.
+
+    Common cases:
+
+      * The instance is attached to a subnet created with `enable_dhcp = false`.
+      * The tenant network is isolated and has no router or metadata agent
+        reaching it.
+      * The deployment uses an OpenStack downstream distribution or networking driver that
+        does not expose the metadata service on certain network types.
 
 * `admin_pass` - (Optional) The administrative password to assign to the server.
     Changing this changes the root password on the existing server.
