@@ -6,13 +6,13 @@ concurrency:
 on:
   pull_request:
     paths:
-      - '.github/workflows/functional-identity.yml'
-      - 'go.mod'
-      - 'openstack/**identity**'
-      - 'CHANGELOG.md'
-      - 'scripts/*'
+    - '.github/workflows/functional-identity.yml'
+    - 'go.mod'
+    - 'openstack/**identity**'
+    - 'CHANGELOG.md'
+    - 'scripts/*'
   schedule:
-    - cron: '0 0 */3 * *'
+  - cron: '0 0 */3 * *'
 permissions:
   contents: read
 jobs:
@@ -20,46 +20,46 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: ["master"]
-        openstack_version: ["master"]
-        ubuntu_version: ["24.04"]
+        name: [ "master" ]
+        openstack_version: [ "master" ]
+        ubuntu_version: [ "24.04" ]
         include:
-          - name: "flamingo"
-            openstack_version: "stable/2025.2"
-            ubuntu_version: "24.04"
-          - name: "epoxy"
-            openstack_version: "stable/2025.1"
-            ubuntu_version: "24.04"
-          - name: "dalmatian"
-            openstack_version: "stable/2024.2"
-            ubuntu_version: "22.04"
+        - name: "gazpacho"
+          openstack_version: "stable/2026.1"
+          ubuntu_version: "24.04"
+        - name: "flamingo"
+          openstack_version: "stable/2025.2"
+          ubuntu_version: "24.04"
+        - name: "epoxy"
+          openstack_version: "stable/2025.1"
+          ubuntu_version: "24.04"
     runs-on: ubuntu-${{ matrix.ubuntu_version }}
     name: Keystone on OpenStack ${{ matrix.name }}
     steps:
-      - name: Checkout TPO
-        uses: actions/checkout@v4
-      - name: Deploy devstack
-        uses: gophercloud/devstack-action@v0.19
-        with:
-          branch: ${{ matrix.openstack_version }}
-          enabled_services: 's-account,s-container,s-object,s-proxy'
-      - name: Checkout go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: 'go.mod'
-          cache: true
-      - name: Run TPO acceptance tests
-        run: ./scripts/acceptancetest.sh
-        env:
-          DEVSTACK_PATH: ${{ github.workspace }}/devstack
-          ACCEPTANCE_TESTS_FILTER: "identity"
-          OS_BRANCH: ${{ matrix.openstack_version }}
-      - name: Generate logs on failure
-        run: ./scripts/collectlogs.sh
-        if: failure()
-      - name: Upload logs artifacts on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: functional-basic-${{ matrix.name }}
-          path: /tmp/devstack-logs/*
+    - name: Checkout TPO
+      uses: actions/checkout@v6
+    - name: Deploy devstack
+      uses: gophercloud/devstack-action@v0.19
+      with:
+        branch: ${{ matrix.openstack_version }}
+        enabled_services: 's-account,s-container,s-object,s-proxy'
+    - name: Checkout go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: 'go.mod'
+        cache: true
+    - name: Run TPO acceptance tests
+      run: ./scripts/acceptancetest.sh
+      env:
+        DEVSTACK_PATH: ${{ github.workspace }}/devstack
+        ACCEPTANCE_TESTS_FILTER: "identity"
+        OS_BRANCH: ${{ matrix.openstack_version }}
+    - name: Generate logs on failure
+      run: ./scripts/collectlogs.sh
+      if: failure()
+    - name: Upload logs artifacts on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: functional-basic-${{ matrix.name }}
+        path: /tmp/devstack-logs/*
