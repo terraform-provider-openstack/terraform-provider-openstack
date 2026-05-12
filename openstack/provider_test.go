@@ -97,14 +97,6 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 	if osNetworkFlavorID == "" {
 		t.Fatal("OS_NETWORK_FLAVOR_ID must be set for acceptance tests")
 	}
-
-	if osDRAgentID == "" {
-		t.Fatal("OS_DRAGENT_ID must be set for acceptance tests")
-	}
-
-	if osDRAgentHost == "" {
-		t.Fatal("OS_DRAGENT_HOST must be set for acceptance tests")
-	}
 }
 
 func testAccPreCheck(t *testing.T) {
