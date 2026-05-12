@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/agents"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/bgp/speakers"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -81,6 +82,12 @@ func resourceNetworkingBGPSpeakerV2() *schema.Resource {
 			},
 
 			"peers": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"dragents": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -174,6 +181,22 @@ func resourceNetworkingBGPSpeakerV2Create(ctx context.Context, d *schema.Resourc
 		}
 	}
 
+	if d.Get("dragents") != nil {
+		dragents := expandToStringSlice(d.Get("dragents").(*schema.Set).List())
+		for _, dragent := range dragents {
+			log.Printf("[DEBUG] Adding dragent '%s' to openstack_networking_bgp_speaker_v2 '%s'", dragent, bgpSpeaker.ID)
+
+			err = agents.ScheduleBGPSpeaker(ctx, networkingClient, dragent, agents.ScheduleBGPSpeakerOpts{
+				SpeakerID: bgpSpeaker.ID,
+			}).ExtractErr()
+			if err != nil && !gophercloud.ResponseCodeIs(err, http.StatusConflict) {
+				return diag.Errorf("Error adding dragent '%s' to openstack_networking_bgp_speaker_v2: %s", dragent, err)
+			}
+
+			log.Printf("[DEBUG] Successfully added dragent '%s' to openstack_networking_bgp_speaker_v2 '%s'", dragent, bgpSpeaker.ID)
+		}
+	}
+
 	return resourceNetworkingBGPSpeakerV2Read(ctx, d, meta)
 }
 
@@ -204,6 +227,18 @@ func resourceNetworkingBGPSpeakerV2Read(ctx context.Context, d *schema.ResourceD
 
 	log.Printf("[DEBUG] Retrieved advertised routes for openstack_networking_bgp_speaker_v2: %#v", advertisedRoutes)
 
+	allPages, err = agents.ListDRAgentHostingBGPSpeakers(networkingClient, d.Id()).AllPages(ctx)
+	if err != nil {
+		return diag.Errorf("Error retrieving dragents for openstack_networking_bgp_speaker_v2: %s", err)
+	}
+
+	dragents, err := agents.ExtractAgents(allPages)
+	if err != nil {
+		return diag.Errorf("Error extracting dragents for openstack_networking_bgp_speaker_v2: %s", err)
+	}
+
+	log.Printf("[DEBUG] Retrieved dragents for openstack_networking_bgp_speaker_v2: %#v", advertisedRoutes)
+
 	d.Set("tenant_id", bgpSpeaker.TenantID)
 	d.Set("name", bgpSpeaker.Name)
 	d.Set("ip_version", bgpSpeaker.IPVersion)
@@ -214,6 +249,7 @@ func resourceNetworkingBGPSpeakerV2Read(ctx context.Context, d *schema.ResourceD
 	d.Set("peers", bgpSpeaker.Peers)
 	d.Set("advertised_routes", flattenBGPSpeakerAdvertisedRoutes(advertisedRoutes))
 	d.Set("region", GetRegion(d, config))
+	d.Set("dragents", flattenNetworkingAgents(dragents))
 
 	return nil
 }
@@ -270,7 +306,7 @@ func resourceNetworkingBGPSpeakerV2Update(ctx context.Context, d *schema.Resourc
 				NetworkID: v.(string),
 			}
 			err = speakers.RemoveGatewayNetwork(ctx, networkingClient, d.Id(), opts).ExtractErr()
-			if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+			if err != nil && !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return diag.Errorf("Error removing network '%s' from openstack_networking_bgp_speaker_v2: %s", v, err)
 			}
 
@@ -303,7 +339,7 @@ func resourceNetworkingBGPSpeakerV2Update(ctx context.Context, d *schema.Resourc
 				BGPPeerID: v.(string),
 			}
 			err = speakers.RemoveBGPPeer(ctx, networkingClient, d.Id(), peerOpts).ExtractErr()
-			if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+			if err != nil && !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 				return diag.Errorf("Error removing peer '%s' from openstack_networking_bgp_speaker_v2: %s", v, err)
 			}
 
@@ -321,6 +357,36 @@ func resourceNetworkingBGPSpeakerV2Update(ctx context.Context, d *schema.Resourc
 			}
 
 			log.Printf("[DEBUG] Successfully added peer '%s' to openstack_networking_bgp_speaker_v2 '%s'", v, d.Id())
+		}
+	}
+
+	if d.HasChange("dragents") {
+		o, n := d.GetChange("dragents")
+		oldAgents, newAgents := o.(*schema.Set), n.(*schema.Set)
+		agentsToDel := oldAgents.Difference(newAgents)
+		agentsToAdd := newAgents.Difference(oldAgents)
+
+		for _, v := range agentsToDel.List() {
+			log.Printf("[DEBUG] Removing dragent '%s' from openstack_networking_bgp_speaker_v2 '%s'", v, d.Id())
+			err = agents.RemoveBGPSpeaker(ctx, networkingClient, v.(string), d.Id()).ExtractErr()
+			if err != nil && !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+				return diag.Errorf("Error removing dragent '%s' from openstack_networking_bgp_speaker_v2: %s", v, err)
+			}
+
+			log.Printf("[DEBUG] Successfully removed dragent '%s' from openstack_networking_bgp_speaker_v2 '%s'", v, d.Id())
+		}
+
+		for _, v := range agentsToAdd.List() {
+			log.Printf("[DEBUG] Adding dragent '%s' to openstack_networking_bgp_speaker_v2 '%s'", v, d.Id())
+			agentOpts := agents.ScheduleBGPSpeakerOpts{
+				SpeakerID: d.Id(),
+			}
+			err = agents.ScheduleBGPSpeaker(ctx, networkingClient, v.(string), agentOpts).ExtractErr()
+			if err != nil && !gophercloud.ResponseCodeIs(err, http.StatusConflict) {
+				return diag.Errorf("Error adding dragent '%s' to openstack_networking_bgp_speaker_v2: %s", v, err)
+			}
+
+			log.Printf("[DEBUG] Successfully added dragent '%s' to openstack_networking_bgp_speaker_v2 '%s'", v, d.Id())
 		}
 	}
 
@@ -356,6 +422,16 @@ func flattenBGPSpeakerAdvertisedRoutes(routes []speakers.AdvertisedRoute) []map[
 			"next_hop":    route.NextHop,
 		}
 		flattened = append(flattened, flattenedRoute)
+	}
+
+	return flattened
+}
+
+func flattenNetworkingAgents(agents []agents.Agent) []string {
+	flattened := make([]string, 0, len(agents))
+
+	for _, agent := range agents {
+		flattened = append(flattened, agent.ID)
 	}
 
 	return flattened

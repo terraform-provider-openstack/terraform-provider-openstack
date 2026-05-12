@@ -55,11 +55,13 @@ jobs:
           enable_plugin neutron-dynamic-routing https://github.com/openstack/neutron-dynamic-routing ${{ matrix.openstack_version }}
 
           [[post-config|\$NEUTRON_CONF]]
+          [DEFAULT]
+          bgp_drscheduler_driver = neutron_dynamic_routing.services.bgp.scheduler.bgp_dragent_scheduler.StaticScheduler
           [oslo_policy]
           policy_dirs = /tmp/neutron-policies
           [service_providers]
           service_provider = L3_ROUTER_NAT:user-defined:neutron.services.ovn_l3.service_providers.user_defined.UserDefined
-        enabled_services: 'neutron-dhcp,neutron-dns,neutron-qos,neutron-segments,neutron-trunk,neutron-uplink-status-propagation,neutron-network-segment-range,neutron-port-forwarding'
+        enabled_services: 'neutron-dhcp,neutron-dns,neutron-qos,neutron-segments,neutron-trunk,neutron-uplink-status-propagation,neutron-network-segment-range,neutron-port-forwarding,q-dr,q-dr-agent'
     - name: Checkout go
       uses: actions/setup-go@v6
       with:
