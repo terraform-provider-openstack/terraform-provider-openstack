@@ -150,6 +150,7 @@ func dataSourceNetworkingBGPSpeakerV2Read(ctx context.Context, d *schema.Resourc
 			return diag.Errorf("No openstack_networking_bgp_speaker_v2 found with speaker_id %v", v)
 		}
 	}
+
 	if v, ok := d.GetOk("name"); ok {
 		if speaker.Name != v.(string) {
 			return diag.Errorf("No openstack_networking_bgp_speaker_v2 found with name %v", v)

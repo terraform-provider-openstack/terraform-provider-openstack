@@ -101,8 +101,7 @@ resource "openstack_networking_bgp_peer_v2" "peer_acc2" {
 }`
 
 func testAccOpenStackNetworkingBGPPeerV2DataSourceBGPPeerBasic() string {
-	return fmt.Sprintf(`
-%s`, testAccOpenStackNetworkingBGPPeerV2DataSourceBGPPeerPeer1)
+	return testAccOpenStackNetworkingBGPPeerV2DataSourceBGPPeerPeer1
 }
 
 func testAccOpenStackNetworkingBGPPeerV2DataSourceBasic() string {

@@ -109,6 +109,7 @@ func dataSourceNetworkingBGPPeerV2Read(ctx context.Context, d *schema.ResourceDa
 			return diag.Errorf("No openstack_networking_bgp_peer_v2 found with name %v", v)
 		}
 	}
+
 	if v, ok := d.GetOk("peer_id"); ok {
 		if peer.ID != v.(string) {
 			return diag.Errorf("No openstack_networking_bgp_peer_v2 found with peer_id %v", v)
