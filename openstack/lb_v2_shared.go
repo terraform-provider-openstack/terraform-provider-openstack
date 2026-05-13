@@ -198,6 +198,18 @@ func flattenLBPoolLoadbalancerIDsV2(loadbalancerIDs []pools.LoadBalancerID) []ma
 	return l
 }
 
+func expandLBAdditionalVIPsV2(raw []interface{}) []loadbalancers.AdditionalVip {
+	vips := make([]loadbalancers.AdditionalVip, len(raw))
+	for i, v := range raw {
+		m := v.(map[string]interface{})
+		vips[i] = loadbalancers.AdditionalVip{
+			SubnetID:  m["subnet_id"].(string),
+			IPAddress: m["ip_address"].(string),
+		}
+	}
+	return vips
+}
+
 func flattenLBAdditionalVIPsV2(additionalVIPs []loadbalancers.AdditionalVip) []map[string]any {
 	a := make([]map[string]any, len(additionalVIPs))
 
