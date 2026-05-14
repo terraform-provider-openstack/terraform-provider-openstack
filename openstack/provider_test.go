@@ -35,6 +35,8 @@ var (
 	osSwiftEnvironment           = os.Getenv("OS_SWIFT_ENVIRONMENT")
 	osLbEnvironment              = os.Getenv("OS_LB_ENVIRONMENT")
 	osLbFlavorName               = os.Getenv("OS_LB_FLAVOR_NAME")
+	osLbProvider                 = os.Getenv("OS_LB_PROVIDER")
+	osLbAvailabilityZone         = os.Getenv("OS_LB_AVAILABILITY_ZONE")
 	osFwEnvironment              = os.Getenv("OS_FW_ENVIRONMENT")
 	osVpnEnvironment             = os.Getenv("OS_VPN_ENVIRONMENT")
 	osBgpVpnEnvironment          = os.Getenv("OS_BGPVPN_ENVIRONMENT")

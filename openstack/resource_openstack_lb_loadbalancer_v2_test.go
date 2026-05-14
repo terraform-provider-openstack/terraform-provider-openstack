@@ -492,6 +492,82 @@ resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
 }
 `
 
+func TestAccLBV2LoadBalancer_additionalVips(t *testing.T) {
+	var lb loadbalancers.LoadBalancer
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckLB(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy(t.Context()),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLbV2LoadBalancerConfigAdditionalVips(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV2LoadBalancerExists(t.Context(),
+						"openstack_lb_loadbalancer_v2.loadbalancer_1", &lb),
+					resource.TestCheckResourceAttr(
+						"openstack_lb_loadbalancer_v2.loadbalancer_1", "additional_vips.#", "1"),
+					resource.TestCheckResourceAttrSet(
+						"openstack_lb_loadbalancer_v2.loadbalancer_1", "additional_vips.0.subnet_id"),
+					resource.TestCheckResourceAttrSet(
+						"openstack_lb_loadbalancer_v2.loadbalancer_1", "additional_vips.0.ip_address"),
+				),
+			},
+		},
+	})
+}
+
+func testAccLbV2LoadBalancerConfigAdditionalVips() string {
+	var providerLine, azLine string
+	if osLbProvider != "" {
+		providerLine = fmt.Sprintf("loadbalancer_provider = \"%s\"", osLbProvider)
+	}
+	if osLbAvailabilityZone != "" {
+		azLine = fmt.Sprintf("availability_zone = \"%s\"", osLbAvailabilityZone)
+	}
+
+	return fmt.Sprintf(`
+resource "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = openstack_networking_network_v2.network_1.id
+}
+
+resource "openstack_networking_subnet_v2" "subnet_2" {
+  name = "subnet_2"
+  cidr = "192.168.200.0/24"
+  ip_version = 4
+  network_id = openstack_networking_network_v2.network_1.id
+}
+
+resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
+  name = "loadbalancer_1"
+  vip_subnet_id = openstack_networking_subnet_v2.subnet_1.id
+  %s
+  %s
+
+  additional_vips {
+    subnet_id = openstack_networking_subnet_v2.subnet_2.id
+  }
+
+  timeouts {
+    create = "15m"
+    update = "15m"
+    delete = "15m"
+  }
+}
+`, providerLine, azLine)
+}
+
 const testAccLbV2LoadBalancerConfigVIPNetwork = `
 resource "openstack_networking_network_v2" "network_1" {
   name = "network_1"
