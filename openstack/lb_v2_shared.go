@@ -202,10 +202,14 @@ func expandLBAdditionalVIPsV2(raw []interface{}) []loadbalancers.AdditionalVip {
 	vips := make([]loadbalancers.AdditionalVip, len(raw))
 	for i, v := range raw {
 		m := v.(map[string]interface{})
-		vips[i] = loadbalancers.AdditionalVip{
-			SubnetID:  m["subnet_id"].(string),
-			IPAddress: m["ip_address"].(string),
+		vip := loadbalancers.AdditionalVip{
+			SubnetID: m["subnet_id"].(string),
 		}
+		// Only set IPAddress when explicitly provided
+		if ipAddr, ok := m["ip_address"]; ok && ipAddr.(string) != "" {
+			vip.IPAddress = ipAddr.(string)
+		}
+		vips[i] = vip
 	}
 	return vips
 }
