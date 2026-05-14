@@ -135,6 +135,7 @@ func resourceLoadBalancerV2() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
 			},
 
 			"additional_vips": {
