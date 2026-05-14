@@ -522,9 +522,11 @@ func TestAccLBV2LoadBalancer_additionalVips(t *testing.T) {
 
 func testAccLbV2LoadBalancerConfigAdditionalVips() string {
 	var providerLine, azLine string
+
 	if osLbProvider != "" {
 		providerLine = fmt.Sprintf("loadbalancer_provider = \"%s\"", osLbProvider)
 	}
+
 	if osLbAvailabilityZone != "" {
 		azLine = fmt.Sprintf("availability_zone = \"%s\"", osLbAvailabilityZone)
 	}

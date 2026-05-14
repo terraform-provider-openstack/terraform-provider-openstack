@@ -209,7 +209,7 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if v, ok := d.GetOk("additional_vips"); ok {
-		createOpts.AdditionalVips = expandLBAdditionalVIPsV2(v.([]interface{}))
+		createOpts.AdditionalVips = expandLBAdditionalVIPsV2(v.([]any))
 	}
 
 	log.Printf("[DEBUG] openstack_lb_loadbalancer_v2 create options: %#v", createOpts)
