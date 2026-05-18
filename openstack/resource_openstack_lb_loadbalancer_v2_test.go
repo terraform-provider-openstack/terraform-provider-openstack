@@ -544,16 +544,13 @@ resource "openstack_networking_subnet_v2" "subnet_1" {
   network_id = openstack_networking_network_v2.network_1.id
 }
 
-resource "openstack_networking_network_v2" "network_2" {
-  name = "network_2"
-  admin_state_up = "true"
-}
-
 resource "openstack_networking_subnet_v2" "subnet_2" {
   name = "subnet_2"
-  cidr = "192.168.200.0/24"
-  ip_version = 4
-  network_id = openstack_networking_network_v2.network_2.id
+  cidr = "fd12:3456:789a::/64"
+  ip_version = 6
+  network_id = openstack_networking_network_v2.network_1.id
+  ipv6_address_mode = "slaac"
+  ipv6_ra_mode = "slaac"
 }
 
 resource "openstack_lb_loadbalancer_v2" "loadbalancer_1" {
