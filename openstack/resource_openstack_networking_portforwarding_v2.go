@@ -91,41 +91,47 @@ func resourceNetworkPortForwardingV2Create(ctx context.Context, d *schema.Resour
 	fipID := d.Get("floatingip_id").(string)
 	createOpts := portforwarding.CreateOpts{
 		InternalIPAddress: d.Get("internal_ip_address").(string),
-		ExternalPort:      d.Get("external_port").(int),
-		ExternalPortRange: d.Get("external_port_range").(string),
-		InternalPort:      d.Get("internal_port").(int),
-		InternalPortRange: d.Get("internal_port_range").(string),
 		InternalPortID:    d.Get("internal_port_id").(string),
 		Protocol:          d.Get("protocol").(string),
 		Description:       d.Get("description").(string),
 	}
 
-	// XXX - Need to assert either external/internal port provider or port range
+	var base_ports = 0
+	var range_ports = 0
 	if v, ok := d.GetOk("external_port"); ok {
 		if v.(int) > 0 {
 			createOpts.ExternalPort = v.(int)
+			base_ports += 1
 		}
 	}
 
 	if v, ok := d.GetOk("internal_port"); ok {
 		if v.(int) > 0 {
 			createOpts.InternalPort = v.(int)
+			base_ports += 1
 		}
 	}
 
 	if v, ok := d.GetOk("external_port_range"); ok {
 		if v.(string) != "" {
 			createOpts.ExternalPortRange = v.(string)
+			range_ports += 1
 		}
 	}
 
 	if v, ok := d.GetOk("internal_port_range"); ok {
 		if v.(string) != "" {
 			createOpts.InternalPortRange = v.(string)
+			range_ports += 1
 		}
 	}
 
 	log.Printf("[DEBUG] openstack_networking_portforwarding_v2 create options: %#v", createOpts)
+
+	if ! (base_ports == 2 || range_ports == 2) {
+		err := "Either external_port/internal_port or external_port_range/internal_port_range must be specified"
+		return diag.Errorf("Error creating openstack_networking_portforwarding_v2: %s", err)
+	}
 
 	pf, err := portforwarding.Create(ctx, networkingClient, fipID, createOpts).Extract()
 	if err != nil {
