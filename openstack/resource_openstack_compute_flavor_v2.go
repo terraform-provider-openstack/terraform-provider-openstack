@@ -214,8 +214,10 @@ func resourceComputeFlavorV2Update(ctx context.Context, d *schema.ResourceData, 
 
 	if d.HasChange("description") {
 		hasChange = true
-		description := d.Get("description").(string)
-		updateOpts.Description = description
+		if v, ok := d.GetOk("description"); ok {
+			descriptionVal := v.(string)
+			updateOpts.Description = &descriptionVal
+		}
 		computeClient.Microversion = computeV2FlavorDescriptionMicroversion
 	}
 

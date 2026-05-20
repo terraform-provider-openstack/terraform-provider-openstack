@@ -131,20 +131,26 @@ func resourceLoadBalancerFlavorProfileV2Update(ctx context.Context, d *schema.Re
 
 	if d.HasChange("name") {
 		hasChange = true
-		name := d.Get("name").(string)
-		updateOpts.Name = name
+		if v, ok := d.GetOk("name"); ok {
+			nameVal := v.(string)
+			updateOpts.Name = &nameVal
+		}
 	}
 
 	if d.HasChange("provider_name") {
 		hasChange = true
-		providerName := d.Get("provider_name").(string)
-		updateOpts.ProviderName = providerName
+		if v, ok := d.GetOk("provider_name"); ok {
+			providerNameVal := v.(string)
+			updateOpts.ProviderName = &providerNameVal
+		}
 	}
 
 	if d.HasChange("flavor_data") {
 		hasChange = true
-		flavorData := d.Get("flavor_data").(string)
-		updateOpts.FlavorData = flavorData
+		if v, ok := d.GetOk("flavor_data"); ok {
+			flavorDataVal := v.(string)
+			updateOpts.FlavorData = &flavorDataVal
+		}
 	}
 
 	if hasChange {

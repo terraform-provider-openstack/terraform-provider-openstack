@@ -182,7 +182,10 @@ func resourceNetworkingSecGroupV2Update(ctx context.Context, d *schema.ResourceD
 
 	if d.HasChange("name") {
 		updated = true
-		updateOpts.Name = d.Get("name").(string)
+		if v, ok := d.GetOk("name"); ok {
+			nameVal := v.(string)
+			updateOpts.Name = &nameVal
+		}
 	}
 
 	if d.HasChange("description") {

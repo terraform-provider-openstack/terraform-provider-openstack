@@ -139,6 +139,6 @@ func dataSourceLBFlavorV2Attributes(d *schema.ResourceData, flavor *flavors.Flav
 	d.Set("name", flavor.Name)
 	d.Set("description", flavor.Description)
 	d.Set("flavor_id", flavor.ID)
-	d.Set("flavor_profile_id", flavor.FlavorProfileId)
+	d.Set("flavor_profile_id", flavor.FlavorProfileID)
 	d.Set("enabled", flavor.Enabled)
 }

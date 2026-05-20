@@ -116,7 +116,7 @@ func getTokenDetails(ctx context.Context, sc *gophercloud.ServiceClient) (authSc
 			return details, err
 		}
 	default:
-		res := tokens3.Get(ctx, sc, sc.TokenID)
+		res := tokens3.Get(ctx, sc, sc.TokenID, tokens3.GetOpts{})
 		if res.Err != nil {
 			return details, res.Err
 		}
@@ -160,7 +160,7 @@ func getTokenInfo(ctx context.Context, sc *gophercloud.ServiceClient) (authScope
 	case tokens3.CreateResult, tokens3.GetResult:
 		return getTokenInfoV3(r)
 	default:
-		token := tokens3.Get(ctx, sc, sc.TokenID)
+		token := tokens3.Get(ctx, sc, sc.TokenID, tokens3.GetOpts{})
 		if token.Err != nil {
 			return authScopeTokenInfo{}, token.Err
 		}

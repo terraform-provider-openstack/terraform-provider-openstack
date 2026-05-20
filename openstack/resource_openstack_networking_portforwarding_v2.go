@@ -49,12 +49,22 @@ func resourceNetworkingPortForwardingV2() *schema.Resource {
 
 			"internal_port": {
 				Type:     schema.TypeInt,
-				Required: true,
+				Optional: true,
+			},
+
+			"internal_port_range": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 
 			"external_port": {
 				Type:     schema.TypeInt,
-				Required: true,
+				Optional: true,
+			},
+
+			"external_port_range": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 
 			"protocol": {
@@ -82,10 +92,37 @@ func resourceNetworkPortForwardingV2Create(ctx context.Context, d *schema.Resour
 	createOpts := portforwarding.CreateOpts{
 		InternalIPAddress: d.Get("internal_ip_address").(string),
 		ExternalPort:      d.Get("external_port").(int),
+		ExternalPortRange: d.Get("external_port_range").(string),
 		InternalPort:      d.Get("internal_port").(int),
+		InternalPortRange: d.Get("internal_port_range").(string),
 		InternalPortID:    d.Get("internal_port_id").(string),
 		Protocol:          d.Get("protocol").(string),
 		Description:       d.Get("description").(string),
+	}
+
+	// XXX - Need to assert either external/internal port provider or port range
+	if v, ok := d.GetOk("external_port"); ok {
+		if v.(int) > 0 {
+			createOpts.ExternalPort = v.(int)
+		}
+	}
+
+	if v, ok := d.GetOk("internal_port"); ok {
+		if v.(int) > 0 {
+			createOpts.InternalPort = v.(int)
+		}
+	}
+
+	if v, ok := d.GetOk("external_port_range"); ok {
+		if v.(string) != "" {
+			createOpts.ExternalPortRange = v.(string)
+		}
+	}
+
+	if v, ok := d.GetOk("internal_port_range"); ok {
+		if v.(string) != "" {
+			createOpts.InternalPortRange = v.(string)
+		}
 	}
 
 	log.Printf("[DEBUG] openstack_networking_portforwarding_v2 create options: %#v", createOpts)
@@ -138,10 +175,21 @@ func resourceNetworkPortForwardingV2Read(ctx context.Context, d *schema.Resource
 	d.Set("description", pf.Description)
 	d.Set("internal_port_id", pf.InternalPortID)
 	d.Set("internal_ip_address", pf.InternalIPAddress)
-	d.Set("internal_port", pf.InternalPort)
-	d.Set("external_port", pf.ExternalPort)
 	d.Set("protocol", pf.Protocol)
 	d.Set("region", GetRegion(d, config))
+
+	if pf.InternalPort > 0 {
+		d.Set("internal_port", pf.InternalPort)
+	}
+	if pf.InternalPortRange != "" {
+		d.Set("internal_port_range", pf.InternalPortRange)
+	}
+	if pf.ExternalPort > 0 {
+		d.Set("external_port", pf.ExternalPort)
+	}
+	if pf.ExternalPortRange != "" {
+		d.Set("external_port_range", pf.ExternalPortRange)
+	}
 
 	return nil
 }
@@ -169,13 +217,29 @@ func resourceNetworkPortForwardingV2Update(ctx context.Context, d *schema.Resour
 	if d.HasChange("external_port") {
 		hasChange = true
 		externalPort := d.Get("external_port").(int)
-		updateOpts.ExternalPort = externalPort
+		if externalPort > 0 {
+			updateOpts.ExternalPort = externalPort
+		}
 	}
 
 	if d.HasChange("internal_port") {
 		hasChange = true
 		internalPort := d.Get("internal_port").(int)
-		updateOpts.InternalPort = internalPort
+		if internalPort > 0 {
+			updateOpts.InternalPort = internalPort
+		}
+	}
+
+	if d.HasChange("external_port_range") {
+		hasChange = true
+		externalPortRange := d.Get("external_port_range").(string)
+		updateOpts.ExternalPortRange = externalPortRange
+	}
+ 
+	if d.HasChange("internal_port_range") {
+		hasChange = true
+		internalPortRange := d.Get("internal_port_range").(string)
+		updateOpts.InternalPortRange = internalPortRange
 	}
 
 	if d.HasChange("protocol") {

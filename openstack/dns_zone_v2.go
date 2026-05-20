@@ -116,7 +116,7 @@ func getProjectFromToken(ctx context.Context, dnsClient *gophercloud.ServiceClie
 			return nil, err
 		}
 	default:
-		res := tokens.Get(ctx, dnsClient, dnsClient.TokenID)
+		res := tokens.Get(ctx, dnsClient, dnsClient.TokenID, tokens.GetOpts{})
 
 		project, err = res.ExtractProject()
 		if err != nil {
