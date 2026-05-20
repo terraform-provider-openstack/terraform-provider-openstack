@@ -5,7 +5,6 @@ go 1.25.8
 require (
 	github.com/google/go-cmp v0.7.0
 	github.com/gophercloud/gophercloud/v2 v2.12.0
-	github.com/gophercloud/utils/v2 v2.0.0-20250710092215-8f6f0255f600
 	github.com/hashicorp/terraform-plugin-log v0.10.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.38.1
 	github.com/hashicorp/terraform-plugin-testing v1.14.0
@@ -26,6 +25,7 @@ require (
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/gofrs/uuid/v5 v5.4.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/gophercloud/utils/v2 v2.0.0-20250710092215-8f6f0255f600
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
@@ -72,9 +72,3 @@ require (
 	google.golang.org/protobuf v1.36.9 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/gophercloud/gophercloud/v2 => ../gophercloud
-
-replace github.com/gophercloud/utils/v2 => ../gophercloudutils
-
-replace github.com/terraform-provider-openstack/utils/v2 => ../terraformutils
