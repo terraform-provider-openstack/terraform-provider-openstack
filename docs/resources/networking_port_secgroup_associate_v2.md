@@ -15,7 +15,10 @@ not created by Terraform (e.g. Manila or LBaaS).
 When the resource is deleted, Terraform doesn't delete the port, but unsets the
 list of user defined security group IDs.  However, if `enforce` is set to `true`
 and the resource is deleted, Terraform will remove all assigned security group
-IDs.
+IDs. Setting `skip_destroy` to `true` overrides both behaviors and leaves the
+port's security groups untouched on destroy — useful when the port (or the
+instance behind it) is managed by external tooling that will reprovision it,
+and the security groups must not be cleared in the meantime.
 
 ~> **Warning:** This resource should **not** be used when the
 port was created directly within Terraform. If it is, it can lead  
@@ -76,6 +79,31 @@ resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
 }
 ```
 
+### Enforce security groups but keep them on destroy
+
+When the port lifecycle is owned by an external system, the resource can
+enforce the exact list of security groups while it exists and skip clearing
+them when it is destroyed.
+
+```hcl
+data "openstack_networking_port_v2" "system_port" {
+  fixed_ip = "10.0.0.10"
+}
+
+data "openstack_networking_secgroup_v2" "secgroup" {
+  name = "secgroup"
+}
+
+resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
+  port_id      = data.openstack_networking_port_v2.system_port.id
+  enforce      = "true"
+  skip_destroy = "true"
+  security_group_ids = [
+    data.openstack_networking_secgroup_v2.secgroup.id,
+  ]
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -93,6 +121,13 @@ The following arguments are supported:
 
 * `enforce` - (Optional) Whether to replace or append the list of security
     groups, specified in the `security_group_ids`. Defaults to `false`.
+
+* `skip_destroy` - (Optional) If `true`, the port's security groups are left
+    untouched when the resource is destroyed. This is independent of
+    `enforce`, which still controls reconcile semantics on create and update.
+    Useful when the port (or the instance behind it) is managed by external
+    tooling and must retain its security groups across Terraform destroys.
+    Defaults to `false`.
 
 ## Attributes Reference
 

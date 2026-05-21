@@ -47,6 +47,12 @@ func resourceNetworkingPortSecGroupAssociateV2() *schema.Resource {
 				Default:  false,
 			},
 
+			"skip_destroy": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+
 			"all_security_group_ids": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -140,6 +146,7 @@ func resourceNetworkingPortSecGroupAssociateV2Read(ctx context.Context, d *schem
 	}
 
 	d.Set("enforce", enforce)
+	d.Set("skip_destroy", d.Get("skip_destroy"))
 	d.Set("port_id", d.Id())
 	d.Set("region", GetRegion(d, config))
 
@@ -210,6 +217,12 @@ func resourceNetworkingPortSecGroupAssociateV2Delete(ctx context.Context, d *sch
 	portID := d.Id()
 	config.Lock(portID)
 	defer config.Unlock(portID)
+
+	if d.Get("skip_destroy").(bool) {
+		log.Printf("[DEBUG] skip_destroy is set; leaving port %s security groups untouched", portID)
+
+		return nil
+	}
 
 	var updateOpts ports.UpdateOpts
 
