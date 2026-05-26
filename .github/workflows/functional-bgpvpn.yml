@@ -88,7 +88,7 @@ jobs:
       with:
         branch: ${{ matrix.openstack_version }}
         conf_overrides: |
-          Q_ML2_PLUGIN_EXT_DRIVERS=qos,port_security,dns_domain_keywords
+          enable_plugin neutron https://opendev.org/openstack/neutron ${{ matrix.openstack_version }}
           enable_plugin neutron-dynamic-routing https://github.com/openstack/neutron-dynamic-routing ${{ matrix.openstack_version }}
           enable_plugin networking-bgpvpn https://github.com/openstack/networking-bgpvpn.git ${{ matrix.openstack_version }}
 
