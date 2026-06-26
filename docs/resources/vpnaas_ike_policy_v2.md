@@ -37,11 +37,11 @@ The following arguments are supported:
 * `description` - (Optional) The human-readable description for the policy.
     Changing this updates the description of the existing policy.
 
-* `auth_algorithm` - (Optional) The authentication hash algorithm. Valid values are sha1, sha256, sha384, sha512,
-    aes-xcbc, aes-cmac. Default is sha1.
+* `auth_algorithm` - (Optional) The authentication hash algorithm. Valid values are sha256, sha384, sha512,
+    aes-xcbc, aes-cmac. Default is sha256.
     Changing this updates the algorithm of the existing policy.
 
-* `encryption_algorithm` - (Optional) The encryption algorithm. Valid values are 3des, aes-128, aes-192, aes-256,
+* `encryption_algorithm` - (Optional) The encryption algorithm. Valid values are aes-128, aes-192, aes-256,
     aes-KKK-ctr, aes-KKK-ccm-II, aes-KKK-gcm-II (with KKK = 128/192/256 bits key size and II = 8/12/16 octets ICV).
     The default value is aes-128. Changing this updates the existing policy.
 

@@ -47,7 +47,7 @@ func resourceIKEPolicyV2() *schema.Resource {
 			"auth_algorithm": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      "sha1",
+				Default:      "sha256",
 				ValidateFunc: resourceIKEPolicyV2AuthAlgorithm,
 			},
 			"encryption_algorithm": {
