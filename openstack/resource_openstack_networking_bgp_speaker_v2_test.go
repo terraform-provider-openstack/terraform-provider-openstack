@@ -6,13 +6,19 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/agents"
+	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/bgp/peers"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/bgp/speakers"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccNetworkingV2BGPSpeaker_basic(t *testing.T) {
-	var bgpSpeaker speakers.BGPSpeaker
+	var (
+		bgpSpeaker speakers.BGPSpeaker
+		bgpPeer    peers.BGPPeer
+		dragent    agents.Agent
+	)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -26,14 +32,18 @@ func TestAccNetworkingV2BGPSpeaker_basic(t *testing.T) {
 				Config: testAccNetworkingV2BGPSpeakerBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2BGPSpeakerExists(t.Context(), "openstack_networking_bgp_speaker_v2.speaker_1", &bgpSpeaker),
+					testAccCheckNetworkingV2BGPPeerExists(t.Context(), "openstack_networking_bgp_peer_v2.peer_1", &bgpPeer),
+					testAccCheckNetworkingV2AgentExists(t.Context(), "data.openstack_networking_agent_v2.dragent", &dragent),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_bgp_speaker_v2.speaker_1", "name", "speaker_1"),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_bgp_speaker_v2.speaker_1", "local_as", "1004"),
-					resource.TestCheckResourceAttr(
-						"openstack_networking_bgp_speaker_v2.speaker_1", "peers.#", "1"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_bgp_speaker_v2.speaker_1", "peers.0", &bgpPeer.ID),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_bgp_speaker_v2.speaker_1", "networks.#", "1"),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_networking_bgp_speaker_v2.speaker_1", "dragents.0", &dragent.ID),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_bgp_speaker_v2.speaker_1", "ip_version", "4"),
 					resource.TestCheckResourceAttr(
@@ -53,6 +63,8 @@ func TestAccNetworkingV2BGPSpeaker_basic(t *testing.T) {
 						"openstack_networking_bgp_speaker_v2.speaker_1", "peers.#", "0"),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_bgp_speaker_v2.speaker_1", "networks.#", "2"),
+					resource.TestCheckResourceAttr(
+						"openstack_networking_bgp_speaker_v2.speaker_1", "dragents.#", "0"),
 					resource.TestCheckResourceAttr(
 						"openstack_networking_bgp_speaker_v2.speaker_1", "advertise_floating_ip_host_routes", "false"),
 					resource.TestCheckResourceAttr(
@@ -121,6 +133,10 @@ func testAccCheckNetworkingV2BGPSpeakerExists(ctx context.Context, n string, spe
 }
 
 const testAccNetworkingV2BGPSpeakerBasic = `
+data "openstack_networking_agent_v2" "dragent" {
+  agent_type = "BGP dynamic routing agent"
+}
+
 resource "openstack_networking_network_v2" "network_1" {
   name           = "network_1"
   admin_state_up = true
@@ -144,6 +160,10 @@ resource "openstack_networking_bgp_speaker_v2" "speaker_1" {
 
   networks = [
     openstack_networking_network_v2.network_1.id,
+  ]
+
+  dragents = [
+    data.openstack_networking_agent_v2.dragent.id
   ]
 }
 `
@@ -169,5 +189,7 @@ resource "openstack_networking_bgp_speaker_v2" "speaker_1" {
     openstack_networking_network_v2.network_2.id,
     openstack_networking_network_v2.network_3.id,
   ]
+
+  dragents = []
 }
 `

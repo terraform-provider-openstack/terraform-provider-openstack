@@ -23,6 +23,8 @@ var (
 	osDNSEnvironment             = os.Getenv("OS_DNS_ENVIRONMENT")
 	osExtGwID                    = os.Getenv("OS_EXTGW_ID")
 	osNetworkFlavorID            = os.Getenv("OS_NETWORK_FLAVOR_ID")
+	osDRAgentID                  = os.Getenv("OS_DRAGENT_ID")
+	osDRAgentHost                = os.Getenv("OS_DRAGENT_HOST")
 	osFlavorID                   = os.Getenv("OS_FLAVOR_ID")
 	osFlavorName                 = os.Getenv("OS_FLAVOR_NAME")
 	osImageID                    = os.Getenv("OS_IMAGE_ID")

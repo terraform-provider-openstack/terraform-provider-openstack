@@ -12,7 +12,7 @@ description: |-
 Manages a V2 Neutron BGP Speaker resource within OpenStack.
 
 This resource allows you to configure a BGP speaker that can be associated with
-a BGP peer to exchange routing information.
+a BGP peer and a dynamic routing agent to exchange routing information.
 
 ## Example Usage
 
@@ -40,6 +40,10 @@ resource "openstack_networking_bgp_speaker_v2" "speaker_1" {
 
   peers = [
     opestack_networking_bgp_peer_v2.peer1.id,
+  ]
+
+  dragents = [
+    "0a06490e-3ab9-4dda-9588-e8b7215ff6f1",
   ]
 }
 ```
@@ -75,6 +79,8 @@ The following arguments are supported:
 
 * `peers` - (Optional) A list of BGP peer IDs to associate with the BGP speaker.
 
+* `dragents` - (Optional) A list of dynamic routing agent IDs to associate with the BGP speaker.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -92,6 +98,7 @@ The following attributes are exported:
   `next_hop` for each route advertised by the BGP speaker. This attribute is
   only populated after the BGP speaker has been created and has established BGP
   sessions with its peers.
+* `dragents` - See Argument Reference above.
 
 ## Import
 
