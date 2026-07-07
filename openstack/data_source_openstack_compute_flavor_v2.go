@@ -191,32 +191,32 @@ func dataSourceComputeFlavorV2Read(ctx context.Context, d *schema.ResourceData, 
 				}
 			}
 
-			// d.GetOk is used because 0 might be a valid choice.
-			if v, ok := d.GetOk("ram"); ok {
+			// d.GetOkExists is used because 0 might be a valid choice.
+			if v, ok := d.GetOkExists("ram"); ok {
 				if flavor.RAM != v.(int) {
 					continue
 				}
 			}
 
-			if v, ok := d.GetOk("vcpus"); ok {
+			if v, ok := d.GetOkExists("vcpus"); ok {
 				if flavor.VCPUs != v.(int) {
 					continue
 				}
 			}
 
-			if v, ok := d.GetOk("disk"); ok {
+			if v, ok := d.GetOkExists("disk"); ok {
 				if flavor.Disk != v.(int) {
 					continue
 				}
 			}
 
-			if v, ok := d.GetOk("swap"); ok {
+			if v, ok := d.GetOkExists("swap"); ok {
 				if flavor.Swap != v.(int) {
 					continue
 				}
 			}
 
-			if v, ok := d.GetOk("rx_tx_factor"); ok {
+			if v, ok := d.GetOkExists("rx_tx_factor"); ok {
 				if flavor.RxTxFactor != v.(float64) {
 					continue
 				}
