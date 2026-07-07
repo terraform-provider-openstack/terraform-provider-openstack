@@ -44,7 +44,7 @@ func resourceIPSecPolicyV2() *schema.Resource {
 			"auth_algorithm": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:     true,
+				Default:      "sha256",
 				ValidateFunc: resourceIPSecPolicyV2AuthAlgorithm,
 			},
 			"encapsulation_mode": {
@@ -62,7 +62,7 @@ func resourceIPSecPolicyV2() *schema.Resource {
 			"encryption_algorithm": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:     true,
+				Default:      "aes-128",
 				ValidateFunc: resourceIPSecPolicyV2EncryptionAlgorithm,
 			},
 			"description": {
