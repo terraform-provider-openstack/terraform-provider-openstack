@@ -259,15 +259,15 @@ func TestAccComputeV2FlavorDataSource_queryDiskZero(t *testing.T) {
 		ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FlavorDataSourceQueryDiskZero(flavorName),
+				Config: testAccComputeV2FlavorDataSourceQueryZeroValues(flavorName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "name", flavorName),
 					resource.TestCheckResourceAttr(
-						"data.openstack_compute_flavor_v2.flavor_1", "ram", "512"),
+						"data.openstack_compute_flavor_v2.flavor_1", "ram", "8192"),
 					resource.TestCheckResourceAttr(
-						"data.openstack_compute_flavor_v2.flavor_1", "vcpus", "1"),
+						"data.openstack_compute_flavor_v2.flavor_1", "vcpus", "2"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_compute_flavor_v2.flavor_1", "disk", "0"),
 				),
@@ -276,18 +276,19 @@ func TestAccComputeV2FlavorDataSource_queryDiskZero(t *testing.T) {
 	})
 }
 
-func testAccComputeV2FlavorDataSourceQueryDiskZero(flavorName string) string {
+func testAccComputeV2FlavorDataSourceQueryZeroValues(flavorName string) string {
 	return fmt.Sprintf(`
           resource "openstack_compute_flavor_v2" "flavor_1" {
             name = "%s"
-            ram = 512
-            vcpus = 1
+            ram = 8192
+            vcpus = 2
             disk = 0
             is_public = true
           }
 
           data "openstack_compute_flavor_v2" "flavor_1" {
-            name = openstack_compute_flavor_v2.flavor_1.name
+            vcpus = 2
+            ram = 8192
             disk = 0
           }
           `, flavorName)
