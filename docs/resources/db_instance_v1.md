@@ -27,7 +27,8 @@ resource "openstack_db_instance_v1" "test" {
   size      = 8
 
   network {
-    uuid = "c0612505-caf2-4fb0-b7cb-56a0240a2b12"
+    network_id = "c0612505-caf2-4fb0-b7cb-56a0240a2b12"
+    subnet_id  = "25ea4ca0-6f57-4dc6-947b-012e9bdf1f3a"
   }
 
   datastore {
@@ -54,8 +55,7 @@ The following arguments are supported:
 
 * `size` - (Required) Specifies the volume size in GB. Changing this creates new instance.
 
-* `volume_type` - (Optional) Specifies the volume type to use. If you want to
-  specify a volume type, you must also specify a volume size. Changing this
+* `volume_type` - (Optional) Specifies the volume type to use. Changing this
   creates new instance.
 
 * `datastore` - (Required) An array of database engine type and version. The datastore
@@ -80,17 +80,38 @@ The `datastore` block supports:
 
 The `network` block supports:
 
-* `uuid` - (Required unless `port` is provided) The network UUID to
-    attach to the instance. Changing this creates a new instance.
+* `network_id` - (Optional) The network UUID to attach to the instance using
+    Trove's modern `network_id` NIC key. Changing this creates a new instance.
 
-* `port` - (Required unless `uuid` is provided) The port UUID of a
-    network to attach to the instance. Changing this creates a new instance.
+* `subnet_id` - (Optional) The subnet UUID to attach to the instance using
+    Trove's modern `subnet_id` NIC key. Changing this creates a new instance.
 
-* `fixed_ip_v4` - (Optional) Specifies a fixed IPv4 address to be used on this
-    network. Changing this creates a new instance.
+* `ip_address` - (Optional) Specifies a fixed IP address to be used on this
+    network using Trove's modern `ip_address` NIC key. Changing this creates a
+    new instance.
 
-* `fixed_ip_v6` - (Optional) Specifies a fixed IPv6 address to be used on this
-    network. Changing this creates a new instance.
+* `uuid` - (Optional; Deprecated) The network UUID to attach to the instance
+    using the legacy `net-id` NIC key. Use `network_id` for modern Trove
+    deployments. Changing this creates a new instance.
+
+* `port` - (Optional; Deprecated) The port UUID of a network to attach to the
+    instance using the legacy `port-id` NIC key. Trove no longer supports
+    port-based NIC specification in modern deployments. Changing this creates a
+    new instance.
+
+* `fixed_ip_v4` - (Optional; Deprecated) Specifies a fixed IPv4 address using
+    the legacy `v4-fixed-ip` NIC key. Use `ip_address` for modern Trove
+    deployments. Changing this creates a new instance.
+
+* `fixed_ip_v6` - (Optional; Deprecated) Specifies a fixed IPv6 address using
+    the legacy `v6-fixed-ip` NIC key. Use `ip_address` for modern Trove
+    deployments. Changing this creates a new instance.
+
+~> **Note:** Do not mix legacy network fields (`uuid`, `port`, `fixed_ip_v4`,
+`fixed_ip_v6`) with modern network fields (`network_id`, `subnet_id`,
+`ip_address`) in the same `network` block. Modern Trove validates NICs against
+the `network_id`, `subnet_id`, and `ip_address` keys and rejects the legacy
+keys.
 
 The `user` block supports:
 
@@ -128,6 +149,9 @@ The following attributes are exported:
 * `configuration_id` - See Argument Reference above.
 * `datastore/type` - See Argument Reference above.
 * `datastore/version` - See Argument Reference above.
+* `network/network_id` - See Argument Reference above.
+* `network/subnet_id` - See Argument Reference above.
+* `network/ip_address` - See Argument Reference above.
 * `network/uuid` - See Argument Reference above.
 * `network/port` - See Argument Reference above.
 * `network/fixed_ip_v4` - The Fixed IPv4 address of the Instance on that
