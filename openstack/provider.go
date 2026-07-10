@@ -503,6 +503,7 @@ func Provider() *schema.Provider {
 			"openstack_sharedfilesystem_share_v2":                resourceSharedFilesystemShareV2(),
 			"openstack_sharedfilesystem_share_access_v2":         resourceSharedFilesystemShareAccessV2(),
 			"openstack_sharedfilesystem_sharetype_v2":            resourceSharedFilesystemShareTypeV2(),
+			"openstack_sharedfilesystem_sharetype_access_v2":     resourceSharedFilesystemShareTypeAccessV2(),
 			"openstack_keymanager_secret_v1":                     resourceKeyManagerSecretV1(),
 			"openstack_keymanager_container_v1":                  resourceKeyManagerContainerV1(),
 			"openstack_keymanager_order_v1":                      resourceKeyManagerOrderV1(),
