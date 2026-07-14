@@ -92,7 +92,10 @@ func resourceSharedFilesystemShareTypeV2ExtraSpecs(d *schema.ResourceData) (shar
 		return opts, nil, fmt.Errorf("driver_handles_share_servers must be a boolean value: %s", err)
 	}
 
-	opts.DriverHandlesShareServers = dhssBool
+	// There is an open issue in gophercloud v2 where creating a share type will fail if
+	// driver_handles_share_servers is false. Work around this by setting it to true, then
+	// updating it to the desired value with SetExtraSpecs.
+	opts.DriverHandlesShareServers = true
 
 	if ss, ok := raw["snapshot_support"]; ok {
 		ssBool, err := strconv.ParseBool(fmt.Sprintf("%v", ss))
@@ -104,6 +107,8 @@ func resourceSharedFilesystemShareTypeV2ExtraSpecs(d *schema.ResourceData) (shar
 	}
 
 	remaining := make(map[string]any)
+
+	remaining["driver_handles_share_servers"] = dhssBool
 
 	for k, v := range raw {
 		if k == "driver_handles_share_servers" || k == "snapshot_support" {
