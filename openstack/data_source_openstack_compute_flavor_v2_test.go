@@ -287,7 +287,7 @@ resource "openstack_compute_flavor_v2" "flavor_1" {
 }
 
 data "openstack_compute_flavor_v2" "flavor_1" {
-  vcpus = 1
+  vcpus = openstack_compute_flavor_v2.flavor_1.vcpus
   ram   = 512
   disk  = 0
 }
