@@ -247,3 +247,49 @@ func testAccComputeV2FlavorDataSourceFlavorID(flavorName string) string {
           }
           `, flavorResource)
 }
+
+func TestAccComputeV2FlavorDataSource_queryDiskZero(t *testing.T) {
+	flavorName := acctest.RandomWithPrefix("tf-acc-flavor")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2FlavorDataSourceZeroDisk(flavorName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2FlavorDataSourceID("data.openstack_compute_flavor_v2.flavor_1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_compute_flavor_v2.flavor_1", "name", flavorName),
+					resource.TestCheckResourceAttr(
+						"data.openstack_compute_flavor_v2.flavor_1", "ram", "512"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_compute_flavor_v2.flavor_1", "vcpus", "1"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_compute_flavor_v2.flavor_1", "disk", "0"),
+				),
+			},
+		},
+	})
+}
+
+func testAccComputeV2FlavorDataSourceZeroDisk(flavorName string) string {
+	return fmt.Sprintf(`
+resource "openstack_compute_flavor_v2" "flavor_1" {
+  name      = "%s"
+  ram       = 512
+  vcpus     = 1
+  disk      = 0
+  is_public = true
+}
+
+data "openstack_compute_flavor_v2" "flavor_1" {
+  vcpus = openstack_compute_flavor_v2.flavor_1.vcpus
+  ram   = 512
+  disk  = 0
+}
+`, flavorName)
+}
