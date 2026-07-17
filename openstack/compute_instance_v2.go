@@ -14,6 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
@@ -494,4 +495,34 @@ func computeV2InstanceUpdateTags(d *schema.ResourceData) []string {
 
 func computeV2InstanceTags(d *schema.ResourceData) []string {
 	return expandObjectTags(d)
+}
+
+func joinInstanceTags(tagsList []string) string {
+	clean := make([]string, 0, len(tagsList))
+
+	for _, t := range tagsList {
+		s := strings.TrimSpace(t)
+		if s != "" {
+			clean = append(clean, s)
+		}
+	}
+
+	return strings.Join(clean, ",")
+}
+
+func expandInstanceTagsList(i any) []string {
+	if i == nil {
+		return nil
+	}
+
+	items := i.([]any)
+	result := make([]string, 0, len(items))
+
+	for _, item := range items {
+		if s, ok := item.(string); ok && strings.TrimSpace(s) != "" {
+			result = append(result, strings.TrimSpace(s))
+		}
+	}
+
+	return result
 }
