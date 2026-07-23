@@ -119,7 +119,9 @@ The following arguments are supported:
 
 The `secret_refs` block supports:
 
-* `name` - (Optional) The name of the secret reference. The reference names must correspond the container type, more details are available [here](https://docs.openstack.org/barbican/stein/api/reference/containers.html).
+* `name` - The name of the secret reference.
+  The reference name must correspond the container type. See the
+  [Barbican container reference documentation][barbican-containers].
 
 * `secret_ref` - (Required) The secret reference / where to find the secret, URL.
 
@@ -161,6 +163,8 @@ The `consumers` block supports:
 
 Containers can be imported using the container id (the last part of the container reference), e.g.:
 
+```shell
+terraform import openstack_keymanager_container_v1.container_1 0c6cd26a-c012-4d7b-8034-057c0f1c2953
 ```
-$ terraform import openstack_keymanager_container_v1.container_1 0c6cd26a-c012-4d7b-8034-057c0f1c2953
-```
+
+[barbican-containers]: https://docs.openstack.org/barbican/latest/api/reference/containers.html

@@ -34,6 +34,9 @@ fmtcheck:
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
 
+lint-markdown:
+	markdownlint-cli2 --config .github/.markdownlint-cli2.jsonc
+
 test-compile:
 	@if [ "$(TEST)" = "./..." ]; then \
 		echo "ERROR: Set TEST to a specific package. For example,"; \

@@ -74,6 +74,6 @@ The following attributes are exported:
 
 Keypairs can be imported using the `name`, e.g.
 
-```
-$ terraform import openstack_compute_keypair_v2.my-keypair test-keypair
+```shell
+terraform import openstack_compute_keypair_v2.my-keypair test-keypair
 ```

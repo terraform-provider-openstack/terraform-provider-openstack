@@ -13,7 +13,7 @@ Manages a V2 load balancer flavorprofile resource within OpenStack.
 
 ~> **Note:** This usually requires admin privileges.
 
-## Example Usage 
+## Example Usage
 
 ### Using jsonencode
 
@@ -22,7 +22,7 @@ resource "openstack_lb_flavorprofile_v2" "flavorprofile_1" {
   name          = "amphora-single-profile"
   provider_name = "amphora"
   flavor_data   = jsonencode({
-    "loadbalancer_topology": "SINGLE",
+    "loadbalancer_topology" : "SINGLE",
   })
 }
 ```
@@ -69,6 +69,7 @@ The following attributes are exported:
 ## Import
 
 flavorprofiles can be imported using their `id`. Example:
-```
-$ terraform import openstack_lb_flavorprofile_v2.flavorprofile_1 2a0f2240-c5e6-41de-896d-e80d97428d6b
+
+```shell
+terraform import openstack_lb_flavorprofile_v2.flavorprofile_1 2a0f2240-c5e6-41de-896d-e80d97428d6b
 ```
