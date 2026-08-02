@@ -155,6 +155,7 @@ linters:
             - github.com/mitchellh/go-homedir
             - github.com/hashicorp/terraform-plugin-log
             - github.com/hashicorp/terraform-plugin-sdk/v2
+            - github.com/hashicorp/go-cty
             - github.com/ulikunitz/xz
             - github.com/klauspost/compress
             - gopkg.in/yaml.v2
