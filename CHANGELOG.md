@@ -1,3 +1,27 @@
+## 3.5.0 (UNRELEASED)
+
+NOTES
+
+* CI: Add `gazpacho` jobs and remove `dalmatian` ([#2027](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/2027))
+* Deprecate SHA1 and 3DES crypto algorithms in VPNaaS resources ([#2045](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/2045))
+
+IMPROVEMENTS
+
+* Add BGP speaker DR-agent association and BGP data sources ([#2028](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/2028))
+* Add `openstack_workflow_cron_trigger_v2` resource ([#1996](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1996))
+* Add `openstack_workflow_cron_trigger_v2` data source ([#2011](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/2011))
+* Add data source for LB Monitor ([#2001](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/2001))
+* Add data source for LB Member ([#1968](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1968))
+* Add router flavor ID option for networking routers ([#1991](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1991))
+* Improve compute resource microversion handling ([#2008](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/2008))
+* Clarify when `config_drive` is required on `openstack_compute_instance_v2` ([#2025](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/2025))
+
+BUG FIXES
+
+* Bump gophercloud to v2.13.0 to remove client-side 300GB limit on `openstack_db_instance_v1` size ([#2044](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/2044))
+* Fix zero-value handling in `openstack_compute_flavor_v2` data source ([#2051](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/2051))
+* Fix read-only image properties check ([#1998](https://github.com/terraform-provider-openstack/terraform-provider-openstack/pull/1998))
+
 ## 3.4.0 (11 November, 2025)
 
 NOTES
