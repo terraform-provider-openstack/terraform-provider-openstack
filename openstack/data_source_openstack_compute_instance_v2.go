@@ -23,46 +23,90 @@ func dataSourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+
 			"id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ExactlyOneOf: []string{"name"},
 			},
+
 			"name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ExactlyOneOf: []string{"id"},
 			},
+
+			"tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"tags_all": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"tags_any": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"not_tags_all": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"not_tags_any": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
 			"image_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"image_name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"flavor_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"flavor_name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"user_data": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				// just stash the hash for state & diff comparisons
 			},
+
 			"security_groups": {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
+
 			"availability_zone": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"network": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -96,35 +140,37 @@ func dataSourceComputeInstanceV2() *schema.Resource {
 					},
 				},
 			},
+
 			"access_ip_v4": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"access_ip_v6": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"key_pair": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"metadata": {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
+
 			"power_state": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"tags": {
-				Type:     schema.TypeSet,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
+
 			"created": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
 			"updated": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -148,15 +194,74 @@ func dataSourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData
 		return diag.Errorf("Error creating OpenStack image client: %s", err)
 	}
 
-	id := d.Get("id").(string)
-	log.Printf("[DEBUG] Attempting to retrieve server %s", id)
+	var server *servers.Server
 
-	server, err := servers.Get(ctx, computeClient, id).Extract()
-	if err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "server"))
+	var requiredMicroversion bool
+
+	if name, ok := d.GetOk("name"); ok {
+		listOpts := servers.ListOpts{
+			Name: name.(string),
+		}
+
+		if v, ok := d.GetOk("tags_all"); ok {
+			listOpts.Tags = joinInstanceTags(expandInstanceTagsList(v))
+			requiredMicroversion = true
+		}
+
+		if v, ok := d.GetOk("tags_any"); ok {
+			listOpts.TagsAny = joinInstanceTags(expandInstanceTagsList(v))
+			requiredMicroversion = true
+		}
+
+		if v, ok := d.GetOk("not_tags_all"); ok {
+			listOpts.NotTags = joinInstanceTags(expandInstanceTagsList(v))
+			requiredMicroversion = true
+		}
+
+		if v, ok := d.GetOk("not_tags_any"); ok {
+			listOpts.NotTagsAny = joinInstanceTags(expandInstanceTagsList(v))
+			requiredMicroversion = true
+		}
+
+		if requiredMicroversion {
+			computeClient.Microversion = computeV2TagsExtensionMicroversion
+		}
+
+		allPages, err := servers.List(computeClient, listOpts).AllPages(ctx)
+		if err != nil {
+			return diag.Errorf("Unable to query OpenStack instance: %s", err)
+		}
+
+		allServers, err := servers.ExtractServers(allPages)
+		if err != nil {
+			return diag.Errorf("Unable to retrieve Openstack inastance: %s", err)
+		}
+
+		if len(allServers) < 1 {
+			return diag.Errorf("Your query returned no results. " +
+				"Please change your search criteria and try again.")
+		}
+
+		if len(allServers) > 1 {
+			log.Printf("[DEBUG] Multiple results found: %#v", allServers)
+
+			return diag.Errorf("Your query returned more than one result. " +
+				"Please try a more specific search criteria")
+		}
+
+		server = &allServers[0]
 	}
 
-	log.Printf("[DEBUG] Retrieved Server %s: %+v", id, server)
+	if id, ok := d.GetOk("id"); ok {
+		log.Printf("[DEBUG] Attempting to retrieve server %s", id)
+
+		server, err = servers.Get(ctx, computeClient, id.(string)).Extract()
+		if err != nil {
+			return diag.FromErr(CheckDeleted(d, err, "server"))
+		}
+	}
+
+	log.Printf("[DEBUG] Retrieved Server %s: %+v", server.ID, server)
 
 	d.SetId(server.ID)
 
