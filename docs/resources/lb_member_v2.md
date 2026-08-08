@@ -61,7 +61,7 @@ The following arguments are supported:
 * `monitor_port` - (Optional) An alternate protocol port used for health monitoring a backend member.
   Available only for Octavia
 
-* `backup` - (Optional) Boolean that indicates whether that member works as a backup or not. Available 
+* `backup` - (Optional) Boolean that indicates whether that member works as a backup or not. Available
   only for Octavia >= 2.1.
 
 * `tags` - (Optional) A list of simple strings assigned to the member.
@@ -90,6 +90,6 @@ The following attributes are exported:
 Load Balancer Pool Member can be imported using the Pool ID and Member ID
 separated by a slash, e.g.:
 
-```
-$ terraform import openstack_lb_member_v2.member_1 c22974d2-4c95-4bcb-9819-0afc5ed303d5/9563b79c-8460-47da-8a95-2711b746510f
+```shell
+terraform import openstack_lb_member_v2.member_1 c22974d2-4c95-4bcb-9819-0afc5ed303d5/9563b79c-8460-47da-8a95-2711b746510f
 ```

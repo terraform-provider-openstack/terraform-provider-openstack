@@ -31,7 +31,6 @@ resource "openstack_compute_interface_attach_v2" "ai_1" {
   instance_id = openstack_compute_instance_v2.instance_1.id
   network_id  = openstack_networking_network_v2.network_1.id
 }
-
 ```
 
 ### Attachment Specifying a Fixed IP
@@ -52,9 +51,7 @@ resource "openstack_compute_interface_attach_v2" "ai_1" {
   network_id  = openstack_networking_port_v2.network_1.id
   fixed_ip    = "10.0.10.10"
 }
-
 ```
-
 
 ### Attachment Using an Existing Port
 
@@ -80,7 +77,6 @@ resource "openstack_compute_interface_attach_v2" "ai_1" {
   instance_id = openstack_compute_instance_v2.instance_1.id
   port_id     = openstack_networking_port_v2.port_1.id
 }
-
 ```
 
 ### Attaching Multiple Interfaces
@@ -173,13 +169,13 @@ The following attributes are exported:
 * `instance_id` - See Argument Reference above.
 * `port_id` - See Argument Reference above.
 * `network_id` - See Argument Reference above.
-* `fixed_ip`  - See Argument Reference above.
+* `fixed_ip` - See Argument Reference above.
 
 ## Import
 
 Interface Attachments can be imported using the Instance ID and Port ID
 separated by a slash, e.g.
 
-```
-$ terraform import openstack_compute_interface_attach_v2.ai_1 89c60255-9bd6-460c-822a-e2b959ede9d2/45670584-225f-46c3-b33e-6707b589b666
+```shell
+terraform import openstack_compute_interface_attach_v2.ai_1 89c60255-9bd6-460c-822a-e2b959ede9d2/45670584-225f-46c3-b33e-6707b589b666
 ```

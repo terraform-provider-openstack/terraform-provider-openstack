@@ -51,9 +51,9 @@ resource "openstack_fw_policy_v2" "policy_2" {
 }
 
 resource "openstack_fw_group_v2" "group_1" {
-  name      = "firewall_group"
+  name                       = "firewall_group"
   ingress_firewall_policy_id = openstack_fw_policy_v2.policy_1.id
-  egress_firewall_policy_id = openstack_fw_policy_v2.policy_2.id
+  egress_firewall_policy_id  = openstack_fw_policy_v2.policy_2.id
 }
 ```
 
@@ -124,6 +124,6 @@ The following attributes are exported:
 
 Firewall groups can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_fw_group_v2.group_1 c9e39fb2-ce20-46c8-a964-25f3898c7a97
+```shell
+terraform import openstack_fw_group_v2.group_1 c9e39fb2-ce20-46c8-a964-25f3898c7a97
 ```

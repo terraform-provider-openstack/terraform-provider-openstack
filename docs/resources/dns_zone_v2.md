@@ -37,7 +37,7 @@ The following arguments are supported:
   Changing this creates a new DNS zone.
 
 * `project_id` - (Optional) The ID of the project DNS zone is created
-  for, sets `X-Auth-Sudo-Tenant-ID` header (requires an assigned 
+  for, sets `X-Auth-Sudo-Tenant-ID` header (requires an assigned
   user role in target project).
 
 * `email` - (Optional) The email contact for the zone record.
@@ -81,7 +81,7 @@ The following attributes are exported:
 
 This resource can be imported by specifying the zone ID with optional project ID:
 
-```
-$ terraform import openstack_dns_zone_v2.zone_1 zone_id
-$ terraform import openstack_dns_zone_v2.zone_1 zone_id/project_id
+```shell
+terraform import openstack_dns_zone_v2.zone_1 zone_id
+terraform import openstack_dns_zone_v2.zone_1 zone_id/project_id
 ```

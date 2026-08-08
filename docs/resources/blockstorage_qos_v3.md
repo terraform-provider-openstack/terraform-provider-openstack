@@ -13,19 +13,17 @@ Manages a V3 block storage Quality-Of-Servirce (qos) resource within OpenStack.
 
 ~> **Note:** This usually requires admin privileges.
 
-
 ## Example Usage
 
 ```hcl
 resource "openstack_blockstorage_qos_v3" "qos" {
-  name = "foo"
+  name     = "foo"
   consumer = "back-end"
   specs = {
-		read_iops_sec  = "40000"
-		write_iops_sec = "40000"
-	}
+    read_iops_sec  = "40000"
+    write_iops_sec = "40000"
+  }
 }
-
 ```
 
 ## Argument Reference
@@ -57,6 +55,6 @@ The following attributes are exported:
 
 Qos can be imported using the `qos_id`, e.g.
 
-```
-$ terraform import openstack_blockstorage_qos_v3.qos 941793f0-0a34-4bc4-b72e-a6326ae58283
+```shell
+terraform import openstack_blockstorage_qos_v3.qos 941793f0-0a34-4bc4-b72e-a6326ae58283
 ```

@@ -65,7 +65,6 @@ In addition to the above, the following attributes are exported:
 
 * `updated` - The time when the instance was last updated.
 
-
 The `network` block is defined as:
 
 * `uuid` - The UUID of the network
@@ -79,4 +78,3 @@ The `network` block is defined as:
 * `port` - The port UUID for this network
 
 * `mac` - The MAC address assigned to this network interface.
-

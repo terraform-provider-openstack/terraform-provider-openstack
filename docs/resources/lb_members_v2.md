@@ -14,7 +14,6 @@ Manages a V2 members resource within OpenStack (batch members update).
 ~> **Note:** This resource has attributes that depend on octavia minor versions.
 Please ensure your Openstack cloud supports the required [minor version](../#octavia-api-versioning).
 
-
 ## Example Usage
 
 ```hcl
@@ -64,10 +63,10 @@ The `member` block supports:
   example, a member with a weight of 10 receives five times as much traffic
   as a member with a weight of 2. Defaults to 1.
 
-* `monitor_port` - (Optional) An alternate protocol port used for health 
+* `monitor_port` - (Optional) An alternate protocol port used for health
   monitoring a backend member.
 
-* `monitor_address` - (Optional) An alternate IP address used for health 
+* `monitor_address` - (Optional) An alternate IP address used for health
 monitoring a backend member.
 
 * `admin_state_up` - (Optional) The administrative state of the member.
@@ -88,6 +87,6 @@ The following attributes are exported:
 
 Load Balancer Pool Members can be imported using the Pool ID, e.g.:
 
-```
-$ terraform import openstack_lb_members_v2.members_1 c22974d2-4c95-4bcb-9819-0afc5ed303d5
+```shell
+terraform import openstack_lb_members_v2.members_1 c22974d2-4c95-4bcb-9819-0afc5ed303d5
 ```
