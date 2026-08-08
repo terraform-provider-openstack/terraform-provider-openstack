@@ -119,10 +119,12 @@ func resourceNetworkingPortV2() *schema.Resource {
 						"subnet_id": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"ip_address": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
