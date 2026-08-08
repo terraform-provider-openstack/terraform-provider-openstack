@@ -47,10 +47,9 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 			},
 
 			"size": {
-				Type:         schema.TypeInt,
-				Required:     true,
-				RequiredWith: []string{"volume_type"},
-				ForceNew:     true,
+				Type:     schema.TypeInt,
+				Required: true,
+				ForceNew: true,
 			},
 
 			"volume_type": {
@@ -87,21 +86,40 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"uuid": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
+							Type:       schema.TypeString,
+							Optional:   true,
+							ForceNew:   true,
+							Deprecated: "Use network_id for modern Trove deployments. uuid serializes the legacy net-id key.",
 						},
 						"port": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
+							Type:       schema.TypeString,
+							Optional:   true,
+							ForceNew:   true,
+							Deprecated: "Trove no longer supports port-based NIC specification in modern deployments.",
 						},
 						"fixed_ip_v4": {
+							Type:       schema.TypeString,
+							Optional:   true,
+							ForceNew:   true,
+							Deprecated: "Use ip_address for modern Trove deployments. fixed_ip_v4 serializes the legacy v4-fixed-ip key.",
+						},
+						"fixed_ip_v6": {
+							Type:       schema.TypeString,
+							Optional:   true,
+							ForceNew:   true,
+							Deprecated: "Use ip_address for modern Trove deployments. fixed_ip_v6 serializes the legacy v6-fixed-ip key.",
+						},
+						"network_id": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
 						},
-						"fixed_ip_v6": {
+						"subnet_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"ip_address": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
@@ -195,7 +213,7 @@ func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceDat
 		return diag.Errorf("Error creating OpenStack database client: %s", err)
 	}
 
-	createOpts := &instances.CreateOpts{
+	createOpts := &databaseInstanceV1CreateOpts{
 		FlavorRef: d.Get("flavor_id").(string),
 		Name:      d.Get("name").(string),
 		Size:      d.Get("size").(int),
@@ -215,9 +233,12 @@ func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceDat
 	createOpts.Datastore = &datastore
 
 	// networks
-	var networks []instances.NetworkOpts
+	var networks []databaseInstanceV1NetworkOpts
 	if v, ok := d.GetOk("network"); ok {
-		networks = expandDatabaseInstanceV1Networks(v.([]any))
+		networks, err = expandDatabaseInstanceV1Networks(v.([]any))
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	createOpts.Networks = networks
