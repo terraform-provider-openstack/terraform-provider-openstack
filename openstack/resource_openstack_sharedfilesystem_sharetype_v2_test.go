@@ -36,7 +36,7 @@ func TestAccSFSV2ShareType_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"openstack_sharedfilesystem_sharetype_v2.sharetype_1", "extra_specs.%", "1"),
 					resource.TestCheckResourceAttr(
-						"openstack_sharedfilesystem_sharetype_v2.sharetype_1", "extra_specs.driver_handles_share_servers", "true"),
+						"openstack_sharedfilesystem_sharetype_v2.sharetype_1", "extra_specs.driver_handles_share_servers", "false"),
 				),
 			},
 			{
@@ -153,7 +153,7 @@ resource "openstack_sharedfilesystem_sharetype_v2" "sharetype_1" {
   is_public   = true
 
   extra_specs = {
-    driver_handles_share_servers = "true"
+    driver_handles_share_servers = "false"
   }
 }
 `

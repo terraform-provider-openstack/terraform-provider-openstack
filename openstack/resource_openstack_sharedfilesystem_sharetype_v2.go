@@ -108,7 +108,7 @@ func resourceSharedFilesystemShareTypeV2ExtraSpecs(d *schema.ResourceData) (shar
 
 	remaining := make(map[string]any)
 
-	remaining["driver_handles_share_servers"] = dhssBool
+	remaining["driver_handles_share_servers"] = fmt.Sprintf("%t", dhssBool)
 
 	for k, v := range raw {
 		if k == "driver_handles_share_servers" || k == "snapshot_support" {
@@ -128,6 +128,7 @@ func resourceSharedFilesystemShareTypeV2Create(ctx context.Context, d *schema.Re
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
+	sfsClient.Microversion = sharedFilesystemV2ShareTypeMinMicroversion
 
 	name := d.Get("name").(string)
 	isPublic := d.Get("is_public").(bool)
@@ -166,8 +167,6 @@ func resourceSharedFilesystemShareTypeV2Create(ctx context.Context, d *schema.Re
 	// The Create call does not accept a description. If one was supplied,
 	// apply it with a follow-up Update call.
 	if v, ok := d.GetOk("description"); ok {
-		sfsClient.Microversion = sharedFilesystemV2ShareTypeMinMicroversion
-
 		description := v.(string)
 		updateOpts := sharetypes.UpdateOpts{Description: &description}
 
