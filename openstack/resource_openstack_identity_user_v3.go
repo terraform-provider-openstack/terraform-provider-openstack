@@ -159,12 +159,12 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 
 	// Add password here so it wouldn't go in the above log entry
 	if d.Get("password_wo") != nil {
-
 		if d.Get("password_wo_version") == nil {
 			return diag.Errorf("You must set password_wo_version if you set password_wo")
 		}
 
 		createOpts.Password = d.Get("password_wo").(string)
+
 	} else {
 		createOpts.Password = d.Get("password").(string)
 	}
@@ -294,6 +294,7 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 		if d.Get("password_wo") == nil {
 			return diag.Errorf("If you change the password_wo_version you must also define password_wo")
 		}
+
 		updateOpts.Password = d.Get("password_wo").(string)
 	}
 
