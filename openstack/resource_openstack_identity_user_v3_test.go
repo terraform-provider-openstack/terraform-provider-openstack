@@ -81,6 +81,19 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 						"openstack_identity_user_v3.user_1", "extra.email", "jdoe@foobar.com"),
 				),
 			},
+			{
+				Config: testAccIdentityV3UserWriteOnly(projectName, userName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3UserExists(t.Context(), "openstack_identity_user_v3.user_1", &user),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_1", &project),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_user_v3.user_1", "name", &user.Name),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_user_v3.user_1", "description", &user.Description),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_user_v3.user_1", "password_wo_version", "1"),
+				),
+			},
 		},
 	})
 }
@@ -153,6 +166,36 @@ func testAccIdentityV3UserBasic(projectName, userName string) string {
       name = "%s"
       description = "A user"
       password = "password123"
+      ignore_change_password_upon_first_use = true
+      multi_factor_auth_enabled = true
+
+      multi_factor_auth_rule {
+        rule = ["password", "totp"]
+      }
+
+      multi_factor_auth_rule {
+        rule = ["password", "custom-auth-method"]
+      }
+
+      extra = {
+        email = "jdoe@example.com"
+      }
+    }
+  `, projectName, userName)
+}
+
+func testAccIdentityV3UserWriteOnly(projectName, userName string) string {
+	return fmt.Sprintf(`
+    resource "openstack_identity_project_v3" "project_1" {
+      name = "%s"
+    }
+
+    resource "openstack_identity_user_v3" "user_1" {
+      default_project_id = openstack_identity_project_v3.project_1.id
+      name = "%s"
+      description = "A user"
+      password_wo = "password123"
+	  password_wo_version = 1
       ignore_change_password_upon_first_use = true
       multi_factor_auth_enabled = true
 

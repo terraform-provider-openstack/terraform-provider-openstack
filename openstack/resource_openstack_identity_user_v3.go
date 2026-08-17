@@ -65,6 +65,16 @@ func resourceIdentityUserV3() *schema.Resource {
 				Optional:  true,
 				Sensitive: true,
 			},
+			"password_wo": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+				WriteOnly: true,
+			},
+			"password_wo_version": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
 
 			// The following are all specific options that must
 			// be bundled into user.Options
@@ -114,6 +124,10 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
+	if d.Get("password_wo") != nil && d.Get("password") != nil {
+		return diag.Errorf("You should set password_wo or password and not both")
+	}
+
 	enabled := d.Get("enabled").(bool)
 	createOpts := users.CreateOpts{
 		DefaultProjectID: d.Get("default_project_id").(string),
@@ -144,7 +158,16 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("[DEBUG] openstack_identity_user_v3 create options: %#v", createOpts)
 
 	// Add password here so it wouldn't go in the above log entry
-	createOpts.Password = d.Get("password").(string)
+	if d.Get("password_wo") != nil {
+
+		if d.Get("password_wo_version") == nil {
+			return diag.Errorf("You must set password_wo_version if you set password_wo")
+		}
+
+		createOpts.Password = d.Get("password_wo").(string)
+	} else {
+		createOpts.Password = d.Get("password").(string)
+	}
 
 	user, err := users.Create(ctx, identityClient, createOpts).Extract()
 	if err != nil {
@@ -207,6 +230,10 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 
 	var updateOpts users.UpdateOpts
 
+	if d.HasChange("password_wo_version") && d.HasChange("password") {
+		return diag.Errorf("Error you should not use password_wo_version and password, you should update password_wo_version and password_wo")
+	}
+
 	if d.HasChange("default_project_id") {
 		hasChange = true
 		updateOpts.DefaultProjectID = d.Get("default_project_id").(string)
@@ -261,6 +288,13 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_identity_user_v3 %s update options: %#v", d.Id(), updateOpts)
+	}
+
+	if d.HasChange("password_wo_version") {
+		if d.Get("password_wo") == nil {
+			return diag.Errorf("If you change the password_wo_version you must also define password_wo")
+		}
+		updateOpts.Password = d.Get("password_wo").(string)
 	}
 
 	if d.HasChange("password") {
