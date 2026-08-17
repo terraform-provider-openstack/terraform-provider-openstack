@@ -164,7 +164,6 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 		}
 
 		createOpts.Password = d.Get("password_wo").(string)
-
 	} else {
 		createOpts.Password = d.Get("password").(string)
 	}
