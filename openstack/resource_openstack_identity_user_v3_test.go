@@ -90,6 +90,7 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 						"openstack_identity_user_v3.user_1", "name", &user.Name),
 					resource.TestCheckResourceAttrPtr(
 						"openstack_identity_user_v3.user_1", "description", &user.Description),
+					resource.TestCheckNoResourceAttr("openstack_identity_user_v3.user_1", "password_wo"),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_user_v3.user_1", "password_wo_version", "1"),
 				),
