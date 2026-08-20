@@ -58,6 +58,18 @@ func resourceIdentityApplicationCredentialV3() *schema.Resource {
 				ForceNew:  true,
 			},
 
+			"secret_wo": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				WriteOnly: true,
+			},
+
+			"secret_wo_version": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			"project_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -146,7 +158,13 @@ func resourceIdentityApplicationCredentialV3Create(ctx context.Context, d *schem
 
 	log.Printf("[DEBUG] openstack_identity_application_credential_v3 create options: %#v", createOpts)
 
-	createOpts.Secret = d.Get("secret").(string)
+	if d.Get("secret_wo") != nil && d.Get("secret") != nil {
+		return diag.Errorf("Either secret or secret_wo could be specified, specifying both could lead to an inconsistent view")
+	} else if d.Get("secret_wo") != nil {
+		createOpts.Secret = d.Get("secret_wo").(string)
+	} else {
+		createOpts.Secret = d.Get("secret").(string)
+	}
 
 	applicationCredential, err := applicationcredentials.Create(ctx, identityClient, tokenInfo.userID, createOpts).Extract()
 	if err != nil {
