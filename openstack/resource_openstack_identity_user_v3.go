@@ -68,12 +68,13 @@ func resourceIdentityUserV3() *schema.Resource {
 			"password_wo": {
 				Type:      schema.TypeString,
 				Optional:  true,
-				Sensitive: true,
 				WriteOnly: true,
+				ConflictsWith: []string{"password"},
 			},
 			"password_wo_version": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				ConflictsWith: []string{"password"},
 			},
 
 			// The following are all specific options that must
@@ -122,10 +123,6 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 	identityClient, err := config.IdentityV3Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack identity client: %s", err)
-	}
-
-	if d.Get("password_wo") != nil && d.Get("password") != nil {
-		return diag.Errorf("You should set password_wo or password and not both")
 	}
 
 	enabled := d.Get("enabled").(bool)
@@ -228,10 +225,6 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 	var hasChange bool
 
 	var updateOpts users.UpdateOpts
-
-	if d.HasChange("password_wo_version") && d.HasChange("password") {
-		return diag.Errorf("Error you should not use password_wo_version and password, you should update password_wo_version and password_wo")
-	}
 
 	if d.HasChange("default_project_id") {
 		hasChange = true
