@@ -59,16 +59,16 @@ func resourceIdentityApplicationCredentialV3() *schema.Resource {
 			},
 
 			"secret_wo": {
-				Type:      schema.TypeString,
-				Optional:  true,
-				WriteOnly: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				WriteOnly:     true,
 				ConflictsWith: []string{"secret"},
 			},
 
 			"secret_wo_version": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeInt,
+				Optional:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"secret"},
 			},
 
