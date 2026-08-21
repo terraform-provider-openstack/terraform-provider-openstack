@@ -160,14 +160,6 @@ func resourceIdentityApplicationCredentialV3Create(ctx context.Context, d *schem
 
 	log.Printf("[DEBUG] openstack_identity_application_credential_v3 create options: %#v", createOpts)
 
-	if d.Get("secret_wo") != nil && d.Get("secret") != nil {
-		return diag.Errorf("Either secret or secret_wo could be specified, specifying both could lead to an inconsistent view")
-	} else if d.Get("secret_wo") != nil {
-		createOpts.Secret = d.Get("secret_wo").(string)
-	} else {
-		createOpts.Secret = d.Get("secret").(string)
-	}
-
 	applicationCredential, err := applicationcredentials.Create(ctx, identityClient, tokenInfo.userID, createOpts).Extract()
 	if err != nil {
 		if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
