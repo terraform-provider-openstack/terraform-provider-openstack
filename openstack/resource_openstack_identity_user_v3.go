@@ -155,14 +155,15 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("[DEBUG] openstack_identity_user_v3 create options: %#v", createOpts)
 
 	// Add password here so it wouldn't go in the above log entry
-	if d.Get("password_wo") != nil {
-		if d.Get("password_wo_version") == nil {
+
+	if password, ok := d.GetOk("password"); ok {
+		createOpts.Password = password.(string)
+	} else if passwordWO, ok := d.GetOk("password_wo"); ok {
+		if _, okWOVersion := d.GetOk("password_wo_version"); okWOVersion {
+			createOpts.Password = passwordWO.(string)
+		} else {
 			return diag.Errorf("You must set password_wo_version if you set password_wo")
 		}
-
-		createOpts.Password = d.Get("password_wo").(string)
-	} else {
-		createOpts.Password = d.Get("password").(string)
 	}
 
 	user, err := users.Create(ctx, identityClient, createOpts).Extract()
