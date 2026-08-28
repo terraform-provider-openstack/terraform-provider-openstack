@@ -49,6 +49,10 @@ signs:
       # if you are using this is a GitHub action or some other automated pipeline, you
       # need to pass the batch flag to indicate its not interactive.
       - "--batch"
+      - "--faked-system-time"
+      - "{{ .Env.GPG_SIGN_TIME }}"
+      - "--digest-algo"
+      - "SHA256"
       - "--local-user"
       - "{{ .Env.GPG_FINGERPRINT }}" # set this environment variable for your signing key
       - "--output"
