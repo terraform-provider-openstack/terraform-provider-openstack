@@ -103,15 +103,15 @@ jobs:
                   "attributes": {"name": provider, "namespace": namespace, "registry-name": registry_name}}})
 
           version_url = api("organizations", org, "registry-providers", registry_name, namespace, provider, "versions", version)
+          # Always delete and recreate the version so we get fresh upload links
           try:
-              ver = req("GET", version_url)
-              print(f"Version {version} already exists")
-          except RuntimeError as exc:
-              if "404" not in str(exc): raise
-              print(f"Creating version {version}")
-              ver = req("POST", api("organizations", org, "registry-providers", registry_name, namespace, provider, "versions"),
-                  {"data": {"type": "registry-provider-versions",
-                      "attributes": {"version": version, "key-id": key_id, "protocols": protocols}}})
+              req("DELETE", version_url, ok=(200, 201, 204, 404))
+          except Exception:
+              pass
+          print(f"Creating version {version}")
+          ver = req("POST", api("organizations", org, "registry-providers", registry_name, namespace, provider, "versions"),
+              {"data": {"type": "registry-provider-versions",
+                  "attributes": {"version": version, "key-id": key_id, "protocols": protocols}}})
 
           links = (ver.get("data") or {}).get("links") or {}
           shasums = f"dist/{dist_name}_{version}_SHA256SUMS"
