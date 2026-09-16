@@ -69,6 +69,7 @@ func resourceIdentityUserV3() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				WriteOnly:     true,
+				Sensitive:     true,
 				ConflictsWith: []string{"password"},
 			},
 			"password_wo_version": {
