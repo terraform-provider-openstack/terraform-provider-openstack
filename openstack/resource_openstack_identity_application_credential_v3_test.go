@@ -56,6 +56,9 @@ func TestAccIdentityV3ApplicationCredential_basic(t *testing.T) {
 						"openstack_identity_application_credential_v3.app_cred_1", "description", &applicationCredential.Description),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_application_credential_v3.app_cred_1", "unrestricted", "true"),
+					resource.TestCheckNoResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_1", "secret",
+					),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_application_credential_v3.app_cred_1", "secret_wo_version", "1"),
 					resource.TestCheckResourceAttrSet(
