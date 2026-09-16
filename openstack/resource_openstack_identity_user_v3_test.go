@@ -17,10 +17,12 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 	var project projects.Project
 
 	projectName := "ACCPTTEST-" + acctest.RandString(5)
+	writeOnlyProjectName := "ACCPTTEST-" + acctest.RandString(5)
 
 	var user users.User
 
 	userName := "ACCPTTEST-" + acctest.RandString(5)
+	writeOnlyUsername := "ACCPTTEST-" + acctest.RandString(5)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -60,7 +62,7 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIdentityV3UserWriteOnly(projectName, userName),
+				Config: testAccIdentityV3UserWriteOnly(writeOnlyProjectName, writeOnlyUsername),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3UserExists(t.Context(), "openstack_identity_user_v3.user_1", &user),
 					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_1", &project),
