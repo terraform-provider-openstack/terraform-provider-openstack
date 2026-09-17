@@ -112,14 +112,6 @@ func resourceSharedFilesystemShareTypeAccessV2Delete(ctx context.Context, d *sch
 		return diag.FromErr(err)
 	}
 
-	// Make sure the access still exists before trying to remove it, so
-	// that a resource which has already been removed out-of-band (or a
-	// share type which no longer exists) does not surface as an error
-	// during "terraform destroy".
-	if _, err := getSharedFilesystemShareTypeAccess(ctx, sfsClient, shareTypeID, projectID); err != nil {
-		return diag.FromErr(CheckDeleted(d, err, "Error deleting openstack_sharedfilesystem_sharetype_access_v2"))
-	}
-
 	removeOpts := sharetypes.AccessOpts{
 		Project: projectID,
 	}
