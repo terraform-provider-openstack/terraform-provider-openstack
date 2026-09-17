@@ -62,22 +62,6 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIdentityV3UserWriteOnly(writeOnlyProjectName, writeOnlyUsername),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3UserExists(t.Context(), "openstack_identity_user_v3.user_2", &user),
-					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_2", &project),
-					resource.TestCheckResourceAttrPtr(
-						"openstack_identity_user_v3.user_2", "name", &user.Name),
-					resource.TestCheckResourceAttrPtr(
-						"openstack_identity_user_v3.user_2", "description", &user.Description),
-					resource.TestCheckNoResourceAttr(
-						"openstack_identity_user_v3.user_2", "password"),
-					resource.TestCheckNoResourceAttr("openstack_identity_user_v3.user_2", "password_wo"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_user_v3.user_2", "password_wo_version", "1"),
-				),
-			},
-			{
 				Config: testAccIdentityV3UserUpdate(projectName, userName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3UserExists(t.Context(), "openstack_identity_user_v3.user_1", &user),
@@ -97,6 +81,22 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 						"openstack_identity_user_v3.user_1", "multi_factor_auth_rule.0.rule.1", "totp"),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_user_v3.user_1", "extra.email", "jdoe@foobar.com"),
+				),
+			},
+			{
+				Config: testAccIdentityV3UserWriteOnly(writeOnlyProjectName, writeOnlyUsername),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3UserExists(t.Context(), "openstack_identity_user_v3.user_2", &user),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_2", &project),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_user_v3.user_2", "name", &user.Name),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_user_v3.user_2", "description", &user.Description),
+					resource.TestCheckNoResourceAttr(
+						"openstack_identity_user_v3.user_2", "password"),
+					resource.TestCheckNoResourceAttr("openstack_identity_user_v3.user_2", "password_wo"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_user_v3.user_2", "password_wo_version", "1"),
 				),
 			},
 		},
