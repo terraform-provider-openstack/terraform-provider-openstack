@@ -185,9 +185,12 @@ func resourceIdentityApplicationCredentialV3Create(ctx context.Context, d *schem
 
 	d.SetId(applicationCredential.ID)
 
-	if _, ok := d.GetOk("secret"); ok {
-		// Secret is returned only once, and will be persisted only if created using the secret argument, not the secret_wo
-		d.Set("secret", applicationCredential.Secret)
+	if _, ok := d.GetOk("secret_wo"); !ok {
+		if applicationCredential.Secret != "" {
+			if err := d.Set("secret", applicationCredential.Secret); err != nil {
+				return diag.FromErr(err)
+			}
+		}
 	}
 
 	return resourceIdentityApplicationCredentialV3Read(ctx, d, meta)
