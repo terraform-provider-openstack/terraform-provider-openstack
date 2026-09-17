@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strconv"
@@ -83,12 +84,12 @@ func resourceSharedFilesystemShareTypeV2ExtraSpecs(d *schema.ResourceData) (shar
 
 	dhss, ok := raw["driver_handles_share_servers"]
 	if !ok {
-		return opts, nil, fmt.Errorf("extra_specs must contain a driver_handles_share_servers key")
+		return opts, nil, errors.New("extra_specs must contain a driver_handles_share_servers key")
 	}
 
 	dhssBool, err := strconv.ParseBool(fmt.Sprintf("%v", dhss))
 	if err != nil {
-		return opts, nil, fmt.Errorf("driver_handles_share_servers must be a boolean value: %s", err)
+		return opts, nil, fmt.Errorf("driver_handles_share_servers must be a boolean value: %w", err)
 	}
 
 	// There is an open issue in gophercloud v2 where creating a share type will fail if
@@ -99,7 +100,7 @@ func resourceSharedFilesystemShareTypeV2ExtraSpecs(d *schema.ResourceData) (shar
 	if ss, ok := raw["snapshot_support"]; ok {
 		ssBool, err := strconv.ParseBool(fmt.Sprintf("%v", ss))
 		if err != nil {
-			return opts, nil, fmt.Errorf("snapshot_support must be a boolean value: %s", err)
+			return opts, nil, fmt.Errorf("snapshot_support must be a boolean value: %w", err)
 		}
 
 		opts.SnapshotSupport = &ssBool
@@ -107,7 +108,7 @@ func resourceSharedFilesystemShareTypeV2ExtraSpecs(d *schema.ResourceData) (shar
 
 	remaining := make(map[string]any)
 
-	remaining["driver_handles_share_servers"] = fmt.Sprintf("%t", dhssBool)
+	remaining["driver_handles_share_servers"] = strconv.FormatBool(dhssBool)
 
 	for k, v := range raw {
 		if k == "driver_handles_share_servers" || k == "snapshot_support" {
@@ -127,6 +128,7 @@ func resourceSharedFilesystemShareTypeV2Create(ctx context.Context, d *schema.Re
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
+
 	sfsClient.Microversion = sharedFilesystemV2ShareTypeMinMicroversion
 
 	name := d.Get("name").(string)
