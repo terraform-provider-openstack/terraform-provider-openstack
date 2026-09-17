@@ -225,6 +225,9 @@ func resourceSharedFilesystemShareTypeV2Update(ctx context.Context, d *schema.Re
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
 	}
+	// Update (and Show) share type support requires microversion 2.50
+	// or later.
+	sfsClient.Microversion = sharedFilesystemV2ShareTypeMinMicroversion
 
 	hasChange := false
 
@@ -249,10 +252,6 @@ func resourceSharedFilesystemShareTypeV2Update(ctx context.Context, d *schema.Re
 	}
 
 	if hasChange {
-		// Update (and Show) share type support requires microversion 2.50
-		// or later.
-		sfsClient.Microversion = sharedFilesystemV2ShareTypeMinMicroversion
-
 		log.Printf("[DEBUG] openstack_sharedfilesystem_sharetype_v2 %s update options: %#v", d.Id(), updateOpts)
 
 		if _, err := sharetypes.Update(ctx, sfsClient, d.Id(), updateOpts).Extract(); err != nil {
