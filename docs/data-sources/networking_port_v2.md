@@ -86,6 +86,10 @@ are exported:
 * `all_fixed_ips` - The collection of Fixed IP addresses on the port in the
   order returned by the Network v2 API.
 
+* `fixed_ips` - The collection of objects containing both IP addresses and
+  their corresponding subnet IDs on the port, in the order returned by the
+  Network v2 API. Extends the functionality of all_fixed_ips.
+
 * `all_security_group_ids` - The set of security group IDs applied on the port.
 
 * `all_tags` - The set of string tags applied on the port.
@@ -125,3 +129,7 @@ The `binding` attribute has fields below:
     specific binding.
 
 * `vif_type` - The VNIC type of the port binding.
+
+## Deprecated Attributes
+
+* `all_fixed_ips`: Will be removed in a future release. Use `fixed_ips` instead.

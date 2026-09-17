@@ -31,6 +31,12 @@ func TestAccNetworkingV2PortDataSource_basic(t *testing.T) {
 						"openstack_networking_port_v2.port_1", "id"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_networking_port_v2.port_3", "all_fixed_ips.#", "2"),
+					resource.TestCheckResourceAttr(
+						"data.openstack_networking_port_v2.port_3", "fixed_ips.#", "2"),
+					resource.TestCheckResourceAttrSet(
+						"data.openstack_networking_port_v2.port_3", "fixed_ips.0.subnet_id"),
+					resource.TestCheckResourceAttrSet(
+						"data.openstack_networking_port_v2.port_3", "fixed_ips.0.ip_address"),
 				),
 			},
 		},
