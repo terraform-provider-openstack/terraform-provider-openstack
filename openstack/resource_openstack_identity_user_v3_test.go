@@ -64,17 +64,17 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 			{
 				Config: testAccIdentityV3UserWriteOnly(writeOnlyProjectName, writeOnlyUsername),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3UserExists(t.Context(), "openstack_identity_user_v3.user_1", &user),
-					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_1", &project),
+					testAccCheckIdentityV3UserExists(t.Context(), "openstack_identity_user_v3.user_2", &user),
+					testAccCheckIdentityV3ProjectExists(t.Context(), "openstack_identity_project_v3.project_2", &project),
 					resource.TestCheckResourceAttrPtr(
-						"openstack_identity_user_v3.user_1", "name", &user.Name),
+						"openstack_identity_user_v3.user_2", "name", &user.Name),
 					resource.TestCheckResourceAttrPtr(
-						"openstack_identity_user_v3.user_1", "description", &user.Description),
+						"openstack_identity_user_v3.user_2", "description", &user.Description),
 					resource.TestCheckNoResourceAttr(
-						"openstack_identity_user_v3.user_1", "password"),
-					resource.TestCheckNoResourceAttr("openstack_identity_user_v3.user_1", "password_wo"),
+						"openstack_identity_user_v3.user_2", "password"),
+					resource.TestCheckNoResourceAttr("openstack_identity_user_v3.user_2", "password_wo"),
 					resource.TestCheckResourceAttr(
-						"openstack_identity_user_v3.user_1", "password_wo_version", "1"),
+						"openstack_identity_user_v3.user_2", "password_wo_version", "1"),
 				),
 			},
 			{
