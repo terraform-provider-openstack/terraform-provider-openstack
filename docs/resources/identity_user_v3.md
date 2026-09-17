@@ -50,6 +50,45 @@ resource "openstack_identity_user_v3" "user_1" {
 }
 ```
 
+Example with ephemerals using `password_wo` attribute
+
+```hcl
+resource "openstack_identity_project_v3" "project_1" {
+  name = "project_1"
+}
+
+ephemeral "random_password" "password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "openstack_identity_user_v3" "user_1" {
+  default_project_id = openstack_identity_project_v3.project_1.id
+  name               = "user_1"
+  description        = "A user"
+
+  password_wo = "${ephemeral.random_password.password.result}"
+  password_wo_version = 1
+
+  ignore_change_password_upon_first_use = true
+
+  multi_factor_auth_enabled = true
+
+  multi_factor_auth_rule {
+    rule = ["password", "totp"]
+  }
+
+  multi_factor_auth_rule {
+    rule = ["password"]
+  }
+
+  extra = {
+    email = "user_1@foobar.com"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -85,6 +124,10 @@ The following arguments are supported:
 * `name` - (Optional) The name of the user.
 
 * `password` - (Optional) The password for the user.
+
+* `password_wo` - (Optional) The password using write only semantics in order to not be persisted in the state
+
+* `password_wo_version` - (Optional) Used in combination to the `password_wo` to persist the password version in the state, if changed will update the password of the user on Openstack
 
 * `region` - (Optional) The region in which to obtain the V3 Keystone client.
     If omitted, the `region` argument of the provider is used. Changing this

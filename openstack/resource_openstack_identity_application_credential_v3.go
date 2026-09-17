@@ -58,6 +58,21 @@ func resourceIdentityApplicationCredentialV3() *schema.Resource {
 				ForceNew:  true,
 			},
 
+			"secret_wo": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				WriteOnly:     true,
+				Sensitive:     true,
+				ConflictsWith: []string{"secret"},
+			},
+
+			"secret_wo_version": {
+				Type:          schema.TypeInt,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"secret"},
+			},
+
 			"project_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -146,7 +161,11 @@ func resourceIdentityApplicationCredentialV3Create(ctx context.Context, d *schem
 
 	log.Printf("[DEBUG] openstack_identity_application_credential_v3 create options: %#v", createOpts)
 
-	createOpts.Secret = d.Get("secret").(string)
+	if secret, ok := d.GetOk("secret"); ok {
+		createOpts.Secret = secret.(string)
+	} else if secretWO, ok := d.GetOk("secret_wo"); ok {
+		createOpts.Secret = secretWO.(string)
+	}
 
 	applicationCredential, err := applicationcredentials.Create(ctx, identityClient, tokenInfo.userID, createOpts).Extract()
 	if err != nil {
@@ -166,8 +185,13 @@ func resourceIdentityApplicationCredentialV3Create(ctx context.Context, d *schem
 
 	d.SetId(applicationCredential.ID)
 
-	// Secret is returned only once
-	d.Set("secret", applicationCredential.Secret)
+	if _, ok := d.GetOk("secret_wo"); !ok {
+		if applicationCredential.Secret != "" {
+			if err := d.Set("secret", applicationCredential.Secret); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
 
 	return resourceIdentityApplicationCredentialV3Read(ctx, d, meta)
 }

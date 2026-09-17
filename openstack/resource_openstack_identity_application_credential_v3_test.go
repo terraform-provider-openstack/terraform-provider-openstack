@@ -47,6 +47,30 @@ func TestAccIdentityV3ApplicationCredential_basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccIdentityV3ApplicationCredentialCustomSecretWo,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3ApplicationCredentialExists(t.Context(), "openstack_identity_application_credential_v3.app_cred_1", &applicationCredential),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_application_credential_v3.app_cred_1", "name", &applicationCredential.Name),
+					resource.TestCheckResourceAttrPtr(
+						"openstack_identity_application_credential_v3.app_cred_1", "description", &applicationCredential.Description),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_1", "unrestricted", "true"),
+					resource.TestCheckNoResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_1", "secret",
+					),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_1", "secret_wo_version", "1"),
+					resource.TestCheckResourceAttrSet(
+						"openstack_identity_application_credential_v3.app_cred_1", "project_id"),
+					resource.TestCheckResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_1", "expires_at", ""),
+					resource.TestCheckNoResourceAttr("openstack_identity_application_credential_v3.app_cred_1", "secret_wo"),
+					resource.TestMatchResourceAttr(
+						"openstack_identity_application_credential_v3.app_cred_1", "roles.#", regexp.MustCompile(`^[2-9]\d*`)),
+				),
+			},
+			{
 				Config: testAccIdentityV3ApplicationCredentialCustomSecret,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ApplicationCredentialExists(t.Context(), "openstack_identity_application_credential_v3.app_cred_1", &applicationCredential),
@@ -56,8 +80,6 @@ func TestAccIdentityV3ApplicationCredential_basic(t *testing.T) {
 						"openstack_identity_application_credential_v3.app_cred_1", "description", &applicationCredential.Description),
 					resource.TestCheckResourceAttr(
 						"openstack_identity_application_credential_v3.app_cred_1", "unrestricted", "true"),
-					resource.TestCheckResourceAttr(
-						"openstack_identity_application_credential_v3.app_cred_1", "secret", "foo"),
 					resource.TestCheckResourceAttrSet(
 						"openstack_identity_application_credential_v3.app_cred_1", "project_id"),
 					resource.TestCheckResourceAttr(
@@ -223,6 +245,16 @@ resource "openstack_identity_application_credential_v3" "app_cred_1" {
   name         = "super-admin"
   description  = "wheel technical user"
   secret       = "foo"
+  unrestricted = true
+}
+`
+
+const testAccIdentityV3ApplicationCredentialCustomSecretWo = `
+resource "openstack_identity_application_credential_v3" "app_cred_2" {
+  name         = "super-admin"
+  description  = "wheel technical user"
+  secret_wo    = "foo"
+  secret_wo_version = 1
   unrestricted = true
 }
 `
