@@ -275,7 +275,7 @@ func resourceBlockStorageVolumeV3Read(ctx context.Context, d *schema.ResourceDat
 	d.Set("availability_zone", v.AvailabilityZone)
 	d.Set("name", v.Name)
 	d.Set("snapshot_id", v.SnapshotID)
-	d.Set("backup_id", v.BackupID)
+	d.Set("backup_id", blockStorageVolumeV3BackupID(v, d.Get("backup_id").(string)))
 	d.Set("source_vol_id", v.SourceVolID)
 	d.Set("volume_type", v.VolumeType)
 	d.Set("metadata", v.Metadata)
@@ -294,6 +294,23 @@ func resourceBlockStorageVolumeV3Read(ctx context.Context, d *schema.ResourceDat
 	}
 
 	return nil
+}
+
+func blockStorageVolumeV3BackupID(v *volumes.Volume, stateBackupID string) string {
+	if v.BackupID != nil && *v.BackupID != "" {
+		return *v.BackupID
+	}
+
+	// Cinder accepts backup_id when creating a volume, but does not return it
+	// from the volume show API. Since Ussuri, Cinder records the source backup
+	// in volume metadata instead.
+	if backupID := v.Metadata["src_backup_id"]; backupID != "" {
+		return backupID
+	}
+
+	// Preserve the configured value for older Cinder versions that expose the
+	// source backup through neither the volume response nor its metadata.
+	return stateBackupID
 }
 
 func resourceBlockStorageVolumeV3Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {

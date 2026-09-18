@@ -143,17 +143,18 @@ func TestAccBlockStorageV3Volume_attachment(t *testing.T) {
 	})
 }
 
-// Test fails as devstack does not configure backup service properly
-// It can be tested locally by creating a backup from a volume first
-// and then exporting its ID to `OS_BACKUP_ID` env var.
+// DevStack CI does not configure the backup service. The test can be run
+// locally by creating a backup and exporting its ID as OS_BACKUP_ID.
 func TestAccBlockStorageV3VolumeFromBackup(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
+			if osBackupID == "" {
+				t.Skip("OS_BACKUP_ID must be set to test creating a volume from a backup")
+			}
 			testAccPreCheck(t)
 			testAccPreCheckNonAdminOnly(t)
-			t.Skip("Currently Cinder Backup is not configured properly on GH-A devstack")
 		},
 		ProviderFactories: testAccProviders,
 		CheckDestroy:      testAccCheckBlockStorageV3VolumeDestroy(t.Context()),
@@ -164,10 +165,52 @@ func TestAccBlockStorageV3VolumeFromBackup(t *testing.T) {
 					testAccCheckBlockStorageV3VolumeExists(t.Context(), "openstack_blockstorage_volume_v3.volume_1", &volume),
 					resource.TestCheckResourceAttr(
 						"openstack_blockstorage_volume_v3.volume_1", "name", "volume_1"),
+					resource.TestCheckResourceAttr(
+						"openstack_blockstorage_volume_v3.volume_1", "backup_id", osBackupID),
 				),
 			},
 		},
 	})
+}
+
+func TestUnitBlockStorageVolumeV3BackupID(t *testing.T) {
+	responseBackupID := "response-backup-id"
+	testCases := map[string]struct {
+		volume        volumes.Volume
+		stateBackupID string
+		expected      string
+	}{
+		"volume response": {
+			volume:        volumes.Volume{BackupID: &responseBackupID},
+			stateBackupID: "state-backup-id",
+			expected:      "response-backup-id",
+		},
+		"Cinder source backup metadata": {
+			volume: volumes.Volume{Metadata: map[string]string{
+				"src_backup_id": "metadata-backup-id",
+			}},
+			stateBackupID: "state-backup-id",
+			expected:      "metadata-backup-id",
+		},
+		"existing state": {
+			volume:        volumes.Volume{},
+			stateBackupID: "state-backup-id",
+			expected:      "state-backup-id",
+		},
+		"unset": {
+			volume:   volumes.Volume{},
+			expected: "",
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			actual := blockStorageVolumeV3BackupID(&testCase.volume, testCase.stateBackupID)
+			if actual != testCase.expected {
+				t.Fatalf("expected backup ID %q, got %q", testCase.expected, actual)
+			}
+		})
+	}
 }
 
 func testAccCheckBlockStorageV3VolumeDestroy(ctx context.Context) resource.TestCheckFunc {
