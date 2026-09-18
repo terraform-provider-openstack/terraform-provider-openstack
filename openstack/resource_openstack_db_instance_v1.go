@@ -11,10 +11,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceDatabaseInstanceV1() *schema.Resource {
-	return &schema.Resource{
+	resource := &schema.Resource{
 		CreateContext: resourceDatabaseInstanceV1Create,
 		ReadContext:   resourceDatabaseInstanceV1Read,
 		DeleteContext: resourceDatabaseInstanceV1Delete,
@@ -51,6 +52,7 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 				Type:         schema.TypeInt,
 				Required:     true,
 				RequiredWith: []string{"volume_type"},
+				ValidateFunc: validation.IntAtLeast(1),
 			},
 
 			"volume_type": {
@@ -185,6 +187,10 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 			},
 		},
 	}
+
+	resource.CustomizeDiff = databaseInstanceV1CustomizeDiff(resource.Schema)
+
+	return resource
 }
 
 func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -304,6 +310,9 @@ func resourceDatabaseInstanceV1Read(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceDatabaseInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	// Preserve the previous state on failure instead of persisting unapplied changes.
+	d.Partial(true)
+
 	config := meta.(*Config)
 
 	databaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
@@ -316,6 +325,8 @@ func resourceDatabaseInstanceUpdate(ctx context.Context, d *schema.ResourceData,
 		if newSize.(int) <= oldSize.(int) {
 			return diag.Errorf("decreasing openstack_db_instance_v1 volume size is not supported")
 		}
+
+		log.Printf("[DEBUG] Resizing openstack_db_instance_v1 %s volume from %d to %d GB", d.Id(), oldSize, newSize)
 
 		err = instances.ResizeVolume(ctx, databaseV1Client, d.Id(), newSize.(int)).ExtractErr()
 		if err != nil {
@@ -356,6 +367,8 @@ func resourceDatabaseInstanceUpdate(ctx context.Context, d *schema.ResourceData,
 			log.Printf("Attaching configuration to openstack_db_instance_v1 %s", d.Id())
 		}
 	}
+
+	d.Partial(false)
 
 	return resourceDatabaseInstanceV1Read(ctx, d, meta)
 }

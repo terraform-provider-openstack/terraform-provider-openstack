@@ -15,6 +15,28 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func databaseInstanceV1CustomizeDiff(resourceSchema map[string]*schema.Schema) schema.CustomizeDiffFunc {
+	return func(_ context.Context, d *schema.ResourceDiff, _ any) error {
+		if d.Id() == "" || !d.HasChange("size") || !d.NewValueKnown("size") {
+			return nil
+		}
+
+		// A replacement instance may have a smaller volume than the old one.
+		for key, field := range resourceSchema {
+			if field.ForceNew && d.HasChange(key) {
+				return nil
+			}
+		}
+
+		oldSize, newSize := d.GetChange("size")
+		if newSize.(int) < oldSize.(int) {
+			return fmt.Errorf("decreasing openstack_db_instance_v1 volume size is not supported: size cannot decrease from %d to %d GB", oldSize, newSize)
+		}
+
+		return nil
+	}
+}
+
 func expandDatabaseInstanceV1Datastore(rawDatastore []any) instances.DatastoreOpts {
 	v := rawDatastore[0].(map[string]any)
 	datastore := instances.DatastoreOpts{
@@ -112,7 +134,7 @@ func databaseInstanceV1VolumeResizeStateRefreshFunc(
 		}
 
 		if strings.EqualFold(i.Status, "error") {
-			return i, i.Status, fmt.Errorf("database instance volume resize failed")
+			return i, i.Status, errors.New("database instance volume resize failed")
 		}
 
 		if (i.Status != "ACTIVE" && i.Status != "HEALTHY") || i.Volume.Size != expectedSize {
