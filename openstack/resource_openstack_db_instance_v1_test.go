@@ -61,6 +61,64 @@ func TestAccDatabaseV1Instance_basic(t *testing.T) {
 	})
 }
 
+func TestAccDatabaseV1Instance_resizeVolume(t *testing.T) {
+	var (
+		instance   instances.Instance
+		instanceID string
+	)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+			testAccPreCheckDatabase(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckDatabaseV1InstanceDestroy(t.Context()),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDatabaseV1InstanceBasicWithSize(10),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDatabaseV1InstanceExists(t.Context(),
+						"openstack_db_instance_v1.basic", &instance),
+					testAccCheckDatabaseV1InstanceID("openstack_db_instance_v1.basic", &instanceID),
+					resource.TestCheckResourceAttr("openstack_db_instance_v1.basic", "size", "10"),
+				),
+			},
+			{
+				Config: testAccDatabaseV1InstanceBasicWithSize(11),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDatabaseV1InstanceExists(t.Context(),
+						"openstack_db_instance_v1.basic", &instance),
+					testAccCheckDatabaseV1InstanceID("openstack_db_instance_v1.basic", &instanceID),
+					resource.TestCheckResourceAttr("openstack_db_instance_v1.basic", "size", "11"),
+				),
+			},
+		},
+	})
+}
+
+func testAccCheckDatabaseV1InstanceID(name string, expectedID *string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		resourceState, ok := s.RootModule().Resources[name]
+		if !ok {
+			return fmt.Errorf("Not found: %s", name)
+		}
+
+		if *expectedID == "" {
+			*expectedID = resourceState.Primary.ID
+
+			return nil
+		}
+
+		if resourceState.Primary.ID != *expectedID {
+			return fmt.Errorf("database instance was recreated: got ID %s, want %s", resourceState.Primary.ID, *expectedID)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckDatabaseV1InstanceExists(ctx context.Context, n string, instance *instances.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -119,6 +177,10 @@ func testAccCheckDatabaseV1InstanceDestroy(ctx context.Context) resource.TestChe
 }
 
 func testAccDatabaseV1InstanceBasic() string {
+	return testAccDatabaseV1InstanceBasicWithSize(10)
+}
+
+func testAccDatabaseV1InstanceBasicWithSize(size int) string {
 	return fmt.Sprintf(`
 resource "openstack_db_instance_v1" "basic" {
   name             = "basic"
@@ -133,7 +195,7 @@ resource "openstack_db_instance_v1" "basic" {
     uuid = "%[3]s"
   }
 
-  size = 10
+  size = %[4]d
   volume_type = "lvmdriver-1"
 
   database {
@@ -181,5 +243,5 @@ resource "openstack_db_configuration_v1" "basic" {
     value = 200
   }
 }
-`, osDBDatastoreVersion, osDBDatastoreType, osNetworkID)
+`, osDBDatastoreVersion, osDBDatastoreType, osNetworkID, size)
 }

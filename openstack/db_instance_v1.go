@@ -3,7 +3,9 @@ package openstack
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/db/v1/databases"
@@ -85,6 +87,36 @@ func databaseInstanceV1StateRefreshFunc(ctx context.Context, client *gophercloud
 
 		if i.Status == "error" {
 			return i, i.Status, errors.New("There was an error creating the database instance")
+		}
+
+		return i, i.Status, nil
+	}
+}
+
+// databaseInstanceV1VolumeResizeStateRefreshFunc waits until the database
+// instance is ready and reports the requested volume size.
+func databaseInstanceV1VolumeResizeStateRefreshFunc(
+	ctx context.Context,
+	client *gophercloud.ServiceClient,
+	instanceID string,
+	expectedSize int,
+) retry.StateRefreshFunc {
+	return func() (any, string, error) {
+		i, err := instances.Get(ctx, client, instanceID).Extract()
+		if err != nil {
+			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+				return i, "DELETED", nil
+			}
+
+			return nil, "", err
+		}
+
+		if strings.EqualFold(i.Status, "error") {
+			return i, i.Status, fmt.Errorf("database instance volume resize failed")
+		}
+
+		if (i.Status != "ACTIVE" && i.Status != "HEALTHY") || i.Volume.Size != expectedSize {
+			return i, "RESIZE", nil
 		}
 
 		return i, i.Status, nil

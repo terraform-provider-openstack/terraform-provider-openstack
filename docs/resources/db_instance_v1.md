@@ -52,7 +52,8 @@ The following arguments are supported:
 * `configuration_id` - (Optional) Configuration ID to be attached to the instance. Database instance
    will be rebooted when configuration is detached.
 
-* `size` - (Required) Specifies the volume size in GB. Changing this creates new instance.
+* `size` - (Required) Specifies the volume size in GB. Increasing the value resizes
+  the attached volume in place. Decreasing the value is not supported.
 
 * `volume_type` - (Optional) Specifies the volume type to use. If you want to
   specify a volume type, you must also specify a volume size. Changing this

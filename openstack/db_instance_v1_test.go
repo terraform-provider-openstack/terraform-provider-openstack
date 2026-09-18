@@ -10,6 +10,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestUnitDatabaseInstanceV1SizeSupportsUpdate(t *testing.T) {
+	resource := resourceDatabaseInstanceV1()
+
+	assert.False(t, resource.Schema["size"].ForceNew)
+	assert.NotNil(t, resource.Timeouts.Update)
+}
+
 func TestUnitExpandDatabaseInstanceV1Datastore(t *testing.T) {
 	datastore := []any{
 		map[string]any{
