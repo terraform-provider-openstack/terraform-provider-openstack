@@ -20,19 +20,19 @@ this resource.
 
 ```hcl
 resource "openstack_identity_user_v3" "user_1" {
-  name = "user_1"
+  name      = "user_1"
   domain_id = "default"
 }
 
 resource "openstack_identity_role_v3" "role_1" {
-  name = "role_1"
+  name      = "role_1"
   domain_id = "default"
 }
 
 resource "openstack_identity_inherit_role_assignment_v3" "role_assignment_1" {
-  user_id = openstack_identity_user_v3.user_1.id
+  user_id   = openstack_identity_user_v3.user_1.id
   domain_id = "default"
-  role_id = openstack_identity_role_v3.role_1.id
+  role_id   = openstack_identity_role_v3.role_1.id
 }
 ```
 
@@ -68,16 +68,16 @@ The following attributes are exported:
 
 ## Import
 
-Inherit role assignments can be imported using a constructed id. The id should 
+Inherit role assignments can be imported using a constructed id. The id should
 have the form of `domainID/projectID/groupID/userID/roleID`. When something is
 not used then leave blank.
 
-For example this will import the inherit role assignment for: 
+For example this will import the inherit role assignment for:
 projectID: 014395cd-89fc-4c9b-96b7-13d1ee79dad2,
 userID: 4142e64b-1b35-44a0-9b1e-5affc7af1106,
 roleID: ea257959-eeb1-4c10-8d33-26f0409a755d
 ( domainID and groupID are left blank)
 
-```
-$ terraform import openstack_identity_inherit_role_assignment_v3.role_assignment_1 /014395cd-89fc-4c9b-96b7-13d1ee79dad2//4142e64b-1b35-44a0-9b1e-5affc7af1106/ea257959-eeb1-4c10-8d33-26f0409a755d
+```shell
+terraform import openstack_identity_inherit_role_assignment_v3.role_assignment_1 /014395cd-89fc-4c9b-96b7-13d1ee79dad2//4142e64b-1b35-44a0-9b1e-5affc7af1106/ea257959-eeb1-4c10-8d33-26f0409a755d
 ```

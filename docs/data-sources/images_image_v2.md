@@ -89,7 +89,7 @@ are exported:
   location of the image or the path to retrieve it.
 * `metadata` - The metadata associated with the image. Image metadata allow for
   meaningfully define the image properties and tags. See
-  https://docs.openstack.org/glance/latest/user/metadefs-concepts.html.
+  <https://docs.openstack.org/glance/latest/user/metadefs-concepts.html>.
 * `min_disk_gb` - The minimum amount of disk space required to use the image.
 * `min_ram_mb` - The minimum amount of ram required to use the image.
 * `properties` - Freeform information about the image.

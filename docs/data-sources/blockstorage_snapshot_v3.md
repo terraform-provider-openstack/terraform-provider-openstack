@@ -34,7 +34,6 @@ data "openstack_blockstorage_snapshot_v3" "snapshot_1" {
 * `most_recent` - (Optional) Pick the most recently created snapshot if there
     are multiple results.
 
-
 ## Attributes Reference
 
 The following attributes are exported:

@@ -44,7 +44,7 @@ The following arguments are supported:
   other than their own. Changing this creates a new monitor.
 
 * `type` - (Required) The type of probe, which is PING, TCP, HTTP, HTTPS,
-  TLS-HELLO, SCTP or UDP-CONNECT, that is sent by the loadbalancer to 
+  TLS-HELLO, SCTP or UDP-CONNECT, that is sent by the loadbalancer to
   verify the member state. Changing this creates a new monitor.
 
 * `delay` - (Required) The time, in seconds, between sending probes to members.
@@ -56,17 +56,17 @@ The following arguments are supported:
 * `max_retries` - (Required) Number of permissible ping failures before
   changing the member's status to INACTIVE. Must be a number between 1
   and 10.
-    
-* `max_retries_down` - (Optional) Number of permissible ping failures before 
-  changing the member's status to ERROR. Must be a number between 1 and 10. 
-  The default is 3. Changing this updates the max_retries_down of the 
+
+* `max_retries_down` - (Optional) Number of permissible ping failures before
+  changing the member's status to ERROR. Must be a number between 1 and 10.
+  The default is 3. Changing this updates the max_retries_down of the
   existing monitor.
 
 * `url_path` - (Optional) Required for HTTP(S) types. URI path that will be
   accessed if monitor type is HTTP or HTTPS. Default is `/`.
 
-* `http_method` - (Optional) Required for HTTP(S) types. The HTTP method that 
-  the health monitor uses for requests. One of CONNECT, DELETE, GET, HEAD, 
+* `http_method` - (Optional) Required for HTTP(S) types. The HTTP method that
+  the health monitor uses for requests. One of CONNECT, DELETE, GET, HEAD,
   OPTIONS, PATCH, POST, PUT, or TRACE. The default is GET.
 
 * `http_version` - (Optional) Required for HTTP(S) types. The HTTP version that
@@ -104,12 +104,12 @@ The following attributes are exported:
 
 Load Balancer Pool Monitor can be imported using the Monitor ID, e.g.:
 
-```
-$ terraform import openstack_lb_monitor_v2.monitor_1 47c26fc3-2403-427a-8c79-1589bd0533c2
+```shell
+terraform import openstack_lb_monitor_v2.monitor_1 47c26fc3-2403-427a-8c79-1589bd0533c2
 ```
 
 In case of using OpenContrail, the import may not work properly. If you face an issue, try to import the monitor providing its parent pool ID:
 
-```
-$ terraform import openstack_lb_monitor_v2.monitor_1 47c26fc3-2403-427a-8c79-1589bd0533c2/708bc224-0f8c-4981-ac82-97095fe051b6
+```shell
+terraform import openstack_lb_monitor_v2.monitor_1 47c26fc3-2403-427a-8c79-1589bd0533c2/708bc224-0f8c-4981-ac82-97095fe051b6
 ```

@@ -22,7 +22,6 @@ data "openstack_compute_availability_zones_v2" "zones" {}
 * `region` - (Optional) The `region` to fetch availability zones from, defaults to the provider's `region`
 * `state` - (Optional) The `state` of the availability zones to match, default ("available").
 
-
 ## Attributes Reference
 
 `id` is set to hash of the returned zone list. In addition, the following attributes

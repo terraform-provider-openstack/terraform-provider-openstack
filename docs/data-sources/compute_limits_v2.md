@@ -26,7 +26,6 @@ data "openstack_compute_limits_v2" "limits" {
 
 * `project_id` - (Required) The id of the project to retrieve the limits.
 
-
 ## Attributes Reference
 
 The following attributes are exported:
