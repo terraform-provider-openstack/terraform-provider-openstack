@@ -288,6 +288,7 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 		if d.Get("password_wo") == nil {
 			return diag.Errorf("If you change the password_wo_version you must also define password_wo")
 		}
+		
 		hasChange = true
 		updateOpts.Password = d.Get("password_wo").(string)
 	}
