@@ -7,7 +7,9 @@ pushd $DEVSTACK_PATH
 source openrc admin admin
 openstack flavor create m1.acctest --id 99 --ram 512 --disk 10 --vcpu 1 --ephemeral 10
 openstack flavor create m1.resize --id 98 --ram 512 --disk 11 --vcpu 1 --ephemeral 10
-openstack keypair create magnum
+if [ -n "${OS_CONTAINER_INFRA_ENVIRONMENT}" ]; then
+        openstack keypair create magnum
+fi
 
 # dump some additional info
 openstack extension list --network
@@ -33,9 +35,22 @@ _IMAGE=$(openstack image list | grep -i cirros | head -n 1)
 _IMAGE_ID=$(echo $_IMAGE | awk -F\| '{print $2}' | tr -d ' ')
 _IMAGE_NAME=$(echo $_IMAGE | awk -F\| '{print $3}' | tr -d ' ')
 _IMAGE_NAME=$(echo $_IMAGE | awk -F\| '{print $3}' | tr -d ' ')
-_MAGNUM_IMAGE_ID=$(openstack image list --format value -c Name -c ID | grep coreos | cut -d ' ' -f 1)
-if [ -z "$_MAGNUM_IMAGE_ID" ]; then
-        _MAGNUM_IMAGE_ID=$(openstack image list --format value -c Name -c ID | grep -i atomic | cut -d ' ' -f 1)
+if [ -n "${OS_CONTAINER_INFRA_ENVIRONMENT}" ]; then
+        _MAGNUM_IMAGE_ID=$(openstack image list --property os_distro=ubuntu --format value -c ID | head -n 1)
+        if [ -z "$_MAGNUM_IMAGE_ID" ]; then
+                _MAGNUM_IMAGE_ID=$(openstack image list --property os_distro=fedora-coreos --format value -c ID | head -n 1)
+        fi
+        if [ -z "$_MAGNUM_IMAGE_ID" ]; then
+                _MAGNUM_IMAGE_ID=$(openstack image list --property os_distro=fedora-atomic --format value -c ID | head -n 1)
+        fi
+        if [ -z "$_MAGNUM_IMAGE_ID" ]; then
+                _MAGNUM_IMAGE_ID=$(openstack image list --format value -c Name -c ID | grep -Ei 'coreos|atomic|ubuntu' | head -n 1 | cut -d ' ' -f 1)
+        fi
+        if [ -z "$_MAGNUM_IMAGE_ID" ]; then
+                echo "No Magnum guest image found" >&2
+                openstack image list
+                exit 1
+        fi
 fi
 
 if [ -n "${OS_LB_ENVIRONMENT}" ]; then
@@ -56,10 +71,12 @@ echo export OS_POOL_NAME="public" >> openrc
 echo export OS_FLAVOR_ID=99 >> openrc
 echo export OS_FLAVOR_ID_RESIZE=98 >> openrc
 echo export OS_DOMAIN_ID=default >> openrc
-echo export OS_MAGNUM_IMAGE_ID="$_MAGNUM_IMAGE_ID" >> openrc
-echo export OS_MAGNUM_IMAGE="$_MAGNUM_IMAGE_ID" >> openrc
-echo export OS_MAGNUM_FLAVOR=99 >> openrc
-echo export OS_MAGNUM_KEYPAIR=magnum >> openrc
+if [ -n "${OS_CONTAINER_INFRA_ENVIRONMENT}" ]; then
+        echo export OS_MAGNUM_IMAGE_ID="$_MAGNUM_IMAGE_ID" >> openrc
+        echo export OS_MAGNUM_IMAGE="$_MAGNUM_IMAGE_ID" >> openrc
+        echo export OS_MAGNUM_FLAVOR=99 >> openrc
+        echo export OS_MAGNUM_KEYPAIR=magnum >> openrc
+fi
 
 source openrc $1 $1
 popd
