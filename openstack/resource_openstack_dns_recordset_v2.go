@@ -138,6 +138,9 @@ func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, m
 		return diag.Errorf("Error creating openstack_dns_recordset_v2: %s", err)
 	}
 
+	// Set the ID so Terraform state contains the record which already exists in the Designate API
+	d.SetId(n.ID)
+
 	if !d.Get("disable_status_check").(bool) {
 		stateConf := &retry.StateChangeConf{
 			Target:     []string{"ACTIVE"},
