@@ -137,6 +137,28 @@ func resourceLoadBalancerV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
+
+			"additional_vips": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"subnet_id": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"ip_address": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -184,6 +206,10 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 	if v, ok := d.GetOk("tags"); ok {
 		tags := v.(*schema.Set).List()
 		createOpts.Tags = expandToStringSlice(tags)
+	}
+
+	if v, ok := d.GetOk("additional_vips"); ok {
+		createOpts.AdditionalVips = expandLBAdditionalVIPsV2(v.([]any))
 	}
 
 	log.Printf("[DEBUG] openstack_lb_loadbalancer_v2 create options: %#v", createOpts)
@@ -252,6 +278,7 @@ func resourceLoadBalancerV2Read(ctx context.Context, d *schema.ResourceData, met
 	d.Set("region", GetRegion(d, config))
 	d.Set("tags", lb.Tags)
 	d.Set("vip_qos_policy_id", lb.VipQosPolicyID)
+	d.Set("additional_vips", flattenLBAdditionalVIPsV2(lb.AdditionalVips))
 
 	vipPortID = lb.VipPortID
 
