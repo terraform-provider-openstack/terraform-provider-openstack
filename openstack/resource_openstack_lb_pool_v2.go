@@ -112,7 +112,7 @@ func resourcePoolV2() *schema.Resource {
 			},
 
 			"alpn_protocols": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true, // unsetting this parameter results in a default value
 				Elem: &schema.Schema{
@@ -197,7 +197,7 @@ func resourcePoolV2Create(ctx context.Context, d *schema.ResourceData, meta any)
 		LoadbalancerID:    lbID,
 		ListenerID:        listenerID,
 		LBMethod:          pools.LBMethod(d.Get("lb_method").(string)),
-		ALPNProtocols:     expandToStringSlice(d.Get("alpn_protocols").(*schema.Set).List()),
+		ALPNProtocols:     expandToStringSlice(d.Get("alpn_protocols").([]any)),
 		CATLSContainerRef: d.Get("ca_tls_container_ref").(string),
 		CRLContainerRef:   d.Get("crl_container_ref").(string),
 		TLSEnabled:        d.Get("tls_enabled").(bool),
@@ -343,7 +343,7 @@ func resourcePoolV2Update(ctx context.Context, d *schema.ResourceData, meta any)
 	}
 
 	if d.HasChange("alpn_protocols") {
-		v := expandToStringSlice(d.Get("alpn_protocols").(*schema.Set).List())
+		v := expandToStringSlice(d.Get("alpn_protocols").([]any))
 		updateOpts.ALPNProtocols = &v
 	}
 
