@@ -33,6 +33,7 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_type", "ip"),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_to", "192.168.199.10"),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_level", "rw"),
+					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "metadata.foo", "bar"),
 					resource.TestMatchResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "share_id",
 						regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
 					testAccCheckSFSV2ShareAccessExists(t.Context(), "openstack_sharedfilesystem_share_access_v2.share_access_2", &shareAccess2),
@@ -51,6 +52,7 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_type", "ip"),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_to", "192.168.199.10"),
 					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_level", "ro"),
+					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "metadata.foo", "bar"),
 					resource.TestMatchResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "share_id",
 						regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
 					testAccCheckSFSV2ShareAccessExists(t.Context(), "openstack_sharedfilesystem_share_access_v2.share_access_2", &shareAccess2),
@@ -60,6 +62,15 @@ func TestAccSFSV2ShareAccess_basic(t *testing.T) {
 					resource.TestMatchResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_2", "share_id",
 						regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
 					testAccCheckSFSV2ShareAccessDiffers(&shareAccess1, &shareAccess2),
+				),
+			},
+			{
+				Config: testAccSFSV2ShareAccessConfigMetadataUpdate(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSFSV2ShareAccessExists(t.Context(), "openstack_sharedfilesystem_share_access_v2.share_access_1", &shareAccess1),
+					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "access_level", "ro"),
+					resource.TestCheckNoResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "metadata.foo"),
+					resource.TestCheckResourceAttr("openstack_sharedfilesystem_share_access_v2.share_access_1", "metadata.baz", "qux"),
 				),
 			},
 		},
@@ -188,6 +199,10 @@ resource "openstack_sharedfilesystem_share_access_v2" "share_access_1" {
   access_type  = "ip"
   access_to    = "192.168.199.10"
   access_level = "rw"
+
+  metadata = {
+    foo = "bar"
+  }
 }
 
 resource "openstack_sharedfilesystem_share_access_v2" "share_access_2" {
@@ -208,6 +223,34 @@ resource "openstack_sharedfilesystem_share_access_v2" "share_access_1" {
   access_type  = "ip"
   access_to    = "192.168.199.10"
   access_level = "ro"
+
+  metadata = {
+    foo = "bar"
+  }
+}
+
+resource "openstack_sharedfilesystem_share_access_v2" "share_access_2" {
+  share_id     = openstack_sharedfilesystem_share_v2.share_1.id
+  access_type  = "ip"
+  access_to    = "192.168.199.11"
+  access_level = "ro"
+}
+`, testAccSFSV2ShareAccessConfig)
+}
+
+func testAccSFSV2ShareAccessConfigMetadataUpdate() string {
+	return fmt.Sprintf(`
+%s
+
+resource "openstack_sharedfilesystem_share_access_v2" "share_access_1" {
+  share_id     = openstack_sharedfilesystem_share_v2.share_1.id
+  access_type  = "ip"
+  access_to    = "192.168.199.10"
+  access_level = "ro"
+
+  metadata = {
+    baz = "qux"
+  }
 }
 
 resource "openstack_sharedfilesystem_share_access_v2" "share_access_2" {

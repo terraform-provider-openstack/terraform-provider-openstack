@@ -139,6 +139,10 @@ The following arguments are supported:
 
 * `access_level` - (Required) The access level to the share. Can either be `rw` or `ro`.
 
+* `metadata` - (Optional) One or more metadata key and value pairs for the share
+  access rule as a dictionary of strings. Requires an OpenStack environment that
+  supports Shared Filesystem microversion 2.45 (Antelope) or later.
+
 ## Attributes Reference
 
 * `id` - The unique ID for the Share Access.
@@ -149,6 +153,9 @@ The following arguments are supported:
 * `access_level` - See Argument Reference above.
 * `access_key` - The access credential of the entity granted access.
 * `state` - The share access state.
+* `metadata` - See Argument Reference above.
+* `all_metadata` - The map of metadata, assigned on the share access rule, which
+  has been explicitly and implicitly added.
 
 ## Import
 
