@@ -4,16 +4,16 @@ go 1.25.10
 
 require (
 	github.com/google/go-cmp v0.7.0
-	github.com/gophercloud/gophercloud/v2 v2.14.0
+	github.com/gophercloud/gophercloud/v2 v2.15.0
 	github.com/gophercloud/utils/v2 v2.0.0-20260424064311-2eeed4ceb3e9
 	github.com/hashicorp/terraform-plugin-log v0.11.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.40.1
 	github.com/hashicorp/terraform-plugin-testing v1.16.0
-	github.com/klauspost/compress v1.20.0
+	github.com/klauspost/compress v1.20.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.12.1
 	github.com/terraform-provider-openstack/utils/v2 v2.0.0-20260520075407-97524fbad4a0
-	github.com/ulikunitz/xz v0.5.16
+	github.com/ulikunitz/xz v0.5.17
 	gopkg.in/yaml.v2 v2.4.0
 )
 
