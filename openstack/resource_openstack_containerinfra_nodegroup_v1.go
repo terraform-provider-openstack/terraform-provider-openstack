@@ -370,7 +370,6 @@ func resourceContainerInfraNodeGroupV1Delete(ctx context.Context, d *schema.Reso
 	}
 
 	stateConf := &retry.StateChangeConf{
-		Pending:      []string{"DELETE_IN_PROGRESS"},
 		Target:       []string{"DELETE_COMPLETE"},
 		Refresh:      containerInfraNodeGroupV1StateRefreshFunc(ctx, containerInfraClient, clusterID, nodeGroupID),
 		Timeout:      d.Timeout(schema.TimeoutDelete),
