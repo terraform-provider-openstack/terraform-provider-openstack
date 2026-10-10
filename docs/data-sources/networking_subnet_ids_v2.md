@@ -29,7 +29,9 @@ data "openstack_networking_subnet_ids_v2" "subnets" {
   A Neutron client is needed to retrieve subnet ids. If omitted, the
   `region` argument of the provider is used.
 
-* `name` - (Optional) The name of the subnet.
+* `name` - (Optional) The name of the subnet. If used, then `name_regex` cannot be used.
+
+* `name_regex` - (Optional) Use regex to match subnet names. If used, then `name` cannot be used.
 
 * `description` - (Optional) Human-readable description of the subnet.
 
