@@ -71,6 +71,7 @@ func resourceIdentityUserV3() *schema.Resource {
 				WriteOnly:     true,
 				Sensitive:     true,
 				ConflictsWith: []string{"password"},
+				RequiredWith:  []string{"password_wo_version"},
 			},
 			"password_wo_version": {
 				Type:          schema.TypeInt,
@@ -159,12 +160,8 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 
 	if password, ok := d.GetOk("password"); ok {
 		createOpts.Password = password.(string)
-	} else if passwordWO, ok := d.GetOk("password_wo"); ok {
-		if _, okWOVersion := d.GetOk("password_wo_version"); okWOVersion {
-			createOpts.Password = passwordWO.(string)
-		} else {
-			return diag.Errorf("You must set password_wo_version if you set password_wo")
-		}
+	} else if passwordWO, ok := getWriteOnlyString(d, "password_wo"); ok {
+		createOpts.Password = passwordWO
 	}
 
 	user, err := users.Create(ctx, identityClient, createOpts).Extract()
@@ -285,12 +282,13 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if d.HasChange("password_wo_version") {
-		if d.Get("password_wo") == nil {
-			return diag.Errorf("If you change the password_wo_version you must also define password_wo")
+		passwordWO, ok := getWriteOnlyString(d, "password_wo")
+		if !ok {
+			return diag.Errorf("password_wo must be set when password_wo_version is changed")
 		}
 
 		hasChange = true
-		updateOpts.Password = d.Get("password_wo").(string)
+		updateOpts.Password = passwordWO
 	}
 
 	if d.HasChange("password") {

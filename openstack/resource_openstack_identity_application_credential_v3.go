@@ -64,6 +64,7 @@ func resourceIdentityApplicationCredentialV3() *schema.Resource {
 				WriteOnly:     true,
 				Sensitive:     true,
 				ConflictsWith: []string{"secret"},
+				RequiredWith:  []string{"secret_wo_version"},
 			},
 
 			"secret_wo_version": {
@@ -161,10 +162,13 @@ func resourceIdentityApplicationCredentialV3Create(ctx context.Context, d *schem
 
 	log.Printf("[DEBUG] openstack_identity_application_credential_v3 create options: %#v", createOpts)
 
+	// Add the secret here so it wouldn't go in the above log entry
+	secretWO, hasSecretWO := getWriteOnlyString(d, "secret_wo")
+
 	if secret, ok := d.GetOk("secret"); ok {
 		createOpts.Secret = secret.(string)
-	} else if secretWO, ok := d.GetOk("secret_wo"); ok {
-		createOpts.Secret = secretWO.(string)
+	} else if hasSecretWO {
+		createOpts.Secret = secretWO
 	}
 
 	applicationCredential, err := applicationcredentials.Create(ctx, identityClient, tokenInfo.userID, createOpts).Extract()
@@ -185,11 +189,11 @@ func resourceIdentityApplicationCredentialV3Create(ctx context.Context, d *schem
 
 	d.SetId(applicationCredential.ID)
 
-	if _, ok := d.GetOk("secret_wo"); !ok {
-		if applicationCredential.Secret != "" {
-			if err := d.Set("secret", applicationCredential.Secret); err != nil {
-				return diag.FromErr(err)
-			}
+	// Secret is returned only once. When a write-only secret was used, the
+	// secret must not be persisted in the state.
+	if !hasSecretWO {
+		if err := d.Set("secret", applicationCredential.Secret); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
