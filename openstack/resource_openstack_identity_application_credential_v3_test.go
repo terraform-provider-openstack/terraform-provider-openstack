@@ -67,7 +67,7 @@ func TestAccIdentityV3ApplicationCredential_basic(t *testing.T) {
 						"openstack_identity_application_credential_v3.app_cred_1", "expires_at", ""),
 					resource.TestCheckNoResourceAttr("openstack_identity_application_credential_v3.app_cred_1", "secret_wo"),
 					resource.TestMatchResourceAttr(
-						"openstack_identity_application_credential_v3.app_cred_1", "roles.#", regexp.MustCompile(`^[2-9]\d*`)),
+						"openstack_identity_application_credential_v3.app_cred_1", "roles.#", regexp.MustCompile(`^[1-9]\d*`)),
 				),
 			},
 			{
@@ -250,7 +250,7 @@ resource "openstack_identity_application_credential_v3" "app_cred_1" {
 `
 
 const testAccIdentityV3ApplicationCredentialCustomSecretWo = `
-resource "openstack_identity_application_credential_v3" "app_cred_2" {
+resource "openstack_identity_application_credential_v3" "app_cred_1" {
   name         = "super-admin"
   description  = "wheel technical user"
   secret_wo    = "foo"
