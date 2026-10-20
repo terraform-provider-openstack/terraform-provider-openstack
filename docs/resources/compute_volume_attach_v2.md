@@ -103,7 +103,7 @@ clouds support multiattach. Multiattach volumes require a volume_type that has [
 resource "openstack_blockstorage_volume_v3" "volume_1" {
   name        = "volume_1"
   size        = 1
-  volume_type = "multiattach" 
+  volume_type = "multiattach"
 }
 
 resource "openstack_compute_instance_v2" "instance_1" {
@@ -186,6 +186,6 @@ The following attributes are exported:
 Volume Attachments can be imported using the Instance ID and Volume ID
 separated by a slash, e.g.
 
-```
-$ terraform import openstack_compute_volume_attach_v2.va_1 89c60255-9bd6-460c-822a-e2b959ede9d2/45670584-225f-46c3-b33e-6707b589b666
+```shell
+terraform import openstack_compute_volume_attach_v2.va_1 89c60255-9bd6-460c-822a-e2b959ede9d2/45670584-225f-46c3-b33e-6707b589b666
 ```

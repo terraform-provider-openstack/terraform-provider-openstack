@@ -88,6 +88,6 @@ The following attributes are exported:
 
 Orders can be imported using the order id (the last part of the order reference), e.g.:
 
-```
-$ terraform import openstack_keymanager_order_v1.order_1 0c6cd26a-c012-4d7b-8034-057c0f1c2953
+```shell
+terraform import openstack_keymanager_order_v1.order_1 0c6cd26a-c012-4d7b-8034-057c0f1c2953
 ```

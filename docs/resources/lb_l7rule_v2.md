@@ -119,6 +119,6 @@ The following attributes are exported:
 Load Balancer L7 Rule can be imported using the L7 Policy ID and L7 Rule ID
 separated by a slash, e.g.:
 
-```
-$ terraform import openstack_lb_l7rule_v2.l7rule_1 e0bd694a-abbe-450e-b329-0931fd1cc5eb/4086b0c9-b18c-4d1c-b6b8-4c56c3ad2a9e
+```shell
+terraform import openstack_lb_l7rule_v2.l7rule_1 e0bd694a-abbe-450e-b329-0931fd1cc5eb/4086b0c9-b18c-4d1c-b6b8-4c56c3ad2a9e
 ```

@@ -10,7 +10,7 @@ description: |-
 # openstack\_networking\_port\_secgroup\_associate\_v2
 
 Manages a V2 port's security groups within OpenStack. Useful, when the port was
-not created by Terraform (e.g. Manila or LBaaS). 
+not created by Terraform (e.g. Manila or LBaaS).
 
 When the resource is deleted, Terraform doesn't delete the port, but unsets the
 list of user defined security group IDs.  However, if `enforce` is set to `true`
@@ -18,7 +18,7 @@ and the resource is deleted, Terraform will remove all assigned security group
 IDs.
 
 ~> **Warning:** This resource should **not** be used when the
-port was created directly within Terraform. If it is, it can lead  
+port was created directly within Terraform. If it is, it can lead
 to **security problems** with incorrect security groups on ports
 
 ## Example Usage
@@ -108,6 +108,6 @@ The following attributes are exported:
 
 Port security group association can be imported using the `id` of the port, e.g.
 
-```
-$ terraform import openstack_networking_port_secgroup_associate_v2.port_1 eae26a3e-1c33-4cc1-9c31-0cd729c438a1
+```shell
+terraform import openstack_networking_port_secgroup_associate_v2.port_1 eae26a3e-1c33-4cc1-9c31-0cd729c438a1
 ```

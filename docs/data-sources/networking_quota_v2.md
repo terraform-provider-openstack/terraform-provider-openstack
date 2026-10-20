@@ -26,7 +26,6 @@ data "openstack_networking_quota_v2" "quota" {
 
 * `project_id` - (Required) The id of the project to retrieve the quota.
 
-
 ## Attributes Reference
 
 The following attributes are exported:

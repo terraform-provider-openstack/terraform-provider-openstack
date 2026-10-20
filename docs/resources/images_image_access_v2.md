@@ -92,6 +92,6 @@ The following attributes are exported:
 Image access can be imported using the `image_id` and the `member_id`,
 separated by a slash, e.g.
 
-```
-$ terraform import openstack_images_image_access_v2 89c60255-9bd6-460c-822a-e2b959ede9d2/bed6b6cbb86a4e2d8dc2735c2f1000e4
+```shell
+terraform import openstack_images_image_access_v2 89c60255-9bd6-460c-822a-e2b959ede9d2/bed6b6cbb86a4e2d8dc2735c2f1000e4
 ```

@@ -15,11 +15,13 @@ Use this data source to get information about a DNS zone share.
 
 ```hcl
 data "openstack_dns_zone_share_v2" "example" {
-  zone_id           = "00000000-0000-0000-0000-000000000000"
+  zone_id = "00000000-0000-0000-0000-000000000000"
+
   # Optionally, filter by target project ID.
   target_project_id = "11111111-1111-1111-1111-111111111111"
+
   # Optionally, specify the owner project ID. Required if the zone is not in your default project.
-  project_id        = "22222222-2222-2222-2222-222222222222"
+  project_id = "22222222-2222-2222-2222-222222222222"
 }
 ```
 

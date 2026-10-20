@@ -1,0 +1,13 @@
+{
+  "config": {
+    // error MD013/line-length Line length (maximum 80)
+    // https://github.com/DavidAnson/markdownlint/blob/main/doc/md013.md
+    "MD013": false
+  },
+  "globs": [
+    "**/*.md"
+  ],
+  "ignores": [
+    ".github/ISSUE_TEMPLATE/*.md"
+  ]
+}

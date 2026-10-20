@@ -56,6 +56,6 @@ The following attributes are exported:
 
 This resource can be imported by specifying the project ID of the account:
 
-```
-$ terraform import openstack_objectstorage_account_v1.account_1 1202b3d0aaa44cfc8b79475c007b0711
+```shell
+terraform import openstack_objectstorage_account_v1.account_1 1202b3d0aaa44cfc8b79475c007b0711
 ```

@@ -35,12 +35,12 @@ The following arguments are supported:
 `id` is set to the ID of the found flavor. In addition, the following attributes
 are exported:
 
- * `name` - The name of the flavor.
+* `name` - The name of the flavor.
 
- * `description` - The description of the flavor.
+* `description` - The description of the flavor.
 
- * `flavor_id` - The ID of the flavor.
+* `flavor_id` - The ID of the flavor.
 
- * `flavor_profile_id` - The ID of the flavor profile.
+* `flavor_profile_id` - The ID of the flavor profile.
 
- * `enabled` - Is the flavor enabled.
+* `enabled` - Is the flavor enabled.

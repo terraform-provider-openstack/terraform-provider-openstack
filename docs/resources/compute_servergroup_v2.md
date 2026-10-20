@@ -13,7 +13,7 @@ Manages a V2 Server Group resource within OpenStack.
 
 ## Example Usage
 
-### Compute service API version 2.63 or below:
+### Compute service API version 2.63 or below
 
 ```hcl
 resource "openstack_compute_servergroup_v2" "test-sg" {
@@ -36,14 +36,14 @@ resource "openstack_compute_instance_v2" "test-instance" {
 }
 ```
 
-### Compute service API version 2.64 or above:
+### Compute service API version 2.64 or above
 
 ```hcl
 resource "openstack_compute_servergroup_v2" "test-sg" {
   name     = "my-sg"
   policies = ["anti-affinity"]
   rules {
-      max_server_per_host = 3
+    max_server_per_host = 3
   }
 }
 
@@ -114,6 +114,6 @@ The following attributes are exported:
 
 Server Groups can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_compute_servergroup_v2.test-sg 1bc30ee9-9d5b-4c30-bdd5-7f1e663f5edf
+```shell
+terraform import openstack_compute_servergroup_v2.test-sg 1bc30ee9-9d5b-4c30-bdd5-7f1e663f5edf
 ```
