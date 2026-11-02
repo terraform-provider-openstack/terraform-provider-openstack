@@ -91,6 +91,7 @@ func checkForRetryableError(err error) *retry.RetryError {
 
 	switch e.Actual {
 	case http.StatusConflict, // 409
+		http.StatusRequestTimeout,      // 408
 		http.StatusInternalServerError, // 500
 		http.StatusBadGateway,          // 502
 		http.StatusServiceUnavailable,  // 503
