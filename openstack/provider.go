@@ -617,9 +617,9 @@ func configureProvider(ctx context.Context, provider *schema.Provider, d *schema
 	// All service clients share this provider client, so this covers every
 	// GET/HEAD request made by the provider, including status polling.
 	if config.MaxRetries > 0 {
-		config.OsClient.RetryFunc = requestTimeoutRetryFunc(
+		config.OsClient.RetryFunc = providerRetryFunc(
 			uint(config.MaxRetries),
-			requestTimeoutRetryDelay,
+			providerRetryDelay,
 		)
 	}
 

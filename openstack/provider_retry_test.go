@@ -13,9 +13,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// newRequestTimeoutTestServer returns a server that answers the first
+// newTestServer returns a server that answers the first
 // `failures` requests with the given status code and then 200.
-func newRequestTimeoutTestServer(t *testing.T, failures int32, code int) (*httptest.Server, *atomic.Int32) {
+func newTestServer(t *testing.T, failures int32, code int) (*httptest.Server, *atomic.Int32) {
 	t.Helper()
 
 	var calls atomic.Int32
@@ -36,10 +36,10 @@ func newRequestTimeoutTestServer(t *testing.T, failures int32, code int) (*httpt
 	return srv, &calls
 }
 
-func newRequestTimeoutTestClient(maxRetries uint) *gophercloud.ProviderClient {
+func newTestClient(maxRetries uint) *gophercloud.ProviderClient {
 	return &gophercloud.ProviderClient{
 		HTTPClient: http.Client{},
-		RetryFunc:  requestTimeoutRetryFunc(maxRetries, time.Millisecond),
+		RetryFunc:  providerRetryFunc(maxRetries, time.Millisecond),
 	}
 }
 
@@ -55,8 +55,8 @@ func doTestRequest(client *gophercloud.ProviderClient, method, url string) error
 }
 
 func TestUnitRequestTimeoutRetryFuncRetriesGet(t *testing.T) {
-	srv, calls := newRequestTimeoutTestServer(t, 2, http.StatusRequestTimeout)
-	client := newRequestTimeoutTestClient(3)
+	srv, calls := newTestServer(t, 2, http.StatusRequestTimeout)
+	client := newTestClient(3)
 
 	err := doTestRequest(client, http.MethodGet, srv.URL)
 	require.NoError(t, err)
@@ -64,8 +64,8 @@ func TestUnitRequestTimeoutRetryFuncRetriesGet(t *testing.T) {
 }
 
 func TestUnitRequestTimeoutRetryFuncGivesUp(t *testing.T) {
-	srv, calls := newRequestTimeoutTestServer(t, 10, http.StatusRequestTimeout)
-	client := newRequestTimeoutTestClient(3)
+	srv, calls := newTestServer(t, 10, http.StatusRequestTimeout)
+	client := newTestClient(3)
 
 	err := doTestRequest(client, http.MethodGet, srv.URL)
 	require.Error(t, err)
@@ -75,8 +75,8 @@ func TestUnitRequestTimeoutRetryFuncGivesUp(t *testing.T) {
 }
 
 func TestUnitRequestTimeoutRetryFuncSkipsNonIdempotent(t *testing.T) {
-	srv, calls := newRequestTimeoutTestServer(t, 1, http.StatusRequestTimeout)
-	client := newRequestTimeoutTestClient(3)
+	srv, calls := newTestServer(t, 1, http.StatusRequestTimeout)
+	client := newTestClient(3)
 
 	err := doTestRequest(client, http.MethodPost, srv.URL)
 	require.Error(t, err)
@@ -85,8 +85,8 @@ func TestUnitRequestTimeoutRetryFuncSkipsNonIdempotent(t *testing.T) {
 }
 
 func TestUnitRequestTimeoutRetryFuncSkipsOtherCodes(t *testing.T) {
-	srv, calls := newRequestTimeoutTestServer(t, 1, http.StatusNotFound)
-	client := newRequestTimeoutTestClient(3)
+	srv, calls := newTestServer(t, 1, http.StatusNotFound)
+	client := newTestClient(3)
 
 	err := doTestRequest(client, http.MethodGet, srv.URL)
 	require.Error(t, err)
@@ -95,7 +95,7 @@ func TestUnitRequestTimeoutRetryFuncSkipsOtherCodes(t *testing.T) {
 }
 
 func TestUnitRequestTimeoutRetryFuncContextCanceled(t *testing.T) {
-	retryFunc := requestTimeoutRetryFunc(3, time.Hour)
+	retryFunc := providerRetryFunc(3, time.Hour)
 	origErr := gophercloud.ErrUnexpectedResponseCode{Actual: http.StatusRequestTimeout}
 
 	ctx, cancel := context.WithCancel(context.Background())

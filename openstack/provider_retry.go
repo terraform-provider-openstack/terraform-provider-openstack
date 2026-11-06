@@ -9,11 +9,11 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-// requestTimeoutRetryDelay is the base delay between retries. It grows
+// providerRetryDelay is the base delay between retries. It grows
 // linearly with each attempt.
-const requestTimeoutRetryDelay = 1 * time.Second
+const providerRetryDelay = 1 * time.Second
 
-// requestTimeoutRetryFunc returns a gophercloud.RetryFunc that retries
+// providerRetryFunc returns a gophercloud.RetryFunc that retries
 // idempotent (GET and HEAD) requests answered with "408 Request Timeout".
 //
 // A load balancer such as HAProxy may answer a request with 408 when it is
@@ -25,7 +25,7 @@ const requestTimeoutRetryDelay = 1 * time.Second
 //
 // Any other error is returned unchanged, so callers still see the original
 // error type and response code.
-func requestTimeoutRetryFunc(maxRetries uint, baseDelay time.Duration) gophercloud.RetryFunc {
+func providerRetryFunc(maxRetries uint, baseDelay time.Duration) gophercloud.RetryFunc {
 	return func(ctx context.Context, method, url string, _ *gophercloud.RequestOpts, err error, failCount uint) error {
 		if method != http.MethodGet && method != http.MethodHead {
 			return err
