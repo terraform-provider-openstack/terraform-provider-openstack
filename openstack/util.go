@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -87,21 +86,17 @@ func checkForRetryableError(err error) *retry.RetryError {
 
 	ok := errors.As(err, &e)
 	if !ok {
-		log.Printf("[DEBUG] is err ok?? %s", ok)
 		return retry.NonRetryableError(err)
 	}
 
 	switch e.Actual {
 	case http.StatusConflict, // 409
-		http.StatusRequestTimeout,      // 408
 		http.StatusInternalServerError, // 500
 		http.StatusBadGateway,          // 502
 		http.StatusServiceUnavailable,  // 503
 		http.StatusGatewayTimeout:      // 504
-		log.Printf("[DEBUG] Retryable error! %s", err)
 		return retry.RetryableError(err)
 	}
-	log.Printf("[DEBUG] NON retryable error! %s", err)
 
 	return retry.NonRetryableError(err)
 }

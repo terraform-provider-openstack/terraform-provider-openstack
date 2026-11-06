@@ -609,7 +609,6 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 
 	err = retry.RetryContext(ctx, stateConf.Timeout, func() *retry.RetryError {
 		_, err = stateConf.WaitForStateContext(ctx)
-		log.Printf("[DEBUG] Error captured!")
 		if err != nil {
 			log.Printf("[DEBUG] Retrying after error: %s", err)
 
