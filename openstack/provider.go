@@ -90,7 +90,7 @@ func Provider() *schema.Provider {
 		"allow_reauth": "If set to `false`, OpenStack authorization won't be perfomed\n" +
 			"automatically, if the initial auth token get expired. Defaults to `true`",
 
-		"max_retries": "How many times HTTP connection should be retried until giving up.",
+		"max_retries": "How many times HTTP connections, 429 Too Many Requests responses and 408 Request Timeout responses to GET/HEAD requests should be retried until giving up.",
 
 		"enable_logging": "Outputs very verbose logs with all calls made to and responses from OpenStack",
 	}
@@ -612,6 +612,15 @@ func configureProvider(ctx context.Context, provider *schema.Provider, d *schema
 
 	if err := config.LoadAndValidate(ctx); err != nil {
 		return nil, diag.FromErr(err)
+	}
+
+	// All service clients share this provider client, so this covers every
+	// GET/HEAD request made by the provider, including status polling.
+	if config.MaxRetries > 0 {
+		config.OsClient.RetryFunc = providerRetryFunc(
+			uint(config.MaxRetries),
+			providerRetryDelay,
+		)
 	}
 
 	return &config, nil
