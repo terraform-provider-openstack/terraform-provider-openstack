@@ -23,6 +23,7 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
 	flavorsutils "github.com/gophercloud/utils/v2/openstack/compute/v2/flavors"
 	imagesutils "github.com/gophercloud/utils/v2/openstack/image/v2/images"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
@@ -97,6 +98,23 @@ func resourceComputeInstanceV2() *schema.Resource {
 						return ""
 					}
 				},
+				ConflictsWith: []string{"user_data_wo", "user_data_wo_version"},
+			},
+			"user_data_wo": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				WriteOnly:     true,
+				ForceNew:      false,
+				Sensitive:     true,
+				ConflictsWith: []string{"user_data"},
+				RequiredWith:  []string{"user_data_wo_version"},
+			},
+			"user_data_wo_version": {
+				Type:          schema.TypeInt,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"user_data"},
+				RequiredWith:  []string{"user_data_wo"},
 			},
 			"security_groups": {
 				Type:     schema.TypeSet,
@@ -521,6 +539,23 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		availabilityZone = d.Get("availability_zone_hints").(string)
 	}
 
+	woUserData, diags := d.GetRawConfigAt(cty.GetAttrPath("user_data_wo"))
+	if diags.HasError() {
+		return diags
+	}
+
+	if !woUserData.Type().Equals(cty.String) {
+		return diag.Errorf("expected a string for user_data_wo")
+	}
+
+	var userData []byte
+
+	if !woUserData.IsNull() {
+		userData = []byte(woUserData.AsString())
+	} else {
+		userData = []byte(d.Get("user_data").(string))
+	}
+
 	createOpts := &servers.CreateOpts{
 		Name:               d.Get("name").(string),
 		ImageRef:           imageID,
@@ -532,7 +567,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		Metadata:           resourceInstanceMetadataV2(d),
 		ConfigDrive:        &configDrive,
 		AdminPass:          d.Get("admin_pass").(string),
-		UserData:           []byte(d.Get("user_data").(string)),
+		UserData:           userData,
 		Personality:        resourceInstancePersonalityV2(d),
 		Tags:               instanceTags,
 	}
