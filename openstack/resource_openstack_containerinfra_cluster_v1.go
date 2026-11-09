@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 
@@ -297,13 +298,27 @@ func resourceContainerInfraClusterV1Create(ctx context.Context, d *schema.Resour
 	// Store the Cluster ID.
 	d.SetId(s)
 
+	refresh := containerInfraClusterV1StateRefreshFunc(ctx, containerInfraClient, s)
+
 	stateConf := &retry.StateChangeConf{
-		Pending:      []string{"CREATE_IN_PROGRESS"},
-		Target:       []string{"CREATE_COMPLETE"},
-		Refresh:      containerInfraClusterV1StateRefreshFunc(ctx, containerInfraClient, s),
-		Timeout:      d.Timeout(schema.TimeoutCreate),
-		Delay:        0,
-		PollInterval: 20 * time.Second,
+		Pending: []string{"CREATE_IN_PROGRESS"},
+		Target:  []string{"CREATE_COMPLETE"},
+		Refresh: func() (any, string, error) {
+			result, status, err := refresh()
+			// Magnum may return 404 (or 400 for a half-written row with master_count 0)
+			// briefly after creation; a nil result makes WaitForStateContext retry
+			// up to NotFoundChecks times.
+			if err == nil && status == "DELETE_COMPLETE" ||
+				gophercloud.ResponseCodeIs(err, http.StatusBadRequest) {
+				return nil, "", nil
+			}
+
+			return result, status, err
+		},
+		Timeout:        d.Timeout(schema.TimeoutCreate),
+		Delay:          0,
+		PollInterval:   20 * time.Second,
+		NotFoundChecks: 20,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
