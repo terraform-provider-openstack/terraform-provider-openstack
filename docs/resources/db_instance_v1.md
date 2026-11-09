@@ -47,12 +47,19 @@ The following arguments are supported:
 * `name` - (Required) A unique name for the resource.
 
 * `flavor_id` - (Required) The flavor ID of the desired flavor for the instance.
-    Changing this creates new instance.
+    Changing this resizes the instance in place: the database service is
+    restarted, but the instance and its data are kept.
 
 * `configuration_id` - (Optional) Configuration ID to be attached to the instance. Database instance
    will be rebooted when configuration is detached.
 
-* `size` - (Required) Specifies the volume size in GB. Changing this creates new instance.
+* `size` - (Required) Specifies the volume size in GB. Increasing this resizes
+    the volume in place and keeps the data. The volume of an instance cannot
+    shrink, so a smaller value is refused when planning, unless another change
+    replaces the instance anyway. To replace the instance with a smaller
+    volume, taint it first (`terraform taint`); `-replace` does not skip this
+    check. If both `flavor_id` and `size` change, the flavor is resized first
+    and the volume after it.
 
 * `volume_type` - (Optional) Specifies the volume type to use. If you want to
   specify a volume type, you must also specify a volume size. Changing this
@@ -115,6 +122,15 @@ The `database` block supports:
 
 * `charset` - (Optional) Database character set. Changing this creates a
     new instance.
+
+## Timeouts
+
+The `timeouts` block allows you to specify timeouts for certain actions:
+
+* `create` - (Default `30 minutes`) Used for creating the instance.
+* `update` - (Default `30 minutes`) Used for each resize of the flavor or the
+    volume.
+* `delete` - (Default `30 minutes`) Used for deleting the instance.
 
 ## Attributes Reference
 

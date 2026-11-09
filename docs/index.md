@@ -498,6 +498,10 @@ the feature or bug you're testing:
 * `OS_DB_DATASTORE_TYPE` - Required if you need to set a Trove/Database
   datastore type.
 
+* `OS_FLAVOR_ID_RESIZE` - Required by the tests that resize an instance, such
+  as the resize test of `openstack_db_instance_v1`. Set this value to the ID of
+  a second flavor, different from `OS_FLAVOR_ID`.
+
 * `OS_DNS_ENVIRONMENT` - Required if you're working on the `openstack_dns_*`
   resources. Set this value to "1" to enable testing these resources.
 
