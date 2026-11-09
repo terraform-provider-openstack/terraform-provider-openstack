@@ -23,6 +23,7 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceSharedFilesystemShareAccessV2Create,
 		ReadContext:   resourceSharedFilesystemShareAccessV2Read,
+		UpdateContext: resourceSharedFilesystemShareAccessV2Update,
 		DeleteContext: resourceSharedFilesystemShareAccessV2Delete,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceSharedFilesystemShareAccessV2Import,
@@ -82,6 +83,16 @@ func resourceSharedFilesystemShareAccessV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
+			"metadata": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
+
+			"all_metadata": {
+				Type:     schema.TypeMap,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -103,10 +114,24 @@ func resourceSharedFilesystemShareAccessV2Create(ctx context.Context, d *schema.
 
 	shareID := d.Get("share_id").(string)
 
-	grantOpts := shares.GrantAccessOpts{
+	metadataRaw := d.Get("metadata").(map[string]any)
+	metadata := make(map[string]string, len(metadataRaw))
+
+	for k, v := range metadataRaw {
+		if stringVal, ok := v.(string); ok {
+			metadata[k] = stringVal
+		}
+	}
+
+	if len(metadata) > 0 {
+		sfsClient.Microversion = sharedFilesystemV2ShareAccessRulesMicroversion
+	}
+
+	grantOpts := shareAccessV2GrantAccessOpts{
 		AccessType:  accessType,
 		AccessTo:    d.Get("access_to").(string),
 		AccessLevel: d.Get("access_level").(string),
+		Metadata:    metadata,
 	}
 
 	log.Printf("[DEBUG] openstack_sharedfilesystem_share_access_v2 create options: %#v", grantOpts)
@@ -156,6 +181,58 @@ func resourceSharedFilesystemShareAccessV2Create(ctx context.Context, d *schema.
 	return resourceSharedFilesystemShareAccessV2Read(ctx, d, meta)
 }
 
+func resourceSharedFilesystemShareAccessV2Update(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	config := meta.(*Config)
+
+	sfsClient, err := config.SharedfilesystemV2Client(ctx, GetRegion(d, config))
+	if err != nil {
+		return diag.Errorf("Error creating OpenStack sharedfilesystem client: %s", err)
+	}
+
+	// Access rule metadata is only supported since microversion 2.45.
+	sfsClient.Microversion = sharedFilesystemV2ShareAccessRulesMicroversion
+
+	if d.HasChange("metadata") {
+		o, n := d.GetChange("metadata")
+		oldMetadata := o.(map[string]any)
+		newMetadata := n.(map[string]any)
+
+		// Determine if any metadata keys were removed from the configuration.
+		// Then request those keys to be unset.
+		for oldKey := range oldMetadata {
+			if _, ok := newMetadata[oldKey]; ok {
+				continue
+			}
+
+			log.Printf("[DEBUG] Deleting openstack_sharedfilesystem_share_access_v2 %s metadata %s", d.Id(), oldKey)
+
+			err := deleteShareAccessV2Metadatum(ctx, sfsClient, d.Id(), oldKey)
+			if err != nil && CheckDeleted(d, err, "") != nil {
+				return diag.Errorf("Error deleting openstack_sharedfilesystem_share_access_v2 %s metadata %s: %s", d.Id(), oldKey, err)
+			}
+		}
+
+		metadataToUpdate := make(map[string]string, len(newMetadata))
+
+		for newKey, newValue := range newMetadata {
+			if stringVal, ok := newValue.(string); ok {
+				metadataToUpdate[newKey] = stringVal
+			}
+		}
+
+		if len(metadataToUpdate) > 0 {
+			log.Printf("[DEBUG] Updating the following items in metadata for openstack_sharedfilesystem_share_access_v2 %s: %v", d.Id(), metadataToUpdate)
+
+			_, err := updateShareAccessV2Metadata(ctx, sfsClient, d.Id(), metadataToUpdate)
+			if err != nil {
+				return diag.Errorf("Error updating openstack_sharedfilesystem_share_access_v2 %s metadata: %s", d.Id(), err)
+			}
+		}
+	}
+
+	return resourceSharedFilesystemShareAccessV2Read(ctx, d, meta)
+}
+
 func resourceSharedFilesystemShareAccessV2Read(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	config := meta.(*Config)
 
@@ -181,6 +258,10 @@ func resourceSharedFilesystemShareAccessV2Read(ctx context.Context, d *schema.Re
 		d.Set("region", GetRegion(d, config))
 		d.Set("access_key", access.AccessKey)
 		d.Set("state", access.State)
+
+		// This will only be set if the Shared Filesystem environment supports
+		// microversion 2.45.
+		d.Set("all_metadata", access.Metadata)
 
 		return nil
 	case shares.AccessRight:
