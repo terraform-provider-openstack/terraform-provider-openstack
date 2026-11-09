@@ -140,9 +140,10 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta a
 		return diag.Errorf("Error creating openstack_dns_zone_v2: %s", err)
 	}
 
-	if d.Get("disable_status_check").(bool) {
-		d.SetId(n.ID)
+	// Set the ID so Terraform state contains the zone which already exists in the Designate API
+	d.SetId(n.ID)
 
+	if d.Get("disable_status_check").(bool) {
 		log.Printf("[DEBUG] Created OpenStack DNS Zone %s: %#v", n.ID, n)
 
 		return resourceDNSZoneV2Read(ctx, d, meta)
@@ -172,8 +173,6 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta a
 		return diag.Errorf(
 			"Error waiting for openstack_dns_zone_v2 %s to become active: %s", d.Id(), err)
 	}
-
-	d.SetId(n.ID)
 
 	log.Printf("[DEBUG] Created OpenStack DNS Zone %s: %#v", n.ID, n)
 
