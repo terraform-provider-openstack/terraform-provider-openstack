@@ -11,10 +11,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceDatabaseInstanceV1() *schema.Resource {
-	return &schema.Resource{
+	resource := &schema.Resource{
 		CreateContext: resourceDatabaseInstanceV1Create,
 		ReadContext:   resourceDatabaseInstanceV1Read,
 		DeleteContext: resourceDatabaseInstanceV1Delete,
@@ -22,6 +23,7 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
@@ -50,7 +52,7 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 				Type:         schema.TypeInt,
 				Required:     true,
 				RequiredWith: []string{"volume_type"},
-				ForceNew:     true,
+				ValidateFunc: validation.IntAtLeast(1),
 			},
 
 			"volume_type": {
@@ -185,6 +187,10 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 			},
 		},
 	}
+
+	resource.CustomizeDiff = databaseInstanceV1CustomizeDiff(resource.Schema)
+
+	return resource
 }
 
 func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -295,6 +301,7 @@ func resourceDatabaseInstanceV1Read(ctx context.Context, d *schema.ResourceData,
 
 	d.Set("name", instance.Name)
 	d.Set("flavor_id", instance.Flavor)
+	d.Set("size", instance.Volume.Size)
 	d.Set("datastore", instance.Datastore)
 	d.Set("addresses", instance.IP)
 	d.Set("region", GetRegion(d, config))
@@ -303,11 +310,42 @@ func resourceDatabaseInstanceV1Read(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceDatabaseInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	// Preserve the previous state on failure instead of persisting unapplied changes.
+	d.Partial(true)
+
 	config := meta.(*Config)
 
 	databaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack database client: %s", err)
+	}
+
+	if d.HasChange("size") {
+		oldSize, newSize := d.GetChange("size")
+		if newSize.(int) <= oldSize.(int) {
+			return diag.Errorf("decreasing openstack_db_instance_v1 volume size is not supported")
+		}
+
+		log.Printf("[DEBUG] Resizing openstack_db_instance_v1 %s volume from %d to %d GB", d.Id(), oldSize, newSize)
+
+		err = instances.ResizeVolume(ctx, databaseV1Client, d.Id(), newSize.(int)).ExtractErr()
+		if err != nil {
+			return diag.Errorf("error resizing openstack_db_instance_v1 %s volume: %s", d.Id(), err)
+		}
+
+		stateConf := &retry.StateChangeConf{
+			Pending:    []string{"RESIZE"},
+			Target:     []string{"ACTIVE", "HEALTHY"},
+			Refresh:    databaseInstanceV1VolumeResizeStateRefreshFunc(ctx, databaseV1Client, d.Id(), newSize.(int)),
+			Timeout:    d.Timeout(schema.TimeoutUpdate),
+			Delay:      0,
+			MinTimeout: 3 * time.Second,
+		}
+
+		_, err = stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return diag.Errorf("error waiting for openstack_db_instance_v1 %s volume resize: %s", d.Id(), err)
+		}
 	}
 
 	if d.HasChange("configuration_id") {
@@ -329,6 +367,8 @@ func resourceDatabaseInstanceUpdate(ctx context.Context, d *schema.ResourceData,
 			log.Printf("Attaching configuration to openstack_db_instance_v1 %s", d.Id())
 		}
 	}
+
+	d.Partial(false)
 
 	return resourceDatabaseInstanceV1Read(ctx, d, meta)
 }
