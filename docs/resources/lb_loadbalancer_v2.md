@@ -82,6 +82,13 @@ The following arguments are supported:
 * `tags` - (Optional) A list of simple strings assigned to the loadbalancer.
     Available only for Octavia **minor version 2.5 or later**.
 
+* `additional_vips` - (Optional) A list of additional VIPs to associate with
+    the loadbalancer. Changing this creates a new loadbalancer. Each additional
+    VIP is defined by:
+    * `subnet_id` - (Required) The subnet ID for the additional VIP.
+    * `ip_address` - (Optional) The IP address for the additional VIP. If not
+        specified, an address will be automatically assigned from the subnet.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -101,6 +108,7 @@ The following attributes are exported:
 * `security_group_ids` - See Argument Reference above.
 * `tags` - See Argument Reference above.
 * `vip_qos_policy_id`: See Argument Reference above.
+* `additional_vips` - See Argument Reference above.
 
 ## Import
 
