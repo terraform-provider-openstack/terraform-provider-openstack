@@ -215,8 +215,6 @@ func expandNetworkingPortFixedIPToStringSlice(fixedIPs []ports.IP) []string {
 }
 
 func flattenNetworkingPortBindingV2(port portExtended) any {
-	var portBinding []map[string]any
-
 	var profile any
 
 	if port.Profile != nil {
@@ -249,13 +247,11 @@ func flattenNetworkingPortBindingV2(port portExtended) any {
 		vifDetails[k] = string(p)
 	}
 
-	portBinding = append(portBinding, map[string]any{
+	return []map[string]any{{
 		"profile":     profile,
 		"vif_type":    port.VIFType,
 		"vif_details": vifDetails,
 		"vnic_type":   port.VNICType,
 		"host_id":     port.HostID,
-	})
-
-	return portBinding
+	}}
 }

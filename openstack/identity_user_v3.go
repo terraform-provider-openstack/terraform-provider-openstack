@@ -30,7 +30,7 @@ func expandIdentityUserV3MFARules(rules []any) []any {
 }
 
 func flattenIdentityUserV3MFARules(v []any) []map[string]any {
-	mfaRules := []map[string]any{}
+	mfaRules := make([]map[string]any, 0, len(v))
 
 	for _, rawRule := range v {
 		mfaRule := map[string]any{
