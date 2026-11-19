@@ -198,9 +198,7 @@ func resourceIKEPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta a
 	lifetimeMap["units"] = policy.Lifetime.Units
 	lifetimeMap["value"] = policy.Lifetime.Value
 
-	var lifetime []map[string]any
-
-	lifetime = append(lifetime, lifetimeMap)
+	lifetime := []map[string]any{lifetimeMap}
 	if err := d.Set("lifetime", &lifetime); err != nil {
 		log.Printf("[WARN] unable to set IKE policy lifetime")
 	}

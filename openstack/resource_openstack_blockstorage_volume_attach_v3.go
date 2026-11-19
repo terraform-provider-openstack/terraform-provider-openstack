@@ -164,7 +164,7 @@ func resourceBlockStorageVolumeAttachV3Create(ctx context.Context, d *schema.Res
 	}
 
 	if v, ok := d.GetOk("wwpns"); ok {
-		var wwpns []string
+		wwpns := make([]string, 0, len(v.([]string)))
 		wwpns = append(wwpns, v.([]string)...)
 
 		connOpts.Wwpns = wwpns
@@ -352,7 +352,7 @@ func resourceBlockStorageVolumeAttachV3Delete(ctx context.Context, d *schema.Res
 	}
 
 	if v, ok := d.GetOk("wwpns"); ok {
-		var wwpns []string
+		wwpns := make([]string, 0, len(v.([]string)))
 		wwpns = append(wwpns, v.([]string)...)
 		termOpts.Wwpns = wwpns
 	}
