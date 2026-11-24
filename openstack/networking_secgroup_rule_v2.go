@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/netip"
 	"strconv"
+	"strings"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/rules"
@@ -87,4 +89,20 @@ func resourceNetworkingSecGroupRuleV2Protocol(v any, k string) ([]string, []erro
 	}
 
 	return nil, nil
+}
+
+func resourceNetworkingSecGroupRuleV2RemoteIPPrefix(v any) string {
+	prefix := strings.ToLower(v.(string))
+
+	// Neutron saves and returns single IPs with their CIDR length
+	if strings.Contains(prefix, "/") {
+		return prefix
+	}
+
+	addr, err := netip.ParseAddr(prefix)
+	if err != nil {
+		return prefix
+	}
+
+	return fmt.Sprintf("%s/%d", prefix, addr.BitLen())
 }

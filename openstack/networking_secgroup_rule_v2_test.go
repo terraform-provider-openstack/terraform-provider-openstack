@@ -81,3 +81,16 @@ func TestUnitResourceNetworkingSecGroupRuleV2ProtocolNumber(t *testing.T) {
 
 	assert.Empty(t, err)
 }
+
+func TestUnitResourceNetworkingSecGroupRuleV2RemoteIPPrefix(t *testing.T) {
+	cases := map[string]string{
+		"192.0.2.12":     "192.0.2.12/32",
+		"192.168.0.0/24": "192.168.0.0/24",
+		"2001:db8::1":    "2001:db8::1/128",
+		"2001:db8::/64":  "2001:db8::/64",
+	}
+
+	for input, expected := range cases {
+		assert.Equal(t, expected, resourceNetworkingSecGroupRuleV2RemoteIPPrefix(input), input)
+	}
+}
