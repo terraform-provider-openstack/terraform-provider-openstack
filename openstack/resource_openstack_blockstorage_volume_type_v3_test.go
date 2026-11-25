@@ -74,6 +74,53 @@ func TestAccBlockStorageVolumeTypeV3_basic(t *testing.T) {
 	})
 }
 
+func TestAccBlockStorageVolumeTypeV3_encryption(t *testing.T) {
+	var volumetype volumetypes.VolumeType
+
+	resourceName := "openstack_blockstorage_volume_type_v3.volume_type_1"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckBlockStorageVolumeTypeV3Destroy(t.Context()),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBlockStorageVolumeTypeV3Encryption(256),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBlockStorageVolumeTypeV3Exists(t.Context(), resourceName, &volumetype),
+					resource.TestCheckResourceAttr(resourceName, "encryption.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "encryption.0.provider", "luks"),
+					resource.TestCheckResourceAttr(resourceName, "encryption.0.cipher", "aes-xts-plain64"),
+					resource.TestCheckResourceAttr(resourceName, "encryption.0.key_size", "256"),
+					resource.TestCheckResourceAttr(resourceName, "encryption.0.control_location", "front-end"),
+				),
+			},
+			{
+				Config: testAccBlockStorageVolumeTypeV3Encryption(512),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBlockStorageVolumeTypeV3Exists(t.Context(), resourceName, &volumetype),
+					resource.TestCheckResourceAttr(resourceName, "encryption.0.key_size", "512"),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBlockStorageVolumeTypeV3Basic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBlockStorageVolumeTypeV3Exists(t.Context(), resourceName, &volumetype),
+					resource.TestCheckResourceAttr(resourceName, "encryption.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccBlockStorageVolumeTypeV3_EndpointCheck(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -202,3 +249,20 @@ resource "openstack_identity_endpoint_v3" "endpoint_1" {
   url             = "http://my-endpoint"
 }
 `
+
+func testAccBlockStorageVolumeTypeV3Encryption(keySize int) string {
+	return fmt.Sprintf(`
+resource "openstack_blockstorage_volume_type_v3" "volume_type_1" {
+  name        = "foo"
+  description = "foo"
+  is_public   = true
+
+  encryption {
+    provider         = "luks"
+    cipher           = "aes-xts-plain64"
+    key_size         = %d
+    control_location = "front-end"
+  }
+}
+`, keySize)
+}
