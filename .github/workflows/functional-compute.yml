@@ -44,6 +44,10 @@ jobs:
         branch: ${{ matrix.openstack_version }}
         conf_overrides: |
           CINDER_ISCSI_HELPER=lioadm
+
+          [[post-config|\$NOVA_CONF]]
+          [DEFAULT]
+          rpc_response_timeout = 180
         enabled_services: 's-account,s-container,s-object,s-proxy'
     - name: Checkout go
       uses: actions/setup-go@v6
