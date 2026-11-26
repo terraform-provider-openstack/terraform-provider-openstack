@@ -38,9 +38,9 @@ jobs:
     name: fwaas on OpenStack ${{ matrix.name }}
     steps:
     - name: Checkout TPO
-      uses: actions/checkout@v6
+      uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
     - name: Deploy devstack
-      uses: gophercloud/devstack-action@v0.20
+      uses: gophercloud/devstack-action@fc61cc16ba19c4224a70b0b4d7e3e4907fac51e7 # v0.20
       with:
         branch: ${{ matrix.openstack_version }}
         conf_overrides: |
@@ -52,7 +52,7 @@ jobs:
           Q_TUNNEL_TYPES=vxlan,gre
         enabled_services: 'q-svc,q-agt,q-dhcp,q-l3,q-meta,q-fwaas-v2,-cinder,-horizon,-tempest,-swift,-c-sch,-c-api,-c-vol,-c-bak,-ovn,-ovn-controller,-ovn-northd,-q-ovn-metadata-agent'
     - name: Checkout go
-      uses: actions/setup-go@v6
+      uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
       with:
         go-version-file: 'go.mod'
         cache: true
@@ -67,7 +67,7 @@ jobs:
       if: failure()
     - name: Upload logs artifacts on failure
       if: failure()
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: functional-fwaas_v2-${{ matrix.name }}
         path: /tmp/devstack-logs/*

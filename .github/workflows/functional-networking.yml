@@ -37,7 +37,7 @@ jobs:
     name: Neutron on OpenStack ${{ matrix.name }}
     steps:
     - name: Checkout TPO
-      uses: actions/checkout@v6
+      uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
     - name: Create additional neutron policies
       run: |
         mkdir /tmp/neutron-policies
@@ -47,7 +47,7 @@ jobs:
         "update_port:binding:profile": "rule:admin_only or rule:service_api"
         EOF
     - name: Deploy devstack
-      uses: gophercloud/devstack-action@v0.20
+      uses: gophercloud/devstack-action@fc61cc16ba19c4224a70b0b4d7e3e4907fac51e7 # v0.20
       with:
         branch: ${{ matrix.openstack_version }}
         conf_overrides: |
@@ -63,7 +63,7 @@ jobs:
           service_provider = L3_ROUTER_NAT:user-defined:neutron.services.ovn_l3.service_providers.user_defined.UserDefined
         enabled_services: 'neutron-dhcp,neutron-dns,neutron-qos,neutron-segments,neutron-trunk,neutron-uplink-status-propagation,neutron-network-segment-range,neutron-port-forwarding,q-dr,q-dr-agent'
     - name: Checkout go
-      uses: actions/setup-go@v6
+      uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
       with:
         go-version-file: 'go.mod'
         cache: true
@@ -78,7 +78,7 @@ jobs:
       if: failure()
     - name: Upload logs artifacts on failure
       if: failure()
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: functional-basic-${{ matrix.name }}
         path: /tmp/devstack-logs/*
