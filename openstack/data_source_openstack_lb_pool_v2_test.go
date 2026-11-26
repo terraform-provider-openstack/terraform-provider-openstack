@@ -40,8 +40,8 @@ func TestAccDataSourceLBV2Pool_basic(t *testing.T) {
 						"data.openstack_lb_pool_v2.pool_ds", "lb_method", "ROUND_ROBIN"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_lb_pool_v2.pool_ds", "tags.#", "3"),
-					resource.TestCheckResourceAttr(
-						"data.openstack_lb_pool_v2.pool_ds", "tags.0", "tag1"),
+					resource.TestCheckTypeSetElemAttr(
+						"data.openstack_lb_pool_v2.pool_ds", "tags.*", "tag1"),
 				),
 			},
 		},

@@ -27,8 +27,8 @@ func TestAccDataSourceLBV2Member_basic(t *testing.T) {
 						"data.openstack_lb_member_v2.mb_ds_2", "member_id"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_lb_member_v2.mb_ds_1", "tags.#", "3"),
-					resource.TestCheckResourceAttr(
-						"data.openstack_lb_member_v2.mb_ds_1", "tags.0", "tag1"),
+					resource.TestCheckTypeSetElemAttr(
+						"data.openstack_lb_member_v2.mb_ds_1", "tags.*", "tag1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_lb_member_v2.mb_ds_1", "monitor_address", "192.168.199.73"),
 					resource.TestCheckResourceAttr(
@@ -52,12 +52,12 @@ func TestAccDataSourceLBV2Member_basic(t *testing.T) {
 						"data.openstack_lb_member_v2.mb_ds_4", "name", "member_1"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_lb_member_v2.mb_ds_3", "tags.#", "2"),
-					resource.TestCheckResourceAttr(
-						"data.openstack_lb_member_v2.mb_ds_3", "tags.0", "tag11"),
+					resource.TestCheckTypeSetElemAttr(
+						"data.openstack_lb_member_v2.mb_ds_3", "tags.*", "tag11"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_lb_member_v2.mb_ds_4", "tags.#", "2"),
-					resource.TestCheckResourceAttr(
-						"data.openstack_lb_member_v2.mb_ds_4", "tags.0", "tag13"),
+					resource.TestCheckTypeSetElemAttr(
+						"data.openstack_lb_member_v2.mb_ds_4", "tags.*", "tag13"),
 				),
 			},
 		},
