@@ -33,7 +33,10 @@ _IMAGE=$(openstack image list | grep -i cirros | head -n 1)
 _IMAGE_ID=$(echo $_IMAGE | awk -F\| '{print $2}' | tr -d ' ')
 _IMAGE_NAME=$(echo $_IMAGE | awk -F\| '{print $3}' | tr -d ' ')
 _IMAGE_NAME=$(echo $_IMAGE | awk -F\| '{print $3}' | tr -d ' ')
-_MAGNUM_IMAGE_ID=$(openstack image list --format value -c Name -c ID | grep coreos | cut -d ' ' -f 1)
+_MAGNUM_IMAGE_ID=$(openstack image list --format value -c Name -c ID | grep -i ubuntu | cut -d ' ' -f 1 | head -n 1)
+if [ -z "$_MAGNUM_IMAGE_ID" ]; then
+        _MAGNUM_IMAGE_ID=$(openstack image list --format value -c Name -c ID | grep coreos | cut -d ' ' -f 1)
+fi
 if [ -z "$_MAGNUM_IMAGE_ID" ]; then
         _MAGNUM_IMAGE_ID=$(openstack image list --format value -c Name -c ID | grep -i atomic | cut -d ' ' -f 1)
 fi
