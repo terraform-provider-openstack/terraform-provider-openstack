@@ -47,7 +47,7 @@ jobs:
         "update_port:binding:profile": "rule:admin_only or rule:service_api"
         EOF
     - name: Deploy devstack
-      uses: gophercloud/devstack-action@v0.19
+      uses: gophercloud/devstack-action@v0.20
       with:
         branch: ${{ matrix.openstack_version }}
         conf_overrides: |
@@ -78,7 +78,7 @@ jobs:
       if: failure()
     - name: Upload logs artifacts on failure
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: functional-basic-${{ matrix.name }}
         path: /tmp/devstack-logs/*
