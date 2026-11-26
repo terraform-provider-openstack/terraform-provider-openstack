@@ -117,12 +117,12 @@ func testAccCheckImagesV2DataSourceID(n string) resource.TestCheckFunc {
 }
 
 // Standard CirrOS image.
-const testAccOpenStackImagesV2ImageDataSourceCirros = `
+var testAccOpenStackImagesV2ImageDataSourceCirros = fmt.Sprintf(`
 resource "openstack_images_image_v2" "image_1" {
   name = "CirrOS-tf_1"
   container_format = "bare"
   disk_format = "qcow2"
-  image_source_url = "http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
+  image_source_url = "%[1]s"
   tags = ["cirros-tf_1"]
   properties = {
     foo = "bar"
@@ -134,7 +134,7 @@ resource "openstack_images_image_v2" "image_2" {
   name = "CirrOS-tf_2"
   container_format = "bare"
   disk_format = "qcow2"
-  image_source_url = "http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
+  image_source_url = "%[1]s"
   tags = ["cirros-tf_2"]
   properties = {
     foo = "bar"
@@ -146,13 +146,13 @@ resource "openstack_images_image_v2" "image_3" {
   container_format = "bare"
   hidden = true
   disk_format = "qcow2"
-  image_source_url = "http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
+  image_source_url = "%[1]s"
   tags = ["cirros-tf_3"]
   properties = {
 	foo = "bar"
   }
 }
-`
+`, osImageSourceURL)
 
 func testAccOpenStackImagesV2ImageDataSourceBasic() string {
 	return fmt.Sprintf(`
@@ -207,7 +207,7 @@ func testAccOpenStackImagesV2ImageDataSourceQuerySizeMin() string {
 data "openstack_images_image_v2" "image_1" {
 	most_recent = true
 	visibility = "private"
-	size_min = "13000000"
+	size_min = openstack_images_image_v2.image_1.size_bytes
 }
 `, testAccOpenStackImagesV2ImageDataSourceCirros)
 }
@@ -219,7 +219,7 @@ func testAccOpenStackImagesV2ImageDataSourceQuerySizeMax() string {
 data "openstack_images_image_v2" "image_1" {
 	most_recent = true
 	visibility = "private"
-	size_max = "23000000"
+	size_max = openstack_images_image_v2.image_1.size_bytes
 }
 `, testAccOpenStackImagesV2ImageDataSourceCirros)
 }

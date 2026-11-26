@@ -77,12 +77,12 @@ func TestAccOpenStackImagesV2ImageIDsDataSource_basic(t *testing.T) {
 }
 
 // Standard CirrOS image.
-const testAccOpenStackImagesV2ImageIDsDataSourceCirros = `
+var testAccOpenStackImagesV2ImageIDsDataSourceCirros = fmt.Sprintf(`
 resource "openstack_images_image_v2" "image_1" {
   name = "CirrOS-tf_1"
   container_format = "bare"
   disk_format = "qcow2"
-  image_source_url = "http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
+  image_source_url = "%[1]s"
   tags = ["cirros-tf_1"]
   properties = {
     foo = "bar"
@@ -95,14 +95,14 @@ resource "openstack_images_image_v2" "image_2" {
   name = "CirrOS-tf_2"
   container_format = "bare"
   disk_format = "qcow2"
-  image_source_url = "http://download.cirros-cloud.net/0.5.1/cirros-0.5.1-x86_64-disk.img"
+  image_source_url = "%[1]s"
   tags = ["cirros-tf_2"]
   properties = {
     foo = "bar"
   }
   visibility = "private"
 }
-`
+`, osImageSourceURL)
 
 func testAccOpenStackImagesV2ImageIDsDataSourceEmpty() string {
 	return fmt.Sprintf(`

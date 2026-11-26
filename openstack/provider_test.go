@@ -52,6 +52,23 @@ var (
 	osMagnumHTTPSProxy           = os.Getenv("OS_MAGNUM_HTTPS_PROXY")
 	osMagnumNoProxy              = os.Getenv("OS_MAGNUM_NO_PROXY")
 	osMagnumLabels               = os.Getenv("OS_MAGNUM_LABELS")
+	osImageSourceURL             = testGetenvDefault("OS_IMAGE_SOURCE_URL", defaultImageSourceURL)
+	osImageSourceURLXZ           = testGetenvDefault("OS_IMAGE_SOURCE_URL_XZ", defaultImageSourceURLXZ)
+	osImageSourceURLZST          = testGetenvDefault("OS_IMAGE_SOURCE_URL_ZST", defaultImageSourceURLZST)
+)
+
+// Images downloaded by the image acceptance tests when the matching
+// OS_IMAGE_SOURCE_URL* variable is not set.
+const (
+	// Small qcow2 image used by most image tests.
+	defaultImageSourceURL = "https://github.com/cirros-dev/cirros/releases/download/0.6.3/cirros-0.6.3-x86_64-disk.img"
+
+	// xz- and zstd-compressed raw images for the "decompress" tests. Keep these
+	// small: they are decompressed on the runner and uploaded to Glance. Since
+	// Talos v1.8.0 the OpenStack image is no longer a GitHub release asset, so
+	// these are the last releases that published it in each format.
+	defaultImageSourceURLXZ  = "https://github.com/siderolabs/talos/releases/download/v1.6.6/openstack-amd64.raw.xz"
+	defaultImageSourceURLZST = "https://github.com/siderolabs/talos/releases/download/v1.8.0-alpha.1/openstack-amd64.raw.zst"
 )
 
 var (
@@ -495,4 +512,12 @@ func testGetenvBool(env string) bool {
 	ret, _ := strconv.ParseBool(os.Getenv(env))
 
 	return ret
+}
+
+func testGetenvDefault(env, def string) string {
+	if v := os.Getenv(env); v != "" {
+		return v
+	}
+
+	return def
 }

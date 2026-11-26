@@ -114,14 +114,14 @@ func testAccCheckImagesImageAccessV2Exists(ctx context.Context, n string, member
 	}
 }
 
-const testAccImagesImageAccessV2 = `
+var testAccImagesImageAccessV2 = fmt.Sprintf(`
 data "openstack_identity_auth_scope_v3" "scope" {
   name = "scope"
 }
 
 resource "openstack_images_image_v2" "image_1" {
   name   = "CirrOS-tf_1"
-  image_source_url = "http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
+  image_source_url = "%[1]s"
   container_format = "bare"
   disk_format = "qcow2"
   visibility = "shared"
@@ -129,7 +129,7 @@ resource "openstack_images_image_v2" "image_1" {
   timeouts {
     create = "10m"
   }
-}`
+}`, osImageSourceURL)
 
 func testAccImagesImageAccessV2Basic() string {
 	return fmt.Sprintf(`

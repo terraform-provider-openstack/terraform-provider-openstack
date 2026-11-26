@@ -452,109 +452,109 @@ func testAccCheckImagesImageV2TagCount(ctx context.Context, n string, expected i
 	}
 }
 
-const testAccImagesImageV2Basic = `
+var testAccImagesImageV2Basic = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "%[1]s"
       container_format = "bare"
       disk_format = "qcow2"
 
       timeouts {
         create = "10m"
       }
-  }`
+  }`, osImageSourceURL)
 
-const testAccImagesImageV2BasicWithID = `
+var testAccImagesImageV2BasicWithID = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_1" {
       name = "Rancher TerraformAccTest"
       image_id = "c1efdf94-9a1a-4401-88b8-d616029d2551"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "%[1]s"
       container_format = "bare"
       disk_format = "qcow2"
 
       timeouts {
         create = "10m"
       }
-  }`
+  }`, osImageSourceURL)
 
-const testAccImagesImageV2BasicHidden = `
+var testAccImagesImageV2BasicHidden = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_1" {
       name = "Rancher TerraformAccTest"
       hidden = true
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "%[1]s"
       container_format = "bare"
       disk_format = "qcow2"
 
       timeouts {
         create = "10m"
       }
-  }`
+  }`, osImageSourceURL)
 
-const testAccImagesImageV2Name1 = `
+var testAccImagesImageV2Name1 = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "%[1]s"
       container_format = "bare"
       disk_format = "qcow2"
-  }`
+  }`, osImageSourceURL)
 
-const testAccImagesImageV2Name2 = `
+var testAccImagesImageV2Name2 = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_1" {
       name   = "TerraformAccTest Rancher"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "%[1]s"
       container_format = "bare"
       disk_format = "qcow2"
-  }`
+  }`, osImageSourceURL)
 
-const testAccImagesImageV2Tags1 = `
+var testAccImagesImageV2Tags1 = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "%[1]s"
       container_format = "bare"
       disk_format = "qcow2"
       tags = ["foo","bar"]
-  }`
+  }`, osImageSourceURL)
 
-const testAccImagesImageV2Tags2 = `
+var testAccImagesImageV2Tags2 = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "%[1]s"
       container_format = "bare"
       disk_format = "qcow2"
       tags = ["foo","bar","baz"]
-  }`
+  }`, osImageSourceURL)
 
-const testAccImagesImageV2Tags3 = `
+var testAccImagesImageV2Tags3 = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "%[1]s"
       container_format = "bare"
       disk_format = "qcow2"
       tags = ["foo","baz"]
-  }`
+  }`, osImageSourceURL)
 
-const testAccImagesImageV2Visibility1 = `
+var testAccImagesImageV2Visibility1 = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "%[1]s"
       container_format = "bare"
       disk_format = "qcow2"
       visibility = "private"
-  }`
+  }`, osImageSourceURL)
 
-const testAccImagesImageV2Visibility2 = `
+var testAccImagesImageV2Visibility2 = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "%[1]s"
       container_format = "bare"
       disk_format = "qcow2"
       visibility = "public"
-  }`
+  }`, osImageSourceURL)
 
-const testAccImagesImageV2Properties1 = `
+var testAccImagesImageV2Properties1 = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "%[1]s"
       container_format = "bare"
       disk_format = "qcow2"
 
@@ -562,36 +562,36 @@ const testAccImagesImageV2Properties1 = `
         foo = "bar"
         bar = "foo"
       }
-  }`
+  }`, osImageSourceURL)
 
-const testAccImagesImageV2Properties2 = `
+var testAccImagesImageV2Properties2 = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "%[1]s"
       container_format = "bare"
       disk_format = "qcow2"
 
       properties = {
         foo = "bar"
       }
-  }`
+  }`, osImageSourceURL)
 
-const testAccImagesImageV2Properties3 = `
+var testAccImagesImageV2Properties3 = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "%[1]s"
       container_format = "bare"
       disk_format = "qcow2"
 
       properties = {
         foo = "baz"
       }
-  }`
+  }`, osImageSourceURL)
 
-const testAccImagesImageV2Properties4 = `
+var testAccImagesImageV2Properties4 = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "%[1]s"
       container_format = "bare"
       disk_format = "qcow2"
 
@@ -599,12 +599,12 @@ const testAccImagesImageV2Properties4 = `
         foo = "baz"
         bar = "foo"
       }
-  }`
+  }`, osImageSourceURL)
 
-const testAccImagesImageV2Webdownload = `
+var testAccImagesImageV2Webdownload = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+      image_source_url = "%[1]s"
       container_format = "bare"
       disk_format = "qcow2"
       web_download = true
@@ -612,22 +612,22 @@ const testAccImagesImageV2Webdownload = `
       timeouts {
         create = "10m"
       }
-  }`
+  }`, osImageSourceURL)
 
-const testAccImagesImageV2DecompressOctetStreamXZ = `
+var testAccImagesImageV2DecompressOctetStreamXZ = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_xz" {
     name             = "openstack-xz"
-    image_source_url = "https://github.com/siderolabs/talos/releases/download/v1.6.6/openstack-amd64.raw.xz"
+    image_source_url = "%s"
     decompress       = true
     container_format = "bare"
     disk_format      = "raw"
-  }`
+  }`, osImageSourceURLXZ)
 
-const testAccImagesImageV2DecompressOctetStreamZST = `
+var testAccImagesImageV2DecompressOctetStreamZST = fmt.Sprintf(`
   resource "openstack_images_image_v2" "image_zst" {
     name             = "openstack-zst"
-    image_source_url = "https://github.com/siderolabs/talos/releases/download/v1.8.0-alpha.1/openstack-amd64.raw.zst"
+    image_source_url = "%s"
     decompress       = true
     container_format = "bare"
     disk_format      = "raw"
-  }`
+  }`, osImageSourceURLZST)
