@@ -69,6 +69,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"flavor_id": {
 				Type:     schema.TypeString,
