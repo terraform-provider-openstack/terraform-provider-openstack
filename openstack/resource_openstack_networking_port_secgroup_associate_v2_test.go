@@ -135,6 +135,64 @@ func TestAccNetworkingV2PortSecGroupAssociate_update(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2PortSecGroupAssociate_skipDestroy(t *testing.T) {
+	var port ports.Port
+
+	if os.Getenv("TF_ACC") != "" {
+		testAccPreCheck(t)
+		testAccPreCheckNonAdminOnly(t)
+
+		hiddenPort, err := testAccCheckNetworkingV2PortSecGroupCreatePort(t, "hidden_port_1", true)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		defer testAccCheckNetworkingV2PortSecGroupDeletePort(t, hiddenPort)
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckNonAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		Steps: []resource.TestStep{
+			// enforce=true + skip_destroy=true: only secgroup_1 attached
+			{ // step 0
+				Config: testAccNetworkingV2PortSecGroupAssociateManifestSkipDestroy0(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "openstack_networking_port_secgroup_associate_v2.port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 1),
+				),
+			},
+			// destroy with skip_destroy=true: secgroup_1 must remain on the port
+			{ // step 1
+				Config: testAccNetworkingV2PortSecGroupAssociateManifestSkipDestroy1(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "data.openstack_networking_port_v2.hidden_port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 1),
+				),
+			},
+			// enforce=false + skip_destroy=true: appends secgroup_2 → 2 groups
+			{ // step 2
+				Config: testAccNetworkingV2PortSecGroupAssociateManifestSkipDestroy2(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "openstack_networking_port_secgroup_associate_v2.port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 2),
+				),
+			},
+			// destroy again with skip_destroy=true: both groups stay
+			{ // step 3
+				Config: testAccNetworkingV2PortSecGroupAssociateManifestSkipDestroy3(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortSecGroupAssociateExists(t.Context(), "data.openstack_networking_port_v2.hidden_port_1", &port),
+					testAccCheckNetworkingV2PortSecGroupAssociateCountSecurityGroups(&port, 2),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2PortSecGroupCreatePort(t *testing.T, portName string, defaultSecGroups bool) (*ports.Port, error) {
 	config := testAccProvider.Meta().(*Config)
 
@@ -475,6 +533,48 @@ resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
 }
 
 func testAccNetworkingV2PortSecGroupAssociateManifestUpdate12() string {
+	return fmt.Sprintf(`
+%s
+`, testAccNetworkingV2PortSecGroupAssociate)
+}
+
+func testAccNetworkingV2PortSecGroupAssociateManifestSkipDestroy0() string {
+	return fmt.Sprintf(`
+%s
+
+resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
+  port_id      = data.openstack_networking_port_v2.hidden_port_1.id
+  enforce      = "true"
+  skip_destroy = "true"
+  security_group_ids = [
+    openstack_networking_secgroup_v2.secgroup_1.id,
+  ]
+}
+`, testAccNetworkingV2PortSecGroupAssociate)
+}
+
+func testAccNetworkingV2PortSecGroupAssociateManifestSkipDestroy1() string {
+	return fmt.Sprintf(`
+%s
+`, testAccNetworkingV2PortSecGroupAssociate)
+}
+
+func testAccNetworkingV2PortSecGroupAssociateManifestSkipDestroy2() string {
+	return fmt.Sprintf(`
+%s
+
+resource "openstack_networking_port_secgroup_associate_v2" "port_1" {
+  port_id      = data.openstack_networking_port_v2.hidden_port_1.id
+  enforce      = "false"
+  skip_destroy = "true"
+  security_group_ids = [
+    openstack_networking_secgroup_v2.secgroup_2.id,
+  ]
+}
+`, testAccNetworkingV2PortSecGroupAssociate)
+}
+
+func testAccNetworkingV2PortSecGroupAssociateManifestSkipDestroy3() string {
 	return fmt.Sprintf(`
 %s
 `, testAccNetworkingV2PortSecGroupAssociate)
