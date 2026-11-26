@@ -12,10 +12,23 @@ updates:
     groups:
       gophercloud:
         patterns:
-          - "^github.com/gophercloud/"
+          - "github.com/gophercloud/*"
       golang_x:
         patterns:
-          - "^golang.org/x/"
+          - "golang.org/x/*"
       default:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Only propose releases that are at least a week old, so broken or
+    # compromised releases are usually caught and pulled first.
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
         patterns:
           - "*"

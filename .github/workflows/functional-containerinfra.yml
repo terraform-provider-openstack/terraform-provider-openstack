@@ -19,61 +19,73 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [ "master" ]
-        openstack_version: [ "master" ]
-        ubuntu_version: [ "24.04" ]
         include:
         - name: "master"
           openstack_version: "master"
           ubuntu_version: "24.04"
           devstack_conf_overrides: |
             enable_plugin magnum https://github.com/openstack/magnum master
-            MAGNUMCLIENT_BRANCH=master
-          additional_services: "openstack-cli-server"
+            enable_plugin magnum-cluster-api https://github.com/vexxhost/magnum-cluster-api main
+
+            MAGNUM_GUEST_IMAGE_URL=https://github.com/vexxhost/capo-image-elements/releases/download/2026.05-1/ubuntu-24.04-v1.35.4.qcow2
         - name: "hibiscus"
           openstack_version: "stable/2026.2"
           ubuntu_version: "24.04"
           devstack_conf_overrides: |
             enable_plugin magnum https://github.com/openstack/magnum stable/2026.2
-            MAGNUMCLIENT_BRANCH=stable/2025.1
-          additional_services: ""
+            enable_plugin magnum-cluster-api https://github.com/vexxhost/magnum-cluster-api main
+
+            MAGNUM_GUEST_IMAGE_URL=https://github.com/vexxhost/capo-image-elements/releases/download/2026.05-1/ubuntu-24.04-v1.35.4.qcow2
         - name: "gazpacho"
           openstack_version: "stable/2026.1"
           ubuntu_version: "24.04"
           devstack_conf_overrides: |
             enable_plugin magnum https://github.com/openstack/magnum stable/2026.1
-            MAGNUMCLIENT_BRANCH=stable/2026.1
-          additional_services: ""
+            enable_plugin magnum-cluster-api https://github.com/vexxhost/magnum-cluster-api main
+
+            MAGNUM_GUEST_IMAGE_URL=https://github.com/vexxhost/capo-image-elements/releases/download/2026.05-1/ubuntu-24.04-v1.35.4.qcow2
         - name: "flamingo"
           openstack_version: "stable/2025.2"
           ubuntu_version: "24.04"
           devstack_conf_overrides: |
             enable_plugin magnum https://github.com/openstack/magnum stable/2025.2
-            MAGNUMCLIENT_BRANCH=stable/2025.2
-          additional_services: ""
+            enable_plugin heat https://github.com/openstack/heat stable/2025.2
+            ENABLED_SERVICES+=,h-eng,h-api,h-api-cfn,h-api-cw
     runs-on: ubuntu-${{ matrix.ubuntu_version }}
     name: Magnum on OpenStack ${{ matrix.name }}
     steps:
     - name: Checkout TPO
-      uses: actions/checkout@v6
+      uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      with:
+        persist-credentials: false
     - name: Deploy devstack
-      uses: gophercloud/devstack-action@v0.19
+      uses: gophercloud/devstack-action@fc61cc16ba19c4224a70b0b4d7e3e4907fac51e7 # v0.20
+      env:
+        # clusterctl (magnum-cluster-api plugin) queries the GitHub API and
+        # hits the anonymous rate limit on shared runner IPs without a token.
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         branch: ${{ matrix.openstack_version }}
         conf_overrides: |
           enable_plugin barbican https://github.com/openstack/barbican ${{ matrix.openstack_version }}
-          enable_plugin heat https://github.com/openstack/heat ${{ matrix.openstack_version }}
+
+          MAGNUMCLIENT_BRANCH=${{ matrix.openstack_version }}
+
           GLANCE_LIMIT_IMAGE_SIZE_TOTAL=5000
           SWIFT_MAX_FILE_SIZE=5368709122
           KEYSTONE_ADMIN_ENDPOINT=true
 
           ${{ matrix.devstack_conf_overrides }}
-        enabled_services: "barbican-svc,barbican-retry,barbican-keystone-listener,h-eng,h-api,h-api-cfn,h-api-cw,${{ matrix.additional_services }}"
+        enabled_services: "barbican-svc,barbican-retry,barbican-keystone-listener,openstack-cli-server"
     - name: Checkout go
-      uses: actions/setup-go@v6
+      uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
       with:
         go-version-file: 'go.mod'
         cache: true
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+      with:
+        terraform_wrapper: false
     - name: Run TPO acceptance tests
       run: OS_CONTAINER_INFRA_ENVIRONMENT=true ./scripts/acceptancetest.sh
       env:
@@ -84,7 +96,7 @@ jobs:
       if: failure()
     - name: Upload logs artifacts on failure
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: functional-containerinfra-${{ matrix.name }}
         path: /tmp/devstack-logs/*

@@ -24,8 +24,8 @@ func TestAccDataSourceLBV2LoadBalancer_basic(t *testing.T) {
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "description", "loadbalancer_1 description"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "tags.#", "3"),
-					resource.TestCheckResourceAttr(
-						"data.openstack_lb_loadbalancer_v2.lb_ds", "tags.0", "tag1"),
+					resource.TestCheckTypeSetElemAttr(
+						"data.openstack_lb_loadbalancer_v2.lb_ds", "tags.*", "tag1"),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_lb_loadbalancer_v2.lb_ds", "vip_subnet_id"),
 					resource.TestCheckResourceAttrSet(

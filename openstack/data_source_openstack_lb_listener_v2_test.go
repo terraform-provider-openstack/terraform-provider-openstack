@@ -24,8 +24,8 @@ func TestAccDataSourceLBV2Listener_basic(t *testing.T) {
 						"data.openstack_lb_listener_v2.ls_ds", "description", "listener_1 description"),
 					resource.TestCheckResourceAttr(
 						"data.openstack_lb_listener_v2.ls_ds", "tags.#", "3"),
-					resource.TestCheckResourceAttr(
-						"data.openstack_lb_listener_v2.ls_ds", "tags.0", "tag1"),
+					resource.TestCheckTypeSetElemAttr(
+						"data.openstack_lb_listener_v2.ls_ds", "tags.*", "tag1"),
 					resource.TestCheckResourceAttrSet(
 						"data.openstack_lb_listener_v2.ls_ds", "provisioning_status"),
 					resource.TestCheckResourceAttrSet(

@@ -36,19 +36,23 @@ jobs:
     name: Mistral on OpenStack ${{ matrix.name }}
     steps:
     - name: Checkout TPO
-      uses: actions/checkout@v6
+      uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
     - name: Deploy devstack
-      uses: gophercloud/devstack-action@v0.19
+      uses: gophercloud/devstack-action@fc61cc16ba19c4224a70b0b4d7e3e4907fac51e7 # v0.20
       with:
         branch: ${{ matrix.openstack_version }}
         conf_overrides: |
           enable_plugin mistral https://github.com/openstack/mistral ${{ matrix.openstack_version }}
         enabled_services: 'mistral,mistral-api,mistral-engine,mistral-executor,mistral-event-engine'
     - name: Checkout go
-      uses: actions/setup-go@v6
+      uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
       with:
         go-version-file: 'go.mod'
         cache: true
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+      with:
+        terraform_wrapper: false
     - name: Run TPO acceptance tests
       run: OS_WORKFLOW_ENVIRONMENT=true ./scripts/acceptancetest.sh
       env:
@@ -59,7 +63,7 @@ jobs:
       if: failure()
     - name: Upload logs artifacts on failure
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: functional-workflow-${{ matrix.name }}
         path: /tmp/devstack-logs/*

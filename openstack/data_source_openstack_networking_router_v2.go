@@ -156,10 +156,6 @@ func dataSourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceDat
 		listOpts.TenantID = v.(string)
 	}
 
-	if v, ok := d.GetOk("flavor_id"); ok {
-		listOpts.FlavorID = v.(string)
-	}
-
 	tags := networkingV2AttributesTags(d)
 	if len(tags) > 0 {
 		listOpts.Tags = strings.Join(tags, ",")
@@ -174,6 +170,21 @@ func dataSourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceDat
 	err = routers.ExtractRoutersInto(pages, &allRouters)
 	if err != nil {
 		return diag.Errorf("Unable to retrieve Routers: %s", err)
+	}
+
+	// Neutron does not support flavor_id as a router list filter (it is not
+	// marked is_filter in the l3-flavors API definition), so filter client-side.
+	if v, ok := d.GetOk("flavor_id"); ok {
+		flavorID := v.(string)
+		filtered := make([]routerExtended, 0, len(allRouters))
+
+		for _, r := range allRouters {
+			if r.FlavorID == flavorID {
+				filtered = append(filtered, r)
+			}
+		}
+
+		allRouters = filtered
 	}
 
 	if len(allRouters) < 1 {
