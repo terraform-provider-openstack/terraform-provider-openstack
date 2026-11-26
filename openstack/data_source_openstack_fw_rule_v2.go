@@ -165,16 +165,8 @@ func dataSourceFWRuleV2Read(ctx context.Context, d *schema.ResourceData, meta an
 		listOpts.SourceIPAddress = v.(string)
 	}
 
-	if v, ok := d.GetOk("source_port"); ok {
-		listOpts.SourcePort = v.(string)
-	}
-
 	if v, ok := d.GetOk("destination_ip_address"); ok {
 		listOpts.DestinationIPAddress = v.(string)
-	}
-
-	if v, ok := d.GetOk("destination_port"); ok {
-		listOpts.DestinationPort = v.(string)
 	}
 
 	if v, ok := d.GetOk("shared"); ok {
@@ -196,6 +188,10 @@ func dataSourceFWRuleV2Read(ctx context.Context, d *schema.ResourceData, meta an
 	if err != nil {
 		return diag.Errorf("Unable to retrieve openstack_fw_rule_v2: %s", err)
 	}
+
+	// Neutron does not allow filtering firewall rules by port (is_filter is
+	// False for source_port and destination_port), so filter client-side.
+	allFWRules = filterFWRulesV2ByPort(allFWRules, d)
 
 	if len(allFWRules) < 1 {
 		return diag.Errorf("Your openstack_fw_rule_v2 query returned no results")
@@ -233,4 +229,29 @@ func dataSourceFWRuleV2Read(ctx context.Context, d *schema.ResourceData, meta an
 	}
 
 	return nil
+}
+
+func filterFWRulesV2ByPort(fwRules []rules.Rule, d *schema.ResourceData) []rules.Rule {
+	sourcePort := d.Get("source_port").(string)
+	destinationPort := d.Get("destination_port").(string)
+
+	if sourcePort == "" && destinationPort == "" {
+		return fwRules
+	}
+
+	filtered := make([]rules.Rule, 0, len(fwRules))
+
+	for _, r := range fwRules {
+		if sourcePort != "" && r.SourcePort != sourcePort {
+			continue
+		}
+
+		if destinationPort != "" && r.DestinationPort != destinationPort {
+			continue
+		}
+
+		filtered = append(filtered, r)
+	}
+
+	return filtered
 }
