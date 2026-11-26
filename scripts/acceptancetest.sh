@@ -8,6 +8,9 @@ set -o pipefail
 # set tests parallelism to 1 if not set
 : "${ACCEPTANCE_TESTS_PARALLELISM:=1}"
 
+# Use the Terraform from PATH (setup-terraform) instead of downloading it per test.
+export TF_ACC_TERRAFORM_PATH="${TF_ACC_TERRAFORM_PATH:-$(command -v terraform || true)}"
+
 failed=
 
 LOG_DIR=/tmp/devstack-logs
