@@ -3,7 +3,6 @@ package openstack
 import (
 	"context"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/rules"
@@ -91,9 +90,7 @@ func resourceNetworkingSecGroupRuleV2() *schema.Resource {
 				ForceNew:      true,
 				Computed:      true,
 				ConflictsWith: []string{"remote_group_id", "remote_address_group_id"},
-				StateFunc: func(v any) string {
-					return strings.ToLower(v.(string))
-				},
+				StateFunc:     resourceNetworkingSecGroupRuleV2RemoteIPPrefix,
 			},
 
 			"remote_address_group_id": {
