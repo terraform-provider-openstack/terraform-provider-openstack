@@ -65,6 +65,19 @@ func resourceIdentityUserV3() *schema.Resource {
 				Optional:  true,
 				Sensitive: true,
 			},
+			"password_wo": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				WriteOnly:     true,
+				Sensitive:     true,
+				ConflictsWith: []string{"password"},
+				RequiredWith:  []string{"password_wo_version"},
+			},
+			"password_wo_version": {
+				Type:          schema.TypeInt,
+				Optional:      true,
+				ConflictsWith: []string{"password"},
+			},
 
 			// The following are all specific options that must
 			// be bundled into user.Options
@@ -144,7 +157,12 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("[DEBUG] openstack_identity_user_v3 create options: %#v", createOpts)
 
 	// Add password here so it wouldn't go in the above log entry
-	createOpts.Password = d.Get("password").(string)
+
+	if password, ok := d.GetOk("password"); ok {
+		createOpts.Password = password.(string)
+	} else if passwordWO, ok := getWriteOnlyString(d, "password_wo"); ok {
+		createOpts.Password = passwordWO
+	}
 
 	user, err := users.Create(ctx, identityClient, createOpts).Extract()
 	if err != nil {
@@ -261,6 +279,16 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 
 	if hasChange {
 		log.Printf("[DEBUG] openstack_identity_user_v3 %s update options: %#v", d.Id(), updateOpts)
+	}
+
+	if d.HasChange("password_wo_version") {
+		passwordWO, ok := getWriteOnlyString(d, "password_wo")
+		if !ok {
+			return diag.Errorf("password_wo must be set when password_wo_version is changed")
+		}
+
+		hasChange = true
+		updateOpts.Password = passwordWO
 	}
 
 	if d.HasChange("password") {
