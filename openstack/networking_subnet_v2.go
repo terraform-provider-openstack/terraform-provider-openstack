@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -28,24 +29,44 @@ func networkingSubnetV2StateRefreshFunc(ctx context.Context, client *gophercloud
 }
 
 // networkingSubnetV2StateRefreshFuncDelete returns a special case retry.StateRefreshFunc to try to delete a subnet.
-func networkingSubnetV2StateRefreshFuncDelete(ctx context.Context, networkingClient *gophercloud.ServiceClient, subnetID string) retry.StateRefreshFunc {
+//
+// A Neutron 409 means the subnet is still referenced (ports, router interfaces,
+// load-balancer VIPs). That is often transient, so it is retried until the
+// caller's timeout like any other in-progress delete. If lastConflict is not
+// nil it records the most recent 409, and is cleared again once a delete attempt
+// no longer conflicts, so the caller can report why the wait timed out.
+func networkingSubnetV2StateRefreshFuncDelete(ctx context.Context, networkingClient *gophercloud.ServiceClient, subnetID string, lastConflict *error) retry.StateRefreshFunc {
+	setConflict := func(err error) {
+		if lastConflict != nil {
+			*lastConflict = err
+		}
+	}
+
 	return func() (any, string, error) {
 		log.Printf("[DEBUG] Attempting to delete openstack_networking_subnet_v2 %s", subnetID)
 
 		err := subnets.Delete(ctx, networkingClient, subnetID).ExtractErr()
 		if err != nil {
 			if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+				setConflict(nil)
 				log.Printf("[DEBUG] Successfully deleted openstack_networking_subnet_v2 %s", subnetID)
 
 				return "", "DELETED", nil
 			}
 			// Subnet is still in use - we can retry.
 			if gophercloud.ResponseCodeIs(err, http.StatusConflict) {
+				setConflict(subnetDeleteConflictError(err))
+				log.Printf("[DEBUG] openstack_networking_subnet_v2 %s is still in use: %s", subnetID, err)
+
 				return "", "ACTIVE", nil
 			}
 
+			setConflict(nil)
+
 			return "", "ACTIVE", err
 		}
+
+		setConflict(nil)
 
 		_, err = subnets.Get(ctx, networkingClient, subnetID).Extract()
 		if err != nil {
@@ -62,6 +83,34 @@ func networkingSubnetV2StateRefreshFuncDelete(ctx context.Context, networkingCli
 
 		return "", "ACTIVE", nil
 	}
+}
+
+// subnetDeleteConflictError turns a Neutron 409 on subnet delete into an error
+// that names the dependent-object conflict (for example SubnetInUse).
+func subnetDeleteConflictError(err error) error {
+	var unexpected gophercloud.ErrUnexpectedResponseCode
+	if errors.As(err, &unexpected) {
+		if neutronErr, decErr := decodeNeutronError(unexpected.Body); decErr == nil && neutronErr.Type != "" {
+			return fmt.Errorf(
+				"subnet cannot be deleted while dependent objects still use it (Neutron %s): %s",
+				neutronErr.Type, neutronErr.Message,
+			)
+		}
+	}
+
+	return fmt.Errorf("subnet cannot be deleted while dependent objects still use it: %w", err)
+}
+
+// subnetDeleteWaitError returns waitErr, annotated with lastConflict when the
+// wait ended while the subnet delete was still being rejected with a 409. This
+// replaces a bare timeout or "context deadline exceeded" with the reason the
+// subnet could not be deleted.
+func subnetDeleteWaitError(waitErr, lastConflict error) error {
+	if lastConflict == nil {
+		return waitErr
+	}
+
+	return fmt.Errorf("%w; last delete attempt: %w", waitErr, lastConflict)
 }
 
 // expandNetworkingSubnetV2AllocationPools returns a slice of subnets.AllocationPool structs.
