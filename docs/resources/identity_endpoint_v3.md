@@ -67,5 +67,5 @@ exported:
 Endpoints can be imported using the `id`, e.g.
 
 ```
-$ terraform import openstack_identity_endpoint_v3.endpoint_1 5392472b-106a-4845-90c6-7c8445f18770
+terraform import openstack_identity_endpoint_v3.endpoint_1 5392472b-106a-4845-90c6-7c8445f18770
 ```

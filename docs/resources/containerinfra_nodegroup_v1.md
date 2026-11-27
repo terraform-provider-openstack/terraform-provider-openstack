@@ -71,7 +71,6 @@ The following arguments are supported:
 * `role` - (Optional) The role of nodes in the node group. Changing this
     creates a new node group.
 
-
 ## Attributes reference
 
 The following attributes are exported:
@@ -96,5 +95,5 @@ The following attributes are exported:
 Node groups can be imported using the `id` (cluster_id/nodegroup_id), e.g.
 
 ```
-$ terraform import openstack_containerinfra_nodegroup_v1.nodegroup_1 b9a45c5c-cd03-4958-82aa-b80bf93cb922/ce0f9463-dd25-474b-9fe8-94de63e5e42b
+terraform import openstack_containerinfra_nodegroup_v1.nodegroup_1 b9a45c5c-cd03-4958-82aa-b80bf93cb922/ce0f9463-dd25-474b-9fe8-94de63e5e42b
 ```

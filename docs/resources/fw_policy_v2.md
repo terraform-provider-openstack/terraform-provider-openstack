@@ -103,5 +103,5 @@ The following attributes are exported:
 Firewall Policies can be imported using the `id`, e.g.
 
 ```
-$ terraform import openstack_fw_policy_v2.policy_1 07f422e6-c596-474b-8b94-fe2c12506ce0
+terraform import openstack_fw_policy_v2.policy_1 07f422e6-c596-474b-8b94-fe2c12506ce0
 ```

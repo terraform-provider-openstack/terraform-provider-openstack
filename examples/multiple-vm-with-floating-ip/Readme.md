@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-We assume you already installed terraform using the following instructions: https://www.terraform.io/downloads.html
+We assume you already installed terraform using the following instructions: <https://www.terraform.io/downloads.html>
 
 ## Getting started
 
@@ -19,7 +19,6 @@ Init providers
 ```
 terraform init
 ```
-
 
 ## Deploy the Configuration
 
@@ -47,7 +46,6 @@ terraform apply -auto-approve \
                 -var 'network_name=my-network' \
                 -var 'ssh_key_file=./id_rsa_os'
 ```
-
 
 ## Tear down
 

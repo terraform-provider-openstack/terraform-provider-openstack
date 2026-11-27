@@ -250,7 +250,7 @@ To enable these logs, set the `OS_DEBUG` environment variable to `1` along
 with the usual `TF_LOG=DEBUG` environment variable:
 
 ```shell
-$ OS_DEBUG=1 TF_LOG=DEBUG terraform apply
+OS_DEBUG=1 TF_LOG=DEBUG terraform apply
 ```
 
 If you submit these logs with a bug report, please ensure any sensitive
@@ -422,22 +422,25 @@ this provider uses [Go Modules](https://github.com/golang/go/wiki/Modules).
 
 If there is access to an existing cloud, developers can test changes on resources
 against that cloud. In order to do so:
-- Build the provider with your changes
+* Build the provider with your changes
 
 Build locally the provider including your changes with:
+
 ```
 go build .
 ```
+
 this should generate a `terraform-provider-openstack` binary.
 
-- Remove the Terraform Lock File
+* Remove the Terraform Lock File
 
 If there is already a terraform lock file, remove it with:
+
 ```
 rm .terraform.lock.hcl
 ```
 
-- Create or edit `.terraform.rc` as shown below:
+* Create or edit `.terraform.rc` as shown below:
 
 ```
 provider_installation {
@@ -447,19 +450,20 @@ provider_installation {
   direct {}
 }
 ```
+
 This configuration tells Terraform to use the provider binary at the specified path
 instead of the one from the Terraform Registry. The direct {} block tells Terraform
 to use the provider from the Terraform Registry if it’s not available locally.
 Any other providers not specified in dev_overrides will still be downloaded from the
 Terraform Registry.
 
-- Set Environment Variable for Terraform Configuration
+* Set Environment Variable for Terraform Configuration
 
 ```
 export TF_CLI_CONFIG_FILE=~/.terraform.rc
 ```
 
-- Run terraform
+* Run terraform
 
 ```
 ❯ terraform plan
@@ -542,26 +546,26 @@ We recommend only running the acceptance tests related to the feature or bug
 you're working on. To do this, run:
 
 ```shell
-$ cd $GOPATH/src/github.com/terraform-providers/terraform-provider-openstack
-$ make testacc TEST=./openstack TESTARGS="-run=<keyword> -count=1"
+cd $GOPATH/src/github.com/terraform-providers/terraform-provider-openstack
+make testacc TEST=./openstack TESTARGS="-run=<keyword> -count=1"
 ```
 
 Where `<keyword>` is the full name or partial name of a test. For example:
 
 ```shell
-$ make testacc TEST=./openstack TESTARGS="-run=TestAccComputeV2Keypair_basic -count=1"
+make testacc TEST=./openstack TESTARGS="-run=TestAccComputeV2Keypair_basic -count=1"
 ```
 
 We recommend running tests with logging set to `DEBUG`:
 
 ```shell
-$ TF_LOG=DEBUG make testacc TEST=./openstack TESTARGS="-run=TestAccComputeV2Keypair_basic -count=1"
+TF_LOG=DEBUG make testacc TEST=./openstack TESTARGS="-run=TestAccComputeV2Keypair_basic -count=1"
 ```
 
 And you can even enable OpenStack debugging to see the actual HTTP API requests:
 
 ```shell
-$ TF_LOG=DEBUG OS_DEBUG=1 make testacc TEST=./openstack TESTARGS="-run=TestAccComputeV2Keypair_basic -count=1"
+TF_LOG=DEBUG OS_DEBUG=1 make testacc TEST=./openstack TESTARGS="-run=TestAccComputeV2Keypair_basic -count=1"
 ```
 
 ### Creating a Pull Request
@@ -570,14 +574,14 @@ When you're ready to submit a Pull Request, create a branch, commit your code,
 and push to your forked version of `terraform-provider-openstack`:
 
 ```shell
-$ git remote add my-github-username https://github.com/my-github-username/terraform-provider-openstack
-$ git checkout -b my-feature
-$ git add .
-$ git commit
-$ git push -u my-github-username my-feature
+git remote add my-github-username https://github.com/my-github-username/terraform-provider-openstack
+git checkout -b my-feature
+git add .
+git commit
+git push -u my-github-username my-feature
 ```
 
-Then navigate to https://github.com/terraform-provider-openstack/terraform-provider-openstack
+Then navigate to <https://github.com/terraform-provider-openstack/terraform-provider-openstack>
 and create a Pull Request.
 
 ### Testing with GitHub Actions

@@ -69,5 +69,5 @@ The following attributes are exported:
 Services can be imported using the `id`, e.g.
 
 ```
-$ terraform import openstack_vpnaas_service_v2.service_1 832cb7f3-59fe-40cf-8f64-8350ffc03272
+terraform import openstack_vpnaas_service_v2.service_1 832cb7f3-59fe-40cf-8f64-8350ffc03272
 ```

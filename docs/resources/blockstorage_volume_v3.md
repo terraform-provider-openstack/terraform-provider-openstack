@@ -78,16 +78,16 @@ The following arguments are supported:
 
 * `scheduler_hints` - (Optional) Provide the Cinder scheduler with hints on where
     to instantiate a volume in the OpenStack cloud. The available hints are described below.
-    
+
 The `scheduler_hints` block supports:
 
-* `different_host` - (Optional) The volume should be scheduled on a 
+* `different_host` - (Optional) The volume should be scheduled on a
     different host from the set of volumes specified in the list provided.
 
 * `same_host` - (Optional) A list of volume UUIDs. The volume should be
     scheduled on the same host as another volume specified in the list provided.
 
-* `local_to_instance` - (Optional) An instance UUID. The volume should be 
+* `local_to_instance` - (Optional) An instance UUID. The volume should be
     scheduled on the same host as the instance.
 
 * `query` - (Optional) A conditional query that a back-end must pass in
@@ -128,5 +128,5 @@ The following attributes are exported:
 Volumes can be imported using the `id`, e.g.
 
 ```
-$ terraform import openstack_blockstorage_volume_v3.volume_1 ea257959-eeb1-4c10-8d33-26f0409a755d
+terraform import openstack_blockstorage_volume_v3.volume_1 ea257959-eeb1-4c10-8d33-26f0409a755d
 ```

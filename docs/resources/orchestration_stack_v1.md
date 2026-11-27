@@ -17,13 +17,13 @@ Manages a V1 stack resource within OpenStack.
 resource "openstack_orchestration_stack_v1" "stack_1" {
   name = "stack_1"
   parameters = {
-	length = 4
+ length = 4
   }
   template_opts = {
-	Bin = "heat_template_version: 2013-05-23\nparameters:\n  length:\n    type: number\nresources:\n  test_res:\n    type: OS::Heat::TestResource\n  random:\n    type: OS::Heat::RandomString\n    properties:\n      length: {get_param: length}\n"
+ Bin = "heat_template_version: 2013-05-23\nparameters:\n  length:\n    type: number\nresources:\n  test_res:\n    type: OS::Heat::TestResource\n  random:\n    type: OS::Heat::RandomString\n    properties:\n      length: {get_param: length}\n"
   }
   environment_opts = {
-	Bin = "\n"
+ Bin = "\n"
   }
   disable_rollback = true
   timeout = 30
@@ -92,5 +92,5 @@ The following attributes are exported:
 stacks can be imported using the `id`, e.g.
 
 ```
-$ terraform import openstack_orchestration_stack_v1.stack_1 ea257959-eeb1-4c10-8d33-26f0409a755d
+terraform import openstack_orchestration_stack_v1.stack_1 ea257959-eeb1-4c10-8d33-26f0409a755d
 ```

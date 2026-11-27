@@ -76,5 +76,5 @@ Share type access can be imported using the `share_type_id/project_id`,
 e.g.
 
 ```
-$ terraform import openstack_sharedfilesystem_sharetype_access_v2.access_1 941793f0-0a34-4bc4-b72e-a6326ae58283/ed498e81f0cc448bae0ad4f8f21bf67f
+terraform import openstack_sharedfilesystem_sharetype_access_v2.access_1 941793f0-0a34-4bc4-b72e-a6326ae58283/ed498e81f0cc448bae0ad4f8f21bf67f
 ```

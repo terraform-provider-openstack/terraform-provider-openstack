@@ -67,5 +67,5 @@ The following attributes are exported:
 EC2 Credentials can be imported using the `access`, e.g.
 
 ```
-$ terraform import openstack_identity_ec2_credential_v3.ec2_cred_1 2d0ac4a2f81b4b0f9513ee49e780647d
+terraform import openstack_identity_ec2_credential_v3.ec2_cred_1 2d0ac4a2f81b4b0f9513ee49e780647d
 ```

@@ -10,7 +10,7 @@ Version 3.0.0 of the OpenStack provider for Terraform is a major release that in
 
 Most of the changes described in this guide were previously marked as deprecated in the `terraform plan/apply` output in earlier provider releases. You can review these changes, including deprecation notices, in the [Terraform OpenStack Provider CHANGELOG](https://github.com/terraform-provider-openstack/terraform-provider-openstack/blob/main/CHANGELOG.md).
 
-### Table of Contents:
+### Table of Contents
 
 - [Provider Version Configuration](#provider-version-configuration)
 - [Compute Floating IPs API Removal](#compute-floating-ips-api-removal)

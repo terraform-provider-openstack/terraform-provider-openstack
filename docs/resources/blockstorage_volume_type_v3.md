@@ -13,7 +13,6 @@ Manages a V3 block storage volume type resource within OpenStack.
 
 ~> **Note:** This usually requires admin privileges.
 
-
 ## Example Usage
 
 ### Basic Volume Type
@@ -42,6 +41,7 @@ resource "openstack_blockstorage_volume_type_v3" "multiattach" {
 }
 
 ```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -76,5 +76,5 @@ The following attributes are exported:
 Volume types can be imported using the `volume_type_id`, e.g.
 
 ```
-$ terraform import openstack_blockstorage_volume_type_v3.volume_type_1 941793f0-0a34-4bc4-b72e-a6326ae58283
+terraform import openstack_blockstorage_volume_type_v3.volume_type_1 941793f0-0a34-4bc4-b72e-a6326ae58283
 ```

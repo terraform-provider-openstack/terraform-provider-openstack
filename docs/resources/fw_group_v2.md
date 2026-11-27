@@ -125,5 +125,5 @@ The following attributes are exported:
 Firewall groups can be imported using the `id`, e.g.
 
 ```
-$ terraform import openstack_fw_group_v2.group_1 c9e39fb2-ce20-46c8-a964-25f3898c7a97
+terraform import openstack_fw_group_v2.group_1 c9e39fb2-ce20-46c8-a964-25f3898c7a97
 ```

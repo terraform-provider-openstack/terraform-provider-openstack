@@ -92,5 +92,5 @@ The following arguments are supported:
 This resource can be imported by specifying the ID of the share type:
 
 ```
-$ terraform import openstack_sharedfilesystem_sharetype_v2.sharetype_1 id
+terraform import openstack_sharedfilesystem_sharetype_v2.sharetype_1 id
 ```

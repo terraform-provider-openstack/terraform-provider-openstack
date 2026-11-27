@@ -207,5 +207,5 @@ The following attributes are exported:
 Cluster templates can be imported using the `id`, e.g.
 
 ```
-$ terraform import openstack_containerinfra_clustertemplate_v1.clustertemplate_1 b9a45c5c-cd03-4958-82aa-b80bf93cb922
+terraform import openstack_containerinfra_clustertemplate_v1.clustertemplate_1 b9a45c5c-cd03-4958-82aa-b80bf93cb922
 ```

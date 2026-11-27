@@ -70,5 +70,5 @@ The following attributes are exported:
 BGP peers can be imported using their ID:
 
 ```shell
-$ terraform import openstack_networking_bgp_peer_v2.peer1 a1b2c3d4-e5f6-7890-abcd-1234567890ef
+terraform import openstack_networking_bgp_peer_v2.peer1 a1b2c3d4-e5f6-7890-abcd-1234567890ef
 ```

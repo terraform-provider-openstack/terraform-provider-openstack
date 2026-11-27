@@ -156,5 +156,5 @@ This resource can be imported by specifying the ID of the share and the ID of th
 share access, separated by a slash, e.g.:
 
 ```
-$ terraform import openstack_sharedfilesystem_share_access_v2.share_access_1 share_id/share_access_id
+terraform import openstack_sharedfilesystem_share_access_v2.share_access_1 share_id/share_access_id
 ```

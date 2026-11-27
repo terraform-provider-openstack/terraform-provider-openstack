@@ -158,5 +158,5 @@ The following attributes are exported:
 Application Credentials can be imported using the `id`, e.g.
 
 ```
-$ terraform import openstack_identity_application_credential_v3.application_credential_1 c17304b7-0953-4738-abb0-67005882b0a0
+terraform import openstack_identity_application_credential_v3.application_credential_1 c17304b7-0953-4738-abb0-67005882b0a0
 ```

@@ -2,6 +2,7 @@ Terraform OpenStack Provider
 ============================
 
 Documentation:
+
 - [registry.terraform.io](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs)
 - [search.opentofu.org](https://search.opentofu.org/provider/terraform-provider-openstack/openstack/latest)
 
@@ -18,18 +19,19 @@ Building The Provider
 Clone the repository
 
 ```sh
-$ git clone git@github.com:terraform-provider-openstack/terraform-provider-openstack.git
+git clone git@github.com:terraform-provider-openstack/terraform-provider-openstack.git
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd terraform-provider-openstack
-$ make build
+cd terraform-provider-openstack
+make build
 ```
 
 Using the provider
 ----------------------
+
 Please see the documentation at [registry.terraform.io](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs) or [search.opentofu.org](https://search.opentofu.org/provider/terraform-provider-openstack/openstack/latest).
 
 Or you can browse the documentation within this repo [here](https://github.com/terraform-provider-openstack/terraform-provider-openstack/tree/main/website/docs).
@@ -42,7 +44,7 @@ If you wish to work on the provider, you'll first need [Go](https://golang.org) 
 To compile the provider, run `make build`. This will build the provider and put the provider binary in the current directory.
 
 ```sh
-$ make build
+make build
 ```
 
 For further details on how to work on this provider, please see the [Testing and Development](https://github.com/terraform-provider-openstack/terraform-provider-openstack/blob/main/docs/index.md#testing-and-development) documentation.
@@ -61,6 +63,6 @@ to publish the provider in the Terraform Registry.
 Releases will as drafts. Once marked as published on the GitHub Releases page,
 they will become available via the Terraform Registry.
 
-Before releasing, a PR updating the changelog should be made to trigger the CI 
+Before releasing, a PR updating the changelog should be made to trigger the CI
 for all services and ensure that everything is OK. Moreover, update the example
 on `website/docs/index.html.markdown` to point to the new version.

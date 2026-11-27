@@ -631,7 +631,7 @@ resource "openstack_compute_instance_v2" "foo" {
 ### Instances and Security Groups
 
 When referencing a security group resource in an instance resource, always
-use the _name_ of the security group. If you specify the ID of the security
+use the *name* of the security group. If you specify the ID of the security
 group, Terraform will remove and reapply the security group upon each call.
 This is because the OpenStack Compute API returns the names of the associated
 security groups and not their IDs.
@@ -738,6 +738,7 @@ Network interface attachment order, and number and sizes of ephemeral
 disks are examples of this.
 
 ### Importing basic instance
+
 Assume you want to import an instance with one ephemeral root disk,
 and one network interface.
 
@@ -757,7 +758,9 @@ resource "openstack_compute_instance_v2" "basic_instance" {
 }
 
 ```
+
 Then you execute
+
 ```
 terraform import openstack_compute_instance_v2.basic_instance instance_id
 ```
@@ -768,13 +771,12 @@ The importer cannot read the emphemeral disk configuration
 of an instance, so just specify image_id as in the configuration
 of the basic instance example.
 
-### Importing instance with multiple network interfaces.
+### Importing instance with multiple network interfaces
 
 Nova returns the network interfaces grouped by network, thus not in creation
 order.
 That means that if you have multiple network interfaces you must take
 care of the order of networks in your configuration.
-
 
 As example we want to import an instance with one ephemeral root disk,
 and 3 network interfaces.
@@ -811,14 +813,13 @@ So either with care check the plan and modify configuration, or read the
 network order in the state file after import and modify your
 configuration accordingly.
 
- * A note on ports. If you have created a neutron port independent of an
+* A note on ports. If you have created a neutron port independent of an
  instance, then the import code has no way to detect that the port is created
  idenpendently, and therefore on deletion of imported instances you might have
  port resources in your project, which you expected to be created by the
  instance and thus to also be deleted with the instance.
 
-
-### Importing instances with multiple block storage volumes.
+### Importing instances with multiple block storage volumes
 
 We have an instance with two block storage volumes, one bootable and one
 non-bootable.
@@ -854,6 +855,7 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
   instance_id = openstack_compute_instance_v2.instance_2.id
 }
 ```
+
 To import the instance outlined in the above configuration
 do the following:
 

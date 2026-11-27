@@ -13,7 +13,7 @@ Manages a V2 load balancer flavorprofile resource within OpenStack.
 
 ~> **Note:** This usually requires admin privileges.
 
-## Example Usage 
+## Example Usage
 
 ### Using jsonencode
 
@@ -69,6 +69,7 @@ The following attributes are exported:
 ## Import
 
 flavorprofiles can be imported using their `id`. Example:
+
 ```
-$ terraform import openstack_lb_flavorprofile_v2.flavorprofile_1 2a0f2240-c5e6-41de-896d-e80d97428d6b
+terraform import openstack_lb_flavorprofile_v2.flavorprofile_1 2a0f2240-c5e6-41de-896d-e80d97428d6b
 ```

@@ -53,6 +53,6 @@ The following attributes are exported:
 DNS zone share can be imported by specifying the zone ID with share ID and optional project ID:
 
 ```bash
-$ terraform import openstack_dns_zone_share_v2.share_1 60cbdc69-64f9-49ee-b294-352e71e22827/0e1dae51-aee2-4b44-962f-885bb69f3a5c
-$ terraform import openstack_dns_zone_share_v2.share_1 60cbdc69-64f9-49ee-b294-352e71e22827/0e1dae51-aee2-4b44-962f-885bb69f3a5c/eb92139f6c054a878852ac9e8cbe612a
+terraform import openstack_dns_zone_share_v2.share_1 60cbdc69-64f9-49ee-b294-352e71e22827/0e1dae51-aee2-4b44-962f-885bb69f3a5c
+terraform import openstack_dns_zone_share_v2.share_1 60cbdc69-64f9-49ee-b294-352e71e22827/0e1dae51-aee2-4b44-962f-885bb69f3a5c/eb92139f6c054a878852ac9e8cbe612a
 ```

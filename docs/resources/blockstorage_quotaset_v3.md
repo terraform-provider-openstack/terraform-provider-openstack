@@ -96,5 +96,5 @@ The following attributes are exported:
 Quotasets can be imported using the `project_id/region`, e.g.
 
 ```
-$ terraform import openstack_blockstorage_quotaset_v3.quotaset_1 2a0f2240-c5e6-41de-896d-e80d97428d6b/region_1
+terraform import openstack_blockstorage_quotaset_v3.quotaset_1 2a0f2240-c5e6-41de-896d-e80d97428d6b/region_1
 ```

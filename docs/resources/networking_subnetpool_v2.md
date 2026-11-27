@@ -132,5 +132,5 @@ The following attributes are exported:
 Subnetpools can be imported using the `id`, e.g.
 
 ```
-$ terraform import openstack_networking_subnetpool_v2.subnetpool_1 832cb7f3-59fe-40cf-8f64-8350ffc03272
+terraform import openstack_networking_subnetpool_v2.subnetpool_1 832cb7f3-59fe-40cf-8f64-8350ffc03272
 ```
