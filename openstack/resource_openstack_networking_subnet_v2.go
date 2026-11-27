@@ -491,10 +491,12 @@ func resourceNetworkingSubnetV2Delete(ctx context.Context, d *schema.ResourceDat
 		return diag.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	var lastConflict error
+
 	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    networkingSubnetV2StateRefreshFuncDelete(ctx, networkingClient, d.Id()),
+		Refresh:    networkingSubnetV2StateRefreshFuncDelete(ctx, networkingClient, d.Id(), &lastConflict),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      0,
 		MinTimeout: 3 * time.Second,
@@ -502,7 +504,7 @@ func resourceNetworkingSubnetV2Delete(ctx context.Context, d *schema.ResourceDat
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return diag.Errorf("Error waiting for openstack_networking_subnet_v2 %s to become deleted: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for openstack_networking_subnet_v2 %s to become deleted: %s", d.Id(), subnetDeleteWaitError(err, lastConflict))
 	}
 
 	return nil
