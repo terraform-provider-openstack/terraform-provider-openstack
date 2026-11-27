@@ -36,7 +36,7 @@ jobs:
     name: Designate on OpenStack ${{ matrix.name }}
     steps:
     - name: Checkout TPO
-      uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Deploy devstack
       uses: gophercloud/devstack-action@fc61cc16ba19c4224a70b0b4d7e3e4907fac51e7 # v0.20
       with:
@@ -47,7 +47,7 @@ jobs:
           ${{ matrix.devstack_conf_overrides }}
         enabled_services: 'designate,designate-central,designate-api,designate-worker,designate-producer,designate-mdns'
     - name: Checkout go
-      uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+      uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
       with:
         go-version-file: 'go.mod'
         cache: true
