@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"reflect"
@@ -15,8 +16,10 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/v2/pagination"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
 func TestAccComputeV2Instance_basic(t *testing.T) {
@@ -39,6 +42,73 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 						"openstack_compute_instance_v2.instance_1", "all_metadata.foo", "bar"),
 					resource.TestCheckResourceAttr(
 						"openstack_compute_instance_v2.instance_1", "availability_zone", "nova"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_basicUserData(t *testing.T) {
+	var instance servers.Server
+
+	instanceName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	userData := "#!/bin/sh\necho user-data-" + instanceName + " > /dev/console\n"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy(t.Context()),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2InstanceBasicUserData(instanceName, userData),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(t.Context(), "openstack_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2InstanceUserData(t.Context(), &instance, userData),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_writeOnlyUserData(t *testing.T) {
+	var (
+		instance1 servers.Server
+		instance2 servers.Server
+	)
+
+	instanceName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	initialUserData := "#!/bin/sh\necho write-only-user-data-initial-" + instanceName + " > /dev/console\n"
+	changedUserData := "#!/bin/sh\necho write-only-user-data-changed-" + instanceName + " > /dev/console\n"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckComputeV2InstanceDestroy(t.Context()),
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_11_0),
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2InstanceWriteOnlyUserData(instanceName, initialUserData, 1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(t.Context(), "openstack_compute_instance_v2.instance_1", &instance1),
+					testAccCheckComputeV2InstanceUserData(t.Context(), &instance1, initialUserData),
+					resource.TestCheckNoResourceAttr("openstack_compute_instance_v2.instance_1", "user_data_wo"),
+				),
+			},
+			{
+				Config: testAccComputeV2InstanceWriteOnlyUserData(instanceName, changedUserData, 2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(t.Context(), "openstack_compute_instance_v2.instance_1", &instance2),
+					testAccCheckComputeV2InstanceRecreated(&instance1, &instance2),
+					testAccCheckComputeV2InstanceUserData(t.Context(), &instance2, changedUserData),
+					resource.TestCheckNoResourceAttr("openstack_compute_instance_v2.instance_1", "user_data_wo"),
 				),
 			},
 		},
@@ -894,6 +964,16 @@ func testAccCheckComputeV2InstanceExists(ctx context.Context, n string, instance
 	}
 }
 
+func testAccCheckComputeV2InstanceRecreated(instance1, instance2 *servers.Server) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
+		if instance1.ID == instance2.ID {
+			return fmt.Errorf("Instance was not recreated: %s", instance1.ID)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckComputeV2InstanceMetadata(
 	instance *servers.Server, k string, v string,
 ) resource.TestCheckFunc {
@@ -1077,6 +1157,40 @@ func testAccCheckComputeV2InstanceNetworkDoesNotExist(n string, _ *servers.Serve
 	}
 }
 
+// testAccCheckComputeV2InstanceUserData asserts that the user data Nova recorded for the given
+// servers.Server is the base64 encoding of userData. Nova reports user data only to requests the
+// os-extended-server-attributes policy permits, which by default means a token scoped to a project
+// in which the user holds the admin role. In DevStack this is the admin user in the admin project,
+// so use testAccPreCheckAdminOnly on the tests that call this function.
+func testAccCheckComputeV2InstanceUserData(ctx context.Context, instance *servers.Server, userData string) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
+		computeClient, err := config.ComputeV2Client(ctx, osRegionName)
+		if err != nil {
+			return fmt.Errorf("error creating OpenStack compute client: %w", err)
+		}
+
+		// Nova API Microversion 2.3 added the extended server attributes that include user data.
+		computeClient.Microversion = "2.3"
+
+		found, err := servers.Get(ctx, computeClient, instance.ID).Extract()
+		if err != nil {
+			return fmt.Errorf("error retrieving OpenStack compute instance %s: %w", instance.ID, err)
+		}
+
+		if found.Userdata == nil {
+			return fmt.Errorf("no user data returned for OpenStack compute instance %s", instance.ID)
+		}
+
+		expected := base64.StdEncoding.EncodeToString([]byte(userData))
+		if *found.Userdata != expected {
+			return fmt.Errorf("expected user data %s for OpenStack compute instance %s, got %s", expected, instance.ID, *found.Userdata)
+		}
+
+		return nil
+	}
+}
+
 func testAccComputeV2InstanceBasic() string {
 	return fmt.Sprintf(`
 resource "openstack_compute_instance_v2" "instance_1" {
@@ -1090,6 +1204,33 @@ resource "openstack_compute_instance_v2" "instance_1" {
   }
 }
 `, osNetworkID)
+}
+
+func testAccComputeV2InstanceBasicUserData(instanceName string, userData string) string {
+	return fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "%s"
+  user_data = "%s"
+  security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
+}
+`, instanceName, base64.StdEncoding.EncodeToString([]byte(userData)), osNetworkID)
+}
+
+func testAccComputeV2InstanceWriteOnlyUserData(instanceName string, userData string, userDataVersion int) string {
+	return fmt.Sprintf(`
+resource "openstack_compute_instance_v2" "instance_1" {
+  name = "%s"
+  user_data_wo = "%s"
+  user_data_wo_version = %d
+  security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
+}
+`, instanceName, base64.StdEncoding.EncodeToString([]byte(userData)), userDataVersion, osNetworkID)
 }
 
 func testAccComputeV2InstanceBootFromVolumeImage() string {

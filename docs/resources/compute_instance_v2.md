@@ -11,9 +11,11 @@ description: |-
 
 Manages a V2 VM instance resource within OpenStack.
 
-~> **Note:** All arguments including the instance admin password will be stored
+~> **Note:** Most arguments, including the instance admin password, will be stored
 in the raw state as plain-text. [Read more about sensitive data in
-state](https://www.terraform.io/docs/language/state/sensitive-data.html).
+state](https://www.terraform.io/docs/language/state/sensitive-data.html). If you wish to include sensitive values in an
+instance's `user_data` argument, you should use the write-only `user_data_wo`
+argument (requires Terraform >= 1.11) instead.
 
 ## Example Usage
 
@@ -325,6 +327,39 @@ resource "openstack_compute_instance_v2" "instance_1" {
 `user_data` can come from a variety of sources: inline, read in from the `file`
 function, or the `template_cloudinit_config` resource.
 
+### Instance with Write-Only User Data (cloud-init) - requires Terraform >= 1.11
+
+```hcl
+# The random_password ephemeral resource is found in the hashicorp/random provider
+ephemeral "random_password" "instance_password" {
+  length = 16
+}
+
+resource "openstack_compute_instance_v2" "instance_1" {
+  name                 = "basic"
+  image_id             = "ad091b52-742f-469e-8f3c-fd81cadf0743"
+  flavor_id            = "3"
+  key_pair             = "my_key_pair_name"
+  security_groups      = ["default"]
+  user_data_wo         = <<-EOT
+    #cloud-config
+    hostname: instance-1.example.com
+    user:
+      lock_passwd: false
+      plain_text_passwd: ${ephemeral.random_password.instance_password.result}
+    EOT
+  user_data_wo_version = 1
+
+  network {
+    name = "my_network"
+  }
+}
+```
+
+`user_data_wo` can use ephemeral values. Changing the value of `user_data_wo`
+alone will not have any effect - you must update `user_data_wo_version` for
+Terraform to detect the change and replace the instance.
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -351,7 +386,21 @@ The following arguments are supported:
     desired flavor for the server. Changing this resizes the existing server.
 
 * `user_data` - (Optional) The user data to provide when launching the instance.
-    Changing this creates a new server.
+    Changing this creates a new server. This argument cannot be used when
+    `user_data_wo` is set.
+
+* `user_data_wo` - (Optional) Requires Terraform >= 1.11. The user data to provide
+    when launching the instance. This is a [write-only argument](https://developer.hashicorp.com/terraform/language/manage-sensitive-data/write-only)
+    and so its value will not be stored in state. Changing this value alone will
+    have no effect - update `user_data_wo_version` to create a new server that
+    will receive the updated user data. This argument must be used with
+    `user_data_wo_version`. This argument cannot be used when `user_data` is set.
+
+* `user_data_wo_version` - (Optional) The version of the user data content last
+    applied to the `user_data_wo` argument. Because `user_data_wo` is a write-only
+    argument, Terraform does not store its value in state and so cannot track
+    changes to it. Changing this creates a new server. This argument must be
+    set when `user_data_wo` is set.
 
 * `security_groups` - (Optional) An array of one or more security group names
     to associate with the server. Changing this results in adding/removing
