@@ -58,13 +58,13 @@ The following arguments are supported:
 
 You can import an existing Host Aggregate by their ID.
 
-```
+```shell
 terraform import openstack_compute_aggregate_v2.myaggregate 24
 ```
 
 The ID can be obtained with an openstack command:
 
-```
+```shell
 $ openstack aggregate list
 +----+------+-------------------+
 | ID | Name | Availability Zone |

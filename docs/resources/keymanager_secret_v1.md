@@ -169,6 +169,6 @@ The following attributes are exported:
 
 Secrets can be imported using the secret id (the last part of the secret reference), e.g.:
 
-```
+```shell
 terraform import openstack_keymanager_secret_v1.secret_1 8a7a79c2-cf17-4e65-b2ae-ddc8bfcf6c74
 ```

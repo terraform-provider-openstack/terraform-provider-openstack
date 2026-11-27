@@ -84,6 +84,6 @@ The following attributes are exported:
 
 Services can be imported using the `id`, e.g.
 
-```
+```shell
 terraform import openstack_vpnaas_ike_policy_v2.policy_1 832cb7f3-59fe-40cf-8f64-8350ffc03272
 ```

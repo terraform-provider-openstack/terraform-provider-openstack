@@ -6,6 +6,8 @@ description: |-
   Terraform Openstack Provider Version 2 Upgrade Guide
 ---
 
+# Terraform Openstack Provider Version 2 Upgrade Guide
+
 ~> **Note:** The provider go module version has been updated to `v2` in the `2.1.0` release. Downstream users should check the changelog of the `2.1.0` release as well before changing to the `v2` module.
 
 Version 2.0.0 of the Openstack provider for Terraform is a major release and includes some changes that you will need to consider when upgrading. We intend this guide to help with that process.
@@ -19,17 +21,18 @@ Upgrade topics:
   - [Provider configuration option](#provider-configuration-option)
   - [Changes for users of Octavia](#changes-for-users-of-octavia)
   - [Changes for users of Neutron-LBaaS](#changes-for-users-of-neutron-lbaas)
-- [Other Removals](#other-removals)
-  - [Remove multiattach from volume_v2](#remove-multiattach-from-blockstoragevolumev3)
-  - [Remove dhcp_disabled from subnet_v2 data source](#remove-dhcpdisabled-from-networkingsubnetv2-data-source)
-  - [Remove update_at from image_v2](#remove-updateat-from-imagesimagev2)
-  - [Remove instance_id from blockstorage_volume_attach_v2](#remove-instanceid-from-blockstoragevolumeattachv2)
-  - [Remove member from lb_pool_v1](#remove-member-from-lbpoolv1)
-  - [Remove allocation_pools from subnet_v2](#remove-allocationpools-from-networkingsubnetv2)
-  - [Remove external_gateway from router_v2](#remove-externalgateway-from-networkingrouterv2)
-  - [Remove floating_ip from instance_v2](#remove-floatingip-from-computeinstancev2)
-  - [Remove volume from instance_v2](#remove-volume-from-computeinstancev2)
-  - [Remove sort_key and sort_dir from glance data sources](#remove-sortkey-and-sortdir-from-glance-data-sources)
+- [Other removals](#other-removals)
+  - [Remove multiattach from blockstorage\_volume\_v3](#remove-multiattach-from-blockstorage_volume_v3)
+  - [Remove dhcp\_disabled from networking\_subnet\_v2 data source](#remove-dhcp_disabled-from-networking_subnet_v2-data-source)
+  - [Remove update\_at from images\_image\_v2](#remove-update_at-from-images_image_v2)
+  - [Remove instance\_id from blockstorage\_volume\_attach\_v2](#remove-instance_id-from-blockstorage_volume_attach_v2)
+  - [Remove member from lb\_pool\_v1](#remove-member-from-lb_pool_v1)
+  - [Remove allocation\_pools from networking\_subnet\_v2](#remove-allocation_pools-from-networking_subnet_v2)
+  - [Remove external\_gateway from networking\_router\_v2](#remove-external_gateway-from-networking_router_v2)
+  - [Remove floating\_ip from compute\_instance\_v2](#remove-floating_ip-from-compute_instance_v2)
+  - [Remove volume from compute\_instance\_v2](#remove-volume-from-compute_instance_v2)
+  - [Remove sort\_key and sort\_dir from glance data sources](#remove-sort_key-and-sort_dir-from-glance-data-sources)
+  - [Remove host\_route from networking\_subnet\_v2](#remove-host_route-from-networking_subnet_v2)
 
 ## Provider Version Configuration
 

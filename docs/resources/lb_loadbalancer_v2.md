@@ -106,6 +106,6 @@ The following attributes are exported:
 
 Load Balancer can be imported using the Load Balancer ID, e.g.:
 
-```
+```shell
 terraform import openstack_lb_loadbalancer_v2.loadbalancer_1 19bcfdc7-c521-4a7e-9459-6750bd16df76
 ```

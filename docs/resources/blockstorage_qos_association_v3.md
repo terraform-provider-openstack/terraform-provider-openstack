@@ -61,6 +61,6 @@ The following attributes are exported:
 
 Qos association can be imported using the `qos_id/volume_type_id`, e.g.
 
-```
+```shell
 terraform import openstack_blockstorage_qos_association_v3.qos_association 941793f0-0a34-4bc4-b72e-a6326ae58283/ea257959-eeb1-4c10-8d33-26f0409a755d
 ```

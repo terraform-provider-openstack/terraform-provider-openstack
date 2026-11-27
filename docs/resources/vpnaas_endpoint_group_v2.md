@@ -64,6 +64,6 @@ The following attributes are exported:
 
 Groups can be imported using the `id`, e.g.
 
-```
+```shell
 terraform import openstack_vpnaas_endpoint_group_v2.group_1 832cb7f3-59fe-40cf-8f64-8350ffc03272
 ```

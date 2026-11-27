@@ -97,8 +97,8 @@ The following arguments are supported:
      Default is 30.
 
 * `mtu` - (Optional) The maximum transmission unit (MTU) value to address fragmentation.
- Minimum value is 68 for IPv4, and 1280 for IPv6.
- 
+    Minimum value is 68 for IPv4, and 1280 for IPv6.
+
 * `value_specs` - (Optional) Map of additional options.
 
 ## Attributes Reference
@@ -128,6 +128,6 @@ The following attributes are exported:
 
 Site Connections can be imported using the `id`, e.g.
 
-```
+```shell
 terraform import openstack_vpnaas_site_connection_v2.conn_1 832cb7f3-59fe-40cf-8f64-8350ffc03272
 ```

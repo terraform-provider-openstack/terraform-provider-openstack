@@ -135,6 +135,6 @@ The following attributes are exported:
 
 Clusters can be imported using the `id`, e.g.
 
-```
+```shell
 terraform import openstack_containerinfra_cluster_v1.cluster_1 ce0f9463-dd25-474b-9fe8-94de63e5e42b
 ```

@@ -70,6 +70,6 @@ The following attributes are exported:
 
 flavorprofiles can be imported using their `id`. Example:
 
-```
+```shell
 terraform import openstack_lb_flavorprofile_v2.flavorprofile_1 2a0f2240-c5e6-41de-896d-e80d97428d6b
 ```

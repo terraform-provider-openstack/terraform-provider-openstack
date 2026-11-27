@@ -294,7 +294,7 @@ with all other resources is either untested or known to not work.
 
 * To use networks, override the endpoint in your provider configuration
 
-```
+```hcl
 provider "openstack" {
   user_name = "your-username"
   password  = "your-password"
@@ -310,7 +310,7 @@ provider "openstack" {
 * Explicitly define the public and private networks in your
 instances as shown below:
 
-```
+```hcl
 resource "openstack_compute_instance_v2" "my_instance" {
   name      = "my_instance"
   region    = "DFW"
@@ -422,11 +422,12 @@ this provider uses [Go Modules](https://github.com/golang/go/wiki/Modules).
 
 If there is access to an existing cloud, developers can test changes on resources
 against that cloud. In order to do so:
+
 * Build the provider with your changes
 
 Build locally the provider including your changes with:
 
-```
+```shell
 go build .
 ```
 
@@ -436,13 +437,13 @@ this should generate a `terraform-provider-openstack` binary.
 
 If there is already a terraform lock file, remove it with:
 
-```
+```shell
 rm .terraform.lock.hcl
 ```
 
 * Create or edit `.terraform.rc` as shown below:
 
-```
+```hcl
 provider_installation {
   dev_overrides {
     "registry.terraform.io/terraform-provider-openstack/openstack" = "/path/to/directory/where/the/provider/binary/is"
@@ -459,13 +460,13 @@ Terraform Registry.
 
 * Set Environment Variable for Terraform Configuration
 
-```
+```shell
 export TF_CLI_CONFIG_FILE=~/.terraform.rc
 ```
 
 * Run terraform
 
-```
+```console
 ❯ terraform plan
 
 │ Warning: Provider development overrides are in effect

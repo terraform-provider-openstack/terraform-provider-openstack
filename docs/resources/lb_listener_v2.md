@@ -114,15 +114,13 @@ argument of the provider is used. Changing this creates a new Listener.
   additional TCP packets for content inspection.
 
 * `default_tls_container_ref` - (Optional) A reference to a Barbican Secrets
-  container which stores TLS information. This is required if the protocol is
-  `TERMINATED_HTTPS`. See
-  [here](https://docs.openstack.org/octavia/latest/user/guides/basic-cookbook.html#deploy-a-tls-terminated-https-load-balancer)
-  for more information.
+  container that stores TLS information. This is required when the protocol is
+  `TERMINATED_HTTPS`. For more information, see the
+  [Octavia TLS-terminated HTTPS load balancer guide][octavia-tls-guide].
 
 * `sni_container_refs` - (Optional) A list of references to Barbican Secrets
-  containers which store SNI information. See
-  [here](https://docs.openstack.org/octavia/latest/user/guides/basic-cookbook.html#deploy-a-tls-terminated-https-load-balancer)
-  for more information.
+  containers that store SNI information. For more information, see the
+  [Octavia TLS-terminated HTTPS load balancer guide][octavia-tls-guide].
 
 * `admin_state_up` - (Optional) The administrative state of the Listener. A
   valid value is true (UP) or false (DOWN).
@@ -222,6 +220,8 @@ The following attributes are exported:
 
 Load Balancer Listener can be imported using the Listener ID, e.g.:
 
-```
+```shell
 terraform import openstack_lb_listener_v2.listener_1 b67ce64e-8b26-405d-afeb-4a078901f15a
 ```
+
+[octavia-tls-guide]: https://docs.openstack.org/octavia/latest/user/guides/basic-cookbook.html#deploy-a-tls-terminated-https-load-balancer

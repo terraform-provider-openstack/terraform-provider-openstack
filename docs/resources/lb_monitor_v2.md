@@ -104,12 +104,12 @@ The following attributes are exported:
 
 Load Balancer Pool Monitor can be imported using the Monitor ID, e.g.:
 
-```
+```shell
 terraform import openstack_lb_monitor_v2.monitor_1 47c26fc3-2403-427a-8c79-1589bd0533c2
 ```
 
 In case of using OpenContrail, the import may not work properly. If you face an issue, try to import the monitor providing its parent pool ID:
 
-```
+```shell
 terraform import openstack_lb_monitor_v2.monitor_1 47c26fc3-2403-427a-8c79-1589bd0533c2/708bc224-0f8c-4981-ac82-97095fe051b6
 ```

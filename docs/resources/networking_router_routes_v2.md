@@ -94,6 +94,6 @@ hop to the router, as in the example above.
 
 Routing entries can be imported using a router `id`:
 
-```
+```shell
 terraform import openstack_networking_router_routes_v2.router_routes_1 686fe248-386c-4f70-9f6c-281607dad079
 ```

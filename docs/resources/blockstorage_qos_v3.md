@@ -56,6 +56,6 @@ The following attributes are exported:
 
 Qos can be imported using the `qos_id`, e.g.
 
-```
+```shell
 terraform import openstack_blockstorage_qos_v3.qos 941793f0-0a34-4bc4-b72e-a6326ae58283
 ```

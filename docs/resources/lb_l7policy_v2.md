@@ -120,6 +120,6 @@ The following attributes are exported:
 
 Load Balancer L7 Policy can be imported using the L7 Policy ID, e.g.:
 
-```
+```shell
 terraform import openstack_lb_l7policy_v2.l7policy_1 8a7a79c2-cf17-4e65-b2ae-ddc8bfcf6c74
 ```

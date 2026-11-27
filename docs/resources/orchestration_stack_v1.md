@@ -91,6 +91,6 @@ The following attributes are exported:
 
 stacks can be imported using the `id`, e.g.
 
-```
+```shell
 terraform import openstack_orchestration_stack_v1.stack_1 ea257959-eeb1-4c10-8d33-26f0409a755d
 ```

@@ -75,6 +75,6 @@ The following attributes are exported:
 
 Volume types can be imported using the `volume_type_id`, e.g.
 
-```
+```shell
 terraform import openstack_blockstorage_volume_type_v3.volume_type_1 941793f0-0a34-4bc4-b72e-a6326ae58283
 ```

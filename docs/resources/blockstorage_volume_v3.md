@@ -90,15 +90,14 @@ The `scheduler_hints` block supports:
 * `local_to_instance` - (Optional) An instance UUID. The volume should be
     scheduled on the same host as the instance.
 
-* `query` - (Optional) A conditional query that a back-end must pass in
-    order to host a volume. The query must use the `JsonFilter` syntax
-    which is described
-    [here](https://docs.openstack.org/cinder/latest/configuration/block-storage/scheduler-filters.html#jsonfilter).
+* `query` - (Optional) A conditional query that a back-end must satisfy in order
+    to host a volume. The query must use the `JsonFilter` syntax which is described in the
+    [Cinder scheduler JsonFilter documentation][cinder-jsonfilter].
     At this time, only simple queries are supported. Compound queries using
     `and`, `or`, or `not` are not supported. An example of a simple query is:
 
-    ```
-    [“=”, “$backend_id”, “rbd:vol@ceph#cloud”]
+    ```json
+    ["=", "$backend_id", "rbd:vol@ceph#cloud"]
     ```
 
 * `additional_properties` - (Optional) Arbitrary key/value pairs of additional
@@ -127,6 +126,8 @@ The following attributes are exported:
 
 Volumes can be imported using the `id`, e.g.
 
-```
+```shell
 terraform import openstack_blockstorage_volume_v3.volume_1 ea257959-eeb1-4c10-8d33-26f0409a755d
 ```
+
+[cinder-jsonfilter]: https://docs.openstack.org/cinder/latest/configuration/block-storage/scheduler-filters.html#jsonfilter

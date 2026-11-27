@@ -16,13 +16,13 @@ this should respond with the default nginx web page.
 First set the required environment variables for the OpenStack provider by
 sourcing the [credentials file](http://docs.openstack.org/cli-reference/content/cli_openrc.html).
 
-```
+```shell
 source openrc
 ```
 
 Afterwards run with a command like this:
 
-```
+```shell
 terraform apply \
   -var 'pool=public'
 ```
@@ -30,7 +30,7 @@ terraform apply \
 To get a list of usable floating IP pools run this command, and the UUID of the external gateway
 is in the following `ID` column:
 
-```
+```shell
 $ openstack network list --external
 +--------------------------------------+--------+----------------------------------------------------------------------------+
 | ID                                   | Name   | Subnets                                                                    |

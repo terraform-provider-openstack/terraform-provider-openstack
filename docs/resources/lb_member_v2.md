@@ -90,6 +90,6 @@ The following attributes are exported:
 Load Balancer Pool Member can be imported using the Pool ID and Member ID
 separated by a slash, e.g.:
 
-```
+```shell
 terraform import openstack_lb_member_v2.member_1 c22974d2-4c95-4bcb-9819-0afc5ed303d5/9563b79c-8460-47da-8a95-2711b746510f
 ```

@@ -34,7 +34,9 @@ Using the provider
 
 Please see the documentation at [registry.terraform.io](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs) or [search.opentofu.org](https://search.opentofu.org/provider/terraform-provider-openstack/openstack/latest).
 
-Or you can browse the documentation within this repo [here](https://github.com/terraform-provider-openstack/terraform-provider-openstack/tree/main/website/docs).
+- [Terraform Registry](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs)
+- [OpenTofu Registry](https://search.opentofu.org/provider/terraform-provider-openstack/openstack/latest)
+- Or browse the [documentation in this repository](https://github.com/terraform-provider-openstack/terraform-provider-openstack/tree/main/docs)
 
 Developing the Provider
 ---------------------------

@@ -390,11 +390,11 @@ The following arguments are supported:
 
     Common cases:
 
-      * The instance is attached to a subnet created with `enable_dhcp = false`.
-      * The tenant network is isolated and has no router or metadata agent
-        reaching it.
-      * The deployment uses an OpenStack downstream distribution or networking driver that
-        does not expose the metadata service on certain network types.
+  * The instance is attached to a subnet created with `enable_dhcp = false`.
+  * The tenant network is isolated and has no router or metadata agent
+    reaching it.
+  * The deployment uses an OpenStack downstream distribution or networking driver that
+    does not expose the metadata service on certain network types.
 
 * `admin_pass` - (Optional) The administrative password to assign to the server.
     Changing this changes the root password on the existing server.
@@ -519,14 +519,14 @@ The `scheduler_hints` block supports:
 * `same_host` - (Optional) A list of instance UUIDs. The instance will be
     scheduled on the same host of those specified.
 
-* `query` - (Optional) A conditional query that a compute node must pass in
-    order to host an instance. The query must use the `JsonFilter` syntax
-    which is described
-    [here](https://docs.openstack.org/nova/latest/admin/configuration/schedulers.html#jsonfilter).
-    At this time, only simple queries are supported. Compound queries using
-    `and`, `or`, or `not` are not supported. An example of a simple query is:
+* `query` - (Optional) A conditional query that a compute node must satisfy in
+    order to host an instance. The query must use the `JsonFilter` syntax, which is
+    described in the
+    [Nova scheduler JsonFilter documentation][nova-jsonfilter].
+    At this time, only simple queries are supported. Compound queries using `and`,
+    `or`, or `not` are not supported. An example of a simple query is:
 
-    ```
+    ```json
     [">=", "$free_ram_mb", "1024"]
     ```
 
@@ -654,10 +654,11 @@ resource "openstack_compute_instance_v2" "foo" {
 Neutron Ports are a great feature and provide a lot of functionality. However,
 there are some notes to be aware of when mixing Instances and Ports:
 
-* In OpenStack environments prior to the Kilo release, deleting or recreating
-an Instance will cause the Instance's Port(s) to be deleted. One way of working
-around this is to taint any Port(s) used in Instances which are to be recreated.
-See [here](https://review.openstack.org/#/c/126309/) for further information.
+* In OpenStack environments prior to the Kilo release, deleting or recreating an
+Instance will cause the Instance's Port(s) to be deleted. One way to work around
+this is to taint any Port(s) used by Instances that are being recreated. For
+further information, see the
+[Nova change that preserves preexisting ports on server delete][nova-preserve-ports].
 
 * When attaching an Instance to one or more networks using Ports, place the
 security groups on the Port and not the Instance. If you place the security
@@ -719,7 +720,7 @@ launch the instance on this network.
 with a `network` block. Not specifying a network will result in the following
 error:
 
-```
+```text
 * openstack_compute_instance_v2.instance: Error creating OpenStack server:
 Expected HTTP response code [201 202] when accessing [POST https://example.com:8774/v2.1/servers], but got 409 instead
 {"conflictingRequest": {"message": "Multiple possible networks found, use a Network ID to be more specific.", "code": 409}}
@@ -761,7 +762,7 @@ resource "openstack_compute_instance_v2" "basic_instance" {
 
 Then you execute
 
-```
+```shell
 terraform import openstack_compute_instance_v2.basic_instance instance_id
 ```
 
@@ -859,7 +860,7 @@ resource "openstack_compute_volume_attach_v2" "va_1" {
 To import the instance outlined in the above configuration
 do the following:
 
-```
+```shell
 terraform import openstack_compute_instance_v2.instance_2 instance_id
 import openstack_blockstorage_volume_v3.volume_1 volume_id
 terraform import openstack_compute_volume_attach_v2.va_1
@@ -871,3 +872,6 @@ instance_id/volume_id
   import an instance created with delete_on_termination false,
   you end up with "orphaned" volumes after destruction of
   instances.
+
+[nova-jsonfilter]: https://docs.openstack.org/nova/latest/admin/scheduling.html#jsonfilter
+[nova-preserve-ports]: https://review.opendev.org/c/openstack/nova/+/126309

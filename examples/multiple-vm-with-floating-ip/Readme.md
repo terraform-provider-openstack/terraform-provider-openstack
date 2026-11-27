@@ -10,13 +10,13 @@ First, download an openrc file from the OpenStack dashboard. If your cloud provi
 
 After you have modified it, source it into your shell environment:
 
-```
+```shell
 source ./openrc
 ```
 
 Init providers
 
-```
+```shell
 terraform init
 ```
 
@@ -24,7 +24,7 @@ terraform init
 
 plan the deployment
 
-```
+```shell
 terraform plan
 # or with specific variables
 terraform plan -var 'pool=gateway' \
@@ -36,7 +36,7 @@ terraform plan -var 'pool=gateway' \
 
 Apply the plan
 
-```
+```shell
 terraform apply -auto-approve
 # or with specific variables
 terraform apply -auto-approve \
@@ -51,7 +51,7 @@ terraform apply -auto-approve \
 
 cleanup, watch the `-force` will not ask for any confirmation.
 
-```
+```shell
 terraform destroy -force
 # or with specific variables
 terraform destroy -force \

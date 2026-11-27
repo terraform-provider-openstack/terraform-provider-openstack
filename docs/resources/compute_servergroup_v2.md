@@ -114,6 +114,6 @@ The following attributes are exported:
 
 Server Groups can be imported using the `id`, e.g.
 
-```
+```shell
 terraform import openstack_compute_servergroup_v2.test-sg 1bc30ee9-9d5b-4c30-bdd5-7f1e663f5edf
 ```

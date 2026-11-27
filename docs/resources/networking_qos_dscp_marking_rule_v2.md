@@ -52,6 +52,6 @@ The following attributes are exported:
 
 QoS DSCP marking rules can be imported using the `qos_policy_id/dscp_marking_rule_id` format, e.g.
 
-```
+```shell
 terraform import openstack_networking_qos_dscp_marking_rule_v2.dscp_marking_rule_1 d6ae28ce-fcb5-4180-aa62-d260a27e09ae/46dfb556-b92f-48ce-94c5-9a9e2140de94
 ```
