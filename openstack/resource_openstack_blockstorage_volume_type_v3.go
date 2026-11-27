@@ -7,6 +7,7 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumetypes"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceBlockStorageVolumeTypeV3() *schema.Resource {
@@ -49,6 +50,37 @@ func resourceBlockStorageVolumeTypeV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+
+			"encryption": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"provider": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+
+						"cipher": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+
+						"key_size": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+
+						"control_location": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Default:      "front-end",
+							ValidateFunc: validation.StringInSlice([]string{"front-end", "back-end"}, false),
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -81,6 +113,16 @@ func resourceBlockStorageVolumeTypeV3Create(ctx context.Context, d *schema.Resou
 
 	d.SetId(vt.ID)
 
+	if raw := d.Get("encryption").([]any); len(raw) > 0 {
+		encOpts := expandBlockStorageVolumeTypeV3Encryption(raw)
+
+		log.Printf("[DEBUG] openstack_blockstorage_volume_type_v3 %s encryption create options: %#v", d.Id(), encOpts)
+
+		if err := volumetypes.CreateEncryption(ctx, blockStorageClient, d.Id(), encOpts).Err; err != nil {
+			return diag.Errorf("Error creating encryption for openstack_blockstorage_volume_type_v3 %s: %s", d.Id(), err)
+		}
+	}
+
 	return resourceBlockStorageVolumeTypeV3Read(ctx, d, meta)
 }
 
@@ -111,6 +153,15 @@ func resourceBlockStorageVolumeTypeV3Read(ctx context.Context, d *schema.Resourc
 
 	if err := d.Set("extra_specs", es); err != nil {
 		log.Printf("[WARN] Unable to set extra_specs for openstack_blockstorage_volume_type_v3 %s: %s", d.Id(), err)
+	}
+
+	enc, err := volumetypes.GetEncryption(ctx, blockStorageClient, d.Id()).Extract()
+	if err != nil {
+		return diag.Errorf("Error reading encryption for openstack_blockstorage_volume_type_v3 %s: %s", d.Id(), err)
+	}
+
+	if err := d.Set("encryption", flattenBlockStorageVolumeTypeV3Encryption(enc)); err != nil {
+		log.Printf("[WARN] Unable to set encryption for openstack_blockstorage_volume_type_v3 %s: %s", d.Id(), err)
 	}
 
 	return nil
@@ -172,6 +223,12 @@ func resourceBlockStorageVolumeTypeV3Update(ctx context.Context, d *schema.Resou
 			if err != nil {
 				return diag.Errorf("Error creating extra_specs for openstack_blockstorage_volume_type_v3 %s: %s", d.Id(), err)
 			}
+		}
+	}
+
+	if d.HasChange("encryption") {
+		if err := updateBlockStorageVolumeTypeV3Encryption(ctx, blockStorageClient, d); err != nil {
+			return diag.Errorf("Error updating encryption for openstack_blockstorage_volume_type_v3 %s: %s", d.Id(), err)
 		}
 	}
 

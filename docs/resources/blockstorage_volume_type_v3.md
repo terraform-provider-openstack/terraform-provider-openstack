@@ -42,6 +42,23 @@ resource "openstack_blockstorage_volume_type_v3" "multiattach" {
 }
 
 ```
+
+### Encrypted Volume Type
+
+```hcl
+resource "openstack_blockstorage_volume_type_v3" "encrypted" {
+  name = "encrypted"
+
+  encryption {
+    provider         = "luks"
+    cipher           = "aes-xts-plain64"
+    key_size         = 256
+    control_location = "front-end"
+  }
+}
+
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -61,6 +78,25 @@ The following arguments are supported:
 
 * `extra_specs` - (Optional) Key/Value pairs of metadata for the volume type.
 
+* `encryption` - (Optional) The encryption spec for volumes created from
+    this type. The `encryption` object structure is documented below.
+    Cinder rejects creating, changing or removing the spec while any volume
+    uses the type.
+
+The `encryption` block supports:
+
+* `provider` - (Required) The class that provides encryption support, such
+    as `luks` or `plain`.
+
+* `cipher` - (Optional) The encryption algorithm or mode, such as
+    `aes-xts-plain64`.
+
+* `key_size` - (Optional) Size of the encryption key, in bits.
+
+* `control_location` - (Optional) Notional service where encryption is
+    performed. Valid values are `front-end` and `back-end`. Defaults to
+    `front-end`.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -70,6 +106,7 @@ The following attributes are exported:
 * `description` - See Argument Reference above.
 * `is_public` - See Argument Reference above.
 * `extra_specs` - See Argument Reference above.
+* `encryption` - See Argument Reference above.
 
 ## Import
 
