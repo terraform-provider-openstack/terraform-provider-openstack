@@ -27,6 +27,7 @@ var (
 	osDRAgentHost                = os.Getenv("OS_DRAGENT_HOST")
 	osFlavorID                   = os.Getenv("OS_FLAVOR_ID")
 	osFlavorName                 = os.Getenv("OS_FLAVOR_NAME")
+	osFlavorIDResize             = os.Getenv("OS_FLAVOR_ID_RESIZE")
 	osImageID                    = os.Getenv("OS_IMAGE_ID")
 	osImageName                  = os.Getenv("OS_IMAGE_NAME")
 	osMagnumFlavor               = os.Getenv("OS_MAGNUM_FLAVOR")

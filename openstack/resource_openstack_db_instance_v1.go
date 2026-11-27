@@ -14,7 +14,7 @@ import (
 )
 
 func resourceDatabaseInstanceV1() *schema.Resource {
-	return &schema.Resource{
+	resource := &schema.Resource{
 		CreateContext: resourceDatabaseInstanceV1Create,
 		ReadContext:   resourceDatabaseInstanceV1Read,
 		DeleteContext: resourceDatabaseInstanceV1Delete,
@@ -22,6 +22,7 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
@@ -41,7 +42,6 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 			"flavor_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Computed:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_FLAVOR_ID", nil),
 			},
@@ -50,7 +50,6 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 				Type:         schema.TypeInt,
 				Required:     true,
 				RequiredWith: []string{"volume_type"},
-				ForceNew:     true,
 			},
 
 			"volume_type": {
@@ -185,6 +184,10 @@ func resourceDatabaseInstanceV1() *schema.Resource {
 			},
 		},
 	}
+
+	resource.CustomizeDiff = databaseInstanceV1CustomizeDiff(resource.Schema)
+
+	return resource
 }
 
 func resourceDatabaseInstanceV1Create(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -294,8 +297,15 @@ func resourceDatabaseInstanceV1Read(ctx context.Context, d *schema.ResourceData,
 	log.Printf("[DEBUG] Retrieved openstack_db_instance_v1 %s: %#v", d.Id(), instance)
 
 	d.Set("name", instance.Name)
-	d.Set("flavor_id", instance.Flavor)
-	d.Set("datastore", instance.Datastore)
+	d.Set("flavor_id", instance.Flavor.ID)
+
+	// Instances without a volume (ephemeral storage) report no size.
+	if instance.Volume.Size > 0 {
+		d.Set("size", instance.Volume.Size)
+	}
+
+	// datastore is not read back: the API returns the version name, and the
+	// configuration may have the version ID.
 	d.Set("addresses", instance.IP)
 	d.Set("region", GetRegion(d, config))
 
@@ -308,6 +318,63 @@ func resourceDatabaseInstanceUpdate(ctx context.Context, d *schema.ResourceData,
 	databaseV1Client, err := config.DatabaseV1Client(ctx, GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack database client: %s", err)
+	}
+
+	// Keep the previous state if a step fails: the next refresh reads the
+	// flavor and the volume size that were actually applied.
+	d.Partial(true)
+
+	if d.HasChanges("flavor_id", "size") {
+		instance, err := instances.Get(ctx, databaseV1Client, d.Id()).Extract()
+		if err != nil {
+			return diag.Errorf("Error retrieving openstack_db_instance_v1 %s: %s", d.Id(), err)
+		}
+
+		// Trove resizes the flavor and the volume in separate actions, and
+		// only one at a time. Resize the flavor first: the volume can only
+		// grow, so it is grown only after the flavor resize has succeeded.
+		if d.HasChange("flavor_id") {
+			flavorID := d.Get("flavor_id").(string)
+
+			if instance.Flavor.ID != flavorID {
+				log.Printf("[DEBUG] Resizing openstack_db_instance_v1 %s flavor from %s to %s", d.Id(), instance.Flavor.ID, flavorID)
+
+				err = instances.Resize(ctx, databaseV1Client, d.Id(), flavorID).ExtractErr()
+				if err != nil {
+					return diag.Errorf("Error resizing openstack_db_instance_v1 %s flavor: %s", d.Id(), err)
+				}
+
+				instance, err = databaseInstanceV1WaitForResize(ctx, databaseV1Client, d.Id(), d.Timeout(schema.TimeoutUpdate),
+					func(i *instances.Instance) bool {
+						return i.Flavor.ID == flavorID
+					})
+				if err != nil {
+					return diag.Errorf("Error waiting for openstack_db_instance_v1 %s flavor resize: %s", d.Id(), err)
+				}
+			}
+		}
+
+		if d.HasChange("size") {
+			size := d.Get("size").(int)
+
+			// Some clouds grow the volume together with the flavor.
+			if instance.Volume.Size != size {
+				log.Printf("[DEBUG] Resizing openstack_db_instance_v1 %s volume from %d to %d GB", d.Id(), instance.Volume.Size, size)
+
+				err = instances.ResizeVolume(ctx, databaseV1Client, d.Id(), size).ExtractErr()
+				if err != nil {
+					return diag.Errorf("Error resizing openstack_db_instance_v1 %s volume: %s", d.Id(), err)
+				}
+
+				_, err = databaseInstanceV1WaitForResize(ctx, databaseV1Client, d.Id(), d.Timeout(schema.TimeoutUpdate),
+					func(i *instances.Instance) bool {
+						return i.Volume.Size == size
+					})
+				if err != nil {
+					return diag.Errorf("Error waiting for openstack_db_instance_v1 %s volume resize: %s", d.Id(), err)
+				}
+			}
+		}
 	}
 
 	if d.HasChange("configuration_id") {
@@ -329,6 +396,8 @@ func resourceDatabaseInstanceUpdate(ctx context.Context, d *schema.ResourceData,
 			log.Printf("Attaching configuration to openstack_db_instance_v1 %s", d.Id())
 		}
 	}
+
+	d.Partial(false)
 
 	return resourceDatabaseInstanceV1Read(ctx, d, meta)
 }
