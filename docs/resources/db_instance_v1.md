@@ -52,7 +52,11 @@ The following arguments are supported:
 * `configuration_id` - (Optional) Configuration ID to be attached to the instance. Database instance
    will be rebooted when configuration is detached.
 
-* `size` - (Required) Specifies the volume size in GB. Changing this creates new instance.
+* `size` - (Required) Specifies the volume size in GB. Must be at least 1.
+  Increasing the value resizes the attached volume in place. Decreasing the size
+  of an existing instance is not supported and is rejected during planning when
+  the requested size is known. If another argument change requires replacing the
+  instance, the new instance may have a smaller volume.
 
 * `volume_type` - (Optional) Specifies the volume type to use. If you want to
   specify a volume type, you must also specify a volume size. Changing this
@@ -115,6 +119,15 @@ The `database` block supports:
 
 * `charset` - (Optional) Database character set. Changing this creates a
     new instance.
+
+## Timeouts
+
+The `timeouts` block allows you to specify timeouts for certain actions:
+
+* `create` - (Defaults to 30 minutes) Used when creating the instance.
+* `update` - (Defaults to 30 minutes) Used when updating the instance, including
+  waiting for a volume resize to complete.
+* `delete` - (Defaults to 30 minutes) Used when deleting the instance.
 
 ## Attributes Reference
 
