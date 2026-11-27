@@ -21,8 +21,8 @@ Manages a V2 load balancer flavorprofile resource within OpenStack.
 resource "openstack_lb_flavorprofile_v2" "flavorprofile_1" {
   name          = "amphora-single-profile"
   provider_name = "amphora"
-  flavor_data   = jsonencode({
-    "loadbalancer_topology": "SINGLE",
+  flavor_data = jsonencode({
+    "loadbalancer_topology" : "SINGLE",
   })
 }
 ```

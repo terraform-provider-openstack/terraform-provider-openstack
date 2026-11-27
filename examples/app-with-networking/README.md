@@ -5,9 +5,9 @@ cloud.
 
 To simplify the example, this intentionally ignores deploying and
 getting your application onto the servers. However, you could do so either via
-[provisioners](https://www.terraform.io/docs/provisioners/) and a configuration
+[provisioners](https://developer.hashicorp.com/terraform/language/provisioners) and a configuration
 management tool, or by pre-baking configured images with
-[Packer](http://www.packer.io).
+[Packer](https://www.packer.io).
 
 After you run `terraform apply` on this configuration, it will output the
 floating IP address assigned to the instance. After your instance started,

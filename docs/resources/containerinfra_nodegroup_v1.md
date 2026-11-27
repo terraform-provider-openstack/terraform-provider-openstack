@@ -17,9 +17,9 @@ Manages a V1 Magnum node group resource within OpenStack.
 
 ```hcl
 resource "openstack_containerinfra_nodegroup_v1" "nodegroup_1" {
-  name                = "nodegroup_1"
-  cluster_id          = "b9a45c5c-cd03-4958-82aa-b80bf93cb922"
-  node_count          = 5
+  name       = "nodegroup_1"
+  cluster_id = "b9a45c5c-cd03-4958-82aa-b80bf93cb922"
+  node_count = 5
 }
 ```
 

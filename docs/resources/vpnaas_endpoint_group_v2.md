@@ -17,8 +17,10 @@ Manages a V2 Neutron Endpoint Group resource within OpenStack.
 resource "openstack_vpnaas_endpoint_group_v2" "group_1" {
   name = "Group 1"
   type = "cidr"
-  endpoints = ["10.2.0.0/24",
-  "10.3.0.0/24", ]
+  endpoints = [
+    "10.2.0.0/24",
+    "10.3.0.0/24",
+  ]
 }
 ```
 

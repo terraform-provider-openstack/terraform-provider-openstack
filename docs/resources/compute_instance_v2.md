@@ -13,7 +13,7 @@ Manages a V2 VM instance resource within OpenStack.
 
 ~> **Note:** All arguments including the instance admin password will be stored
 in the raw state as plain-text. [Read more about sensitive data in
-state](https://www.terraform.io/docs/language/state/sensitive-data.html).
+state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 
 ## Example Usage
 
@@ -510,7 +510,7 @@ The `block_device` block supports:
 The `scheduler_hints` block supports:
 
 * `group` - (Optional) A UUID of a Server Group. The instance will be placed
-    into that group. See [reference](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/compute_servergroup_v2)
+    into that group. See [reference](compute_servergroup_v2)
     for details on managing servergroup resources
 
 * `different_host` - (Optional) A list of instance UUIDs. The instance will
@@ -751,13 +751,12 @@ resource "openstack_compute_instance_v2" "basic_instance" {
   flavor_id       = "<flavor_id>"
   key_pair        = "<keyname>"
   security_groups = ["default"]
-  image_id =  "<image_id>"
+  image_id        = "<image_id>"
 
   network {
     name = "<network_name>"
   }
 }
-
 ```
 
 Then you execute
@@ -799,7 +798,7 @@ resource "openstack_compute_instance_v2" "boot-from-volume" {
     name = "<network2>"
   }
   network {
-    name = "<network1>"
+    name        = "<network1>"
     fixed_ip_v4 = "<fixed_ip_v4>"
   }
 
@@ -843,7 +842,7 @@ resource "openstack_compute_instance_v2" "instance_2" {
     delete_on_termination = true
   }
 
-   network {
+  network {
     name = "<network_name>"
   }
 }
@@ -862,9 +861,8 @@ do the following:
 
 ```shell
 terraform import openstack_compute_instance_v2.instance_2 instance_id
-import openstack_blockstorage_volume_v3.volume_1 volume_id
-terraform import openstack_compute_volume_attach_v2.va_1
-instance_id/volume_id
+terraform import openstack_blockstorage_volume_v3.volume_1 volume_id
+terraform import openstack_compute_volume_attach_v2.va_1 instance_id/volume_id
 ```
 
 * A note on block storage volumes, the importer does not read

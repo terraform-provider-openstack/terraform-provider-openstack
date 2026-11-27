@@ -58,22 +58,22 @@ The following arguments are supported:
 
 * `local_ep_group_id` - (Optional) The ID for the endpoint group that contains private subnets for the local side of the connection.
     You must specify this parameter with the peer_ep_group_id parameter unless
- in backward- compatible mode where peer_cidrs is provided with a subnet_id for the VPN service.
+    in backward-compatible mode where peer_cidrs is provided with a subnet_id for the VPN service.
     Changing this updates the existing connection.
 
 * `ipsecpolicy_id` - (Required) The ID of the IPsec policy. Changing this creates a new connection.
 
 * `peer_id` - (Required) The peer router identity for authentication. A valid value is an IPv4 address, IPv6 address, e-mail address, key ID, or FQDN.
- Typically, this value matches the peer_address value.
- Changing this updates the existing policy.
+    Typically, this value matches the peer_address value.
+    Changing this updates the existing policy.
 
 * `peer_ep_group_id` - (Optional) The ID for the endpoint group that contains private CIDRs in the form < net_address > / < prefix > for the peer side of the connection.
- You must specify this parameter with the local_ep_group_id parameter unless in backward-compatible mode
- where peer_cidrs is provided with a subnet_id for the VPN service.
+    You must specify this parameter with the local_ep_group_id parameter unless in backward-compatible mode
+    where peer_cidrs is provided with a subnet_id for the VPN service.
 
 * `local_id` - (Optional) An ID to be used instead of the external IP address for a virtual router used in traffic between instances on different networks in east-west traffic.
- Most often, local ID would be domain name, email address, etc.
- If this is not configured then the external IP address will be used as the ID.
+    Most often, local ID would be domain name, email address, etc.
+    If this is not configured then the external IP address will be used as the ID.
 
 * `peer_address` - (Required) The peer gateway public IPv4 or IPv6 address or FQDN.
 

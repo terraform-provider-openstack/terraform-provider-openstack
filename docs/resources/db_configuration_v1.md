@@ -75,7 +75,8 @@ The following attributes are exported:
 ## Types of configuration parameter values
 
 Openstack API requires to store some database configuration parameter's values as strings, even if they contain numbers.
-To force store their values as strings set `string_type` to `true`. Otherwise Terraform will try to store them as number what can cause error from Openstack API like below:
+To force store their values as strings set `string_type` to `true`. Otherwise Terraform will try to store them as number what can cause error from Openstack
+API like below:
 
 ```json
 "The value provided for the configuration parameter log_min_duration_statement is not of type string."

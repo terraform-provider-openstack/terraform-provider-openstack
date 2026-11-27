@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-We assume you already installed terraform using the following instructions: <https://www.terraform.io/downloads.html>
+We assume you already installed terraform using the following instructions: <https://developer.hashicorp.com/terraform/install>
 
 ## Getting started
 

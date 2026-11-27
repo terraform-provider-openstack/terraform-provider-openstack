@@ -43,7 +43,7 @@ resource "openstack_compute_servergroup_v2" "test-sg" {
   name     = "my-sg"
   policies = ["anti-affinity"]
   rules {
-      max_server_per_host = 3
+    max_server_per_host = 3
   }
 }
 

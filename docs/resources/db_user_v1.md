@@ -13,7 +13,7 @@ Manages a V1 DB user resource within OpenStack.
 
 ~> **Note:** All arguments including the database password will be stored in the
 raw state as plain-text. [Read more about sensitive data in
-state](https://www.terraform.io/docs/language/state/sensitive-data.html).
+state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 
 ## Example Usage
 
@@ -21,10 +21,10 @@ state](https://www.terraform.io/docs/language/state/sensitive-data.html).
 
 ```hcl
 resource "openstack_db_user_v1" "basic" {
-  name         = "basic"
-  instance_id  = openstack_db_instance_v1.basic.id
-  password     = "password"
-  databases    = ["testdb"]
+  name        = "basic"
+  instance_id = openstack_db_instance_v1.basic.id
+  password    = "password"
+  databases   = ["testdb"]
 }
 ```
 

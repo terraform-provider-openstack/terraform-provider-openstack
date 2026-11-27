@@ -103,7 +103,7 @@ provider "openstack" {
 }
 
 resource "openstack_objectstorage_container_v1" "container_1" {
-  name   = "tf-test-container-1"
+  name = "tf-test-container-1"
 
   storage_policy = "az1"
   storage_class  = "SSD"

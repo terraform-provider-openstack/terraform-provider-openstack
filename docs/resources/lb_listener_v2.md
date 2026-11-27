@@ -173,7 +173,7 @@ argument of the provider is used. Changing this creates a new Listener.
 
 * `tls_ciphers` - (Optional) List of ciphers in OpenSSL format
   (colon-separated). See
-  <https://www.openssl.org/docs/man1.1.1/man1/ciphers.html> for more information.
+  <https://docs.openssl.org/1.1.1/man1/ciphers/> for more information.
   Supported only in **Octavia minor version >= 2.15**.
 
 * `tls_versions` - (Optional) A list of TLS protocol versions. Available

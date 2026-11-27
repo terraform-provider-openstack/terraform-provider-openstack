@@ -15,7 +15,7 @@ endpoints or to authenticate against Keystone.
 
 ~> **Note:** All arguments including the EC2 credential access key and secret
 will be stored in the raw state as plain-text. [Read more about sensitive data
-in state](https://www.terraform.io/docs/language/state/sensitive-data.html).
+in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 
 ## Example Usage
 
@@ -32,7 +32,7 @@ from the current auth scope.
 
 ```hcl
 resource "openstack_identity_ec2_credential_v3" "ec2_key1" {
-    project_id = "f7ac731cc11f40efbc03a9f9e1d1d21f"
+  project_id = "f7ac731cc11f40efbc03a9f9e1d1d21f"
 }
 ```
 

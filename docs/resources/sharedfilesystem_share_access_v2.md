@@ -15,7 +15,7 @@ Use this resource to control the share access lists.
 be stored *unencrypted* in your Terraform state file. If you use this resource
 in production, please make sure your state file is sufficiently protected.
 [Read more about sensitive data in
-state](https://www.terraform.io/docs/language/state/sensitive-data.html).
+state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 
 ## Example Usage
 

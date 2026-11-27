@@ -21,9 +21,9 @@ data "openstack_workflow_workflow_v2" "hello_workflow" {
 }
 
 resource "openstack_workflow_cron_trigger_v2" "hello_cron_trigger" {
-  name          = "hello_cron_trigger"
-  workflow_id   = data.openstack_workflow_workflow_v2.hello_workflow.id
-  pattern       = "0 5 * * *"
+  name        = "hello_cron_trigger"
+  workflow_id = data.openstack_workflow_workflow_v2.hello_workflow.id
+  pattern     = "0 5 * * *"
 
   workflow_input = {
     message = "Hello, OpenStack!"

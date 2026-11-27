@@ -103,7 +103,7 @@ clouds support multiattach. Multiattach volumes require a volume_type that has [
 resource "openstack_blockstorage_volume_v3" "volume_1" {
   name        = "volume_1"
   size        = 1
-  volume_type = "multiattach" 
+  volume_type = "multiattach"
 }
 
 resource "openstack_compute_instance_v2" "instance_1" {

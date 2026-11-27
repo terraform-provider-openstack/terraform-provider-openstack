@@ -90,8 +90,8 @@ The following arguments are supported:
 * `redirect_prefix` - (Optional) Requests matching this policy will be redirected to
     this Prefix URL. Only valid if action is REDIRECT\_PREFIX.
 
-* `redirect_http_code` - (Optional) Integer. Requests matching this policy will be  
-    redirected to the specified URL or Prefix URL with the HTTP response code.  
+* `redirect_http_code` - (Optional) Integer. Requests matching this policy will be
+    redirected to the specified URL or Prefix URL with the HTTP response code.
     Valid if action is REDIRECT\_TO\_URL or REDIRECT\_PREFIX. Valid options are:
     301, 302, 303, 307, or 308. Default is 302. New in octavia version 2.9
 

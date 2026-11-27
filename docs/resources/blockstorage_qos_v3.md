@@ -17,14 +17,13 @@ Manages a V3 block storage Quality-Of-Servirce (qos) resource within OpenStack.
 
 ```hcl
 resource "openstack_blockstorage_qos_v3" "qos" {
-  name = "foo"
+  name     = "foo"
   consumer = "back-end"
   specs = {
-  read_iops_sec  = "40000"
-  write_iops_sec = "40000"
- }
+    read_iops_sec  = "40000"
+    write_iops_sec = "40000"
+  }
 }
-
 ```
 
 ## Argument Reference

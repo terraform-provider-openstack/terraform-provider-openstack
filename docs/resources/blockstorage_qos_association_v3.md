@@ -17,10 +17,10 @@ Manages a V3 block storage Qos Association resource within OpenStack.
 
 ```hcl
 resource "openstack_blockstorage_qos_v3" "qos" {
-  name = "%s"
+  name     = "%s"
   consumer = "front-end"
   specs = {
-   read_iops_sec = "20000"
+    read_iops_sec = "20000"
   }
 }
 
@@ -32,7 +32,6 @@ resource "openstack_blockstorage_qos_association_v3" "qos_association" {
   qos_id         = openstack_blockstorage_qos_v3.qos.id
   volume_type_id = openstack_blockstorage_volume_type_v3.volume_type.id
 }
-
 ```
 
 ## Argument Reference

@@ -19,7 +19,7 @@ Use the navigation to the left to read about the available resources.
 ```hcl
 # Define required providers
 terraform {
-required_version = ">= 0.14.0"
+  required_version = ">= 0.14.0"
   required_providers {
     openstack = {
       source  = "terraform-provider-openstack/openstack"
@@ -475,13 +475,12 @@ export TF_CLI_CONFIG_FILE=~/.terraform.rc
 │  - terraform-provider-openstack/openstack in /path/to/directory/where/the/provider/binary/is
 │
 | The behavior may therefore not match any released version of the provider and applying changes may cause the state to become incompatible with published releases.
-
 ```
 
 ### Acceptance Tests
 
 Acceptance Tests are a crucial part of adding features or fixing a bug. Please
-make sure to read the core [testing](https://www.terraform.io/docs/extend/testing/index.html)
+make sure to read the core [testing](https://developer.hashicorp.com/terraform/plugin/sdkv2/testing)
 documentation for more information about how Acceptance Tests work.
 
 In order to run the Acceptance Tests, you'll need to set the following

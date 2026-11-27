@@ -85,9 +85,9 @@ The following attributes are exported:
 ## Notes
 
 The `next_hop` IP address must be directly reachable from the router at the
-``openstack_networking_router_routes_v2`` resource creation time.  You can
+`openstack_networking_router_routes_v2` resource creation time.  You can
 ensure that by explicitly specifying a dependency on the
-``openstack_networking_router_interface_v2`` resource that connects the next
+`openstack_networking_router_interface_v2` resource that connects the next
 hop to the router, as in the example above.
 
 ## Import

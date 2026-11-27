@@ -22,7 +22,7 @@ Most of the changes described in this guide were previously marked as deprecated
 
 ## Provider Version Configuration
 
-When configuring Terraform providers, always use [version constraints](https://www.terraform.io/docs/configuration/providers.html#provider-versions). If you have implemented version constraints, update them accordingly in your configuration and run [`terraform init -upgrade`](https://www.terraform.io/docs/commands/init.html) to download the latest version.
+When configuring Terraform providers, always use [version constraints](https://developer.hashicorp.com/terraform/language/block/provider#provider-versions). If you have implemented version constraints, update them accordingly in your configuration and run [`terraform init -upgrade`](https://developer.hashicorp.com/terraform/cli/commands/init) to download the latest version.
 
 For example, if your previous configuration looked like this:
 

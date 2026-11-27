@@ -36,9 +36,9 @@ Upgrade topics:
 
 ## Provider Version Configuration
 
--> Before upgrading to version 2.0.0, upgrade to the most recent 1.X.Y version of the provider and ensure that your environment successfully runs [`terraform plan`](https://www.terraform.io/docs/commands/plan.html). You should not see changes you don't expect.
+-> Before upgrading to version 2.0.0, upgrade to the most recent 1.X.Y version of the provider and ensure that your environment successfully runs [`terraform plan`](https://developer.hashicorp.com/terraform/cli/commands/plan). You should not see changes you don't expect.
 
-Use [version constraints when configuring Terraform providers](https://www.terraform.io/docs/configuration/providers.html#provider-versions). If you are following that recommendation, update the version constraints in your Terraform configuration and run [`terraform init -upgrade`](https://www.terraform.io/docs/commands/init.html) to download the new version.
+Use [version constraints when configuring Terraform providers](https://developer.hashicorp.com/terraform/language/block/provider#provider-versions). If you are following that recommendation, update the version constraints in your Terraform configuration and run [`terraform init -upgrade`](https://developer.hashicorp.com/terraform/cli/commands/init) to download the new version.
 
 For example, given this previous configuration:
 
@@ -84,7 +84,7 @@ The provider configuration option `use_octavia` has been removed, since the prov
 
 ```terraform
 provider "openstack" {
-  ...
+  # ...
   use_octavia = false/true
 }
 ```
@@ -93,7 +93,7 @@ Should be updated into:
 
 ```terraform
 provider "openstack" {
-  ...
+  # ...
 }
 ```
 
@@ -118,7 +118,7 @@ resource "openstack_blockstorage_volume_type_v3" "multiattach" {
   name        = "multiattach"
   description = "Multiattach-enabled volume type"
   extra_specs = {
-      multiattach = "<is> True"
+    multiattach = "<is> True"
   }
 }
 ```

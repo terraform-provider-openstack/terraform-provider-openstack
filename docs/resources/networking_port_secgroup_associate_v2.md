@@ -18,7 +18,7 @@ and the resource is deleted, Terraform will remove all assigned security group
 IDs.
 
 ~> **Warning:** This resource should **not** be used when the
-port was created directly within Terraform. If it is, it can lead  
+port was created directly within Terraform. If it is, it can lead
 to **security problems** with incorrect security groups on ports
 
 ## Example Usage

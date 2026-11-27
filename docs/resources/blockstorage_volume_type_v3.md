@@ -22,11 +22,10 @@ resource "openstack_blockstorage_volume_type_v3" "volume_type_1" {
   name        = "volume_type_1"
   description = "Volume type 1"
   extra_specs = {
-      capabilities        = "gpu"
-      volume_backend_name = "ssd"
+    capabilities        = "gpu"
+    volume_backend_name = "ssd"
   }
 }
-
 ```
 
 ### Volume Type with multiattach enabled
@@ -36,10 +35,9 @@ resource "openstack_blockstorage_volume_type_v3" "multiattach" {
   name        = "multiattach"
   description = "Multiattach-enabled volume type"
   extra_specs = {
-      multiattach = "<is> True"
+    multiattach = "<is> True"
   }
 }
-
 ```
 
 ## Argument Reference

@@ -70,7 +70,7 @@ The following arguments are supported:
     creates a new volume. Requires microversion >= 3.47.
 
 * `volume_type` - (Optional) The type of volume to create or update.
-    Changing this will attempt an in-place retype operation; migration depends on `volume_retype_policy`.  
+    Changing this will attempt an in-place retype operation; migration depends on `volume_retype_policy`.
 
 * `volume_retype_policy` - (Optional) Migration policy when changing `volume_type`.
     `"never"` *(default)* prevents migration to another storage backend, while `"on-demand"`
