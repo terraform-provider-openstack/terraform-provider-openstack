@@ -201,9 +201,7 @@ func resourceIPSecPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta
 	lifetimeMap["units"] = policy.Lifetime.Units
 	lifetimeMap["value"] = policy.Lifetime.Value
 
-	var lifetime []map[string]any
-
-	lifetime = append(lifetime, lifetimeMap)
+	lifetime := []map[string]any{lifetimeMap}
 	if err := d.Set("lifetime", &lifetime); err != nil {
 		log.Printf("[WARN] unable to set IPSec policy lifetime")
 	}

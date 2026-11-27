@@ -257,9 +257,7 @@ func resourceSiteConnectionV2Read(ctx context.Context, d *schema.ResourceData, m
 	dpdMap["interval"] = conn.DPD.Interval
 	dpdMap["timeout"] = conn.DPD.Timeout
 
-	var dpd []map[string]any
-
-	dpd = append(dpd, dpdMap)
+	dpd := []map[string]any{dpdMap}
 	if err := d.Set("dpd", &dpd); err != nil {
 		log.Printf("[WARN] unable to set Site connection DPD")
 	}
