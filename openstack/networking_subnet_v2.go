@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
@@ -28,8 +29,26 @@ func networkingSubnetV2StateRefreshFunc(ctx context.Context, client *gophercloud
 	}
 }
 
+// subnetDeleteConflictGracePeriod is how long a subnet delete keeps retrying
+// on a Neutron 409 before giving up. Dependent objects such as ports are often
+// still being torn down when the subnet delete is first attempted, so a short
+// retry window is needed; a conflict that outlasts it is a real dependency.
+const subnetDeleteConflictGracePeriod = time.Minute
+
 // networkingSubnetV2StateRefreshFuncDelete returns a special case retry.StateRefreshFunc to try to delete a subnet.
 func networkingSubnetV2StateRefreshFuncDelete(ctx context.Context, networkingClient *gophercloud.ServiceClient, subnetID string) retry.StateRefreshFunc {
+	return networkingSubnetV2StateRefreshFuncDeleteWithGrace(ctx, networkingClient, subnetID, subnetDeleteConflictGracePeriod)
+}
+
+// networkingSubnetV2StateRefreshFuncDeleteWithGrace is like
+// networkingSubnetV2StateRefreshFuncDelete but takes the period during which a
+// Neutron 409 is retried. Once conflicts have persisted for that long the
+// refresh function fails with an error naming the dependent-object conflict,
+// instead of polling until the delete timeout and reporting only
+// "context deadline exceeded".
+func networkingSubnetV2StateRefreshFuncDeleteWithGrace(ctx context.Context, networkingClient *gophercloud.ServiceClient, subnetID string, grace time.Duration) retry.StateRefreshFunc {
+	var firstConflict time.Time
+
 	return func() (any, string, error) {
 		log.Printf("[DEBUG] Attempting to delete openstack_networking_subnet_v2 %s", subnetID)
 
@@ -40,19 +59,31 @@ func networkingSubnetV2StateRefreshFuncDelete(ctx context.Context, networkingCli
 
 				return "", "DELETED", nil
 			}
-			// Neutron 409 means the subnet is still referenced (ports, router
-			// interfaces, load-balancer VIPs). Returning ACTIVE here used to
-			// retry until TimeoutDelete (10m) and then surface only
-			// "context deadline exceeded", hiding the dependent objects.
-			// Fail on the first conflict so tofu destroy stops immediately.
-			if gophercloud.ResponseCodeIs(err, http.StatusConflict) {
-				log.Printf("[DEBUG] openstack_networking_subnet_v2 %s is still in use: %s", subnetID, err)
 
-				return "", "", subnetDeleteConflictError(subnetID, err)
+			// Neutron 409 means the subnet is still referenced (ports, router
+			// interfaces, load-balancer VIPs). This is often transient while
+			// those objects are being deleted, so retry for a grace period and
+			// only then fail with the conflict details.
+			if gophercloud.ResponseCodeIs(err, http.StatusConflict) {
+				if firstConflict.IsZero() {
+					firstConflict = time.Now()
+				}
+
+				if time.Since(firstConflict) >= grace {
+					log.Printf("[DEBUG] openstack_networking_subnet_v2 %s is still in use: %s", subnetID, err)
+
+					return "", "", subnetDeleteConflictError(subnetID, err)
+				}
+
+				log.Printf("[DEBUG] openstack_networking_subnet_v2 %s is in use, retrying: %s", subnetID, err)
+
+				return "", "ACTIVE", nil
 			}
 
 			return "", "ACTIVE", err
 		}
+
+		firstConflict = time.Time{}
 
 		_, err = subnets.Get(ctx, networkingClient, subnetID).Extract()
 		if err != nil {
