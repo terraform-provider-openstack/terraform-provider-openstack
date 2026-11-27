@@ -176,6 +176,9 @@ The following arguments are supported:
 * `max_retries` - (Optional) If set to a value greater than 0, the OpenStack
   client will retry failed HTTP connections and Too Many Requests (429 code)
   HTTP responses with a `Retry-After` header within the specified value.
+  GET and HEAD requests answered with Request Timeout (408 code), which a load
+  balancer such as HAProxy may return when it closes an idle keep-alive
+  connection, are also retried.
 
 * `enable_logging` - (Optional) When enabled, generates verbose logs containing
   all the calls made to and responses received from OpenStack.
