@@ -207,7 +207,7 @@ func dataSourceLBPoolV2() *schema.Resource {
 			},
 
 			"alpn_protocols": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -240,7 +240,7 @@ func dataSourceLBPoolV2() *schema.Resource {
 			},
 
 			"tls_versions": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
