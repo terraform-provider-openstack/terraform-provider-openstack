@@ -79,6 +79,6 @@ The following attributes are exported:
 
 RBAC policies can be imported using the `id`, e.g.
 
-```
-$ terraform import openstack_networking_rbac_policy_v2.rbac_policy_1 eae26a3e-1c33-4cc1-9c31-0cd729c438a1
+```shell
+terraform import openstack_networking_rbac_policy_v2.rbac_policy_1 eae26a3e-1c33-4cc1-9c31-0cd729c438a1
 ```

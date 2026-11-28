@@ -88,6 +88,6 @@ The following attributes are exported:
 
 Flavors can be imported using the `ID`, e.g.
 
-```
-$ terraform import openstack_compute_flavor_v2.my-flavor 4142e64b-1b35-44a0-9b1e-5affc7af1106
+```shell
+terraform import openstack_compute_flavor_v2.my-flavor 4142e64b-1b35-44a0-9b1e-5affc7af1106
 ```

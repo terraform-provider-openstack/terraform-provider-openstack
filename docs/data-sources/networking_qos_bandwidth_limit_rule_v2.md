@@ -24,15 +24,14 @@ data "openstack_networking_qos_bandwidth_limit_rule_v2" "qos_bandwidth_limit_rul
 * `region` - (Optional) The region in which to obtain the V2 Networking client.
     A Networking client is needed to create a Neutron QoS bandwidth limit rule. If omitted, the
     `region` argument of the provider is used.
-    
+
 * `qos_policy_id` - (Required) The QoS policy reference.
-   
+
 * `max_kbps` - (Optional) The maximum kilobits per second of a QoS bandwidth limit rule.
 
 * `max_burst_kbps` - (Optional) The maximum burst size in kilobits of a QoS bandwidth limit rule.
-   
-* `direction` - (Optional) The direction of traffic.
 
+* `direction` - (Optional) The direction of traffic.
 
 ## Attributes Reference
 

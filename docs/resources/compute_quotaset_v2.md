@@ -112,6 +112,6 @@ The following attributes are exported:
 
 Quotasets can be imported using the `project_id/region_name`, e.g.
 
-```
-$ terraform import openstack_compute_quotaset_v2.quotaset_1 2a0f2240-c5e6-41de-896d-e80d97428d6b/region_1
+```shell
+terraform import openstack_compute_quotaset_v2.quotaset_1 2a0f2240-c5e6-41de-896d-e80d97428d6b/region_1
 ```

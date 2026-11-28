@@ -71,7 +71,6 @@ The following arguments are supported:
   updates the existing quota. Omitting it sets it to 0. Available in
   **Octavia minor version 2.19**.
 
-
 ## Attributes Reference
 
 The following attributes are exported:
@@ -90,6 +89,6 @@ The following attributes are exported:
 Quotas can be imported using the `project_id/region_name`, where region_name is the
 one defined is the Openstack credentials that are in use. E.g.
 
-```
-$ terraform import openstack_lb_quota_v2.quota_1 2a0f2240-c5e6-41de-896d-e80d97428d6b/region_1
+```shell
+terraform import openstack_lb_quota_v2.quota_1 2a0f2240-c5e6-41de-896d-e80d97428d6b/region_1
 ```

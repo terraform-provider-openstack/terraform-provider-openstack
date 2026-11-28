@@ -17,7 +17,7 @@ the username or project name currently in use as well as the service catalog.
 source will store an *unencrypted* session token in your Terraform state file.
 **Use of this data source with `set_token_id = true` in production deployments
 is *not* recommended**.
-[Read more about sensitive data in state](https://www.terraform.io/docs/language/state/sensitive-data.html).
+[Read more about sensitive data in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 
 ## Example Usage
 
@@ -34,10 +34,18 @@ service catalog:
 
 ```hcl
 locals {
-  object_store_service    = [for entry in data.openstack_identity_auth_scope_v3.scope.service_catalog:
-                                 entry if entry.type=="object-store"][0]
-  object_store_endpoint   = [for endpoint in local.object_store_service.endpoints:
-                                 endpoint if (endpoint.interface=="public" && endpoint.region=="region1")][0]
+  object_store_service = [
+    for entry in data.openstack_identity_auth_scope_v3.scope.service_catalog :
+    entry
+    if entry.type == "object-store"
+  ][0]
+
+  object_store_endpoint = [
+    for endpoint in local.object_store_service.endpoints :
+    endpoint
+    if endpoint.interface == "public" && endpoint.region == "region1"
+  ][0]
+
   object_store_public_url = local.object_store_endpoint.url
 }
 ```
@@ -54,10 +62,18 @@ data "openstack_identity_auth_scope_v3" "scope" {
 
 ```hcl
 locals {
-  object_store_service    = [for entry in data.openstack_identity_auth_scope_v3.scope.service_catalog:
-                                 entry if entry.type=="object-store"][0]
-  object_store_endpoint   = [for endpoint in local.object_store_service.endpoints:
-                                 endpoint if (endpoint.interface=="public" && endpoint.region=="region1")][0]
+  object_store_service = [
+    for entry in data.openstack_identity_auth_scope_v3.scope.service_catalog :
+    entry
+    if entry.type == "object-store"
+  ][0]
+
+  object_store_endpoint = [
+    for endpoint in local.object_store_service.endpoints :
+    endpoint
+    if endpoint.interface == "public" && endpoint.region == "region1"
+  ][0]
+
   object_store_public_url = local.object_store_endpoint.url
 }
 

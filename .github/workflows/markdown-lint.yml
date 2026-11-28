@@ -1,0 +1,30 @@
+name: Markdown-lint
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.md'
+      - '.github/.markdownlint-cli2.jsonc'
+      - '.github/workflows/markdown-lint.yml'
+  pull_request:
+    paths:
+      - '**/*.md'
+      - '.github/.markdownlint-cli2.jsonc'
+      - '.github/workflows/markdown-lint.yml'
+permissions:
+  contents: read
+jobs:
+  markdown-lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Markdownlint
+        uses: DavidAnson/markdownlint-cli2-action@3ce8f712b5d8f31acd8e201be6d97e3d2bb23eb7 # v25.1.0
+        with:
+          config: '.github/.markdownlint-cli2.jsonc'

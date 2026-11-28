@@ -85,15 +85,15 @@ The following attributes are exported:
 ## Notes
 
 The `next_hop` IP address must be directly reachable from the router at the
-``openstack_networking_router_routes_v2`` resource creation time.  You can
+`openstack_networking_router_routes_v2` resource creation time.  You can
 ensure that by explicitly specifying a dependency on the
-``openstack_networking_router_interface_v2`` resource that connects the next
+`openstack_networking_router_interface_v2` resource that connects the next
 hop to the router, as in the example above.
 
 ## Import
 
 Routing entries can be imported using a router `id`:
 
-```
-$ terraform import openstack_networking_router_routes_v2.router_routes_1 686fe248-386c-4f70-9f6c-281607dad079
+```shell
+terraform import openstack_networking_router_routes_v2.router_routes_1 686fe248-386c-4f70-9f6c-281607dad079
 ```
